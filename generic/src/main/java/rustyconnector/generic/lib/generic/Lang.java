@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.lib.generic;
+package group.aelysium.rustyconnector.plugin.velocity.lib.generic;
 
 import net.kyori.adventure.text.Component;
 

@@ -1,0 +1,6 @@
+{
+    "private-key": "check the console after first boot",
+    "families": {
+        "root": "lobby",
+    }
+}

@@ -1,16 +1,10 @@
-package group.aelysium.rustyconnector.lib.generic;
+package rustyconnector.generic.lib.generic;
 
-import com.velocitypowered.api.proxy.Player;
-
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class Whitelist {
     private String name;
-    private List<WhitelistPlayer> players;
+    private final List<WhitelistPlayer> players = new ArrayList<>();
 
     public Whitelist(String name) {
         this.name = name;
@@ -22,17 +16,17 @@ public class Whitelist {
 
     /**
      * Validate if a user is whitelisted or not
-     * @param player The user to validate
+     * @param uuid The uuid of the user to validate
+     * @param ip The IP address of the user to validate
      * @return `boolean` - `true` If the user is valid. `false` If the user is invalid. If a user has an IP Address defined. They must connect from that IP for their connection to be valid.
      */
-    public boolean validate(Player player) {
-        WhitelistPlayer whitelistPlayer = this.find(player.getUniqueId());
+    public boolean validate(UUID uuid, String ip) {
+        WhitelistPlayer whitelistPlayer = this.find(uuid);
 
         if(whitelistPlayer == null) return false;
 
         if(!whitelistPlayer.hasIP()) return true;
 
-        String ip = player.getRemoteAddress().getHostString();
         if(whitelistPlayer.getIP().equals(ip)) return true;
 
         return false;
@@ -40,7 +34,7 @@ public class Whitelist {
 
 
     public WhitelistPlayer find(UUID uuid) {
-        Optional<WhitelistPlayer> response = players.stream().findFirst(player -> Objects.equals(player.getUUID(), uuid));
+        Optional<WhitelistPlayer> response = players.stream().filter(player -> Objects.equals(player.getUUID(), uuid)).findFirst();
         return response.orElse(null);
     }
 }

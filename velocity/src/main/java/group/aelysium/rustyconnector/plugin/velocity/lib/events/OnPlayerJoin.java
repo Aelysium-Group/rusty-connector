@@ -1,11 +1,11 @@
-package group.aelysium.rustyconnector.lib.events;
+package group.aelysium.rustyconnector.plugin.velocity.lib.events;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.lib.generic.Lang;
-import group.aelysium.rustyconnector.lib.generic.server.Proxy;
-import group.aelysium.rustyconnector.lib.generic.Whitelist;
+import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Lang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Whitelist;
+import group.aelysium.rustyconnector.plugin.velocity.lib.generic.server.Proxy;
 
 public class OnPlayerJoin {
     @Subscribe

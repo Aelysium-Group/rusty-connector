@@ -1,6 +1,6 @@
-package group.aelysium.rustyconnector.lib.generic.server;
+package group.aelysium.rustyconnector.plugin.velocity.lib.generic.server;
 
-import group.aelysium.rustyconnector.lib.generic.Whitelist;
+import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Whitelist;
 
 import java.util.ArrayList;
 import java.util.List;

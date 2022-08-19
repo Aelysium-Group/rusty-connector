@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector;
+package group.aelysium.rustyconnector.plugin.velocity.plugin.paper;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
