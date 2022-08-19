@@ -1,2 +1,5 @@
-package rustyconnector.generic.lib.generic;public class Callback {
+package rustyconnector.generic.lib.generic;
+
+public interface Callback {
+    void call();
 }

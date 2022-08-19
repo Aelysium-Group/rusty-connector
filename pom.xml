@@ -13,6 +13,7 @@
         <module>velocity</module>
         <module>paper</module>
         <module>assembly</module>
+        <module>generic</module>
     </modules>
 
     <url>https://aelysium.group/</url>

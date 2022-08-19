@@ -1,13 +1,11 @@
-package net.aelysium.screencontrol.lib.database;
+package rustyconnector.generic.database;
 
-import com.google.common.io.Closeables;
-import net.aelysium.screencontrol.ScreenControl;
-import net.aelysium.screencontrol.lib.generic.ScreenChannel;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import redis.clients.jedis.*;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisPubSub;
 
-import java.io.IOException;
+import javax.security.auth.callback.Callback;
 
 public class Redis {
     private String host;
@@ -16,7 +14,7 @@ public class Redis {
     private String dataChannel;
     private Jedis client;
     private Jedis jedisSubscriber;
-    private RedisSubscriber subscriber;
+    private Subscriber subscriber;
     private JedisPool pool;
 
     public Redis() {}
@@ -34,35 +32,29 @@ public class Redis {
     /**
      * Tests the connection to the provided Redis server
      */
-    public void connect() throws ExceptionInInitializerError{
+    public void connect(Callback callback) throws ExceptionInInitializerError{
         try{
             if(!(this.client == null)) return;
 
             this.client = new Jedis(this.host, this.port);
             this.client.auth(this.password);
             this.client.connect();
-            ScreenControl.log("Redis authenticated!");
-            ScreenControl.log("Pinging server...");
-            ScreenControl.log(this.client.ping());
 
             final JedisPoolConfig poolConfig = new JedisPoolConfig();
             this.pool = new JedisPool(poolConfig, this.host, this.port, 0);
             this.jedisSubscriber = this.pool.getResource();
             this.jedisSubscriber.auth(this.password);
-            this.subscriber = new RedisSubscriber();
-            ScreenControl.log("Subscribing...");
+            this.subscriber = new Subscriber();
+
+            Subscriber.setCallback(callback);
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        ScreenControl.log("Initializing Thread...");
                         jedisSubscriber.subscribe(subscriber, dataChannel);
-                        ScreenControl.log("Subscription ended.");
                     } catch (Exception e) {
-                        ScreenControl.log("Subscription failed.");
                         e.printStackTrace();
-                        ScreenControl.log("Killing plugin...");
-                        Bukkit.getPluginManager().disablePlugin(ScreenControl.getProvidingPlugin(ScreenControl.class));
                     }
                 }
             }).start();
@@ -73,21 +65,39 @@ public class Redis {
     }
 
     public void publish(String message) {
-        if(ScreenControl.getPlugin(ScreenControl.class).debug) ScreenControl.log("Sent message: "+message+" on channel "+this.dataChannel);
         this.client.publish(this.dataChannel, message);
     }
 
     /**
      * Disconnects
      */
-    public void disconnect() throws ExceptionInInitializerError {
+    public void disconnect(Callback callback) throws ExceptionInInitializerError {
         try {
             this.subscriber.unsubscribe();
             this.jedisSubscriber.close();
             this.client.close();
             this.client.disconnect();
+            callback.call();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+
+    public class Subscriber extends JedisPubSub {
+        private static Callback callback;
+
+        public static void setCallback(Callback callback) {
+            Subscriber.callback = callback;
+        }
+
+        @Override
+        public void onMessage(String channel, String message) {
+            try {
+                Subscriber.callback.call(message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

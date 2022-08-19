@@ -1,6 +1,168 @@
-{
-    "private-key": "check the console after first boot",
-    "families": {
-        "root": "lobby",
-    }
-}
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                Welcome to RustyConnector!                #
+#                                                          #
+#               ---------------------------                #
+# | RustyConnector is your go-to load-balancer and player  #
+# | manager for Minecraft networks!                        #
+#                                                          #
+# | Built for usage on high-traffic networks;              #
+# | RustyConnector is meant to be scalable and easy        #
+# | to maintain!                                           #
+#               ---------------------------                #
+#                       Produced by:                       #
+#                        Aelysium                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+#
+# Do not touch this value, it might totally mess up your entire plugin!
+# And that's the last thing anyone wants :)
+#
+config-version: "0.1"
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                       Registration                       #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#
+# Private key is used to validate server connections.
+# This way external servers can't appear and add themselves to the proxy network pool.
+# This value should be changed periodically for security purposes.
+#
+# To generate a new key, set the string to be an empty value and the plugin will send a new key in console on next restart.
+#
+private-key: ""
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Families                          #
+#                                                          #
+#               ---------------------------                #
+# | Families are a collection of servers. To register      #
+# | new servers into a family, you need to configure       #
+# | your sub-servers appropriately.                        #
+#                                                          #
+# | If your sub-servers use family names that don't match  #
+# | what you define here, they will not be registered.     #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#
+# The root family. Once a player connects and is validated.
+# This is the family that they will automatically be routed to.
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# YOUR ROOT FAMILY MUST BE DEFINED IN THE families ARRAY IN ORDER TO WORK
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+#
+root-family: "lobby"
+
+#
+# The families array.
+# Define as many families here as you'd like!
+# After defining your list of families, restart the plugin, and it will auto-generate the config files you'll need.
+# If you remove a family from this list, the plugin will no longer use that family, and you can safely delete its
+# config files from your server.
+#
+# Make sure you also list your "root-family" in this list as well!
+#
+families:
+  - "lobby"
+    "survival"
+    "creative"
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Database                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#########################
+#         Redis         #
+#########################
+#
+# Redis is required in order to provide quick and easy syncing between the proxy and sub-servers
+#
+redis:
+    host: "localhost",
+    port: "3306",
+    password: "password",
+
+#
+# The name of the data channel that sync information should be sent over.
+# If you don't know what this is, don't mess with it! The default value here is fine.
+# You probably won't break anything, but you generally just shouldn't touch things you don't understand.
+#
+    data-channel: "rustyConnector-sync"
+
+#########################
+#         MySQL         #
+#########################
+#
+# !!!!!!! MYSQL INTEGRATION IS NOT CURRENTLY AVAILABLE !!!!!!!
+# !!!!!!! THIS SECTION DOESN'T DO ANYTHING !!!!!!!
+#
+# Enable MySQL usage for syncing configurations across multiple proxy servers.
+# Can be helpful if you have multiple proxies and need to quickly distribute your configurations.
+#
+# !!!!!!! MYSQL INTEGRATION IS NOT CURRENTLY AVAILABLE !!!!!!!
+# !!!!!!! THIS SECTION DOESN'T DO ANYTHING !!!!!!!
+#
+mysql:
+#
+# Set to true to enable MySQL.
+#
+    use-mysql-configuration-syncing: false
+
+#
+# Change this value between ROOT and BRANCH to set whether this plugin should be posting data to the database or pulling only.
+# ROOT - Every restart, the plugin will post it's configurations to the database. Totally re-writing what was there before.
+# BRANCH - Every restart, the plugin will read whatever data from the database. The plugin will not write any data to the database.
+#
+    plugin-type: ROOT
+
+    host: "localhost",
+    port: "3306",
+    database: "",
+    user: "",
+    password: "",
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Whitelist                         #
+#                                                          #
+#               ---------------------------                #
+# | RustyConnector attempts to be as flexible as possible  #
+# | when configuring whitelists!                           #
+# | To setup a whitelist, you'll need to navigate to the   #
+# | "whitelists" folder and follow the directions in the   #
+# | provided whitelist-template.                           #
+#                                                          #
+# | More often than not, you will have multiple whitelist  #
+# | configurations that you may want to switch between     #
+# | during various points in your network's lifetime.      #
+# | This system allows you to setup as many pre-defined    #
+# | whitelists as you'd like, and enable or switch between #
+# | then whenever you want!                                #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#
+# If you set this to be on. You will be turning on a whitelist which will **effect your entire proxy**!
+# If you only want to effect certain families or individual servers. Look into the appropriate configuration locations!
+#
+use-whitelist: false
+whitelist: "whitelist-template"
