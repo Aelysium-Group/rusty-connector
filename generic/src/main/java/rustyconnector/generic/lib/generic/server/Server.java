@@ -1,7 +1,5 @@
 package rustyconnector.generic.lib.generic.server;
 
-import rustyconnector.generic.lib.generic.whitelist.Whitelist;
-
 public class Server {
     private String name;
     private int priorityIndex = 0;

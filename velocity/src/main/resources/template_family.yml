@@ -8,7 +8,7 @@
 # | your sub-servers appropriately.                        #
 #                                                          #
 # | If your sub-servers use family names that don't match  #
-# | what you define in config.yml, they will not be        #
+# | what you define in config_template.yml, they will not be        #
 # | registered.                                            #
 #                                                          #
 # | In this config you can manage this family's            #

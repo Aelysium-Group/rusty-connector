@@ -32,7 +32,7 @@ public class Redis {
     /**
      * Tests the connection to the provided Redis server
      */
-    public void connect(Callback callback) throws ExceptionInInitializerError{
+    public void connect() throws ExceptionInInitializerError{
         try{
             if(!(this.client == null)) return;
 
@@ -45,8 +45,6 @@ public class Redis {
             this.jedisSubscriber = this.pool.getResource();
             this.jedisSubscriber.auth(this.password);
             this.subscriber = new Subscriber();
-
-            Subscriber.setCallback(callback);
 
             new Thread(new Runnable() {
                 @Override
@@ -69,32 +67,31 @@ public class Redis {
     }
 
     /**
-     * Disconnects
+     * When redis disconnects
      */
-    public void disconnect(Callback callback) throws ExceptionInInitializerError {
+    public void onDisconnect() throws ExceptionInInitializerError {
         try {
             this.subscriber.unsubscribe();
             this.jedisSubscriber.close();
             this.client.close();
             this.client.disconnect();
-            callback.call();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * When redis receives a message
+     *
+     * @param message The messsage that is received
+     */
+    public void onMessage(String message) {}
 
     public class Subscriber extends JedisPubSub {
-        private static Callback callback;
-
-        public static void setCallback(Callback callback) {
-            Subscriber.callback = callback;
-        }
-
         @Override
         public void onMessage(String channel, String message) {
             try {
-                Subscriber.callback.call(message);
+                Redis.this.onMessage(message);
             } catch (Exception e) {
                 e.printStackTrace();
             }

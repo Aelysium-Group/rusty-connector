@@ -11,7 +11,7 @@ import org.bukkit.event.Listener;
 import java.io.*;
 import java.util.*;
 
-public final class RustyConnector extends JavaPlugin implements Listener {
+public final class PaperRustyConnector extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
 
@@ -47,7 +47,7 @@ public final class RustyConnector extends JavaPlugin implements Listener {
      * @param configName The name of the config template to get
      */
     public static JsonObject createCustomConfig(String configName) {
-        JavaPlugin plugin = RustyConnector.getProvidingPlugin(RustyConnector.class);
+        JavaPlugin plugin = PaperRustyConnector.getProvidingPlugin(PaperRustyConnector.class);
         File customConfigFile = new File(plugin.getDataFolder(), configName); // Load the custom config from the plugins data file
         log("> > " + "Searching for "+configName);
         if (!customConfigFile.exists()) { // Check if the custom config actually exists
@@ -112,7 +112,7 @@ public final class RustyConnector extends JavaPlugin implements Listener {
         System.out.println("[ScreenControl] " + log);
     }
 
-    public static InputStream getResourceAsStream(String filename, RustyConnector rustyConnector) {
+    public static InputStream getResourceAsStream(String filename, PaperRustyConnector rustyConnector) {
         return rustyConnector.getClassLoader().getResourceAsStream(filename);
     }
 }

@@ -1,6 +1,7 @@
 package rustyconnector.generic.lib.generic.server;
 
-import rustyconnector.generic.lib.generic.whitelist.Whitelist;
+import rustyconnector.generic.lib.generic.Config;
+import rustyconnector.generic.lib.generic.Whitelist;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,5 +23,9 @@ public class Family {
         this.name = name;
         this.algorithm = algorithm;
         this.whitelist = whitelist;
+    }
+
+    public static void parseConfig(Config config) {
+
     }
 }

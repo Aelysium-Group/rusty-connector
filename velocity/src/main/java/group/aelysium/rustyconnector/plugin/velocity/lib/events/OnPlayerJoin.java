@@ -4,7 +4,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.Player;
 import rustyconnector.generic.lib.generic.Lang;
-import rustyconnector.generic.lib.generic.whitelist.Whitelist;
+import rustyconnector.generic.lib.generic.Whitelist;
 import rustyconnector.generic.lib.generic.server.Proxy;
 
 public class OnPlayerJoin {

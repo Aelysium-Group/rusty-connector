@@ -126,7 +126,7 @@ mysql:
 
 #
 # Change this value between ROOT and BRANCH to set whether this plugin should be posting data to the database or pulling only.
-# ROOT - Every restart, the plugin will post it's configurations to the database. Totally re-writing what was there before.
+# ROOT - Every restart, the plugin will post its configurations to the database. Totally re-writing what was there before.
 # BRANCH - Every restart, the plugin will read whatever data from the database. The plugin will not write any data to the database.
 #
     plugin-type: ROOT

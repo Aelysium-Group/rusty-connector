@@ -1,6 +1,4 @@
-package rustyconnector.generic.lib.generic.whitelist;
-
-import com.axlabs.ip2asn2cc.Ip2Asn2Cc;
+package rustyconnector.generic.lib.generic;
 
 import java.util.*;
 
@@ -45,7 +43,7 @@ public class Whitelist {
         // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
 
         // TODO Add permission handling
-        if(this.usesPermission()) valid = ;
+        if(this.usesPermission()) valid = false;
         return valid;
     }
 

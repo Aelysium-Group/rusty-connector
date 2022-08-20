@@ -2,7 +2,9 @@ package rustyconnector.generic.lib.generic;
 
 import net.kyori.adventure.text.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Lang {
@@ -27,4 +29,41 @@ public class Lang {
     public static Component get(String key) {
         return langMap.get(key);
     }
+
+    public static List<String> getWordmark() {
+        List<String> wordmark = new ArrayList<>();
+        wordmark.add("#################################################################################################");
+        wordmark.add("");
+        wordmark.add(" /$$$$$$$                        /$$");
+        wordmark.add("| $$__  $$                      | $$");
+        wordmark.add("| $$  \\ $$ /$$   /$$  /$$$$$$$ /$$$$$$   /$$   /$$");
+        wordmark.add("| $$$$$$$/| $$  | $$ /$$_____/|_  $$_/  | $$  | $$");
+        wordmark.add("| $$__  $$| $$  | $$|  $$$$$$   | $$    | $$  | $$");
+        wordmark.add("| $$  \\ $$| $$  | $$ \\____  $$  | $$ /$$| $$  | $$");
+        wordmark.add("| $$  | $$|  $$$$$$/ /$$$$$$$/  |  $$$$/|  $$$$$$$");
+        wordmark.add("|__/  |__/ \\______/ |_______/    \\___/   \\____  $$");
+        wordmark.add("                                         /$$  | $$");
+        wordmark.add("                                        |  $$$$$$/");
+        wordmark.add("                                         \\______/");
+        wordmark.add("  /$$$$$$                                                      /$$");
+        wordmark.add(" /$$__  $$                                                    | $$");
+        wordmark.add("| $$  \\__/  /$$$$$$  /$$$$$$$  /$$$$$$$   /$$$$$$   /$$$$$$$ /$$$$$$    /$$$$$$   /$$$$$$");
+        wordmark.add("| $$       /$$__  $$| $$__  $$| $$__  $$ /$$__  $$ /$$_____/|_  $$_/   /$$__  $$ /$$__  $$");
+        wordmark.add("| $$      | $$  \\ $$| $$  \\ $$| $$  \\ $$| $$$$$$$$| $$        | $$    | $$  \\ $$| $$  \\__/");
+        wordmark.add("| $$    $$| $$  | $$| $$  | $$| $$  | $$| $$_____/| $$        | $$ /$$| $$  | $$| $$");
+        wordmark.add("|  $$$$$$/|  $$$$$$/| $$  | $$| $$  | $$|  $$$$$$$|  $$$$$$$  |  $$$$/|  $$$$$$/| $$");
+        wordmark.add("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/");
+        wordmark.add("");
+        wordmark.add("#################################################################################################");
+        wordmark.add("");
+        wordmark.add("Developed by Aelysium | Nathan (SIVIN)");
+        wordmark.add("");
+        wordmark.add("#################################################################################################");
+
+        return wordmark;
+    }
 }
+
+
+
+
