@@ -19,7 +19,7 @@ import java.security.InvalidAlgorithmParameterException;
 
 public class Redis extends rustyconnector.generic.lib.database.Redis {
     @Override
-    public void onMessage(String rawMessage, RustyConnector plugin) {
+    public void onMessage(String rawMessage, RustyConnector plugin, Long messageSnowflake) {
         try {
             Gson gson = new Gson();
             JsonArray json = gson.fromJson(rawMessage, JsonArray.class);
@@ -55,8 +55,10 @@ public class Redis extends rustyconnector.generic.lib.database.Redis {
             }
         } catch (IllegalArgumentException e) {
             plugin.logger().error("Incoming message is not formatted properly. Throwing away...",e);
+            plugin.logger().log("To view the thrown away message use: /rc log retrieve "+messageSnowflake.toString());
         } catch (Exception e) {
-
+            plugin.logger().error("There was an issue handling the incoming message! Throwing away...",e);
+            plugin.logger().log("To view the thrown away message use: /rc log retrieve "+messageSnowflake.toString());
         }
     }
 

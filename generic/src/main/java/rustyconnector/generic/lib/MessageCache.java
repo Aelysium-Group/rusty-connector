@@ -8,10 +8,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MessageCache {
-    private final LinkedHashMap<Long, RedisMessage> messages = new LinkedHashMap<>(50){
+    private int max = 25;
+
+    public MessageCache(Integer max) {
+        this.max = max;
+    }
+
+    private final LinkedHashMap<Long, String> messages = new LinkedHashMap<>(this.max){
         @Override
         protected boolean removeEldestEntry(final Map.Entry eldest) {
-            return size() > 50;
+            return size() > max;
         }
     };;
 
@@ -20,10 +26,7 @@ public class MessageCache {
      * @param message The message to cache.
      * @return The id of the cached message, so it can be referenced later.
      */
-    public Long cacheMessage(RedisMessage message) {
-        boolean isFull = this.messages.size() >= 50;
-        if(isFull) this.messages.removeEldestEntry();
-
+    public Long cacheMessage(String message) {
         Long snowflake = RustyConnector.getInstance().newSnowflake();
         this.messages.put(snowflake,message);
         return snowflake;
@@ -35,7 +38,7 @@ public class MessageCache {
      * @return The cached message.
      * @throws NullPointerException If the message can't be found or has been pushed out of the cache.
      */
-    public RedisMessage getMessage(Long messageSnowflake) throws NullPointerException {
+    public String getMessage(Long messageSnowflake) throws NullPointerException {
         return this.messages.get(messageSnowflake);
     }
 }

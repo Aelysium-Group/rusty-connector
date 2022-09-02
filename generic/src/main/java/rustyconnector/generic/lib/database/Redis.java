@@ -5,8 +5,10 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 import rustyconnector.RustyConnector;
+import rustyconnector.generic.lib.MessageCache;
 
 public class Redis {
+    private MessageCache messageCache;
     private String host;
     private int port;
     private String password;
@@ -44,6 +46,7 @@ public class Redis {
             this.jedisSubscriber = this.pool.getResource();
             this.jedisSubscriber.auth(this.password);
             this.subscriber = new Subscriber(plugin);
+            this.messageCache = new MessageCache(50);
 
             new Thread(new Runnable() {
                 @Override
@@ -84,7 +87,7 @@ public class Redis {
      *
      * @param message The messsage that is received
      */
-    public void onMessage(String message, RustyConnector plugin) {}
+    public void onMessage(String message, RustyConnector plugin, Long messageSnowflake) {}
 
     public class Subscriber extends JedisPubSub {
         private RustyConnector plugin;
@@ -96,7 +99,8 @@ public class Redis {
         @Override
         public void onMessage(String channel, String message) {
             try {
-                Redis.this.onMessage(message, plugin);
+                Long snowflake = Redis.this.messageCache.cacheMessage(message);
+                Redis.this.onMessage(message, plugin, snowflake);
             } catch (Exception e) {
                 e.printStackTrace();
             }
