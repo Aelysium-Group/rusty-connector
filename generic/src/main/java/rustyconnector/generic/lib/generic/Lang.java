@@ -1,6 +1,7 @@
 package rustyconnector.generic.lib.generic;
 
 import net.kyori.adventure.text.Component;
+import rustyconnector.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,45 +23,136 @@ public class Lang {
     }
 
     /**
-     * Return a value from lang.json.
-     * @param key The key of the value to return.
-     * @return A Component containing the value.
+     * Get a value which has been set in the lang.json file
+     * @param key The key of the lang to return
      */
-    public static Component get(String key) {
+    public static Component getDynamic(String key) {
         return langMap.get(key);
     }
 
-    public static List<String> getWordmark() {
-        List<String> wordmark = new ArrayList<>();
-        wordmark.add("#################################################################################################");
-        wordmark.add("");
-        wordmark.add(" /$$$$$$$                        /$$");
-        wordmark.add("| $$__  $$                      | $$");
-        wordmark.add("| $$  \\ $$ /$$   /$$  /$$$$$$$ /$$$$$$   /$$   /$$");
-        wordmark.add("| $$$$$$$/| $$  | $$ /$$_____/|_  $$_/  | $$  | $$");
-        wordmark.add("| $$__  $$| $$  | $$|  $$$$$$   | $$    | $$  | $$");
-        wordmark.add("| $$  \\ $$| $$  | $$ \\____  $$  | $$ /$$| $$  | $$");
-        wordmark.add("| $$  | $$|  $$$$$$/ /$$$$$$$/  |  $$$$/|  $$$$$$$");
-        wordmark.add("|__/  |__/ \\______/ |_______/    \\___/   \\____  $$");
-        wordmark.add("                                         /$$  | $$");
-        wordmark.add("                                        |  $$$$$$/");
-        wordmark.add("                                         \\______/");
-        wordmark.add("  /$$$$$$                                                      /$$");
-        wordmark.add(" /$$__  $$                                                    | $$");
-        wordmark.add("| $$  \\__/  /$$$$$$  /$$$$$$$  /$$$$$$$   /$$$$$$   /$$$$$$$ /$$$$$$    /$$$$$$   /$$$$$$");
-        wordmark.add("| $$       /$$__  $$| $$__  $$| $$__  $$ /$$__  $$ /$$_____/|_  $$_/   /$$__  $$ /$$__  $$");
-        wordmark.add("| $$      | $$  \\ $$| $$  \\ $$| $$  \\ $$| $$$$$$$$| $$        | $$    | $$  \\ $$| $$  \\__/");
-        wordmark.add("| $$    $$| $$  | $$| $$  | $$| $$  | $$| $$_____/| $$        | $$ /$$| $$  | $$| $$");
-        wordmark.add("|  $$$$$$/|  $$$$$$/| $$  | $$| $$  | $$|  $$$$$$$|  $$$$$$$  |  $$$$/|  $$$$$$/| $$");
-        wordmark.add("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/");
-        wordmark.add("");
-        wordmark.add("#################################################################################################");
-        wordmark.add("");
-        wordmark.add("Developed by Aelysium | Nathan (SIVIN)");
-        wordmark.add("");
-        wordmark.add("#################################################################################################");
+    public static List<String> get(String name, String... params) {
+        switch (name) {
+            case "wordmark":
+                return wordmark();
+            case "info":
+                return info();
+            case "registered-families":
+                return registeredFamilies();
+            case "registered-servers":
+                registeredServers(params);
+        }
+        return new ArrayList<>();
+    }
 
-        return wordmark;
+    public static void print(Logger logger, List<String> message) {
+        message.forEach(logger::log);
+    }
+
+    public static String border() {
+        return "█████████████████████████████████████████████████████████████████████████████████████████████████";
+    }
+    public static String spacing() {
+        return "";
+    }
+
+    private static List<String> registeredFamilies() { // font: ANSI Shadow
+        List<String> text = new ArrayList<>();
+        text.add(border());
+        text.add(spacing());
+        text.add("██████╗  ███████╗  ██████╗  ██╗ ███████╗ ████████╗ ███████╗ ██████╗  ███████╗ ██████╗ ");
+        text.add("██╔══██╗ ██╔════╝ ██╔════╝  ██║ ██╔════╝ ╚══██╔══╝ ██╔════╝ ██╔══██╗ ██╔════╝ ██╔══██╗");
+        text.add("██████╔╝ █████╗   ██║  ███╗ ██║ ███████╗    ██║    █████╗   ██████╔╝ █████╗   ██║  ██║");
+        text.add("██╔══██╗ ██╔══╝   ██║   ██║ ██║ ╚════██║    ██║    ██╔══╝   ██╔══██╗ ██╔══╝   ██║  ██║");
+        text.add("██║  ██║ ███████╗ ╚██████╔╝ ██║ ███████║    ██║    ███████╗ ██║  ██║ ███████╗ ██████╔╝");
+        text.add("╚═╝  ╚═╝ ╚══════╝  ╚═════╝  ╚═╝ ╚══════╝    ╚═╝    ╚══════╝ ╚═╝  ╚═╝ ╚══════╝ ╚═════╝ ");
+        text.add(spacing());
+        text.add("███████╗  █████╗  ███╗   ███╗ ██╗ ██╗      ██╗ ███████╗ ███████╗");
+        text.add("██╔════╝ ██╔══██╗ ████╗ ████║ ██║ ██║      ██║ ██╔════╝ ██╔════╝");
+        text.add("█████╗   ███████║ ██╔████╔██║ ██║ ██║      ██║ █████╗   ███████╗");
+        text.add("██╔══╝   ██╔══██║ ██║╚██╔╝██║ ██║ ██║      ██║ ██╔══╝   ╚════██║");
+        text.add("██║      ██║  ██║ ██║ ╚═╝ ██║ ██║ ███████╗ ██║ ███████╗ ███████║");
+        text.add("╚═╝      ╚═╝  ╚═╝ ╚═╝     ╚═╝ ╚═╝ ╚══════╝ ╚═╝ ╚══════╝ ╚══════╝");
+        text.add(spacing());
+        text.add(border());
+
+        return text;
+    }
+
+    private static List<String> registeredServers(String[] params) { // font: ANSI Shadow
+        List<String> text = new ArrayList<>();
+        text.add(border());
+        text.add(spacing());
+        text.add("██████╗  ███████╗  ██████╗  ██╗ ███████╗ ████████╗ ███████╗ ██████╗  ███████╗ ██████╗ ");
+        text.add("██╔══██╗ ██╔════╝ ██╔════╝  ██║ ██╔════╝ ╚══██╔══╝ ██╔════╝ ██╔══██╗ ██╔════╝ ██╔══██╗");
+        text.add("██████╔╝ █████╗   ██║  ███╗ ██║ ███████╗    ██║    █████╗   ██████╔╝ █████╗   ██║  ██║");
+        text.add("██╔══██╗ ██╔══╝   ██║   ██║ ██║ ╚════██║    ██║    ██╔══╝   ██╔══██╗ ██╔══╝   ██║  ██║");
+        text.add("██║  ██║ ███████╗ ╚██████╔╝ ██║ ███████║    ██║    ███████╗ ██║  ██║ ███████╗ ██████╔╝");
+        text.add("╚═╝  ╚═╝ ╚══════╝  ╚═════╝  ╚═╝ ╚══════╝    ╚═╝    ╚══════╝ ╚═╝  ╚═╝ ╚══════╝ ╚═════╝ ");
+        text.add(spacing());
+        text.add("███████╗ ███████╗ ██████╗  ██╗   ██╗ ███████╗ ██████╗  ███████╗");
+        text.add("██╔════╝ ██╔════╝ ██╔══██╗ ██║   ██║ ██╔════╝ ██╔══██╗ ██╔════╝");
+        text.add("███████╗ █████╗   ██████╔╝ ██║   ██║ █████╗   ██████╔╝ ███████╗");
+        text.add("╚════██║ ██╔══╝   ██╔══██╗ ╚██╗ ██╔╝ ██╔══╝   ██╔══██╗ ╚════██║");
+        text.add("███████║ ███████╗ ██║  ██║  ╚████╔╝  ███████╗ ██║  ██║ ███████║");
+        text.add("╚══════╝ ╚══════╝ ╚═╝  ╚═╝   ╚═══╝   ╚══════╝ ╚═╝  ╚═╝ ╚══════╝");
+        text.add(spacing());
+        text.add(border());
+        text.add(spacing());
+        text.add("All servers that have been registered to the family: "+params[0]);
+        text.add(params[0]);
+        text.add(spacing());
+        text.add(border());
+
+        return text;
+    }
+
+    private static List<String> info() { // font: ANSI Shadow
+        List<String> text = new ArrayList<>();
+        text.add(border());
+        text.add(spacing());
+        text.add("██╗ ███╗   ██╗ ███████╗  ██████╗ ");
+        text.add("██║ ████╗  ██║ ██╔════╝ ██╔═══██╗");
+        text.add("██║ ██╔██╗ ██║ █████╗   ██║   ██║");
+        text.add("██║ ██║╚██╗██║ ██╔══╝   ██║   ██║");
+        text.add("██║ ██║ ╚████║ ██║      ╚██████╔╝");
+        text.add("╚═╝ ╚═╝  ╚═══╝ ╚═╝       ╚═════╝ ");
+        text.add(spacing());
+        text.add(border());
+
+        return text;
+    }
+
+    private static List<String> wordmark() {
+        List<String> text = new ArrayList<>();
+        text.add(border());
+        text.add(spacing());
+        text.add(" /███████                        /██");
+        text.add("| ██__  ██                      | ██");
+        text.add("| ██  \\ ██ /██   /██  /███████ /██████   /██   /██");
+        text.add("| ███████/| ██  | ██ /██_____/|_  ██_/  | ██  | ██");
+        text.add("| ██__  ██| ██  | ██|  ██████   | ██    | ██  | ██");
+        text.add("| ██  \\ ██| ██  | ██ \\____  ██  | ██ /██| ██  | ██");
+        text.add("| ██  | ██|  ██████/ /███████/  |  ████/|  ███████");
+        text.add("|__/  |__/ \\______/ |_______/    \\___/   \\____  ██");
+        text.add("                                         /██  | ██");
+        text.add("                                        |  ██████/");
+        text.add("  /██████                                \\______/             /██");
+        text.add(" /██__  ██                                                    | ██");
+        text.add("| ██  \\__/  /██████  /███████  /███████   /██████   /███████ /██████    /██████   /██████");
+        text.add("| ██       /██__  ██| ██__  ██| ██__  ██ /██__  ██ /██_____/|_  ██_/   /██__  ██ /██__  ██");
+        text.add("| ██      | ██  \\ ██| ██  \\ ██| ██  \\ ██| ████████| ██        | ██    | ██  \\ ██| ██  \\__/");
+        text.add("| ██    ██| ██  | ██| ██  | ██| ██  | ██| ██_____/| ██        | ██ /██| ██  | ██| ██");
+        text.add("|  ██████/|  ██████/| ██  | ██| ██  | ██|  ███████|  ███████  |  ████/|  ██████/| ██");
+        text.add("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/");
+        text.add(spacing());
+        text.add(border());
+        text.add(spacing());
+        text.add("Developed by Aelysium | Nathan (SIVIN)");
+        text.add("Use: `/rc help` to get started");
+        text.add(spacing());
+        text.add(border());
+
+        return text;
     }
 }
 

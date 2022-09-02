@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.generic;
 
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.GenericParser;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import rustyconnector.generic.lib.generic.server.Proxy;
@@ -81,17 +82,5 @@ public class Config extends rustyconnector.generic.lib.generic.Config {
             this.plugin.logger().error("",e);
             return null;
         }
-    }
-
-    public void parse(ParseAs parseAs, Proxy proxy) {
-        if(parseAs == ParseAs.GENERIC_CONFIG) ConfigParser.parseGeneric(this, this.plugin);
-        if(parseAs == ParseAs.FAMILY_CONFIG) ConfigParser.parseFamilies(this, this.plugin);
-        if(parseAs == ParseAs.WHITELIST_CONFIG) ConfigParser.parseWhitelist(this, this.plugin);
-    }
-
-    public enum ParseAs {
-        GENERIC_CONFIG,
-        WHITELIST_CONFIG,
-        FAMILY_CONFIG
     }
 }

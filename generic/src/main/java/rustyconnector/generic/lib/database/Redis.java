@@ -1,11 +1,10 @@
-package rustyconnector.generic.database;
+package rustyconnector.generic.lib.database;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
-
-import javax.security.auth.callback.Callback;
+import rustyconnector.RustyConnector;
 
 public class Redis {
     private String host;
@@ -32,7 +31,7 @@ public class Redis {
     /**
      * Tests the connection to the provided Redis server
      */
-    public void connect() throws ExceptionInInitializerError{
+    public void connect(RustyConnector plugin) throws ExceptionInInitializerError{
         try{
             if(!(this.client == null)) return;
 
@@ -44,7 +43,7 @@ public class Redis {
             this.pool = new JedisPool(poolConfig, this.host, this.port, 0);
             this.jedisSubscriber = this.pool.getResource();
             this.jedisSubscriber.auth(this.password);
-            this.subscriber = new Subscriber();
+            this.subscriber = new Subscriber(plugin);
 
             new Thread(new Runnable() {
                 @Override
@@ -85,13 +84,19 @@ public class Redis {
      *
      * @param message The messsage that is received
      */
-    public void onMessage(String message) {}
+    public void onMessage(String message, RustyConnector plugin) {}
 
     public class Subscriber extends JedisPubSub {
+        private RustyConnector plugin;
+
+        public Subscriber(RustyConnector plugin) {
+            this.plugin = plugin;
+        }
+
         @Override
         public void onMessage(String channel, String message) {
             try {
-                Redis.this.onMessage(message);
+                Redis.this.onMessage(message, plugin);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -20,7 +20,7 @@
 # Do not touch this value, it might totally mess up your entire plugin!
 # And that's the last thing anyone wants :)
 #
-config-version: "0.1"
+config-version: 1
 
 
 
@@ -73,12 +73,14 @@ root-family: "lobby"
 # If you remove a family from this list, the plugin will no longer use that family, and you can safely delete its
 # config files from your server.
 #
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Make sure you also list your "root-family" in this list as well!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #
 families:
   - "lobby"
-    "survival"
-    "creative"
+  - "survival"
+  - "creative"
 
 
 ############################################################
@@ -94,9 +96,9 @@ families:
 # Redis is required in order to provide quick and easy syncing between the proxy and sub-servers
 #
 redis:
-    host: "localhost",
-    port: "3306",
-    password: "password",
+    host: "localhost"
+    port: 3306
+    password: "password"
 
 #
 # The name of the data channel that sync information should be sent over.
@@ -131,11 +133,11 @@ mysql:
 #
     plugin-type: ROOT
 
-    host: "localhost",
-    port: "3306",
-    database: "",
-    user: "",
-    password: "",
+    host: "localhost"
+    port: 3306
+    database: ""
+    user: ""
+    password: ""
 
 
 ############################################################
@@ -166,3 +168,59 @@ mysql:
 #
 use-whitelist: false
 whitelist: "whitelist-template"
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                    Connection Gateway                    #
+#                                                          #
+#               ---------------------------                #
+# | Sadly we can't all have nice things. If you notice     #
+# | you're getting server requests from ip addresses you   #
+# | don't recognize, you can block them!                   #
+#                                                          #
+# | Alternatively, if you'd like to only allow messages    #
+# | from certain ip addresses; you can whitelist them!     #
+#                                                          #
+#  NOTE: This section has NOTHING to do with players!      #
+#        Instead, it is used to provide better control     #
+#        over where servers are allowed to auto-register   #
+#        from.                                             #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+gateway:
+    enabled: false
+
+#
+# The gateway whitelist.
+# To disable the whitelist, set it to be:
+# whitelist: []
+#
+# By listing IP addresses here. The plugin will NEVER accept messages if they don't contain one of these IP Addresses!
+# If you know exactly which IP Addresses you want to allow messages from. You can whitelist them here!
+#
+# VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
+#                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
+#                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
+#
+    whitelist:
+      - "127.0.0.1"
+
+#
+# The gateway denylist.
+# To disable the denylist, set it to be:
+# denylist: []
+#
+# By listing IP addresses here. The plugin will NEVER accept messages containing one of these IP Addresses!
+#
+# NOTE: The denylist has precedence over the whitelist. If an IP is defined in both the whitelist AND the denylist
+#       it will not be accepted.
+#
+  # VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
+  #                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
+  #                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
+#
+    denylist:
+      - "127.0.0.1"

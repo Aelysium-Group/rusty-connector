@@ -8,8 +8,8 @@
 # | your sub-servers appropriately.                        #
 #                                                          #
 # | If your sub-servers use family names that don't match  #
-# | what you define in config_template.yml, they will not be        #
-# | registered.                                            #
+# | what you define in config_template.yml, they will      #
+# | not be registered.                                     #
 #                                                          #
 # | In this config you can manage this family's            #
 # | load-balancing, whitelist, and more!                   #
@@ -43,10 +43,10 @@ load-balancing:
 # | balancing algorithms if there are other algorithms     #
 # | you'd like to see in the future, let us know!          #
 #                                                          #
-#  ⚫ TROUGH - A "Least Connection" based algorithm.        #
+#  ⚫ TROUGH - A "Least Connection" based algorithm.       #
 #             Connects players to the server with the      #
 #             fewest players currently connected.          #
-#  ⚫ CASCADE - A "Fixed Weighting" based algorithm.        #
+#  ⚫ CASCADE - A "Fixed Weighting" based algorithm.       #
 #             servers that are assigned a higher "level"   #
 #             will get filled up first, before the         #
 #             algorithm starts filling up lower level      #
@@ -65,6 +65,14 @@ load-balancing:
 # the servers as it sees fit.
 #
     algorithm: "CASCADE"
+
+#
+# If set to `true`. Persistence will cause the algorithm to keep trying to connect the player to this
+# family if, for some reason they haven't been able to connect yet.
+# If set to `false`; The algorithm will give up on trying to connect the player to the family
+# the moment it fails. It will then return an error message.
+#
+    persistence: false
 
 
 ############################################################

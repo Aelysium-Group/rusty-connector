@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
-import java.util.logging.Level;
 import org.slf4j.Logger;
+import org.slf4j.Marker;
 
 public class PluginLogger implements rustyconnector.Logger {
     private final Logger logger;
@@ -11,7 +11,7 @@ public class PluginLogger implements rustyconnector.Logger {
     }
     @Override
     public void log(String message) {
-        logger.debug(message);
+        logger.info(message);
     }
 
     @Override
