@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
 import org.slf4j.Logger;
-import org.slf4j.Marker;
 
-public class PluginLogger implements rustyconnector.Logger {
+public class PluginLogger implements group.aelysium.rustyconnector.core.Logger {
     private final Logger logger;
 
     public PluginLogger(Logger logger) {

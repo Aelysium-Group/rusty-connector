@@ -5,9 +5,9 @@ import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Proxy;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
-import rustyconnector.generic.lib.generic.Lang;
-import rustyconnector.generic.lib.generic.whitelist.Whitelist;
-import rustyconnector.generic.lib.generic.whitelist.WhitelistPlayer;
+import group.aelysium.rustyconnector.core.generic.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.Whitelist;
+import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.WhitelistPlayer;
 
 public class OnPlayerJoin {
     /**

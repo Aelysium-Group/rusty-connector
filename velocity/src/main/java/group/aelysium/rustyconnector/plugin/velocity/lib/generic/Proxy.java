@@ -2,14 +2,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.generic;
 
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
-import rustyconnector.generic.lib.generic.whitelist.Whitelist;
+import group.aelysium.rustyconnector.core.generic.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.Whitelist;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class Proxy implements rustyconnector.generic.lib.generic.server.Proxy {
+public class Proxy implements group.aelysium.rustyconnector.core.generic.lib.generic.server.Proxy {
     private String privateKey = null;
     private VelocityRustyConnector plugin;
     private ServerFamily rootFamily;
@@ -61,5 +59,29 @@ public class Proxy implements rustyconnector.generic.lib.generic.server.Proxy {
 
     public boolean validatePrivateKey(String keyToValidate) {
         return this.privateKey.equals(keyToValidate);
+    }
+
+    public ServerFamily findFamily(String name) {
+        return this.getRegisteredFamilies().stream()
+                .filter(family ->
+                        Objects.equals(family.getName(), name)
+                ).findFirst().orElse(null);
+    }
+
+    public void printFamilies() {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        Lang.print(plugin.logger(), Lang.get("registered-families"));
+        plugin.logger().log(Lang.spacing());
+        this.getRegisteredFamilies().forEach(family -> {
+            plugin.logger().log("   ---| "+family.getName());
+        });
+        plugin.logger().log(Lang.spacing());
+        plugin.logger().log("To see more details about a particular family use:");
+        plugin.logger().log("/rc family info <family name>");
+        plugin.logger().log("To see all servers currently saved to a family use:");
+        plugin.logger().log("/rc family info <family name> servers");
+        plugin.logger().log(Lang.spacing());
+        plugin.logger().log(Lang.border());
     }
 }

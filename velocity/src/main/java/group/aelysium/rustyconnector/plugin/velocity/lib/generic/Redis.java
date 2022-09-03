@@ -4,20 +4,16 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
-import rustyconnector.RustyConnector;
-import rustyconnector.generic.lib.database.RedisMessage;
-import rustyconnector.generic.lib.database.RedisMessageType;
-import rustyconnector.generic.lib.generic.server.Family;
+import group.aelysium.rustyconnector.core.RustyConnector;
+import group.aelysium.rustyconnector.core.generic.lib.database.RedisMessage;
+import group.aelysium.rustyconnector.core.generic.lib.database.RedisMessageType;
 
 import javax.naming.AuthenticationException;
 import java.security.InvalidAlgorithmParameterException;
 
-public class Redis extends rustyconnector.generic.lib.database.Redis {
+public class Redis extends group.aelysium.rustyconnector.core.generic.lib.database.Redis {
     @Override
     public void onMessage(String rawMessage, RustyConnector plugin, Long messageSnowflake) {
         try {
@@ -55,10 +51,10 @@ public class Redis extends rustyconnector.generic.lib.database.Redis {
             }
         } catch (IllegalArgumentException e) {
             plugin.logger().error("Incoming message is not formatted properly. Throwing away...",e);
-            plugin.logger().log("To view the thrown away message use: /rc log retrieve "+messageSnowflake.toString());
+            plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
         } catch (Exception e) {
             plugin.logger().error("There was an issue handling the incoming message! Throwing away...",e);
-            plugin.logger().log("To view the thrown away message use: /rc log retrieve "+messageSnowflake.toString());
+            plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
         }
     }
 

@@ -1,15 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.generic;
 
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.GenericParser;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
-import rustyconnector.generic.lib.generic.server.Proxy;
 
 import java.io.*;
 import java.nio.file.Files;
 
-public class Config extends rustyconnector.generic.lib.generic.Config {
+public class Config extends group.aelysium.rustyconnector.core.generic.lib.generic.Config {
     private VelocityRustyConnector plugin;
     private File configPointer;
     private String template;

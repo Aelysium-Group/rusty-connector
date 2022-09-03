@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>group.aelysium.rustyconnector</groupId>
-            <artifactId>generic</artifactId>
+            <artifactId>core</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

@@ -4,9 +4,9 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 import ninja.leaping.configurate.ConfigurationNode;
-import rustyconnector.generic.lib.generic.parsing.YAML;
-import rustyconnector.generic.lib.generic.whitelist.Whitelist;
-import rustyconnector.generic.lib.generic.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.core.generic.lib.generic.parsing.YAML;
+import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.Whitelist;
+import group.aelysium.rustyconnector.core.generic.lib.generic.load_balancing.AlgorithmType;
 
 import java.io.File;
 import java.util.List;

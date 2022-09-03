@@ -2,18 +2,22 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Redis;
 import ninja.leaping.configurate.ConfigurationNode;
-import rustyconnector.generic.lib.database.Redis;
-import rustyconnector.generic.lib.generic.parsing.YAML;
+import group.aelysium.rustyconnector.core.generic.lib.generic.parsing.YAML;
 
 public class GenericParser {
-    public static void parse(Config config, VelocityRustyConnector plugin) {
+    public static void parse(Config config) {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
         ConfigurationNode configData = config.getData();
         plugin.logger().log("-------| Configuring Proxy...");
         FamilyParser.parse(config, plugin);
 
         plugin.logger().log("---------| Preparing Redis...");
         Redis redis = new Redis();
+        plugin.setRedis(redis);
+
         redis.setConnection(
                 YAML.get(configData,"redis.host").getString(),
                 YAML.get(configData,"redis.port").getInt(),

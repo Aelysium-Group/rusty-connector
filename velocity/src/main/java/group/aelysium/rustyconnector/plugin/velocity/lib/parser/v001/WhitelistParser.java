@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
 import ninja.leaping.configurate.ConfigurationNode;
-import rustyconnector.generic.lib.generic.whitelist.Whitelist;
+import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.Whitelist;
 
 public class WhitelistParser {
     public static boolean parse(String configName, Config config, VelocityRustyConnector plugin) {

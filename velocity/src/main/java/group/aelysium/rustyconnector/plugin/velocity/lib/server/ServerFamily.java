@@ -1,18 +1,16 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
-import com.typesafe.config.ConfigException;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import rustyconnector.generic.lib.generic.Lang;
-import rustyconnector.generic.lib.generic.load_balancing.Algorithm;
-import rustyconnector.generic.lib.generic.load_balancing.AlgorithmType;
-import rustyconnector.generic.lib.generic.server.Family;
-import rustyconnector.generic.lib.generic.server.Server;
-import rustyconnector.generic.lib.generic.whitelist.Whitelist;
-import rustyconnector.generic.lib.generic.whitelist.WhitelistPlayer;
+import group.aelysium.rustyconnector.core.generic.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.generic.lib.generic.load_balancing.Algorithm;
+import group.aelysium.rustyconnector.core.generic.lib.generic.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.core.generic.lib.generic.server.Family;
+import group.aelysium.rustyconnector.core.generic.lib.generic.server.Server;
+import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.Whitelist;
+import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.WhitelistPlayer;
 
-import java.awt.print.Paper;
 import java.util.*;
 
 public class ServerFamily implements Family {
@@ -56,8 +54,9 @@ public class ServerFamily implements Family {
         player.createConnectionRequest(server.getRawServer());
     }
 
-    public Map<ServerInfo,PaperServer> getRegisteredServers() {
-        return this.registeredServers;
+    @Override
+    public Map<Object, Server> getRegisteredServers() {
+        return new HashMap<>(); // TODO: sort this out
     }
 
     @Override
@@ -88,5 +87,37 @@ public class ServerFamily implements Family {
      */
     public PaperServer getServer(ServerInfo serverInfo) throws NullPointerException {
         return this.registeredServers.get(serverInfo);
+    }
+
+    public void printInfo() {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        Lang.print(plugin.logger(), Lang.get("info"));
+        plugin.logger().log(Lang.spacing());
+        plugin.logger().log("Family Info");
+        plugin.logger().log(Lang.spacing());
+        plugin.logger().log("   ---| Name: "+this.getName());
+        plugin.logger().log("   ---| Online Players: "+this.playerCount());
+        plugin.logger().log("   ---| Registered Servers: "+this.serverCount());
+        plugin.logger().log("   ---| Load Balancing Algorithm: "+this.algorithm());
+        plugin.logger().log(Lang.spacing());
+        plugin.logger().log(Lang.border());
+    }
+
+    public void printServers() {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        Lang.print(plugin.logger(), Lang.get("info"));
+        plugin.logger().log(Lang.spacing());
+        plugin.logger().log("All servers registered to the family: "+this.name);
+        plugin.logger().log("Registered Servers: "+this.serverCount());
+        plugin.logger().log(Lang.spacing());
+        plugin.logger().log(Lang.border());
+        plugin.logger().log(Lang.spacing());
+        this.registeredServers.forEach((info, data) -> {
+            plugin.logger().log("   ---| "+info.getName());
+        });
+        plugin.logger().log(Lang.spacing());
+        plugin.logger().log(Lang.border());
     }
 }
