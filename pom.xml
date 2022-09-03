@@ -12,7 +12,6 @@
     <modules>
         <module>velocity</module>
         <module>paper</module>
-        <module>assembly</module>
         <module>core</module>
     </modules>
 
