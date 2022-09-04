@@ -1,6 +1,6 @@
 name: RustyConnector
 version: '${project.version}'
-main: group.aelysium.rustyconnector.RustyConnector
+main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
 api-version: 1.16
 authors: [ Sivin ]
 commands: {}

@@ -29,13 +29,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-@Plugin(
-        id = "rustyconnector-velocity",
-        name = "RustyConnector",
-        version = "1.0",
-        url = "https://aelysium.group/",
-        authors = {"sivin"}
-)
 public class VelocityRustyConnector implements RustyConnector {
     private final Snowflake snowflakeGenerator = new Snowflake();
     private static RustyConnector instance;

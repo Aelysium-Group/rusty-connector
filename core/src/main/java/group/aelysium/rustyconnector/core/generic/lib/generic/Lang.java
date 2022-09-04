@@ -170,7 +170,7 @@ public class Lang {
         text.add(border());
         text.add(spacing());
         text.add("Developed by Aelysium | Nathan (SIVIN)");
-        text.add("Use: `/rc help` to get started");
+        text.add("Use: `/rc` to get started");
         text.add(spacing());
         text.add(border());
 
