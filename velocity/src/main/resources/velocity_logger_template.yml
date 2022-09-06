@@ -1,0 +1,50 @@
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                         Logger                           #
+#                                                          #
+#               ---------------------------                #
+# | In order to operate, RustyConnector passes lots of     #
+# | data around. In this file, you can control what does   #
+# | and does not appear in your console when               #
+# | something happens!                                     #
+#                                                          #
+# | One of our biggest pet peeves is plugins that default  #
+# | with everything turned on, and then you have to spend  #
+# | hours to turn it all off. Because of this, everything  #
+# | in this config is off by default except for            #
+# | certain important messages,                            #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+messaging:
+# Should we log when a server requests to be registered?
+# NOTE: This option can spam your proxy console if your proxy sends out a call-for-registration
+#       which requires all listening servers to submit a registration request
+    registration-request: false
+
+# Should we log when the proxy calls for all servers to register themselves?
+    call-for-registration: false
+
+# Should we log when the proxy makes a ping request to servers?
+    ping: false
+
+# Should we log when the proxy receives a ping response from a server? (Also called a `pong`)
+    pong: false
+
+# Should we log when a server decides to send a player-count update?
+    player-count-update: false
+
+security:
+
+# Should we log when a message contains an invalid key?
+# If you are getting this message, check the IP Address! Do you recognize it?
+# If not, somebody might have gained access to your Redis database
+# and is trying to crack your private key via brute forcing!
+    invalid-private-key: true
+
+# Should we log when a blacklisted address tries to send a message to us?
+    blacklisted-address-message: true
+
+# Should we log when an address which hasn't been whitelisted tries to send a message to us?
+    whitelist-denied-address-message: true

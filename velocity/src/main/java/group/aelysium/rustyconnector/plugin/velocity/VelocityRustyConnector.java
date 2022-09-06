@@ -7,30 +7,30 @@ import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import group.aelysium.rustyconnector.core.lib.generic.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Proxy;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Redis;
+import group.aelysium.rustyconnector.plugin.velocity.lib.generic.database.Redis;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.GenericParser;
 import group.aelysium.rustyconnector.core.RustyConnector;
-import group.aelysium.rustyconnector.core.generic.lib.MessageCache;
-import group.aelysium.rustyconnector.core.generic.lib.generic.Callable;
-import group.aelysium.rustyconnector.core.generic.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
+import group.aelysium.rustyconnector.core.lib.generic.Callable;
+import group.aelysium.rustyconnector.core.lib.generic.Lang;
+import ninja.leaping.configurate.ConfigurationNode;
 import org.slf4j.Logger;
-import group.aelysium.rustyconnector.core.generic.lib.hash.MD5;
-import group.aelysium.rustyconnector.core.generic.lib.hash.Snowflake;
+import group.aelysium.rustyconnector.core.lib.generic.hash.MD5;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 public class VelocityRustyConnector implements RustyConnector {
-    private final Snowflake snowflakeGenerator = new Snowflake();
     private static RustyConnector instance;
     private Proxy proxy;
     private Map<String,Config> configs = new HashMap<>();
@@ -38,6 +38,18 @@ public class VelocityRustyConnector implements RustyConnector {
     private final PluginLogger logger;
     private final File dataFolder;
     private Redis redis;
+    private MessageTunnel messageTunnel;
+
+    /**
+     * Set the message tunnel for the redis connection. Once this is set it cannot be changed.
+     * @param messageTunnel The message tunnel to set.
+     */
+    public void setMessageTunnel(MessageTunnel messageTunnel) throws IllegalStateException {
+        if(this.messageTunnel != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+        this.messageTunnel = messageTunnel;
+    }
+
+    public boolean validateMessage(InetSocketAddress address) { return this.messageTunnel.validate(address); }
 
     public MessageCache getMessageCache() {
         return this.redis.getMessageCache();
@@ -61,18 +73,15 @@ public class VelocityRustyConnector implements RustyConnector {
         this.server = server;
         this.logger = new PluginLogger(logger);
         this.dataFolder = dataFolder.toFile();
-        logger.info("Hello there, it's a test plugin I made!");
     }
 
     @Subscribe
     public void onLoad(ProxyInitializeEvent event) {
         instance = this;
 
-        boolean firstStart = !getDataFolder().exists();
-
         if(!loadConfigs()) return;
 
-        registerCommands();
+        loadCommands();
     }
 
     @Subscribe
@@ -82,45 +91,54 @@ public class VelocityRustyConnector implements RustyConnector {
 
     @Override
     public boolean loadConfigs() {
-        this.logger().log("-| Registering configs");
-        this.configs.put("config.yml",new Config(this, new File(this.getDataFolder(), "config.yml"), "config_template.yml"));
-        Config genericConfig = this.configs.get("config.yml");
-        if(!genericConfig.register()) return false;
+        try {
+            this.logger().log("-| Registering configs");
+            this.configs.put("config.yml",new Config(new File(this.getDataFolder(), "config.yml"), "velocity_config_template.yml"));
+            Config genericConfig = this.configs.get("config.yml");
+            if(!genericConfig.register()) return false;
 
-        this.logger().log("---| Preparing proxy...");
-        this.logger().log("-----| Registering private key...");
-        String privateKey = genericConfig.getData().getNode("private-key").getString();
-        if(privateKey == null) {
-            this.logger().log(Lang.border());
-            this.logger().log("No private-key was defined! Generating one now...");
-            this.logger().log("Paste this into the private-key field in config.yml");
-            this.logger().log(Lang.border());
-            this.logger().log(Lang.spacing());
-            this.logger().log(MD5.generatePrivateKey());
-            this.logger().log(Lang.spacing());
-            this.logger().log(Lang.border());
-            return false;
+            this.logger().log("---| Preparing proxy...");
+            this.logger().log("-----| Registering private key...");
+            String privateKey = genericConfig.getData().getNode("private-key").getString();
+            if(privateKey == null || privateKey.equals("")) {
+
+                Lang.print(this.logger, Lang.get(
+                        "boxed-message",
+                        "No private-key was defined! Generating one now...",
+                        "Paste this into the `private-key` field in `config.yml`",
+                        Lang.spacing(),
+                        Lang.border(),
+                        Lang.spacing(),
+                        MD5.generatePrivateKey()
+                        ));
+                return false;
+            }
+            this.proxy = new Proxy(this, privateKey);
+            this.logger().log("-----| Finished!");
+            this.logger().log("-----| Configuring Proxy...");
+
+            GenericParser.parse(genericConfig);
+
+            Lang.print(this.logger, Lang.get("wordmark"));
+
+            return true;
+        } catch (Exception e) {
+            Lang.print(this.logger, Lang.get("boxed-message",e.getMessage()));
         }
-        this.proxy = new Proxy(this, privateKey);
-        this.logger().log("-----| Finished!");
-        this.logger().log("-----| Configuring Proxy...");
-
-        GenericParser.parse(genericConfig);
-
-        Lang.print(this.logger, Lang.get("wordmark"));
-
-        return true;
+        return false;
     }
 
     @Override
     public void reload() {
         this.redis = null;
         this.proxy = null;
+        this.messageTunnel = null;
 
         this.loadConfigs();
     }
 
-    public void registerCommands() {
+    @Override
+    public boolean loadCommands() {
         CommandManager commandManager = server.getCommandManager();
 
         Callable registerRusty = () -> {
@@ -133,15 +151,14 @@ public class VelocityRustyConnector implements RustyConnector {
         };
 
         registerRusty.execute();
+
+        return true;
     }
 
     @Override
     public PluginLogger logger() {
         return this.logger;
     }
-
-    @Override
-    public Long newSnowflake() { return this.snowflakeGenerator.nextId(); }
 
     @Override
     public File getDataFolder() {
@@ -152,4 +169,6 @@ public class VelocityRustyConnector implements RustyConnector {
     public InputStream getResourceAsStream(String filename) {
         return getClass().getClassLoader().getResourceAsStream(filename);
     }
+
+
 }

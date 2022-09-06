@@ -3,13 +3,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.core.generic.lib.generic.Lang;
-import group.aelysium.rustyconnector.core.generic.lib.generic.load_balancing.Algorithm;
-import group.aelysium.rustyconnector.core.generic.lib.generic.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.core.generic.lib.generic.server.Family;
-import group.aelysium.rustyconnector.core.generic.lib.generic.server.Server;
-import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.Whitelist;
-import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.WhitelistPlayer;
+import group.aelysium.rustyconnector.core.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.lib.generic.load_balancing.Algorithm;
+import group.aelysium.rustyconnector.core.lib.generic.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.core.lib.generic.server.Family;
+import group.aelysium.rustyconnector.core.lib.generic.server.Server;
+import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
+import group.aelysium.rustyconnector.core.lib.generic.firewall.WhitelistPlayer;
 
 import java.util.*;
 

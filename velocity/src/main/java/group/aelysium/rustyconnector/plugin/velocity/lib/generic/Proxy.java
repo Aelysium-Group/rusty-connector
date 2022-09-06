@@ -2,12 +2,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.generic;
 
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
-import group.aelysium.rustyconnector.core.generic.lib.generic.Lang;
-import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.Whitelist;
+import group.aelysium.rustyconnector.core.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
 
 import java.util.*;
 
-public class Proxy implements group.aelysium.rustyconnector.core.generic.lib.generic.server.Proxy {
+public class Proxy implements group.aelysium.rustyconnector.core.lib.generic.server.Proxy {
     private String privateKey = null;
     private VelocityRustyConnector plugin;
     private ServerFamily rootFamily;

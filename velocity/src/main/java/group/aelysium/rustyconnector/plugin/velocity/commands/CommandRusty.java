@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.commands;
 
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -12,8 +13,8 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import group.aelysium.rustyconnector.core.generic.lib.MessageCache;
-import group.aelysium.rustyconnector.core.generic.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
+import group.aelysium.rustyconnector.core.lib.generic.Lang;
 
 import java.util.List;
 
@@ -51,7 +52,45 @@ public final class CommandRusty {
 
                 return 1;
             })
-            .then(RequiredArgumentBuilder.<CommandSource, String>argument("family", StringArgumentType.word())
+            .then(LiteralArgumentBuilder.<CommandSource>literal("retrieveMessage")
+                    .executes(context -> {
+                        CommandSource source = context.getSource();
+
+                        Lang.print(VelocityRustyConnector.getInstance().logger(), Lang.commandUsage());
+
+                        source.sendMessage(Component.text("/rc retrieveMessage <Message ID>").color(NamedTextColor.AQUA));
+                        source.sendMessage(Component.text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!").color(NamedTextColor.GRAY));
+                        VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
+                        VelocityRustyConnector.getInstance().logger().log(Lang.border());
+
+                        return 1;
+                    })
+                    .then(RequiredArgumentBuilder.<CommandSource, Long>argument("snowflake", LongArgumentType.longArg())
+                            .executes(context -> {
+                                try {
+                                    Long snowflake = context.getArgument("snowflake", Long.class);
+                                    MessageCache messageCache = VelocityRustyConnector.getInstance().getMessageCache();
+
+                                    String message = messageCache.getMessage(snowflake);
+
+                                    Lang.print(VelocityRustyConnector.getInstance().logger(),
+                                        Lang.get("boxed-message",
+                                            "Found message with ID "+snowflake.toString(),
+                                            Lang.spacing(),
+                                            message
+                                            )
+                                    );
+                                } catch (NullPointerException e) {
+                                    VelocityRustyConnector.getInstance().logger().log("That message either doesn't exist or is no-longer available in the cache!");
+                                } catch (Exception e) {
+                                    VelocityRustyConnector.getInstance().logger().log("An error stopped us from getting that message!", e);
+                                }
+
+                                return 1;
+                            })
+                    )
+            )
+            .then(LiteralArgumentBuilder.<CommandSource>literal("family")
                 .executes(context -> {
                     CommandSource source = context.getSource();
 
@@ -74,13 +113,13 @@ public final class CommandRusty {
 
                     return 1;
                 })
-                .then(RequiredArgumentBuilder.<CommandSource, String>argument("list", StringArgumentType.word())
+                .then(LiteralArgumentBuilder.<CommandSource>literal("list")
                     .executes(context -> {
                         plugin.getProxy().printFamilies();
                         return 1;
                     })
                 )
-                .then(RequiredArgumentBuilder.<CommandSource, String>argument("info", StringArgumentType.word())
+                .then(LiteralArgumentBuilder.<CommandSource>literal("info")
                     .executes(context -> {
                         CommandSource source = context.getSource();
 
@@ -116,7 +155,7 @@ public final class CommandRusty {
                             )
                     )
                 )
-                .then(RequiredArgumentBuilder.<CommandSource, String>argument("reload", StringArgumentType.word())
+                .then(LiteralArgumentBuilder.<CommandSource>literal("reload")
                     .executes(context -> {
                         CommandSource source = context.getSource();
 
@@ -134,7 +173,7 @@ public final class CommandRusty {
                         VelocityRustyConnector.getInstance().logger().log(Lang.border());
                         return 1;
                     })
-                    .then(RequiredArgumentBuilder.<CommandSource, String>argument("all", StringArgumentType.word())
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("all")
                             .executes(context -> {
                                 List<ServerFamily> families = VelocityRustyConnector.getInstance().getProxy().getRegisteredFamilies();
 
@@ -143,7 +182,7 @@ public final class CommandRusty {
                                 return 1;
                             })
                     )
-                    .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("familyName")
                             .executes(context -> {
                                 String familyName = context.getArgument("familyName", String.class);
                                 ServerFamily family = VelocityRustyConnector.getInstance().getProxy().findFamily(familyName);
@@ -155,50 +194,12 @@ public final class CommandRusty {
                     )
                 )
             )
-            .then(RequiredArgumentBuilder.<CommandSource, String>argument("reload", StringArgumentType.word())
+            .then(LiteralArgumentBuilder.<CommandSource>literal("reload")
                 .executes(context -> {
                     VelocityRustyConnector.getInstance().reload();
 
                     return 1;
                 })
-            )
-            .then(RequiredArgumentBuilder.<CommandSource, String>argument("retrieveMessage", StringArgumentType.word())
-                .executes(context -> {
-                    CommandSource source = context.getSource();
-
-                    Lang.print(VelocityRustyConnector.getInstance().logger(), Lang.commandUsage());
-
-                    source.sendMessage(Component.text("/rc retrieveMessage <Message ID>").color(NamedTextColor.AQUA));
-                    source.sendMessage(Component.text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!").color(NamedTextColor.GRAY));
-                    VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
-                    VelocityRustyConnector.getInstance().logger().log(Lang.border());
-
-                    return 1;
-                })
-                .then(RequiredArgumentBuilder.<CommandSource, String>argument("snowflake", StringArgumentType.string())
-                    .executes(context -> {
-                        try {
-                            Long snowflake = context.getArgument("snowflake", Long.class);
-                            MessageCache messageCache = VelocityRustyConnector.getInstance().getMessageCache();
-
-                            String message = messageCache.getMessage(snowflake);
-
-                            VelocityRustyConnector.getInstance().logger().log(Lang.border());
-                            VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
-                            VelocityRustyConnector.getInstance().logger().log("Found message with ID "+snowflake.toString());
-                            VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
-                            VelocityRustyConnector.getInstance().logger().log(message);
-                            VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
-                            VelocityRustyConnector.getInstance().logger().log(Lang.border());
-                        } catch (NullPointerException e) {
-                            VelocityRustyConnector.getInstance().logger().log("That message either doesn't exist or is no-longer available in the cache!");
-                        } catch (Exception e) {
-                            VelocityRustyConnector.getInstance().logger().log("An error stopped us from getting that message!");
-                        }
-
-                        return 1;
-                    })
-                )
             )
             .build();
 

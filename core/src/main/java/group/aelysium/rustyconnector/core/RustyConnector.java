@@ -1,15 +1,14 @@
 package group.aelysium.rustyconnector.core;
 
-import group.aelysium.rustyconnector.core.generic.lib.hash.Snowflake;
+import group.aelysium.rustyconnector.core.lib.generic.database.Redis;
+import group.aelysium.rustyconnector.core.lib.generic.hash.Snowflake;
 
 import java.io.File;
 import java.io.InputStream;
 
 public interface RustyConnector {
     RustyConnector instance = null;
-    Snowflake snowflakeGenerator = null;
-
-    Long newSnowflake();
+    Redis redis = null;
 
     static RustyConnector getInstance() {
         return instance;
@@ -30,6 +29,8 @@ public interface RustyConnector {
      * Load the configs for this plugin
      */
     boolean loadConfigs();
+
+    boolean loadCommands();
 
     /**
      * Reload the plugin

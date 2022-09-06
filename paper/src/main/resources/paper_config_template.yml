@@ -1,0 +1,199 @@
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#                                                                                                         #
+#   /███████                           /██                                                                #
+#  | ██__  ██                         | ██                                                                #
+#  | ██  \ ██  /██   /██   /███████  /██████    /██   /██                                                 #
+#  | ███████/ | ██  | ██  /██_____/ |_  ██_/   | ██  | ██                                                 #
+#  | ██__  ██ | ██  | ██ |  ██████    | ██     | ██  | ██                                                 #
+#  | ██  \ ██ | ██  | ██  \____  ██   | ██ /██ | ██  | ██                                                 #
+#  | ██  | ██ |  ██████/  /███████/   |  ████/ |  ███████                                                 #
+#  |__/  |__/  \______/  |_______/     \___/    \____  ██                                                 #
+#                                               /██  | ██                                                 #
+#                                              |  ██████/                                                 #
+#    /██████                                    \______/                /██                               #
+#   /██__  ██                                                          | ██                               #
+#  | ██  \__/   /██████   /███████   /███████    /██████    /███████  /██████     /██████    /██████      #
+#  | ██        /██__  ██ | ██__  ██ | ██__  ██  /██__  ██  /██_____/ |_  ██_/    /██__  ██  /██__  ██     #
+#  | ██       | ██  \ ██ | ██  \ ██ | ██  \ ██ | ████████ | ██         | ██     | ██  \ ██ | ██  \__/     #
+#  | ██    ██ | ██  | ██ | ██  | ██ | ██  | ██ | ██_____/ | ██         | ██ /██ | ██  | ██ | ██           #
+#  |  ██████/ |  ██████/ | ██  | ██ | ██  | ██ |  ███████ |  ███████   |  ████/ |  ██████/ | ██           #
+#   \______/   \______/  |__/  |__/ |__/  |__/  \_______/  \_______/    \___/    \______/  |__/           #
+#                                                                                                         #
+#                                                                                                         #
+#                                        Welcome to RustyConnector!                                       #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+# | RustyConnector is your go-to load-balancer and     | Built for usage on high-traffic networks;        #
+# | player manager for Minecraft networks!             | RustyConnector is meant to be scalable and easy  #
+#                                                      | to maintain!                                     #
+#                                                                                                         #
+#                               | If you ever need assistance setting up your                             #
+#                               | plugin come join us in our discord server:                              #
+#                               | https://join.aelysium.group/                                            #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+#                                          Produced by: Aelysium                                          #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#
+# Do not touch this value, it might totally mess up your entire plugin!
+# And that's the last thing anyone wants :)
+#
+config-version: "0.1"
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                       Registration                       #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#
+# Private key is used to validate server connections.
+# This way external servers can't appear and add themselves to the proxy network pool.
+# This value should be changed periodically for security purposes.
+#
+# Set this value so that it matches whatever is set in your proxy.
+#
+private-key: ""
+
+server:
+#
+# This field is not required. If you don't set this field the proxy will generate a string to put here.
+# It will then use that to identify this server.
+# If you name the server yourself, you will have a much easier time managing permissions and other data.
+#
+    name: ""
+
+#
+# This field is required.
+# Enter the address of this server! This address should match what a player would enter if they were trying to
+# connect directly to this server. Make sure you also include the port number!
+#
+# Example: 127.0.0.1:25565
+#
+    address: ""
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                Family and Load Balancing                 #
+#                                                          #
+#               ---------------------------                #
+# | Families are a collection of servers. To register      #
+# | new servers into a family, you need to configure       #
+# | your sub-servers appropriately.                        #
+#                                                          #
+# | If your sub-servers use family names that don't match  #
+# | what you define in your  proxy, they will not          #
+# | be registered.                                         #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+#
+# The name of the family that this plugin should be registered into.
+# If this name does not match one of the names listed on your proxy. This server will not get registered.
+#
+family: "lobby"
+
+#########################
+#     Load Balancing    #
+#########################
+#
+# If the family that this server is associated with has load balancing set to "CASCADE"
+# you'll need to define indexes so that the proxy knows what order to fill the servers.
+# The proxy will look at whichever server has the highest index and will start filling that up until it's reached its soft player cap.
+#
+cascade-priority-index: 0
+
+#########################
+#      Player Caps      #
+#########################
+#
+# The soft player cap will define, at what point, this server should stop accepting regular players.
+# This allows you to mark the server as "full" while still allowing extra space for VIP and staff.
+#
+# To allow players to join past this point, you can give them one of two permissions:
+# rustyconnector.softCapBypass - Bypass the soft cap of any server on this network
+# rustyconnector.<family name>.softCapBypass - Bypass the soft cap of any server inside of this family
+# rustyconnector.<family name>.<server name>.softCapBypass - Bypass the soft cap of only this server in particular
+#
+soft-player-cap: 20
+
+#
+# The hard player cap is the point at which no more players are allowed to join the server.
+# if you wish to still allow high-level staff to access a server at hard player cap. You can grant them the permission:
+# rustyconnector.admin.hardCapBypass
+#
+hard-player-cap: 30
+
+#
+# NOTE: If you set soft-player-cap to be the same number as hard-player-cap.
+#       This server will run in player-limit mode. In which case, once player count
+#       reaches the defined value, no more players will be allowed to enter.
+#
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                          Redis                           #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#
+# Redis is required in order to provide quick and easy syncing between the proxy and sub-servers
+#
+# Every server that you define will connect to your Redis database. Make sure your database has enough available "connections"
+# so that you don't run into issues creating new servers and registering them.
+#
+redis:
+    host: "localhost"
+    port: "3306"
+    password: "password"
+
+#
+# The name of the data channel that sync information should be sent over.
+# If you don't know what this is, don't mess with it! The default value here is fine.
+# You probably won't break anything, but you generally just shouldn't touch things you don't understand.
+#
+# NOTE: Make sure that, if you do change this. It matches the data-channel that is set in your proxy!
+#
+    data-channel: "rustyConnector-sync"
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Whitelist                         #
+#                                                          #
+#               ---------------------------                #
+# | RustyConnector attempts to be as flexible as possible  #
+# | when configuring whitelists!                           #
+# | To setup a whitelist, you'll need to navigate to the   #
+# | "whitelists" folder and follow the directions in the   #
+# | provided whitelist-template.                           #
+#                                                          #
+# | More often than not, you will have multiple whitelist  #
+# | configurations that you may want to switch between     #
+# | during various points in your network's lifetime.      #
+# | This system allows you to setup as many pre-defined    #
+# | whitelists as you'd like, and enable or switch between #
+# | then whenever you want!                                #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#
+# If you set this to be on. You will only be setting a whitelist for this individual server.
+# If you'd like to setup whitelists for server families or for your entire proxy make sure
+# you look in the configs on your velocity server.
+#
+use-whitelist: false
+whitelist: "whitelist-template"

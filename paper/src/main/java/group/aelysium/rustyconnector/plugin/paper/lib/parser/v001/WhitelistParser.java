@@ -1,23 +1,23 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
+package group.aelysium.rustyconnector.plugin.paper.lib.parser.v001;
 
 import com.google.gson.Gson;
-import group.aelysium.rustyconnector.core.lib.generic.firewall.WhitelistPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
-import ninja.leaping.configurate.ConfigurationNode;
 import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
+import group.aelysium.rustyconnector.core.lib.generic.firewall.WhitelistPlayer;
+import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.lib.generic.Config;
+import ninja.leaping.configurate.ConfigurationNode;
 
 import java.io.File;
 import java.util.List;
 
 public class WhitelistParser {
     public static boolean parse(String configName) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
         try {
             plugin.logger().log("-----------| Loading whitelist: "+configName+"...");
 
-            Config whitelistConfig = new Config(new File(plugin.getDataFolder(), "whitelists/"+configName+".yml"), "velocity_whitelist_template.yml");
+            Config whitelistConfig = new Config(new File(plugin.getDataFolder(), "whitelists/"+configName+".yml"), "paper_whitelist_template.yml");
             if(!whitelistConfig.register()) throw new RuntimeException("Unable to register "+configName+".yml");
 
             plugin.logger().log("-----------| Finished!");
@@ -34,7 +34,7 @@ public class WhitelistParser {
             if(usePlayers) WhitelistParser.parsePlayers(configData, whitelist);
             if(useCountry) WhitelistParser.parseCountries(configData, whitelist);
 
-            plugin.getProxy().registerWhitelist(configName, whitelist);
+            plugin.getVirtualServer().registerWhitelist(whitelist);
 
             plugin.logger().log("-----------| Finished loading server whitelist!");
             return true;
@@ -48,7 +48,7 @@ public class WhitelistParser {
     }
 
     public static void parsePlayers(ConfigurationNode configData, Whitelist whitelist) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
         plugin.logger().log("-------------| Getting players...");
 
@@ -69,7 +69,7 @@ public class WhitelistParser {
     }
 
     public static void parseCountries(ConfigurationNode configData, Whitelist whitelist) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
         plugin.logger().log("-------------| Getting players...");
 

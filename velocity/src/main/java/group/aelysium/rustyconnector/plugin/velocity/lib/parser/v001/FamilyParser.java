@@ -4,15 +4,17 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 import ninja.leaping.configurate.ConfigurationNode;
-import group.aelysium.rustyconnector.core.generic.lib.generic.parsing.YAML;
-import group.aelysium.rustyconnector.core.generic.lib.generic.whitelist.Whitelist;
-import group.aelysium.rustyconnector.core.generic.lib.generic.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.core.lib.generic.parsing.YAML;
+import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
+import group.aelysium.rustyconnector.core.lib.generic.load_balancing.AlgorithmType;
 
 import java.io.File;
 import java.util.List;
 
 public class FamilyParser {
-    public static void parse(Config config, VelocityRustyConnector plugin) {
+    public static void parse(Config config) {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
         ConfigurationNode configData = config.getData();
         plugin.logger().log("---------| Preparing Families...");
         plugin.logger().log("-----------| Getting family names...");
@@ -25,20 +27,16 @@ public class FamilyParser {
         familyNames.forEach(name -> {
             plugin.logger().log("-------------| Loading: "+name+"...");
             try {
-                Config familyConfig = new Config(plugin, new File(plugin.getDataFolder(), "families/"+name+".yml"), "template_family.yml");
+                Config familyConfig = new Config(new File(plugin.getDataFolder(), "families/"+name+".yml"), "velocity_family_template.yml");
                 if(!familyConfig.register()) throw new RuntimeException("Unable to register "+name+".yml");
 
                 AlgorithmType algorithm = AlgorithmType.valueOf((String) YAML.get(familyConfig.getData(),"load-balancing.algorithm").getValue());
 
-                boolean shouldUseWhitelist = (boolean) familyConfig.getData().getNode("use-whitelist").getValue();
-                String whitelistName = (String) familyConfig.getData().getNode("whitelist").getValue();
+                boolean shouldUseWhitelist = familyConfig.getData().getNode("use-whitelist").getBoolean();
+                String whitelistName = familyConfig.getData().getNode("whitelist").getString();
 
                 if(shouldUseWhitelist) {
-                    plugin.logger().log("---------------| Getting whitelist: "+whitelistName+"...");
-                    Config whitelistConfig = new Config(plugin, new File(plugin.getDataFolder(), "whitelists/"+whitelistName+".yml"), "template_whitelist.yml");
-                    if(!whitelistConfig.register()) throw new RuntimeException("Unable to register the defined whitelist");
-
-                    if(!WhitelistParser.parse(whitelistName, whitelistConfig, plugin)) throw new NullPointerException("The requested whitelist is invalid or doesn't exist! Is it configured properly?");
+                    WhitelistParser.parse(whitelistName);
 
                     Whitelist whitelist = plugin.getProxy().getWhitelist(whitelistName);
 

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity;
+package group.aelysium.rustyconnector.plugin.paper;
 
 import com.jcabi.log.MulticolorLayout;
 import org.slf4j.Logger;

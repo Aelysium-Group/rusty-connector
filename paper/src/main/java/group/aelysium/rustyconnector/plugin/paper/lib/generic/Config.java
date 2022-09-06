@@ -1,10 +1,12 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.generic;
+package group.aelysium.rustyconnector.plugin.paper.lib.generic;
 
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 
 public class Config extends group.aelysium.rustyconnector.core.lib.generic.Config {
@@ -22,8 +24,8 @@ public class Config extends group.aelysium.rustyconnector.core.lib.generic.Confi
 
     @Override
     public boolean register() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-
+        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+        
         plugin.logger().log("---| Registering "+this.configPointer.getName()+"...");
         plugin.logger().log("-----| Looking for "+this.configPointer.getName()+"...");
 
@@ -37,6 +39,7 @@ public class Config extends group.aelysium.rustyconnector.core.lib.generic.Confi
 
             plugin.logger().log("-------| Preparing template file...");
             InputStream templateStream = plugin.getResourceAsStream(this.template);
+            plugin.saveResource(this.template, false);
             if (templateStream == null) {
                 plugin.logger().error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
                 return false;
@@ -77,7 +80,7 @@ public class Config extends group.aelysium.rustyconnector.core.lib.generic.Confi
                     .setPath(file.toPath())
                     .build().load();
         } catch (IOException e) {
-            VelocityRustyConnector.getInstance().logger().error("",e);
+            PaperRustyConnector.getInstance().logger().error("",e);
             return null;
         }
     }

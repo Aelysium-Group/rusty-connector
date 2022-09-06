@@ -1,118 +1,129 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import com.velocitypowered.api.command.BrigadierCommand;
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandMeta;
+import group.aelysium.rustyconnector.core.RustyConnector;
+import group.aelysium.rustyconnector.core.lib.generic.Callable;
+import group.aelysium.rustyconnector.core.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.generic.hash.Snowflake;
+import group.aelysium.rustyconnector.plugin.paper.lib.generic.Config;
+import group.aelysium.rustyconnector.plugin.paper.lib.generic.PaperServer;
+import group.aelysium.rustyconnector.plugin.paper.lib.generic.database.Redis;
+import group.aelysium.rustyconnector.plugin.paper.lib.parser.v001.GenericParser;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.*;
 
-public final class PaperRustyConnector extends JavaPlugin implements Listener {
+public final class PaperRustyConnector extends JavaPlugin implements Listener, RustyConnector {
+    private Map<String, Config> configs = new HashMap<>();
+    private Redis redis;
+    private String privateKey;
+    private static PaperRustyConnector instance;
+    private PluginLogger logger;
+    private PaperServer server;
+
+    public static PaperRustyConnector getInstance() { return PaperRustyConnector.instance; }
+
+    /**
+     * Set the Redis handler for the plugin. Once this is set it cannot be changed.
+     * @param redis The redis handler to set.
+     */
+    public void setRedis(Redis redis) throws IllegalStateException {
+        if(this.redis != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+        this.redis = redis;
+    }
+
+    /**
+     * Set the PaperServer handler for the plugin. Once this is set it cannot be changed.
+     * @param server The PaperServer to set.
+     */
+    public void setServer(PaperServer server) throws IllegalStateException {
+        if(this.server != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+        this.server = server;
+    }
+
     @Override
     public void onEnable() {
+        PaperRustyConnector.instance = this;
+        this.logger = new PluginLogger(this.getSLF4JLogger());
 
-        log("Started Successfully!");
+        if(!loadConfigs()) return;
+
+        this.logger().log("Started Successfully!");
+        this.logger().log("Attempting to register with the proxy...");
+        this.server.registerToProxy(this.redis);
     }
 
     @Override
     public void onDisable() {
-        log("Shutting down...");
+        this.logger().log("Shutting down...");
     }
 
-    /**
-     * Register all of the plugin's commands
-     */
-    public void registerCommands() {
+    @Override
+    public InputStream getResourceAsStream(String filename) {
+        return this.getResource(filename);
     }
 
-    /**
-     * Register all of the plugin's Event Listeners
-     */
-    public void registerEvents() {
+    @Override
+    public boolean loadConfigs() {
+        try {
+            this.logger().log("-| Registering configs");
+            this.configs.put("config.yml", new Config(new File(this.getDataFolder(), "config.yml"), "paper_config_template.yml"));
+            Config genericConfig = this.configs.get("config.yml");
+            if (!genericConfig.register()) return false;
+
+            this.logger().log("---| Preparing proxy...");
+            this.logger().log("-----| Registering private key...");
+            String privateKey = genericConfig.getData().getNode("private-key").getString();
+            if (privateKey == null || privateKey.equals("")) {
+                this.logger().log(Lang.border());
+                this.logger().log(Lang.spacing());
+                this.logger().log("No private-key was defined! You should paste here, the private key that you use on your proxy!");
+                this.logger().log(Lang.spacing());
+                this.logger().log(Lang.border());
+                return false;
+            }
+            this.logger().log("-----| Finished!");
+            this.logger().log("-----| Configuring Server...");
+
+            GenericParser.parse(genericConfig);
+
+            Lang.print(this.logger, Lang.get("wordmark"));
+
+            return true;
+        } catch (Exception e) {
+            Lang.print(this.logger, Lang.get("boxed-message",e.getMessage()));
+        }
+        return false;
     }
 
-    /**
-     * Register the plugin's config files
-     */
-    public boolean registerConfigs() {
+    @Override
+    public boolean loadCommands() {
+
         return true;
     }
 
-    /**
-     * Creates a custom config file using a template from resources/config
-     * @param configName The name of the config template to get
-     */
-    public static JsonObject createCustomConfig(String configName) {
-        JavaPlugin plugin = PaperRustyConnector.getProvidingPlugin(PaperRustyConnector.class);
-        File customConfigFile = new File(plugin.getDataFolder(), configName); // Load the custom config from the plugins data file
-        log("> > " + "Searching for "+configName);
-        if (!customConfigFile.exists()) { // Check if the custom config actually exists
-            log("> > " + configName + " could not be found. Making it now!");
-            plugin.saveResource(configName, false); // If it doesn't, create it
-            log("> > " + configName + " was successfully generated!");
-        } else {
-            log("> > " + configName + " was found!");
-        }
+    @Override
+    public void reload() {
+        this.server = null;
+        this.privateKey = null;
 
-        if (customConfigFile.exists()) { // Re-check if the custom config exists
-            try {
-                Gson gson = new Gson();
-                return gson.fromJson(new FileReader(customConfigFile), JsonObject.class);
-            } catch (FileNotFoundException e) {
-                log("> > " + configName + " could not be loaded!");
-            }
-        } else {
-            log("> > " + configName + " still doesn't exist!");
-        }
-        return null;
+        this.loadConfigs();
     }
 
-    /**
-     * Reload a config
-     * @param name The name of the config to reload
-     */
-    public void reloadConfig(String name) {/*
-        File config = new File(getDataFolder(), name);
-        Gson gson = new Gson();
-        try {
-            this.configs.put(name,gson.fromJson(new FileReader(config), JsonObject.class));
-        } catch (FileNotFoundException e) {
-            log(name + " could not be loaded!");
-        }*/
+    public PaperServer getVirtualServer() { return this.server; }
+
+    @Override
+    public PluginLogger logger() {
+        return this.logger;
     }
 
-    /**
-     * Save a config
-     * @param name Name of the config to save to
-     * @param data The data to save
-     */
-    public void saveConfig(String name, Map<String, Object> data) {
-        FileConfiguration fileConfiguration;
-        File config = new File(getDataFolder(), name);
-        fileConfiguration = YamlConfiguration.loadConfiguration(config);
-        for(Map.Entry<String, Object> entry : data.entrySet()) {
-            fileConfiguration.set(entry.getKey(),entry.getValue());
-        }
-        try {
-            fileConfiguration.save(config);
-        } catch (IOException e) {
-            log("Failed to save "+name); // shouldn't really happen, but save throws the exception
-        }
-    }
-
-    /**
-     * Sends a String to the log
-     * @param log The text to be logged
-     */
-    public static void log(String log) {
-        System.out.println("[ScreenControl] " + log);
-    }
-
-    public static InputStream getResourceAsStream(String filename, PaperRustyConnector rustyConnector) {
-        return rustyConnector.getClassLoader().getResourceAsStream(filename);
+    public boolean validatePrivateKey(String keyToValidate) {
+        return this.privateKey.equals(keyToValidate);
     }
 }

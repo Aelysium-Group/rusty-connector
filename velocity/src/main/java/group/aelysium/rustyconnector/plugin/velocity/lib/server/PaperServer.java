@@ -3,9 +3,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.core.generic.lib.database.MessageProcessor;
-import group.aelysium.rustyconnector.core.generic.lib.database.RedisMessageType;
-import group.aelysium.rustyconnector.core.generic.lib.generic.server.Server;
+import group.aelysium.rustyconnector.core.lib.generic.database.MessageProcessor;
+import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.generic.server.Server;
 
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
@@ -97,12 +97,11 @@ public class PaperServer implements Server {
                     ).findFirst().orElse(null);
             if (familyResponse == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
-            String[] address = message.getAddress().split(":");
-            InetSocketAddress inetAddress = new InetSocketAddress(address[0], Integer.parseInt(address[1]));
+            InetSocketAddress address = message.getAddress();
 
             ServerInfo serverInfo = new ServerInfo(
                     message.getParameter("name"),
-                    inetAddress
+                    address
             );
 
             RegisteredServer registeredServer = plugin.getVelocityServer().registerServer(serverInfo);
@@ -130,12 +129,11 @@ public class PaperServer implements Server {
                     ).findFirst().orElse(null);
             if (familyResponse == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
-            String[] address = message.getAddress().split(":");
-            InetSocketAddress inetAddress = new InetSocketAddress(address[0], Integer.parseInt(address[1]));
+            InetSocketAddress address = message.getAddress();
 
             ServerInfo serverInfo = new ServerInfo(
                     message.getParameter("name"),
-                    inetAddress
+                    address
             );
 
             familyResponse.unregisterServer(serverInfo);
@@ -151,12 +149,11 @@ public class PaperServer implements Server {
 
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
-            String[] address = message.getAddress().split(":");
-            InetSocketAddress inetAddress = new InetSocketAddress(address[0], Integer.parseInt(address[1]));
+            InetSocketAddress address = message.getAddress();
 
             ServerInfo serverInfo = new ServerInfo(
                     message.getParameter("name"),
-                    inetAddress
+                    address
             );
 
             try {

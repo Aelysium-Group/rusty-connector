@@ -1,4 +1,4 @@
-name: RustyConnector
+name: rustyconnector-paper
 version: '${project.version}'
 main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
 api-version: 1.16
