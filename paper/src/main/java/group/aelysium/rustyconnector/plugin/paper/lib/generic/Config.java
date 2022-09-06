@@ -2,6 +2,9 @@ package group.aelysium.rustyconnector.plugin.paper.lib.generic;
 
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.ConfigurationOptions;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.File;
@@ -75,11 +78,8 @@ public class Config extends group.aelysium.rustyconnector.core.lib.generic.Confi
 
     public ConfigurationNode loadYAML(File file) {
         try {
-            return YAMLConfigurationLoader.builder()
-                    .setIndent(2)
-                    .setPath(file.toPath())
-                    .build().load();
-        } catch (IOException e) {
+            return YAMLConfigurationLoader.builder().setPath(file.toPath()).build().load();
+        } catch (Exception e) {
             PaperRustyConnector.getInstance().logger().error("",e);
             return null;
         }

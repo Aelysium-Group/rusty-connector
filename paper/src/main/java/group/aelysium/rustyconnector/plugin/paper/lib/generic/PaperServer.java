@@ -132,6 +132,20 @@ public class PaperServer implements Server {
         registrationMessage.addParameter("soft-cap", String.valueOf(this.softPlayerCap));
         registrationMessage.addParameter("hard-cap", String.valueOf(this.hardPlayerCap));
         registrationMessage.addParameter("player-count", String.valueOf(this.playerCount));
+        registrationMessage.addParameter("priority", String.valueOf(this.priorityIndex));
+
+        registrationMessage.dispatchMessage(redis);
+    }
+
+    public void unregisterFromProxy(Redis redis) {
+        RedisMessage registrationMessage = new RedisMessage(
+                this.privateKey,
+                RedisMessageType.UNREG,
+                this.address.getHostName()+":"+this.address.getPort(),
+                false
+        );
+        registrationMessage.addParameter("family",this.family);
+        registrationMessage.addParameter("name",this.name);
 
         registrationMessage.dispatchMessage(redis);
     }

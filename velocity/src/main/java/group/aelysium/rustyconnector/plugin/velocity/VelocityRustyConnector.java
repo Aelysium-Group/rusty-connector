@@ -19,6 +19,7 @@ import group.aelysium.rustyconnector.core.RustyConnector;
 import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
 import group.aelysium.rustyconnector.core.lib.generic.Callable;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 import group.aelysium.rustyconnector.core.lib.generic.hash.MD5;
@@ -82,6 +83,8 @@ public class VelocityRustyConnector implements RustyConnector {
         if(!loadConfigs()) return;
 
         loadCommands();
+
+        PaperServer.registerProcessors();
     }
 
     @Subscribe

@@ -89,7 +89,7 @@ public class PaperServer implements Server {
          * Processes a request to register a server to the proxy
          */
         messageProcessors.put(RedisMessageType.REG, message -> {
-            String familyName = message.getParameter("family-name");
+            String familyName = message.getParameter("family");
 
             ServerFamily familyResponse = plugin.getProxy().getRegisteredFamilies().stream()
                     .filter(family ->
@@ -110,18 +110,20 @@ public class PaperServer implements Server {
                     registeredServer,
                     Integer.parseInt(message.getParameter("soft-cap")),
                     Integer.parseInt(message.getParameter("hard-cap")),
-                    Integer.parseInt(message.getParameter("priority-index"))
+                    Integer.parseInt(message.getParameter("priority"))
             );
             familyResponse.registerServer(server);
 
             server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
+
+
         });
 
         /*
          * Processes a request to unregister a server from the proxy
          */
         messageProcessors.put(RedisMessageType.UNREG, message -> {
-            String familyName = message.getParameter("family-name");
+            String familyName = message.getParameter("family");
 
             ServerFamily familyResponse = plugin.getProxy().getRegisteredFamilies().stream()
                     .filter(family ->

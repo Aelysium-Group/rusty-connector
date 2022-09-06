@@ -27,6 +27,12 @@ public class RedisMessage {
 
         this.didReceive = didReceive;
     }
+    public RedisMessage(String key, RedisMessageType type, InetSocketAddress address, boolean didReceive) {
+        this.key = key;
+        this.type = type;
+        this.address = address;
+        this.didReceive = didReceive;
+    }
 
     public void addParameter(String key, String value) {
         this.parameters.put(key, value);

@@ -1,23 +1,22 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import com.velocitypowered.api.command.BrigadierCommand;
-import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.command.CommandMeta;
+import cloud.commandframework.execution.CommandExecutionCoordinator;
+import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.RustyConnector;
-import group.aelysium.rustyconnector.core.lib.generic.Callable;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
-import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.generic.hash.Snowflake;
+import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
+import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.lib.generic.Config;
 import group.aelysium.rustyconnector.plugin.paper.lib.generic.PaperServer;
 import group.aelysium.rustyconnector.plugin.paper.lib.generic.database.Redis;
 import group.aelysium.rustyconnector.plugin.paper.lib.parser.v001.GenericParser;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 
 public final class PaperRustyConnector extends JavaPlugin implements Listener, RustyConnector {
     private Map<String, Config> configs = new HashMap<>();
@@ -26,6 +25,12 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
     private static PaperRustyConnector instance;
     private PluginLogger logger;
     private PaperServer server;
+    private PaperCommandManager<CommandSender> manager;
+    public boolean hasRegistered = false;
+
+    public MessageCache getMessageCache() {
+        return this.redis.getMessageCache();
+    }
 
     public static PaperRustyConnector getInstance() { return PaperRustyConnector.instance; }
 
@@ -52,15 +57,27 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
         PaperRustyConnector.instance = this;
         this.logger = new PluginLogger(this.getSLF4JLogger());
 
-        if(!loadConfigs()) return;
+        if(!loadConfigs()) {
+            this.killPlugin();
+            return;
+        }
+
+        if(!loadCommands()) {
+            this.killPlugin();
+            return;
+        }
 
         this.logger().log("Started Successfully!");
         this.logger().log("Attempting to register with the proxy...");
         this.server.registerToProxy(this.redis);
+        this.hasRegistered = true;
+        this.logger().log("Attempt made. Check the console in your proxy to see if it succeeded!");
     }
 
     @Override
     public void onDisable() {
+        if(this.hasRegistered) this.server.unregisterFromProxy(this.redis);
+
         this.logger().log("Shutting down...");
     }
 
@@ -104,8 +121,28 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
 
     @Override
     public boolean loadCommands() {
+        try {
+            this.manager = new PaperCommandManager<>(
+                    /* Owning plugin */ this,
+                    CommandExecutionCoordinator.simpleCoordinator(),
+                    Function.identity(),
+                    Function.identity()
+            );
 
-        return true;
+            CommandRusty.create(this.manager);
+
+            return true;
+        } catch (Exception e) {
+            Lang.print(
+                this.logger(),
+                Lang.get(
+                    "boxed-message",
+                    "Commands failed to load! Killing plugin..."
+                    )
+            );
+            this.logger.error("",e);
+            return false;
+        }
     }
 
     @Override
@@ -125,5 +162,9 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
 
     public boolean validatePrivateKey(String keyToValidate) {
         return this.privateKey.equals(keyToValidate);
+    }
+
+    private void killPlugin() {
+        this.getPluginLoader().disablePlugin(this);
     }
 }

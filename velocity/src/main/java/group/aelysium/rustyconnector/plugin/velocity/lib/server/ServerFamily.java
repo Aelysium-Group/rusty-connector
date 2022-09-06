@@ -68,7 +68,9 @@ public class ServerFamily implements Family {
     public void registerServer(Server server) {
         PaperServer paperServer = (PaperServer) server;
         this.registeredServers.put(paperServer.getRawServer().getServerInfo(), paperServer);
-        VelocityRustyConnector.getInstance().getVelocityServer().unregisterServer(paperServer.getRawServer().getServerInfo());
+        VelocityRustyConnector.getInstance().getVelocityServer().registerServer(paperServer.getRawServer().getServerInfo());
+
+        VelocityRustyConnector.getInstance().logger().log("Registered server: "+paperServer.getRawServer().getServerInfo().getName());
     }
 
     /**
@@ -78,6 +80,8 @@ public class ServerFamily implements Family {
     public void unregisterServer(ServerInfo serverInfo) {
         this.registeredServers.remove(serverInfo);
         VelocityRustyConnector.getInstance().getVelocityServer().unregisterServer(serverInfo);
+
+        VelocityRustyConnector.getInstance().logger().log("Unregistered server: "+serverInfo.getName());
     }
 
     /**

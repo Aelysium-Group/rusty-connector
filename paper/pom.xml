@@ -52,16 +52,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>configurate-yaml</artifactId>
-            <version>3.7.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.velocitypowered</groupId>
-            <artifactId>velocity-api</artifactId>
-            <version>3.1.1</version>
-            <scope>compile</scope>
+            <groupId>cloud.commandframework</groupId>
+            <artifactId>cloud-paper</artifactId>
+            <version>1.7.1</version>
         </dependency>
     </dependencies>
 
