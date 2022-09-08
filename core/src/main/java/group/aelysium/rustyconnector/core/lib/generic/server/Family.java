@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.core.lib.generic.server;
 import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
 import group.aelysium.rustyconnector.core.lib.generic.load_balancing.AlgorithmType;
 
+import java.util.List;
 import java.util.Map;
 
 public interface Family {
@@ -14,6 +15,4 @@ public interface Family {
     String getName();
 
     void registerServer(Server server);
-
-    Map<Object, Server> getRegisteredServers();
 }

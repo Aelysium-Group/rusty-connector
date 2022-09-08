@@ -130,26 +130,5 @@ public class Redis {
      * @throws IllegalArgumentException If message parameters contains parameters: `pk`, `type`, or `ip`
      */
     public void sendMessage(String privateKey, RedisMessageType type, InetSocketAddress address, Map<String, String> parameters) throws IllegalArgumentException {
-        Gson gson = new Gson();
-
-        JsonObject object = new JsonObject();
-        object.addProperty("pk",privateKey);
-        object.addProperty("type",type.toString());
-        object.addProperty("from",address.toString());
-
-        JsonObject parameterObject = new JsonObject();
-        parameters.forEach(object::addProperty);
-
-        parameterObject.entrySet().forEach(entry -> {
-            if(Objects.equals(entry.getKey(), "pk")) throw new IllegalArgumentException("You can't send this parameters in a message!");
-            if(Objects.equals(entry.getKey(), "type")) throw new IllegalArgumentException("You can't send this parameters in a message!");
-            if(Objects.equals(entry.getKey(), "ip")) throw new IllegalArgumentException("You can't send this parameters in a message!");
-            if(Objects.equals(entry.getKey(), "to")) throw new IllegalArgumentException("You can't send this parameters in a message!");
-            if(Objects.equals(entry.getKey(), "from")) throw new IllegalArgumentException("You can't send this parameters in a message!");
-
-            object.addProperty(entry.getKey(),entry.getValue().getAsString());
-        });
-
-        this.publish(gson.toJson(object));
     }
 }

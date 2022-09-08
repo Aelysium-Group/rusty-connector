@@ -149,4 +149,22 @@ public class PaperServer implements Server {
 
         registrationMessage.dispatchMessage(redis);
     }
+
+    /**
+     * Requests that the proxy moves this player to another server.
+     * @param player The player to send.
+     * @param familyName The name of the family to send to.
+     */
+    public void sendToOtherFamily(Player player, String familyName, Redis redis) {
+        RedisMessage registrationMessage = new RedisMessage(
+                this.privateKey,
+                RedisMessageType.SEND,
+                this.address.getHostName()+":"+this.address.getPort(),
+                false
+        );
+        registrationMessage.addParameter("uuid",player.getUniqueId().toString());
+        registrationMessage.addParameter("family",familyName);
+
+        registrationMessage.dispatchMessage(redis);
+    }
 }

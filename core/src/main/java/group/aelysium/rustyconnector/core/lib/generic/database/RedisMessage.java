@@ -1,6 +1,10 @@
 package group.aelysium.rustyconnector.core.lib.generic.database;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import group.aelysium.rustyconnector.core.RustyConnector;
+import group.aelysium.rustyconnector.core.lib.generic.Callable;
+import group.aelysium.rustyconnector.core.lib.generic.util.AddressUtil;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -72,5 +76,97 @@ public class RedisMessage {
         if(this.didReceive) throw new IllegalCallerException("You can't send a message if it's already been received over the datachannel!");
 
         redis.sendMessage(this.key, this.type, this.address, this.parameters);
+    }
+
+    /**
+     * Sends a RESPONSE message
+     * @throws IllegalCallerException If you try to respond to a message that originated here.
+     */
+    public void reply(Redis redis) throws IllegalCallerException {
+        if(!this.didReceive) throw new IllegalCallerException("You can only respond to messages received!");
+
+        redis.sendMessage(this.key, this.type, this.address, this.parameters);
+    }
+
+    /**
+     * Create new Redis message from a JSON.
+     *
+     * @param message The JSON to be parsed.
+     * @param origin  Where should the message be originating from?
+     * @param addressForCompare The address to use to check if a message is directed to the current server (optional for proxies)
+     * @return A Redis Message.
+     */
+    public static RedisMessage create(JsonObject message, MessageOrigin origin, InetSocketAddress addressForCompare) {
+        RustyConnector plugin = RustyConnector.getInstance();
+
+        Callable<RedisMessage> processProxyMessage = () -> { // Messages coming from the proxy
+            if(addressForCompare == null) throw new NullPointerException("In order to process messages from the proxy, the sub-server must provide an address!");
+
+            JsonElement assumedPrivateKey = message.get("pk");
+            JsonElement assumedType = message.get("type");
+            JsonElement assumedFromAddress = message.get("from");
+            JsonElement assumedToAddress = message.get("to");
+
+            // If `from` is NOT null. We have a problem.
+            if(!(assumedFromAddress == null)) throw new IllegalArgumentException("`from` shouldn't be set for messages sent from the proxy!");
+
+            if(assumedPrivateKey == null) throw new NullPointerException("`private-key` is required in transit messages!");
+            if(assumedType == null) throw new NullPointerException("`type` is required in transit messages!");
+            if(assumedToAddress == null) throw new NullPointerException("`to` is required for in transit messages sent from the proxy!");
+
+            try {
+                RedisMessageType type = RedisMessageType.valueOf(assumedType.getAsString());
+                String privateKey = assumedPrivateKey.getAsString();
+                InetSocketAddress address = AddressUtil.stringToAddress(assumedToAddress.getAsString());
+
+                // Check and make sure that the message is actually addressed to this server
+                if(!AddressUtil.addressToString(address).equals(AddressUtil.addressToString(addressForCompare))) throw new IllegalArgumentException("This message isn't directed at us!");
+
+                return new RedisMessage(
+                        privateKey,
+                        type,
+                        address,
+                        true
+                );
+            } catch (IllegalArgumentException e) {
+                plugin.logger().log("");
+            }
+            return null;
+        };
+        Callable<RedisMessage> processServerMessage = () -> { // Messages coming from a sub-server
+            JsonElement assumedPrivateKey = message.get("pk");
+            JsonElement assumedType = message.get("type");
+            JsonElement assumedFromAddress = message.get("from");
+            JsonElement assumedToAddress = message.get("to");
+
+            // If `to` is NOT null. We have a problem.
+            if(!(assumedToAddress == null)) throw new IllegalArgumentException("`to` shouldn't be set for messages sent from sub-servers!");
+
+            if(assumedPrivateKey == null) throw new NullPointerException("`private-key` is required in transit messages!");
+            if(assumedType == null) throw new NullPointerException("`type` is required in transit messages!");
+            if(assumedFromAddress == null) throw new NullPointerException("`from` is required for in transit messages sent from sub-servers!");
+
+            try {
+                RedisMessageType type = RedisMessageType.valueOf(assumedType.getAsString());
+                String privateKey = assumedPrivateKey.getAsString();
+                InetSocketAddress address = AddressUtil.stringToAddress(assumedFromAddress.getAsString());
+
+                return new RedisMessage(
+                        privateKey,
+                        type,
+                        address,
+                        true
+                );
+            } catch (IllegalArgumentException e) {
+                plugin.logger().log("");
+            }
+            return null;
+        };
+
+
+        if(origin == MessageOrigin.SERVER) return processProxyMessage.execute();
+        if(origin == MessageOrigin.PROXY) return processServerMessage.execute();
+
+        throw new NullPointerException("The origin that was provided for this message is invalid and doesn't exist!");
     }
 }

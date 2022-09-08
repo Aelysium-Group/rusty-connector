@@ -129,7 +129,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
                     Function.identity()
             );
 
-            CommandRusty.create(this.manager);
+            CommandRusty.create(this.manager, this.redis);
 
             return true;
         } catch (Exception e) {
@@ -166,5 +166,11 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
 
     private void killPlugin() {
         this.getPluginLoader().disablePlugin(this);
+    }
+
+    public void registerToProxy() {
+        if(this.hasRegistered) this.logger.warn("This server has already registered itself! Re-registering anyways...");
+        this.getVirtualServer().registerToProxy(this.redis);
+        PaperRustyConnector.getInstance().logger().log("Server has submitted it's registration request.");
     }
 }

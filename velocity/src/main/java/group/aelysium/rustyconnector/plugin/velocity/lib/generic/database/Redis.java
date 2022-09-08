@@ -1,13 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.generic.database;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import group.aelysium.rustyconnector.core.lib.generic.firewall.MessageTunnel;
+import group.aelysium.rustyconnector.core.lib.generic.database.MessageOrigin;
+import group.aelysium.rustyconnector.core.lib.generic.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;
 import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessageType;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 
 import javax.naming.AuthenticationException;
 import java.net.InetSocketAddress;
@@ -25,27 +26,7 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.generic.databa
             Gson gson = new Gson();
             JsonObject object = gson.fromJson(rawMessage, JsonObject.class);
 
-            String fromAddress = object.get("from").getAsString();
-            if(fromAddress == null) throw new IllegalArgumentException("`from` should be a string representing a hostname and port number! This message had something else.");
-            String[] addressSplit = fromAddress.split(":");
-            InetSocketAddress address = new InetSocketAddress(addressSplit[0].replace("/",""), Integer.parseInt(addressSplit[1]));
-
-            JsonElement toAddress = object.get("to");
-            if(toAddress != null) throw new IllegalArgumentException("`to` is set! This message is from the proxy! Ignoring...");
-
-            String typeString = object.get("type").getAsString();
-            RedisMessageType type = RedisMessageType.valueOf(typeString);
-            if(type == null) throw new IllegalArgumentException("`type` should be a string which resolves to a RedisMessageType");
-
-            String privateKey = object.get("pk").getAsString();
-            if(privateKey == null) throw new IllegalArgumentException("`pk` should be a string! This message had something else.");
-
-            RedisMessage message = new RedisMessage(
-                privateKey,
-                type,
-                fromAddress,
-                true
-            );
+            RedisMessage message = RedisMessage.create(object, MessageOrigin.PROXY, null);
 
             try {
                 if (!(plugin.getProxy().validatePrivateKey(message.getKey())))
@@ -53,7 +34,7 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.generic.databa
 
                 Redis.processParameters(message, object, messageSnowflake);
             } catch (AuthenticationException e) {
-                plugin.logger().error("Incoming message from: "+address+" contains an invalid private key! Throwing away...");
+                plugin.logger().error("Incoming message from: "+message.getAddress().toString()+" contains an invalid private key! Throwing away...");
                 plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
             }
         } catch (IllegalArgumentException e) {
@@ -93,7 +74,13 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.generic.databa
                     message.setToParameter(object, "name"); // The server's identifier
                     message.setToParameter(object, "player-count"); // The server's current player count
 
-                    PaperServer.getProcessor(message.getType()).execute(message);
+                    ServerFamily.getProcessor(message.getType()).execute(message);
+                }
+                case SEND -> {
+                    message.setToParameter(object, "family"); // The family to send the player to
+                    message.setToParameter(object, "uuid"); // The uuid of the player to move
+
+                    ServerFamily.getProcessor(message.getType()).execute(message);
                 }
             }
         } catch (NullPointerException e) { // If a parameter fails to resolve, we get this exception.
@@ -105,28 +92,20 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.generic.databa
         }
     }
 
-
-    /**
-     * Send a message over the data channel on this Redis instance
-     * @param privateKey The private key to send
-     * @param type The type of message being sent
-     * @param to The IP Address of the server we're sending to.
-     * @param parameters Additional parameters
-     * @throws IllegalArgumentException If message parameters contains parameters: `pk`, `type`, or `ip`
-     */
     @Override
-    public void sendMessage(String privateKey, RedisMessageType type, InetSocketAddress to, Map<String, String> parameters) throws IllegalArgumentException {
+    public void sendMessage(String privateKey, RedisMessageType type, InetSocketAddress address, Map<String, String> parameters) throws IllegalArgumentException {
         Gson gson = new Gson();
 
         JsonObject object = new JsonObject();
         object.addProperty("pk",privateKey);
         object.addProperty("type",type.toString());
-        object.addProperty("to",to.toString());
+        object.addProperty("to", AddressUtil.addressToString(address)); // We tell the servers who we are sending our message to
 
         JsonObject parameterObject = new JsonObject();
         parameters.forEach(object::addProperty);
 
         parameterObject.entrySet().forEach(entry -> {
+            // List of illegal parameters which can't be used
             if(Objects.equals(entry.getKey(), "pk")) throw new IllegalArgumentException("You can't send this parameters in a message!");
             if(Objects.equals(entry.getKey(), "type")) throw new IllegalArgumentException("You can't send this parameters in a message!");
             if(Objects.equals(entry.getKey(), "ip")) throw new IllegalArgumentException("You can't send this parameters in a message!");

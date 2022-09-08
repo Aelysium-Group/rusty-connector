@@ -1,7 +1,12 @@
-package group.aelysium.rustyconnector.core.lib.generic.load_balancing;
+package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
+import group.aelysium.rustyconnector.core.lib.generic.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.generic.server.Family;
 import group.aelysium.rustyconnector.core.lib.generic.server.Server;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
+
+import java.util.List;
 
 public class Algorithm {
     /**
@@ -9,7 +14,7 @@ public class Algorithm {
      * @param family The family to look at.
      * @return The name of the server to connect to.
      */
-    public Server processConnection(Family family) {
+    public List<PaperServer> balance(ServerFamily family) {
         return null;
     }
 

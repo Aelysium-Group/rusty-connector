@@ -35,12 +35,16 @@ public final class CommandRusty {
                 source.sendMessage(Component.text("Used to access the family controls for this plugin.").color(NamedTextColor.GRAY));
                 VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
 
-                source.sendMessage(Component.text("/rc retrieveMessage").color(NamedTextColor.AQUA));
+                source.sendMessage(Component.text("/rc retrieveMessage <Message ID>").color(NamedTextColor.YELLOW));
                 source.sendMessage(Component.text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!").color(NamedTextColor.GRAY));
                 VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
 
                 source.sendMessage(Component.text("/rc player").color(NamedTextColor.AQUA));
                 source.sendMessage(Component.text("Used to access the player controls for this plugin.").color(NamedTextColor.GRAY));
+                VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
+
+                source.sendMessage(Component.text("/rc registerAll").color(NamedTextColor.YELLOW));
+                source.sendMessage(Component.text("Request that all servers listening to the datachannel attempt to register themselves").color(NamedTextColor.GRAY));
                 VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
 
                 source.sendMessage(Component.text("/rc reload").color(NamedTextColor.YELLOW));
@@ -98,6 +102,10 @@ public final class CommandRusty {
 
                     source.sendMessage(Component.text("/rc family list").color(NamedTextColor.AQUA));
                     source.sendMessage(Component.text("Gets a list of all registered families.").color(NamedTextColor.GRAY));
+                    VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
+
+                    source.sendMessage(Component.text("/rc family info <family name>").color(NamedTextColor.AQUA));
+                    source.sendMessage(Component.text("Gets info about a particular family").color(NamedTextColor.GRAY));
                     VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
 
                     source.sendMessage(Component.text("/rc family reload all").color(NamedTextColor.AQUA));
@@ -194,12 +202,20 @@ public final class CommandRusty {
                     )
                 )
             )
-            .then(LiteralArgumentBuilder.<CommandSource>literal("reload")
-                .executes(context -> {
-                    VelocityRustyConnector.getInstance().reload();
+            .then(LiteralArgumentBuilder.<CommandSource>literal("registerAll")
+                    .executes(context -> {
+                        // TODO: Make registerAll work
+                        VelocityRustyConnector.getInstance().registerAllServers();
 
-                    return 1;
-                })
+                        return 1;
+                    })
+            )
+            .then(LiteralArgumentBuilder.<CommandSource>literal("reload")
+                    .executes(context -> {
+                        VelocityRustyConnector.getInstance().reload();
+
+                        return 1;
+                    })
             )
             .build();
 

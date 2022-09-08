@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.lib.generic.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.database.Redis;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 import ninja.leaping.configurate.ConfigurationNode;
 import group.aelysium.rustyconnector.core.lib.generic.parsing.YAML;
 
@@ -18,6 +19,14 @@ public class GenericParser {
         plugin.logger().log("-------| Configuring Proxy...");
         plugin.logger().log("---------| Preparing Families...");
         FamilyParser.parse(config);
+
+        plugin.logger().log("---------| Registering root family of proxy...");
+        String rootFamilyString = YAML.get(configData,"root-family").getString();
+        ServerFamily rootFamily = ServerFamily.findFamily(rootFamilyString);
+        if(rootFamily == null) throw new NullPointerException("Root family is referencing a family that doesn't exist! Make sure if you list a `root-family` you also include it's name in `families`.");
+
+        plugin.getProxy().setRootFamily(rootFamily);
+        plugin.logger().log("---------| Finished!");
 
         plugin.logger().log("---------| Preparing Redis...");
         Redis redis = new Redis();

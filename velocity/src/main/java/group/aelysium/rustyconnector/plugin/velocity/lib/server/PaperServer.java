@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
+import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
@@ -99,8 +100,10 @@ public class PaperServer implements Server {
 
             InetSocketAddress address = message.getAddress();
 
+            String serverName = message.getParameter("name");
+
             ServerInfo serverInfo = new ServerInfo(
-                    message.getParameter("name"),
+                    serverName,
                     address
             );
 
@@ -138,35 +141,9 @@ public class PaperServer implements Server {
                     address
             );
 
+            if(!familyResponse.containsServer(serverInfo)) throw new InvalidAlgorithmParameterException("The server requesting to un-register isn't on this server!");
+
             familyResponse.unregisterServer(serverInfo);
-        });
-
-        /*
-         * Processes a request to unregister a server from the proxy
-         */
-        messageProcessors.put(RedisMessageType.PLAYER_CNT, message -> {
-            String familyName = message.getParameter("family-name");
-
-            ServerFamily family = plugin.getProxy().findFamily(familyName);
-
-            if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
-
-            InetSocketAddress address = message.getAddress();
-
-            ServerInfo serverInfo = new ServerInfo(
-                    message.getParameter("name"),
-                    address
-            );
-
-            try {
-                PaperServer server = family.getServer(serverInfo);
-
-                server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
-            } catch (NullPointerException e) {
-                throw new InvalidAlgorithmParameterException("The provided server doesn't exist in this family!");
-            } catch (NumberFormatException e) {
-                throw new InvalidAlgorithmParameterException("The player count provided wasn't valid!");
-            }
         });
     }
 }

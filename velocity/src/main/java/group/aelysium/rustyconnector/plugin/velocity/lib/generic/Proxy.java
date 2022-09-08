@@ -1,5 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.generic;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import group.aelysium.rustyconnector.core.lib.generic.database.Redis;
+import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.generic.firewall.MessageTunnel;
+import group.aelysium.rustyconnector.core.lib.generic.server.Server;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
@@ -17,6 +24,15 @@ public class Proxy implements group.aelysium.rustyconnector.core.lib.generic.ser
     public List<ServerFamily> getRegisteredFamilies() { return this.registeredFamilies; }
 
     public ServerFamily getRootFamily() { return this.rootFamily; }
+
+    /**
+     * Set the root family for the proxy. Once this is set it cannot be changed.
+     * @param rootFamily The root family to set.
+     */
+    public void setRootFamily(ServerFamily rootFamily) throws IllegalStateException {
+        if(this.rootFamily != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+        this.rootFamily = rootFamily;
+    }
 
     public Proxy(VelocityRustyConnector plugin, String privateKey) {
         this.plugin = plugin;
@@ -83,5 +99,23 @@ public class Proxy implements group.aelysium.rustyconnector.core.lib.generic.ser
         plugin.logger().log("/rc family info <family name> servers");
         plugin.logger().log(Lang.spacing());
         plugin.logger().log(Lang.border());
+    }
+
+    /**
+     * Sends a request to all servers listening on this data channel to register themselves.
+     * Can be usefull if you've just restarted your proxy and need to quickly get all your servers back online.
+     * @param redis The redis connection to use.
+     */
+    public void registerAllServers(Redis redis) {
+        VelocityRustyConnector.getInstance().logger().log("Sending request for all servers to register themselves. This might take a minute...");
+
+        RedisMessage message = new RedisMessage(
+                this.privateKey,
+                RedisMessageType.REG_ALL,
+                "127.0.0.1:0",
+                false
+        );
+
+        message.dispatchMessage(redis);
     }
 }

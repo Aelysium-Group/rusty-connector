@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.core.lib.generic;
 
-public interface Callable {
+public interface Callable<K> {
     /**
      * Execute the callable
      */
-    void execute();
+    K execute();
 }

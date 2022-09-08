@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
+import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -11,6 +12,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.core.lib.generic.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
+import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Proxy;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.database.Redis;
@@ -20,7 +22,7 @@ import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
 import group.aelysium.rustyconnector.core.lib.generic.Callable;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;
-import ninja.leaping.configurate.ConfigurationNode;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 import org.slf4j.Logger;
 import group.aelysium.rustyconnector.core.lib.generic.hash.MD5;
 
@@ -84,7 +86,16 @@ public class VelocityRustyConnector implements RustyConnector {
 
         loadCommands();
 
+        registerEvents();
+
         PaperServer.registerProcessors();
+        ServerFamily.registerProcessors();
+    }
+
+    public void registerEvents() {
+        EventManager manager = this.getVelocityServer().getEventManager();
+
+        manager.register(this, new OnPlayerJoin());
     }
 
     @Subscribe
@@ -144,13 +155,15 @@ public class VelocityRustyConnector implements RustyConnector {
     public boolean loadCommands() {
         CommandManager commandManager = server.getCommandManager();
 
-        Callable registerRusty = () -> {
+        Callable<Boolean> registerRusty = () -> {
             CommandMeta meta = commandManager.metaBuilder("group/aelysium/rustyconnector/core")
                     .aliases("rusty", "rc")
                     .build();
             BrigadierCommand command = CommandRusty.create();
 
             commandManager.register(meta, command);
+
+            return true;
         };
 
         registerRusty.execute();
@@ -173,5 +186,7 @@ public class VelocityRustyConnector implements RustyConnector {
         return getClass().getClassLoader().getResourceAsStream(filename);
     }
 
-
+    public void registerAllServers() {
+        this.proxy.registerAllServers(this.redis);
+    }
 }

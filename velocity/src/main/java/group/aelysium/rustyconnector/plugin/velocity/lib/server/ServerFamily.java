@@ -1,20 +1,31 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
+import com.sun.jdi.request.DuplicateRequestException;
+import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.generic.database.MessageProcessor;
+import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessageType;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
-import group.aelysium.rustyconnector.core.lib.generic.load_balancing.Algorithm;
 import group.aelysium.rustyconnector.core.lib.generic.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.generic.server.Family;
 import group.aelysium.rustyconnector.core.lib.generic.server.Server;
 import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
 import group.aelysium.rustyconnector.core.lib.generic.firewall.WhitelistPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.Algorithm;
+import net.kyori.adventure.text.Component;
 
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.security.InvalidAlgorithmParameterException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerFamily implements Family {
-    private final Map<ServerInfo,PaperServer> registeredServers = new HashMap<>();
+    private static Map<RedisMessageType, MessageProcessor> messageProcessors = new HashMap<>();
+    private final List<PaperServer> registeredServers = new ArrayList<>();
     private String name;
     protected int playerCount = 0;
     protected AlgorithmType algorithm;
@@ -27,13 +38,52 @@ public class ServerFamily implements Family {
 
     public String algorithm() { return this.algorithm.toString(); }
     public int serverCount() { return this.registeredServers.size(); }
-    public int playerCount() { return this.registeredServers.size(); }
+
+    public static ServerFamily findFamily(String name) {
+        return VelocityRustyConnector.getInstance().getProxy().getRegisteredFamilies().stream()
+                .filter(family ->
+                        Objects.equals(family.getName(), name)
+                ).findFirst().orElse(null);
+    }
+
+    /**
+     * Gets the aggregate player count across all servers in this family
+     * @return A player count
+     */
+    public int getPlayerCount() {
+        AtomicInteger newPlayerCount = new AtomicInteger();
+        registeredServers.forEach(server -> {
+            newPlayerCount.addAndGet(server.getPlayerCount());
+        });
+
+        playerCount = newPlayerCount.get();
+
+        return this.playerCount;
+    }
+
+    /**
+     * Set's the player count of a sub-server. Then re-calculates the aggregate player count of this family.
+     * Finally, re-balance the family's priority order of sub-servers.
+     * @param playerCount Player count to set.
+     * @param server The server to set.
+     */
+    public void setServerPlayerCount(int playerCount, PaperServer server) {
+        server.setPlayerCount(playerCount);
+
+        this.getPlayerCount();
+
+        this.balance();
+    }
+
+    public boolean containsServer(ServerInfo serverInfo) {
+        return !(this.getServer(serverInfo) == null);
+    }
 
     /**
      * Connect a player to this family
      * @param player The player to connect
      */
-    public void connect(Player player) {
+    public void connect(Player player) throws MalformedURLException {
         if(this.whitelist != null) {
             String ip = player.getRemoteAddress().getHostString();
 
@@ -43,7 +93,9 @@ public class ServerFamily implements Family {
                 player.disconnect(Lang.getDynamic("When Player Isn't Whitelisted"));
         }
 
-        PaperServer server = (PaperServer) Algorithm.getAlgorithm(this.algorithm).processConnection(this);
+        if(this.registeredServers.size() == 0) throw new MalformedURLException("There are no servers in this family!");
+
+        PaperServer server = this.registeredServers.get(0); // Get the server that is currently listed as highest priority
 
         if(server.isFull())
             if(!player.hasPermission("rustyconnector.bypasssoftcap"))
@@ -51,12 +103,20 @@ public class ServerFamily implements Family {
         if(server.isMaxed())
             return;
 
-        player.createConnectionRequest(server.getRawServer());
+        try {
+            //player.createConnectionRequest(server.getRawServer()).connect();
+            ConnectionRequestBuilder connection = player.createConnectionRequest(server.getRawServer());
+            connection.connect().whenCompleteAsync((status, throwable) -> {
+                VelocityRustyConnector.getInstance().logger().log("connected!!!!!");
+                VelocityRustyConnector.getInstance().logger().error("",throwable);
+            });
+        } catch (Exception e) {
+            VelocityRustyConnector.getInstance().logger().error("",e);
+        }
     }
 
-    @Override
-    public Map<Object, Server> getRegisteredServers() {
-        return new HashMap<>(); // TODO: sort this out
+    public List<PaperServer> getRegisteredServers() {
+        return this.registeredServers;
     }
 
     @Override
@@ -67,10 +127,24 @@ public class ServerFamily implements Family {
     @Override
     public void registerServer(Server server) {
         PaperServer paperServer = (PaperServer) server;
-        this.registeredServers.put(paperServer.getRawServer().getServerInfo(), paperServer);
-        VelocityRustyConnector.getInstance().getVelocityServer().registerServer(paperServer.getRawServer().getServerInfo());
+        InetSocketAddress address = paperServer.getRawServer().getServerInfo().getAddress();
 
-        VelocityRustyConnector.getInstance().logger().log("Registered server: "+paperServer.getRawServer().getServerInfo().getName());
+        ServerInfo serverInfo = ((PaperServer) server).getRawServer().getServerInfo();
+
+        if(this.containsServer(serverInfo)) throw new DuplicateRequestException("Server ["+serverInfo.getName()+"]("+address.getAddress()+":"+address.getPort()+") can't be registered twice!");
+
+        this.registeredServers.add(paperServer);
+        RegisteredServer registeredServer = VelocityRustyConnector.getInstance().getVelocityServer().registerServer(paperServer.getRawServer().getServerInfo());
+
+        VelocityRustyConnector.getInstance().logger().log("Registered server: ["+registeredServer.getServerInfo().getName()+"]("+registeredServer.getServerInfo().getAddress().getHostName()+":"+registeredServer.getServerInfo().getAddress().getPort()+") into the family: "+this.getName());
+    }
+
+    /**
+     * Takes all servers in this family and runs them through this family's load balancer.
+     * Re-arranging them in priority order.
+     */
+    public void balance() {
+        Algorithm.getAlgorithm(this.algorithm).balance(this);
     }
 
     /**
@@ -78,19 +152,24 @@ public class ServerFamily implements Family {
      * @param serverInfo The info matching the server to unregister
      */
     public void unregisterServer(ServerInfo serverInfo) {
-        this.registeredServers.remove(serverInfo);
+        PaperServer server = this.getServer(serverInfo);
+        if(server == null) throw new NullPointerException("The server requesting to un-register doesn't exist on this family!");
+
+        this.registeredServers.remove(server);
         VelocityRustyConnector.getInstance().getVelocityServer().unregisterServer(serverInfo);
 
-        VelocityRustyConnector.getInstance().logger().log("Unregistered server: "+serverInfo.getName());
+        VelocityRustyConnector.getInstance().logger().log("Unregistered server: ["+serverInfo.getName()+"]("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+") from the family: "+this.getName());
     }
 
     /**
      * Gets a server that is a part of the family.
      * @param serverInfo The info matching the server to get.
-     * @throws NullPointerException If the server can't be found.
      */
     public PaperServer getServer(ServerInfo serverInfo) throws NullPointerException {
-        return this.registeredServers.get(serverInfo);
+        return this.getRegisteredServers().stream()
+                .filter(server ->
+                        Objects.equals(server.getRawServer().getServerInfo(), serverInfo)
+                ).findFirst().orElse(null);
     }
 
     public void printInfo() {
@@ -101,7 +180,7 @@ public class ServerFamily implements Family {
         plugin.logger().log("Family Info");
         plugin.logger().log(Lang.spacing());
         plugin.logger().log("   ---| Name: "+this.getName());
-        plugin.logger().log("   ---| Online Players: "+this.playerCount());
+        plugin.logger().log("   ---| Online Players: "+this.getPlayerCount());
         plugin.logger().log("   ---| Registered Servers: "+this.serverCount());
         plugin.logger().log("   ---| Load Balancing Algorithm: "+this.algorithm());
         plugin.logger().log(Lang.spacing());
@@ -114,14 +193,76 @@ public class ServerFamily implements Family {
         Lang.print(plugin.logger(), Lang.get("info"));
         plugin.logger().log(Lang.spacing());
         plugin.logger().log("All servers registered to the family: "+this.name);
+        plugin.logger().log("Servers are listed, from top to bottom, by priority. The server at the top will have players added to it first.");
+        plugin.logger().log("The order of the servers will change over time as players join or leave them and their priority changes.");
         plugin.logger().log("Registered Servers: "+this.serverCount());
         plugin.logger().log(Lang.spacing());
         plugin.logger().log(Lang.border());
         plugin.logger().log(Lang.spacing());
-        this.registeredServers.forEach((info, data) -> {
-            plugin.logger().log("   ---| "+info.getName());
+        this.registeredServers.forEach(entry -> {
+            plugin.logger().log("   ---| "+entry.getRawServer().getServerInfo().getName());
         });
         plugin.logger().log(Lang.spacing());
         plugin.logger().log(Lang.border());
+    }
+
+    public static MessageProcessor getProcessor(RedisMessageType name) {
+        return messageProcessors.get(name);
+    }
+
+    public static void registerProcessors() {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        /*
+         * Sends a player to a family
+         */
+        messageProcessors.put(RedisMessageType.SEND, message -> {
+            String familyName = message.getParameter("family");
+            UUID uuid = UUID.fromString(message.getParameter("uuid"));
+
+            ServerFamily familyResponse = plugin.getProxy().getRegisteredFamilies().stream()
+                    .filter(family ->
+                            Objects.equals(family.getName(), familyName)
+                    ).findFirst().orElse(null);
+            if (familyResponse == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
+
+            Player player = VelocityRustyConnector.getInstance().getVelocityServer().getPlayer(uuid).stream().findFirst().orElse(null);
+            if(player == null) return;
+
+            try {
+                familyResponse.connect(player);
+            } catch (MalformedURLException e) {
+                player.disconnect(Component.text("Unable to connect you to the network! There are no default servers available!"));
+                plugin.logger().log("There are no servers registered in the root family! Player's will be unable to join your network if there are no servers here!");
+            }
+        });
+
+        /*
+         * Processes a request to unregister a server from the proxy
+         */
+        messageProcessors.put(RedisMessageType.PLAYER_CNT, message -> {
+            String familyName = message.getParameter("family-name");
+
+            ServerFamily family = plugin.getProxy().findFamily(familyName);
+
+            if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
+
+            InetSocketAddress address = message.getAddress();
+
+            ServerInfo serverInfo = new ServerInfo(
+                    message.getParameter("name"),
+                    address
+            );
+
+            try {
+                PaperServer server = family.getServer(serverInfo);
+
+                family.setServerPlayerCount(Integer.parseInt(message.getParameter("player-count")), server);
+            } catch (NullPointerException e) {
+                throw new InvalidAlgorithmParameterException("The provided server doesn't exist in this family!");
+            } catch (NumberFormatException e) {
+                throw new InvalidAlgorithmParameterException("The player count provided wasn't valid!");
+            }
+        });
     }
 }

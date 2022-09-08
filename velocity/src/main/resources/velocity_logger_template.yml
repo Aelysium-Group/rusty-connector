@@ -48,3 +48,16 @@ security:
 
 # Should we log when an address which hasn't been whitelisted tries to send a message to us?
     whitelist-denied-address-message: true
+
+log:
+# Log what we do when a player joins the server
+    player-join: false
+
+# Log what happens when a player leaves the server
+    player-leave: false
+
+    # Log what happens when a player moves between servers
+    player-move: false
+
+    # Log anytime a family re-balances it's server priorities
+    family-balancing: false
