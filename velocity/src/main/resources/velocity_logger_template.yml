@@ -23,6 +23,9 @@ messaging:
 #       which requires all listening servers to submit a registration request
     registration-request: false
 
+# Should we log when a server requests to be unregistered?
+    unregistration-request: false
+
 # Should we log when the proxy calls for all servers to register themselves?
     call-for-registration: false
 
@@ -64,3 +67,66 @@ log:
 
     # Log anytime a family re-balances it's server priorities
     family-balancing: false
+
+console-icons:
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Console Icons                       #
+#                                                          #
+#               ---------------------------                #
+# | Any system developer will tell you that watching       #
+# | logs can sometimes feel messy and overwhelming.        #
+# | Sometimes, this is because there are just to many      #
+# | things you have to read in such short amounts of time  #
+#                                                          #
+# | To address this issue. We've implemented something     #
+# | we're calling Console Icons. These are short           #
+# | combinations of characters meant to convey a meaning.  #
+# | It's a known fact that the human eye recognizes shapes #
+# | faster than it can process words. So we wanted to      #
+# | take advantage of that ability.                        #
+#                                                          #
+# | If you find that it's not your style, you are welcome  #
+# | to replace the icons below with your own worded        #
+# | versions! Or you can adjust them in a way that helps   #
+# | you interpret them faster and better!                  #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#
+#   Symbol used when a server is requesting the proxy to register it into a family.
+#   Example: [server name](127.0.0.1:25565) ?>>>? family-name
+#
+    requesting-registration: "?>>>?"
+
+#
+#   Symbol used when a server gets registered into a family
+#   Example: [server name](127.0.0.1:25565) >>>>> family-name
+#
+    registered: ">>>>>"
+
+#
+#   Symbol used when the proxy asks all servers to register themselves
+#   Example: (Velocity)[127.0.0.1] |>~=- ALL SERVERS
+#
+    call-for-registration: "|>~=-"
+
+#
+#   Symbol used when a server requests to be unregistered from a family
+#   Example: [server name](127.0.0.1:25565) ?///? family-name
+#
+    requesting-unregistration: "?///?"
+
+#
+#   Symbol used when a server gets unregistered from a family
+#   Example: [server name](127.0.0.1:25565) ///// family-name
+#
+    unregistered: "/////"
+
+#
+#   Symbol used when a previous request gets canceled as a result of an error
+#   Example: [server name](127.0.0.1:25565) xxxxx family-name
+#
+    canceled-request: "xxxxx"

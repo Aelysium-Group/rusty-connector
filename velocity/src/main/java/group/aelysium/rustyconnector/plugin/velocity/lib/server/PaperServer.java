@@ -3,6 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.lib.generic.util.logger.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.core.lib.generic.database.MessageProcessor;
 import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessageType;
@@ -115,6 +117,14 @@ public class PaperServer implements Server {
                     Integer.parseInt(message.getParameter("hard-cap")),
                     Integer.parseInt(message.getParameter("priority"))
             );
+
+            if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
+                VelocityRustyConnector.getInstance().logger().log(
+                        "["+registeredServer.getServerInfo().getName()+"]" +
+                        "("+registeredServer.getServerInfo().getAddress().getHostName()+":"+registeredServer.getServerInfo().getAddress().getPort()+")" +
+                        " "+ Lang.getDynamic("request-registration_icon") +" "+familyName
+                );
+
             familyResponse.registerServer(server);
 
             server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
@@ -141,9 +151,20 @@ public class PaperServer implements Server {
                     address
             );
 
+            if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
+                VelocityRustyConnector.getInstance().logger().log(
+                        "["+serverInfo.getName()+"]" +
+                                "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
+                                " "+ Lang.getDynamic("request-unregistration_icon") +" "+familyName
+                );
+
             if(!familyResponse.containsServer(serverInfo)) throw new InvalidAlgorithmParameterException("The server requesting to un-register isn't on this server!");
 
             familyResponse.unregisterServer(serverInfo);
         });
+    }
+
+    public static void unregisterProcessors() {
+        PaperServer.messageProcessors.clear();
     }
 }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.lib.generic.database.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.generic.util.AddressUtil;
+import group.aelysium.rustyconnector.core.lib.generic.util.logger.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;
 import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessage;
@@ -34,14 +35,19 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.generic.databa
 
                 Redis.processParameters(message, object, messageSnowflake);
             } catch (AuthenticationException e) {
-                plugin.logger().error("Incoming message from: "+message.getAddress().toString()+" contains an invalid private key! Throwing away...");
-                plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
+                if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
+                else if(!plugin.logger().getGate().check(GateKey.INVALID_PRIVATE_KEY)) return;
+
+                plugin.logger().error("Incoming message from: "+message.getAddress().toString()+" contains an invalid private key!");
+                plugin.logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
             }
         } catch (Exception e) {
             VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
+            if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
+
             plugin.logger().error("There was an issue handling the incoming message! Throwing away...",e);
-            plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
+            plugin.logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
         }
     }
 
@@ -79,11 +85,19 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.generic.databa
                 }
             }
         } catch (NullPointerException e) { // If a parameter fails to resolve, we get this exception.
-            VelocityRustyConnector.getInstance().logger().error("Incoming message "+message.getType().toString()+" from "+message.getAddress()+" is not formatted properly. Throwing away...", e);
-            VelocityRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
+            VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+            if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
+
+            plugin.logger().error("Incoming message "+message.getType().toString()+" from "+message.getAddress()+" is not formatted properly. Throwing away...", e);
+            plugin.logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
         } catch (InvalidAlgorithmParameterException e) { // If one of the data processors fails, we get this exception.
-            VelocityRustyConnector.getInstance().logger().error("There was an issue handling the message. Throwing away...", e);
-            VelocityRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
+            VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+            if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
+
+            plugin.logger().error("There was an issue handling the message. Throwing away...", e);
+            plugin.logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
         }
     }
 

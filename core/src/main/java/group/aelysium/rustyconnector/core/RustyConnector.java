@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core;
 
 import group.aelysium.rustyconnector.core.lib.generic.database.Redis;
-import group.aelysium.rustyconnector.core.lib.generic.hash.Snowflake;
+import group.aelysium.rustyconnector.core.lib.generic.util.logger.Logger;
 
 import java.io.File;
 import java.io.InputStream;

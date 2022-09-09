@@ -4,13 +4,16 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
+import com.velocitypowered.api.event.EventHandler;
 import com.velocitypowered.api.event.EventManager;
+import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.core.lib.generic.firewall.MessageTunnel;
+import group.aelysium.rustyconnector.core.lib.generic.util.logger.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
@@ -21,6 +24,7 @@ import group.aelysium.rustyconnector.core.RustyConnector;
 import group.aelysium.rustyconnector.core.lib.generic.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.generic.Callable;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.LoggerParser;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 import org.slf4j.Logger;
@@ -80,6 +84,15 @@ public class VelocityRustyConnector implements RustyConnector {
 
     @Subscribe
     public void onLoad(ProxyInitializeEvent event) {
+        this.init();
+    }
+
+    @Subscribe
+    public void onUnload(ProxyShutdownEvent event) {
+        this.uninit();
+    }
+
+    public void init() {
         instance = this;
 
         if(!loadConfigs()) return;
@@ -92,15 +105,28 @@ public class VelocityRustyConnector implements RustyConnector {
         ServerFamily.registerProcessors();
     }
 
+    public void uninit() {
+        instance = null;
+        this.redis.disconnect();
+        this.redis = null;
+        this.proxy = null;
+        this.messageTunnel = null;
+        this.configs = new HashMap<>();
+        this.getVelocityServer().getCommandManager().unregister("rc");
+
+        this.getVelocityServer().getEventManager().unregisterListener(this, new OnPlayerJoin());
+
+        PaperServer.registerProcessors();
+        ServerFamily.registerProcessors();
+    }
+
+
+
+
     public void registerEvents() {
         EventManager manager = this.getVelocityServer().getEventManager();
 
         manager.register(this, new OnPlayerJoin());
-    }
-
-    @Subscribe
-    public void onUnload(ProxyShutdownEvent event) {
-
     }
 
     @Override
@@ -109,6 +135,8 @@ public class VelocityRustyConnector implements RustyConnector {
             this.logger().log("-| Registering configs");
             this.configs.put("config.yml",new Config(new File(this.getDataFolder(), "config.yml"), "velocity_config_template.yml"));
             Config genericConfig = this.configs.get("config.yml");
+            this.configs.put("logger.yml",new Config(new File(this.getDataFolder(), "logger.yml"), "velocity_logger_template.yml"));
+            Config loggerConfig = this.configs.get("logger.yml");
             if(!genericConfig.register()) return false;
 
             this.logger().log("---| Preparing proxy...");
@@ -133,6 +161,8 @@ public class VelocityRustyConnector implements RustyConnector {
 
             GenericParser.parse(genericConfig);
 
+            LoggerParser.parse(loggerConfig);
+
             Lang.print(this.logger, Lang.get("wordmark"));
 
             return true;
@@ -144,11 +174,8 @@ public class VelocityRustyConnector implements RustyConnector {
 
     @Override
     public void reload() {
-        this.redis = null;
-        this.proxy = null;
-        this.messageTunnel = null;
-
-        this.loadConfigs();
+        this.uninit();
+        this.init();
     }
 
     @Override
@@ -156,7 +183,7 @@ public class VelocityRustyConnector implements RustyConnector {
         CommandManager commandManager = server.getCommandManager();
 
         Callable<Boolean> registerRusty = () -> {
-            CommandMeta meta = commandManager.metaBuilder("group/aelysium/rustyconnector/core")
+            CommandMeta meta = commandManager.metaBuilder("rustyconnector")
                     .aliases("rusty", "rc")
                     .build();
             BrigadierCommand command = CommandRusty.create();
@@ -187,6 +214,10 @@ public class VelocityRustyConnector implements RustyConnector {
     }
 
     public void registerAllServers() {
+        if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.CALL_FOR_REGISTRATION))
+            VelocityRustyConnector.getInstance().logger().log("[Velocity](127.0.0.1) "+Lang.getDynamic("call-for-registration_icon") +" EVERYONE");
+
         this.proxy.registerAllServers(this.redis);
+
     }
 }

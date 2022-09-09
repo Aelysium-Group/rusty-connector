@@ -107,8 +107,6 @@ public class Proxy implements group.aelysium.rustyconnector.core.lib.generic.ser
      * @param redis The redis connection to use.
      */
     public void registerAllServers(Redis redis) {
-        VelocityRustyConnector.getInstance().logger().log("Sending request for all servers to register themselves. This might take a minute...");
-
         RedisMessage message = new RedisMessage(
                 this.privateKey,
                 RedisMessageType.REG_ALL,

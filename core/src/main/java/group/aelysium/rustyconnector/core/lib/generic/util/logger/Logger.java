@@ -1,6 +1,9 @@
-package group.aelysium.rustyconnector.core;
+package group.aelysium.rustyconnector.core.lib.generic.util.logger;
+
+import group.aelysium.rustyconnector.core.lib.generic.util.logger.LoggerGate;
 
 public interface Logger {
+    LoggerGate getGate();
 
     void log(String message);
     void log(String message, Throwable e);

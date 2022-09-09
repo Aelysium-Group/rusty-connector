@@ -33,7 +33,7 @@ public class OnPlayerJoin {
                 WhitelistPlayer whitelistPlayer = new WhitelistPlayer(player.getUsername(), player.getUniqueId(), ip);
 
                 if (!whitelist.validate(whitelistPlayer))
-                    player.disconnect(Lang.getDynamic("When Player Isn't Whitelisted"));
+                    player.disconnect(Component.text("You aren't whitelisted on this server!"));
             }
 
             ServerFamily rootFamily = plugin.getProxy().getRootFamily();

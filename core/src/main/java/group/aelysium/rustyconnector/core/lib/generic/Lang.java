@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.core.lib.generic;
 
 import net.kyori.adventure.text.Component;
-import group.aelysium.rustyconnector.core.Logger;
+import group.aelysium.rustyconnector.core.lib.generic.util.logger.Logger;
 
 import java.util.*;
 
 public class Lang {
-    private static Map<String, Component> langMap = new HashMap<>();
+    private static Map<String, String> langMap = new HashMap<>();
 
     /**
      * Add a value to the lang.json.
@@ -15,15 +15,14 @@ public class Lang {
      * @return void
      */
     public static void add(String key, String value) {
-        Component component = Component.text(value);
-        langMap.put(key, component);
+        langMap.put(key, value);
     }
 
     /**
      * Get a value which has been set in the lang.json file
      * @param key The key of the lang to return
      */
-    public static Component getDynamic(String key) {
+    public static String getDynamic(String key) {
         return langMap.get(key);
     }
 

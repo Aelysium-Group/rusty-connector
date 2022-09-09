@@ -1,14 +1,21 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
-import com.jcabi.log.MulticolorLayout;
+import group.aelysium.rustyconnector.core.lib.generic.util.logger.LoggerGate;
 import org.slf4j.Logger;
 
-public class PluginLogger implements group.aelysium.rustyconnector.core.Logger {
+public class PluginLogger implements group.aelysium.rustyconnector.core.lib.generic.util.logger.Logger {
+    private final LoggerGate gate = new LoggerGate();
     private final Logger logger;
 
     public PluginLogger(Logger logger) {
         this.logger = logger;
     }
+
+    @Override
+    public LoggerGate getGate() {
+        return this.gate;
+    }
+
     @Override
     public void log(String message) {
         logger.info(message);

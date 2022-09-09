@@ -7,6 +7,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.generic.database.MessageProcessor;
 import group.aelysium.rustyconnector.core.lib.generic.database.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.generic.util.logger.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
 import group.aelysium.rustyconnector.core.lib.generic.load_balancing.AlgorithmType;
@@ -90,7 +91,7 @@ public class ServerFamily implements Family {
             WhitelistPlayer whitelistPlayer = new WhitelistPlayer(player.getUsername(), player.getUniqueId(), ip);
 
             if (!whitelist.validate(whitelistPlayer))
-                player.disconnect(Lang.getDynamic("When Player Isn't Whitelisted"));
+                player.disconnect(Component.text("You aren't whitelisted on this server!"));
         }
 
         if(this.registeredServers.size() == 0) throw new MalformedURLException("There are no servers in this family!");
@@ -125,18 +126,33 @@ public class ServerFamily implements Family {
     }
 
     @Override
-    public void registerServer(Server server) {
+    public void registerServer(Server server) throws DuplicateRequestException {
         PaperServer paperServer = (PaperServer) server;
         InetSocketAddress address = paperServer.getRawServer().getServerInfo().getAddress();
 
         ServerInfo serverInfo = ((PaperServer) server).getRawServer().getServerInfo();
 
-        if(this.containsServer(serverInfo)) throw new DuplicateRequestException("Server ["+serverInfo.getName()+"]("+address.getAddress()+":"+address.getPort()+") can't be registered twice!");
+        if(this.containsServer(serverInfo)) {
+            if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
+                VelocityRustyConnector.getInstance().logger().log(
+                        "["+serverInfo.getName()+"]" +
+                        "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
+                        " "+ Lang.getDynamic("canceled_icon") +" "+this.getName()
+                );
+
+            throw new DuplicateRequestException("Server ["+serverInfo.getName()+"]("+address.getAddress()+":"+address.getPort()+") can't be registered twice!");
+        }
 
         this.registeredServers.add(paperServer);
         RegisteredServer registeredServer = VelocityRustyConnector.getInstance().getVelocityServer().registerServer(paperServer.getRawServer().getServerInfo());
 
-        VelocityRustyConnector.getInstance().logger().log("Registered server: ["+registeredServer.getServerInfo().getName()+"]("+registeredServer.getServerInfo().getAddress().getHostName()+":"+registeredServer.getServerInfo().getAddress().getPort()+") into the family: "+this.getName());
+
+        if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
+            VelocityRustyConnector.getInstance().logger().log(
+                    "["+registeredServer.getServerInfo().getName()+"]" +
+                    "("+registeredServer.getServerInfo().getAddress().getHostName()+":"+registeredServer.getServerInfo().getAddress().getPort()+")" +
+                    " "+ Lang.getDynamic("registered_icon") +" "+this.getName()
+            );
     }
 
     /**
@@ -153,12 +169,27 @@ public class ServerFamily implements Family {
      */
     public void unregisterServer(ServerInfo serverInfo) {
         PaperServer server = this.getServer(serverInfo);
-        if(server == null) throw new NullPointerException("The server requesting to un-register doesn't exist on this family!");
+        if(server == null) {
+            if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
+                VelocityRustyConnector.getInstance().logger().log(
+                        "["+serverInfo.getName()+"]" +
+                                "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
+                                " "+ Lang.getDynamic("canceled_icon") +" "+this.getName()
+                );
+
+            throw new NullPointerException("The server requesting to un-register doesn't exist on this family!");
+        }
 
         this.registeredServers.remove(server);
         VelocityRustyConnector.getInstance().getVelocityServer().unregisterServer(serverInfo);
 
-        VelocityRustyConnector.getInstance().logger().log("Unregistered server: ["+serverInfo.getName()+"]("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+") from the family: "+this.getName());
+
+        if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
+            VelocityRustyConnector.getInstance().logger().log(
+                    "["+serverInfo.getName()+"]" +
+                            "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
+                            " "+ Lang.getDynamic("unregistered_icon") +" "+this.getName()
+            );
     }
 
     /**
@@ -264,5 +295,8 @@ public class ServerFamily implements Family {
                 throw new InvalidAlgorithmParameterException("The player count provided wasn't valid!");
             }
         });
+    }
+    public static void unregisterProcessors() {
+        ServerFamily.messageProcessors.clear();
     }
 }

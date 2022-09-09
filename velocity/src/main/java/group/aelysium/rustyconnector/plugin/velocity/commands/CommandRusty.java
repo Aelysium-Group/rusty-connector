@@ -319,19 +319,18 @@ public final class CommandRusty {
             )
             .then(LiteralArgumentBuilder.<CommandSource>literal("registerAll")
                     .executes(context -> {
-                        // TODO: Make registerAll work
                         VelocityRustyConnector.getInstance().registerAllServers();
 
                         return 1;
                     })
             )
-            .then(LiteralArgumentBuilder.<CommandSource>literal("reload")
+            /*.then(LiteralArgumentBuilder.<CommandSource>literal("reload")
                     .executes(context -> {
                         VelocityRustyConnector.getInstance().reload();
 
                         return 1;
                     })
-            )
+            )*/
             .build();
 
         // BrigadierCommand implements Command

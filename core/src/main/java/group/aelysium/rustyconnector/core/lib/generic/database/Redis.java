@@ -20,6 +20,7 @@ public class Redis {
     private Jedis jedisSubscriber;
     private Subscriber subscriber;
     private JedisPool pool;
+    private Thread subscriberThread;
 
     public MessageCache getMessageCache() {
         return this.messageCache;
@@ -59,7 +60,7 @@ public class Redis {
             this.subscriber = new Subscriber(plugin);
             this.messageCache = new MessageCache(50);
 
-            new Thread(new Runnable() {
+            this.subscriberThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -68,7 +69,9 @@ public class Redis {
                         e.printStackTrace();
                     }
                 }
-            }).start();
+            });
+
+            this.subscriberThread.start();
         } catch (Exception e) {
             e.printStackTrace();
             throw new ExceptionInInitializerError();
@@ -82,10 +85,13 @@ public class Redis {
     /**
      * When redis disconnects
      */
-    public void onDisconnect() throws ExceptionInInitializerError {
+    public void disconnect() throws ExceptionInInitializerError {
         try {
+            this.subscriberThread.interrupt();
+            this.subscriberThread.join();
             this.subscriber.unsubscribe();
             this.jedisSubscriber.close();
+            this.jedisSubscriber.disconnect();
             this.client.close();
             this.client.disconnect();
         } catch (Exception e) {
