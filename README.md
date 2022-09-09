@@ -5,6 +5,7 @@ Meet Rusty Connector! The premier Velocity server and player manager!
 > Collect servers together into server families with built-in load balancing!
 > 
 > Create server-wide, family-wide, and individual server whitelists!
+> Switching between different whitelist configurations as your needs change!
 > 
 > Never configure servers into your Velocity proxy again with *server auto-registration*!
 > 
