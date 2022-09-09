@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -9,11 +10,12 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
+import group.aelysium.rustyconnector.core.lib.generic.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
+import group.aelysium.rustyconnector.core.lib.generic.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
 
 import java.util.List;
@@ -35,8 +37,8 @@ public final class CommandRusty {
                 source.sendMessage(Component.text("Used to access the family controls for this plugin.").color(NamedTextColor.GRAY));
                 VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
 
-                source.sendMessage(Component.text("/rc retrieveMessage <Message ID>").color(NamedTextColor.YELLOW));
-                source.sendMessage(Component.text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!").color(NamedTextColor.GRAY));
+                source.sendMessage(Component.text("/rc message").color(NamedTextColor.AQUA));
+                source.sendMessage(Component.text("Access recently sent rusty-connector messages.").color(NamedTextColor.GRAY));
                 VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
 
                 source.sendMessage(Component.text("/rc player").color(NamedTextColor.AQUA));
@@ -56,42 +58,155 @@ public final class CommandRusty {
 
                 return 1;
             })
-            .then(LiteralArgumentBuilder.<CommandSource>literal("retrieveMessage")
+            .then(LiteralArgumentBuilder.<CommandSource>literal("message")
                     .executes(context -> {
                         CommandSource source = context.getSource();
 
                         Lang.print(VelocityRustyConnector.getInstance().logger(), Lang.commandUsage());
 
-                        source.sendMessage(Component.text("/rc retrieveMessage <Message ID>").color(NamedTextColor.AQUA));
+                        source.sendMessage(Component.text("/rc message get <Message ID>").color(NamedTextColor.YELLOW));
                         source.sendMessage(Component.text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!").color(NamedTextColor.GRAY));
+                        VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
+
+                        source.sendMessage(Component.text("/rc message list <page number>").color(NamedTextColor.YELLOW));
+                        source.sendMessage(Component.text("Lists all currently cached messages! As new messages get cached, older ones will be pushed out of the cache.").color(NamedTextColor.GRAY));
                         VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
                         VelocityRustyConnector.getInstance().logger().log(Lang.border());
 
                         return 1;
                     })
-                    .then(RequiredArgumentBuilder.<CommandSource, Long>argument("snowflake", LongArgumentType.longArg())
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("list")
                             .executes(context -> {
-                                try {
-                                    Long snowflake = context.getArgument("snowflake", Long.class);
-                                    MessageCache messageCache = VelocityRustyConnector.getInstance().getMessageCache();
+                                new Thread(() -> {
+                                    try {
+                                        if(plugin.getMessageCache().getSize() > 10) {
+                                            double numberOfPages = Math.floorDiv(plugin.getMessageCache().getSize(),10) + 1;
 
-                                    String message = messageCache.getMessage(snowflake);
+                                            List<CacheableMessage> messagesPage = plugin.getMessageCache().getMessagesPage(1);
 
-                                    Lang.print(VelocityRustyConnector.getInstance().logger(),
-                                        Lang.get("boxed-message",
-                                            "Found message with ID "+snowflake.toString(),
-                                            Lang.spacing(),
-                                            message
-                                            )
-                                    );
-                                } catch (NullPointerException e) {
-                                    VelocityRustyConnector.getInstance().logger().log("That message either doesn't exist or is no-longer available in the cache!");
-                                } catch (Exception e) {
-                                    VelocityRustyConnector.getInstance().logger().log("An error stopped us from getting that message!", e);
-                                }
+                                            plugin.logger().log(Lang.spacing());
+                                            plugin.logger().log(Lang.spacing());
+                                            plugin.logger().log(Lang.spacing());
+                                            messagesPage.forEach(message -> {
+                                                Lang.print(plugin.logger(),
+                                                    Lang.get(
+                                                            "boxed-message",
+                                                            "ID: "+message.getSnowflake(),
+                                                            "Date: "+message.getDate().toString(),
+                                                            "Contents: "+message.getContents()
+                                                        )
+                                                    );
+                                            });
+
+                                            plugin.logger().log(Lang.spacing());
+                                            plugin.logger().log("Showing page 1 out of "+ Math.floor(numberOfPages));
+                                            plugin.logger().log(Lang.spacing());
+                                            plugin.logger().log(Lang.border());
+
+                                            return;
+                                        }
+
+                                        List<CacheableMessage> messages = plugin.getMessageCache().getMessages();
+
+                                        plugin.logger().log(Lang.spacing());
+                                        plugin.logger().log(Lang.spacing());
+                                        plugin.logger().log(Lang.spacing());
+                                        messages.forEach(message -> {
+                                            Lang.print(plugin.logger(),
+                                                    Lang.get(
+                                                            "boxed-message",
+                                                            "ID: "+message.getSnowflake(),
+                                                            "Date: "+message.getDate().toString(),
+                                                            "Contents: "+message.getContents()
+                                                    )
+                                            );
+                                        });
+                                    } catch (Exception e) {
+                                        plugin.logger().error("There was an issue getting those messages!");
+                                    }
+                                }).start();
 
                                 return 1;
                             })
+                            .then(RequiredArgumentBuilder.<CommandSource, Integer>argument("page-number", IntegerArgumentType.integer())
+                                    .executes(context -> {
+                                        new Thread(() -> {
+                                            try {
+                                                Integer pageNumber = context.getArgument("page-number", Integer.class);
+
+                                                List<CacheableMessage> messagesPage = plugin.getMessageCache().getMessagesPage(pageNumber);
+
+                                                double numberOfPages = Math.floorDiv(plugin.getMessageCache().getSize(),10) + 1;
+
+
+                                                plugin.logger().log(Lang.spacing());
+                                                plugin.logger().log(Lang.spacing());
+                                                plugin.logger().log(Lang.spacing());
+                                                messagesPage.forEach(message -> {
+                                                    Lang.print(plugin.logger(),
+                                                            Lang.get(
+                                                                    "boxed-message",
+                                                                    "ID: "+message.getSnowflake(),
+                                                                    "Date: "+message.getDate().toString(),
+                                                                    "Contents: "+message.getContents()
+                                                            )
+                                                    );
+                                                });
+
+                                                plugin.logger().log(Lang.spacing());
+                                                plugin.logger().log("Showing page "+pageNumber+" out of "+ Math.floor(numberOfPages));
+                                                plugin.logger().log(Lang.spacing());
+                                                plugin.logger().log(Lang.border());
+
+                                                return;
+                                            } catch (Exception e) {
+                                                plugin.logger().error("There was an issue getting those messages!");
+                                            }
+
+                                        }).start();
+                                        return 1;
+                                    })
+                            )
+                    )
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("get")
+                            .executes(context -> {
+                                CommandSource source = context.getSource();
+
+                                Lang.print(VelocityRustyConnector.getInstance().logger(), Lang.commandUsage());
+
+                                source.sendMessage(Component.text("/rc message get <Message ID>").color(NamedTextColor.YELLOW));
+                                source.sendMessage(Component.text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!").color(NamedTextColor.GRAY));
+                                VelocityRustyConnector.getInstance().logger().log(Lang.spacing());
+                                VelocityRustyConnector.getInstance().logger().log(Lang.border());
+
+                                return 1;
+                            })
+                            .then(RequiredArgumentBuilder.<CommandSource, Long>argument("snowflake", LongArgumentType.longArg())
+                                    .executes(context -> {
+                                        try {
+                                            Long snowflake = context.getArgument("snowflake", Long.class);
+                                            MessageCache messageCache = VelocityRustyConnector.getInstance().getMessageCache();
+
+                                            CacheableMessage message = messageCache.getMessage(snowflake);
+
+                                            Lang.print(VelocityRustyConnector.getInstance().logger(),
+                                                    Lang.get("boxed-message",
+                                                            "Found message with ID "+snowflake.toString(),
+                                                            Lang.spacing(),
+                                                            "ID: "+message.getSnowflake(),
+                                                            "Date: "+message.getDate().toString(),
+                                                            "Contents: "+message.getContents()
+                                                    )
+                                            );
+                                        } catch (NullPointerException e) {
+                                            VelocityRustyConnector.getInstance().logger().log("That message either doesn't exist or is no-longer available in the cache!");
+                                        } catch (Exception e) {
+                                            VelocityRustyConnector.getInstance().logger().log("An error stopped us from getting that message!", e);
+                                        }
+
+                                        return 1;
+                                    })
+                            )
                     )
             )
             .then(LiteralArgumentBuilder.<CommandSource>literal("family")

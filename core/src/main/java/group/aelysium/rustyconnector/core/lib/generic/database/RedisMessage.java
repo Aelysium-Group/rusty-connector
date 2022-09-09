@@ -95,10 +95,10 @@ public class RedisMessage {
      * @param origin  Where should the message be originating from?
      * @param addressForCompare The address to use to check if a message is directed to the current server (optional for proxies)
      * @return A Redis Message.
+     * @throws NullPointerException If the message is missing a necessary parameter.
+     * @throws IllegalArgumentException If the message is malformed or not meant for the server reading it.
      */
-    public static RedisMessage create(JsonObject message, MessageOrigin origin, InetSocketAddress addressForCompare) {
-        RustyConnector plugin = RustyConnector.getInstance();
-
+    public static RedisMessage create(JsonObject message, MessageOrigin origin, InetSocketAddress addressForCompare) throws NullPointerException, IllegalArgumentException {
         Callable<RedisMessage> processProxyMessage = () -> { // Messages coming from the proxy
             if(addressForCompare == null) throw new NullPointerException("In order to process messages from the proxy, the sub-server must provide an address!");
 
@@ -114,24 +114,21 @@ public class RedisMessage {
             if(assumedType == null) throw new NullPointerException("`type` is required in transit messages!");
             if(assumedToAddress == null) throw new NullPointerException("`to` is required for in transit messages sent from the proxy!");
 
-            try {
-                RedisMessageType type = RedisMessageType.valueOf(assumedType.getAsString());
-                String privateKey = assumedPrivateKey.getAsString();
-                InetSocketAddress address = AddressUtil.stringToAddress(assumedToAddress.getAsString());
+            RedisMessageType type = RedisMessageType.valueOf(assumedType.getAsString());
+            String privateKey = assumedPrivateKey.getAsString();
+            InetSocketAddress address = AddressUtil.stringToAddress(assumedToAddress.getAsString());
 
-                // Check and make sure that the message is actually addressed to this server
-                if(!AddressUtil.addressToString(address).equals(AddressUtil.addressToString(addressForCompare))) throw new IllegalArgumentException("This message isn't directed at us!");
+            // Unless type is a REG_ALL. Check and make sure that the message is actually addressed to this server
+            if(!(type == RedisMessageType.REG_ALL))
+                if(!AddressUtil.addressToString(address).equals(AddressUtil.addressToString(addressForCompare)))
+                    throw new IllegalArgumentException("This message isn't directed at us!");
 
-                return new RedisMessage(
-                        privateKey,
-                        type,
-                        address,
-                        true
-                );
-            } catch (IllegalArgumentException e) {
-                plugin.logger().log("");
-            }
-            return null;
+            return new RedisMessage(
+                    privateKey,
+                    type,
+                    address,
+                    true
+            );
         };
         Callable<RedisMessage> processServerMessage = () -> { // Messages coming from a sub-server
             JsonElement assumedPrivateKey = message.get("pk");
@@ -146,21 +143,16 @@ public class RedisMessage {
             if(assumedType == null) throw new NullPointerException("`type` is required in transit messages!");
             if(assumedFromAddress == null) throw new NullPointerException("`from` is required for in transit messages sent from sub-servers!");
 
-            try {
-                RedisMessageType type = RedisMessageType.valueOf(assumedType.getAsString());
-                String privateKey = assumedPrivateKey.getAsString();
-                InetSocketAddress address = AddressUtil.stringToAddress(assumedFromAddress.getAsString());
+            RedisMessageType type = RedisMessageType.valueOf(assumedType.getAsString());
+            String privateKey = assumedPrivateKey.getAsString();
+            InetSocketAddress address = AddressUtil.stringToAddress(assumedFromAddress.getAsString());
 
-                return new RedisMessage(
-                        privateKey,
-                        type,
-                        address,
-                        true
-                );
-            } catch (IllegalArgumentException e) {
-                plugin.logger().log("");
-            }
-            return null;
+            return new RedisMessage(
+                    privateKey,
+                    type,
+                    address,
+                    true
+            );
         };
 
 

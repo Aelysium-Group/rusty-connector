@@ -24,12 +24,12 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerFamily implements Family {
-    private static Map<RedisMessageType, MessageProcessor> messageProcessors = new HashMap<>();
+    private static final Map<RedisMessageType, MessageProcessor> messageProcessors = new HashMap<>();
     private final List<PaperServer> registeredServers = new ArrayList<>();
-    private String name;
+    private final String name;
+    private final Whitelist whitelist;
     protected int playerCount = 0;
     protected AlgorithmType algorithm;
-    private Whitelist whitelist;
     public ServerFamily(String name, AlgorithmType algorithm, Whitelist whitelist) {
         this.name = name;
         this.algorithm = algorithm;

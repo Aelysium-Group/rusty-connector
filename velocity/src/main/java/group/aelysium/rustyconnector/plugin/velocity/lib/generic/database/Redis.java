@@ -37,11 +37,6 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.generic.databa
                 plugin.logger().error("Incoming message from: "+message.getAddress().toString()+" contains an invalid private key! Throwing away...");
                 plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
             }
-        } catch (IllegalArgumentException e) {
-            VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-
-            plugin.logger().error("Incoming message is not formatted properly. Throwing away...",e);
-            plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
         } catch (Exception e) {
             VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 

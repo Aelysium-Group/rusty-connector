@@ -4,7 +4,7 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.RustyConnector;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
-import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
+import group.aelysium.rustyconnector.core.lib.generic.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.lib.generic.Config;
 import group.aelysium.rustyconnector.plugin.paper.lib.generic.PaperServer;
@@ -105,6 +105,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
                 this.logger().log(Lang.border());
                 return false;
             }
+            this.privateKey = privateKey;
             this.logger().log("-----| Finished!");
             this.logger().log("-----| Configuring Server...");
 

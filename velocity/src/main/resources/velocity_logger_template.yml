@@ -35,6 +35,9 @@ messaging:
 # Should we log when a server decides to send a player-count update?
     player-count-update: false
 
+# Should we log anytime the message parser throws away a message? (Can generate lots of console spam on busy servers!)
+    message-parser-trash: false
+
 security:
 
 # Should we log when a message contains an invalid key?

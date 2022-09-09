@@ -1,8 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.generic.database;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
+import group.aelysium.rustyconnector.core.lib.generic.cache.MessageCache;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -11,7 +9,6 @@ import group.aelysium.rustyconnector.core.RustyConnector;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
-import java.util.Objects;
 
 public class Redis {
     private MessageCache messageCache;

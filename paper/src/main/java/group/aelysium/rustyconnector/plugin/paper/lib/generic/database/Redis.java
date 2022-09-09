@@ -32,19 +32,14 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.generic.databa
 
                 Redis.processParameters(message, object, messageSnowflake);
             } catch (AuthenticationException e) {
-                plugin.logger().error("Incoming message from: "+message.getAddress().toString()+" contains an invalid private key! Throwing away...");
-                plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
+                plugin.logger().error("Incoming message from: " + message.getAddress().toString() + " contains an invalid private key! Throwing away...");
+                plugin.logger().log("To view the thrown away message use: /rc message get " + messageSnowflake.toString());
             }
-        } catch (IllegalArgumentException e) {
-            PaperRustyConnector plugin = PaperRustyConnector.getInstance();
-
-            plugin.logger().error("Incoming message is not formatted properly. Throwing away...",e);
-            plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
         } catch (Exception e) {
             PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
             plugin.logger().error("There was an issue handling the incoming message! Throwing away...",e);
-            plugin.logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
+            plugin.logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
         }
     }
 
@@ -61,10 +56,10 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.generic.databa
             }
         } catch (NullPointerException e) { // If a parameter fails to resolve, we get this exception.
             PaperRustyConnector.getInstance().logger().error("Incoming message "+message.getType().toString()+" from "+message.getAddress()+" is not formatted properly. Throwing away...", e);
-            PaperRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
+            PaperRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
         } catch (InvalidAlgorithmParameterException e) { // If one of the data processors fails, we get this exception.
             PaperRustyConnector.getInstance().logger().error("There was an issue handling the message. Throwing away...", e);
-            PaperRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc retrieveMessage "+messageSnowflake.toString());
+            PaperRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
         }
     }
 

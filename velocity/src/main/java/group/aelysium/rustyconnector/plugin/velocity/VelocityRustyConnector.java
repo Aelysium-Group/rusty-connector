@@ -18,7 +18,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Proxy;
 import group.aelysium.rustyconnector.plugin.velocity.lib.generic.database.Redis;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.GenericParser;
 import group.aelysium.rustyconnector.core.RustyConnector;
-import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
+import group.aelysium.rustyconnector.core.lib.generic.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.generic.Callable;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;

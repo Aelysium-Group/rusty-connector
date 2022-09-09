@@ -7,7 +7,8 @@ import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.generic.Lang;
-import group.aelysium.rustyconnector.core.lib.generic.MessageCache;
+import group.aelysium.rustyconnector.core.lib.generic.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.generic.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.generic.database.Redis;
 import org.bukkit.command.CommandSender;
@@ -29,13 +30,15 @@ public final class CommandRusty {
 
                             MessageCache messageCache = PaperRustyConnector.getInstance().getMessageCache();
 
-                            String message = messageCache.getMessage(snowflake);
+                            CacheableMessage message = messageCache.getMessage(snowflake);
 
                             Lang.print(plugin.logger(),
                                     Lang.get("boxed-message",
                                             "Found message with ID "+snowflake.toString(),
                                             Lang.spacing(),
-                                            message
+                                            "ID: "+message.getSnowflake(),
+                                            "Contents: "+message.getContents(),
+                                            "Date: "+message.getDate().toString()
                                     )
                             );
                         } catch (NullPointerException e) {
