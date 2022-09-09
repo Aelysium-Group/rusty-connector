@@ -1,3 +1,8 @@
 ![Aelysium Wordmark Image](https://github.com/Aelysium-Group/.github/blob/main/images/logo-color-background.png?raw=true)
-# RustyConnector
-A player and server connection manager for Velocity based Minecraft Networks!
+# Rusty Connector
+Meet Rusty Connector! The premier Velocity server and player manager!
+
+> Collect servers togetehr into server families with built-in load balancing!
+> Create server-wide, family-wide, and individual server whitelists!
+> Never configure servers into your Velocity proxy again with *server auto-register*!
+> Redis Integration!
