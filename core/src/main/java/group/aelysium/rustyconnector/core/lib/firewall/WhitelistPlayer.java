@@ -25,15 +25,13 @@ public class WhitelistPlayer {
         this.uuid = uuid;
         this.ip = ip;
     }
-    public WhitelistPlayer(Object object) {
-    }
 
     public static boolean validate(Whitelist whitelist, WhitelistPlayer playerToValidate) {
         WhitelistPlayer player = whitelist.getPlayerManager().find(playerToValidate.getUsername());
         if(player == null) return false;
 
         if(player.getUUID() != null)
-            if(player.getUUID() != playerToValidate.getUUID())
+            if(!Objects.equals(player.getUUID().toString(), playerToValidate.getUUID().toString()))
                 return false;
 
         if(player.getIP() != null)

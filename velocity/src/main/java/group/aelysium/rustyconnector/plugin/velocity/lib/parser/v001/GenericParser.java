@@ -28,7 +28,6 @@ public class GenericParser {
 
         plugin.logger().log("---------| Preparing Redis...");
         Redis redis = new Redis();
-        plugin.setRedis(redis);
 
         redis.setConnection(
                 YAML.get(configData,"redis.host").getString(),
@@ -48,6 +47,8 @@ public class GenericParser {
         plugin.logger().log("---------| Preparing Proxy Whitelist...");
         if(configData.getNode("use-whitelist").getBoolean()) {
             String whitelistName = configData.getNode("whitelist").getString();
+            plugin.getProxy().setWhitelist(whitelistName);
+
             WhitelistParser.parse(whitelistName);
 
             plugin.logger().log("---------| Finished!");

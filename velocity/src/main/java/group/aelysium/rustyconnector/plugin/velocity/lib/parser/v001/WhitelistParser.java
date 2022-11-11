@@ -27,8 +27,9 @@ public class WhitelistParser {
             boolean usePlayers = configData.getNode("use-players").getBoolean();
             boolean usePermission = configData.getNode("use-permission").getBoolean();
             boolean useCountry = configData.getNode("use-country").getBoolean();
+            String message = configData.getNode("message").getString();
 
-            Whitelist whitelist = new Whitelist(configName, usePlayers, usePermission, useCountry);
+            Whitelist whitelist = new Whitelist(configName, usePlayers, usePermission, useCountry, message);
 
             plugin.logger().log("-----------| Processing whitelist criteria...");
             if(usePlayers) WhitelistParser.parsePlayers(configData, whitelist);
@@ -64,7 +65,7 @@ public class WhitelistParser {
 
             plugin.logger().log("-------------| Finished!");
         } catch (Exception e) {
-            throw new RuntimeException("There was an issue registering the players for the whitelist! Is your config properly formatted?");
+            throw new RuntimeException("There was an issue registering the players for the whitelist! Is your config properly formatted? A common issue is using a uuid without dashes! Make sure your UUID contains dashes!");
         }
     }
 

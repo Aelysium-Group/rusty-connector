@@ -1,7 +1,7 @@
 ![Aelysium Wordmark Image](https://github.com/Aelysium-Group/.github/blob/main/images/logo-color-background.png?raw=true)
 # Rusty Connector
 Meet Rusty Connector! The premier Velocity player and server manager!
-Velocity opperates via Redis messaging to communicate with sub-servers. Once you've configured your server groups, called *families*, all you have to do is setup your sub-servers and they'll auto-register to your proxy whenever they're ready! You'll never have to touch your `velocity.toml` again when adding new servers to your network!
+RustyConnector operates via Redis messaging to communicate with sub-servers. Once you've configured your server groups, called *families*, all you have to do is setup your sub-servers and they'll auto-register to your proxy whenever they're ready! You'll never have to touch your `velocity.toml` again when adding new servers to your network!
 
 > Collect servers together into server families with built-in load balancing!
 > 
@@ -11,4 +11,4 @@ Velocity opperates via Redis messaging to communicate with sub-servers. Once you
 > 
 > Never again will you have to manually configure servers into your Velocity proxy with *server auto-registration*!
 > 
-> Ultra fast data-transition with Redis integration!
+> Ultra fast data-transmission with Redis integration!

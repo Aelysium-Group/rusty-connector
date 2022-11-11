@@ -8,7 +8,10 @@ public class Whitelist {
     public String getName() {
         return name;
     }
-
+    public String getMessage() {
+        return message;
+    }
+    private String message = "You aren't whitelisted on this server!";
     private String name;
     private final WhitelistPlayerManager whitelistPlayerManager;
     private final List<String> countries = new ArrayList<>();
@@ -29,11 +32,12 @@ public class Whitelist {
     private boolean useCountries = false;
     private boolean usePermission = false;
 
-    public Whitelist(String name, boolean usePlayers, boolean usePermission, boolean useCountries) {
+    public Whitelist(String name, boolean usePlayers, boolean usePermission, boolean useCountries, String message) {
         this.name = name;
         this.usePlayers = usePlayers;
         this.useCountries = useCountries;
         this.usePermission = usePermission;
+        this.message = message;
 
         this.whitelistPlayerManager = new WhitelistPlayerManager();
     }
@@ -55,8 +59,7 @@ public class Whitelist {
         if(this.usesPlayers()) valid = WhitelistPlayer.validate(this, player);
         // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
 
-        // TODO Add permission handling
-        if(this.usesPermission()) valid = false;
+        //if(this.usesPermission()) valid = false;
         return valid;
     }
 

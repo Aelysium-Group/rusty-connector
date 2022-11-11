@@ -156,6 +156,14 @@ public class Proxy {
     }
 
     /**
+     * Set the whitelist used for the whole proxy.
+     * @param whitelistName Name of the whitelist.
+     */
+    public void setWhitelist(String whitelistName) {
+        this.proxyWhitelist = whitelistName;
+    }
+
+    /**
      * Validate a private key.
      * @param key The private key that needs to be validated.
      * @return `true` if the key is valid. `false` otherwise.

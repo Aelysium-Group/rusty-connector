@@ -20,28 +20,32 @@ public class OnPlayerJoin {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerJoin(PostLoginEvent event) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        Player player = event.getPlayer();
 
         return EventTask.async(() -> {
-            Player player = event.getPlayer();
-
-            // Check if there's a whitelist, run it if there is.
-            Whitelist whitelist = plugin.getProxy().getProxyWhitelist();
-            if(whitelist != null) {
-                String ip = player.getRemoteAddress().getHostString();
-
-                WhitelistPlayer whitelistPlayer = new WhitelistPlayer(player.getUsername(), player.getUniqueId(), ip);
-
-                if (!whitelist.validate(whitelistPlayer))
-                    player.disconnect(Component.text("You aren't whitelisted on this server!"));
-            }
-
-            ServerFamily rootFamily = plugin.getProxy().getRootFamily();
-
             try {
-                rootFamily.connect(player);
-            } catch (MalformedURLException e) {
-                player.disconnect(Component.text("Unable to connect you to the network! There are no default servers available!"));
-                plugin.logger().log("There are no servers registered in the root family! Player's will be unable to join your network if there are no servers here!");
+                // Check if there's a whitelist, run it if there is.
+                Whitelist whitelist = plugin.getProxy().getProxyWhitelist();
+                if(whitelist != null) {
+                    String ip = player.getRemoteAddress().getHostString();
+
+                    WhitelistPlayer whitelistPlayer = new WhitelistPlayer(player.getUsername(), player.getUniqueId(), ip);
+
+                    if (!whitelist.validate(whitelistPlayer))
+                        player.disconnect(Component.text(whitelist.getMessage()));
+                }
+
+                ServerFamily rootFamily = plugin.getProxy().getRootFamily();
+
+                try {
+                    rootFamily.connect(player);
+                } catch (MalformedURLException e) {
+                    player.disconnect(Component.text("Unable to connect you to the network! There are no default servers available!"));
+                    plugin.logger().log("There are no servers registered in the root family! Player's will be unable to join your network if there are no servers here!");
+                }
+            } catch (Exception e) {
+                player.disconnect(Component.text("There was an error connecting to the network."));
+                e.printStackTrace();
             }
         });
     }

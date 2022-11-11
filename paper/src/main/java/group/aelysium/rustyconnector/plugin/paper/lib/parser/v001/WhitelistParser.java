@@ -28,7 +28,7 @@ public class WhitelistParser {
             boolean usePermission = configData.getNode("use-permission").getBoolean();
             boolean useCountry = configData.getNode("use-country").getBoolean();
 
-            Whitelist whitelist = new Whitelist(configName, usePlayers, usePermission, useCountry);
+            Whitelist whitelist = new Whitelist(configName, usePlayers, usePermission, useCountry, "");
 
             plugin.logger().log("-----------| Processing whitelist criteria...");
             if(usePlayers) WhitelistParser.parsePlayers(configData, whitelist);

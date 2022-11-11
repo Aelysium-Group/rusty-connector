@@ -58,14 +58,6 @@ public class VelocityRustyConnector implements RustyConnector {
     public Proxy getProxy() { return this.proxy; }
     public ProxyServer getVelocityServer() { return this.server; }
 
-    /**
-     * Set the Redis handler for the plugin. Once this is set it cannot be changed.
-     * @param redis The redis handler to set.
-     */
-    public void setRedis(Redis redis) throws IllegalStateException {
-        if(this.redis != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
-    }
-
     @Inject
     public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
         this.server = server;

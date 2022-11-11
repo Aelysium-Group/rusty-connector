@@ -24,7 +24,7 @@
 #                                                          #
 # | You are free to use all three or only one of these     #
 # | criteria to check if someone is whitelisted!           #
-# | As a bear minimum, you MUST at least include username  #
+# | As a bear minimum, you MUST at least include username. #
 #                                                          #
 # NOTE: It's not hard for any good hacker to spoof an      #
 #       IP Address. As such, make sure you are properly    #
@@ -36,6 +36,18 @@
 #                                                          #
 #       There are laws that protect user data!             #
 #       Don't break them!                                  #
+#                                                          #
+# NOTE: You'll want to make sure that you use a UUID       #
+#       format containing dashes! If you use the format    #
+#       without dashes the whitelist will fail to load!    #
+#                                                          #
+#       Example:                                           #
+#       00000000-0000-0000-0000-000000000000               #
+#                                                          #
+#       Example (INVALID):                                 #
+#       00000000000000000000000000000000                   #
+#                                                          #
+#                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -52,16 +64,16 @@ players:
 
 # Check for username AND uuid
   - username: "user3-username"
-    uuid: "user3-uuid"
+    uuid: "00000000-0000-0000-0000-000000000000"
 
 # Check for username AND IP Address
   - username: "user4-username"
-    ip: "user4-IPAddress"
+    ip: "127.0.0.1"
 
 # Check for username, uuid, AND IP Address
   - username: "user4-username"
-    uuid: "user5-uuid"
-    ip: "user5-IPAddress"
+    uuid: "00000000-0000-0000-0000-000000000000"
+    ip: "127.0.0.1"
 
 
 ############################################################
@@ -116,3 +128,17 @@ countries:
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 use-permission: false
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Kick Message                        #
+#                                                          #
+#               ---------------------------                #
+# | The message to show a player if they                   #
+# | fail the whitelist.                                    #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+message: "You aren't whitelisted on this server!"
