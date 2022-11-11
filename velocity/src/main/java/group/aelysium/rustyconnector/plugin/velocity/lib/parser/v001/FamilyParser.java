@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import ninja.leaping.configurate.ConfigurationNode;
-import group.aelysium.rustyconnector.core.lib.generic.parsing.YAML;
-import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
-import group.aelysium.rustyconnector.core.lib.generic.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.core.lib.parsing.YAML;
+import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
+import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 
 import java.io.File;
 import java.util.List;
@@ -38,14 +38,14 @@ public class FamilyParser {
                 if(shouldUseWhitelist) {
                     WhitelistParser.parse(whitelistName);
 
-                    Whitelist whitelist = plugin.getProxy().getWhitelist(whitelistName);
+                    Whitelist whitelist = plugin.getProxy().getWhitelistManager().find(whitelistName);
 
                     ServerFamily family = new ServerFamily(
                             name,
                             algorithm,
                             whitelist
                             );
-                    plugin.getProxy().registerFamily(family);
+                    plugin.getProxy().getFamilyManager().add(family);
                     plugin.logger().log("-----------| Finished!");
                     return;
                 }
@@ -55,7 +55,7 @@ public class FamilyParser {
                         algorithm,
                         null
                 );
-                plugin.getProxy().registerFamily(family);
+                plugin.getProxy().getFamilyManager().add(family);
                 plugin.logger().log("-----------| Finished! Family doesn't have a whitelist.");
                 return;
             } catch (NullPointerException e) {

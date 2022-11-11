@@ -1,11 +1,11 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.parser.v001;
 
-import group.aelysium.rustyconnector.core.lib.generic.hash.MD5;
-import group.aelysium.rustyconnector.core.lib.generic.parsing.YAML;
+import group.aelysium.rustyconnector.core.lib.hash.MD5;
+import group.aelysium.rustyconnector.core.lib.parsing.YAML;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.lib.generic.Config;
-import group.aelysium.rustyconnector.plugin.paper.lib.generic.PaperServer;
-import group.aelysium.rustyconnector.plugin.paper.lib.generic.database.Redis;
+import group.aelysium.rustyconnector.plugin.paper.lib.Config;
+import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
+import group.aelysium.rustyconnector.plugin.paper.lib.database.Redis;
 import ninja.leaping.configurate.ConfigurationNode;
 
 public class GenericParser {
@@ -32,23 +32,10 @@ public class GenericParser {
 
         String family = YAML.get(configData,"family").getString();
 
-        PaperServer server = new PaperServer(
-                serverName,
-                privateKey,
-                address,
-                family
-        );
-
-        int softPlayerCap = YAML.get(configData,"soft-player-cap").getInt();
-        int hardPlayerCap = YAML.get(configData,"hard-player-cap").getInt();
-
-        server.setPlayerCap(softPlayerCap, hardPlayerCap);
-
         plugin.logger().log("---------| Finished!");
 
         plugin.logger().log("---------| Preparing Redis...");
         Redis redis = new Redis();
-        plugin.setRedis(redis);
 
         redis.setConnection(
                 YAML.get(configData,"redis.host").getString(),
@@ -57,6 +44,19 @@ public class GenericParser {
                 YAML.get(configData,"redis.data-channel").getString()
         );
         redis.connect(plugin);
+
+        PaperServer server = new PaperServer(
+                serverName,
+                privateKey,
+                address,
+                family,
+                redis
+        );
+
+        int softPlayerCap = YAML.get(configData,"soft-player-cap").getInt();
+        int hardPlayerCap = YAML.get(configData,"hard-player-cap").getInt();
+
+        server.setPlayerCap(softPlayerCap, hardPlayerCap);
 
         plugin.setServer(server);
 

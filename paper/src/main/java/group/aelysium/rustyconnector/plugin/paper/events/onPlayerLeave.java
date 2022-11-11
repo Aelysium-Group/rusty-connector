@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.events;
 
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.lib.generic.PaperServer;
+import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;

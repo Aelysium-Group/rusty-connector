@@ -52,18 +52,43 @@ config-version: 1
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                       Registration                       #
+#                         General                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 
+#########################
+#      Private Key      #
+#########################
 #
-# Private key is used to validate server connections.
-# This way external servers can't appear and add themselves to the proxy network pool.
+# Private key is used to validate messages.
+# This way external users can't appear and send messages.
 # This value should be changed periodically for security purposes.
 #
-# To generate a new key, set the string to be an empty value and the plugin will send a new key in console on next restart.
+# To generate a new keyset, set the string to be an empty value and the plugin will send a new key in console on next restart.
+#
+# DO NOT EVER SHARE THIS KEY!
 #
 private-key: ""
+#
+# The public key associated with the private key.
+#
+# This key will be sent in server messages.
+#
+public-key: ""
+
+#########################
+#         Heart         #
+#########################
+#
+# The proxy's heart.
+#
+# When it beats it will ping all servers.
+# If a server doesn't respond before the heart beats again, it will be un-registered.
+# This is how the plugin unregisters servers that become unresponsive or failed to unregister themselves when they were shutdown.
+#
+# Time is in seconds.
+#
+heart-beat: 10
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -244,9 +269,9 @@ message-tunnel:
 # NOTE: The denylist has precedence over the whitelist. If an IP is defined in both the whitelist AND the denylist
 #       it will not be accepted.
 #
-  # VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
-  #                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
-  #                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
+# VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
+#                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
+#                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
 #
     denylist:
       - "127.0.0.1"

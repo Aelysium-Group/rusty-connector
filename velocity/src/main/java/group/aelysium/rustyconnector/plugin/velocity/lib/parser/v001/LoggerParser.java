@@ -1,12 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 
 
-import group.aelysium.rustyconnector.core.lib.generic.Lang;
-import group.aelysium.rustyconnector.core.lib.generic.parsing.YAML;
-import group.aelysium.rustyconnector.core.lib.generic.util.logger.GateKey;
-import group.aelysium.rustyconnector.core.lib.generic.util.logger.LoggerGate;
+import group.aelysium.rustyconnector.core.lib.util.logger.*;
+import group.aelysium.rustyconnector.core.lib.parsing.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
 import ninja.leaping.configurate.ConfigurationNode;
 
 public class LoggerParser {
@@ -24,6 +22,10 @@ public class LoggerParser {
         gate.registerNode(
                 GateKey.REGISTRATION_REQUEST,
                 YAML.get(configData,"messaging.registration-request").getBoolean()
+        );
+        gate.registerNode(
+                GateKey.UNREGISTRATION_REQUEST,
+                YAML.get(configData,"messaging.unregistration-request").getBoolean()
         );
         gate.registerNode(
                 GateKey.CALL_FOR_REGISTRATION,
@@ -84,12 +86,42 @@ public class LoggerParser {
     public static void parseLang(Config config) {
         ConfigurationNode configData = config.getData();
 
-        Lang.add("request-registration_icon",YAML.get(configData,"console-icons.requesting-registration").getString());
-        Lang.add("registered_icon",YAML.get(configData,"console-icons.registered").getString());
-        Lang.add("requesting-unregistration_icon",YAML.get(configData,"console-icons.requesting-unregistration").getString());
-        Lang.add("unregistered_icon",YAML.get(configData,"console-icons.unregistered").getString());
-        Lang.add("canceled_icon",YAML.get(configData,"console-icons.canceled-request").getString());
-        Lang.add("call-for-registration_icon",YAML.get(configData,"console-icons.call-for-registration").getString());
+        Lang.add(
+                LangKey.ICON_REQUEST_REGISTRATION,
+                new LangEntry(YAML.get(configData,"console-icons.requesting-registration").getString())
+        );
+        Lang.add(
+                LangKey.ICON_REGISTERED,
+                new LangEntry(YAML.get(configData,"console-icons.registered").getString())
+        );
+        Lang.add(
+                LangKey.ICON_REQUESTING_UNREGISTRATION,
+                new LangEntry(YAML.get(configData,"console-icons.requesting-unregistration").getString())
+        );
+        Lang.add(
+                LangKey.ICON_UNREGISTERED,
+                new LangEntry(YAML.get(configData,"console-icons.unregistered").getString())
+        );
+        Lang.add(
+                LangKey.ICON_CANCELED,
+                new LangEntry(YAML.get(configData,"console-icons.canceled-request").getString())
+        );
+        Lang.add(
+                LangKey.ICON_CALL_FOR_REGISTRATION,
+                new LangEntry(YAML.get(configData,"console-icons.call-for-registration").getString())
+        );
+        Lang.add(
+                LangKey.ICON_FAMILY_BALANCING,
+                new LangEntry(YAML.get(configData,"console-icons.family-balancing").getString())
+        );
+        Lang.add(
+                LangKey.ICON_PING,
+                new LangEntry(YAML.get(configData,"console-icons.ping").getString())
+        );
+        Lang.add(
+                LangKey.ICON_PONG,
+                new LangEntry(YAML.get(configData,"console-icons.pong").getString())
+        );
     }
 
 }

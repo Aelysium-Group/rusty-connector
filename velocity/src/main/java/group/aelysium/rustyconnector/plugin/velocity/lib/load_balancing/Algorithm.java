@@ -1,10 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
-import group.aelysium.rustyconnector.core.lib.generic.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.core.lib.generic.server.Family;
-import group.aelysium.rustyconnector.core.lib.generic.server.Server;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
+import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 
 import java.util.List;
 

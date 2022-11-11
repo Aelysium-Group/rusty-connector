@@ -1,12 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 
-import group.aelysium.rustyconnector.core.lib.generic.firewall.MessageTunnel;
+import group.aelysium.rustyconnector.core.lib.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.database.Redis;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import ninja.leaping.configurate.ConfigurationNode;
-import group.aelysium.rustyconnector.core.lib.generic.parsing.YAML;
+import group.aelysium.rustyconnector.core.lib.parsing.YAML;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -22,10 +23,7 @@ public class GenericParser {
 
         plugin.logger().log("---------| Registering root family of proxy...");
         String rootFamilyString = YAML.get(configData,"root-family").getString();
-        ServerFamily rootFamily = ServerFamily.findFamily(rootFamilyString);
-        if(rootFamily == null) throw new NullPointerException("Root family is referencing a family that doesn't exist! Make sure if you list a `root-family` you also include it's name in `families`.");
-
-        plugin.getProxy().setRootFamily(rootFamily);
+        plugin.getProxy().setRootFamily(rootFamilyString);
         plugin.logger().log("---------| Finished!");
 
         plugin.logger().log("---------| Preparing Redis...");
@@ -39,6 +37,11 @@ public class GenericParser {
                 YAML.get(configData,"redis.data-channel").getString()
         );
         redis.connect(plugin);
+
+        plugin.getProxy().setRedis(redis);
+
+        plugin.getProxy().startHeart(YAML.get(configData,"heart-beat").getLong());
+
         plugin.logger().log("---------| Finished!");
 
 

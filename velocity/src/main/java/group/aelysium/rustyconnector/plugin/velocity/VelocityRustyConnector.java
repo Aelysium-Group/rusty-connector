@@ -4,31 +4,28 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
-import com.velocitypowered.api.event.EventHandler;
 import com.velocitypowered.api.event.EventManager;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import group.aelysium.rustyconnector.core.lib.generic.firewall.MessageTunnel;
-import group.aelysium.rustyconnector.core.lib.generic.util.logger.GateKey;
+import group.aelysium.rustyconnector.core.lib.firewall.MessageTunnel;
+import group.aelysium.rustyconnector.core.lib.util.logger.GateKey;
+import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
+import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerJoin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Proxy;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.database.Redis;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
+import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.GenericParser;
 import group.aelysium.rustyconnector.core.RustyConnector;
-import group.aelysium.rustyconnector.core.lib.generic.cache.MessageCache;
-import group.aelysium.rustyconnector.core.lib.generic.Callable;
-import group.aelysium.rustyconnector.core.lib.generic.Lang;
+import group.aelysium.rustyconnector.core.lib.Callable;
+import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.LoggerParser;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PaperServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
 import org.slf4j.Logger;
-import group.aelysium.rustyconnector.core.lib.generic.hash.MD5;
+import group.aelysium.rustyconnector.core.lib.hash.MD5;
 
 import java.io.File;
 import java.io.InputStream;
@@ -44,7 +41,6 @@ public class VelocityRustyConnector implements RustyConnector {
     private final ProxyServer server;
     private final PluginLogger logger;
     private final File dataFolder;
-    private Redis redis;
     private MessageTunnel messageTunnel;
 
     /**
@@ -58,10 +54,6 @@ public class VelocityRustyConnector implements RustyConnector {
 
     public boolean validateMessage(InetSocketAddress address) { return this.messageTunnel.validate(address); }
 
-    public MessageCache getMessageCache() {
-        return this.redis.getMessageCache();
-    }
-
     public static VelocityRustyConnector getInstance() { return (VelocityRustyConnector) instance; }
     public Proxy getProxy() { return this.proxy; }
     public ProxyServer getVelocityServer() { return this.server; }
@@ -72,7 +64,6 @@ public class VelocityRustyConnector implements RustyConnector {
      */
     public void setRedis(Redis redis) throws IllegalStateException {
         if(this.redis != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
-        this.redis = redis;
     }
 
     @Inject
@@ -100,28 +91,19 @@ public class VelocityRustyConnector implements RustyConnector {
         loadCommands();
 
         registerEvents();
-
-        PaperServer.registerProcessors();
-        ServerFamily.registerProcessors();
     }
 
     public void uninit() {
         instance = null;
         this.redis.disconnect();
-        this.redis = null;
         this.proxy = null;
         this.messageTunnel = null;
         this.configs = new HashMap<>();
+        this.getProxy().killHeartbeat();
         this.getVelocityServer().getCommandManager().unregister("rc");
 
         this.getVelocityServer().getEventManager().unregisterListener(this, new OnPlayerJoin());
-
-        PaperServer.registerProcessors();
-        ServerFamily.registerProcessors();
     }
-
-
-
 
     public void registerEvents() {
         EventManager manager = this.getVelocityServer().getEventManager();
@@ -144,18 +126,19 @@ public class VelocityRustyConnector implements RustyConnector {
             String privateKey = genericConfig.getData().getNode("private-key").getString();
             if(privateKey == null || privateKey.equals("")) {
 
-                Lang.print(this.logger, Lang.get(
-                        "boxed-message",
-                        "No private-key was defined! Generating one now...",
-                        "Paste this into the `private-key` field in `config.yml`",
-                        Lang.spacing(),
-                        Lang.border(),
-                        Lang.spacing(),
-                        MD5.generatePrivateKey()
-                        ));
+                (new LangMessage(this.logger))
+                        .insert(Lang.boxedMessage(
+                                "No private-key was defined! Generating one now...",
+                                "Paste this into the `private-key` field in `config.yml`"
+                                ))
+                        .insert(Lang.spacing())
+                        .insert(MD5.generatePrivateKey())
+                        .insert(Lang.spacing())
+                        .insert(Lang.border())
+                        .print();
                 return false;
             }
-            this.proxy = new Proxy(this, privateKey);
+            this.proxy = new Proxy(privateKey);
             this.logger().log("-----| Finished!");
             this.logger().log("-----| Configuring Proxy...");
 
@@ -163,11 +146,15 @@ public class VelocityRustyConnector implements RustyConnector {
 
             LoggerParser.parse(loggerConfig);
 
-            Lang.print(this.logger, Lang.get("wordmark"));
+            (new LangMessage(this.logger))
+                    .insert(Lang.wordmark())
+                    .print();
 
             return true;
         } catch (Exception e) {
-            Lang.print(this.logger, Lang.get("boxed-message",e.getMessage()));
+            (new LangMessage(this.logger))
+                    .insert(Lang.boxedMessage(e.getMessage()))
+                    .print();
         }
         return false;
     }
@@ -211,13 +198,5 @@ public class VelocityRustyConnector implements RustyConnector {
     @Override
     public InputStream getResourceAsStream(String filename) {
         return getClass().getClassLoader().getResourceAsStream(filename);
-    }
-
-    public void registerAllServers() {
-        if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.CALL_FOR_REGISTRATION))
-            VelocityRustyConnector.getInstance().logger().log("[Velocity](127.0.0.1) "+Lang.getDynamic("call-for-registration_icon") +" EVERYONE");
-
-        this.proxy.registerAllServers(this.redis);
-
     }
 }

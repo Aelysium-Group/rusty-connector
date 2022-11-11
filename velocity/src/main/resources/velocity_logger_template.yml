@@ -130,3 +130,21 @@ console-icons:
 #   Example: [server name](127.0.0.1:25565) xxxxx family-name
 #
     canceled-request: "xxxxx"
+
+    #
+    #   Symbol used when a family is balancing its servers
+    #   Example: family-name /---\
+    #
+    family-balancing: "▲▼▲▼▲"
+
+    #
+    #   Symbol used when the proxy pings a server
+    #   Example: Proxy |>>>> [family name] [server name](127.0.0.1:25565)
+    #
+    ping: "|>>>>"
+
+    #
+    #   Symbol used when a server responds to a ping
+    #   Example: Proxy <<<<| [family name] [server name](127.0.0.1:25565)
+    #
+    pong: "<<<<|"

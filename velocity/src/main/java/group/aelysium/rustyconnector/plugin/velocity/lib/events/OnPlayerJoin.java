@@ -6,11 +6,9 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Proxy;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerFamily;
-import group.aelysium.rustyconnector.core.lib.generic.Lang;
-import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
-import group.aelysium.rustyconnector.core.lib.generic.firewall.WhitelistPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
+import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
+import group.aelysium.rustyconnector.core.lib.firewall.WhitelistPlayer;
 import net.kyori.adventure.text.Component;
 
 import java.net.MalformedURLException;
@@ -19,13 +17,14 @@ public class OnPlayerJoin {
     /**
      * Runs when a player first joins the proxy
      */
-    @Subscribe(order = PostOrder.NORMAL)
+    @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerJoin(PostLoginEvent event) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         return EventTask.async(() -> {
             Player player = event.getPlayer();
 
+            // Check if there's a whitelist, run it if there is.
             Whitelist whitelist = plugin.getProxy().getProxyWhitelist();
             if(whitelist != null) {
                 String ip = player.getRemoteAddress().getHostString();

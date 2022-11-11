@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
-import group.aelysium.rustyconnector.core.lib.generic.util.logger.LoggerGate;
+import group.aelysium.rustyconnector.core.lib.util.logger.LoggerGate;
 import org.slf4j.Logger;
 
-public class PluginLogger implements group.aelysium.rustyconnector.core.lib.generic.util.logger.Logger {
+public class PluginLogger implements group.aelysium.rustyconnector.core.lib.util.logger.Logger {
     private final LoggerGate gate = new LoggerGate();
     private final Logger logger;
 

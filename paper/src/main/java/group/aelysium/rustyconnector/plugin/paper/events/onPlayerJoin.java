@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.plugin.paper.events;
 
-import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
-import group.aelysium.rustyconnector.core.lib.generic.firewall.WhitelistPlayer;
+import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
+import group.aelysium.rustyconnector.core.lib.firewall.WhitelistPlayer;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.lib.generic.PaperServer;
+import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,7 +20,7 @@ public class onPlayerJoin implements Listener {
 
         if(server.hasWhitelist()) {
             Whitelist whitelist = server.getWhitelist();
-            WhitelistPlayer whitelistPlayer = whitelist.findPlayer(player.getName());
+            WhitelistPlayer whitelistPlayer = whitelist.getPlayerManager().find(player.getName());
             if(whitelistPlayer == null) {
                 player.kick(Component.text("You aren't whitelisted on this server!"));
                 return;

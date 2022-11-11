@@ -1,11 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 
 import com.google.gson.Gson;
-import group.aelysium.rustyconnector.core.lib.generic.firewall.WhitelistPlayer;
+import group.aelysium.rustyconnector.core.lib.firewall.WhitelistPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.generic.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
 import ninja.leaping.configurate.ConfigurationNode;
-import group.aelysium.rustyconnector.core.lib.generic.firewall.Whitelist;
+import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
 
 import java.io.File;
 import java.util.List;
@@ -34,7 +34,7 @@ public class WhitelistParser {
             if(usePlayers) WhitelistParser.parsePlayers(configData, whitelist);
             if(useCountry) WhitelistParser.parseCountries(configData, whitelist);
 
-            plugin.getProxy().registerWhitelist(configName, whitelist);
+            plugin.getProxy().getWhitelistManager().add(whitelist);
 
             plugin.logger().log("-----------| Finished loading server whitelist!");
             return true;
@@ -59,7 +59,7 @@ public class WhitelistParser {
                 String json = gson.toJson(entry);
                 WhitelistPlayer player = gson.fromJson(json, WhitelistPlayer.class);
 
-                whitelist.registerPlayer(player);
+                whitelist.getPlayerManager().add(player);
             });
 
             plugin.logger().log("-------------| Finished!");

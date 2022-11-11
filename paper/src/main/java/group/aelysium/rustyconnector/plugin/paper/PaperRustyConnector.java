@@ -3,12 +3,13 @@ package group.aelysium.rustyconnector.plugin.paper;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.RustyConnector;
-import group.aelysium.rustyconnector.core.lib.generic.Lang;
-import group.aelysium.rustyconnector.core.lib.generic.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
+import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.paper.lib.generic.Config;
-import group.aelysium.rustyconnector.plugin.paper.lib.generic.PaperServer;
-import group.aelysium.rustyconnector.plugin.paper.lib.generic.database.Redis;
+import group.aelysium.rustyconnector.plugin.paper.lib.Config;
+import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
+import group.aelysium.rustyconnector.plugin.paper.lib.database.Redis;
 import group.aelysium.rustyconnector.plugin.paper.lib.parser.v001.GenericParser;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
@@ -20,7 +21,6 @@ import java.util.function.Function;
 
 public final class PaperRustyConnector extends JavaPlugin implements Listener, RustyConnector {
     private Map<String, Config> configs = new HashMap<>();
-    private Redis redis;
     private String privateKey;
     private static PaperRustyConnector instance;
     private PluginLogger logger;
@@ -28,20 +28,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
     private PaperCommandManager<CommandSender> manager;
     public boolean hasRegistered = false;
 
-    public MessageCache getMessageCache() {
-        return this.redis.getMessageCache();
-    }
-
     public static PaperRustyConnector getInstance() { return PaperRustyConnector.instance; }
-
-    /**
-     * Set the Redis handler for the plugin. Once this is set it cannot be changed.
-     * @param redis The redis handler to set.
-     */
-    public void setRedis(Redis redis) throws IllegalStateException {
-        if(this.redis != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
-        this.redis = redis;
-    }
 
     /**
      * Set the PaperServer handler for the plugin. Once this is set it cannot be changed.
@@ -69,14 +56,14 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
 
         this.logger().log("Started Successfully!");
         this.logger().log("Attempting to register with the proxy...");
-        this.server.registerToProxy(this.redis);
+        this.server.registerToProxy();
         this.hasRegistered = true;
         this.logger().log("Attempt made. Check the console in your proxy to see if it succeeded!");
     }
 
     @Override
     public void onDisable() {
-        if(this.hasRegistered) this.server.unregisterFromProxy(this.redis);
+        if(this.hasRegistered) this.server.unregisterFromProxy();
 
         this.logger().log("Shutting down...");
     }
@@ -111,11 +98,15 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
 
             GenericParser.parse(genericConfig);
 
-            Lang.print(this.logger, Lang.get("wordmark"));
+            (new LangMessage(this.logger))
+                    .insert(Lang.wordmark())
+                            .print();
 
             return true;
         } catch (Exception e) {
-            Lang.print(this.logger, Lang.get("boxed-message",e.getMessage()));
+            (new LangMessage(this.logger))
+                    .insert(Lang.boxedMessage(e.getMessage()))
+                    .print();
         }
         return false;
     }
@@ -124,23 +115,19 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
     public boolean loadCommands() {
         try {
             this.manager = new PaperCommandManager<>(
-                    /* Owning plugin */ this,
+                    this,
                     CommandExecutionCoordinator.simpleCoordinator(),
                     Function.identity(),
                     Function.identity()
             );
 
-            CommandRusty.create(this.manager, this.redis);
+            CommandRusty.create(this.manager);
 
             return true;
         } catch (Exception e) {
-            Lang.print(
-                this.logger(),
-                Lang.get(
-                    "boxed-message",
-                    "Commands failed to load! Killing plugin..."
-                    )
-            );
+            (new LangMessage(this.logger))
+                    .insert(Lang.boxedMessage("Commands failed to load! Killing plugin..."))
+                    .print();
             this.logger.error("",e);
             return false;
         }
@@ -170,8 +157,6 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
     }
 
     public void registerToProxy() {
-        if(this.hasRegistered) this.logger.warn("This server has already registered itself! Re-registering anyways...");
-        this.getVirtualServer().registerToProxy(this.redis);
-        PaperRustyConnector.getInstance().logger().log("Server has submitted it's registration request.");
+        this.getVirtualServer().registerToProxy();
     }
 }
