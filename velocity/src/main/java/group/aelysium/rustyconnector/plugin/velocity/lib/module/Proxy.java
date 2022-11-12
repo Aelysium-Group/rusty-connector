@@ -5,7 +5,6 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.database.Redis;
-import group.aelysium.rustyconnector.core.lib.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
@@ -70,11 +69,19 @@ public class Proxy {
 
         heart.start((Callable<Boolean>) () -> {
             VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+            if(plugin.logger().getGate().check(GateKey.PING))
+                (new LangMessage(plugin.logger()))
+                        .insert(Lang.border())
+                        .insert("Sending out pings and killing dead servers...")
+                        .print();
+
             try {
                 for (Map.Entry<ServerInfo, Boolean> entry : lifeMatrix.entrySet()) {
                     ServerInfo serverInfo = entry.getKey();
 
                     PaperServer server = this.findServer(serverInfo);
+                    if(server == null) throw new NullPointerException(serverInfo.getName() + " couldn't be found!");
 
                     if(!entry.getValue()) {
                         this.unregisterServer(serverInfo, server.getFamilyName());
@@ -111,7 +118,10 @@ public class Proxy {
 
     public PaperServer findServer(ServerInfo serverInfo) {
         for(ServerFamily family : this.getFamilyManager().dump()) {
-            return family.getServer(serverInfo);
+            PaperServer server = family.getServer(serverInfo);
+            if(server == null) continue;
+
+            return server;
         }
         return null;
     }

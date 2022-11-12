@@ -150,11 +150,11 @@ public class ServerFamily implements Family {
     /**
      * Gets a server that is a part of the family.
      * @param name The name of the server.
+     * @return A found server or `null` if there's no match.
      */
     public PaperServer getServer(String name) {
         return this.getRegisteredServers().stream()
-                .filter(server ->
-                        Objects.equals(server.getRegisteredServer().getServerInfo().getName(), name)
+                .filter(server -> Objects.equals(server.getServerInfo().getName(), name)
                 ).findFirst().orElse(null);
     }
 
