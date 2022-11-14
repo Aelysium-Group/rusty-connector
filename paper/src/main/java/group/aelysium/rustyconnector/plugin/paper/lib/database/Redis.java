@@ -37,10 +37,12 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
                 plugin.logger().log("To view the thrown away message use: /rc message get " + messageSnowflake.toString());
             }
         } catch (Exception e) {
+            /* TODO: Uncomment and implement proper logging handling
             PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
             plugin.logger().error("There was an issue handling the incoming message! Throwing away...",e);
             plugin.logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
+            */
         }
     }
 
