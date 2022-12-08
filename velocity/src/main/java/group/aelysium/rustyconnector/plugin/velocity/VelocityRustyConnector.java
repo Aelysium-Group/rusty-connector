@@ -13,8 +13,11 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.core.lib.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigFileLoader;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.WhitelistConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerJoin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerKick;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.GenericParser;
@@ -35,7 +38,7 @@ import java.util.Map;
 public class VelocityRustyConnector implements RustyConnector {
     private static RustyConnector instance;
     private Proxy proxy;
-    private Map<String,Config> configs = new HashMap<>();
+    private Map<String, ConfigFileLoader> configs = new HashMap<>();
     private final ProxyServer server;
     private final PluginLogger logger;
     private final File dataFolder;
@@ -84,12 +87,13 @@ public class VelocityRustyConnector implements RustyConnector {
     }
 
     public void uninit() {
+        WhitelistConfig.empty();
+        DefaultConfig.empty();
         instance = null;
         assert this.redis != null;
         this.redis.disconnect();
         this.proxy = null;
         this.messageTunnel = null;
-        this.configs = new HashMap<>();
         this.getProxy().killHeartbeat();
         this.getVelocityServer().getCommandManager().unregister("rc");
 
@@ -107,15 +111,22 @@ public class VelocityRustyConnector implements RustyConnector {
     public boolean loadConfigs() {
         try {
             this.logger().log("-| Registering configs");
-            this.configs.put("config.yml",new Config(new File(this.getDataFolder(), "config.yml"), "velocity_config_template.yml"));
-            Config genericConfig = this.configs.get("config.yml");
-            this.configs.put("logger.yml",new Config(new File(this.getDataFolder(), "logger.yml"), "velocity_logger_template.yml"));
-            Config loggerConfig = this.configs.get("logger.yml");
-            if(!genericConfig.register()) return false;
+            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(this.getDataFolder(), "config.yml"), "velocity_config_template.yml");
+            if(!defaultConfig.generate()) {
+                throw new IllegalStateException("Unable to load or create config.yml!");
+            }
+            defaultConfig.register();
+
+
+            LoggerConfig loggerConfig = LoggerConfig.newConfig(new File(this.getDataFolder(), "logger.yml"), "velocity_logger_template.yml");
+            if(!loggerConfig.generate()) {
+                throw new IllegalStateException("Unable to load or create logger.yml!");
+            }
+            loggerConfig.register();
 
             this.logger().log("---| Preparing proxy...");
             this.logger().log("-----| Registering private key...");
-            String privateKey = genericConfig.getData().getNode("private-key").getString();
+            String privateKey = genericConfigFileLoader.getData().getNode("private-key").getString();
             if(privateKey == null || privateKey.equals("")) {
 
                 (new LangMessage(this.logger))
@@ -134,9 +145,9 @@ public class VelocityRustyConnector implements RustyConnector {
             this.logger().log("-----| Finished!");
             this.logger().log("-----| Configuring Proxy...");
 
-            GenericParser.parse(genericConfig);
+            GenericParser.parse(genericConfigFileLoader);
 
-            LoggerParser.parse(loggerConfig);
+            LoggerParser.parse(loggerConfigFileLoader);
 
             (new LangMessage(this.logger))
                     .insert(Lang.wordmark())

@@ -2,10 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 
 import group.aelysium.rustyconnector.core.lib.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigFileLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import ninja.leaping.configurate.ConfigurationNode;
 import group.aelysium.rustyconnector.core.lib.parsing.YAML;
 
@@ -13,13 +11,13 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 public class GenericParser {
-    public static void parse(Config config) throws IllegalAccessException {
+    public static void parse(ConfigFileLoader configFileLoader) throws IllegalAccessException {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
-        ConfigurationNode configData = config.getData();
+        ConfigurationNode configData = configFileLoader.getData();
         plugin.logger().log("-------| Configuring Proxy...");
         plugin.logger().log("---------| Preparing Families...");
-        FamilyParser.parse(config);
+        FamilyParser.parse(configFileLoader);
 
         plugin.logger().log("---------| Registering root family of proxy...");
         String rootFamilyString = YAML.get(configData,"root-family").getString();

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigFileLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
@@ -12,13 +12,12 @@ import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 
 import java.io.File;
 import java.util.List;
-import java.util.Objects;
 
 public class FamilyParser {
-    public static void parse(Config config) {
+    public static void parse(ConfigFileLoader configFileLoader) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
-        ConfigurationNode configData = config.getData();
+        ConfigurationNode configData = configFileLoader.getData();
         plugin.logger().log("---------| Preparing Families...");
         plugin.logger().log("-----------| Getting family names...");
 
@@ -30,13 +29,13 @@ public class FamilyParser {
         familyNames.forEach(name -> {
             plugin.logger().log("-------------| Loading: "+name+"...");
             try {
-                Config familyConfig = new Config(new File(plugin.getDataFolder(), "families/"+name+".yml"), "velocity_family_template.yml");
-                if(!familyConfig.register()) throw new RuntimeException("Unable to register "+name+".yml");
+                ConfigFileLoader familyConfigFileLoader = new ConfigFileLoader(new File(plugin.getDataFolder(), "families/"+name+".yml"), "velocity_family_template.yml");
+                if(!familyConfigFileLoader.register()) throw new RuntimeException("Unable to register "+name+".yml");
 
-                boolean shouldUseWhitelist = familyConfig.getData().getNode("use-whitelist").getBoolean();
-                String whitelistName = familyConfig.getData().getNode("whitelist").getString();
+                boolean shouldUseWhitelist = familyConfigFileLoader.getData().getNode("use-whitelist").getBoolean();
+                String whitelistName = familyConfigFileLoader.getData().getNode("whitelist").getString();
 
-                String algorithmName = String.valueOf(YAML.get(familyConfig.getData(),"load-balancing.algorithm").getValue());
+                String algorithmName = String.valueOf(YAML.get(familyConfigFileLoader.getData(),"load-balancing.algorithm").getValue());
 
                 Whitelist whitelist = null;
                 if(shouldUseWhitelist) {

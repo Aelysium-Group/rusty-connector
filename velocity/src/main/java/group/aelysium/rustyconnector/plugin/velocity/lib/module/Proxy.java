@@ -5,23 +5,35 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.database.Redis;
+import group.aelysium.rustyconnector.core.lib.firewall.MessageTunnel;
+import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.parsing.YAML;
 import group.aelysium.rustyconnector.core.lib.util.logger.GateKey;
 import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigFileLoader;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.PlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.FamilyParser;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.WhitelistParser;
 
+import java.io.File;
+import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Proxy {
@@ -306,6 +318,135 @@ public class Proxy {
                         .insert(error.getMessage())
                         .print();
             }
+        }
+    }
+
+    /**
+     * Initializes the proxy based on the configuration.
+     * @param config The configuration file.
+     */
+    public static void init(DefaultConfig config) {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        plugin.logger().log("-------| Configuring Proxy...");
+        plugin.logger().log("---------| Preparing Families...");
+        FamilyParser.parse(config);
+
+        config.getFamilies().forEach(name -> {
+            plugin.logger().log("-------------| Loading: "+name+"...");
+            try {
+                ConfigFileLoader familyConfigFileLoader = new ConfigFileLoader(new File(plugin.getDataFolder(), "families/"+name+".yml"), "velocity_family_template.yml");
+                if(!familyConfigFileLoader.register()) throw new RuntimeException("Unable to register "+name+".yml");
+
+                boolean shouldUseWhitelist = familyConfigFileLoader.getData().getNode("use-whitelist").getBoolean();
+                String whitelistName = familyConfigFileLoader.getData().getNode("whitelist").getString();
+
+                String algorithmName = String.valueOf(YAML.get(familyConfigFileLoader.getData(),"load-balancing.algorithm").getValue());
+
+                Whitelist whitelist = null;
+                if(shouldUseWhitelist) {
+                    WhitelistParser.parse(whitelistName);
+
+                    whitelist = plugin.getProxy().getWhitelistManager().find(whitelistName);
+
+                    plugin.logger().log("-----------| Family has a whitelist.");
+                } else {
+                    plugin.logger().log("-----------| Family doesn't have a whitelist.");
+                }
+
+                switch (Enum.valueOf(AlgorithmType.class, algorithmName)) {
+                    case ROUND_ROBIN -> plugin.getProxy().getFamilyManager().add(
+                            new ServerFamily<>(
+                                    name,
+                                    whitelist,
+                                    RoundRobin.class
+                            )
+                    );
+                    case LEAST_CONNECTION -> plugin.getProxy().getFamilyManager().add(
+                            new ServerFamily<>(
+                                    name,
+                                    whitelist,
+                                    LeastConnection.class
+                            )
+                    );
+                }
+                plugin.logger().log("-----------| Finished!");
+            } catch (NullPointerException e) {
+                plugin.logger().log("Unable to register the family: "+name);
+                plugin.logger().error("One of the data types provided in this family's config is invalid and not what was expected!",e);
+            } catch (Exception e) {
+                plugin.logger().error("Unable to register the family: "+name,e);
+            }
+        });
+
+        plugin.logger().log("---------| Registering root family of proxy...");
+        String rootFamilyString = YAML.get(configData,"root-family").getString();
+        plugin.getProxy().setRootFamily(rootFamilyString);
+        plugin.logger().log("---------| Finished!");
+
+        plugin.logger().log("---------| Preparing Redis...");
+        group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis redis = new group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis();
+
+        redis.setConnection(
+                YAML.get(configData,"redis.host").getString(),
+                YAML.get(configData,"redis.port").getInt(),
+                YAML.get(configData,"redis.password").getString(),
+                YAML.get(configData,"redis.data-channel").getString()
+        );
+        redis.connect(plugin);
+
+        plugin.getProxy().setRedis(redis);
+
+        plugin.getProxy().startHeart(YAML.get(configData,"heart-beat").getLong());
+
+        plugin.logger().log("---------| Finished!");
+
+
+        plugin.logger().log("---------| Preparing Proxy Whitelist...");
+        if(configData.getNode("use-whitelist").getBoolean()) {
+            String whitelistName = configData.getNode("whitelist").getString();
+            plugin.getProxy().setWhitelist(whitelistName);
+
+            WhitelistParser.parse(whitelistName);
+
+            plugin.logger().log("---------| Finished!");
+        } else {
+            plugin.logger().log("---------| Finished! Proxy doesn't have a whitelist.");
+        }
+
+
+        plugin.logger().log("---------| Preparing Proxy Messaging Tunnel...");
+        if(YAML.get(configData,"message-tunnel.enabled").getBoolean()) {
+
+            List<String> whitelist = (List<String>) YAML.get(configData,"message-tunnel.whitelist").getValue();
+            List<String> blacklist = (List<String>) YAML.get(configData,"message-tunnel.denylist").getValue();
+
+            boolean useWhitelist = whitelist.size() > 0;
+            boolean useBlacklist = blacklist.size() > 0;
+
+            MessageTunnel messageTunnel = new MessageTunnel(useBlacklist, useWhitelist);
+
+            plugin.setMessageTunnel(messageTunnel);
+
+            whitelist.forEach(entry -> {
+                String[] addressSplit = entry.split(":");
+
+                InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
+
+                messageTunnel.whitelistAddress(address);
+            });
+
+            blacklist.forEach(entry -> {
+                String[] addressSplit = entry.split(":");
+
+                InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
+
+                messageTunnel.blacklistAddress(address);
+            });
+
+            plugin.logger().log("---------| Finished!");
+        } else {
+            plugin.logger().log("---------| Finished! Proxy doesn't have a message tunnel.");
         }
     }
 

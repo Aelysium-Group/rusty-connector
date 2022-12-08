@@ -158,39 +158,6 @@ redis:
 #
     data-channel: "rustyConnector-sync"
 
-#########################
-#         MySQL         #
-#########################
-#
-# !!!!!!! MYSQL INTEGRATION IS NOT CURRENTLY AVAILABLE !!!!!!!
-# !!!!!!! THIS SECTION DOESN'T DO ANYTHING !!!!!!!
-#
-# Enable MySQL usage for syncing configurations across multiple proxy servers.
-# Can be helpful if you have multiple proxies and need to quickly distribute your configurations.
-#
-# !!!!!!! MYSQL INTEGRATION IS NOT CURRENTLY AVAILABLE !!!!!!!
-# !!!!!!! THIS SECTION DOESN'T DO ANYTHING !!!!!!!
-#
-mysql:
-#
-# Set to true to enable MySQL.
-#
-    use-mysql-configuration-syncing: false
-
-#
-# Change this value between ROOT and BRANCH to set whether this plugin should be posting data to the database or pulling only.
-# ROOT - Every restart, the plugin will post its configurations to the database. Totally re-writing what was there before.
-# BRANCH - Every restart, the plugin will read whatever data from the database. The plugin will not write any data to the database.
-#
-    plugin-type: ROOT
-
-    host: "localhost"
-    port: 3306
-    database: ""
-    user: ""
-    password: ""
-
-
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Whitelist                         #

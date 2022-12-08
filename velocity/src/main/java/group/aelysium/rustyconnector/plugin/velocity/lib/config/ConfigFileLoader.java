@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib;
+package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -7,7 +7,7 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import java.io.*;
 import java.nio.file.Files;
 
-public class Config extends group.aelysium.rustyconnector.core.lib.Config {
+public class ConfigFileLoader extends group.aelysium.rustyconnector.core.lib.Config {
     private File configPointer;
     private String template;
     private ConfigurationNode data;
@@ -15,13 +15,17 @@ public class Config extends group.aelysium.rustyconnector.core.lib.Config {
     @Override
     public ConfigurationNode getData() { return this.data; }
 
-    public Config(File configPointer, String template) {
+    public ConfigFileLoader(File configPointer, String template) {
         this.configPointer = configPointer;
         this.template = template;
     }
 
+    public String getName() {
+        return this.configPointer.getName();
+    }
+
     @Override
-    public boolean register() {
+    public boolean generate() {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         plugin.logger().log("---| Registering "+this.configPointer.getName()+"...");

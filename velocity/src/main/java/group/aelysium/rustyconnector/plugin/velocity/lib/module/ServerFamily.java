@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
-import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.LoadBalancer;

@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 import com.google.gson.Gson;
 import group.aelysium.rustyconnector.core.lib.firewall.WhitelistPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigFileLoader;
 import ninja.leaping.configurate.ConfigurationNode;
 import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
 
@@ -17,13 +17,13 @@ public class WhitelistParser {
         try {
             plugin.logger().log("-----------| Loading whitelist: "+configName+"...");
 
-            Config whitelistConfig = new Config(new File(plugin.getDataFolder(), "whitelists/"+configName+".yml"), "velocity_whitelist_template.yml");
-            if(!whitelistConfig.register()) throw new RuntimeException("Unable to register "+configName+".yml");
+            ConfigFileLoader whitelistConfigFileLoader = new ConfigFileLoader(new File(plugin.getDataFolder(), "whitelists/"+configName+".yml"), "velocity_whitelist_template.yml");
+            if(!whitelistConfigFileLoader.register()) throw new RuntimeException("Unable to register "+configName+".yml");
 
             plugin.logger().log("-----------| Finished!");
 
             plugin.logger().log("-----------| Getting whitelist criteria...");
-            ConfigurationNode configData = whitelistConfig.getData();
+            ConfigurationNode configData = whitelistConfigFileLoader.getData();
             boolean usePlayers = configData.getNode("use-players").getBoolean();
             boolean usePermission = configData.getNode("use-permission").getBoolean();
             boolean useCountry = configData.getNode("use-country").getBoolean();

@@ -8,7 +8,7 @@ public abstract class Config {
     /**
      * Load the config. If it doesn't exist, create it.
      */
-    public abstract boolean register();
+    public abstract boolean generate();
 
     /**
      * Reload the config at the defined path.

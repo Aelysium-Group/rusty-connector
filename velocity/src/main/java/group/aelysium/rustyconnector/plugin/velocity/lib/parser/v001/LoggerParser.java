@@ -4,18 +4,18 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 import group.aelysium.rustyconnector.core.lib.util.logger.*;
 import group.aelysium.rustyconnector.core.lib.parsing.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigFileLoader;
 import ninja.leaping.configurate.ConfigurationNode;
 
 public class LoggerParser {
-    public static void parse(Config config) throws IllegalAccessException {
+    public static void parse(ConfigFileLoader configFileLoader) throws IllegalAccessException {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         plugin.logger().log("-----| Registering Logger Gateways...");
 
-        if(!config.register()) throw new RuntimeException("Unable to register logger.yml");
+        if(!configFileLoader.register()) throw new RuntimeException("Unable to register logger.yml");
 
-        ConfigurationNode configData = config.getData();
+        ConfigurationNode configData = configFileLoader.getData();
 
         LoggerGate gate = plugin.logger().getGate();
 
@@ -78,13 +78,13 @@ public class LoggerParser {
                 YAML.get(configData,"log.family-balancing").getBoolean()
         );
 
-        LoggerParser.parseLang(config);
+        LoggerParser.parseLang(configFileLoader);
 
         plugin.logger().log("-----| Finished!");
     }
 
-    public static void parseLang(Config config) {
-        ConfigurationNode configData = config.getData();
+    public static void parseLang(ConfigFileLoader configFileLoader) {
+        ConfigurationNode configData = configFileLoader.getData();
 
         Lang.add(
                 LangKey.ICON_REQUEST_REGISTRATION,
