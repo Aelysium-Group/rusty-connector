@@ -1,5 +1,4 @@
 ![Aelysium Wordmark Image](https://github.com/Aelysium-Group/.github/blob/main/images/logo-color-background.png?raw=true)
-[![release](https://badgen.net/github/release/Aelysium-Group/rusty-connector)](https://github.com/Aelysium-Group/rusty-connector/releases)
 [![Maven](https://github.com/Aelysium-Group/rusty-connector/actions/workflows/maven.yml/badge.svg?branch=main)](https://github.com/Aelysium-Group/rusty-connector/actions/workflows/maven.yml)
 [![Aelysium](https://badgen.net/discord/members/jAZkAXf7zT)](https://discord.gg/jAZkAXf7zT)
 # Rusty Connector
