@@ -14,6 +14,7 @@ import group.aelysium.rustyconnector.core.lib.message.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
@@ -45,12 +46,7 @@ public final class CommandRusty {
                                     "Used to access the player controls for this plugin.",
                                     Lang.spacing(),
                                     "/rc registerAll",
-                                    "Request that all servers listening to the datachannel attempt to register themselves",
-                                    Lang.spacing(),
-                                    "/rc reload",
-                                    "Reloads the RustyConnector plugin.",
-                                    "This command should really only be used if the network is down for maintenance or if nobody is online!",
-                                    "This command will kick EVERYONE off of this proxy!"
+                                    "Request that all servers listening to the datachannel attempt to register themselves"
                                 )
                         )
                         .print();
@@ -89,15 +85,13 @@ public final class CommandRusty {
                                                     .insert(Lang.spacing())
                                                     .insert(Lang.spacing())
                                                     .insert(Lang.spacing());
-                                            messagesPage.forEach(message -> {
-                                                langMessage.insert(
-                                                    Lang.boxedMessage(
-                                                        "ID: "+message.getSnowflake(),
-                                                        "Date: "+message.getDate().toString(),
-                                                        "Contents: "+message.getContents()
-                                                    )
-                                                );
-                                            });
+                                            messagesPage.forEach(message -> langMessage.insert(
+                                                Lang.boxedMessage(
+                                                    "ID: "+message.getSnowflake(),
+                                                    "Date: "+message.getDate().toString(),
+                                                    "Contents: "+message.getContents()
+                                                )
+                                            ));
 
                                             langMessage
                                                     .insert(Lang.spacing())
@@ -115,15 +109,13 @@ public final class CommandRusty {
                                                 .insert(Lang.spacing())
                                                 .insert(Lang.spacing())
                                                 .insert(Lang.spacing());
-                                        messages.forEach(message -> {
-                                            langMessage.insert(
-                                                    Lang.boxedMessage(
-                                                            "ID: "+message.getSnowflake(),
-                                                            "Date: "+message.getDate().toString(),
-                                                            "Contents: "+message.getContents()
-                                                    )
-                                            );
-                                        });
+                                        messages.forEach(message -> langMessage.insert(
+                                                Lang.boxedMessage(
+                                                        "ID: "+message.getSnowflake(),
+                                                        "Date: "+message.getDate().toString(),
+                                                        "Contents: "+message.getContents()
+                                                )
+                                        ));
 
                                         langMessage.print();
                                     } catch (Exception e) {
@@ -148,15 +140,13 @@ public final class CommandRusty {
                                                         .insert(Lang.spacing())
                                                         .insert(Lang.spacing())
                                                         .insert(Lang.spacing());
-                                                messagesPage.forEach(message -> {
-                                                    langMessage.insert(
-                                                            Lang.boxedMessage(
-                                                                    "ID: "+message.getSnowflake(),
-                                                                    "Date: "+message.getDate().toString(),
-                                                                    "Contents: "+message.getContents()
-                                                            )
-                                                    );
-                                                });
+                                                messagesPage.forEach(message -> langMessage.insert(
+                                                        Lang.boxedMessage(
+                                                                "ID: "+message.getSnowflake(),
+                                                                "Date: "+message.getDate().toString(),
+                                                                "Contents: "+message.getContents()
+                                                        )
+                                                ));
 
                                                 langMessage
                                                         .insert(Lang.spacing())
@@ -165,7 +155,6 @@ public final class CommandRusty {
                                                         .insert(Lang.border())
                                                         .print();
 
-                                                return;
                                             } catch (Exception e) {
                                                 plugin.logger().error("There was an issue getting those messages!");
                                             }
@@ -227,16 +216,8 @@ public final class CommandRusty {
                                             "/rc family list",
                                             "Gets a list of all registered families.",
                                             Lang.spacing(),
-                                            "/rc family info <family name>",
-                                            "Gets info about a particular family",
-                                            Lang.spacing(),
-                                            "/rc family reload all",
-                                            "Reloads all families, this also unregisters all servers that are saved.",
-                                            "This command will kick EVERYONE off of this proxy!",
-                                            Lang.spacing(),
-                                            "/rc family reload <family name>",
-                                            "Reload a specific family, this also unregisters all servers that are saved to this family.",
-                                            "This command will kick EVERYONE off of this specific family!"
+                                            "/rc family <family name>",
+                                            "Gets info about a particular family"
                                     )
                             )
                             .print();
@@ -249,85 +230,14 @@ public final class CommandRusty {
                         return 1;
                     })
                 )
-                .then(LiteralArgumentBuilder.<CommandSource>literal("info")
-                    .executes(context -> {
-                        (new LangMessage(plugin.logger()))
-                                .insert(Lang.commandUsage())
-                                .insert(
-                                        Lang.boxedMessage(
-                                                "/rc family info <family name>",
-                                                "Get info for this family",
-                                                Lang.spacing(),
-                                                "/rc family info <family name> servers",
-                                                "Lists all servers that are registered to this family",
-                                                Lang.spacing(),
-                                                "/rc family reload all",
-                                                "Reloads all families, this also unregisters all servers that are saved.",
-                                                "This command will kick EVERYONE off of this proxy!",
-                                                Lang.spacing(),
-                                                "/rc family reload <family name>",
-                                                "Reload a specific family, this also unregisters all servers that are saved to this family.",
-                                                "This command will kick EVERYONE off of this specific family!"
-                                        )
-                                )
-                                .print();
-                        return 1;
-                    })
-                    .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
-                            .executes(context -> {
-                                String familyName = context.getArgument("familyName", String.class);
-                                ServerFamily family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
+                .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
+                        .executes(context -> {
+                            String familyName = context.getArgument("familyName", String.class);
+                            ServerFamily<? extends PaperServerLoadBalancer> family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
 
-                                family.printInfo();
-                                return 1;
-                            })
-                            .then(RequiredArgumentBuilder.<CommandSource, String>argument("servers", StringArgumentType.word())
-                                    .executes(context -> {
-                                        String familyName = context.getArgument("familyName", String.class);
-                                        ServerFamily family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
-
-                                        family.printServers();
-                                        return 1;
-                                    })
-                            )
-                    )
-                )
-                .then(LiteralArgumentBuilder.<CommandSource>literal("reload")
-                    .executes(context -> {
-                        (new LangMessage(plugin.logger()))
-                                .insert(Lang.commandUsage())
-                                .insert(
-                                        Lang.boxedMessage(
-                                                "/rc family reload all",
-                                                "Reloads all families, this also unregisters all servers that are saved.",
-                                                "This command will kick EVERYONE off of this proxy!",
-                                                Lang.spacing(),
-                                                "/rc family reload <family name>",
-                                                "Reload a specific family, this also unregisters all servers that are saved to this family.",
-                                                "This command will kick EVERYONE off of this specific family!"
-                                        )
-                                )
-                                .print();
-                        return 1;
-                    })
-                    .then(LiteralArgumentBuilder.<CommandSource>literal("all")
-                            .executes(context -> {
-
-                                // TODO: Reload all families
-
-                                return 1;
-                            })
-                    )
-                    .then(LiteralArgumentBuilder.<CommandSource>literal("familyName")
-                            .executes(context -> {
-                                String familyName = context.getArgument("familyName", String.class);
-                                ServerFamily family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
-
-                                // TODO: Reload a specific family
-
-                                return 1;
-                            })
-                    )
+                            family.printInfo();
+                            return 1;
+                        })
                 )
             )
             .then(LiteralArgumentBuilder.<CommandSource>literal("registerAll")
@@ -356,7 +266,7 @@ public final class CommandRusty {
 
                                 InetSocketAddress address = AddressUtil.parseAddress(ip);
 
-                                ServerFamily family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
+                                ServerFamily<? extends PaperServerLoadBalancer> family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
                                 PaperServer server = family.getServer(address);
 
                                 family.setServerPlayerCount(playerCount,server);

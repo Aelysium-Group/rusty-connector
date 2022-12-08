@@ -11,14 +11,12 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.core.lib.firewall.MessageTunnel;
-import group.aelysium.rustyconnector.core.lib.util.logger.GateKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerKick;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
-import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001.GenericParser;
 import group.aelysium.rustyconnector.core.RustyConnector;
 import group.aelysium.rustyconnector.core.lib.Callable;
@@ -87,6 +85,7 @@ public class VelocityRustyConnector implements RustyConnector {
 
     public void uninit() {
         instance = null;
+        assert this.redis != null;
         this.redis.disconnect();
         this.proxy = null;
         this.messageTunnel = null;
@@ -101,6 +100,7 @@ public class VelocityRustyConnector implements RustyConnector {
         EventManager manager = this.getVelocityServer().getEventManager();
 
         manager.register(this, new OnPlayerJoin());
+        manager.register(this, new OnPlayerKick());
     }
 
     @Override

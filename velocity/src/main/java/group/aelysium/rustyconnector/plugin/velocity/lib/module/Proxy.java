@@ -14,6 +14,7 @@ import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.PlayerManager;
@@ -34,7 +35,7 @@ public class Proxy {
     private String proxyWhitelist;
     private Clock heart;
 
-    public ServerFamily getRootFamily() {
+    public ServerFamily<? extends PaperServerLoadBalancer> getRootFamily() {
         return this.familyManager.find(this.rootFamily);
     }
 
@@ -84,7 +85,12 @@ public class Proxy {
                     if(server == null) throw new NullPointerException(serverInfo.getName() + " couldn't be found!");
 
                     if(!entry.getValue()) {
-                        this.unregisterServer(serverInfo, server.getFamilyName());
+                        //this.unregisterServer(serverInfo, server.getFamilyName());
+                        if(plugin.logger().getGate().check(GateKey.PING))
+                            (new LangMessage(plugin.logger()))
+                                    .insert(Lang.border())
+                                    .insert(server.getServerInfo().getName()+" never responded to ping! It should be killed!")
+                                    .print();
                         continue;
                     }
 
@@ -117,7 +123,7 @@ public class Proxy {
     }
 
     public PaperServer findServer(ServerInfo serverInfo) {
-        for(ServerFamily family : this.getFamilyManager().dump()) {
+        for(ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
             PaperServer server = family.getServer(serverInfo);
             if(server == null) continue;
 
@@ -127,7 +133,7 @@ public class Proxy {
     }
 
     public boolean contains(String serverName) {
-        for(ServerFamily family : this.getFamilyManager().dump()) {
+        for(ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
             if(family.containsServer(serverName)) return true;
         }
         return false;
@@ -220,13 +226,13 @@ public class Proxy {
 
             if(plugin.getProxy().contains(server.getServerInfo().getName())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
 
-            ServerFamily family = this.familyManager.find(familyName);
+            ServerFamily<? extends PaperServerLoadBalancer> family = this.familyManager.find(familyName);
             if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
             RegisteredServer registeredServer = plugin.getVelocityServer().registerServer(server.getServerInfo());
             if(registeredServer == null) throw new NullPointerException("Unable to register the server to the proxy.");
 
-            family.registerServer(server);
+            family.addServer(server);
 
             this.lifeMatrix.put(server.getServerInfo(),true);
 
@@ -273,7 +279,7 @@ public class Proxy {
                     )
                     .print();
 
-            ServerFamily family = server.getFamily();
+            ServerFamily<? extends PaperServerLoadBalancer> family = server.getFamily();
             family.removeServer(server);
 
             plugin.getVelocityServer().unregisterServer(server.getServerInfo());
@@ -289,7 +295,8 @@ public class Proxy {
                         )
                         .print();
         } catch (Exception error) {
-            if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
+            if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST)) {
+                assert server != null;
                 (new LangMessage(plugin.logger()))
                         .insert(
                                 "["+server.getServerInfo().getName()+"]" +
@@ -298,6 +305,7 @@ public class Proxy {
                         )
                         .insert(error.getMessage())
                         .print();
+            }
         }
     }
 

@@ -1,8 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import com.sun.jdi.request.DuplicateRequestException;
+import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.LoadBalancer;
 import group.aelysium.rustyconnector.core.lib.database.Redis;
 import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
@@ -12,12 +15,13 @@ import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 
 import java.security.InvalidAlgorithmParameterException;
 
 public class PaperServer implements Server {
     private RegisteredServer registeredServer = null;
-    private ServerInfo serverInfo;
+    private final ServerInfo serverInfo;
     private String familyName;
     private int playerCount = 0;
     private int priorityIndex = 0;
@@ -27,10 +31,6 @@ public class PaperServer implements Server {
     public PaperServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int priorityIndex) {
         this.serverInfo = serverInfo;
 
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-        (new LangMessage(plugin.logger()))
-                .insert(serverInfo.getName())
-                .print();
         this.priorityIndex = priorityIndex;
 
         this.softPlayerCap = softPlayerCap;
@@ -116,11 +116,11 @@ public class PaperServer implements Server {
      * @throws IllegalStateException If the server hasn't been registered yet.
      * @throws NullPointerException If the family associated with this server doesn't exist.
      */
-    public ServerFamily getFamily() throws IllegalStateException, NullPointerException {
+    public ServerFamily<? extends PaperServerLoadBalancer> getFamily() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
-        ServerFamily family = plugin.getProxy().getFamilyManager().find(this.familyName);
+        ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getProxy().getFamilyManager().find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
@@ -152,5 +152,35 @@ public class PaperServer implements Server {
                                     "{"+ familyName +"}"
                     )
                     .print();
+    }
+
+    /**
+     * Connects a player to the server.
+     * This also increases the player count on this server by 1.
+     * @param player The player to connect.
+     */
+    public void connect(Player player) {
+        try {
+            ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
+            connection.connect().whenCompleteAsync((status, throwable) -> {});
+
+            this.playerCount += 1;
+        } catch (Exception e) {
+            VelocityRustyConnector.getInstance().logger().error("",e);
+        }
+    }
+
+    /**
+     * Reduces the player count on this server by 1.
+     */
+    public void playerLeft() {
+        if(this.playerCount > 0) this.playerCount -= 1;
+    }
+
+    @Override
+    public String toString() {
+        return "["+this.getServerInfo().getName()+"]" +
+               "("+this.getServerInfo().getAddress().getHostName()+":"+this.getServerInfo().getAddress().getPort()+") - " +
+               "{"+ this.familyName +"}";
     }
 }

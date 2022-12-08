@@ -43,28 +43,23 @@ load-balancing:
 # | balancing algorithms if there are other algorithms     #
 # | you'd like to see in the future, let us know!          #
 #                                                          #
-#  ⚫ TROUGH - A "Least Connection" based algorithm.       #
+#  ⚫ LEAST_CONNECTION -                                   #
 #             Connects players to the server with the      #
-#             fewest players currently connected.          #
-#  ⚫ CASCADE - A "Fixed Weighting" based algorithm.       #
-#             servers that are assigned a higher "level"   #
-#             will get filled up first, before the         #
-#             algorithm starts filling up lower level      #
-#             servers.                                     #
-#       NOTE: For it to work properly, the Cascade         #
-#             algorithm will require additional            #
-#             configuration on the servers in this         #
-#             family.                                      #
+#             the fewest players currently connected.      #
+#             This mode is best if you want evenly         #
+#             distributed players across all servers.      #
+#  ⚫ ROUND_ROBIN -                                        #
+#             Every time a connection occurs, the next     #
+#             server in the load balancer will be queued   #
+#             for the next connection.                     #
+#             Once the load balancer reaches the end of    #
+#             the server queue, the load balancer will     #
+#             loop back to the beginning and start again.  #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-#
-# Make sure you define proper "priority-index" inside the configs of your sub-servers of this family!
-# Otherwise, this algorithm will just work like a "Round Robin" and dump players into
-# the servers as it sees fit.
-#
-    algorithm: "CASCADE"
+    algorithm: ROUND_ROBIN
 
 #
 # If set to `true`. Persistence will cause the algorithm to keep trying to connect the player to this
