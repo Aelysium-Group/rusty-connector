@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Config;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import ninja.leaping.configurate.ConfigurationNode;
 import group.aelysium.rustyconnector.core.lib.parsing.YAML;
@@ -10,6 +12,7 @@ import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 public class FamilyParser {
     public static void parse(Config config) {
@@ -30,34 +33,39 @@ public class FamilyParser {
                 Config familyConfig = new Config(new File(plugin.getDataFolder(), "families/"+name+".yml"), "velocity_family_template.yml");
                 if(!familyConfig.register()) throw new RuntimeException("Unable to register "+name+".yml");
 
-                AlgorithmType algorithm = AlgorithmType.valueOf((String) YAML.get(familyConfig.getData(),"load-balancing.algorithm").getValue());
-
                 boolean shouldUseWhitelist = familyConfig.getData().getNode("use-whitelist").getBoolean();
                 String whitelistName = familyConfig.getData().getNode("whitelist").getString();
 
+                String algorithmName = String.valueOf(YAML.get(familyConfig.getData(),"load-balancing.algorithm").getValue());
+
+                Whitelist whitelist = null;
                 if(shouldUseWhitelist) {
                     WhitelistParser.parse(whitelistName);
 
-                    Whitelist whitelist = plugin.getProxy().getWhitelistManager().find(whitelistName);
+                    whitelist = plugin.getProxy().getWhitelistManager().find(whitelistName);
 
-                    ServerFamily family = new ServerFamily(
-                            name,
-                            algorithm,
-                            whitelist
-                            );
-                    plugin.getProxy().getFamilyManager().add(family);
-                    plugin.logger().log("-----------| Finished!");
-                    return;
+                    plugin.logger().log("-----------| Family has a whitelist.");
+                } else {
+                    plugin.logger().log("-----------| Family doesn't have a whitelist.");
                 }
 
-                ServerFamily family = new ServerFamily(
-                        name,
-                        algorithm,
-                        null
-                );
-                plugin.getProxy().getFamilyManager().add(family);
-                plugin.logger().log("-----------| Finished! Family doesn't have a whitelist.");
-                return;
+                switch (Enum.valueOf(AlgorithmType.class, algorithmName)) {
+                    case ROUND_ROBIN -> plugin.getProxy().getFamilyManager().add(
+                            new ServerFamily<>(
+                                    name,
+                                    whitelist,
+                                    RoundRobin.class
+                            )
+                    );
+                    case LEAST_CONNECTION -> plugin.getProxy().getFamilyManager().add(
+                            new ServerFamily<>(
+                                    name,
+                                    whitelist,
+                                    LeastConnection.class
+                            )
+                    );
+                }
+                plugin.logger().log("-----------| Finished!");
             } catch (NullPointerException e) {
                 plugin.logger().log("Unable to register the family: "+name);
                 plugin.logger().error("One of the data types provided in this family's config is invalid and not what was expected!",e);

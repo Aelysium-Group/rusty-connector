@@ -3,18 +3,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.LoadBalancer;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.core.lib.util.logger.GateKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.core.lib.model.Family;
-import group.aelysium.rustyconnector.core.lib.model.Server;
 import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
 import group.aelysium.rustyconnector.core.lib.firewall.WhitelistPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.Algorithm;
 import net.kyori.adventure.text.Component;
 
 import java.net.InetSocketAddress;
@@ -22,35 +17,22 @@ import java.net.MalformedURLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ServerFamily implements Family {
-    private final List<PaperServer> registeredServers = new ArrayList<>();
+public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
+    private LB loadBalancer;
     private final String name;
     private final Whitelist whitelist;
     protected int playerCount = 0;
-    protected AlgorithmType algorithm;
-    public ServerFamily(String name, AlgorithmType algorithm, Whitelist whitelist) {
+    public ServerFamily(String name, Whitelist whitelist, Class<LB> clazz) {
         this.name = name;
-        this.algorithm = algorithm;
         this.whitelist = whitelist;
+
+        try {
+            this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+        }
     }
 
-    public String algorithm() { return this.algorithm.toString(); }
-    public int serverCount() { return this.registeredServers.size(); }
-
-    /**
-     * Gets the aggregate player count across all servers in this family
-     * @return A player count
-     */
-    public int getPlayerCount() {
-        AtomicInteger newPlayerCount = new AtomicInteger();
-        registeredServers.forEach(server -> {
-            newPlayerCount.addAndGet(server.getPlayerCount());
-        });
-
-        playerCount = newPlayerCount.get();
-
-        return this.playerCount;
-    }
+    public String loadBalancerName() { return this.loadBalancer.toString(); }
 
     /**
      * Set's the player count of a sub-server. Then re-calculates the aggregate player count of this family.
@@ -63,7 +45,21 @@ public class ServerFamily implements Family {
 
         this.getPlayerCount();
 
-        this.balance();
+    }
+
+    public long serverCount() { return this.loadBalancer.size(); }
+
+    /**
+     * Gets the aggregate player count across all servers in this family
+     * @return A player count
+     */
+    public int getPlayerCount() {
+        AtomicInteger newPlayerCount = new AtomicInteger();
+        this.loadBalancer.dump().forEach(server -> newPlayerCount.addAndGet(server.getPlayerCount()));
+
+        playerCount = newPlayerCount.get();
+
+        return this.playerCount;
     }
 
     public boolean containsServer(ServerInfo serverInfo) {
@@ -78,69 +74,66 @@ public class ServerFamily implements Family {
      * @param player The player to connect
      */
     public void connect(Player player) throws MalformedURLException {
-        if(this.whitelist != null) {
+        if(!(this.whitelist == null)) {
             String ip = player.getRemoteAddress().getHostString();
 
             WhitelistPlayer whitelistPlayer = new WhitelistPlayer(player.getUsername(), player.getUniqueId(), ip);
 
-            if (!whitelist.validate(whitelistPlayer))
+            if (!whitelist.validate(whitelistPlayer)) {
                 player.disconnect(Component.text("You aren't whitelisted on this server!"));
+                return;
+            }
         }
 
-        if(this.registeredServers.size() == 0) throw new MalformedURLException("There are no servers in this family!");
+        if(this.loadBalancer.size() == 0) {
+            player.disconnect(Component.text("There are no servers for you to connect to!"));
+            return;
+        }
 
-        PaperServer server = this.registeredServers.get(0); // Get the server that is currently listed as highest priority
+        PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
+        VelocityRustyConnector.getInstance().logger().log(server.toString());
 
         if(server.isFull())
-            if(!player.hasPermission("rustyconnector.bypasssoftcap"))
+            if(!player.hasPermission("rustyconnector.bypasssoftcap")) {
+                player.disconnect(Component.text("The server you're trying to connect to is full!"));
                 return;
-        if(server.isMaxed())
+            }
+        if(server.isMaxed()) {
+            player.disconnect(Component.text("The server you're trying to connect to is full!"));
             return;
-
-        try {
-            ConnectionRequestBuilder connection = player.createConnectionRequest(server.getRegisteredServer());
-            connection.connect().whenCompleteAsync((status, throwable) -> {});
-        } catch (Exception e) {
-            VelocityRustyConnector.getInstance().logger().error("",e);
         }
+
+        server.connect(player);
+
+        this.loadBalancer.iterate();
     }
 
     public List<PaperServer> getRegisteredServers() {
-        return this.registeredServers;
+        return this.loadBalancer.dump();
     }
 
-    @Override
     public String getName() {
         return this.name;
     }
 
-    @Override
-    public void registerServer(Server server) {
-        this.registeredServers.add((PaperServer) server);
-    }
-
     /**
-     * Takes all servers in this family and runs them through this family's load balancer.
-     * Re-arranging them in priority order.
+     * Add a server to the family.
+     * @param server The server to add.
      */
-    public void balance() {
-        if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
-            VelocityRustyConnector.getInstance().logger().log(
-                    this.getName()+" "+Lang.get(LangKey.ICON_FAMILY_BALANCING)
-            );
-        Algorithm.getAlgorithm(this.algorithm).balance(this);
+    public void addServer(PaperServer server) {
+        this.loadBalancer.add(server);
     }
 
     /**
-     * Removes a server from this family.
+     * Remove a server from this family.
      * @param server The server to remove.
      */
     public void removeServer(PaperServer server) {
-        this.registeredServers.remove(server);
+        this.loadBalancer.remove(server);
     }
 
     /**
-     * Gets a server that is a part of the family.
+     * Get a server that is a part of the family.
      * @param serverInfo The info matching the server to get.
      */
     public PaperServer getServer(ServerInfo serverInfo) {
@@ -183,46 +176,39 @@ public class ServerFamily implements Family {
                 .insert("   ---| Name: "+this.getName())
                 .insert("   ---| Online Players: "+this.getPlayerCount())
                 .insert("   ---| Registered Servers: "+this.serverCount())
-                .insert("   ---| Load Balancing Algorithm: "+this.algorithm())
+                .insert("   ---| Load Balancing Algorithm: "+this.loadBalancerName())
                 .insert(Lang.spacing())
                 .insert(Lang.border())
+                .insert(Lang.spacing())
+                .insert("Registered Servers:")
+                .insert(Lang.spacing())
+                .insert(Lang.border())
+                .insert(Lang.spacing())
                 .print();
-    }
 
 
-    /**
-     * Print info related to the servers on this server
-     */
-    public void printServers() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-
-        LangMessage langMessage = (new LangMessage(plugin.logger()))
-                .insert(Lang.info())
-                .insert(Lang.spacing())
-                .insert("All servers registered to the family: "+this.name)
-                .insert("Servers are listed, from top to bottom, by priority. The server at the top will have players added to it first.")
-                .insert("The order of the servers will change over time as players join or leave them and their priority changes.")
-                .insert("Registered Servers: "+this.serverCount())
-                .insert("Online Players: "+this.serverCount())
-                .insert(Lang.spacing())
-                .insert(Lang.border())
-                .insert(Lang.spacing());
-
+        LangMessage serverList = (new LangMessage(plugin.logger()));
         AtomicInteger index = new AtomicInteger(1);
-        this.registeredServers.forEach(entry -> {
 
-            // Looks like: ---| 1. [server name](127.0.0.1:25565) [0 (10 <> 20)]
-
-            langMessage
-                    .insert(
-                            "   ---| "+index.get()+". ["+entry.getRegisteredServer().getServerInfo().getName()+"]" +
-                            "("+ AddressUtil.addressToString(entry.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                            "["+entry.getPlayerCount()+" ("+entry.getSoftPlayerCap()+" <> "+entry.getSoftPlayerCap()+")"
-                    );
+        for (PaperServer server: this.loadBalancer.dump()) {
+            if((this.loadBalancer.getIndex() + 1) == index.get())
+                serverList
+                        .insert(
+                                "   ---| "+index.get()+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
+                                        "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
+                                        "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+")] <<<"
+                        );
+            else
+                serverList
+                        .insert(
+                                "   ---| "+index.get()+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
+                                        "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
+                                        "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+")]"
+                        );
 
             index.getAndIncrement();
-        });
-        langMessage
+        }
+        serverList
                 .insert(Lang.spacing())
                 .insert(Lang.border())
                 .print();
