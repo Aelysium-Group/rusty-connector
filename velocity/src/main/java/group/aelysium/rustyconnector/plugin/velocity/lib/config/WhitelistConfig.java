@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class WhitelistConfig extends YAML {
+
     private static Map<String,WhitelistConfig> configs = new HashMap<>();
 
     private boolean use_players = false;
@@ -21,8 +22,31 @@ public class WhitelistConfig extends YAML {
 
     private String message = "You aren't whitelisted on this server!";
 
-    public WhitelistConfig(File configPointer, String template) {
+    private WhitelistConfig(File configPointer, String template) {
         super(configPointer, template);
+    }
+    public boolean isUse_players() {
+        return use_players;
+    }
+
+    public List<Object> getPlayers() {
+        return players;
+    }
+
+    public boolean isUse_permission() {
+        return use_permission;
+    }
+
+    public boolean isUse_country() {
+        return use_country;
+    }
+
+    public List<String> getCountries() {
+        return countries;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     /**
@@ -36,11 +60,14 @@ public class WhitelistConfig extends YAML {
 
     /**
      * Add a whitelist config to the proxy.
-     * @param key The name of the whitelist config to get.
-     * @param config The whitelist config to put.
+     * @param name The name of the whitelist family to save.
+     * @param configPointer The config file.
+     * @param template The path to the template config file.
      */
-    public static void addConfig(String key, WhitelistConfig config) {
-        configs.put(key, config);
+    public static WhitelistConfig newConfig(String name, File configPointer, String template) {
+        WhitelistConfig config = new WhitelistConfig(configPointer, template);
+        configs.put(name, config);
+        return config;
     }
 
     /**

@@ -14,8 +14,28 @@ public class FamilyConfig extends YAML {
     private boolean use_whitelist = false;
     private String whitelist = "whitelist-template";
 
-    public FamilyConfig(File configPointer, String template) {
+    private FamilyConfig(File configPointer, String template) {
         super(configPointer, template);
+    }
+
+    public static Map<String, FamilyConfig> getConfigs() {
+        return configs;
+    }
+
+    public String getLoadBalancing_algorithm() {
+        return loadBalancing_algorithm;
+    }
+
+    public boolean isLoadBalancing_persistence() {
+        return loadBalancing_persistence;
+    }
+
+    public boolean isUse_whitelist() {
+        return use_whitelist;
+    }
+
+    public String getWhitelist() {
+        return whitelist;
     }
 
     /**
@@ -29,11 +49,14 @@ public class FamilyConfig extends YAML {
 
     /**
      * Add a whitelist config to the proxy.
-     * @param key The name of the whitelist config to get.
-     * @param config The whitelist config to put.
+     * @param name The name of the whitelist family to save.
+     * @param configPointer The config file.
+     * @param template The path to the template config file.
      */
-    public static void addConfig(String key, FamilyConfig config) {
-        configs.put(key, config);
+    public static FamilyConfig newConfig(String name, File configPointer, String template) {
+        FamilyConfig config = new FamilyConfig(configPointer, template);
+        configs.put(name, config);
+        return config;
     }
 
     /**
@@ -42,6 +65,7 @@ public class FamilyConfig extends YAML {
     public static void empty() {
         configs = new HashMap<>();
     }
+
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {

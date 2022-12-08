@@ -27,7 +27,7 @@ public class DefaultConfig extends YAML {
     private List<String> messageTunnel_whitelist = new ArrayList<>();
     private List<String> messageTunnel_denylist = new ArrayList<>();
 
-    public DefaultConfig(File configPointer, String template) {
+    private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
     }
 

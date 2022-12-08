@@ -1,34 +1,121 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
-import ninja.leaping.configurate.ConfigurationNode;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class LoggerConfig extends YAML {
     private static LoggerConfig config;
 
-    private String private_key = "";
-    private String public_key = "";
-    private int heart_beat = 10;
-    private String root_family = "lobby";
-    private List<String> families = new ArrayList<>();
+    private boolean messaging_registrationRequest = false;
+    private boolean messaging_unregistrationRequest = false;
+    private boolean messaging_callForRegistration = false;
+    private boolean messaging_ping = false;
+    private boolean messaging_pong = false;
+    private boolean messaging_messageParserTrash = false;
 
-    private String redis_host = "localhost";
-    private int redis_port = 3306;
-    private String redis_password = "password";
-    private String redis_dataChannel = "rustyConnector-sync";
+    private boolean security_blacklistedAddressMessage = true;
+    private boolean security_whitelistDeniedAddressMessage = true;
 
-    private boolean use_whitelist = false;
-    private String whitelist = "whitelist-template";
+    private boolean log_playerJoin = false;
+    private boolean log_playerLeave = false;
+    private boolean log_playerMove = false;
+    private boolean log_familyBalancing = false;
 
-    private boolean messageTunnel_enabled = false;
-    private List<String> messageTunnel_whitelist = new ArrayList<>();
-    private List<String> messageTunnel_denylist = new ArrayList<>();
+    private String consoleIcons_requestingRegistration = "?>>>?";
+    private String consoleIcons_registered = ">>>>>";
+    private String consoleIcons_callForRegistration = "|>~=-";
+    private String consoleIcons_requestingUnregistration = "?///?";
+    private String consoleIcons_unregistered = "/////";
+    private String consoleIcons_canceledRequest = "xxxxx";
+    private String consoleIcons_familyBalancing = "▲▼▲▼▲";
+    private String consoleIcons_ping = "|>>>>";
+    private String consoleIcons_pong = "<<<<|";
 
-    public LoggerConfig(File configPointer, String template) {
+    private LoggerConfig(File configPointer, String template) {
         super(configPointer, template);
+    }
+
+    public boolean isMessaging_registrationRequest() {
+        return messaging_registrationRequest;
+    }
+
+    public boolean isMessaging_unregistrationRequest() {
+        return messaging_unregistrationRequest;
+    }
+
+    public boolean isMessaging_callForRegistration() {
+        return messaging_callForRegistration;
+    }
+
+    public boolean isMessaging_ping() {
+        return messaging_ping;
+    }
+
+    public boolean isMessaging_pong() {
+        return messaging_pong;
+    }
+
+    public boolean isMessaging_messageParserTrash() {
+        return messaging_messageParserTrash;
+    }
+
+    public boolean isSecurity_blacklistedAddressMessage() {
+        return security_blacklistedAddressMessage;
+    }
+
+    public boolean isSecurity_whitelistDeniedAddressMessage() {
+        return security_whitelistDeniedAddressMessage;
+    }
+
+    public boolean isLog_playerJoin() {
+        return log_playerJoin;
+    }
+
+    public boolean isLog_playerLeave() {
+        return log_playerLeave;
+    }
+
+    public boolean isLog_playerMove() {
+        return log_playerMove;
+    }
+
+    public boolean isLog_familyBalancing() {
+        return log_familyBalancing;
+    }
+
+    public String getConsoleIcons_requestingRegistration() {
+        return consoleIcons_requestingRegistration;
+    }
+
+    public String getConsoleIcons_registered() {
+        return consoleIcons_registered;
+    }
+
+    public String getConsoleIcons_callForRegistration() {
+        return consoleIcons_callForRegistration;
+    }
+
+    public String getConsoleIcons_requestingUnregistration() {
+        return consoleIcons_requestingUnregistration;
+    }
+
+    public String getConsoleIcons_unregistered() {
+        return consoleIcons_unregistered;
+    }
+
+    public String getConsoleIcons_canceledRequest() {
+        return consoleIcons_canceledRequest;
+    }
+
+    public String getConsoleIcons_familyBalancing() {
+        return consoleIcons_familyBalancing;
+    }
+
+    public String getConsoleIcons_ping() {
+        return consoleIcons_ping;
+    }
+
+    public String getConsoleIcons_pong() {
+        return consoleIcons_pong;
     }
 
     /**
@@ -55,93 +142,31 @@ public class LoggerConfig extends YAML {
         config = null;
     }
 
-    public String getPrivate_key() {
-        return this.private_key;
-    }
-
-    public String getPublic_key() {
-        return this.public_key;
-    }
-
-    public int getHeart_beat() {
-        return this.heart_beat;
-    }
-
-    public String getRoot_family() {
-        return this.root_family;
-    }
-
-    public List<String> getFamilies() {
-        return this.families;
-    }
-
-    public String getRedis_host() {
-        return this.redis_host;
-    }
-
-    public int getRedis_port() {
-        return this.redis_port;
-    }
-
-    public String getRedis_password() {
-        return this.redis_password;
-    }
-
-    public String getRedis_dataChannel() {
-        return this.redis_dataChannel;
-    }
-
-    public boolean isUse_whitelist() {
-        return this.use_whitelist;
-    }
-
-    public String getWhitelist() {
-        return this.whitelist;
-    }
-
-    public boolean isMessageTunnel_enabled() {
-        return this.messageTunnel_enabled;
-    }
-
-    public List<String> getMessageTunnel_whitelist() {
-        return this.messageTunnel_whitelist;
-    }
-
-    public List<String> getMessageTunnel_denylist() {
-        return this.messageTunnel_denylist;
-    }
-
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
-        this.private_key = this.getNode(this.data,"private-key",String.class);
-        this.public_key = this.getNode(this.data,"public-key",String.class);
-        this.heart_beat = this.getNode(this.data,"heart-beat",Integer.class);
+        this.messaging_registrationRequest = this.getNode(this.data,"messaging.registration-request",Boolean.class);
+        this.messaging_unregistrationRequest = this.getNode(this.data,"messaging.unregistration-request",Boolean.class);
+        this.messaging_callForRegistration = this.getNode(this.data,"messaging.call-for-registration",Boolean.class);
+        this.messaging_ping = this.getNode(this.data,"messaging.ping",Boolean.class);
+        this.messaging_pong = this.getNode(this.data,"messaging.pong",Boolean.class);
+        this.messaging_messageParserTrash = this.getNode(this.data,"messaging.message-parser-trash",Boolean.class);
 
-        this.root_family = this.getNode(this.data,"root-family",String.class);
-        try {
-            this.families = (List<String>) (this.getNode(this.data,"families",List.class));
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("The node [families] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
+        this.security_blacklistedAddressMessage = this.getNode(this.data,"security.blacklisted-address-message",Boolean.class);
+        this.security_whitelistDeniedAddressMessage = this.getNode(this.data,"security.whitelist-denied-address-message",Boolean.class);
 
-        this.redis_host = this.getNode(this.data,"redis.host",String.class);
-        this.redis_port = this.getNode(this.data,"redis.port",Integer.class);
-        this.redis_password = this.getNode(this.data,"redis.password",String.class);
-        this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
+        this.log_playerJoin = this.getNode(this.data,"log.player-join",Boolean.class);
+        this.log_playerLeave = this.getNode(this.data,"log.player-leave",Boolean.class);
+        this.log_playerMove = this.getNode(this.data,"log.player-move",Boolean.class);
+        this.log_familyBalancing = this.getNode(this.data,"log.family-balancing",Boolean.class);
 
-        this.use_whitelist = this.getNode(this.data,"use-whitelist",Boolean.class);
-        this.whitelist = this.getNode(this.data,"whitelist",String.class);
-
-        this.messageTunnel_enabled = this.getNode(this.data,"message-tunnel.enabled",Boolean.class);
-        try {
-            this.messageTunnel_whitelist = (List<String>) this.getNode(this.data,"message-tunnel.whitelist",List.class);
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("The node [message-tunnel.whitelist] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
-        try {
-            this.messageTunnel_denylist = (List<String>) this.getNode(this.data,"message-tunnel.denylist",List.class);
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("The node [message-tunnel.denylist] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
+        this.consoleIcons_requestingRegistration = this.getNode(this.data,"console-icons.",String.class);
+        this.consoleIcons_registered = this.getNode(this.data,"console-icons.",String.class);
+        this.consoleIcons_callForRegistration = this.getNode(this.data,"console-icons.",String.class);
+        this.consoleIcons_requestingUnregistration = this.getNode(this.data,"console-icons.",String.class);
+        this.consoleIcons_unregistered = this.getNode(this.data,"console-icons.",String.class);
+        this.consoleIcons_canceledRequest = this.getNode(this.data,"console-icons.",String.class);
+        this.consoleIcons_familyBalancing = this.getNode(this.data,"console-icons.",String.class);
+        this.consoleIcons_ping = this.getNode(this.data,"console-icons.",String.class);
+        this.consoleIcons_pong = this.getNode(this.data,"console-icons.",String.class);
     }
 }
