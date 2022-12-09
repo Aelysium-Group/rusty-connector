@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parser.v001;
 
 
 import group.aelysium.rustyconnector.core.lib.util.logger.*;
-import group.aelysium.rustyconnector.core.lib.parsing.YAML;
+import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigFileLoader;
 import ninja.leaping.configurate.ConfigurationNode;

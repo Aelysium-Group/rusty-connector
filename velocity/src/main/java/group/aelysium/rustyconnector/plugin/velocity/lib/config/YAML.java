@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-public class YAML extends group.aelysium.rustyconnector.core.lib.parsing.YAML {
+public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
     public YAML(File configPointer, String template) {
         super(configPointer, template);
     }
