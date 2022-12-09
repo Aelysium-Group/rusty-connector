@@ -15,10 +15,10 @@ public interface Server {
     void setPlayerCount(int playerCount);
 
     /**
-     * Get the priority index of this server
-     * @return The priority index of this server
+     * Get the weight of this server
+     * @return The weight of this server
      */
-    int getPriorityIndex();
+    int getWeight();
 
     /**
      * Get the soft player cap of this server

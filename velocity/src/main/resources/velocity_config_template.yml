@@ -172,20 +172,25 @@ redis:
 # | More often than not, you will have multiple whitelist  #
 # | configurations that you may want to switch between     #
 # | during various points in your network's lifetime.      #
-# | This system allows you to setup as many pre-defined    #
+# | This system allows you to set up as many pre-defined   #
 # | whitelists as you'd like, and enable or switch between #
 # | then whenever you want!                                #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-
+whitelist:
 #
 # If you set this to be on. You will be turning on a whitelist which will **effect your entire proxy**!
 # If you only want to effect certain families or individual servers. Look into the appropriate configuration locations!
 #
-use-whitelist: false
-whitelist: "whitelist-template"
+    enabled: false
+
+#
+# The name of the whitelist configuration file in your "whitelists" folder.
+# You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
+#
+    name: "whitelist-template"
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

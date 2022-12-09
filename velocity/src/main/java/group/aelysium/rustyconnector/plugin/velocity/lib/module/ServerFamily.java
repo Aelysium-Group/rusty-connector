@@ -3,14 +3,19 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.LoadBalancer;
+import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
-import group.aelysium.rustyconnector.core.lib.firewall.WhitelistPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import net.kyori.adventure.text.Component;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.util.*;
@@ -211,5 +216,50 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
                 .insert(Lang.spacing())
                 .insert(Lang.border())
                 .print();
+    }
+
+    /**
+     * Initializes all server families based on the configs.
+     * @return A list of all server families.
+     */
+    public static List<ServerFamily<? extends PaperServerLoadBalancer>> init(DefaultConfig config) {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        List<ServerFamily<? extends PaperServerLoadBalancer>> families = new ArrayList<>();
+
+        for (String familyName: config.getFamilies()) {
+            FamilyConfig familyConfig = FamilyConfig.newConfig(
+                    familyName,
+                    new File(plugin.getDataFolder(), "families/"+familyName+".yml"),
+                    "velocity_family_template.yml"
+            );
+            if(!familyConfig.generate()) {
+                throw new IllegalStateException("Unable to load or create families/"+familyName+".yml!");
+            }
+            familyConfig.register();
+
+            Whitelist whitelist = null;
+            if(familyConfig.getUse_whitelist()) {
+                whitelist = Whitelist.init(familyConfig.getWhitelist());
+            }
+
+            switch (Enum.valueOf(AlgorithmType.class, familyConfig.getLoadBalancing_algorithm())) {
+                case ROUND_ROBIN -> families.add(
+                        new ServerFamily<>(
+                                familyName,
+                                whitelist,
+                                RoundRobin.class
+                        )
+                );
+                case LEAST_CONNECTION -> families.add(
+                        new ServerFamily<>(
+                                familyName,
+                                whitelist,
+                                LeastConnection.class
+                        )
+                );
+            }
+        }
+
+        return families;
     }
 }

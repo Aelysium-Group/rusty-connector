@@ -88,11 +88,11 @@ public class Redis {
      */
     public void disconnect() throws ExceptionInInitializerError {
         try {
-            this.subscriberThread.interrupt();
-            this.subscriberThread.join();
             this.subscriber.unsubscribe();
             this.jedisSubscriber.close();
             this.jedisSubscriber.disconnect();
+
+            this.subscriberThread.interrupt();
             this.client.close();
             this.client.disconnect();
         } catch (Exception e) {

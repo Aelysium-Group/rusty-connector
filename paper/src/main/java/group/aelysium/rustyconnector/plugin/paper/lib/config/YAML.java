@@ -1,32 +1,20 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.config;
+package group.aelysium.rustyconnector.plugin.paper.lib.config;
 
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 
-public class ConfigFileLoader extends group.aelysium.rustyconnector.core.lib.Config {
-    private File configPointer;
-    private String template;
-    private ConfigurationNode data;
-
-    @Override
-    public ConfigurationNode getData() { return this.data; }
-
-    public ConfigFileLoader(File configPointer, String template) {
-        this.configPointer = configPointer;
-        this.template = template;
-    }
-
-    public String getName() {
-        return this.configPointer.getName();
+public class YAML extends group.aelysium.rustyconnector.core.lib.parsing.YAML {
+    public YAML(File configPointer, String template) {
+        super(configPointer, template);
     }
 
     @Override
     public boolean generate() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
         plugin.logger().log("---| Registering "+this.configPointer.getName()+"...");
         plugin.logger().log("-----| Looking for "+this.configPointer.getName()+"...");
@@ -59,30 +47,11 @@ public class ConfigFileLoader extends group.aelysium.rustyconnector.core.lib.Con
             plugin.logger().log("-----| Found it!");
         }
 
-        this.data = this.loadYAML(this.configPointer);
-        if(this.data == null) return false;
-        return true;
-    }
-
-    @Override
-    public void reload() {
-        int number = 0;
-    }
-
-    @Override
-    public void save(String data) {
-        int number = 0;
-    }
-
-    public ConfigurationNode loadYAML(File file) {
         try {
-            return YAMLConfigurationLoader.builder()
-                    .setIndent(2)
-                    .setPath(file.toPath())
-                    .build().load();
-        } catch (IOException e) {
-            VelocityRustyConnector.getInstance().logger().error("",e);
-            return null;
+            this.data = this.loadYAML(this.configPointer);
+            return !(this.data == null);
+        } catch (Exception e) {
+            return false;
         }
     }
 }

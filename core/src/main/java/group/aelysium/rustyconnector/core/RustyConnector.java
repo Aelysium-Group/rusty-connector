@@ -26,13 +26,6 @@ public interface RustyConnector {
     InputStream getResourceAsStream(String filename);
 
     /**
-     * Load the configs for this plugin
-     */
-    boolean loadConfigs();
-
-    boolean loadCommands();
-
-    /**
      * Reload the plugin
      */
     void reload();

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.firewall;
+package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import java.util.Objects;
 import java.util.UUID;

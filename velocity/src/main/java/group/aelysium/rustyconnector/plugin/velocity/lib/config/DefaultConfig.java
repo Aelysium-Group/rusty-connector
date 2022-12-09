@@ -1,5 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
+import group.aelysium.rustyconnector.core.lib.hash.MD5;
+import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
+import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import ninja.leaping.configurate.ConfigurationNode;
 
 import java.io.File;
@@ -11,7 +15,7 @@ public class DefaultConfig extends YAML {
 
     private String private_key = "";
     private String public_key = "";
-    private int heart_beat = 10;
+    private int heartbeat = 10;
     private String root_family = "lobby";
     private List<String> families = new ArrayList<>();
 
@@ -63,8 +67,8 @@ public class DefaultConfig extends YAML {
         return this.public_key;
     }
 
-    public int getHeart_beat() {
-        return this.heart_beat;
+    public int getHeartbeat() {
+        return this.heartbeat;
     }
 
     public String getRoot_family() {
@@ -91,7 +95,7 @@ public class DefaultConfig extends YAML {
         return this.redis_dataChannel;
     }
 
-    public boolean isUse_whitelist() {
+    public boolean getUse_whitelist() {
         return this.use_whitelist;
     }
 
@@ -113,9 +117,22 @@ public class DefaultConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
-        this.private_key = this.getNode(this.data,"private-key",String.class);
+        try {
+            this.private_key = this.getNode(this.data,"private-key",String.class);
+        } catch (Exception e) {
+            (new LangMessage(VelocityRustyConnector.getInstance().logger()))
+                    .insert(Lang.boxedMessage(
+                            "No private-key was defined! Generating one now...",
+                            "Paste this into the `private-key` field in `config.yml` the restart your proxy."
+                    ))
+                    .insert(Lang.spacing())
+                    .insert(MD5.generatePrivateKey())
+                    .insert(Lang.spacing())
+                    .insert(Lang.border())
+                    .print();
+        }
         this.public_key = this.getNode(this.data,"public-key",String.class);
-        this.heart_beat = this.getNode(this.data,"heart-beat",Integer.class);
+        this.heartbeat = this.getNode(this.data,"heart-beat",Integer.class);
 
         this.root_family = this.getNode(this.data,"root-family",String.class);
         try {
@@ -129,8 +146,8 @@ public class DefaultConfig extends YAML {
         this.redis_password = this.getNode(this.data,"redis.password",String.class);
         this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
 
-        this.use_whitelist = this.getNode(this.data,"use-whitelist",Boolean.class);
-        this.whitelist = this.getNode(this.data,"whitelist",String.class);
+        this.use_whitelist = this.getNode(this.data,"whitelist.enabled",Boolean.class);
+        this.whitelist = this.getNode(this.data,"whitelist.name",String.class);
 
         this.messageTunnel_enabled = this.getNode(this.data,"message-tunnel.enabled",Boolean.class);
         try {

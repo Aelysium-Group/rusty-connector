@@ -26,11 +26,11 @@ public class FamilyConfig extends YAML {
         return loadBalancing_algorithm;
     }
 
-    public boolean isLoadBalancing_persistence() {
+    public boolean getLoadBalancing_persistence() {
         return loadBalancing_persistence;
     }
 
-    public boolean isUse_whitelist() {
+    public boolean getUse_whitelist() {
         return use_whitelist;
     }
 
@@ -72,7 +72,7 @@ public class FamilyConfig extends YAML {
         this.loadBalancing_algorithm = this.getNode(this.data,"load-balancing.algorithm",String.class);
         this.loadBalancing_persistence = this.getNode(this.data,"load-balancing.persistence",Boolean.class);
 
-        this.use_whitelist = this.getNode(this.data,"use-whitelist",Boolean.class);
-        this.whitelist = this.getNode(this.data,"whitelist",String.class);
+        this.use_whitelist = this.getNode(this.data,"whitelist.enabled",Boolean.class);
+        this.whitelist = this.getNode(this.data,"whitelist.name",String.class);
     }
 }

@@ -28,7 +28,7 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
             RedisMessage message = RedisMessage.create(object, MessageOrigin.SERVER, plugin.getVirtualServer().getAddress());
 
             try {
-                if (!(plugin.validatePrivateKey(message.getKey())))
+                if (!(plugin.getVirtualServer().validatePrivateKey(message.getKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 Redis.processParameters(message, object, messageSnowflake);

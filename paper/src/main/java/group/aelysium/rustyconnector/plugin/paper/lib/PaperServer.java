@@ -5,9 +5,8 @@ import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.model.Server;
-import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.lib.Permission;
+import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.Redis;
 import org.bukkit.entity.Player;
 
@@ -17,14 +16,13 @@ public class PaperServer implements Server {
     private Redis redis;
     private String family;
     private int playerCount = 0;
-    private int priorityIndex = 0;
+    private int weight = 0;
     private int softPlayerCap = 20;
     private int hardPlayerCap = 30;
     private final String name;
 
     private final String privateKey;
     private final InetSocketAddress address;
-    private Whitelist whitelist = null;
 
     public PaperServer(String name, String privateKey, String address, String family, Redis redis) {
         if(name.equals("")) {
@@ -40,6 +38,10 @@ public class PaperServer implements Server {
         this.family = family;
 
         this.redis = redis;
+    }
+
+    public boolean validatePrivateKey(String keyToValidate) {
+        return this.privateKey.equals(keyToValidate);
     }
 
     public MessageCache getMessageCache() {
@@ -59,8 +61,8 @@ public class PaperServer implements Server {
     }
 
     @Override
-    public int getPriorityIndex() {
-        return this.priorityIndex;
+    public int getWeight() {
+        return this.weight;
     }
 
     @Override
@@ -92,11 +94,6 @@ public class PaperServer implements Server {
         this.softPlayerCap = softPlayerCap;
     }
 
-    public boolean hasWhitelist() {
-        if(this.whitelist == null) return false;
-        return true;
-    }
-
     /**
      * Validates the player against the server's current player count.
      * If the server is full or the player doesn't have permissions to bypass soft and hard player caps. They will be kicked
@@ -123,11 +120,6 @@ public class PaperServer implements Server {
         return false; // If something somehow breaks with the previous checks. The method should fail to closed.
     }
 
-    public void registerWhitelist(Whitelist whitelist) {
-        this.whitelist = whitelist;
-    }
-    public Whitelist getWhitelist() { return this.whitelist; }
-
     public void registerToProxy() {
         RedisMessage registrationMessage = new RedisMessage(
                 this.privateKey,
@@ -140,7 +132,7 @@ public class PaperServer implements Server {
         registrationMessage.addParameter("soft-cap", String.valueOf(this.softPlayerCap));
         registrationMessage.addParameter("hard-cap", String.valueOf(this.hardPlayerCap));
         registrationMessage.addParameter("player-count", String.valueOf(this.playerCount));
-        registrationMessage.addParameter("priority", String.valueOf(this.priorityIndex));
+        registrationMessage.addParameter("weight", String.valueOf(this.weight));
 
         registrationMessage.dispatchMessage(this.redis);
     }
@@ -190,5 +182,40 @@ public class PaperServer implements Server {
         registrationMessage.addParameter("player-count", String.valueOf(this.playerCount));
 
         registrationMessage.dispatchMessage(this.redis);
+    }
+
+    public static PaperServer init(DefaultConfig config) throws IllegalAccessException {
+        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+
+        if((config.getPrivate_key().equals(""))) throw new IllegalArgumentException("You must define a `private-key` for this server! Copy the private key from your proxy and paste it in `config.yml`!");
+
+        if((config.getServer_address().equals(""))) throw new IllegalArgumentException("You must define an `address`. Copy the IP Address associated with this server and paste it into the `address` field in your `config.yml`");
+        if((config.getServer_name().equals(""))) throw new IllegalArgumentException("You must define a `name` for this server!");
+
+        plugin.logger().log("---------| Preparing Redis...");
+        Redis redis = new Redis();
+
+        redis.setConnection(
+                config.getRedis_host(),
+                config.getRedis_port(),
+                config.getRedis_password(),
+                config.getRedis_dataChannel()
+        );
+        redis.connect(plugin);
+
+        PaperServer server = new PaperServer(
+                config.getServer_name(),
+                config.getPrivate_key(),
+                config.getServer_address(),
+                config.getServer_family(),
+                redis
+        );
+
+        server.setPlayerCap(
+                config.getServer_playerCap_soft(),
+                config.getServer_playerCap_hard()
+        );
+
+        return server;
     }
 }

@@ -5,7 +5,6 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.LoadBalancer;
 import group.aelysium.rustyconnector.core.lib.database.Redis;
 import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
@@ -24,14 +23,14 @@ public class PaperServer implements Server {
     private final ServerInfo serverInfo;
     private String familyName;
     private int playerCount = 0;
-    private int priorityIndex = 0;
+    private int weight = 0;
     private int softPlayerCap = 20;
     private int hardPlayerCap = 30;
 
-    public PaperServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int priorityIndex) {
+    public PaperServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight) {
         this.serverInfo = serverInfo;
 
-        this.priorityIndex = priorityIndex;
+        this.weight = weight;
 
         this.softPlayerCap = softPlayerCap;
         this.hardPlayerCap = hardPlayerCap;
@@ -96,8 +95,8 @@ public class PaperServer implements Server {
     }
 
     @Override
-    public int getPriorityIndex() {
-        return this.priorityIndex;
+    public int getWeight() {
+        return this.weight;
     }
 
     @Override

@@ -1,9 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
 
-import ch.qos.logback.core.spi.AbstractComponentTracker;
-import group.aelysium.rustyconnector.core.lib.firewall.Whitelist;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 
 import java.util.HashMap;
 import java.util.List;

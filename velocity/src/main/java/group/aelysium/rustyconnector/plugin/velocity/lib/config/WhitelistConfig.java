@@ -25,7 +25,7 @@ public class WhitelistConfig extends YAML {
     private WhitelistConfig(File configPointer, String template) {
         super(configPointer, template);
     }
-    public boolean isUse_players() {
+    public boolean getUse_players() {
         return use_players;
     }
 
@@ -33,11 +33,11 @@ public class WhitelistConfig extends YAML {
         return players;
     }
 
-    public boolean isUse_permission() {
+    public boolean getUse_permission() {
         return use_permission;
     }
 
-    public boolean isUse_country() {
+    public boolean getUse_country() {
         return use_country;
     }
 

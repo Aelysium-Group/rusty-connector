@@ -1,7 +1,7 @@
-package group.aelysium.rustyconnector.core.lib.managers;
+package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
 
-import group.aelysium.rustyconnector.core.lib.firewall.WhitelistPlayer;
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.WhitelistPlayer;
 
 import java.util.HashMap;
 import java.util.List;
