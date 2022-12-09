@@ -79,10 +79,6 @@ public class VelocityRustyConnector implements RustyConnector {
     public void init() {
         instance = this;
         if(!Engine.start()) uninit();
-
-        (new LangMessage(this.logger))
-                .insert(Lang.wordmark())
-                .print();
     }
 
     public void uninit() {

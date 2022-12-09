@@ -20,6 +20,8 @@ public class DefaultConfig extends YAML {
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
+    private boolean registerOnBoot = true;
+
     private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
     }
@@ -71,6 +73,10 @@ public class DefaultConfig extends YAML {
         return redis_dataChannel;
     }
 
+    public boolean isRegisterOnBoot() {
+        return registerOnBoot;
+    }
+
     /**
      * Get the current config.
      * @return The config.
@@ -111,5 +117,7 @@ public class DefaultConfig extends YAML {
         this.redis_port = this.getNode(this.data,"redis.port",Integer.class);
         this.redis_password = this.getNode(this.data,"redis.password",String.class);
         this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
+
+        this.registerOnBoot = this.getNode(this.data,"register-on-boot",Boolean.class);
     }
 }

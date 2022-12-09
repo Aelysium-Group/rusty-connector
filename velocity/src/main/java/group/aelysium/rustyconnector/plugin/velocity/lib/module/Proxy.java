@@ -1,6 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import com.sun.jdi.request.DuplicateRequestException;
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.permission.Tristate;
+import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
@@ -21,6 +24,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.PlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
 
+import java.io.Console;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.HashMap;
@@ -317,6 +321,15 @@ public class Proxy {
     }
 
     /**
+     * Attempt to dispatch a command as the Proxy
+     * @param command The command to dispatch.
+     */
+    public void dispatchCommand(String command) {
+        VelocityRustyConnector.getInstance().getVelocityServer().getCommandManager()
+                .executeAsync((ConsoleCommandSource) permission -> null, command);
+    }
+
+    /**
      * Initializes the proxy based on the configuration.
      * @param config The configuration file.
      */
@@ -376,10 +389,7 @@ public class Proxy {
 
                 messageTunnel.blacklistAddress(address);
             });
-
-            plugin.logger().log("---------| Finished!");
         } else {
-            plugin.logger().log("---------| Finished! Proxy doesn't have a message tunnel.");
         }
 
         return proxy;

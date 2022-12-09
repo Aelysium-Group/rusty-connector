@@ -247,3 +247,30 @@ message-tunnel:
 #
     denylist:
       - "127.0.0.1"
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Boot Commands                       #
+#                                                          #
+#               ---------------------------                #
+# | You can run proxy commands when RustyConnector         #
+# | finishes booting up!                                   #
+#                                                          #
+# | This is a great way to automatically send a            #
+# | register all command through the data channel          #
+# | after a server restart!                                #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+boot-commands:
+    enabled: false
+
+#
+# The proxy commands to send on-boot.
+# These commands will be sent, in order, from top to bottom.
+# Remember that these are proxy commands. You won't be able to run commands on your sub-servers from here.
+#
+    commands:
+      - "rc registerAll"

@@ -4,6 +4,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
@@ -23,6 +24,24 @@ public class Engine {
         if(!initConfigs(plugin)) return false;
         if(!initCommands(plugin)) return false;
         if(!initEvents(plugin)) return false;
+
+        (new LangMessage(plugin.logger()))
+                .insert(Lang.wordmark())
+                .print();
+
+        DefaultConfig defaultConfig = DefaultConfig.getConfig();
+        if(defaultConfig.isBootCommands_enabled()) {
+            plugin.logger().log("Issuing boot commands...");
+            defaultConfig.getBootCommands_commands().forEach(command -> {
+                plugin.logger().log(">>> "+command);
+                plugin.getProxy().dispatchCommand(command);
+            });
+        }
+
+        WhitelistConfig.empty();
+        DefaultConfig.empty();
+        FamilyConfig.empty();
+        LoggerConfig.empty();
 
         return true;
     }
@@ -61,11 +80,6 @@ public class Engine {
             PluginLogger.init(loggerConfig);
 
             plugin.setProxy(Proxy.init(defaultConfig));
-
-            WhitelistConfig.empty();
-            DefaultConfig.empty();
-            FamilyConfig.empty();
-            LoggerConfig.empty();
 
             return true;
         } catch (Exception e) {

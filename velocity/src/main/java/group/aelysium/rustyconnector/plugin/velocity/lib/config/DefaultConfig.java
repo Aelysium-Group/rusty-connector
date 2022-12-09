@@ -30,6 +30,9 @@ public class DefaultConfig extends YAML {
     private List<String> messageTunnel_whitelist = new ArrayList<>();
     private List<String> messageTunnel_denylist = new ArrayList<>();
 
+    private boolean bootCommands_enabled = false;
+    private List<String> bootCommands_commands = new ArrayList<>();
+
     private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
     }
@@ -114,6 +117,14 @@ public class DefaultConfig extends YAML {
         return this.messageTunnel_denylist;
     }
 
+    public boolean isBootCommands_enabled() {
+        return bootCommands_enabled;
+    }
+
+    public List<String> getBootCommands_commands() {
+        return bootCommands_commands;
+    }
+
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
         try {
@@ -158,6 +169,14 @@ public class DefaultConfig extends YAML {
             this.messageTunnel_denylist = (List<String>) this.getNode(this.data,"message-tunnel.denylist",List.class);
         } catch (ClassCastException e) {
             throw new IllegalStateException("The node [message-tunnel.denylist] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
+        }
+
+
+        this.bootCommands_enabled = this.getNode(this.data,"boot-commands.enabled",Boolean.class);
+        try {
+            this.bootCommands_commands = (List<String>) this.getNode(this.data,"boot-commands.commands",List.class);
+        } catch (ClassCastException e) {
+            throw new IllegalStateException("The node [boot-commands.commands] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
     }
 }

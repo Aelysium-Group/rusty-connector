@@ -19,8 +19,7 @@ public class ServerRegHandler implements MessageHandler {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
         PaperRustyConnector.getInstance().logger().log("Server has been requested to register itself...");
-        if(plugin.hasRegistered) plugin.logger().warn("This server has already registered itself! Re-registering anyways...");
         plugin.registerToProxy();
-        PaperRustyConnector.getInstance().logger().log("Server has submitted it's registration request.");
+        PaperRustyConnector.getInstance().logger().log("Server has submitted its registration request.");
     }
 }

@@ -75,6 +75,10 @@ public class PaperServer implements Server {
         return this.hardPlayerCap;
     }
 
+    public void killRedis() {
+        this.redis.disconnect();
+    }
+
     /**
      * Set the player cap for this server. If soft cap is larger than hard cap. Set soft cap to be the same value as hard cap.
      * @param softPlayerCap The soft player cap

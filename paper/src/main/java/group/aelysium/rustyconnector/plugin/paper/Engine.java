@@ -24,7 +24,13 @@ public class Engine {
     public static void stop() {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
-        if(plugin.hasRegistered) plugin.getVirtualServer().unregisterFromProxy();
+        plugin.getVirtualServer().unregisterFromProxy();
+
+        DefaultConfig.empty();
+
+        plugin.getVirtualServer().killRedis();
+
+        plugin.getCommandManager().deleteRootCommand("rc");
     }
 
     private static boolean initConfigs(PaperRustyConnector plugin) {
@@ -40,6 +46,13 @@ public class Engine {
             (new LangMessage(plugin.logger()))
                     .insert(Lang.wordmark())
                     .print();
+
+            if(defaultConfig.isRegisterOnBoot()) {
+                (new LangMessage(plugin.logger()))
+                        .insert("Sent a registration request over the data-channel...")
+                        .print();
+                plugin.getVirtualServer().registerToProxy();
+            }
 
             DefaultConfig.empty();
 
