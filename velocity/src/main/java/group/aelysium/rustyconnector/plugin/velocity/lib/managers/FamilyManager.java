@@ -63,9 +63,7 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
         langMessage
                 .insert(Lang.spacing())
                 .insert("To see more details about a particular family use:")
-                .insert("/rc family info <family name>")
-                .insert("To see all servers currently saved to a family use:")
-                .insert("/rc family info <family name> servers")
+                .insert("/rc family <family name>")
                 .insert(Lang.spacing())
                 .insert(Lang.border())
                 .print();

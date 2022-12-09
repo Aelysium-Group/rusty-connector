@@ -238,8 +238,8 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
             familyConfig.register();
 
             Whitelist whitelist = null;
-            if(familyConfig.getUse_whitelist()) {
-                whitelist = Whitelist.init(familyConfig.getWhitelist());
+            if(familyConfig.isWhitelist_enabled()) {
+                whitelist = Whitelist.init(familyConfig.getWhitelist_name());
             }
 
             switch (Enum.valueOf(AlgorithmType.class, familyConfig.getLoadBalancing_algorithm())) {

@@ -58,8 +58,7 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
                     message.setToParameter(object, "name"); // The server's identifier
                     message.setToParameter(object, "soft-cap"); // The server's soft cap
                     message.setToParameter(object, "hard-cap"); // The server's hard cap
-                    message.setToParameter(object, "player-count"); // The server's current player count
-                    message.setToParameter(object, "priority"); // The server's current player count
+                    message.setToParameter(object, "weight"); // The server's current player count
 
                     new ServerRegHandler(message).execute();
                 }
@@ -69,13 +68,6 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
 
                     new ServerUnRegHandler(message).execute();
                 }
-                case PLAYER_COUNT -> {
-                    message.setToParameter(object, "family"); // The family that holds the server
-                    message.setToParameter(object, "name"); // The server's identifier
-                    message.setToParameter(object, "player-count"); // The server's current player count
-
-                    new PlayerCountUpdateHandler(message).execute();
-                }
                 case SEND -> {
                     message.setToParameter(object, "family"); // The family to send the player to
                     message.setToParameter(object, "uuid"); // The uuid of the player to move
@@ -84,7 +76,6 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
                 }
                 case PONG -> {
                     message.setToParameter(object, "name"); // The server's identifier
-                    message.setToParameter(object, "player-count"); // The server's current player count
 
                     new PongHandler(message).execute();
                 }

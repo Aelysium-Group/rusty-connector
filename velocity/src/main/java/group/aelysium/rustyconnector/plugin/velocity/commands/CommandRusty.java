@@ -209,27 +209,10 @@ public final class CommandRusty {
             )
             .then(LiteralArgumentBuilder.<CommandSource>literal("family")
                 .executes(context -> {
-                    (new LangMessage(plugin.logger()))
-                            .insert(Lang.commandUsage())
-                            .insert(
-                                    Lang.boxedMessage(
-                                            "/rc family list",
-                                            "Gets a list of all registered families.",
-                                            Lang.spacing(),
-                                            "/rc family <family name>",
-                                            "Gets info about a particular family"
-                                    )
-                            )
-                            .print();
+                    plugin.getProxy().getFamilyManager().printFamilies();
 
                     return 1;
                 })
-                .then(LiteralArgumentBuilder.<CommandSource>literal("list")
-                    .executes(context -> {
-                        plugin.getProxy().getFamilyManager().printFamilies();
-                        return 1;
-                    })
-                )
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
                         .executes(context -> {
                             String familyName = context.getArgument("familyName", String.class);

@@ -106,5 +106,10 @@ public class DefaultConfig extends YAML {
         this.server_weight = this.getNode(this.data,"server.weight",Integer.class);
         this.server_playerCap_soft = this.getNode(this.data,"server.player-cap.soft",Integer.class);
         this.server_playerCap_hard = this.getNode(this.data,"server.player-cap.hard",Integer.class);
+
+        this.redis_host = this.getNode(this.data,"redis.host",String.class);
+        this.redis_port = this.getNode(this.data,"redis.port",Integer.class);
+        this.redis_password = this.getNode(this.data,"redis.password",String.class);
+        this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
     }
 }

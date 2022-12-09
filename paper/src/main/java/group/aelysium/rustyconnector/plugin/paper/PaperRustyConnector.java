@@ -49,9 +49,9 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
     @Override
     public void onEnable() {
         instance = this;
+        this.logger = new PluginLogger(this.getSLF4JLogger());
 
         if(!Engine.start()) this.killPlugin();
-        this.logger = new PluginLogger(this.getSLF4JLogger());
 
         (new LangMessage(this.logger))
                 .insert(Lang.wordmark())
@@ -61,8 +61,6 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
     @Override
     public void onDisable() {
         Engine.stop();
-
-        this.logger().log("Shutting down...");
     }
 
     @Override

@@ -32,7 +32,7 @@ public class ServerRegHandler implements MessageHandler {
                 serverInfo,
                 Integer.parseInt(message.getParameter("soft-cap")),
                 Integer.parseInt(message.getParameter("hard-cap")),
-                Integer.parseInt(message.getParameter("priority"))
+                Integer.parseInt(message.getParameter("weight"))
         );
 
         server.register(familyName);

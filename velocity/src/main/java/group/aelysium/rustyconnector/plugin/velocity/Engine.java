@@ -4,8 +4,6 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.EventManager;
-import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
@@ -60,8 +58,9 @@ public class Engine {
                 throw new IllegalStateException("Unable to load or create logger.yml!");
             }
             loggerConfig.register();
+            PluginLogger.init(loggerConfig);
 
-            plugin.setProxy(Proxy.init(defaultConfig,loggerConfig));
+            plugin.setProxy(Proxy.init(defaultConfig));
 
             WhitelistConfig.empty();
             DefaultConfig.empty();
@@ -70,6 +69,9 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
+            (new LangMessage(plugin.logger()))
+                    .insert(e.getMessage())
+                    .print();
             return false;
         }
     }
@@ -85,6 +87,9 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
+            (new LangMessage(plugin.logger()))
+                    .insert(e.getMessage())
+                    .print();
             return false;
         }
     }
@@ -97,6 +102,9 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
+            (new LangMessage(plugin.logger()))
+                    .insert(e.getMessage())
+                    .print();
             return false;
         }
     }

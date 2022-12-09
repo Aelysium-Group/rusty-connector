@@ -4,7 +4,6 @@ import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
 import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import ninja.leaping.configurate.ConfigurationNode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,8 +23,8 @@ public class DefaultConfig extends YAML {
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
-    private boolean use_whitelist = false;
-    private String whitelist = "whitelist-template";
+    private boolean whitelist_enabled = false;
+    private String whitelist_name = "whitelist-template";
 
     private boolean messageTunnel_enabled = false;
     private List<String> messageTunnel_whitelist = new ArrayList<>();
@@ -95,12 +94,12 @@ public class DefaultConfig extends YAML {
         return this.redis_dataChannel;
     }
 
-    public boolean getUse_whitelist() {
-        return this.use_whitelist;
+    public boolean isWhitelist_enabled() {
+        return this.whitelist_enabled;
     }
 
-    public String getWhitelist() {
-        return this.whitelist;
+    public String getWhitelist_name() {
+        return this.whitelist_name;
     }
 
     public boolean isMessageTunnel_enabled() {
@@ -146,8 +145,8 @@ public class DefaultConfig extends YAML {
         this.redis_password = this.getNode(this.data,"redis.password",String.class);
         this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
 
-        this.use_whitelist = this.getNode(this.data,"whitelist.enabled",Boolean.class);
-        this.whitelist = this.getNode(this.data,"whitelist.name",String.class);
+        this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
+        this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
 
         this.messageTunnel_enabled = this.getNode(this.data,"message-tunnel.enabled",Boolean.class);
         try {

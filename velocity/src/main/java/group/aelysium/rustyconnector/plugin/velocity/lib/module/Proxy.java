@@ -15,7 +15,6 @@ import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
@@ -321,15 +320,15 @@ public class Proxy {
      * Initializes the proxy based on the configuration.
      * @param config The configuration file.
      */
-    public static Proxy init(DefaultConfig config, LoggerConfig loggerConfig) throws IllegalAccessException {
-
+    public static Proxy init(DefaultConfig config) throws IllegalAccessException {
         Proxy proxy = new Proxy(config.getPrivate_key());
 
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         List<ServerFamily<? extends PaperServerLoadBalancer>> families = ServerFamily.init(config);
+        families.forEach(family -> proxy.getFamilyManager().add(family));
 
-        plugin.getProxy().setRootFamily(config.getRoot_family());
+        proxy.setRootFamily(config.getRoot_family());
 
         Redis redis = new Redis();
         redis.setConnection(
@@ -344,10 +343,10 @@ public class Proxy {
 
         proxy.startHeart(config.getHeartbeat());
 
-        if(config.getUse_whitelist()) {
-            plugin.getProxy().setWhitelist(config.getWhitelist());
+        if(config.isWhitelist_enabled()) {
+            proxy.setWhitelist(config.getWhitelist_name());
 
-            proxy.whitelistManager.add(Whitelist.init(config.getWhitelist()));
+            proxy.whitelistManager.add(Whitelist.init(config.getWhitelist_name()));
         } else {
         }
 

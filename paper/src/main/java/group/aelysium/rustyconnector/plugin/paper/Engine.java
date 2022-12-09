@@ -45,6 +45,9 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
+            (new LangMessage(plugin.logger()))
+                    .insert(e.getMessage())
+                    .print();
             return false;
         }
     }

@@ -159,14 +159,14 @@ public class LoggerConfig extends YAML {
         this.log_playerMove = this.getNode(this.data,"log.player-move",Boolean.class);
         this.log_familyBalancing = this.getNode(this.data,"log.family-balancing",Boolean.class);
 
-        this.consoleIcons_requestingRegistration = this.getNode(this.data,"console-icons.",String.class);
-        this.consoleIcons_registered = this.getNode(this.data,"console-icons.",String.class);
-        this.consoleIcons_callForRegistration = this.getNode(this.data,"console-icons.",String.class);
-        this.consoleIcons_requestingUnregistration = this.getNode(this.data,"console-icons.",String.class);
-        this.consoleIcons_unregistered = this.getNode(this.data,"console-icons.",String.class);
-        this.consoleIcons_canceledRequest = this.getNode(this.data,"console-icons.",String.class);
-        this.consoleIcons_familyBalancing = this.getNode(this.data,"console-icons.",String.class);
-        this.consoleIcons_ping = this.getNode(this.data,"console-icons.",String.class);
-        this.consoleIcons_pong = this.getNode(this.data,"console-icons.",String.class);
+        this.consoleIcons_requestingRegistration = this.getNode(this.data,"console-icons.requesting-registration",String.class);
+        this.consoleIcons_registered = this.getNode(this.data,"console-icons.registered",String.class);
+        this.consoleIcons_callForRegistration = this.getNode(this.data,"console-icons.call-for-registration",String.class);
+        this.consoleIcons_requestingUnregistration = this.getNode(this.data,"console-icons.requesting-unregistration",String.class);
+        this.consoleIcons_unregistered = this.getNode(this.data,"console-icons.unregistered",String.class);
+        this.consoleIcons_canceledRequest = this.getNode(this.data,"console-icons.canceled-request",String.class);
+        this.consoleIcons_familyBalancing = this.getNode(this.data,"console-icons.family-balancing",String.class);
+        this.consoleIcons_ping = this.getNode(this.data,"console-icons.ping",String.class);
+        this.consoleIcons_pong = this.getNode(this.data,"console-icons.pong",String.class);
     }
 }

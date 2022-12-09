@@ -131,7 +131,6 @@ public class PaperServer implements Server {
         registrationMessage.addParameter("name",this.name);
         registrationMessage.addParameter("soft-cap", String.valueOf(this.softPlayerCap));
         registrationMessage.addParameter("hard-cap", String.valueOf(this.hardPlayerCap));
-        registrationMessage.addParameter("player-count", String.valueOf(this.playerCount));
         registrationMessage.addParameter("weight", String.valueOf(this.weight));
 
         registrationMessage.dispatchMessage(this.redis);
@@ -179,7 +178,6 @@ public class PaperServer implements Server {
                 false
         );
         registrationMessage.addParameter("name", this.name);
-        registrationMessage.addParameter("player-count", String.valueOf(this.playerCount));
 
         registrationMessage.dispatchMessage(this.redis);
     }
