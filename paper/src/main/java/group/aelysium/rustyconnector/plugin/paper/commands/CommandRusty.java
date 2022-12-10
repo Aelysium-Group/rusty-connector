@@ -6,12 +6,12 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.message.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.lib.database.Redis;
+import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -21,7 +21,7 @@ public final class CommandRusty {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
         final Command.Builder<CommandSender> builder = manager.commandBuilder("rc","rusty","rustyconnector");
 
-        manager.command(builder.literal("retrieveMessage")
+        manager.command(builder.literal("message")
                 .senderType(ConsoleCommandSender.class)
                 .argument(LongArgument.of("snowflake"), ArgumentDescription.of("Message ID"))
                 .handler(context -> manager.taskRecipe().begin(context)
@@ -33,15 +33,7 @@ public final class CommandRusty {
 
                             CacheableMessage message = messageCache.getMessage(snowflake);
 
-                            (new LangMessage(plugin.logger()))
-                                    .insert(Lang.boxedMessage(
-                                            "Found message with ID "+snowflake.toString(),
-                                            Lang.spacing(),
-                                            "ID: "+message.getSnowflake(),
-                                            "Contents: "+message.getContents(),
-                                            "Date: "+message.getDate().toString()
-                                    ))
-                                    .print();
+                            PaperLang.RC_MESSAGE_GET_MESSAGE.send(plugin.logger(), message.getSnowflake(), message.getDate(), message.getContents());
                         } catch (NullPointerException e) {
                             plugin.logger().log("That message either doesn't exist or is no-longer available in the cache!");
                         } catch (Exception e) {
@@ -61,9 +53,9 @@ public final class CommandRusty {
 
                                 plugin.getVirtualServer().sendToOtherFamily(player,familyName);
                             } catch (NullPointerException e) {
-                                plugin.logger().log("That message either doesn't exist or is no-longer available in the cache!");
+                                PaperLang.RC_SEND_USAGE.send(plugin.logger());
                             } catch (Exception e) {
-                                plugin.logger().log("An error stopped us from getting that message!", e);
+                                plugin.logger().log("An error stopped us from processing the request!", e);
                             }
                         }).execute())
         ).command(builder.literal("register")

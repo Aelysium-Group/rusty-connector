@@ -4,10 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.LoadBalancer;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
@@ -116,6 +113,10 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
         return this.loadBalancer.dump();
     }
 
+    public int getQueuedServer() {
+        return this.loadBalancer.getIndex();
+    }
+
     public String getName() {
         return this.name;
     }
@@ -164,58 +165,6 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
                 .filter(server ->
                         Objects.equals(server.getRegisteredServer().getServerInfo().getAddress(), address)
                 ).findFirst().orElse(null);
-    }
-
-    /**
-     * Print info related to this family.
-     */
-    public void printInfo() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-
-        (new LangMessage(plugin.logger()))
-                .insert(Lang.info())
-                .insert(Lang.spacing())
-                .insert("Family Info")
-                .insert(Lang.spacing())
-                .insert("   ---| Name: "+this.getName())
-                .insert("   ---| Online Players: "+this.getPlayerCount())
-                .insert("   ---| Registered Servers: "+this.serverCount())
-                .insert("   ---| Load Balancing Algorithm: "+this.loadBalancerName())
-                .insert(Lang.spacing())
-                .insert(Lang.border())
-                .insert(Lang.spacing())
-                .insert("Registered Servers:")
-                .insert(Lang.spacing())
-                .insert(Lang.border())
-                .insert(Lang.spacing())
-                .print();
-
-
-        LangMessage serverList = (new LangMessage(plugin.logger()));
-        AtomicInteger index = new AtomicInteger(1);
-
-        for (PaperServer server: this.loadBalancer.dump()) {
-            if((this.loadBalancer.getIndex() + 1) == index.get())
-                serverList
-                        .insert(
-                                "   ---| "+index.get()+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
-                                        "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                        "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+")] <<<"
-                        );
-            else
-                serverList
-                        .insert(
-                                "   ---| "+index.get()+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
-                                        "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                        "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+")]"
-                        );
-
-            index.getAndIncrement();
-        }
-        serverList
-                .insert(Lang.spacing())
-                .insert(Lang.border())
-                .print();
     }
 
     /**

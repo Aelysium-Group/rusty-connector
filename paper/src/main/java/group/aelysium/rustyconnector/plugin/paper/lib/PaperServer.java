@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.plugin.paper.lib;
 
-import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.model.Server;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;

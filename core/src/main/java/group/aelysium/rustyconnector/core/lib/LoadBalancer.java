@@ -17,7 +17,7 @@ public interface LoadBalancer<I> {
     I getCurrent();
 
     /**
-     * Get the current index number of currently selected item.
+     * Get the index number of the currently selected item.
      * @return The current index.
      */
     int getIndex();

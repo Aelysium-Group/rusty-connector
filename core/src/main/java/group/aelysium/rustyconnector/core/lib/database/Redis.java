@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.database;
 
-import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;

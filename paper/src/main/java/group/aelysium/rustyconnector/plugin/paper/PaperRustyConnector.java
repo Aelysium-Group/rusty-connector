@@ -2,8 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper;
 
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.RustyConnector;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
@@ -52,10 +51,6 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
         this.logger = new PluginLogger(this.getSLF4JLogger());
 
         if(!Engine.start()) this.killPlugin();
-
-        (new LangMessage(this.logger))
-                .insert(Lang.wordmark())
-                .print();
     }
 
     @Override
@@ -73,10 +68,6 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
         Engine.stop();
 
         if(!Engine.start()) this.killPlugin();
-
-        (new LangMessage(this.logger))
-                .insert(Lang.wordmark())
-                .print();
     }
 
     public PaperServer getVirtualServer() { return this.server; }

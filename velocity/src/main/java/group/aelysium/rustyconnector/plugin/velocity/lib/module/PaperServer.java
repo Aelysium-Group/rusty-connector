@@ -6,14 +6,14 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.database.Redis;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.model.Server;
-import group.aelysium.rustyconnector.core.lib.util.logger.GateKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.LangKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -142,15 +142,7 @@ public class PaperServer implements Server {
         message.dispatchMessage(redis);
 
         if(plugin.logger().getGate().check(GateKey.PING))
-            (new LangMessage(plugin.logger()))
-                    .insert(
-                            "Proxy" +
-                                    " "+ Lang.get(LangKey.ICON_PING) +" " +
-                                    "["+this.getServerInfo().getName()+"]" +
-                                    "("+this.getServerInfo().getAddress().getHostName()+":"+this.getServerInfo().getAddress().getPort()+") - " +
-                                    "{"+ familyName +"}"
-                    )
-                    .print();
+            VelocityLang.PING.send(plugin.logger(),this.serverInfo);
     }
 
     /**

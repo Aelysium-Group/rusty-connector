@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.message;
+package group.aelysium.rustyconnector.core.lib.data_messaging;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

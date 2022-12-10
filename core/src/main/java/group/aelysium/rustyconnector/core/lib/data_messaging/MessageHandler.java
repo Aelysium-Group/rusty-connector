@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.message;
+package group.aelysium.rustyconnector.core.lib.data_messaging;
 
 import java.security.InvalidAlgorithmParameterException;
 

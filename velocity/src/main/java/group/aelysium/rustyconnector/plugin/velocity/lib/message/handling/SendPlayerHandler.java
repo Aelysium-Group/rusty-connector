@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.message.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import net.kyori.adventure.text.Component;

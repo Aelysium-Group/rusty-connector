@@ -1,30 +1,25 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import com.sun.jdi.request.DuplicateRequestException;
-import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.message.firewall.MessageTunnel;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
-import group.aelysium.rustyconnector.core.lib.util.logger.GateKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTunnel;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.PlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
 
-import java.io.Console;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.HashMap;
@@ -79,25 +74,22 @@ public class Proxy {
             VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
             if(plugin.logger().getGate().check(GateKey.PING))
-                (new LangMessage(plugin.logger()))
-                        .insert(Lang.border())
-                        .insert("Sending out pings and killing dead servers...")
-                        .print();
+                plugin.logger().log("Sending out pings and killing dead servers...");
 
             try {
                 for (Map.Entry<ServerInfo, Boolean> entry : lifeMatrix.entrySet()) {
                     ServerInfo serverInfo = entry.getKey();
 
                     PaperServer server = this.findServer(serverInfo);
-                    if(server == null) throw new NullPointerException(serverInfo.getName() + " couldn't be found!");
+                    if(server == null) {
+                        plugin.logger().log(serverInfo.getName() + " couldn't be found! Ignoring...");
+                        continue;
+                    }
 
                     if(!entry.getValue()) {
                         //this.unregisterServer(serverInfo, server.getFamilyName());
                         if(plugin.logger().getGate().check(GateKey.PING))
-                            (new LangMessage(plugin.logger()))
-                                    .insert(Lang.border())
-                                    .insert(server.getServerInfo().getName()+" never responded to ping! It should be killed!")
-                                    .print();
+                            plugin.logger().log(server.getServerInfo().getName()+" never responded to ping! It should be killed!");
                         continue;
                     }
 
@@ -107,10 +99,7 @@ public class Proxy {
                 }
                 return true;
             } catch (Exception error) {
-                (new LangMessage(plugin.logger()))
-                        .insert("There was an issue with the Proxy heartbeat!")
-                        .insert(error.getMessage())
-                        .print();
+                plugin.logger().log(error.getMessage());
             }
             return false;
         });
@@ -204,8 +193,10 @@ public class Proxy {
      * Can be usefull if you've just restarted your proxy and need to quickly get all your servers back online.
      */
     public void registerAllServers() {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
         if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.CALL_FOR_REGISTRATION))
-            VelocityRustyConnector.getInstance().logger().log("[Velocity](127.0.0.1) "+Lang.get(LangKey.ICON_CALL_FOR_REGISTRATION) +" EVERYONE");
+            VelocityLang.CALL_FOR_REGISTRATION.send(plugin.logger());
 
         RedisMessage message = new RedisMessage(
                 this.privateKey,
@@ -227,13 +218,7 @@ public class Proxy {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         try {
             if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
-                (new LangMessage(plugin.logger()))
-                    .insert(
-                        "["+server.getServerInfo().getName()+"]" +
-                        "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
-                        " "+ Lang.get(LangKey.ICON_REQUEST_REGISTRATION) +" "+familyName
-                    )
-                    .print();
+                VelocityLang.REGISTRATION_REQUEST.send(plugin.logger(), server, familyName);
 
             if(plugin.getProxy().contains(server.getServerInfo().getName())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
 
@@ -248,25 +233,12 @@ public class Proxy {
             this.lifeMatrix.put(server.getServerInfo(),true);
 
             if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
-                (new LangMessage(plugin.logger()))
-                    .insert(
-                        "["+registeredServer.getServerInfo().getName()+"]" +
-                                "("+registeredServer.getServerInfo().getAddress().getHostName()+":"+registeredServer.getServerInfo().getAddress().getPort()+")" +
-                                " "+ Lang.get(LangKey.ICON_REGISTERED) +" "+family.getName()
-                    )
-                    .print();
+                VelocityLang.REGISTERED.send(plugin.logger(), server, familyName);
 
             return registeredServer;
         } catch (Exception error) {
             if(plugin.logger().getGate().check(GateKey.REGISTRATION_REQUEST))
-                (new LangMessage(plugin.logger()))
-                    .insert(
-                            "["+server.getServerInfo().getName()+"]" +
-                                    "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
-                                    " "+ Lang.get(LangKey.ICON_CANCELED) +" "+familyName
-                    )
-                    .insert(error.getMessage())
-                    .print();
+                VelocityLang.REGISTRATION_CANCELED.send(plugin.logger(), server, familyName);
         }
         return null;
     }
@@ -282,13 +254,7 @@ public class Proxy {
             if(server == null) throw new NullPointerException("Server ["+serverInfo.getName()+"]("+serverInfo.getAddress()+":"+serverInfo.getAddress().getPort()+") doesn't exist! It can't be unregistered!");
 
             if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
-                (new LangMessage(plugin.logger()))
-                    .insert(
-                        "["+serverInfo.getName()+"]" +
-                              "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                              " "+ Lang.get(LangKey.ICON_REQUESTING_UNREGISTRATION) +" "+server.getFamilyName()
-                    )
-                    .print();
+                VelocityLang.UNREGISTRATION_REQUEST.send(plugin.logger(), server, familyName);
 
             ServerFamily<? extends PaperServerLoadBalancer> family = server.getFamily();
             family.removeServer(server);
@@ -298,24 +264,11 @@ public class Proxy {
             this.lifeMatrix.remove(serverInfo);
 
             if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
-                (new LangMessage(plugin.logger()))
-                        .insert(
-                                "["+server.getServerInfo().getName()+"]" +
-                                        "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
-                                        " "+ Lang.get(LangKey.ICON_UNREGISTERED) +" "+server.getFamilyName()
-                        )
-                        .print();
+                VelocityLang.UNREGISTERED.send(plugin.logger(), server, familyName);
         } catch (Exception error) {
             if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST)) {
                 assert server != null;
-                (new LangMessage(plugin.logger()))
-                        .insert(
-                                "["+server.getServerInfo().getName()+"]" +
-                                        "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
-                                        " "+ Lang.get(LangKey.ICON_CANCELED) +" "+familyName
-                        )
-                        .insert(error.getMessage())
-                        .print();
+                VelocityLang.REGISTRATION_CANCELED.send(plugin.logger(), server, familyName);
             }
         }
     }

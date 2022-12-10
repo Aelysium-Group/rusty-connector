@@ -2,11 +2,12 @@ package group.aelysium.rustyconnector.plugin.paper;
 
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
 import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.function.Function;
@@ -43,14 +44,10 @@ public class Engine {
 
             plugin.setServer(PaperServer.init(defaultConfig));
 
-            (new LangMessage(plugin.logger()))
-                    .insert(Lang.wordmark())
-                    .print();
+            Lang.WORDMARK_RUSTY_CONNECTOR.send(plugin.logger());
 
             if(defaultConfig.isRegisterOnBoot()) {
-                (new LangMessage(plugin.logger()))
-                        .insert("Sent a registration request over the data-channel...")
-                        .print();
+                Lang.BOXED_MESSAGE.send(plugin.logger(), Component.text("Sent a registration request over the data-channel...", NamedTextColor.GREEN));
                 plugin.getVirtualServer().registerToProxy();
             }
 
@@ -58,9 +55,7 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
-            (new LangMessage(plugin.logger()))
-                    .insert(e.getMessage())
-                    .print();
+            plugin.logger().log(e.getMessage());
             return false;
         }
     }
@@ -77,10 +72,7 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
-            (new LangMessage(plugin.logger()))
-                    .insert(Lang.boxedMessage("Commands failed to load! Killing plugin..."))
-                    .print();
-            plugin.logger().error("",e);
+            plugin.logger().log(e.getMessage());
             return false;
         }
     }

@@ -1,4 +1,6 @@
-package group.aelysium.rustyconnector.core.lib.util.logger;
+package group.aelysium.rustyconnector.core.lib.lang_messaging;
+
+import net.kyori.adventure.text.Component;
 
 public interface Logger {
     LoggerGate getGate();
@@ -13,4 +15,5 @@ public interface Logger {
     void warn(String message, Throwable e);
     void error(String message);
     void error(String message, Throwable e);
+    void send(Component message);
 }

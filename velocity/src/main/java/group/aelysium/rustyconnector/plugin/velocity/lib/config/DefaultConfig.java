@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -127,19 +127,11 @@ public class DefaultConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         try {
             this.private_key = this.getNode(this.data,"private-key",String.class);
         } catch (Exception e) {
-            (new LangMessage(VelocityRustyConnector.getInstance().logger()))
-                    .insert(Lang.boxedMessage(
-                            "No private-key was defined! Generating one now...",
-                            "Paste this into the `private-key` field in `config.yml` the restart your proxy."
-                    ))
-                    .insert(Lang.spacing())
-                    .insert(MD5.generatePrivateKey())
-                    .insert(Lang.spacing())
-                    .insert(Lang.border())
-                    .print();
+            VelocityLang.PRIVATE_KEY.send(plugin.logger());
         }
         this.public_key = this.getNode(this.data,"public-key",String.class);
         this.heartbeat = this.getNode(this.data,"heart-beat",Integer.class);

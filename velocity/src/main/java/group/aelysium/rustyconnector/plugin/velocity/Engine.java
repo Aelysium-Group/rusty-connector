@@ -4,8 +4,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.EventManager;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
@@ -13,7 +12,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.WhitelistConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerKick;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 
@@ -25,9 +27,7 @@ public class Engine {
         if(!initCommands(plugin)) return false;
         if(!initEvents(plugin)) return false;
 
-        (new LangMessage(plugin.logger()))
-                .insert(Lang.wordmark())
-                .print();
+        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(plugin.logger());
 
         DefaultConfig defaultConfig = DefaultConfig.getConfig();
         if(defaultConfig.isBootCommands_enabled()) {
@@ -41,7 +41,6 @@ public class Engine {
         WhitelistConfig.empty();
         DefaultConfig.empty();
         FamilyConfig.empty();
-        LoggerConfig.empty();
 
         return true;
     }
@@ -83,9 +82,7 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
-            (new LangMessage(plugin.logger()))
-                    .insert(e.getMessage())
-                    .print();
+            VelocityLang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text(e.getMessage()), NamedTextColor.RED);
             return false;
         }
     }
@@ -94,6 +91,7 @@ public class Engine {
         try {
             CommandMeta meta = commandManager.metaBuilder("rustyconnector")
                     .aliases("rusty", "rc")
+                    .aliases("/rustyconnector","/rusty","/rc") // Add slash varients so that they can be used in console as well
                     .build();
             BrigadierCommand command = CommandRusty.create();
 
@@ -101,9 +99,7 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
-            (new LangMessage(plugin.logger()))
-                    .insert(e.getMessage())
-                    .print();
+            VelocityLang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text(e.getMessage()), NamedTextColor.RED);
             return false;
         }
     }
@@ -116,9 +112,7 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
-            (new LangMessage(plugin.logger()))
-                    .insert(e.getMessage())
-                    .print();
+            VelocityLang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text(e.getMessage()), NamedTextColor.RED);
             return false;
         }
     }

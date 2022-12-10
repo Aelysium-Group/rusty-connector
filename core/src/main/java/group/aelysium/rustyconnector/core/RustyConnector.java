@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core;
 
 import group.aelysium.rustyconnector.core.lib.database.Redis;
-import group.aelysium.rustyconnector.core.lib.util.logger.Logger;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Logger;
 
 import java.io.File;
 import java.io.InputStream;

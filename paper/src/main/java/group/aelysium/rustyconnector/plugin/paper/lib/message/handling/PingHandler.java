@@ -1,11 +1,8 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.message.handling;
 
-import group.aelysium.rustyconnector.core.lib.message.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-
-import java.net.InetSocketAddress;
-import java.security.InvalidAlgorithmParameterException;
 
 public class PingHandler implements MessageHandler {
     private final RedisMessage message;

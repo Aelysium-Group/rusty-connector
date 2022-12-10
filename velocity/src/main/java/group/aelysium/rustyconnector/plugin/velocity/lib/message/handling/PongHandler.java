@@ -1,15 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.message.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.util.logger.GateKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.LangKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import net.kyori.adventure.text.Component;
 
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
@@ -36,25 +36,10 @@ public class PongHandler implements MessageHandler {
             plugin.getProxy().reviveServer(serverInfo);
 
             if(plugin.logger().getGate().check(GateKey.PONG))
-                (new LangMessage(plugin.logger()))
-                        .insert(
-                                "Proxy" +
-                                        " "+ Lang.get(LangKey.ICON_PONG) +" " +
-                                        "["+serverInfo.getName()+"]" +
-                                        "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
-                        )
-                        .print();
+                VelocityLang.PONG.send(plugin.logger(), serverInfo);
         } catch (Exception error) {
             if(plugin.logger().getGate().check(GateKey.PONG))
-                (new LangMessage(plugin.logger()))
-                        .insert(
-                                "Proxy" +
-                                        " "+ Lang.get(LangKey.ICON_CANCELED) +" " +
-                                        "["+serverInfo.getName()+"]" +
-                                        "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
-                        )
-                        .insert(error.getMessage())
-                        .print();
+                VelocityLang.PONG_CANCELED.send(plugin.logger(), serverInfo);
         }
     }
 }

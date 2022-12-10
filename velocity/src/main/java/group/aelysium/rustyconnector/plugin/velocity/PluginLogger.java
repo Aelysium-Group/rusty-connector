@@ -1,10 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
-import group.aelysium.rustyconnector.core.lib.util.logger.*;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
+import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
-public class PluginLogger implements group.aelysium.rustyconnector.core.lib.util.logger.Logger {
+public class PluginLogger implements group.aelysium.rustyconnector.core.lib.lang_messaging.Logger {
     private final LoggerGate gate = new LoggerGate();
     private final Logger logger;
 
@@ -54,6 +55,10 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.lib.util
     @Override
     public void error(String message, Throwable e) {
         logger.error(message, e);
+    }
+
+    public void send(Component message) {
+        VelocityRustyConnector.getInstance().getVelocityServer().sendMessage(message);
     }
 
     public static void init(LoggerConfig config) {
@@ -110,45 +115,6 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.lib.util
         gate.registerNode(
                 GateKey.FAMILY_BALANCING,
                 config.isLog_familyBalancing()
-        );
-
-
-
-        Lang.add(
-                LangKey.ICON_REQUEST_REGISTRATION,
-                new LangEntry(config.getConsoleIcons_requestingRegistration())
-        );
-        Lang.add(
-                LangKey.ICON_REGISTERED,
-                new LangEntry(config.getConsoleIcons_registered())
-        );
-        Lang.add(
-                LangKey.ICON_REQUESTING_UNREGISTRATION,
-                new LangEntry(config.getConsoleIcons_requestingUnregistration())
-        );
-        Lang.add(
-                LangKey.ICON_UNREGISTERED,
-                new LangEntry(config.getConsoleIcons_unregistered())
-        );
-        Lang.add(
-                LangKey.ICON_CANCELED,
-                new LangEntry(config.getConsoleIcons_canceledRequest())
-        );
-        Lang.add(
-                LangKey.ICON_CALL_FOR_REGISTRATION,
-                new LangEntry(config.getConsoleIcons_callForRegistration())
-        );
-        Lang.add(
-                LangKey.ICON_FAMILY_BALANCING,
-                new LangEntry(config.getConsoleIcons_familyBalancing())
-        );
-        Lang.add(
-                LangKey.ICON_PING,
-                new LangEntry(config.getConsoleIcons_ping())
-        );
-        Lang.add(
-                LangKey.ICON_PONG,
-                new LangEntry(config.getConsoleIcons_pong())
         );
     }
 }

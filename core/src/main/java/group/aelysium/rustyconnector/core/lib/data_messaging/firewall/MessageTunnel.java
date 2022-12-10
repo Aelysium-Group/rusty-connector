@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.message.firewall;
+package group.aelysium.rustyconnector.core.lib.data_messaging.firewall;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;

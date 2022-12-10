@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.util.logger;
+package group.aelysium.rustyconnector.core.lib.lang_messaging;
 
 public enum GateKey {
     // Messaging
@@ -7,7 +7,6 @@ public enum GateKey {
     CALL_FOR_REGISTRATION,
     PING,
     PONG,
-    PLAYER_COUNT_UPDATE,
     MESSAGE_PARSER_TRASH,
 
 
