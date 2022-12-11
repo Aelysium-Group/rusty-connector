@@ -1,5 +1,6 @@
-package group.aelysium.rustyconnector.core.lib.data_messaging.cache;
+package group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache;
 
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
 
 import java.util.LinkedHashMap;
@@ -24,15 +25,15 @@ public class MessageCache {
     /**
      * Caches a redis message, so it can be accessed later.
      * @param message The message to cache.
-     * @return The id of the cached message, so it can be referenced later.
+     * @return The cached message.
      */
-    public Long cacheMessage(String message) {
+    public CacheableMessage cacheMessage(String message, MessageStatus status) {
         Long snowflake = this.newSnowflake();
 
-        CacheableMessage cacheableMessage = new CacheableMessage(snowflake, message);
+        CacheableMessage cacheableMessage = new CacheableMessage(snowflake, message, status);
 
         this.messages.put(snowflake,cacheableMessage);
-        return snowflake;
+        return cacheableMessage;
     }
 
     /**

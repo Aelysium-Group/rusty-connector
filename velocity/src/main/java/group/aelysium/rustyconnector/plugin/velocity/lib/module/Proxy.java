@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
@@ -291,11 +291,13 @@ public class Proxy {
 
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
+        // Setup families
         List<ServerFamily<? extends PaperServerLoadBalancer>> families = ServerFamily.init(config);
         families.forEach(family -> proxy.getFamilyManager().add(family));
 
         proxy.setRootFamily(config.getRoot_family());
 
+        // Setup Redis
         Redis redis = new Redis();
         redis.setConnection(
                 config.getRedis_host(),
@@ -309,12 +311,14 @@ public class Proxy {
 
         proxy.startHeart(config.getHeartbeat());
 
+        // Setup network whitelist
         if(config.isWhitelist_enabled()) {
             proxy.setWhitelist(config.getWhitelist_name());
 
             proxy.whitelistManager.add(Whitelist.init(config.getWhitelist_name()));
         }
 
+        // Setup message tunnel
         if(config.isMessageTunnel_whitelist_enabled() || config.isMessageTunnel_denylist_enabled()) {
             MessageTunnel messageTunnel = new MessageTunnel(config.isMessageTunnel_denylist_enabled(), config.isMessageTunnel_whitelist_enabled());
 

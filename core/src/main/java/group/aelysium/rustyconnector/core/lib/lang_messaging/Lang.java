@@ -1,9 +1,10 @@
 package group.aelysium.rustyconnector.core.lib.lang_messaging;
 
-import group.aelysium.rustyconnector.core.lib.model.Server;
+import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.CacheableMessage;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+
+import java.util.List;
 
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
@@ -107,6 +108,54 @@ public interface Lang {
             BORDER.color(color),
             SPACING
     );
+
+    ParameterizedMessage1<CacheableMessage> CACHED_MESSAGE = (message) -> join(
+                    newlines(),
+                    BORDER,
+                    text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
+                    text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
+                    text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
+                    text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                    BORDER
+            );
+
+    ParameterizedMessage3<List<CacheableMessage>,Integer, Integer> RC_MESSAGE_PAGE = (messages, pageNumber, maxPages) -> {
+        Component output = text("");
+        for (CacheableMessage message : messages) {
+            output = output.append(join(
+                    newlines(),
+                    BORDER,
+                    SPACING,
+                    text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
+                    text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
+                    text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
+                    text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                    SPACING
+            ));
+        }
+
+        Component pageNumbers = text("[ ",DARK_GRAY);
+        for (int i = 1; i <= maxPages; i++) {
+            if(i == pageNumber)
+                pageNumbers = pageNumbers.append(text(i+" ",GOLD));
+            else
+                pageNumbers = pageNumbers.append(text(i+" ",GRAY));
+        }
+        pageNumbers = pageNumbers.append(text("]",DARK_GRAY));
+
+        return output.append(
+                join(
+                        newlines(),
+                        SPACING,
+                        BORDER,
+                        SPACING,
+                        text("Pages:"),
+                        pageNumbers,
+                        SPACING,
+                        BORDER
+                )
+        );
+    };
 
     interface Message {
         Component build();

@@ -1,11 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.LangKey;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
@@ -218,43 +217,6 @@ public interface VelocityLang extends Lang {
                 servers,
                 SPACING,
                 BORDER
-        );
-    };
-
-    ParameterizedMessage3<List<CacheableMessage>,Integer, Integer> RC_MESSAGE_PAGE = (messages, pageNumber, maxPages) -> {
-        Component output = text("");
-        for (CacheableMessage message : messages) {
-            output = output.append(join(
-                    newlines(),
-                    BORDER,
-                    SPACING,
-                    text("ID: "+message.getSnowflake(), GRAY),
-                    text("Timestamp: "+message.getDate().toString(), GRAY),
-                    text("Contents: "+ message.getContents(), GRAY),
-                    SPACING
-            ));
-        }
-
-        Component pageNumbers = text("[ ",DARK_GRAY);
-        for (int i = 1; i <= maxPages; i++) {
-            if(i == pageNumber)
-                pageNumbers = pageNumbers.append(text(i+" ",GOLD));
-            else
-                pageNumbers = pageNumbers.append(text(i+" ",GRAY));
-        }
-        pageNumbers = pageNumbers.append(text("]",DARK_GRAY));
-
-        return output.append(
-                join(
-                        newlines(),
-                        SPACING,
-                        BORDER,
-                        SPACING,
-                        text("Pages:"),
-                        pageNumbers,
-                        SPACING,
-                        BORDER
-                )
         );
     };
 

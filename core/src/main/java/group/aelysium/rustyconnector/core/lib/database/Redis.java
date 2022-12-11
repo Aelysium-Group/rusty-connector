@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.core.lib.database;
 
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
+import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -103,7 +105,7 @@ public class Redis {
      *
      * @param message The messsage that is received
      */
-    public void onMessage(String message, Long messageSnowflake) {}
+    public void onMessage(String message, CacheableMessage cachedMessage) {}
 
     public class Subscriber extends JedisPubSub {
         private RustyConnector plugin;
@@ -115,8 +117,8 @@ public class Redis {
         @Override
         public void onMessage(String channel, String message) {
             try {
-                Long snowflake = Redis.this.messageCache.cacheMessage(message);
-                Redis.this.onMessage(message, snowflake);
+                CacheableMessage cachedMessage = Redis.this.messageCache.cacheMessage(message, MessageStatus.UNDEFINED);
+                Redis.this.onMessage(message, cachedMessage);
             } catch (Exception e) {
                 e.printStackTrace();
             }
