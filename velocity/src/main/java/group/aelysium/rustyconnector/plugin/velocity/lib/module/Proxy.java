@@ -313,20 +313,14 @@ public class Proxy {
             proxy.setWhitelist(config.getWhitelist_name());
 
             proxy.whitelistManager.add(Whitelist.init(config.getWhitelist_name()));
-        } else {
         }
 
-        if(config.isMessageTunnel_enabled()) {
-            List<String> whitelist = config.getMessageTunnel_whitelist_addresses();
-            List<String> blacklist = config.getMessageTunnel_denylist_addresses();
-
-            boolean useWhitelist = whitelist.size() > 0;
-            boolean useBlacklist = blacklist.size() > 0;
-
-            MessageTunnel messageTunnel = new MessageTunnel(useBlacklist, useWhitelist);
+        if(config.isMessageTunnel_whitelist_enabled() || config.isMessageTunnel_denylist_enabled()) {
+            MessageTunnel messageTunnel = new MessageTunnel(config.isMessageTunnel_denylist_enabled(), config.isMessageTunnel_whitelist_enabled());
 
             plugin.setMessageTunnel(messageTunnel);
 
+            List<String> whitelist = config.getMessageTunnel_whitelist_addresses();
             whitelist.forEach(entry -> {
                 String[] addressSplit = entry.split(":");
 
@@ -335,6 +329,7 @@ public class Proxy {
                 messageTunnel.whitelistAddress(address);
             });
 
+            List<String> blacklist = config.getMessageTunnel_denylist_addresses();
             blacklist.forEach(entry -> {
                 String[] addressSplit = entry.split(":");
 
@@ -342,7 +337,6 @@ public class Proxy {
 
                 messageTunnel.blacklistAddress(address);
             });
-        } else {
         }
 
         return proxy;
