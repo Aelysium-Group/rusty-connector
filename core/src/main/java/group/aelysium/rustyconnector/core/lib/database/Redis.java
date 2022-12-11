@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.core.RustyConnector;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
+// TODO: Move this to be a RedisIO implementation
 public class Redis {
     private MessageCache messageCache;
     private String host;
@@ -61,14 +62,11 @@ public class Redis {
             this.subscriber = new Subscriber(plugin);
             this.messageCache = new MessageCache(50);
 
-            this.subscriberThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        jedisSubscriber.subscribe(subscriber, dataChannel);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            this.subscriberThread = new Thread(() -> {
+                try {
+                    jedisSubscriber.subscribe(subscriber, dataChannel);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
 

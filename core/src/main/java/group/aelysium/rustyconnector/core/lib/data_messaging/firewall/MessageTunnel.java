@@ -36,10 +36,12 @@ public class MessageTunnel {
     /**
      * Validate an address.
      * This system first checks to see if the address is blacklisted. If so it returns `false`.
-     * If the address is not whitelisted, it checks if the address is whitelisted. If not we return `false`.
-     * The system returns `true` if the address is both whitelisted and not blacklisted.
+     * If the address is not blacklisted, it checks if the address is whitelisted. If not we return `false`.
+     *
+     * Returns `true` if the address is both whitelisted and not blacklisted.
+     * Returns `true` if no whitelist or blacklist is defined.
      * @param address An address to check.
-     * @return `true` If the address is validated. `false` if not.
+     * @return `true` If the address is valid. `false` if not.
      */
     public boolean validate(InetSocketAddress address) {
         if(hasBlacklist)
@@ -48,6 +50,6 @@ public class MessageTunnel {
         if(hasWhitelist)
             return this.whitelist.contains(address);
 
-        return false;
+        return true;
     }
 }

@@ -6,12 +6,10 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
-import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -19,13 +17,13 @@ import org.bukkit.entity.Player;
 public final class CommandRusty {
     public static void create(PaperCommandManager<CommandSender> manager) {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
-        final Command.Builder<CommandSender> builder = manager.commandBuilder("rc","rusty","rustyconnector");
+        final Command.Builder<CommandSender> builder = manager.commandBuilder("rc","rusty","rustyconnector","/rc","/rusty","/rustyconnector");
 
         manager.command(builder.literal("message")
                 .senderType(ConsoleCommandSender.class)
                 .argument(LongArgument.of("snowflake"), ArgumentDescription.of("Message ID"))
                 .handler(context -> manager.taskRecipe().begin(context)
-                    .synchronous(commandContext -> {
+                    .asynchronous(commandContext -> {
                         try {
                             final Long snowflake = commandContext.get("snowflake");
 
@@ -40,7 +38,6 @@ public final class CommandRusty {
                             plugin.logger().log("An error stopped us from getting that message!", e);
                         }
                     }).execute())
-
         ).command(builder.literal("send")
                 .senderType(ConsoleCommandSender.class)
                 .argument(PlayerArgument.of("player"), ArgumentDescription.of("Player"))

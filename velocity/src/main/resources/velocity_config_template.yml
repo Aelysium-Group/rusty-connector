@@ -209,6 +209,12 @@ whitelist:
 #        over where servers are allowed to auto-register   #
 #        from.                                             #
 #                                                          #
+#  NOTE: This section more or less completely destroys the #
+#        scalability that RustyConnector provides.         #
+#        While it does prevent the registration of IPs     #
+#        we don't recognize, it also prevents the          #
+#        registration of new IPs without manually adding   #
+#        them below.                                       #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -229,7 +235,9 @@ message-tunnel:
 #                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
 #
     whitelist:
-      - "127.0.0.1"
+        enabled: false
+        addresses:
+          - "127.0.0.1"
 
 #
 # The tunnel denylist.
@@ -246,7 +254,9 @@ message-tunnel:
 #                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
 #
     denylist:
-      - "127.0.0.1"
+        enabled: false
+        addresses:
+          - "127.0.0.1"
 
 
 ############################################################
@@ -271,6 +281,7 @@ boot-commands:
 # The proxy commands to send on-boot.
 # These commands will be sent, in order, from top to bottom.
 # Remember that these are proxy commands. You won't be able to run commands on your sub-servers from here.
+# This section doesn't care about whether other plugins on the proxy have started yet!
 #
     commands:
       - "rc registerAll"
