@@ -317,8 +317,8 @@ public class Proxy {
         }
 
         if(config.isMessageTunnel_enabled()) {
-            List<String> whitelist = config.getMessageTunnel_whitelist();
-            List<String> blacklist = config.getMessageTunnel_denylist();
+            List<String> whitelist = config.getMessageTunnel_whitelist_addresses();
+            List<String> blacklist = config.getMessageTunnel_denylist_addresses();
 
             boolean useWhitelist = whitelist.size() > 0;
             boolean useBlacklist = blacklist.size() > 0;

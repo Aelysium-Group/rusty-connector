@@ -1,7 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
-import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 
@@ -26,9 +24,10 @@ public class DefaultConfig extends YAML {
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
-    private boolean messageTunnel_enabled = false;
-    private List<String> messageTunnel_whitelist = new ArrayList<>();
-    private List<String> messageTunnel_denylist = new ArrayList<>();
+    private boolean messageTunnel_whitelist_enabled = false;
+    private List<String> messageTunnel_whitelist_addresses = new ArrayList<>();
+    private boolean messageTunnel_denylist_enabled = false;
+    private List<String> messageTunnel_denylist_addresses = new ArrayList<>();
 
     private boolean bootCommands_enabled = false;
     private List<String> bootCommands_commands = new ArrayList<>();
@@ -105,16 +104,19 @@ public class DefaultConfig extends YAML {
         return this.whitelist_name;
     }
 
-    public boolean isMessageTunnel_enabled() {
-        return this.messageTunnel_enabled;
+    public List<String> getMessageTunnel_whitelist_addresses() {
+        return this.messageTunnel_whitelist_addresses;
     }
 
-    public List<String> getMessageTunnel_whitelist() {
-        return this.messageTunnel_whitelist;
+    public boolean isMessageTunnel_whitelist_enabled() {
+        return this.messageTunnel_whitelist_enabled;
     }
 
-    public List<String> getMessageTunnel_denylist() {
-        return this.messageTunnel_denylist;
+    public List<String> getMessageTunnel_denylist_addresses() {
+        return this.messageTunnel_denylist_addresses;
+    }
+    public boolean isMessageTunnel_denylist_enabled() {
+        return this.messageTunnel_denylist_enabled;
     }
 
     public boolean isBootCommands_enabled() {
@@ -151,14 +153,15 @@ public class DefaultConfig extends YAML {
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
         this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
 
-        this.messageTunnel_enabled = this.getNode(this.data,"message-tunnel.enabled",Boolean.class);
+        this.messageTunnel_whitelist_enabled = this.getNode(this.data,"message-tunnel.whitelist.enabled",Boolean.class);
         try {
-            this.messageTunnel_whitelist = (List<String>) this.getNode(this.data,"message-tunnel.whitelist",List.class);
+            this.messageTunnel_whitelist_addresses = (List<String>) this.getNode(this.data,"message-tunnel.whitelist.addresses",List.class);
         } catch (ClassCastException e) {
             throw new IllegalStateException("The node [message-tunnel.whitelist] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
+        this.messageTunnel_denylist_enabled = this.getNode(this.data,"message-tunnel.denylist.enabled",Boolean.class);
         try {
-            this.messageTunnel_denylist = (List<String>) this.getNode(this.data,"message-tunnel.denylist",List.class);
+            this.messageTunnel_denylist_addresses = (List<String>) this.getNode(this.data,"message-tunnel.denylist.addresses",List.class);
         } catch (ClassCastException e) {
             throw new IllegalStateException("The node [message-tunnel.denylist] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }

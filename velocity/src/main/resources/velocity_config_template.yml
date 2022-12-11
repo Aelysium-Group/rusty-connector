@@ -220,8 +220,6 @@ whitelist:
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 message-tunnel:
-    enabled: false
-
 #
 # The tunnel whitelist.
 # To disable the whitelist, set it to be:
