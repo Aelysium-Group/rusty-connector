@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.data_messaging;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.lib.Callable;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RedisMessage {
+    private final String rawMessage;
     private final String key;
     private final RedisMessageType type;
     private final InetSocketAddress address;
@@ -21,7 +23,7 @@ public class RedisMessage {
     public InetSocketAddress getAddress() { return this.address; }
     public RedisMessageType getType() { return this.type; }
 
-    public RedisMessage(String key, RedisMessageType type, String address, boolean didReceive) {
+    public RedisMessage(String key, RedisMessageType type, String address) {
         this.key = key;
         this.type = type;
 
@@ -29,13 +31,15 @@ public class RedisMessage {
 
         this.address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
 
-        this.didReceive = didReceive;
+        this.didReceive = false;
+        this.rawMessage = null;
     }
-    public RedisMessage(String key, RedisMessageType type, InetSocketAddress address, boolean didReceive) {
+    private RedisMessage(String key, RedisMessageType type, InetSocketAddress address, String rawMessage) {
         this.key = key;
         this.type = type;
         this.address = address;
-        this.didReceive = didReceive;
+        this.didReceive = true;
+        this.rawMessage = rawMessage;
     }
 
     public void addParameter(String key, String value) {
@@ -89,23 +93,36 @@ public class RedisMessage {
     }
 
     /**
+     * Returns the message as a string.
+     * The returned string is actually the raw message that was received and parsed into this RedisMessage.
+     * @return The message as a string.
+     */
+    @Override
+    public String toString() {
+        return this.rawMessage;
+    }
+
+    /**
      * Create new Redis message from a JSON.
      *
-     * @param message The JSON to be parsed.
+     * @param rawMessage The raw message, to be parsed.
      * @param origin  Where should the message be originating from?
      * @param addressForCompare The address to use to check if a message is directed to the current server (optional for proxies)
      * @return A Redis Message.
      * @throws NullPointerException If the message is missing a necessary parameter.
      * @throws IllegalArgumentException If the message is malformed or not meant for the server reading it.
      */
-    public static RedisMessage create(JsonObject message, MessageOrigin origin, InetSocketAddress addressForCompare) throws NullPointerException, IllegalArgumentException {
+    public static RedisMessage create(String rawMessage, MessageOrigin origin, InetSocketAddress addressForCompare) throws NullPointerException, IllegalArgumentException {
+        Gson gson = new Gson();
+        JsonObject messageObject = gson.fromJson(rawMessage, JsonObject.class);
+
         Callable<RedisMessage> processProxyMessage = () -> { // Messages coming from the proxy
             if(addressForCompare == null) throw new NullPointerException("In order to process messages from the proxy, the sub-server must provide an address!");
 
-            JsonElement assumedPrivateKey = message.get("pk");
-            JsonElement assumedType = message.get("type");
-            JsonElement assumedFromAddress = message.get("from");
-            JsonElement assumedToAddress = message.get("to");
+            JsonElement assumedPrivateKey = messageObject.get("pk");
+            JsonElement assumedType = messageObject.get("type");
+            JsonElement assumedFromAddress = messageObject.get("from");
+            JsonElement assumedToAddress = messageObject.get("to");
 
             // If `from` is NOT null. We have a problem.
             if(!(assumedFromAddress == null)) throw new IllegalArgumentException("`from` shouldn't be set for messages sent from the proxy!");
@@ -127,14 +144,14 @@ public class RedisMessage {
                     privateKey,
                     type,
                     address,
-                    true
+                    rawMessage
             );
         };
         Callable<RedisMessage> processServerMessage = () -> { // Messages coming from a sub-server
-            JsonElement assumedPrivateKey = message.get("pk");
-            JsonElement assumedType = message.get("type");
-            JsonElement assumedFromAddress = message.get("from");
-            JsonElement assumedToAddress = message.get("to");
+            JsonElement assumedPrivateKey = messageObject.get("pk");
+            JsonElement assumedType = messageObject.get("type");
+            JsonElement assumedFromAddress = messageObject.get("from");
+            JsonElement assumedToAddress = messageObject.get("to");
 
             // If `to` is NOT null. We have a problem.
             if(!(assumedToAddress == null)) throw new IllegalArgumentException("`to` shouldn't be set for messages sent from sub-servers!");
@@ -151,7 +168,7 @@ public class RedisMessage {
                     privateKey,
                     type,
                     address,
-                    true
+                    rawMessage
             );
         };
 

@@ -24,6 +24,8 @@ public class DefaultConfig extends YAML {
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
+    private int messageTunnel_messageCacheSize = 50;
+    private int messageTunnel_messageMaxLength = 512;
     private boolean messageTunnel_whitelist_enabled = false;
     private List<String> messageTunnel_whitelist_addresses = new ArrayList<>();
     private boolean messageTunnel_denylist_enabled = false;
@@ -104,6 +106,14 @@ public class DefaultConfig extends YAML {
         return this.whitelist_name;
     }
 
+    public int getMessageTunnel_messageCacheSize() {
+        return messageTunnel_messageCacheSize;
+    }
+
+    public int getMessageTunnel_messageMaxLength() {
+        return messageTunnel_messageMaxLength;
+    }
+
     public List<String> getMessageTunnel_whitelist_addresses() {
         return this.messageTunnel_whitelist_addresses;
     }
@@ -152,6 +162,9 @@ public class DefaultConfig extends YAML {
 
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
         this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
+
+        this.messageTunnel_messageCacheSize = this.getNode(this.data,"message-tunnel.message-cache-size",Integer.class);
+        this.messageTunnel_messageMaxLength = this.getNode(this.data,"message-tunnel.message-max-length",Integer.class);
 
         this.messageTunnel_whitelist_enabled = this.getNode(this.data,"message-tunnel.whitelist.enabled",Boolean.class);
         try {

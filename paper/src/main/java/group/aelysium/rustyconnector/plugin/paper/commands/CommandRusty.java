@@ -6,8 +6,10 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
 import org.bukkit.command.CommandSender;
@@ -73,6 +75,19 @@ public final class CommandRusty {
                                 plugin.getVirtualServer().unregisterFromProxy();
                             } catch (Exception e) {
                                 plugin.logger().log("An error stopped us from sending your request!", e);
+                            }
+                        }).execute())
+        ).command(builder.literal("sendmessage")
+                .senderType(ConsoleCommandSender.class)
+                .argument(StringArgument.of("message"), ArgumentDescription.of("A message"))
+                .handler(context -> manager.taskRecipe().begin(context)
+                        .asynchronous(commandContext -> {
+                            try {
+                                final String message = commandContext.get("message");
+
+                                plugin.getVirtualServer().sendMessage(message);
+                            } catch (Exception e) {
+                                plugin.logger().log("There was an error sending that!");
                             }
                         }).execute())
         );

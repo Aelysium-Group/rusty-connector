@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.lang_messaging;
 
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -9,23 +9,11 @@ import java.util.List;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.JoinConfiguration.newlines;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.BLACK;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_BLUE;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_PURPLE;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY;
-import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 import static net.kyori.adventure.text.format.NamedTextColor.YELLOW;
-import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
 
 /**
  * Thank you to https://github.com/LuckPerms/LuckPerms for inspiring this implementation.
@@ -122,16 +110,31 @@ public interface Lang {
     ParameterizedMessage3<List<CacheableMessage>,Integer, Integer> RC_MESSAGE_PAGE = (messages, pageNumber, maxPages) -> {
         Component output = text("");
         for (CacheableMessage message : messages) {
-            output = output.append(join(
-                    newlines(),
-                    BORDER,
-                    SPACING,
-                    text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
-                    text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
-                    text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
-                    text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
-                    SPACING
-            ));
+            if(!(message.getSentenceReason() == null))
+                output = output.append(join(
+                        newlines(),
+                        BORDER,
+                        SPACING,
+                        text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
+                        text("Reason: " + message.getSentenceReason(), message.getSentence().getColor()),
+                        SPACING,
+                        text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
+                        text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
+                        text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                        SPACING
+                ));
+            else
+                output = output.append(join(
+                        newlines(),
+                        BORDER,
+                        SPACING,
+                        text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
+                        SPACING,
+                        text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
+                        text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
+                        text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                        SPACING
+                ));
         }
 
         Component pageNumbers = text("[ ",DARK_GRAY);

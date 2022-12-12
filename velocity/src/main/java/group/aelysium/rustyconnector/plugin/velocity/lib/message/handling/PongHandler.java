@@ -4,12 +4,8 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.LangKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import net.kyori.adventure.text.Component;
 
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
@@ -22,7 +18,7 @@ public class PongHandler implements MessageHandler {
     }
 
     @Override
-    public void execute() throws InvalidAlgorithmParameterException {
+    public void execute() throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         InetSocketAddress address = message.getAddress();
@@ -37,9 +33,10 @@ public class PongHandler implements MessageHandler {
 
             if(plugin.logger().getGate().check(GateKey.PONG))
                 VelocityLang.PONG.send(plugin.logger(), serverInfo);
-        } catch (Exception error) {
+        } catch (Exception e) {
             if(plugin.logger().getGate().check(GateKey.PONG))
                 VelocityLang.PONG_CANCELED.send(plugin.logger(), serverInfo);
+            throw new Exception(e.getMessage());
         }
     }
 }

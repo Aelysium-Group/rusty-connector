@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.PingHandler;
@@ -14,27 +14,23 @@ import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerReg
 
 import javax.naming.AuthenticationException;
 import java.net.InetSocketAddress;
-import java.security.InvalidAlgorithmParameterException;
 import java.util.Map;
 import java.util.Objects;
 
 public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis {
     @Override
-    public void onMessage(String rawMessage, CacheableMessage cachedMessage) {
+    public void onMessage(String rawMessage) {
+        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+        CacheableMessage cachedMessage = plugin.getVirtualServer().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
         try {
-            PaperRustyConnector plugin = PaperRustyConnector.getInstance();
-
-            Gson gson = new Gson();
-            JsonObject object = gson.fromJson(rawMessage, JsonObject.class);
-
-            RedisMessage message = RedisMessage.create(object, MessageOrigin.SERVER, plugin.getVirtualServer().getAddress());
+            RedisMessage message = RedisMessage.create(rawMessage, MessageOrigin.SERVER, plugin.getVirtualServer().getAddress());
             try {
                 if (!(plugin.getVirtualServer().validatePrivateKey(message.getKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
 
-                Redis.processParameters(message, object, cachedMessage);
+                Redis.processParameters(message, cachedMessage);
             } catch (AuthenticationException e) {
                 plugin.logger().error("Incoming message from: " + message.getAddress().toString() + " contains an invalid private key! Throwing away...");
                 plugin.logger().log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
@@ -60,7 +56,10 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
         }
     }
 
-    private static void processParameters(RedisMessage message, JsonObject object, CacheableMessage cachedMessage) {
+    private static void processParameters(RedisMessage message, CacheableMessage cachedMessage) {
+        Gson gson = new Gson();
+        JsonObject object = gson.fromJson(message.toString(), JsonObject.class);
+
         try {
             switch (message.getType()) {
                 case REG_ALL -> new ServerRegHandler(message).execute();

@@ -2,7 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 
 import java.net.InetSocketAddress;
@@ -16,7 +18,7 @@ public class ServerRegHandler implements MessageHandler {
     }
 
     @Override
-    public void execute() throws InvalidAlgorithmParameterException {
+    public void execute() throws Exception {
         String familyName = message.getParameter("family");
 
         InetSocketAddress address = message.getAddress();

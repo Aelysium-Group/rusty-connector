@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
@@ -20,40 +20,43 @@ import java.util.Objects;
 public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis {
 
     @Override
-    public void onMessage(String rawMessage, CacheableMessage cachedMessage) {
+    public void onMessage(String rawMessage) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        CacheableMessage cachedMessage = plugin.getProxy().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
         try {
-            Gson gson = new Gson();
-            JsonObject object = gson.fromJson(rawMessage, JsonObject.class);
-
-            RedisMessage message = RedisMessage.create(object, MessageOrigin.PROXY, null);
+            RedisMessage message = RedisMessage.create(rawMessage, MessageOrigin.PROXY, null);
             try {
+                if(!plugin.getProxy().validateMessage(message))
+                    throw new AuthenticationException("The message was to long!");
                 if (!(plugin.getProxy().validatePrivateKey(message.getKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
-                Redis.processParameters(message, object, cachedMessage);
+                Redis.processParameters(message, cachedMessage);
             } catch (AuthenticationException e) {
-                cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL);
+                cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
 
                 if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
                 else if(!plugin.logger().getGate().check(GateKey.INVALID_PRIVATE_KEY)) return;
 
-                plugin.logger().error("Incoming message from: "+message.getAddress().toString()+" contains an invalid private key!");
+                plugin.logger().error("An incoming message from: "+message.getAddress().toString()+" was thrown away!");
                 plugin.logger().log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
             }
         } catch (Exception e) {
-            cachedMessage.sentenceMessage(MessageStatus.TRASHED);
+            cachedMessage.sentenceMessage(MessageStatus.TRASHED, e.getMessage());
 
             if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 
-            plugin.logger().error("There was an issue handling the incoming message! Throwing away...",e);
+            plugin.logger().error("An incoming message was thrown away!");
             plugin.logger().log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
         }
     }
 
-    private static void processParameters(RedisMessage message, JsonObject object, CacheableMessage cachedMessage) {
+    private static void processParameters(RedisMessage message, CacheableMessage cachedMessage) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        Gson gson = new Gson();
+        JsonObject object = gson.fromJson(message.toString(), JsonObject.class);
         try {
             switch (message.getType()) {
                 case REG -> {
@@ -85,8 +88,15 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
             }
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
             cachedMessage.sentenceMessage(MessageStatus.PARSING_ERROR);
+
+            if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
+
+            plugin.logger().error("There was an issue handling the message. Throwing away...", e);
+            plugin.logger().log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
+        } catch (Exception e) {
+            cachedMessage.sentenceMessage(MessageStatus.EXECUTING_ERROR, e.getMessage());
 
             if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 

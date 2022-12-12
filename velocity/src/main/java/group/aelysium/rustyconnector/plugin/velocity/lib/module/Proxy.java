@@ -5,10 +5,11 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Proxy {
+    private MessageCache messageCache;
     private Redis redis;
     private final Map<ServerInfo, Boolean> lifeMatrix = new HashMap<>();
     private final FamilyManager familyManager;
@@ -36,6 +38,7 @@ public class Proxy {
     private String rootFamily;
     private String proxyWhitelist;
     private Clock heart;
+    private MessageTunnel messageTunnel;
 
     public ServerFamily<? extends PaperServerLoadBalancer> getRootFamily() {
         return this.familyManager.find(this.rootFamily);
@@ -55,6 +58,27 @@ public class Proxy {
         this.rootFamily = rootFamily;
     }
 
+    /**
+     * Set the message cache for the proxy. Once this is set it cannot be changed.
+     * @param max The max number of messages the cache will accept.
+     */
+    public void setMessageCache(int max) throws IllegalStateException {
+        if(this.messageCache != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+
+        if(max <= 0) max = 0;
+        if(max > 500) max = 500;
+        this.messageCache = new MessageCache(max);
+    }
+
+    /**
+     * Set the message tunnel for the proxy. Once this is set it cannot be changed.
+     * @param messageTunnel The message tunnel to set.
+     */
+    public void setMessageTunnel(MessageTunnel messageTunnel) throws IllegalStateException {
+        if(this.messageTunnel != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+        this.messageTunnel = messageTunnel;
+    }
+
     private Proxy(String privateKey) {
         this.privateKey = privateKey;
 
@@ -64,7 +88,17 @@ public class Proxy {
     }
 
     public MessageCache getMessageCache() {
-        return this.redis.getMessageCache();
+        return this.messageCache;
+    }
+
+    /**
+     * Validate a message against the message tunnel.
+     * If no message tunnel has been defined this will default to `true`
+     * @param message The message to verify.
+     * @return `true` if the message is valid. `false` otherwise.
+     */
+    public boolean validateMessage(RedisMessage message) {
+        return this.messageTunnel.validate(message);
     }
 
     public void startHeart(long heartbeat) {
@@ -201,8 +235,7 @@ public class Proxy {
         RedisMessage message = new RedisMessage(
                 this.privateKey,
                 RedisMessageType.REG_ALL,
-                "127.0.0.1:0",
-                false
+                "127.0.0.1:0"
         );
 
         message.dispatchMessage(this.redis);
@@ -214,7 +247,7 @@ public class Proxy {
      * @param familyName The family to register the server into.
      * @return A RegisteredServer node.
      */
-    public RegisteredServer registerServer(PaperServer server, String familyName) throws DuplicateRequestException {
+    public RegisteredServer registerServer(PaperServer server, String familyName) throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         try {
             if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
@@ -239,15 +272,15 @@ public class Proxy {
         } catch (Exception error) {
             if(plugin.logger().getGate().check(GateKey.REGISTRATION_REQUEST))
                 VelocityLang.REGISTRATION_CANCELED.send(plugin.logger(), server, familyName);
+            throw new Exception(error.getMessage());
         }
-        return null;
     }
 
     /**
      * Unregister a server from the proxy.
      * @param serverInfo The server to be unregistered.
      */
-    public void unregisterServer(ServerInfo serverInfo, String familyName) {
+    public void unregisterServer(ServerInfo serverInfo, String familyName) throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         PaperServer server = this.findServer(serverInfo);
         try {
@@ -265,11 +298,12 @@ public class Proxy {
 
             if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
                 VelocityLang.UNREGISTERED.send(plugin.logger(), server, familyName);
-        } catch (Exception error) {
+        } catch (Exception e) {
             if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST)) {
                 assert server != null;
                 VelocityLang.REGISTRATION_CANCELED.send(plugin.logger(), server, familyName);
             }
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -319,10 +353,18 @@ public class Proxy {
         }
 
         // Setup message tunnel
-        if(config.isMessageTunnel_whitelist_enabled() || config.isMessageTunnel_denylist_enabled()) {
-            MessageTunnel messageTunnel = new MessageTunnel(config.isMessageTunnel_denylist_enabled(), config.isMessageTunnel_whitelist_enabled());
+        proxy.setMessageCache(config.getMessageTunnel_messageCacheSize());
 
-            plugin.setMessageTunnel(messageTunnel);
+        MessageTunnel messageTunnel = new MessageTunnel(
+                config.isMessageTunnel_denylist_enabled(),
+                config.isMessageTunnel_whitelist_enabled(),
+                config.getMessageTunnel_messageMaxLength()
+        );
+        proxy.setMessageTunnel(messageTunnel);
+
+        if(config.isMessageTunnel_whitelist_enabled() || config.isMessageTunnel_denylist_enabled()) {
+
+            proxy.setMessageTunnel(messageTunnel);
 
             List<String> whitelist = config.getMessageTunnel_whitelist_addresses();
             whitelist.forEach(entry -> {

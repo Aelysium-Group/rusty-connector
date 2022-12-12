@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache;
+package group.aelysium.rustyconnector.core.lib.data_messaging.cache;
 
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.hash.Snowflake;

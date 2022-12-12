@@ -197,20 +197,20 @@ whitelist:
 #                     Message Tunnel                       #
 #                                                          #
 #               ---------------------------                #
-# | Sadly we can't all have nice things. If you notice     #
-# | you're getting server requests from ip addresses you   #
-# | don't recognize, you can block them!                   #
-#                                                          #
-# | Alternatively, if you'd like to only allow messages    #
-# | from certain ip addresses; you can whitelist them!     #
+# | The message tunnel allows you to have more control     #
+# | over what messages you will allow the proxy to accept  #
+# | or decline.                                            #
+# | This does NOT affect what messages are being sent over #
+# | your Redis channels. All it does is control what your  #
+# | proxy will and will not accept.                        #
 #                                                          #
 #  NOTE: This section has NOTHING to do with players!      #
 #        Instead, it is used to provide better control     #
 #        over where servers are allowed to auto-register   #
 #        from.                                             #
 #                                                          #
-#  NOTE: This section more or less completely destroys the #
-#        scalability that RustyConnector provides.         #
+#  NOTE: This section can more or less completely destroy  #
+#        the scalability that RustyConnector provides.     #
 #        While it does prevent the registration of IPs     #
 #        we don't recognize, it also prevents the          #
 #        registration of new IPs without manually adding   #
@@ -220,6 +220,23 @@ whitelist:
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 message-tunnel:
+#
+# The number of messages that will be saved into memory.
+# The message cache allows you to view messages that have recently been received by the proxy.
+# As new messages are generated, old messages will get pushed out of the cache.
+#
+# You can view cached messages using the `/rc message` command.
+#
+    message-cache-size: 50
+
+#
+# The max length that messages received over Redis are allowed to be.
+# If a message is over this value it will get thrown away!
+# The size below should work for just about everything that is sent by RustyConnector.
+# If you are defining larger addresses or names on your paper servers, you might want to increase this.
+#
+    message-max-length: 512
+
 #
 # The tunnel whitelist.
 # To disable the whitelist, set it to be:

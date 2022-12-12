@@ -55,7 +55,6 @@ public class Engine {
         plugin.getProxy().killHeartbeat();
         plugin.getProxy().killRedis();
         plugin.unsetProxy();
-        plugin.unsetMessageTunnel();
 
         plugin.getVelocityServer().getCommandManager().unregister("rc");
 

@@ -1,9 +1,11 @@
 package group.aelysium.rustyconnector.plugin.paper.lib;
 
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.model.Server;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
@@ -13,6 +15,7 @@ import org.bukkit.entity.Player;
 import java.net.InetSocketAddress;
 
 public class PaperServer implements Server {
+    private MessageCache messageCache;
     private Redis redis;
     private String family;
     private int playerCount = 0;
@@ -44,8 +47,20 @@ public class PaperServer implements Server {
         return this.privateKey.equals(keyToValidate);
     }
 
+    /**
+     * Set the message cache for the proxy. Once this is set it cannot be changed.
+     * @param max The max number of messages the cache will accept.
+     */
+    public void setMessageCache(int max) throws IllegalStateException {
+        if(this.messageCache != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+
+        if(max <= 0) max = 0;
+        if(max > 500) max = 500;
+        this.messageCache = new MessageCache(max);
+    }
+
     public MessageCache getMessageCache() {
-        return this.redis.getMessageCache();
+        return this.messageCache;
     }
 
     public InetSocketAddress getAddress() { return this.address; }
@@ -128,8 +143,7 @@ public class PaperServer implements Server {
         RedisMessage registrationMessage = new RedisMessage(
                 this.privateKey,
                 RedisMessageType.REG,
-                this.address.getHostName()+":"+this.address.getPort(),
-                false
+                this.address.getHostName()+":"+this.address.getPort()
         );
         registrationMessage.addParameter("family",this.family);
         registrationMessage.addParameter("name",this.name);
@@ -144,13 +158,17 @@ public class PaperServer implements Server {
         RedisMessage registrationMessage = new RedisMessage(
                 this.privateKey,
                 RedisMessageType.UNREG,
-                this.address.getHostName()+":"+this.address.getPort(),
-                false
+                this.address.getHostName()+":"+this.address.getPort()
         );
         registrationMessage.addParameter("family",this.family);
         registrationMessage.addParameter("name",this.name);
 
         registrationMessage.dispatchMessage(this.redis);
+    }
+
+    @Deprecated
+    public void sendMessage(String rawMessage) {
+        RedisMessage.create(rawMessage, MessageOrigin.SERVER, this.getAddress()).dispatchMessage(this.redis);
     }
 
     /**
@@ -162,8 +180,7 @@ public class PaperServer implements Server {
         RedisMessage registrationMessage = new RedisMessage(
                 this.privateKey,
                 RedisMessageType.SEND,
-                this.address.getHostName()+":"+this.address.getPort(),
-                false
+                this.address.getHostName()+":"+this.address.getPort()
         );
         registrationMessage.addParameter("uuid",player.getUniqueId().toString());
         registrationMessage.addParameter("family",familyName);
@@ -178,8 +195,7 @@ public class PaperServer implements Server {
         RedisMessage registrationMessage = new RedisMessage(
                 this.privateKey,
                 RedisMessageType.PONG,
-                this.address.getHostName()+":"+this.address.getPort(),
-                false
+                this.address.getHostName()+":"+this.address.getPort()
         );
         registrationMessage.addParameter("name", this.name);
 
@@ -212,6 +228,7 @@ public class PaperServer implements Server {
                 config.getServer_family(),
                 redis
         );
+        server.setMessageCache(50);
 
         server.setPlayerCap(
                 config.getServer_playerCap_soft(),

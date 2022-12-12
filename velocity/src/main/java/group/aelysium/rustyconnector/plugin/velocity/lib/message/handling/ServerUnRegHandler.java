@@ -17,7 +17,7 @@ public class ServerUnRegHandler implements MessageHandler {
     }
 
     @Override
-    public void execute() throws InvalidAlgorithmParameterException {
+    public void execute() throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         String familyName = message.getParameter("family");

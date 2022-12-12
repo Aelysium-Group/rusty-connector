@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.core.lib.database;
 
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -15,7 +15,6 @@ import java.util.Map;
 
 // TODO: Move this to be a RedisIO implementation
 public class Redis {
-    private MessageCache messageCache;
     private String host;
     private int port;
     private String password;
@@ -25,10 +24,6 @@ public class Redis {
     private Subscriber subscriber;
     private JedisPool pool;
     private Thread subscriberThread;
-
-    public MessageCache getMessageCache() {
-        return this.messageCache;
-    }
 
     public Redis() {}
 
@@ -62,7 +57,6 @@ public class Redis {
             this.jedisSubscriber = this.pool.getResource();
             this.jedisSubscriber.auth(this.password);
             this.subscriber = new Subscriber(plugin);
-            this.messageCache = new MessageCache(50);
 
             this.subscriberThread = new Thread(() -> {
                 try {
@@ -103,9 +97,9 @@ public class Redis {
     /**
      * When redis receives a message
      *
-     * @param message The messsage that is received
+     * @param rawMessage The raw message that is received
      */
-    public void onMessage(String message, CacheableMessage cachedMessage) {}
+    public void onMessage(String rawMessage) {}
 
     public class Subscriber extends JedisPubSub {
         private RustyConnector plugin;
@@ -115,10 +109,9 @@ public class Redis {
         }
 
         @Override
-        public void onMessage(String channel, String message) {
+        public void onMessage(String channel, String rawMessage) {
             try {
-                CacheableMessage cachedMessage = Redis.this.messageCache.cacheMessage(message, MessageStatus.UNDEFINED);
-                Redis.this.onMessage(message, cachedMessage);
+                Redis.this.onMessage(rawMessage);
             } catch (Exception e) {
                 e.printStackTrace();
             }

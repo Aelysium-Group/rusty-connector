@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import net.kyori.adventure.text.Component;
 
@@ -19,23 +20,23 @@ public class SendPlayerHandler implements MessageHandler {
     }
 
     @Override
-    public void execute() throws InvalidAlgorithmParameterException {
+    public void execute() throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         String familyName = message.getParameter("family");
         UUID uuid = UUID.fromString(message.getParameter("uuid"));
 
-        ServerFamily family = plugin.getProxy().getFamilyManager().find(familyName);
-        if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
-
         Player player = VelocityRustyConnector.getInstance().getVelocityServer().getPlayer(uuid).stream().findFirst().orElse(null);
         if(player == null) return;
 
         try {
+            ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getProxy().getFamilyManager().find(familyName);
+            if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
+
             family.connect(player);
-        } catch (MalformedURLException e) {
-            player.disconnect(Component.text("Unable to connect you to the network! There are no default servers available!"));
-            plugin.logger().log("There are no servers registered in the root family! Player's will be unable to join your network if there are no servers here!");
+        } catch (Exception e) {
+            player.disconnect(Component.text("There was an issue connecting you to that server!"));
+            throw new Exception(e.getMessage());
         }
     }
 }

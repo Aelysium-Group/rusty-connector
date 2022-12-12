@@ -6,7 +6,6 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
 import group.aelysium.rustyconnector.core.RustyConnector;
 import org.slf4j.Logger;
@@ -21,22 +20,6 @@ public class VelocityRustyConnector implements RustyConnector {
     private final ProxyServer server;
     private final PluginLogger logger;
     private final File dataFolder;
-    private MessageTunnel messageTunnel;
-
-    /**
-     * Set the message tunnel for the redis connection. Once this is set it cannot be changed.
-     * @param messageTunnel The message tunnel to set.
-     */
-    public void setMessageTunnel(MessageTunnel messageTunnel) throws IllegalStateException {
-        if(this.messageTunnel != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
-        this.messageTunnel = messageTunnel;
-    }
-    /**
-     * Unsets the message tunnel.
-     */
-    public void unsetMessageTunnel() {
-        this.messageTunnel = null;
-    }
 
     /**
      * Set the proxy for Velocity. Once this is set it cannot be changed.

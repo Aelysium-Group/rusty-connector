@@ -23,9 +23,12 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
     private final String name;
     private final Whitelist whitelist;
     protected int playerCount = 0;
-    public ServerFamily(String name, Whitelist whitelist, Class<LB> clazz) {
+    protected boolean weighted = false;
+
+    public ServerFamily(String name, Whitelist whitelist, Class<LB> clazz, boolean weighted) {
         this.name = name;
         this.whitelist = whitelist;
+        this.weighted = weighted;
 
         try {
             this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
@@ -196,14 +199,16 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
                         new ServerFamily<>(
                                 familyName,
                                 whitelist,
-                                RoundRobin.class
+                                RoundRobin.class,
+                                familyConfig.isLoadBalancing_weighted()
                         )
                 );
                 case LEAST_CONNECTION -> families.add(
                         new ServerFamily<>(
                                 familyName,
                                 whitelist,
-                                LeastConnection.class
+                                LeastConnection.class,
+                                familyConfig.isLoadBalancing_weighted()
                         )
                 );
             }

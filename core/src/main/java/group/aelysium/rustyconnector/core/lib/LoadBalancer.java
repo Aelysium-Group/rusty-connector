@@ -9,6 +9,18 @@ public interface LoadBalancer<I> {
     List<?> items = new ArrayList<>();
 
     /**
+     * Is the load balancer persistent?
+     * @return `true` if the load balancer is persistent. `false` otherwise.
+     */
+    boolean isPersistent();
+
+    /**
+     * Get the number of attempts that persistence will make.
+     * @return The number of attempts. Or `null` if persistence is off.
+     */
+    Integer getAttempts();
+
+    /**
      * Get the item that the iterator is currently pointing to.
      * Once this returns an item, it will automatically iterate to the next item.
      *
@@ -54,4 +66,11 @@ public interface LoadBalancer<I> {
      * @return The load balancer as a string.
      */
     String toString();
+
+    /**
+     * Set the persistence of the load balancer.
+     * @param persistence The persistence.
+     * @param attempts The number of attempts that persistence will try to connect a player before quiting. This value doesn't matter if persistence is set to `false`
+     */
+    void setPersistence(boolean persistence, int attempts);
 }

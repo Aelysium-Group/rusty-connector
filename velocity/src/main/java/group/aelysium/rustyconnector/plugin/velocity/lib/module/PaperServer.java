@@ -10,8 +10,6 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.model.Server;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.LangKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
@@ -60,7 +58,7 @@ public class PaperServer implements Server {
      * @throws DuplicateRequestException If the server has already been registered to the proxy.
      * @throws InvalidAlgorithmParameterException Of the family doesn't exist.
      */
-    public void register(String familyName) throws DuplicateRequestException, InvalidAlgorithmParameterException {
+    public void register(String familyName) throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         this.registeredServer = plugin.getProxy().registerServer(this, familyName);
@@ -135,8 +133,7 @@ public class PaperServer implements Server {
         RedisMessage message = new RedisMessage(
                 privateKey,
                 RedisMessageType.PING,
-                this.getAddress(),
-                false
+                this.getAddress()
         );
 
         message.dispatchMessage(redis);

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.data_messaging.firewall.cache;
+package group.aelysium.rustyconnector.core.lib.data_messaging.cache;
 
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +9,7 @@ public class CacheableMessage {
     private final Long snowflake;
     private final Date date;
     private final String contents;
+    private String reason;
     private MessageStatus status;
 
     public CacheableMessage(Long snowflake, String contents, MessageStatus status) {
@@ -33,12 +34,29 @@ public class CacheableMessage {
     public MessageStatus getSentence() {
         return this.status;
     }
+    public String getSentenceReason() {
+        return this.reason;
+    }
+
+    /**
+     * Sentence the message to a new status.
+     * Will also unset `reason`.
+     * @param status The new status to issue.
+     */
+    public void sentenceMessage(MessageStatus status) {
+        this.status = status;
+        this.reason = null;
+    }
 
     /**
      * Sentence the message to a new status.
      * @param status The new status to issue.
+     * @param reason The reason for the sentence.
      */
-    public void sentenceMessage(MessageStatus status) { this.status = status; }
+    public void sentenceMessage(MessageStatus status, String reason) {
+        this.status = status;
+        this.reason = reason;
+    }
 
     @Override
     public String toString() {

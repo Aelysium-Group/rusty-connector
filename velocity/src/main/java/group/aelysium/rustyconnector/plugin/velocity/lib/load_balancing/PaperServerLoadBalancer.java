@@ -7,8 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
+    private boolean persistence = false;
+    private int attempts = 5;
     protected int index = 0;
     protected List<PaperServer> items = new ArrayList<>();
+
+    @Override
+    public boolean isPersistent() {
+        return this.persistence;
+    }
+
+    @Override
+    public Integer getAttempts() {
+        if(!this.isPersistent()) return null;
+        return this.attempts;
+    }
 
     @Override
     public PaperServer getCurrent() {
@@ -54,5 +67,11 @@ public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
     @Override
     public String toString() {
         return "LoadBalancer (RoundRobin): "+this.size()+" items";
+    }
+
+    @Override
+    public void setPersistence(boolean persistence, int attempts) {
+        this.persistence = persistence;
+        this.attempts = attempts;
     }
 }
