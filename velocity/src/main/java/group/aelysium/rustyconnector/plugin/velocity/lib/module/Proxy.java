@@ -37,7 +37,8 @@ public class Proxy {
     private final String privateKey;
     private String rootFamily;
     private String proxyWhitelist;
-    private Clock heart;
+    private Clock serverLifecycleHeart;
+    private Clock familyServerSorting;
     private MessageTunnel messageTunnel;
 
     public ServerFamily<? extends PaperServerLoadBalancer> getRootFamily() {
@@ -102,9 +103,9 @@ public class Proxy {
     }
 
     public void startServerLifecycleHeart(long heartbeat, boolean shouldUnregister) {
-        this.heart = new Clock(heartbeat);
+        this.serverLifecycleHeart = new Clock(heartbeat);
 
-        heart.start((Callable<Boolean>) () -> {
+        serverLifecycleHeart.start((Callable<Boolean>) () -> {
             VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
             if(plugin.logger().getGate().check(GateKey.PING))
@@ -145,9 +146,9 @@ public class Proxy {
     }
 
     public void startFamilyServerSorting(long heartbeat) {
-        this.heart = new Clock(heartbeat);
+        this.familyServerSorting = new Clock(heartbeat);
 
-        heart.start((Callable<Boolean>) () -> {
+        familyServerSorting.start((Callable<Boolean>) () -> {
             VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
             try {
                 if(plugin.logger().getGate().check(GateKey.FAMILY_BALANCING))
@@ -168,8 +169,9 @@ public class Proxy {
         });
     }
 
-    public void killHeartbeat() {
-        this.heart.end();
+    public void killHeartbeats() {
+        this.familyServerSorting.end();
+        this.serverLifecycleHeart.end();
     }
 
     public void killRedis() {

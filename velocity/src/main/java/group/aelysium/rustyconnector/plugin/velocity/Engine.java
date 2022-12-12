@@ -53,7 +53,7 @@ public class Engine {
         FamilyConfig.empty();
         LoggerConfig.empty();
 
-        plugin.getProxy().killHeartbeat();
+        plugin.getProxy().killHeartbeats();
         plugin.getProxy().killRedis();
         plugin.unsetProxy();
 
