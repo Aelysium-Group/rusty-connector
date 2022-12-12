@@ -5,7 +5,6 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
@@ -102,7 +101,7 @@ public class Proxy {
         return this.messageTunnel.validate(message);
     }
 
-    public void startHeart(long heartbeat) {
+    public void startServerLifecycleHeart(long heartbeat, boolean shouldUnregister) {
         this.heart = new Clock(heartbeat);
 
         heart.start((Callable<Boolean>) () -> {
@@ -122,9 +121,14 @@ public class Proxy {
                     }
 
                     if(!entry.getValue()) {
-                        //this.unregisterServer(serverInfo, server.getFamilyName());
-                        if(plugin.logger().getGate().check(GateKey.PING))
-                            plugin.logger().log(server.getServerInfo().getName()+" never responded to ping! It should be killed!");
+                        if(shouldUnregister) {
+                            this.unregisterServer(serverInfo, server.getFamilyName());
+                            if (plugin.logger().getGate().check(GateKey.PING))
+                                plugin.logger().log(server.getServerInfo().getName() + " never responded to ping! Killing it...");
+                        } else {
+                            if (plugin.logger().getGate().check(GateKey.PING))
+                                plugin.logger().log(server.getServerInfo().getName() + " never responded to ping!");
+                        }
                         continue;
                     }
 
@@ -139,6 +143,31 @@ public class Proxy {
             return false;
         });
     }
+
+    public void startFamilyServerSorting(long heartbeat) {
+        this.heart = new Clock(heartbeat);
+
+        heart.start((Callable<Boolean>) () -> {
+            VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+            try {
+                if(plugin.logger().getGate().check(GateKey.FAMILY_BALANCING))
+                    plugin.logger().log("Balancing families...");
+
+                for (ServerFamily<? extends PaperServerLoadBalancer> family : plugin.getProxy().getFamilyManager().dump()) {
+                    family.getLoadBalancer().completeSort();
+                    if(plugin.logger().getGate().check(GateKey.FAMILY_BALANCING))
+                        VelocityLang.FAMILY_BALANCING.send(plugin.logger(), family);
+                }
+
+                if(plugin.logger().getGate().check(GateKey.FAMILY_BALANCING))
+                    plugin.logger().log("Finished balancing families.");
+            } catch (Exception e) {
+                return false;
+            }
+            return true;
+        });
+    }
+
     public void killHeartbeat() {
         this.heart.end();
     }
@@ -344,7 +373,9 @@ public class Proxy {
 
         proxy.setRedis(redis);
 
-        proxy.startHeart(config.getHeartbeat());
+        if(config.isHearts_serverLifecycle_enabled()) proxy.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
+
+        if(config.getMessageTunnel_familyServerSorting_enabled()) proxy.startFamilyServerSorting(config.getMessageTunnel_familyServerSorting_interval());
 
         // Setup network whitelist
         if(config.isWhitelist_enabled()) {

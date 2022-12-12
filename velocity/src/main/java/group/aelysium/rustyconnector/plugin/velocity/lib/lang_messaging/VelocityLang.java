@@ -302,6 +302,6 @@ public interface VelocityLang extends Lang {
     Message CALL_FOR_REGISTRATION = () -> text("[Velocity](127.0.0.1) " + LoggerConfig.getConfig().getConsoleIcons_callForRegistration() +" EVERYONE");
 
     ParameterizedMessage1<ServerFamily<? extends PaperServerLoadBalancer>> FAMILY_BALANCING = family -> text(
-             family.getName() + " " + LoggerConfig.getConfig().getConsoleIcons_familyBalancing()
+            family.getName() + " " + LoggerConfig.getConfig().getConsoleIcons_familyBalancing()
     );
 }

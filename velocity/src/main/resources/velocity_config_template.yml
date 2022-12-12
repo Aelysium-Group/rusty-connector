@@ -287,17 +287,49 @@ boot-commands:
     commands:
       - "rc registerAll"
 
-#########################
-#        Hearts         #
-#########################
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                          Hearts                          #
+#                                                          #
+#               ---------------------------                #
+# | Hearts are certain processes that run every specific   #
+# | interval! They can be enabled, disabled, and adjusted  #
+# | here.                                                  #
+#                                                          #
+# | All intervals are in seconds.                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+hearts:
+#
+# Manages the lifecycles of servers.
+#
+    server-lifecycle:
+        enabled: true
+#
+# Time, in seconds, between sending out a ping and expecting a pong.
+#
+        interval: 30
+#
+# If a server doesn't respond to the most recent ping before the heart's next interval.
+# Should the server get unregistered?
+#
+# This is an additional life-cycle option in-case servers become unresponsive and unable to unregister themselves.
+# If a server can't unregister itself (bad shutdown, server freezing, etc) this will be able to see that it's unresponsive and unregister it.
+#
+        unregister-on-ignore: false
 
 #
-# The proxy's heart.
+# Manages the load balancing of the proxy's families.
 #
-# When it beats it will ping all servers.
-# If a server doesn't respond before the heart beats again, it will be un-registered.
-# This is how the plugin unregisters servers that become unresponsive or failed to unregister themselves when they were shutdown.
+    family-server-sorting:
+        enabled: true
 #
-# Time is in seconds.
+# Time, in seconds, between when the families sort their servers. This interval will cause your proxy to sort ALL of the servers registered to it!
+# The higher this value the higher accuracy your load balancing will operate at.
+# If you have larger sets of servers on a family, setting the interval to be larger can help save resources.
 #
-heart-beat: 10
+# If you disable this heart, you are effectively setting load balancing for your entire network to be ROUND_ROBIN
+#
+        interval: 20

@@ -12,7 +12,6 @@ public class DefaultConfig extends YAML {
 
     private String private_key = "";
     private String public_key = "";
-    private int heartbeat = 10;
     private String root_family = "lobby";
     private List<String> families = new ArrayList<>();
 
@@ -33,6 +32,12 @@ public class DefaultConfig extends YAML {
 
     private boolean bootCommands_enabled = false;
     private List<String> bootCommands_commands = new ArrayList<>();
+
+    private Boolean hearts_serverLifecycle_enabled = true;
+    private Integer hearts_serverLifecycle_interval = 30;
+    private Boolean hearts_serverLifecycle_unregisterOnIgnore = false;
+    private Boolean messageTunnel_familyServerSorting_enabled = true;
+    private Integer messageTunnel_familyServerSorting_interval = 20;
 
     private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -68,10 +73,6 @@ public class DefaultConfig extends YAML {
 
     public String getPublic_key() {
         return this.public_key;
-    }
-
-    public int getHeartbeat() {
-        return this.heartbeat;
     }
 
     public String getRoot_family() {
@@ -137,16 +138,38 @@ public class DefaultConfig extends YAML {
         return bootCommands_commands;
     }
 
+    public Boolean isHearts_serverLifecycle_enabled() {
+        return hearts_serverLifecycle_enabled;
+    }
+
+    public Integer getHearts_serverLifecycle_interval() {
+        return hearts_serverLifecycle_interval;
+    }
+
+    public Boolean shouldHearts_serverLifecycle_unregisterOnIgnore() {
+        return hearts_serverLifecycle_unregisterOnIgnore;
+    }
+
+    public Integer getMessageTunnel_familyServerSorting_interval() {
+        return messageTunnel_familyServerSorting_interval;
+    }
+
+    public Boolean getMessageTunnel_familyServerSorting_enabled() {
+        return messageTunnel_familyServerSorting_enabled;
+    }
+
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        // General
+
         try {
             this.private_key = this.getNode(this.data,"private-key",String.class);
         } catch (Exception e) {
             VelocityLang.PRIVATE_KEY.send(plugin.logger());
         }
         this.public_key = this.getNode(this.data,"public-key",String.class);
-        this.heartbeat = this.getNode(this.data,"heart-beat",Integer.class);
 
         this.root_family = this.getNode(this.data,"root-family",String.class);
         try {
@@ -155,13 +178,19 @@ public class DefaultConfig extends YAML {
             throw new IllegalStateException("The node [families] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
 
+        // Redis
+
         this.redis_host = this.getNode(this.data,"redis.host",String.class);
         this.redis_port = this.getNode(this.data,"redis.port",Integer.class);
         this.redis_password = this.getNode(this.data,"redis.password",String.class);
         this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
 
+        // Whitelist
+
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
         this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
+
+        // Message tunnel
 
         this.messageTunnel_messageCacheSize = this.getNode(this.data,"message-tunnel.message-cache-size",Integer.class);
         this.messageTunnel_messageMaxLength = this.getNode(this.data,"message-tunnel.message-max-length",Integer.class);
@@ -179,6 +208,7 @@ public class DefaultConfig extends YAML {
             throw new IllegalStateException("The node [message-tunnel.denylist] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
 
+        // Boot commands
 
         this.bootCommands_enabled = this.getNode(this.data,"boot-commands.enabled",Boolean.class);
         try {
@@ -186,5 +216,13 @@ public class DefaultConfig extends YAML {
         } catch (ClassCastException e) {
             throw new IllegalStateException("The node [boot-commands.commands] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
+
+        // Hearts
+        this.hearts_serverLifecycle_enabled = this.getNode(this.data,"hearts.server-lifecycle.enabled",Boolean.class);
+        this.hearts_serverLifecycle_interval = this.getNode(this.data,"hearts.server-lifecycle.interval",Integer.class);
+        this.hearts_serverLifecycle_unregisterOnIgnore = this.getNode(this.data,"hearts.server-lifecycle.unregister-on-ignore",Boolean.class);
+
+        this.messageTunnel_familyServerSorting_enabled = this.getNode(this.data,"hearts.family-server-sorting.enabled",Boolean.class);
+        this.messageTunnel_familyServerSorting_interval = this.getNode(this.data,"hearts.family-server-sorting.interval",Integer.class);
     }
 }
