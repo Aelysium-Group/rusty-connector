@@ -76,20 +76,6 @@ private-key: ""
 #
 public-key: ""
 
-#########################
-#         Heart         #
-#########################
-#
-# The proxy's heart.
-#
-# When it beats it will ping all servers.
-# If a server doesn't respond before the heart beats again, it will be un-registered.
-# This is how the plugin unregisters servers that become unresponsive or failed to unregister themselves when they were shutdown.
-#
-# Time is in seconds.
-#
-heart-beat: 10
-
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Families                          #
@@ -300,3 +286,18 @@ boot-commands:
 #
     commands:
       - "rc registerAll"
+
+#########################
+#        Hearts         #
+#########################
+
+#
+# The proxy's heart.
+#
+# When it beats it will ping all servers.
+# If a server doesn't respond before the heart beats again, it will be un-registered.
+# This is how the plugin unregisters servers that become unresponsive or failed to unregister themselves when they were shutdown.
+#
+# Time is in seconds.
+#
+heart-beat: 10

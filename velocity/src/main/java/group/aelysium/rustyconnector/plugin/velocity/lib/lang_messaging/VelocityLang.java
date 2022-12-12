@@ -176,18 +176,18 @@ public interface VelocityLang extends Lang {
         int i = 0;
 
         for (PaperServer server : family.getRegisteredServers()) {
-            if((family.getQueuedServer() + 1) == i)
+            if(family.getLoadBalancer().getIndex() == i)
+                servers = servers.append(
+                        text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
+                                        "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
+                                        "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+")] <<<<<"
+                                , GREEN));
+            else
                 servers = servers.append(
                         text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
                                         "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
                                         "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+")]"
-                        , GRAY));
-            else
-                servers = servers.append(
-                        text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
-                                "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+")] <<<<<"
-                        , GREEN));
+                                , GRAY));
 
             servers = servers.append(newline());
 
@@ -206,11 +206,21 @@ public interface VelocityLang extends Lang {
                 SPACING,
                 text("   ---| Online Players: "+family.getPlayerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
-                text("   ---| Load Balancing Algorithm: "+family.loadBalancerName()),
+                text("   ---| Load Balancing:"),
+                text("      | - Algorithm: "+family.getLoadBalancer()),
+                text("      | - Weighted Sorting: "+family.isWeighted()),
+                text("      | - Persistence: "+family.getLoadBalancer().isPersistent()),
+                text("      | - Max Attempts: "+family.getLoadBalancer().getAttempts()),
                 SPACING,
                 BORDER,
                 SPACING,
-                text("Registered Servers:",GOLD),
+                text("Registered Servers", AQUA),
+                SPACING,
+                text("/rc family <family name> sort", GOLD),
+                text("Will cause the family to completely resort itself in accordance with it's load balancing algorithm.", DARK_GRAY),
+                SPACING,
+                text("/rc family <family name> resetIndex", GOLD),
+                text("Will reset the family's input to the first server in the family.", DARK_GRAY),
                 SPACING,
                 servers,
                 SPACING,

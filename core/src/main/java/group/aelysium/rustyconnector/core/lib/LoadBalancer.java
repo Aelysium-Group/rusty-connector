@@ -15,10 +15,16 @@ public interface LoadBalancer<I> {
     boolean isPersistent();
 
     /**
-     * Get the number of attempts that persistence will make.
-     * @return The number of attempts. Or `null` if persistence is off.
+     * Is the load balancer weighted?
+     * @return `true` if the load balancer is weighted. `false` otherwise.
      */
-    Integer getAttempts();
+    boolean isWeighted();
+
+    /**
+     * Get the number of attempts that persistence will make.
+     * @return The number of attempts.
+     */
+    int getAttempts();
 
     /**
      * Get the item that the iterator is currently pointing to.
@@ -38,6 +44,19 @@ public interface LoadBalancer<I> {
      * Iterate to the next item.
      */
     void iterate();
+
+    /**
+     * Sort the entire load balancers contents.
+     * Also resets the index to 0.
+     */
+    void completeSort();
+
+    /**
+     * Sort only one index into a new position.
+     * The index chosen is this.index.
+     * Also resets the index to 0.
+     */
+    void singleSort();
 
     /**
      * Add an item to the load balancer.
@@ -73,4 +92,15 @@ public interface LoadBalancer<I> {
      * @param attempts The number of attempts that persistence will try to connect a player before quiting. This value doesn't matter if persistence is set to `false`
      */
     void setPersistence(boolean persistence, int attempts);
+
+    /**
+     * Set whether the load balancer is weighted.
+     * @param weighted Whether the load balancer is weighted.
+     */
+    void setWeighted(boolean weighted);
+
+    /**
+     * Resets the index of the load balancer.
+     */
+    void resetIndex();
 }

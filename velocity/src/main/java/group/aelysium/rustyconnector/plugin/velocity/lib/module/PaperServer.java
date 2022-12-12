@@ -14,6 +14,7 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 
+import javax.swing.plaf.SplitPaneUI;
 import java.security.InvalidAlgorithmParameterException;
 
 public class PaperServer implements Server {
@@ -21,7 +22,7 @@ public class PaperServer implements Server {
     private final ServerInfo serverInfo;
     private String familyName;
     private int playerCount = 0;
-    private int weight = 0;
+    private int weight = 1;
     private int softPlayerCap = 20;
     private int hardPlayerCap = 30;
 
@@ -93,6 +94,11 @@ public class PaperServer implements Server {
     }
 
     @Override
+    public int getSortIndex() {
+        return this.playerCount;
+    }
+
+    @Override
     public int getWeight() {
         return this.weight;
     }
@@ -146,15 +152,16 @@ public class PaperServer implements Server {
      * Connects a player to the server.
      * This also increases the player count on this server by 1.
      * @param player The player to connect.
+     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
      */
-    public void connect(Player player) {
+    public boolean connect(Player player) {
+        ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
         try {
-            ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
-            connection.connect().whenCompleteAsync((status, throwable) -> {});
-
-            this.playerCount += 1;
+            boolean didSucceed = connection.connect().get().isSuccessful();
+            if(didSucceed) this.playerCount += 1;
+            return didSucceed;
         } catch (Exception e) {
-            VelocityRustyConnector.getInstance().logger().error("",e);
+            return false;
         }
     }
 

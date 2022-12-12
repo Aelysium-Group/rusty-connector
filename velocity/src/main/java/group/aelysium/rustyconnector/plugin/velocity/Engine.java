@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.WhitelistConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerDisconnect;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerKick;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
@@ -81,7 +82,7 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text(e.getMessage()), NamedTextColor.RED);
+            plugin.logger().error(e.getMessage());
             return false;
         }
     }
@@ -108,6 +109,7 @@ public class Engine {
         try {
             manager.register(plugin, new OnPlayerJoin());
             manager.register(plugin, new OnPlayerKick());
+            manager.register(plugin, new OnPlayerDisconnect());
 
             return true;
         } catch (Exception e) {

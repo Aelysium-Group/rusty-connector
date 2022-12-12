@@ -76,6 +76,11 @@ public class PaperServer implements Server {
     }
 
     @Override
+    public int getSortIndex() {
+        return 0;
+    }
+
+    @Override
     public int getWeight() {
         return this.weight;
     }

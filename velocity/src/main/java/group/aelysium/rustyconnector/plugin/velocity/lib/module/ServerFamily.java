@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.LoadBalancer;
+import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
@@ -11,32 +11,39 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastCon
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
-    private LB loadBalancer;
+public class ServerFamily<LB extends PaperServerLoadBalancer> {
+    private final LB loadBalancer;
     private final String name;
     private final Whitelist whitelist;
     protected int playerCount = 0;
+
     protected boolean weighted = false;
 
-    public ServerFamily(String name, Whitelist whitelist, Class<LB> clazz, boolean weighted) {
+    private ServerFamily(String name, Whitelist whitelist, Class<LB> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         this.name = name;
         this.whitelist = whitelist;
         this.weighted = weighted;
 
-        try {
-            this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-        }
+        this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
+        this.loadBalancer.setPersistence(persistence, attempts);
+        this.loadBalancer.setWeighted(weighted);
     }
 
-    public String loadBalancerName() { return this.loadBalancer.toString(); }
+    public boolean isWeighted() {
+        return weighted;
+    }
+
+    public LB getLoadBalancer() {
+        return this.loadBalancer;
+    }
 
     /**
      * Set's the player count of a sub-server. Then re-calculates the aggregate player count of this family.
@@ -48,7 +55,6 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
         server.setPlayerCount(playerCount);
 
         this.getPlayerCount();
-
     }
 
     public long serverCount() { return this.loadBalancer.size(); }
@@ -77,47 +83,80 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
      * Connect a player to this family
      * @param player The player to connect
      */
-    public void connect(Player player) throws MalformedURLException {
+    public void connect(Player player) {
+        if(this.loadBalancer.size() == 0) {
+            player.disconnect(Component.text("There are no servers for you to connect to!"));
+            return;
+        }
+
         if(!(this.whitelist == null)) {
             String ip = player.getRemoteAddress().getHostString();
 
             WhitelistPlayer whitelistPlayer = new WhitelistPlayer(player.getUsername(), player.getUniqueId(), ip);
 
             if (!whitelist.validate(whitelistPlayer)) {
-                player.disconnect(Component.text("You aren't whitelisted on this server!"));
+                player.disconnect(Component.text(whitelist.getMessage()));
                 return;
             }
         }
 
-        if(this.loadBalancer.size() == 0) {
-            player.disconnect(Component.text("There are no servers for you to connect to!"));
-            return;
-        }
+        Callable<Boolean> notPersistent = () -> {
+            PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
 
-        PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
-        VelocityRustyConnector.getInstance().logger().log(server.toString());
-
-        if(server.isFull())
-            if(!player.hasPermission("rustyconnector.bypasssoftcap")) {
+            if(server.isFull())
+                if(!player.hasPermission("rustyconnector.bypasssoftcap")) {
+                    player.disconnect(Component.text("The server you're trying to connect to is full!"));
+                    return false;
+                }
+            if(server.isMaxed()) {
                 player.disconnect(Component.text("The server you're trying to connect to is full!"));
-                return;
+                return false;
             }
-        if(server.isMaxed()) {
-            player.disconnect(Component.text("The server you're trying to connect to is full!"));
-            return;
-        }
 
-        server.connect(player);
+            if(!server.connect(player)) {
+                player.disconnect(Component.text("There was an issue connecting you to the server!"));
+                return false;
+            }
 
-        this.loadBalancer.iterate();
+            this.loadBalancer.iterate();
+
+            return true;
+        };
+        Callable<Boolean> persistent = () -> {
+            int attemptsLeft = this.loadBalancer.getAttempts();
+
+            for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
+                VelocityRustyConnector.getInstance().logger().log("attempt: "+attempt);
+                boolean isFinal = (attempt == attemptsLeft);
+                PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
+
+                try {
+                    if(server.isFull())
+                        if(!player.hasPermission("rustyconnector.bypasssoftcap")) {
+                            throw new RuntimeException("The server you're trying to connect to is full!");
+                        }
+                    if(server.isMaxed()) {
+                        throw new RuntimeException("The server you're trying to connect to is full!");
+                    }
+
+                    if(server.connect(player)) break;
+                    else throw new RuntimeException("Unable to connect you to the server in time!");
+                } catch (Exception e) {
+                    if(isFinal)
+                        player.disconnect(Component.text(e.getMessage()));
+                }
+                this.loadBalancer.iterate();
+            }
+
+            return true;
+        };
+
+        if(this.loadBalancer.isPersistent() && this.loadBalancer.getAttempts() > 1) persistent.execute();
+        else notPersistent.execute();
     }
 
     public List<PaperServer> getRegisteredServers() {
         return this.loadBalancer.dump();
-    }
-
-    public int getQueuedServer() {
-        return this.loadBalancer.getIndex();
     }
 
     public String getName() {
@@ -144,7 +183,7 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
      * Get a server that is a part of the family.
      * @param serverInfo The info matching the server to get.
      */
-    public PaperServer getServer(ServerInfo serverInfo) {
+    public PaperServer getServer(@NotNull ServerInfo serverInfo) {
         return this.getServer(serverInfo.getName());
     }
 
@@ -174,7 +213,7 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
      * Initializes all server families based on the configs.
      * @return A list of all server families.
      */
-    public static List<ServerFamily<? extends PaperServerLoadBalancer>> init(DefaultConfig config) {
+    public static List<ServerFamily<? extends PaperServerLoadBalancer>> init(DefaultConfig config) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         List<ServerFamily<? extends PaperServerLoadBalancer>> families = new ArrayList<>();
 
@@ -195,22 +234,28 @@ public class ServerFamily<LB extends LoadBalancer<PaperServer>> {
             }
 
             switch (Enum.valueOf(AlgorithmType.class, familyConfig.getLoadBalancing_algorithm())) {
-                case ROUND_ROBIN -> families.add(
-                        new ServerFamily<>(
-                                familyName,
-                                whitelist,
-                                RoundRobin.class,
-                                familyConfig.isLoadBalancing_weighted()
-                        )
-                );
-                case LEAST_CONNECTION -> families.add(
-                        new ServerFamily<>(
-                                familyName,
-                                whitelist,
-                                LeastConnection.class,
-                                familyConfig.isLoadBalancing_weighted()
-                        )
-                );
+                case ROUND_ROBIN ->
+                    families.add(
+                            new ServerFamily<>(
+                                    familyName,
+                                    whitelist,
+                                    RoundRobin.class,
+                                    familyConfig.isLoadBalancing_weighted(),
+                                    familyConfig.isLoadBalancing_persistence_enabled(),
+                                    familyConfig.getLoadBalancing_persistence_attempts()
+                            )
+                    );
+                case LEAST_CONNECTION ->
+                    families.add(
+                            new ServerFamily<>(
+                                    familyName,
+                                    whitelist,
+                                    LeastConnection.class,
+                                    familyConfig.isLoadBalancing_weighted(),
+                                    familyConfig.isLoadBalancing_persistence_enabled(),
+                                    familyConfig.getLoadBalancing_persistence_attempts()
+                            )
+                    );
             }
         }
 

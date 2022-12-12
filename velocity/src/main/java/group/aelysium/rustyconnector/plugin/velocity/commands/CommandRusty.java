@@ -132,6 +132,42 @@ public final class CommandRusty {
                             }
                             return 1;
                         })
+                        .then(LiteralArgumentBuilder.<CommandSource>literal("resetIndex")
+                                .executes(context -> {
+                                    try {
+                                        String familyName = context.getArgument("familyName", String.class);
+                                        ServerFamily<? extends PaperServerLoadBalancer> family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
+                                        if(family == null) throw new NullPointerException();
+
+                                        family.getLoadBalancer().resetIndex();
+
+                                        VelocityLang.RC_FAMILY_INFO.send(plugin.logger(), family);
+                                    } catch (NullPointerException e) {
+                                        VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"A family with that name doesn't exist!");
+                                    } catch (Exception e) {
+                                        VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"Something prevented us from doing that!");
+                                    }
+                                    return 1;
+                                })
+                        )
+                        .then(LiteralArgumentBuilder.<CommandSource>literal("sort")
+                                .executes(context -> {
+                                    try {
+                                        String familyName = context.getArgument("familyName", String.class);
+                                        ServerFamily<? extends PaperServerLoadBalancer> family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
+                                        if(family == null) throw new NullPointerException();
+
+                                        family.getLoadBalancer().completeSort();
+
+                                        VelocityLang.RC_FAMILY_INFO.send(plugin.logger(), family);
+                                    } catch (NullPointerException e) {
+                                        VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"A family with that name doesn't exist!");
+                                    } catch (Exception e) {
+                                        VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"Something prevented us from doing that!"+e.getMessage());
+                                    }
+                                    return 1;
+                                })
+                        )
                 )
             )
             .then(LiteralArgumentBuilder.<CommandSource>literal("registerAll")

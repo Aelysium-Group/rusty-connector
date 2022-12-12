@@ -1,14 +1,16 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
+import group.aelysium.rustyconnector.core.lib.util.QuickSort;
+import group.aelysium.rustyconnector.core.lib.util.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 
 public class LeastConnection extends PaperServerLoadBalancer {
-    /**
+    /*
      * Used to speed up calculation times.
      * When we run iterate, we first check to see if `index` is still smaller than `secondComingIndex`
      * If it is, we don't do anything because the current server should still be the lowest.
      * If not, we run the iteration algorithm.
-     */
+
     protected int secondComingIndex = 0;
 
     @Override
@@ -34,6 +36,18 @@ public class LeastConnection extends PaperServerLoadBalancer {
 
         this.secondComingIndex = currentSecondComingIndex;
         this.index = lowestIndex;
+    }*/
+
+    @Override
+    public void completeSort() {
+        this.index = 0;
+        QuickSort.sort(this.items);
+    }
+
+    @Override
+    public void singleSort() {
+        this.index = 0;
+        SingleSort.sort(this.items, this.index);
     }
 
     @Override

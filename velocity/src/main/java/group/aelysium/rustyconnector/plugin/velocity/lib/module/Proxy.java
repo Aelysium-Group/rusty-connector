@@ -21,6 +21,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.PlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.HashMap;
@@ -320,7 +321,7 @@ public class Proxy {
      * Initializes the proxy based on the configuration.
      * @param config The configuration file.
      */
-    public static Proxy init(DefaultConfig config) throws IllegalAccessException {
+    public static Proxy init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
         Proxy proxy = new Proxy(config.getPrivate_key());
 
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
