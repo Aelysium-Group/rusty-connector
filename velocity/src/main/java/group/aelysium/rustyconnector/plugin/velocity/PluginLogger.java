@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
@@ -58,7 +59,7 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.lib.lang
     }
 
     public void send(Component message) {
-        VelocityRustyConnector.getInstance().getVelocityServer().sendMessage(message);
+        VelocityRustyConnector.getInstance().getVelocityServer().getConsoleCommandSource().sendMessage(message);
     }
 
     public static void init(LoggerConfig config) {

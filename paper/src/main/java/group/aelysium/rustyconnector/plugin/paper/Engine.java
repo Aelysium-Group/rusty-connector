@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
 import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.command.ConsoleCommandSender;
 
 import java.io.File;
 import java.util.function.Function;
