@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.model.Server;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
+import group.aelysium.rustyconnector.core.lib.util.WeightLevel;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
@@ -22,14 +23,14 @@ public class PaperServer implements Server {
     private final ServerInfo serverInfo;
     private String familyName;
     private int playerCount = 0;
-    private int weight = 1;
+    private int weight = 0;
     private int softPlayerCap = 20;
     private int hardPlayerCap = 30;
 
     public PaperServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight) {
         this.serverInfo = serverInfo;
 
-        this.weight = weight;
+        this.weight = Math.max(weight, 0);
 
         this.softPlayerCap = softPlayerCap;
         this.hardPlayerCap = hardPlayerCap;
@@ -176,6 +177,16 @@ public class PaperServer implements Server {
     public String toString() {
         return "["+this.getServerInfo().getName()+"]" +
                "("+this.getServerInfo().getAddress().getHostName()+":"+this.getServerInfo().getAddress().getPort()+") - " +
+               "["+this.getPlayerCount()+" ("+this.getSoftPlayerCap()+" <> "+this.getSoftPlayerCap()+") w-"+this.getWeight()+"]" +
                "{"+ this.familyName +"}";
+    }
+
+    @Deprecated
+    public void setFamilyName(String name) {
+        this.familyName = name;
+    }
+    @Deprecated
+    public void setRegisteredServer() {
+        this.registeredServer = VelocityRustyConnector.getInstance().getVelocityServer().registerServer(this.getServerInfo());
     }
 }

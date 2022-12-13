@@ -18,12 +18,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ServerFamily<LB extends PaperServerLoadBalancer> {
     private final LB loadBalancer;
     private final String name;
     private final Whitelist whitelist;
-    protected int playerCount = 0;
+    protected long playerCount = 0;
 
     protected boolean weighted = false;
 
@@ -42,6 +43,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
     }
 
     public LB getLoadBalancer() {
+        System.out.print(this.loadBalancer);
         return this.loadBalancer;
     }
 
@@ -63,8 +65,8 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
      * Gets the aggregate player count across all servers in this family
      * @return A player count
      */
-    public int getPlayerCount() {
-        AtomicInteger newPlayerCount = new AtomicInteger();
+    public long getPlayerCount() {
+        AtomicLong newPlayerCount = new AtomicLong();
         this.loadBalancer.dump().forEach(server -> newPlayerCount.addAndGet(server.getPlayerCount()));
 
         playerCount = newPlayerCount.get();
@@ -145,7 +147,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                     if(isFinal)
                         player.disconnect(Component.text(e.getMessage()));
                 }
-                this.loadBalancer.iterate();
+                this.loadBalancer.forceIterate();
             }
 
             return true;

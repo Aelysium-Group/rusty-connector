@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
 import group.aelysium.rustyconnector.core.lib.util.QuickSort;
 import group.aelysium.rustyconnector.core.lib.util.SingleSort;
+import group.aelysium.rustyconnector.core.lib.util.WeightedQuickSort;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 
 public class LeastConnection extends PaperServerLoadBalancer {
@@ -19,7 +21,8 @@ public class LeastConnection extends PaperServerLoadBalancer {
     @Override
     public void completeSort() {
         this.index = 0;
-        QuickSort.sort(this.items);
+        if(this.isWeighted()) WeightedQuickSort.sort(this.items, VelocityRustyConnector.getInstance().logger());
+        else QuickSort.sort(this.items);
     }
 
     @Override

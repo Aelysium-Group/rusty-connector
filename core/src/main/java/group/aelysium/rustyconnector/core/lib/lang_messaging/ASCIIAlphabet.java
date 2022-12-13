@@ -260,6 +260,51 @@ public interface ASCIIAlphabet {
             text("███████╗"),
             text("╚══════╝")
     );
+    Lang.Message PERIOD = () -> join(
+            JoinConfiguration.noSeparators(),
+            text("     "),
+            text("     "),
+            text("     "),
+            text("████╗"),
+            text("████║"),
+            text("╚═══╝")
+    );
+    Lang.Message EXCLAMATION = () -> join(
+            JoinConfiguration.noSeparators(),
+            text("██╗"),
+            text("██║"),
+            text("██║"),
+            text("╚═╝"),
+            text("██╗"),
+            text("╚═╝")
+    );
+    Lang.Message QUESTION = () -> join(
+            JoinConfiguration.noSeparators(),
+            text("██████╗ "),
+            text("╚════██╗"),
+            text("  ▄███╔╝"),
+            text("  ▀▀══╝ "),
+            text("  ██╗   "),
+            text("  ╚═╝   ")
+    );
+    Lang.Message DASH = () -> join(
+            JoinConfiguration.noSeparators(),
+            text("      "),
+            text("      "),
+            text("█████╗"),
+            text("╚════╝"),
+            text("      "),
+            text("      ")
+    );
+    Lang.Message UNDERSCORE = () -> join(
+            JoinConfiguration.noSeparators(),
+            text("        "),
+            text("        "),
+            text("        "),
+            text("        "),
+            text("███████╗"),
+            text("╚══════╝")
+    );
 
     /**
      * Converts a string to an ASCIIAlphabet equivalent.
@@ -327,6 +372,11 @@ public interface ASCIIAlphabet {
         output.put('Y',ASCIIAlphabet.Y);
         output.put('Z',ASCIIAlphabet.Z);
         output.put(' ',ASCIIAlphabet.WHITESPACE);
+        output.put('.',ASCIIAlphabet.PERIOD);
+        output.put('-',ASCIIAlphabet.DASH);
+        output.put('!',ASCIIAlphabet.EXCLAMATION);
+        output.put('?',ASCIIAlphabet.QUESTION);
+        output.put('_',ASCIIAlphabet.UNDERSCORE);
         return output;
     };
 }

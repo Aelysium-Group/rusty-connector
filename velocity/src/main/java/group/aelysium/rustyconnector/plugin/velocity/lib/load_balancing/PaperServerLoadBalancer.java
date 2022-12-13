@@ -1,8 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
 import group.aelysium.rustyconnector.core.lib.LoadBalancer;
-import group.aelysium.rustyconnector.core.lib.util.QuickSort;
-import group.aelysium.rustyconnector.core.lib.util.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 
 import java.util.ArrayList;
@@ -51,6 +49,12 @@ public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
 
     @Override
     public void iterate() {
+        this.index += 1;
+        if(this.index >= this.items.size()) this.index = 0;
+    }
+
+    @Override
+    final public void forceIterate() {
         this.index += 1;
         if(this.index >= this.items.size()) this.index = 0;
     }

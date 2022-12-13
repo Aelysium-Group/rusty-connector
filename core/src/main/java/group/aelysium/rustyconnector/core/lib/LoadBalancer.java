@@ -42,8 +42,14 @@ public interface LoadBalancer<I> {
 
     /**
      * Iterate to the next item.
+     * Some conditions might apply causing it to not truely iterate.
      */
     void iterate();
+
+    /**
+     * No matter what, iterate to the next item.
+     */
+    void forceIterate();
 
     /**
      * Sort the entire load balancers contents.

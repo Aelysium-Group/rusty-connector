@@ -10,13 +10,17 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
+import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 
 
@@ -132,6 +136,51 @@ public final class CommandRusty {
                             }
                             return 1;
                         })
+                        .then(LiteralArgumentBuilder.<CommandSource>literal("addServer")
+                                .executes(context -> {
+                                    return 0;
+                                })
+                                .then(RequiredArgumentBuilder.<CommandSource, Integer>argument("playercount", IntegerArgumentType.integer())
+                                        .executes(context -> {
+                                            return 0;
+                                        })
+                                        .then(RequiredArgumentBuilder.<CommandSource, Integer>argument("weight", IntegerArgumentType.integer())
+                                                .executes(context -> {
+                                                    try {
+                                                        int weight = context.getArgument("weight", Integer.class);
+                                                        int playercount = context.getArgument("playercount", Integer.class);
+                                                        String familyName = context.getArgument("familyName", String.class);
+                                                        ServerFamily<? extends PaperServerLoadBalancer> family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
+                                                        if(family == null) throw new NullPointerException();
+
+                                                        PaperServer server = new PaperServer(
+                                                                new ServerInfo(
+                                                                        MD5.generatePrivateKey(),
+                                                                        InetSocketAddress.createUnresolved("127.0.0.1",0)
+                                                                ),
+                                                                10,
+                                                                10,
+                                                                weight
+                                                        );
+
+                                                        server.setPlayerCount(playercount);
+                                                        server.setRegisteredServer();
+                                                        server.setFamilyName(familyName);
+                                                        family.addServer(server);
+
+                                                        VelocityLang.RC_FAMILY_INFO.send(plugin.logger(), family);
+                                                    } catch (NullPointerException e) {
+                                                        VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"A family with that name doesn't exist!"+e.getMessage());
+                                                        plugin.logger().error(e.getMessage(),e);
+                                                    } catch (Exception e) {
+                                                        VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"Something prevented us from getting that family!"+e.getMessage());
+                                                        plugin.logger().error(e.getMessage(),e);
+                                                    }
+                                                    return 1;
+                                                })
+                                        )
+                                )
+                        )
                         .then(LiteralArgumentBuilder.<CommandSource>literal("resetIndex")
                                 .executes(context -> {
                                     try {
