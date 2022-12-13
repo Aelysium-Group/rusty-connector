@@ -180,13 +180,4 @@ public class PaperServer implements Server {
                "["+this.getPlayerCount()+" ("+this.getSoftPlayerCap()+" <> "+this.getSoftPlayerCap()+") w-"+this.getWeight()+"]" +
                "{"+ this.familyName +"}";
     }
-
-    @Deprecated
-    public void setFamilyName(String name) {
-        this.familyName = name;
-    }
-    @Deprecated
-    public void setRegisteredServer() {
-        this.registeredServer = VelocityRustyConnector.getInstance().getVelocityServer().registerServer(this.getServerInfo());
-    }
 }
