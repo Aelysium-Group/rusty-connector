@@ -29,5 +29,6 @@ public class Clock {
 
     public void end() {
         this.timer.cancel();
+        this.timer.purge();
     }
 }

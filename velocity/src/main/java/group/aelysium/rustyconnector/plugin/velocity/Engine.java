@@ -46,21 +46,23 @@ public class Engine {
         return true;
     }
     public static void stop() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        try {
+            VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
-        WhitelistConfig.empty();
-        DefaultConfig.empty();
-        FamilyConfig.empty();
-        LoggerConfig.empty();
+            WhitelistConfig.empty();
+            DefaultConfig.empty();
+            FamilyConfig.empty();
+            LoggerConfig.empty();
 
-        plugin.getProxy().killHeartbeats();
-        plugin.getProxy().killRedis();
-        plugin.unsetProxy();
+            plugin.getProxy().killHeartbeats();
+            plugin.getProxy().killRedis();
+            plugin.unsetProxy();
 
-        plugin.getVelocityServer().getCommandManager().unregister("rc");
+            plugin.getVelocityServer().getCommandManager().unregister("rc");
 
-        plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerJoin());
-        plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerJoin());
+            plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerJoin());
+            plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerJoin());
+        } catch (Exception ignore) {}
     }
 
     private static boolean initConfigs(VelocityRustyConnector plugin) {

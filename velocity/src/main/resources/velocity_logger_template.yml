@@ -17,6 +17,14 @@
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
+#
+# Generally speaking trashed messages are thrown away because they have an
+# invalid private key or because they were sent by the proxy.
+#
+# You can usually set this to `false` so that only messages that are from other servers are saved.
+#
+save-trashed-messages: true
+
 messaging:
 # Should we log when a server requests to be registered?
 # NOTE: This option can spam your proxy console if your proxy sends out a call-for-registration

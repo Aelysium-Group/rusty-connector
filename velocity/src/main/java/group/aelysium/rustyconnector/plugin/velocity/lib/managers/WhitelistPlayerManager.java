@@ -48,4 +48,9 @@ public class WhitelistPlayerManager implements NodeManager<WhitelistPlayer> {
     public void remove(String username) {
         this.registeredPlayers.remove(username);
     }
+
+    @Override
+    public void clear() {
+        this.registeredPlayers.clear();
+    }
 }

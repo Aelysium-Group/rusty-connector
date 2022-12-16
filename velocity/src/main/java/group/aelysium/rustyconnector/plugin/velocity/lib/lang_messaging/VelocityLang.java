@@ -53,8 +53,11 @@ public interface VelocityLang extends Lang {
             text("/rc message", AQUA),
             text("Access recently sent rusty-connector messages.", DARK_GRAY),
             SPACING,
-            text("/rc registerAll", GOLD),
-            text("Request that all servers listening to the data-channel attempt to register themselves.", DARK_GRAY),
+            text("/rc register", AQUA),
+            text("See server registration options.", DARK_GRAY),
+            SPACING,
+            text("/rc reload", AQUA),
+            text("See reload options.", DARK_GRAY),
             SPACING,
             BORDER
     );
@@ -86,6 +89,58 @@ public interface VelocityLang extends Lang {
             SPACING,
             text("/rc message get <Message ID>",AQUA),
             text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!", GRAY),
+            SPACING,
+            BORDER
+    );
+
+    Message RC_RELOAD_USAGE = () -> join(
+            newlines(),
+            BORDER,
+            SPACING,
+            WORDMARK_USAGE.build().color(AQUA),
+            SPACING,
+            text("Blue commands will return information or data to you! They will not cause changes to be made.",GRAY),
+            text("Orange commands will make the plugin do something. Make sure you know what these commands do before using them!",GRAY),
+            SPACING,
+            text("Using reload to create or delete families is not currently supported. You must restart your proxy to add or remove families.",RED),
+            SPACING,
+            BORDER,
+            SPACING,
+            text("/rc reload proxy", GOLD),
+            text("Reloads config.yml", DARK_GRAY),
+            text("Does NOT reload families.", RED),
+            text("Does NOT reload redis.", RED),
+            SPACING,
+            text("/rc reload family <family name>", GOLD),
+            text("Reload a specific family's configuration.", DARK_GRAY),
+            text("All servers will have to re-register into this family.", RED),
+            SPACING,
+            text("/rc reload logger", GOLD),
+            text("Reloads logger.yml", DARK_GRAY),
+            SPACING,
+            text("/rc reload whitelists", GOLD),
+            text("Reloads all active whitelists. Will also register if the proxy or a family's whitelist settings change.", DARK_GRAY),
+            text("Players already connected to servers will NOT be kicked out if a whitelist is activated.", RED),
+            SPACING,
+            BORDER
+    );
+
+    Message RC_REGISTER_USAGE = () -> join(
+            newlines(),
+            BORDER,
+            SPACING,
+            WORDMARK_USAGE.build().color(AQUA),
+            SPACING,
+            text("Blue commands will return information or data to you! They will not cause changes to be made.",GRAY),
+            text("Orange commands will make the plugin do something. Make sure you know what these commands do before using them!",GRAY),
+            SPACING,
+            BORDER,
+            SPACING,
+            text("/rc register all", GOLD),
+            text("Register all servers to the proxy.", DARK_GRAY),
+            SPACING,
+            text("/rc register family <family name>", GOLD),
+            text("Register all servers associate with a specific family.", DARK_GRAY),
             SPACING,
             BORDER
     );
@@ -157,7 +212,7 @@ public interface VelocityLang extends Lang {
             BORDER
     );
 
-    ParameterizedMessage1<String> RC_REGISTERALL_ERROR = error -> join(
+    ParameterizedMessage1<String> RC_REGISTER_ERROR = error -> join(
             newlines(),
             BORDER,
             SPACING,
@@ -300,6 +355,7 @@ public interface VelocityLang extends Lang {
     );
 
     Message CALL_FOR_REGISTRATION = () -> text("[Velocity](127.0.0.1) " + LoggerConfig.getConfig().getConsoleIcons_callForRegistration() +" EVERYONE");
+    ParameterizedMessage1<String> CALL_FOR_FAMILY_REGISTRATION = (familyName) -> text("[Velocity](127.0.0.1) " + LoggerConfig.getConfig().getConsoleIcons_callForRegistration() +" "+ familyName);
 
     ParameterizedMessage1<ServerFamily<? extends PaperServerLoadBalancer>> FAMILY_BALANCING = family -> text(
             family.getName() + " " + LoggerConfig.getConfig().getConsoleIcons_familyBalancing()

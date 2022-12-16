@@ -44,4 +44,9 @@ public class ServerManager implements NodeManager<PaperServer> {
         return this.registeredServers.values().stream().toList();
     }
 
+    @Override
+    public void clear() {
+        this.registeredServers.clear();
+    }
+
 }

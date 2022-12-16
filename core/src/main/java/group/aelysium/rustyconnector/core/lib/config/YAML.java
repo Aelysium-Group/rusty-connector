@@ -46,11 +46,13 @@ public class YAML {
     protected <T> T getNode(ConfigurationNode data, String node, Class<? extends T> type) throws IllegalStateException {
         try {
             Object objectData = YAML.get(data,node).getValue();
-            assert objectData != null;
+            if(objectData == null) throw new NullPointerException();
 
             return type.cast(objectData);
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("The node ["+node+"] is missing!");
         } catch (ClassCastException e) {
-            throw new IllegalStateException("The node ["+node+"] in config.yml is invalid! Make sure you are using the correct type of data!");
+            throw new IllegalStateException("The node ["+node+"] is if the wrong data type! Make sure you are using the correct type of data!");
         } catch (Exception e) {
             throw new IllegalStateException("Unable to register the node: "+node);
         }

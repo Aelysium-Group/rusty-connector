@@ -3,10 +3,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
@@ -17,20 +20,20 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ServerFamily<LB extends PaperServerLoadBalancer> {
-    private final LB loadBalancer;
+    private LB loadBalancer;
     private final String name;
-    private final Whitelist whitelist;
+    private String whitelist;
     protected long playerCount = 0;
 
     protected boolean weighted = false;
 
     private ServerFamily(String name, Whitelist whitelist, Class<LB> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         this.name = name;
-        this.whitelist = whitelist;
+        if(whitelist == null) this.whitelist = null;
+        else this.whitelist = whitelist.getName();
         this.weighted = weighted;
 
         this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
@@ -45,6 +48,21 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
     public LB getLoadBalancer() {
         System.out.print(this.loadBalancer);
         return this.loadBalancer;
+    }
+
+    /**
+     * Get the whitelist for this family, or `null` if there isn't one.
+     * @return The whitelist or `null` if there isn't one.
+     */
+    public Whitelist getWhitelist() {
+        if(this.name == null) return null;
+        return VelocityRustyConnector.getInstance().getProxy().getWhitelistManager().find(this.whitelist);
+    }
+
+    public void setLoadBalancer(Class<LB> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
+        this.loadBalancer.setPersistence(persistence, attempts);
+        this.loadBalancer.setWeighted(weighted);
     }
 
     /**
@@ -92,12 +110,14 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         }
 
         if(!(this.whitelist == null)) {
+            Whitelist familyWhitelist = this.getWhitelist();
+
             String ip = player.getRemoteAddress().getHostString();
 
             WhitelistPlayer whitelistPlayer = new WhitelistPlayer(player.getUsername(), player.getUniqueId(), ip);
 
-            if (!whitelist.validate(whitelistPlayer)) {
-                player.disconnect(Component.text(whitelist.getMessage()));
+            if (!familyWhitelist.validate(whitelistPlayer)) {
+                player.disconnect(Component.text(familyWhitelist.getMessage()));
                 return;
             }
         }
@@ -201,66 +221,107 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
     }
 
     /**
-     * Gets a server that is a part of the family.
-     * @param address The address of the server to get
+     * Unregisters all servers from this family.
      */
-    public PaperServer getServer(InetSocketAddress address) throws NullPointerException {
-        return this.getRegisteredServers().stream()
-                .filter(server ->
-                        Objects.equals(server.getRegisteredServer().getServerInfo().getAddress(), address)
-                ).findFirst().orElse(null);
+    public void unregisterServers() throws Exception {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        for (PaperServer server : this.loadBalancer.dump()) {
+            plugin.getProxy().unregisterServer(server.getServerInfo(),this.name);
+        }
     }
 
     /**
      * Initializes all server families based on the configs.
      * @return A list of all server families.
      */
-    public static List<ServerFamily<? extends PaperServerLoadBalancer>> init(DefaultConfig config) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static ServerFamily<? extends PaperServerLoadBalancer> init(Proxy proxy, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-        List<ServerFamily<? extends PaperServerLoadBalancer>> families = new ArrayList<>();
+        plugin.logger().log("Registering family: "+familyName);
+        if(Objects.equals(familyName, "all")) throw new RuntimeException("You can't name a server \"all\"!");
 
-        for (String familyName: config.getFamilies()) {
-            FamilyConfig familyConfig = FamilyConfig.newConfig(
-                    familyName,
-                    new File(plugin.getDataFolder(), "families/"+familyName+".yml"),
-                    "velocity_family_template.yml"
-            );
-            if(!familyConfig.generate()) {
-                throw new IllegalStateException("Unable to load or create families/"+familyName+".yml!");
-            }
-            familyConfig.register();
+        FamilyConfig familyConfig = FamilyConfig.newConfig(
+                familyName,
+                new File(plugin.getDataFolder(), "families/"+familyName+".yml"),
+                "velocity_family_template.yml"
+        );
+        if(!familyConfig.generate()) {
+            throw new IllegalStateException("Unable to load or create families/"+familyName+".yml!");
+        }
+        familyConfig.register();
 
-            Whitelist whitelist = null;
-            if(familyConfig.isWhitelist_enabled()) {
-                whitelist = Whitelist.init(familyConfig.getWhitelist_name());
-            }
+        Whitelist whitelist = null;
+        if(familyConfig.isWhitelist_enabled()) {
+            whitelist = Whitelist.init(familyConfig.getWhitelist_name());
 
+            proxy.getWhitelistManager().add(whitelist);
+
+            plugin.logger().log(familyName+" whitelist registered!");
+        } else
+            plugin.logger().log(familyName+" doesn't have a whitelist.");
+
+        try {
             switch (Enum.valueOf(AlgorithmType.class, familyConfig.getLoadBalancing_algorithm())) {
-                case ROUND_ROBIN ->
-                    families.add(
-                            new ServerFamily<>(
-                                    familyName,
-                                    whitelist,
-                                    RoundRobin.class,
-                                    familyConfig.isLoadBalancing_weighted(),
-                                    familyConfig.isLoadBalancing_persistence_enabled(),
-                                    familyConfig.getLoadBalancing_persistence_attempts()
-                            )
+                case ROUND_ROBIN -> {
+                    return new ServerFamily<>(
+                            familyName,
+                            whitelist,
+                            RoundRobin.class,
+                            familyConfig.isLoadBalancing_weighted(),
+                            familyConfig.isLoadBalancing_persistence_enabled(),
+                            familyConfig.getLoadBalancing_persistence_attempts()
                     );
-                case LEAST_CONNECTION ->
-                    families.add(
-                            new ServerFamily<>(
-                                    familyName,
-                                    whitelist,
-                                    LeastConnection.class,
-                                    familyConfig.isLoadBalancing_weighted(),
-                                    familyConfig.isLoadBalancing_persistence_enabled(),
-                                    familyConfig.getLoadBalancing_persistence_attempts()
-                            )
+                }
+                case LEAST_CONNECTION -> {
+                    return new ServerFamily<>(
+                            familyName,
+                            whitelist,
+                            LeastConnection.class,
+                            familyConfig.isLoadBalancing_weighted(),
+                            familyConfig.isLoadBalancing_persistence_enabled(),
+                            familyConfig.getLoadBalancing_persistence_attempts()
                     );
+                }
             }
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
 
-        return families;
+        throw new RuntimeException("There was an issue setting up the family: "+familyName);
+    }
+
+    /**
+     * Reloads the whitelist associated with this server.
+     */
+    public void reloadWhitelist() {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        Whitelist currentWhitelist = this.getWhitelist();
+        if(!(currentWhitelist == null)) {
+            plugin.getProxy().getWhitelistManager().remove(currentWhitelist);
+        }
+
+        FamilyConfig familyConfig = FamilyConfig.newConfig(
+                this.name,
+                new File(plugin.getDataFolder(), "families/"+this.name+".yml"),
+                "velocity_family_template.yml"
+        );
+        if(!familyConfig.generate()) {
+            throw new IllegalStateException("Unable to load or create families/"+this.name+".yml!");
+        }
+        familyConfig.register();
+
+        Whitelist newWhitelist;
+        if(familyConfig.isWhitelist_enabled()) {
+            newWhitelist = Whitelist.init(familyConfig.getWhitelist_name());
+
+            this.whitelist = familyConfig.getWhitelist_name();
+            plugin.getProxy().getWhitelistManager().add(newWhitelist);
+
+            plugin.logger().log("Finished reloading whitelist for "+this.name);
+            return;
+        }
+
+        this.whitelist = null;
+        plugin.logger().log("There is no whitelist for "+this.name);
     }
 }

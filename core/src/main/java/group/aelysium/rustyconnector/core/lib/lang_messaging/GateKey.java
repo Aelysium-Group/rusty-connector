@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.core.lib.lang_messaging;
 
 public enum GateKey {
+    SAVE_TRASH_MESSAGES,
+
     // Messaging
     REGISTRATION_REQUEST,
     UNREGISTRATION_REQUEST,

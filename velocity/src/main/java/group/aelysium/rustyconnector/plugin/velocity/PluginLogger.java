@@ -68,6 +68,11 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.lib.lang
         LoggerGate gate = plugin.logger().getGate();
 
         gate.registerNode(
+                GateKey.SAVE_TRASH_MESSAGES,
+                config.shouldSaveTrashedMessages()
+        );
+
+        gate.registerNode(
                 GateKey.REGISTRATION_REQUEST,
                 config.isMessaging_registrationRequest()
         );

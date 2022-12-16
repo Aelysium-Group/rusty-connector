@@ -60,4 +60,9 @@ public class PlayerManager implements NodeManager<Player> {
     public void remove(UUID uuid) {
         this.registeredPlayers.remove(uuid);
     }
+
+    @Override
+    public void clear() {
+        this.registeredPlayers.clear();
+    }
 }

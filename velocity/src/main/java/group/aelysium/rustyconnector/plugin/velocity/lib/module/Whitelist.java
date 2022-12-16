@@ -9,28 +9,10 @@ import java.io.File;
 import java.util.*;
 
 public class Whitelist {
-    public String getName() {
-        return name;
-    }
-    public String getMessage() {
-        return message;
-    }
     private String message = "You aren't whitelisted on this server!";
     private String name;
     private final WhitelistPlayerManager whitelistPlayerManager;
     private final List<String> countries = new ArrayList<>();
-
-    public boolean usesPlayers() {
-        return usePlayers;
-    }
-
-    public boolean usesCountries() {
-        return useCountries;
-    }
-
-    public boolean usesPermission() {
-        return usePermission;
-    }
 
     private boolean usePlayers = false;
     private boolean useCountries = false;
@@ -44,6 +26,24 @@ public class Whitelist {
         this.message = message;
 
         this.whitelistPlayerManager = new WhitelistPlayerManager();
+    }
+
+    public boolean usesPlayers() {
+        return usePlayers;
+    }
+
+    public boolean usesCountries() {
+        return useCountries;
+    }
+
+    public boolean usesPermission() {
+        return usePermission;
+    }
+    public String getName() {
+        return name;
+    }
+    public String getMessage() {
+        return message;
     }
 
     public WhitelistPlayerManager getPlayerManager() {
@@ -78,6 +78,7 @@ public class Whitelist {
      */
     public static Whitelist init(String whitelistName) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        whitelistName = whitelistName.replaceAll(".yml","");
 
         WhitelistConfig whitelistConfig = WhitelistConfig.newConfig(
                 whitelistName,
@@ -96,7 +97,6 @@ public class Whitelist {
                 whitelistConfig.getUse_country(),
                 whitelistConfig.getMessage()
         );
-
         if(whitelistConfig.getUse_players()) {
             List<Object> players = whitelistConfig.getPlayers();
             Gson gson = new Gson();
@@ -112,6 +112,7 @@ public class Whitelist {
             countries.forEach(whitelist::registerCountry);
         };
 
+        plugin.logger().log("Loaded whitelist: "+whitelistName);
         return whitelist;
     }
 }

@@ -47,6 +47,14 @@ public class MessageCache {
     }
 
     /**
+     * Removes a message from the cache.
+     * @param messageSnowflake The snowflake of the cached message.
+     */
+    public void removeMessage(Long messageSnowflake) {
+        this.messages.remove(messageSnowflake);
+    }
+
+    /**
      * Get all currently cached messages.
      * @return All currently cached messages.
      */
@@ -77,4 +85,6 @@ public class MessageCache {
     public Long newSnowflake() { return this.snowflakeGenerator.nextId(); }
 
     public int getSize() { return this.messages.size(); }
+
+    public void empty() { this.messages.clear(); }
 }

@@ -43,4 +43,9 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
     public List<ServerFamily<? extends PaperServerLoadBalancer>> dump() {
         return this.registeredFamilies.values().stream().toList();
     }
+
+    @Override
+    public void clear() {
+        this.registeredFamilies.clear();
+    }
 }

@@ -5,6 +5,7 @@ import java.io.File;
 public class LoggerConfig extends YAML {
     private static LoggerConfig config;
 
+    private boolean saveTrashedMessages = true;
     private boolean messaging_registrationRequest = false;
     private boolean messaging_unregistrationRequest = false;
     private boolean messaging_callForRegistration = false;
@@ -32,6 +33,10 @@ public class LoggerConfig extends YAML {
 
     private LoggerConfig(File configPointer, String template) {
         super(configPointer, template);
+    }
+
+    public boolean shouldSaveTrashedMessages() {
+        return saveTrashedMessages;
     }
 
     public boolean isMessaging_registrationRequest() {
@@ -144,6 +149,8 @@ public class LoggerConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
+        this.saveTrashedMessages = this.getNode(this.data,"save-trashed-messages",Boolean.class);
+
         this.messaging_registrationRequest = this.getNode(this.data,"messaging.registration-request",Boolean.class);
         this.messaging_unregistrationRequest = this.getNode(this.data,"messaging.unregistration-request",Boolean.class);
         this.messaging_callForRegistration = this.getNode(this.data,"messaging.call-for-registration",Boolean.class);

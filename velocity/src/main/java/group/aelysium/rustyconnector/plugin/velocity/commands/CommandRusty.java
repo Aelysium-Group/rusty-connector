@@ -10,16 +10,19 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.hash.MD5;
+import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -174,24 +177,144 @@ public final class CommandRusty {
                         )
                 )
             )
-            .then(LiteralArgumentBuilder.<CommandSource>literal("registerAll")
+            .then(LiteralArgumentBuilder.<CommandSource>literal("register")
                     .executes(context -> {
                         try {
-                            VelocityRustyConnector.getInstance().getProxy().registerAllServers();
+                            VelocityLang.RC_REGISTER_USAGE.send(plugin.logger());
                         } catch (Exception e) {
-                            VelocityLang.RC_REGISTERALL_ERROR.send(plugin.logger(), "Something prevented us from sending a request for registration!");
+                            VelocityLang.RC_REGISTER_ERROR.send(plugin.logger(), "Something prevented us from sending a request for registration!");
                         }
 
                         return 1;
                     })
-            )
-            /*.then(LiteralArgumentBuilder.<CommandSource>literal("reload")
-                    .executes(context -> {
-                        VelocityRustyConnector.getInstance().reload();
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("all")
+                            .executes(context -> {
+                                try {
+                                    plugin.getProxy().registerAllServers();
+                                    return 1;
+                                } catch (Exception e) {
+                                    VelocityLang.RC_REGISTER_ERROR.send(plugin.logger(), e.getMessage());
+                                }
+                                return 0;
+                            })
+                    )
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("family")
+                            .executes(context -> {
+                                VelocityLang.RC_REGISTER_USAGE.send(plugin.logger());
+                                return 1;
+                            }).then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
+                                    .executes(context -> {
+                                        try {
+                                            String familyName = context.getArgument("familyName", String.class);
+                                            ServerFamily<? extends PaperServerLoadBalancer> family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
+                                            if(family == null) throw new NullPointerException();
 
+                                            VelocityRustyConnector.getInstance().getProxy().registerAllServers(familyName);
+                                        } catch (NullPointerException e) {
+                                            VelocityLang.RC_REGISTER_ERROR.send(plugin.logger(),"A family with that name doesn't exist!");
+                                        } catch (Exception e) {
+                                            VelocityLang.RC_REGISTER_ERROR.send(plugin.logger(),"Something prevented us from reloading that family!");
+                                        }
+                                        return 1;
+                                    })
+                            )
+                    )
+            )
+            .then(LiteralArgumentBuilder.<CommandSource>literal("reload")
+                    .executes(context -> {
+                        VelocityLang.RC_RELOAD_USAGE.send(plugin.logger());
                         return 1;
                     })
-            )*/
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("proxy")
+                            .executes(context -> {
+                                plugin.logger().log("Reloading the proxy...");
+                                try {
+                                    DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(plugin.getDataFolder(), "config.yml"), "velocity_config_template.yml");
+                                    if(!defaultConfig.generate()) {
+                                        throw new IllegalStateException("Unable to load or create config.yml!");
+                                    }
+                                    defaultConfig.register();
+
+                                    plugin.getProxy().reload(defaultConfig);
+                                    plugin.logger().log("Done reloading!");
+                                    return 1;
+                                } catch (Exception e) {
+                                    VelocityRustyConnector.getInstance().logger().error(e.getMessage(),e);
+                                }
+                                return 0;
+                            })
+                    )
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("family")
+                            .executes(context -> {
+                                VelocityLang.RC_RELOAD_USAGE.send(plugin.logger());
+                                return 1;
+                            }).then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
+                                    .executes(context -> {
+                                        try {
+                                            String familyName = context.getArgument("familyName", String.class);
+                                            plugin.logger().log("Reloading the family: "+familyName+"...");
+                                            ServerFamily<? extends PaperServerLoadBalancer> family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
+                                            if(family == null) {
+                                                VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"A family with that name doesn't exist!");
+                                                return 1;
+                                            }
+
+                                            ServerFamily<? extends PaperServerLoadBalancer> newFamily = ServerFamily.init(plugin.getProxy(), familyName);
+
+                                            FamilyManager familyManager = plugin.getProxy().getFamilyManager();
+                                            familyManager.remove(family);
+                                            family.unregisterServers();
+
+                                            plugin.getProxy().getFamilyManager().add(newFamily);
+                                            plugin.logger().log("Done reloading!");
+
+                                            return 1;
+                                        } catch (Exception e) {
+                                            VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"Something prevented us from reloading that family!\n"+e.getMessage());
+                                        }
+                                        return 0;
+                                    })
+                            )
+                    )
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("logger")
+                            .executes(context -> {
+                                try {
+                                    plugin.logger().log("Reloading plugin logger...");
+                                    LoggerConfig loggerConfig = LoggerConfig.newConfig(new File(plugin.getDataFolder(), "logger.yml"), "velocity_logger_template.yml");
+                                    if (!loggerConfig.generate()) {
+                                        throw new IllegalStateException("Unable to load or create logger.yml!");
+                                    }
+                                    loggerConfig.register();
+                                    PluginLogger.init(loggerConfig);
+                                    plugin.logger().log("Done reloading!");
+
+                                    return 1;
+                                } catch (Exception e) {
+                                    VelocityRustyConnector.getInstance().logger().error(e.getMessage(),e);
+                                }
+                                return 0;
+                            })
+                    )
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("whitelists")
+                            .executes(context -> {
+                                plugin.logger().log("Reloading whitelists...");
+                                try {
+                                    DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(plugin.getDataFolder(), "config.yml"), "velocity_config_template.yml");
+                                    if(!defaultConfig.generate()) {
+                                        throw new IllegalStateException("Unable to load or create config.yml!");
+                                    }
+                                    defaultConfig.register();
+
+                                    plugin.getProxy().reloadWhitelists(defaultConfig);
+                                    plugin.logger().log("Done reloading!");
+                                    return 1;
+                                } catch (Exception e) {
+                                    VelocityRustyConnector.getInstance().logger().error(e.getMessage(),e);
+                                }
+                                return 0;
+                            })
+                    )
+            )
             .build();
 
         // BrigadierCommand implements Command

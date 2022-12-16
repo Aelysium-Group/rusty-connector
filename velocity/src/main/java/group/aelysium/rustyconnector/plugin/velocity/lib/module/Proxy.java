@@ -75,7 +75,7 @@ public class Proxy {
      * Set the message tunnel for the proxy. Once this is set it cannot be changed.
      * @param messageTunnel The message tunnel to set.
      */
-    public void setMessageTunnel(MessageTunnel messageTunnel) throws IllegalStateException {
+    private void setMessageTunnel(MessageTunnel messageTunnel) throws IllegalStateException {
         if(this.messageTunnel != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
         this.messageTunnel = messageTunnel;
     }
@@ -169,9 +169,18 @@ public class Proxy {
         });
     }
 
+    /**
+     * Ends the current heart lifecycles and prepares them for garbage collection.
+     */
     public void killHeartbeats() {
-        this.familyServerSorting.end();
-        this.serverLifecycleHeart.end();
+        if(this.familyServerSorting != null) {
+            this.familyServerSorting.end();
+            this.familyServerSorting = null;
+        }
+        if(this.serverLifecycleHeart != null) {
+            this.serverLifecycleHeart.end();
+            this.serverLifecycleHeart = null;
+        }
     }
 
     public void killRedis() {
@@ -234,6 +243,7 @@ public class Proxy {
      * @return The whitelist, if any. Otherwise `null`.
      */
     public Whitelist getProxyWhitelist() {
+        if(this.proxyWhitelist == null) return null;
         return this.whitelistManager.find(this.proxyWhitelist);
     }
 
@@ -269,6 +279,28 @@ public class Proxy {
                 RedisMessageType.REG_ALL,
                 "127.0.0.1:0"
         );
+
+        message.dispatchMessage(this.redis);
+    }
+
+    /**
+     * Sends a request to all servers associated with a specific family asking them to register themselves.
+     * Can be usefull if you've just reloaded a family and need to quickly get all your servers back online.
+     * @param familyName The name of the family to target.
+     */
+    public void registerAllServers(String familyName) {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.CALL_FOR_REGISTRATION))
+            VelocityLang.CALL_FOR_FAMILY_REGISTRATION.send(plugin.logger(), familyName);
+
+        RedisMessage message = new RedisMessage(
+                this.privateKey,
+                RedisMessageType.REG_ALL,
+                "127.0.0.1:0"
+        );
+
+        message.addParameter("family",familyName);
 
         message.dispatchMessage(this.redis);
     }
@@ -358,10 +390,13 @@ public class Proxy {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         // Setup families
-        List<ServerFamily<? extends PaperServerLoadBalancer>> families = ServerFamily.init(config);
-        families.forEach(family -> proxy.getFamilyManager().add(family));
+        for (String familyName: config.getFamilies())
+            proxy.getFamilyManager().add(ServerFamily.init(proxy, familyName));
+
+        plugin.logger().log("Finished setting up families");
 
         proxy.setRootFamily(config.getRoot_family());
+        plugin.logger().log("Finished setting up root family");
 
         // Setup Redis
         Redis redis = new Redis();
@@ -374,10 +409,11 @@ public class Proxy {
         redis.connect(plugin);
 
         proxy.setRedis(redis);
+        plugin.logger().log("Finished setting up redis");
 
         if(config.isHearts_serverLifecycle_enabled()) proxy.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
-
         if(config.getMessageTunnel_familyServerSorting_enabled()) proxy.startFamilyServerSorting(config.getMessageTunnel_familyServerSorting_interval());
+        plugin.logger().log("Finished setting up heartbeats");
 
         // Setup network whitelist
         if(config.isWhitelist_enabled()) {
@@ -385,9 +421,11 @@ public class Proxy {
 
             proxy.whitelistManager.add(Whitelist.init(config.getWhitelist_name()));
         }
+        plugin.logger().log("Finished setting up network whitelist");
 
         // Setup message tunnel
         proxy.setMessageCache(config.getMessageTunnel_messageCacheSize());
+        plugin.logger().log("Set message cache size to be: "+config.getMessageTunnel_messageCacheSize());
 
         MessageTunnel messageTunnel = new MessageTunnel(
                 config.isMessageTunnel_denylist_enabled(),
@@ -397,8 +435,6 @@ public class Proxy {
         proxy.setMessageTunnel(messageTunnel);
 
         if(config.isMessageTunnel_whitelist_enabled() || config.isMessageTunnel_denylist_enabled()) {
-
-            proxy.setMessageTunnel(messageTunnel);
 
             List<String> whitelist = config.getMessageTunnel_whitelist_addresses();
             whitelist.forEach(entry -> {
@@ -418,7 +454,89 @@ public class Proxy {
                 messageTunnel.blacklistAddress(address);
             });
         }
+        plugin.logger().log("Finished setting up message tunnel");
 
         return proxy;
+    }
+
+    /**
+     * Initializes the proxy based on the configuration.
+     * @param config The configuration file.
+     */
+    public void reload(DefaultConfig config) {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        plugin.logger().log("Reloading config.yml");
+
+        // Heartbeats
+        this.killHeartbeats();
+        if(config.isHearts_serverLifecycle_enabled()) this.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
+        if(config.getMessageTunnel_familyServerSorting_enabled()) this.startFamilyServerSorting(config.getMessageTunnel_familyServerSorting_interval());
+        plugin.logger().log("Restarted heartbeats");
+
+        this.reloadWhitelists(config);
+        plugin.logger().log("Reloaded all whitelists");
+
+        // Setup message tunnel
+        this.messageCache.empty();
+        this.messageCache = null;
+        this.setMessageCache(config.getMessageTunnel_messageCacheSize());
+        plugin.logger().log("Message cache size set to: "+config.getMessageTunnel_messageCacheSize());
+
+        this.messageTunnel = null;
+        MessageTunnel messageTunnel = new MessageTunnel(
+                config.isMessageTunnel_denylist_enabled(),
+                config.isMessageTunnel_whitelist_enabled(),
+                config.getMessageTunnel_messageMaxLength()
+        );
+        this.setMessageTunnel(messageTunnel);
+
+        if(config.isMessageTunnel_whitelist_enabled() || config.isMessageTunnel_denylist_enabled()) {
+
+            List<String> whitelist = config.getMessageTunnel_whitelist_addresses();
+            whitelist.forEach(entry -> {
+                String[] addressSplit = entry.split(":");
+
+                InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
+
+                messageTunnel.whitelistAddress(address);
+            });
+
+            List<String> blacklist = config.getMessageTunnel_denylist_addresses();
+            blacklist.forEach(entry -> {
+                String[] addressSplit = entry.split(":");
+
+                InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
+
+                messageTunnel.blacklistAddress(address);
+            });
+        }
+        plugin.logger().log("Message tunnel reloaded");
+    }
+
+    /**
+     * Reload all whitelists currently active on the proxy.
+     * @param config The default config to read.
+     */
+    public void reloadWhitelists(DefaultConfig config) {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        this.proxyWhitelist = null;
+        this.whitelistManager.clear();
+
+        // Setup network whitelist
+        if(config.isWhitelist_enabled()) {
+            this.setWhitelist(config.getWhitelist_name());
+
+            this.whitelistManager.add(Whitelist.init(config.getWhitelist_name()));
+            plugin.logger().log("Proxy whitelist is enabled");
+        } else {
+            plugin.logger().log("There is no proxy whitelist");
+        }
+
+        // Reload server whitelists
+        for (ServerFamily<? extends PaperServerLoadBalancer> family : this.familyManager.dump()) {
+            family.reloadWhitelist();
+        }
+        plugin.logger().log("Reloaded all family whitelists");
     }
 }

@@ -17,6 +17,7 @@ public class WhitelistManager implements NodeManager<Whitelist> {
      */
     @Override
     public Whitelist find(String name) {
+        if(name == null) return null;
         return this.registeredWhitelists.get(name);
     }
 
@@ -41,5 +42,10 @@ public class WhitelistManager implements NodeManager<Whitelist> {
     @Override
     public List<Whitelist> dump() {
         return this.registeredWhitelists.values().stream().toList();
+    }
+
+    @Override
+    public void clear() {
+        this.registeredWhitelists.clear();
     }
 }

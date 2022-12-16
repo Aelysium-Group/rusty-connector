@@ -43,7 +43,10 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
                 plugin.logger().log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
             }
         } catch (Exception e) {
-            cachedMessage.sentenceMessage(MessageStatus.TRASHED, e.getMessage());
+            if(plugin.logger().getGate().check(GateKey.SAVE_TRASH_MESSAGES))
+                cachedMessage.sentenceMessage(MessageStatus.TRASHED, e.getMessage());
+            else
+                plugin.getProxy().getMessageCache().removeMessage(cachedMessage.getSnowflake());
 
             if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 

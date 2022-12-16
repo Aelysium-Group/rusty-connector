@@ -15,19 +15,11 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
     @Override
     public boolean generate() {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-
-        plugin.logger().log("---| Registering "+this.configPointer.getName()+"...");
-        plugin.logger().log("-----| Looking for "+this.configPointer.getName()+"...");
-
         if (!this.configPointer.exists()) {
-            plugin.logger().log("-------| "+this.configPointer.getName()+" doesn't exist! Setting it up now...");
-            plugin.logger().log("-------| Preparing directory...");
             File parent = this.configPointer.getParentFile();
-            if (!parent.exists()) {
+            if (!parent.exists())
                 parent.mkdirs();
-            }
 
-            plugin.logger().log("-------| Preparing template file...");
             InputStream templateStream = plugin.getResourceAsStream(this.template);
             if (templateStream == null) {
                 plugin.logger().error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
@@ -35,23 +27,20 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
             }
 
             try {
-                plugin.logger().log("-------| Cloning template file to new configuration...");
                 Files.copy(templateStream, this.configPointer.toPath());
-                plugin.logger().log("-------| Finished setting up "+this.configPointer.getName());
-
             } catch (IOException e) {
                 plugin.logger().error("!!!!! Unable to setup "+this.configPointer.getName()+" !!!!!",e);
                 return false;
             }
-        } else {
-            plugin.logger().log("-----| Found it!");
         }
 
         try {
             this.data = this.loadYAML(this.configPointer);
             if(this.data == null) return false;
+            plugin.logger().log("Finished registering "+this.configPointer.getName());
             return true;
         } catch (Exception e) {
+            plugin.logger().log("Failed to register: "+this.configPointer.getName());
             return false;
         }
     }
