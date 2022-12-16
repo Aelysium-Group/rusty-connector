@@ -81,8 +81,8 @@ public interface LoadBalancer<I> {
     int size();
 
     /**
-     * Return the number of items.
-     * @return The number of items.
+     * Return all items from the load balancer.
+     * @return The items to return.
      */
     List<I> dump();
 

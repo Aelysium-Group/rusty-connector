@@ -5,17 +5,17 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 
-import java.security.InvalidAlgorithmParameterException;
+import java.util.Objects;
 
-public class ServerRegHandler implements MessageHandler {
+public class ServerRegAllHandler implements MessageHandler {
     private final RedisMessage message;
 
-    public ServerRegHandler(RedisMessage message) {
+    public ServerRegAllHandler(RedisMessage message) {
         this.message = message;
     }
 
     @Override
-    public void execute() throws InvalidAlgorithmParameterException {
+    public void execute() {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
         PaperRustyConnector.getInstance().logger().log("Server has been requested to register itself...");

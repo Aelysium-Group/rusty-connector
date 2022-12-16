@@ -10,7 +10,8 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMess
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.PingHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegHandler;
+import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegAllHandler;
+import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegFamilyHandler;
 
 import javax.naming.AuthenticationException;
 import java.net.InetSocketAddress;
@@ -62,7 +63,12 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
 
         try {
             switch (message.getType()) {
-                case REG_ALL -> new ServerRegHandler(message).execute();
+                case REG_ALL -> new ServerRegAllHandler(message).execute();
+                case REG_FAMILY -> {
+                    message.setToParameter(object, "family"); // The family of this server
+
+                    new ServerRegFamilyHandler(message).execute();
+                }
                 case PING -> new PingHandler(message).execute();
             }
 

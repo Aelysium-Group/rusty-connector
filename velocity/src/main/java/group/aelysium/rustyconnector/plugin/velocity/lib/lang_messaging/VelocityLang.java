@@ -230,26 +230,27 @@ public interface VelocityLang extends Lang {
         Component servers = text("");
         int i = 0;
 
-        for (PaperServer server : family.getRegisteredServers()) {
-            if(family.getLoadBalancer().getIndex() == i)
-                servers = servers.append(
-                        text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
-                                        "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                        "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+") w-"+server.getWeight()+"] <<<<<"
-                                , GREEN));
-            else
-                servers = servers.append(
-                        text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
-                                        "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                        "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+") w-"+server.getWeight()+"]"
-                                , GRAY));
+        if(family.getRegisteredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
+        else if(family.getRegisteredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
+            else for (PaperServer server : family.getRegisteredServers()) {
+                if(family.getLoadBalancer().getIndex() == i)
+                    servers = servers.append(
+                            text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
+                                            "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
+                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+") w-"+server.getWeight()+"] <<<<<"
+                                    , GREEN));
+                else
+                    servers = servers.append(
+                            text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
+                                            "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
+                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+") w-"+server.getWeight()+"]"
+                                    , GRAY));
 
-            servers = servers.append(newline());
+                servers = servers.append(newline());
 
-            i++;
-        }
+                i++;
+            }
 
-        if(family.getRegisteredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
 
         return join(
                 newlines(),
@@ -318,33 +319,33 @@ public interface VelocityLang extends Lang {
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
     );
 
-    ParameterizedMessage2<PaperServer, String> REGISTRATION_REQUEST = (server, familyName) -> text(
-            "["+server.getServerInfo().getName()+"]" +
-                    "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
+    ParameterizedMessage2<ServerInfo, String> REGISTRATION_REQUEST = (serverInfo, familyName) -> text(
+            "["+serverInfo.getName()+"]" +
+                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_requestingRegistration() +" "+familyName
     );
 
-    ParameterizedMessage2<PaperServer, String> REGISTERED = (server, familyName) -> text(
-            "["+server.getServerInfo().getName()+"]" +
-                    "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
+    ParameterizedMessage2<ServerInfo, String> REGISTERED = (serverInfo, familyName) -> text(
+            "["+serverInfo.getName()+"]" +
+                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_registered() +" "+familyName
     );
 
-    ParameterizedMessage2<PaperServer, String> REGISTRATION_CANCELED = (server, familyName) -> text(
-            "["+server.getServerInfo().getName()+"]" +
-                    "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
+    ParameterizedMessage2<ServerInfo, String> REGISTRATION_CANCELED = (serverInfo, familyName) -> text(
+            "["+serverInfo.getName()+"]" +
+                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_canceledRequest() +" "+familyName
     );
 
-    ParameterizedMessage2<PaperServer, String> UNREGISTRATION_REQUEST = (server, familyName) -> text(
-            "["+server.getServerInfo().getName()+"]" +
-                    "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
+    ParameterizedMessage2<ServerInfo, String> UNREGISTRATION_REQUEST = (serverInfo, familyName) -> text(
+            "["+serverInfo.getName()+"]" +
+                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_requestingUnregistration() +" "+familyName
     );
 
-    ParameterizedMessage2<PaperServer, String> UNREGISTERED = (server, familyName) -> text(
-            "["+server.getServerInfo().getName()+"]" +
-                    "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
+    ParameterizedMessage2<ServerInfo, String> UNREGISTERED = (serverInfo, familyName) -> text(
+            "["+serverInfo.getName()+"]" +
+                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_unregistered() +" "+familyName
     );
 

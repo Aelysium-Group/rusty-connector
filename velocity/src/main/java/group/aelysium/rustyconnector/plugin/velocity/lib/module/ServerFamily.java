@@ -226,7 +226,8 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
     public void unregisterServers() throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         for (PaperServer server : this.loadBalancer.dump()) {
-            plugin.getProxy().unregisterServer(server.getServerInfo(),this.name);
+            if(server == null) continue;
+            plugin.getProxy().unregisterServer(server.getServerInfo(),this.name, false);
         }
     }
 
@@ -281,12 +282,13 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                             familyConfig.getLoadBalancing_persistence_attempts()
                     );
                 }
+                default -> {
+                    throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
+                }
             }
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
-
-        throw new RuntimeException("There was an issue setting up the family: "+familyName);
     }
 
     /**

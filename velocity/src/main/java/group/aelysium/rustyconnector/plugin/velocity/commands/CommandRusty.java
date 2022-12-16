@@ -237,6 +237,8 @@ public final class CommandRusty {
 
                                     plugin.getProxy().reload(defaultConfig);
                                     plugin.logger().log("Done reloading!");
+
+                                    VelocityLang.RC_ROOT_USAGE.send(plugin.logger());
                                     return 1;
                                 } catch (Exception e) {
                                     VelocityRustyConnector.getInstance().logger().error(e.getMessage(),e);
@@ -253,21 +255,22 @@ public final class CommandRusty {
                                         try {
                                             String familyName = context.getArgument("familyName", String.class);
                                             plugin.logger().log("Reloading the family: "+familyName+"...");
-                                            ServerFamily<? extends PaperServerLoadBalancer> family = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
-                                            if(family == null) {
+                                            ServerFamily<? extends PaperServerLoadBalancer> oldFamily = VelocityRustyConnector.getInstance().getProxy().getFamilyManager().find(familyName);
+                                            if(oldFamily == null) {
                                                 VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"A family with that name doesn't exist!");
                                                 return 1;
                                             }
 
                                             ServerFamily<? extends PaperServerLoadBalancer> newFamily = ServerFamily.init(plugin.getProxy(), familyName);
 
-                                            FamilyManager familyManager = plugin.getProxy().getFamilyManager();
-                                            familyManager.remove(family);
-                                            family.unregisterServers();
+                                            oldFamily.unregisterServers();
 
+                                            plugin.getProxy().getFamilyManager().remove(oldFamily);
                                             plugin.getProxy().getFamilyManager().add(newFamily);
+
                                             plugin.logger().log("Done reloading!");
 
+                                            VelocityLang.RC_FAMILY_INFO.send(plugin.logger(), newFamily);
                                             return 1;
                                         } catch (Exception e) {
                                             VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"Something prevented us from reloading that family!\n"+e.getMessage());

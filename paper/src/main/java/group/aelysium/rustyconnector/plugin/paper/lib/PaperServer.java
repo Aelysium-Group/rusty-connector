@@ -65,6 +65,8 @@ public class PaperServer implements Server {
 
     public InetSocketAddress getAddress() { return this.address; }
 
+    public String getFamily() { return this.family; }
+
     @Override
     public int getPlayerCount() {
         return playerCount;

@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
 
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 
@@ -27,6 +28,7 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
      */
     @Override
     public void add(ServerFamily<? extends PaperServerLoadBalancer> family) {
+        VelocityRustyConnector.getInstance().logger().log(family.toString());
         this.registeredFamilies.put(family.getName(),family);
     }
 

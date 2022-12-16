@@ -123,7 +123,7 @@ public class Proxy {
 
                     if(!entry.getValue()) {
                         if(shouldUnregister) {
-                            this.unregisterServer(serverInfo, server.getFamilyName());
+                            this.unregisterServer(serverInfo, server.getFamilyName(), true);
                             if (plugin.logger().getGate().check(GateKey.PING))
                                 plugin.logger().log(server.getServerInfo().getName() + " never responded to ping! Killing it...");
                         } else {
@@ -296,7 +296,7 @@ public class Proxy {
 
         RedisMessage message = new RedisMessage(
                 this.privateKey,
-                RedisMessageType.REG_ALL,
+                RedisMessageType.REG_FAMILY,
                 "127.0.0.1:0"
         );
 
@@ -315,7 +315,7 @@ public class Proxy {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         try {
             if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
-                VelocityLang.REGISTRATION_REQUEST.send(plugin.logger(), server, familyName);
+                VelocityLang.REGISTRATION_REQUEST.send(plugin.logger(), server.getServerInfo(), familyName);
 
             if(plugin.getProxy().contains(server.getServerInfo().getName())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
 
@@ -330,12 +330,12 @@ public class Proxy {
             this.lifeMatrix.put(server.getServerInfo(),true);
 
             if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
-                VelocityLang.REGISTERED.send(plugin.logger(), server, familyName);
+                VelocityLang.REGISTERED.send(plugin.logger(), server.getServerInfo(), familyName);
 
             return registeredServer;
         } catch (Exception error) {
             if(plugin.logger().getGate().check(GateKey.REGISTRATION_REQUEST))
-                VelocityLang.REGISTRATION_CANCELED.send(plugin.logger(), server, familyName);
+                VelocityLang.REGISTRATION_CANCELED.send(plugin.logger(), server.getServerInfo(), familyName);
             throw new Exception(error.getMessage());
         }
     }
@@ -343,30 +343,28 @@ public class Proxy {
     /**
      * Unregister a server from the proxy.
      * @param serverInfo The server to be unregistered.
+     * @param familyName The name of the family associated with the server.
+     * @param removeFromFamily Should the server be removed from it's associated family?
      */
-    public void unregisterServer(ServerInfo serverInfo, String familyName) throws Exception {
+    public void unregisterServer(ServerInfo serverInfo, String familyName, Boolean removeFromFamily) throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-        PaperServer server = this.findServer(serverInfo);
         try {
+            PaperServer server = this.findServer(serverInfo);
             if(server == null) throw new NullPointerException("Server ["+serverInfo.getName()+"]("+serverInfo.getAddress()+":"+serverInfo.getAddress().getPort()+") doesn't exist! It can't be unregistered!");
 
             if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
-                VelocityLang.UNREGISTRATION_REQUEST.send(plugin.logger(), server, familyName);
+                VelocityLang.UNREGISTRATION_REQUEST.send(plugin.logger(), serverInfo, familyName);
 
             ServerFamily<? extends PaperServerLoadBalancer> family = server.getFamily();
-            family.removeServer(server);
-
-            plugin.getVelocityServer().unregisterServer(server.getServerInfo());
 
             this.lifeMatrix.remove(serverInfo);
+            plugin.getVelocityServer().unregisterServer(server.getServerInfo());
+            if(removeFromFamily)
+                family.removeServer(server);
 
             if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
-                VelocityLang.UNREGISTERED.send(plugin.logger(), server, familyName);
+                VelocityLang.UNREGISTERED.send(plugin.logger(), serverInfo, familyName);
         } catch (Exception e) {
-            if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST)) {
-                assert server != null;
-                VelocityLang.REGISTRATION_CANCELED.send(plugin.logger(), server, familyName);
-            }
             throw new Exception(e.getMessage());
         }
     }

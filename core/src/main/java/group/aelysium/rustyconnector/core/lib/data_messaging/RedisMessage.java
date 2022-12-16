@@ -135,8 +135,8 @@ public class RedisMessage {
             String privateKey = assumedPrivateKey.getAsString();
             InetSocketAddress address = AddressUtil.stringToAddress(assumedToAddress.getAsString());
 
-            // Unless type is a REG_ALL. Check and make sure that the message is actually addressed to this server
-            if(!(type == RedisMessageType.REG_ALL))
+            // Unless type is a REG_ALL or REG_FAMILY. Check and make sure that the message is actually addressed to this server
+            if(!(type == RedisMessageType.REG_ALL) && !(type == RedisMessageType.REG_FAMILY))
                 if(!AddressUtil.addressToString(address).equals(AddressUtil.addressToString(addressForCompare)))
                     throw new IllegalArgumentException("This message isn't directed at us!");
 

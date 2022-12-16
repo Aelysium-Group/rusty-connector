@@ -6,5 +6,5 @@ authors: [ Sivin ]
 commands:
   rc:
     description: Used for managing the server
-    usage: /control
+    usage: /rc
     permission: rustyconnector.control

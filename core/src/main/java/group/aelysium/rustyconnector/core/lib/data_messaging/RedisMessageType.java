@@ -19,6 +19,7 @@ public enum RedisMessageType {
     PING,
     PONG,
     REG_ALL, // Proxy > Server | An outbound request for servers to register themselves
+    REG_FAMILY, // Proxy > Server | An outbound request for servers of a particular family to register themselves
     REG, // Server > Proxy | A server's response to the REG_OUT message. This is also used when a server boots up and needs to register itself.
     UNREG, // Server > Proxy | A server's message to the proxy when it needs to un-register itself.
 
