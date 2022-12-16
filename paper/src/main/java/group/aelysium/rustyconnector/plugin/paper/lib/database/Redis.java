@@ -2,41 +2,52 @@ package group.aelysium.rustyconnector.plugin.paper.lib.database;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import group.aelysium.rustyconnector.core.lib.message.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.PingHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegHandler;
+import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegAllHandler;
+import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegFamilyHandler;
 
 import javax.naming.AuthenticationException;
 import java.net.InetSocketAddress;
-import java.security.InvalidAlgorithmParameterException;
 import java.util.Map;
 import java.util.Objects;
 
 public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis {
     @Override
-    public void onMessage(String rawMessage, Long messageSnowflake) {
+    public void onMessage(String rawMessage) {
+        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+        CacheableMessage cachedMessage = plugin.getVirtualServer().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
         try {
-            PaperRustyConnector plugin = PaperRustyConnector.getInstance();
-
-            Gson gson = new Gson();
-            JsonObject object = gson.fromJson(rawMessage, JsonObject.class);
-
-            RedisMessage message = RedisMessage.create(object, MessageOrigin.SERVER, plugin.getVirtualServer().getAddress());
-
+            RedisMessage message = RedisMessage.create(rawMessage, MessageOrigin.SERVER, plugin.getVirtualServer().getAddress());
             try {
-                if (!(plugin.validatePrivateKey(message.getKey())))
+                if (!(plugin.getVirtualServer().validatePrivateKey(message.getKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
-                Redis.processParameters(message, object, messageSnowflake);
+                cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
+
+                Redis.processParameters(message, cachedMessage);
             } catch (AuthenticationException e) {
                 plugin.logger().error("Incoming message from: " + message.getAddress().toString() + " contains an invalid private key! Throwing away...");
-                plugin.logger().log("To view the thrown away message use: /rc message get " + messageSnowflake.toString());
+                plugin.logger().log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
             }
+        } catch (NullPointerException e) {
+            cachedMessage.sentenceMessage(MessageStatus.PARSING_ERROR);
+
+            /* TODO: Uncomment and implement proper logging handling
+            PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+
+            plugin.logger().error("There was an issue handling the incoming message! Throwing away...",e);
+            plugin.logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
+            */
         } catch (Exception e) {
+            cachedMessage.sentenceMessage(MessageStatus.TRASHED);
+
             /* TODO: Uncomment and implement proper logging handling
             PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
@@ -46,22 +57,27 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
         }
     }
 
-    private static void processParameters(RedisMessage message, JsonObject object, Long messageSnowflake) {
+    private static void processParameters(RedisMessage message, CacheableMessage cachedMessage) {
+        Gson gson = new Gson();
+        JsonObject object = gson.fromJson(message.toString(), JsonObject.class);
+
         try {
             switch (message.getType()) {
-                case REG_ALL -> {
-                    new ServerRegHandler(message).execute();
+                case REG_ALL -> new ServerRegAllHandler(message).execute();
+                case REG_FAMILY -> {
+                    message.setToParameter(object, "family"); // The family of this server
+
+                    new ServerRegFamilyHandler(message).execute();
                 }
-                case PING -> {
-                    new PingHandler(message).execute();
-                }
+                case PING -> new PingHandler(message).execute();
             }
-        } catch (NullPointerException e) { // If a parameter fails to resolve, we get this exception.
-            PaperRustyConnector.getInstance().logger().error("Incoming message "+message.getType().toString()+" from "+message.getAddress()+" is not formatted properly. Throwing away...", e);
-            PaperRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
-        } catch (InvalidAlgorithmParameterException e) { // If one of the data processors fails, we get this exception.
-            PaperRustyConnector.getInstance().logger().error("There was an issue handling the message. Throwing away...", e);
-            PaperRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
+
+            cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
+        } catch (Exception e) {
+            cachedMessage.sentenceMessage(MessageStatus.PARSING_ERROR);
+
+            PaperRustyConnector.getInstance().logger().error("Incoming message " + message.getType().toString() + " from " + message.getAddress() + " is not formatted properly. Throwing away...", e);
+            PaperRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
         }
     }
 

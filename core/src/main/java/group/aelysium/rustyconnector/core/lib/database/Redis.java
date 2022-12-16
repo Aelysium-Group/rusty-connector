@@ -1,7 +1,9 @@
 package group.aelysium.rustyconnector.core.lib.database;
 
-import group.aelysium.rustyconnector.core.lib.message.cache.MessageCache;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -11,8 +13,8 @@ import group.aelysium.rustyconnector.core.RustyConnector;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
+// TODO: Move this to be a RedisIO implementation
 public class Redis {
-    private MessageCache messageCache;
     private String host;
     private int port;
     private String password;
@@ -22,10 +24,6 @@ public class Redis {
     private Subscriber subscriber;
     private JedisPool pool;
     private Thread subscriberThread;
-
-    public MessageCache getMessageCache() {
-        return this.messageCache;
-    }
 
     public Redis() {}
 
@@ -59,16 +57,12 @@ public class Redis {
             this.jedisSubscriber = this.pool.getResource();
             this.jedisSubscriber.auth(this.password);
             this.subscriber = new Subscriber(plugin);
-            this.messageCache = new MessageCache(50);
 
-            this.subscriberThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        jedisSubscriber.subscribe(subscriber, dataChannel);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            this.subscriberThread = new Thread(() -> {
+                try {
+                    jedisSubscriber.subscribe(subscriber, dataChannel);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
 
@@ -88,11 +82,11 @@ public class Redis {
      */
     public void disconnect() throws ExceptionInInitializerError {
         try {
-            this.subscriberThread.interrupt();
-            this.subscriberThread.join();
             this.subscriber.unsubscribe();
             this.jedisSubscriber.close();
             this.jedisSubscriber.disconnect();
+
+            this.subscriberThread.interrupt();
             this.client.close();
             this.client.disconnect();
         } catch (Exception e) {
@@ -103,9 +97,9 @@ public class Redis {
     /**
      * When redis receives a message
      *
-     * @param message The messsage that is received
+     * @param rawMessage The raw message that is received
      */
-    public void onMessage(String message, Long messageSnowflake) {}
+    public void onMessage(String rawMessage) {}
 
     public class Subscriber extends JedisPubSub {
         private RustyConnector plugin;
@@ -115,10 +109,9 @@ public class Redis {
         }
 
         @Override
-        public void onMessage(String channel, String message) {
+        public void onMessage(String channel, String rawMessage) {
             try {
-                Long snowflake = Redis.this.messageCache.cacheMessage(message);
-                Redis.this.onMessage(message, snowflake);
+                Redis.this.onMessage(rawMessage);
             } catch (Exception e) {
                 e.printStackTrace();
             }

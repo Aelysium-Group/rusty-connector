@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
-public interface Server {
+public interface Server extends Sortable {
 
     /**
      * Get the number of players on this server
@@ -15,10 +15,10 @@ public interface Server {
     void setPlayerCount(int playerCount);
 
     /**
-     * Get the priority index of this server
-     * @return The priority index of this server
+     * Get the weight of this server
+     * @return The weight of this server
      */
-    int getPriorityIndex();
+    int getWeight();
 
     /**
      * Get the soft player cap of this server

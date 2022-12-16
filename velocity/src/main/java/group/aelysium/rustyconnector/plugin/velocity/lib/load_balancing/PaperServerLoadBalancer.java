@@ -7,8 +7,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
+    private boolean weighted = false;
+    private boolean persistence = false;
+    private int attempts = 5;
     protected int index = 0;
     protected List<PaperServer> items = new ArrayList<>();
+
+    @Override
+    public boolean isPersistent() {
+        return this.persistence;
+    }
+
+    @Override
+    public int getAttempts() {
+        if(!this.isPersistent()) return 0;
+        return this.attempts;
+    }
+
+    @Override
+    public boolean isWeighted() {
+        return this.weighted;
+    }
 
     @Override
     public PaperServer getCurrent() {
@@ -29,7 +48,22 @@ public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
     }
 
     @Override
-    public void iterate() {}
+    public void iterate() {
+        this.index += 1;
+        if(this.index >= this.items.size()) this.index = 0;
+    }
+
+    @Override
+    final public void forceIterate() {
+        this.index += 1;
+        if(this.index >= this.items.size()) this.index = 0;
+    }
+
+    @Override
+    public void completeSort() {}
+
+    @Override
+    public void singleSort() {}
 
     @Override
     public void add(PaperServer item) {
@@ -54,5 +88,21 @@ public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
     @Override
     public String toString() {
         return "LoadBalancer (RoundRobin): "+this.size()+" items";
+    }
+
+    @Override
+    public void setPersistence(boolean persistence, int attempts) {
+        this.persistence = persistence;
+        this.attempts = attempts;
+    }
+
+    @Override
+    public void setWeighted(boolean weighted) {
+        this.weighted = weighted;
+    }
+
+    @Override
+    public void resetIndex() {
+        this.index = 0;
     }
 }

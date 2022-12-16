@@ -76,20 +76,6 @@ private-key: ""
 #
 public-key: ""
 
-#########################
-#         Heart         #
-#########################
-#
-# The proxy's heart.
-#
-# When it beats it will ping all servers.
-# If a server doesn't respond before the heart beats again, it will be un-registered.
-# This is how the plugin unregisters servers that become unresponsive or failed to unregister themselves when they were shutdown.
-#
-# Time is in seconds.
-#
-heart-beat: 10
-
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Families                          #
@@ -158,39 +144,6 @@ redis:
 #
     data-channel: "rustyConnector-sync"
 
-#########################
-#         MySQL         #
-#########################
-#
-# !!!!!!! MYSQL INTEGRATION IS NOT CURRENTLY AVAILABLE !!!!!!!
-# !!!!!!! THIS SECTION DOESN'T DO ANYTHING !!!!!!!
-#
-# Enable MySQL usage for syncing configurations across multiple proxy servers.
-# Can be helpful if you have multiple proxies and need to quickly distribute your configurations.
-#
-# !!!!!!! MYSQL INTEGRATION IS NOT CURRENTLY AVAILABLE !!!!!!!
-# !!!!!!! THIS SECTION DOESN'T DO ANYTHING !!!!!!!
-#
-mysql:
-#
-# Set to true to enable MySQL.
-#
-    use-mysql-configuration-syncing: false
-
-#
-# Change this value between ROOT and BRANCH to set whether this plugin should be posting data to the database or pulling only.
-# ROOT - Every restart, the plugin will post its configurations to the database. Totally re-writing what was there before.
-# BRANCH - Every restart, the plugin will read whatever data from the database. The plugin will not write any data to the database.
-#
-    plugin-type: ROOT
-
-    host: "localhost"
-    port: 3306
-    database: ""
-    user: ""
-    password: ""
-
-
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Whitelist                         #
@@ -205,44 +158,70 @@ mysql:
 # | More often than not, you will have multiple whitelist  #
 # | configurations that you may want to switch between     #
 # | during various points in your network's lifetime.      #
-# | This system allows you to setup as many pre-defined    #
+# | This system allows you to set up as many pre-defined   #
 # | whitelists as you'd like, and enable or switch between #
 # | then whenever you want!                                #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-
+whitelist:
 #
 # If you set this to be on. You will be turning on a whitelist which will **effect your entire proxy**!
 # If you only want to effect certain families or individual servers. Look into the appropriate configuration locations!
 #
-use-whitelist: false
-whitelist: "whitelist-template"
+    enabled: false
+
+#
+# The name of the whitelist configuration file in your "whitelists" folder.
+# You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
+#
+    name: "whitelist-template"
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                     Message Tunnel                       #
 #                                                          #
 #               ---------------------------                #
-# | Sadly we can't all have nice things. If you notice     #
-# | you're getting server requests from ip addresses you   #
-# | don't recognize, you can block them!                   #
-#                                                          #
-# | Alternatively, if you'd like to only allow messages    #
-# | from certain ip addresses; you can whitelist them!     #
+# | The message tunnel allows you to have more control     #
+# | over what messages you will allow the proxy to accept  #
+# | or decline.                                            #
+# | This does NOT affect what messages are being sent over #
+# | your Redis channels. All it does is control what your  #
+# | proxy will and will not accept.                        #
 #                                                          #
 #  NOTE: This section has NOTHING to do with players!      #
 #        Instead, it is used to provide better control     #
 #        over where servers are allowed to auto-register   #
 #        from.                                             #
 #                                                          #
+#  NOTE: This section can more or less completely destroy  #
+#        the scalability that RustyConnector provides.     #
+#        While it does prevent the registration of IPs     #
+#        we don't recognize, it also prevents the          #
+#        registration of new IPs without manually adding   #
+#        them below.                                       #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 message-tunnel:
-    enabled: false
+#
+# The number of messages that will be saved into memory.
+# The message cache allows you to view messages that have recently been received by the proxy.
+# As new messages are generated, old messages will get pushed out of the cache.
+#
+# You can view cached messages using the `/rc message` command.
+#
+    message-cache-size: 50
+
+#
+# The max length that messages received over Redis are allowed to be.
+# If a message is over this value it will get thrown away!
+# The size below should work for just about everything that is sent by RustyConnector.
+# If you are defining larger addresses or names on your paper servers, you might want to increase this.
+#
+    message-max-length: 512
 
 #
 # The tunnel whitelist.
@@ -257,7 +236,9 @@ message-tunnel:
 #                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
 #
     whitelist:
-      - "127.0.0.1"
+        enabled: false
+        addresses:
+          - "127.0.0.1"
 
 #
 # The tunnel denylist.
@@ -274,4 +255,81 @@ message-tunnel:
 #                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
 #
     denylist:
-      - "127.0.0.1"
+        enabled: false
+        addresses:
+          - "127.0.0.1"
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Boot Commands                       #
+#                                                          #
+#               ---------------------------                #
+# | You can run proxy commands when RustyConnector         #
+# | finishes booting up!                                   #
+#                                                          #
+# | This is a great way to automatically send a            #
+# | register all command through the data channel          #
+# | after a server restart!                                #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+boot-commands:
+    enabled: false
+
+#
+# The proxy commands to send on-boot.
+# These commands will be sent, in order, from top to bottom.
+# Remember that these are proxy commands. You won't be able to run commands on your sub-servers from here.
+# This section doesn't care about whether other plugins on the proxy have started yet!
+#
+    commands:
+      - "rc registerAll"
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                          Hearts                          #
+#                                                          #
+#               ---------------------------                #
+# | Hearts are certain processes that run every specific   #
+# | interval! They can be enabled, disabled, and adjusted  #
+# | here.                                                  #
+#                                                          #
+# | All intervals are in seconds.                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+hearts:
+#
+# Manages the lifecycles of servers.
+#
+    server-lifecycle:
+        enabled: true
+#
+# Time, in seconds, between sending out a ping and expecting a pong.
+#
+        interval: 30
+#
+# If a server doesn't respond to the most recent ping before the heart's next interval.
+# Should the server get unregistered?
+#
+# This is an additional life-cycle option in-case servers become unresponsive and unable to unregister themselves.
+# If a server can't unregister itself (bad shutdown, server freezing, etc) this will be able to see that it's unresponsive and unregister it.
+#
+        unregister-on-ignore: false
+
+#
+# Manages the load balancing of the proxy's families.
+#
+    family-server-sorting:
+        enabled: true
+#
+# Time, in seconds, between when the families sort their servers. This interval will cause your proxy to sort ALL of the servers registered to it!
+# The higher this value the higher accuracy your load balancing will operate at.
+# If you have larger sets of servers on a family, setting the interval to be larger can help save resources.
+#
+# If you disable this heart, you are effectively setting load balancing for your entire network to be ROUND_ROBIN
+#
+        interval: 20

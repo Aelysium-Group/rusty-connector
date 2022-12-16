@@ -1,8 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
 
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
@@ -30,6 +28,7 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
      */
     @Override
     public void add(ServerFamily<? extends PaperServerLoadBalancer> family) {
+        VelocityRustyConnector.getInstance().logger().log(family.toString());
         this.registeredFamilies.put(family.getName(),family);
     }
 
@@ -47,27 +46,8 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
         return this.registeredFamilies.values().stream().toList();
     }
 
-
-    /**
-     * Print the families and their info to the console.
-     */
-    public void printFamilies() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-
-        LangMessage langMessage = (new LangMessage(plugin.logger()))
-                .insert(Lang.registeredFamilies())
-                .insert(Lang.spacing());
-
-        this.registeredFamilies.forEach((key, family) -> langMessage.insert("   ---| "+family.getName()));
-
-        langMessage
-                .insert(Lang.spacing())
-                .insert("To see more details about a particular family use:")
-                .insert("/rc family info <family name>")
-                .insert("To see all servers currently saved to a family use:")
-                .insert("/rc family info <family name> servers")
-                .insert(Lang.spacing())
-                .insert(Lang.border())
-                .print();
+    @Override
+    public void clear() {
+        this.registeredFamilies.clear();
     }
 }

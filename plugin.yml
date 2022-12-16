@@ -3,4 +3,8 @@ version: '${project.version}'
 main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
 api-version: 1.16
 authors: [ Sivin ]
-commands: {}
+commands:
+  rc:
+    description: Used for managing the server
+    usage: /rc
+    permission: rustyconnector.control

@@ -5,18 +5,17 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.LoadBalancer;
 import group.aelysium.rustyconnector.core.lib.database.Redis;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.message.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.model.Server;
-import group.aelysium.rustyconnector.core.lib.util.logger.GateKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.Lang;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangKey;
-import group.aelysium.rustyconnector.core.lib.util.logger.LangMessage;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
+import group.aelysium.rustyconnector.core.lib.util.WeightLevel;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 
+import javax.swing.plaf.SplitPaneUI;
 import java.security.InvalidAlgorithmParameterException;
 
 public class PaperServer implements Server {
@@ -24,14 +23,14 @@ public class PaperServer implements Server {
     private final ServerInfo serverInfo;
     private String familyName;
     private int playerCount = 0;
-    private int priorityIndex = 0;
+    private int weight = 0;
     private int softPlayerCap = 20;
     private int hardPlayerCap = 30;
 
-    public PaperServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int priorityIndex) {
+    public PaperServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight) {
         this.serverInfo = serverInfo;
 
-        this.priorityIndex = priorityIndex;
+        this.weight = Math.max(weight, 0);
 
         this.softPlayerCap = softPlayerCap;
         this.hardPlayerCap = hardPlayerCap;
@@ -61,7 +60,7 @@ public class PaperServer implements Server {
      * @throws DuplicateRequestException If the server has already been registered to the proxy.
      * @throws InvalidAlgorithmParameterException Of the family doesn't exist.
      */
-    public void register(String familyName) throws DuplicateRequestException, InvalidAlgorithmParameterException {
+    public void register(String familyName) throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         this.registeredServer = plugin.getProxy().registerServer(this, familyName);
@@ -96,8 +95,13 @@ public class PaperServer implements Server {
     }
 
     @Override
-    public int getPriorityIndex() {
-        return this.priorityIndex;
+    public int getSortIndex() {
+        return this.playerCount;
+    }
+
+    @Override
+    public int getWeight() {
+        return this.weight;
     }
 
     @Override
@@ -136,37 +140,29 @@ public class PaperServer implements Server {
         RedisMessage message = new RedisMessage(
                 privateKey,
                 RedisMessageType.PING,
-                this.getAddress(),
-                false
+                this.getAddress()
         );
 
         message.dispatchMessage(redis);
 
         if(plugin.logger().getGate().check(GateKey.PING))
-            (new LangMessage(plugin.logger()))
-                    .insert(
-                            "Proxy" +
-                                    " "+ Lang.get(LangKey.ICON_PING) +" " +
-                                    "["+this.getServerInfo().getName()+"]" +
-                                    "("+this.getServerInfo().getAddress().getHostName()+":"+this.getServerInfo().getAddress().getPort()+") - " +
-                                    "{"+ familyName +"}"
-                    )
-                    .print();
+            VelocityLang.PING.send(plugin.logger(),this.serverInfo);
     }
 
     /**
      * Connects a player to the server.
      * This also increases the player count on this server by 1.
      * @param player The player to connect.
+     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
      */
-    public void connect(Player player) {
+    public boolean connect(Player player) {
+        ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
         try {
-            ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
-            connection.connect().whenCompleteAsync((status, throwable) -> {});
-
-            this.playerCount += 1;
+            boolean didSucceed = connection.connect().get().isSuccessful();
+            if(didSucceed) this.playerCount += 1;
+            return didSucceed;
         } catch (Exception e) {
-            VelocityRustyConnector.getInstance().logger().error("",e);
+            return false;
         }
     }
 
@@ -181,6 +177,7 @@ public class PaperServer implements Server {
     public String toString() {
         return "["+this.getServerInfo().getName()+"]" +
                "("+this.getServerInfo().getAddress().getHostName()+":"+this.getServerInfo().getAddress().getPort()+") - " +
+               "["+this.getPlayerCount()+" ("+this.getSoftPlayerCap()+" <> "+this.getSoftPlayerCap()+") w-"+this.getWeight()+"]" +
                "{"+ this.familyName +"}";
     }
 }

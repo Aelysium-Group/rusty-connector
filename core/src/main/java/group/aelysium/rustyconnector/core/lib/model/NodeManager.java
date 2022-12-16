@@ -25,4 +25,9 @@ public interface NodeManager<T> {
      * Dump the manager's contents.
      */
     List<T> dump();
+
+    /**
+     * Clears all nodes from the manager.
+     */
+    void clear();
 }

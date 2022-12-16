@@ -32,6 +32,14 @@
 ############################################################
 load-balancing:
 
+#
+# If set to `true`. the load balancer will attempt to put players into the servers with the highest `weight`
+# `weight` is defined in the individual server configs on RustyConnector-paper.
+#
+# If multiple server are set to be the same weight level, the load balancer will use `algorithm` on those servers
+# until they have been filled. It will then step to the next, lower, weight level and continue.
+#
+    weighted: false
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Algorithm                         #
@@ -61,15 +69,35 @@ load-balancing:
 ############################################################
     algorithm: ROUND_ROBIN
 
-#
-# If set to `true`. Persistence will cause the algorithm to keep trying to connect the player to this
-# family if, for some reason they haven't been able to connect yet.
-# If set to `false`; The algorithm will give up on trying to connect the player to the family
-# the moment it fails. It will then return an error message.
-#
-    persistence: false
 
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                       Persistence                        #
+#                                                          #
+#               ---------------------------                #
+# | Persistence defines whether or not the load balancer   #
+# | should give up if it's first attempt to connect a      #
+# | player to this family fails.                           #
+# | If this is off, the player will have to manually       #
+# | try again if the attempt fails.                        #
+# | If this is on, the load balancer will keep trying      #
+# | until it's number of attempts has exceeded `attempts`  #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+    persistence:
+        enabled: false
 
+#
+# This is how many times the load balancer will attempt to connect a player to this family before giving up.
+# If you have lots of servers in this family with whitelists, it might be better to increase this value.
+#
+# Set to -1 for the family to never give up. (In most cases this isn't really the best idea)
+#
+        attempts: 5
+
+whitelist:
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Whitelist                         #
@@ -84,17 +112,17 @@ load-balancing:
 # | More often than not, you will have multiple whitelist  #
 # | configurations that you may want to switch between     #
 # | during various points in your network's lifetime.      #
-# | This system allows you to setup as many pre-defined    #
+# | This system allows you to set up as many pre-defined   #
 # | whitelists as you'd like, and enable or switch between #
 # | then whenever you want!                                #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-use-whitelist: false
+    enabled: false
 
 #
 # The name of the whitelist configuration file in your "whitelists" folder.
-# You can include the ".yml" at the end of the name below if you'd like. It doesn't matter.
+# You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
 #
-whitelist: "whitelist-template"
+    name: "whitelist-template"

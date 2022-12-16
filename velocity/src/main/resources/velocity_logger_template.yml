@@ -17,6 +17,14 @@
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
+#
+# Generally speaking trashed messages are thrown away because they have an
+# invalid private key or because they were sent by the proxy.
+#
+# You can usually set this to `false` so that only messages that are from other servers are saved.
+#
+save-trashed-messages: true
+
 messaging:
 # Should we log when a server requests to be registered?
 # NOTE: This option can spam your proxy console if your proxy sends out a call-for-registration
@@ -35,20 +43,10 @@ messaging:
 # Should we log when the proxy receives a ping response from a server? (Also called a `pong`)
     pong: false
 
-# Should we log when a server decides to send a player-count update?
-    player-count-update: false
-
 # Should we log anytime the message parser throws away a message? (Can generate lots of console spam on busy servers!)
     message-parser-trash: false
 
 security:
-
-# Should we log when a message contains an invalid key?
-# If you are getting this message, check the IP Address! Do you recognize it?
-# If not, somebody might have gained access to your Redis database
-# and is trying to crack your private key via brute forcing!
-    invalid-private-key: true
-
 # Should we log when a blacklisted address tries to send a message to us?
     blacklisted-address-message: true
 

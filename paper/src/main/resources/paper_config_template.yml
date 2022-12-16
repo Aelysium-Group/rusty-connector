@@ -55,21 +55,26 @@ config-version: 1
 #                       Registration                       #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-
 #
-# Private key is used to validate server connections.
-# This way external servers can't appear and add themselves to the proxy network pool.
+# Private key is used to validate messages.
+# This way external users can't appear and send messages.
 # This value should be changed periodically for security purposes.
 #
-# Set this value so that it matches whatever is set in your proxy.
+# This value should match what is set in your proxy.
 #
 private-key: ""
+#
+# The public key associated with the private key.
+#
+# This key should match what is set in your proxy.
+#
+public-key: ""
 
 server:
 #
-# This field is not required. If you don't set this field the proxy will generate a string to put here.
-# It will then use that to identify this server.
-# If you name the server yourself, you will have a much easier time managing permissions and other data.
+# This field is required.
+# The name of this server.
+# This is mostly used to help you identify this server when reading your proxy logs.
 #
     name: ""
 
@@ -100,23 +105,23 @@ server:
 ############################################################
 #
 # The name of the family that this plugin should be registered into.
-# If this name does not match one of the names listed on your proxy. This server will not get registered.
+# If this name does not match one of the names listed on your proxy; yhis server will not get registered.
 #
-family: "lobby"
+    family: "lobby"
 
 #########################
 #     Load Balancing    #
 #########################
 #
-# If the family that this server is associated with has load balancing set to "CASCADE"
-# you'll need to define indexes so that the proxy knows what order to fill the servers.
-# The proxy will look at whichever server has the highest index and will start filling that up until it's reached its soft player cap.
+# If the family that this server is associated with has load balancing which involves "weight" you can set this server's weight level here.
+# When servers are added to a weighted family. The family will first add players to the servers with the highest weight.
 #
-cascade-priority-index: 0
+    weight: 0
 
 #########################
 #      Player Caps      #
 #########################
+    player-cap:
 #
 # The soft player cap will define, at what point, this server should stop accepting regular players.
 # This allows you to mark the server as "full" while still allowing extra space for VIP and staff.
@@ -126,14 +131,14 @@ cascade-priority-index: 0
 # rustyconnector.<family name>.softCapBypass - Bypass the soft cap of any server inside of this family
 # rustyconnector.<family name>.<server name>.softCapBypass - Bypass the soft cap of only this server in particular
 #
-soft-player-cap: 20
+        soft: 20
 
 #
 # The hard player cap is the point at which no more players are allowed to join the server.
 # if you wish to still allow high-level staff to access a server at hard player cap. You can grant them the permission:
 # rustyconnector.admin.hardCapBypass
 #
-hard-player-cap: 30
+        hard: 30
 
 #
 # NOTE: If you set soft-player-cap to be the same number as hard-player-cap.
@@ -159,7 +164,7 @@ redis:
     password: "password"
 
 #
-# The name of the data channel that sync information should be sent over.
+# The name of the data channel that information should be sent over.
 # If you don't know what this is, don't mess with it! The default value here is fine.
 # You probably won't break anything, but you generally just shouldn't touch things you don't understand.
 #
@@ -173,27 +178,34 @@ redis:
 #                        Whitelist                         #
 #                                                          #
 #               ---------------------------                #
-# | RustyConnector attempts to be as flexible as possible  #
-# | when configuring whitelists!                           #
-# | To setup a whitelist, you'll need to navigate to the   #
-# | "whitelists" folder and follow the directions in the   #
-# | provided whitelist-template.                           #
-#                                                          #
-# | More often than not, you will have multiple whitelist  #
-# | configurations that you may want to switch between     #
-# | during various points in your network's lifetime.      #
-# | This system allows you to setup as many pre-defined    #
-# | whitelists as you'd like, and enable or switch between #
-# | then whenever you want!                                #
+# | At this time RustyConnector-paper provides support for #
+# | Minecraft's built in whitelist!                        #
+# | If RustyConnector attempts to connect a player to a    #
+# | server with a whitelist and the attempt fails,         #
+# | the attempt will then act in accordance with           #
+# | `load-balancing.persistence` set in                    #
+# | your family's config.                                  #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 
-#
-# If you set this to be on. You will only be setting a whitelist for this individual server.
-# If you'd like to setup whitelists for server families or for your entire proxy make sure
-# you look in the configs on your velocity server.
-#
-use-whitelist: false
-whitelist: "whitelist-template"
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                    Register on Boot                      #
+#                                                          #
+#               ---------------------------                #
+# | Change this setting to decide if this server should    #
+# | issue a registration request once it's                 #
+# | finished booting up.                                   #
+#                                                          #
+# | If this is set to `false`, the only way this server    #
+# | can get registered is if the proxy issues a            #
+# | register all request.                                  #
+# | Or if this server sends a registration request to      #
+# | the proxy via the `rc register` command.               #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+register-on-boot: true
