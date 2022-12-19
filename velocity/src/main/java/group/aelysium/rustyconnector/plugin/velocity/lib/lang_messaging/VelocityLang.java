@@ -237,13 +237,13 @@ public interface VelocityLang extends Lang {
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
                                             "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+") w-"+server.getWeight()+"] <<<<<"
+                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getHardPlayerCap()+") w-"+server.getWeight()+"] <<<<<"
                                     , GREEN));
                 else
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
                                             "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getSoftPlayerCap()+") w-"+server.getWeight()+"]"
+                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getHardPlayerCap()+") w-"+server.getWeight()+"]"
                                     , GRAY));
 
                 servers = servers.append(newline());

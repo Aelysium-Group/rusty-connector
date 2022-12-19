@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
 public final class CommandRusty {
     public static void create(PaperCommandManager<CommandSender> manager) {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
-        final Command.Builder<CommandSender> builder = manager.commandBuilder("rc","rusty","rustyconnector","/rc","/rusty","/rustyconnector");
+        final Command.Builder<CommandSender> builder = manager.commandBuilder("rc","rc", "rusty","rustyconnector");
 
         manager.command(builder.literal("message")
                 .senderType(ConsoleCommandSender.class)

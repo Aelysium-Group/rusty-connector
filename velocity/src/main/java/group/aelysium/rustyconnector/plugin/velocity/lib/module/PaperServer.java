@@ -10,12 +10,10 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.model.Server;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
-import group.aelysium.rustyconnector.core.lib.util.WeightLevel;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 
-import javax.swing.plaf.SplitPaneUI;
 import java.security.InvalidAlgorithmParameterException;
 
 public class PaperServer implements Server {
@@ -86,12 +84,14 @@ public class PaperServer implements Server {
 
     @Override
     public int getPlayerCount() {
-        return this.playerCount;
+        return 0;
+        //return this.playerCount;
     }
 
     @Override
     public void setPlayerCount(int playerCount) {
-        this.playerCount = playerCount;
+        this.playerCount = 0;
+        //this.playerCount = playerCount;
     }
 
     @Override
@@ -159,7 +159,7 @@ public class PaperServer implements Server {
         ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
         try {
             boolean didSucceed = connection.connect().get().isSuccessful();
-            if(didSucceed) this.playerCount += 1;
+            //if(didSucceed) this.playerCount += 1;
             return didSucceed;
         } catch (Exception e) {
             return false;
@@ -170,7 +170,7 @@ public class PaperServer implements Server {
      * Reduces the player count on this server by 1.
      */
     public void playerLeft() {
-        if(this.playerCount > 0) this.playerCount -= 1;
+        //if(this.playerCount > 0) this.playerCount -= 1;
     }
 
     @Override
