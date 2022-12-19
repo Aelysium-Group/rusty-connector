@@ -257,8 +257,9 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
             proxy.getWhitelistManager().add(whitelist);
 
             plugin.logger().log(familyName+" whitelist registered!");
-        } else
-            plugin.logger().log(familyName+" doesn't have a whitelist.");
+        } else {
+            plugin.logger().log(familyName + " doesn't have a whitelist.");
+        }
 
         try {
             switch (Enum.valueOf(AlgorithmType.class, familyConfig.getLoadBalancing_algorithm())) {

@@ -28,7 +28,6 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
      */
     @Override
     public void add(ServerFamily<? extends PaperServerLoadBalancer> family) {
-        VelocityRustyConnector.getInstance().logger().log(family.toString());
         this.registeredFamilies.put(family.getName(),family);
     }
 
