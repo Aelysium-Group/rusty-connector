@@ -9,12 +9,12 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 import net.kyori.adventure.text.Component;
 
-public class OnPlayerKicked {
+public class OnPlayerLeaveServer {
     /**
      * Runs when a player disconnects from a paper server
      */
     @Subscribe(order = PostOrder.FIRST)
-    public EventTask onPlayerKicked(KickedFromServerEvent event) {
+    public EventTask onPlayerLeaveServer(KickedFromServerEvent event) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         Player player = event.getPlayer();
 
