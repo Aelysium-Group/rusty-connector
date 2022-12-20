@@ -1,9 +1,10 @@
-package group.aelysium.rustyconnector.plugin.paper.lib;
+package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
-import org.bukkit.entity.Player;
-import org.intellij.lang.annotations.RegExp;
+import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 public class Permission {
     /**
@@ -15,12 +16,14 @@ public class Permission {
      */
     public static boolean validate(Player player, String... nodes) {
         for (String node : nodes) {
-            if(player.hasPermission(node)) return true;
+            String nodeToLower = node.toLowerCase(Locale.ROOT);
+
+            if(player.hasPermission(nodeToLower)) return true;
 
             /*
              * Check for wildcard variants of permissions like: rustyconnector.* or rustyconnector.admin.*
              */
-            String adjustedNode = node.replace("[A-z\\_\\-]*$","*");
+            String adjustedNode = nodeToLower.replaceFirst("[A-z\\_\\-]*$","*");
             if(player.hasPermission(adjustedNode)) return true;
         }
         return false;
@@ -38,9 +41,8 @@ public class Permission {
      * @return
      */
     public static String constructNode(String pattern, String... insertions) {
-        for (String node : insertions) {
-            pattern = pattern.replace("(\\<[A-z\\s]*\\>)",node);
-        }
+        for (String node : insertions)
+            pattern = pattern.replaceFirst("\\<[A-z\\s]*\\>",node);
         return pattern;
     }
 }

@@ -309,6 +309,8 @@ hearts:
         enabled: true
 #
 # Time, in seconds, between sending out a ping and expecting a pong.
+# Servers will also send their current player count with their pong response. This way, if the proxy
+# somehow unsyncs it's player count from the actual count, it can be corrected.
 #
         interval: 30
 #

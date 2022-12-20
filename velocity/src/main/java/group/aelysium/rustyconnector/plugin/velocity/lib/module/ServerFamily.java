@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
@@ -65,18 +66,6 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         this.loadBalancer.setWeighted(weighted);
     }
 
-    /**
-     * Set's the player count of a sub-server. Then re-calculates the aggregate player count of this family.
-     * Finally, re-balance the family's priority order of sub-servers.
-     * @param playerCount Player count to set.
-     * @param server The server to set.
-     */
-    public void setServerPlayerCount(int playerCount, PaperServer server) {
-        server.setPlayerCount(playerCount);
-
-        this.getPlayerCount();
-    }
-
     public long serverCount() { return this.loadBalancer.size(); }
 
     /**
@@ -90,10 +79,6 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         playerCount = newPlayerCount.get();
 
         return this.playerCount;
-    }
-
-    public boolean containsServer(ServerInfo serverInfo) {
-        return !(this.getServer(serverInfo) == null);
     }
     public boolean containsServer(String name) {
         return !(this.getServer(name) == null);
@@ -114,9 +99,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
             String ip = player.getRemoteAddress().getHostString();
 
-            WhitelistPlayer whitelistPlayer = new WhitelistPlayer(player.getUsername(), player.getUniqueId(), ip);
-
-            if (!familyWhitelist.validate(whitelistPlayer)) {
+            if (!familyWhitelist.validate(player)) {
                 player.disconnect(Component.text(familyWhitelist.getMessage()));
                 return;
             }
@@ -124,44 +107,102 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
         Callable<Boolean> notPersistent = () -> {
             PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
+            try {
+                if(!server.validatePlayer(player))
+                    throw new RuntimeException("The server you're trying to connect to is full!");
 
-            if(server.isFull())
-                if(!player.hasPermission("rustyconnector.bypasssoftcap")) {
-                    player.disconnect(Component.text("The server you're trying to connect to is full!"));
-                    return false;
-                }
-            if(server.isMaxed()) {
-                player.disconnect(Component.text("The server you're trying to connect to is full!"));
-                return false;
+                if (!server.connect(player))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+
+                this.loadBalancer.iterate();
+
+                return true;
+            } catch (RuntimeException e) {
+                player.disconnect(Component.text(e.getMessage()));
             }
 
-            if(!server.connect(player)) {
-                player.disconnect(Component.text("There was an issue connecting you to the server!"));
-                return false;
-            }
-
-            this.loadBalancer.iterate();
-
-            return true;
+            return false;
         };
         Callable<Boolean> persistent = () -> {
             int attemptsLeft = this.loadBalancer.getAttempts();
 
             for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
-                VelocityRustyConnector.getInstance().logger().log("attempt: "+attempt);
                 boolean isFinal = (attempt == attemptsLeft);
                 PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
 
                 try {
-                    if(server.isFull())
-                        if(!player.hasPermission("rustyconnector.bypasssoftcap")) {
-                            throw new RuntimeException("The server you're trying to connect to is full!");
-                        }
-                    if(server.isMaxed()) {
+                    if(!server.validatePlayer(player))
                         throw new RuntimeException("The server you're trying to connect to is full!");
-                    }
 
                     if(server.connect(player)) break;
+                    else throw new RuntimeException("Unable to connect you to the server in time!");
+                } catch (Exception e) {
+                    if(isFinal)
+                        player.disconnect(Component.text(e.getMessage()));
+                }
+                this.loadBalancer.forceIterate();
+            }
+
+            return true;
+        };
+
+        if(this.loadBalancer.isPersistent() && this.loadBalancer.getAttempts() > 1) persistent.execute();
+        else notPersistent.execute();
+    }
+
+    /**
+     * Connect a player to this family
+     * @param player The player to connect
+     * @param event The initial connection event of a player
+     */
+    public void connect(Player player, PlayerChooseInitialServerEvent event) {
+        if(this.loadBalancer.size() == 0) {
+            player.disconnect(Component.text("There are no servers for you to connect to!"));
+            return;
+        }
+
+        if(!(this.whitelist == null)) {
+            Whitelist familyWhitelist = this.getWhitelist();
+
+            String ip = player.getRemoteAddress().getHostString();
+
+            if (!familyWhitelist.validate(player)) {
+                player.disconnect(Component.text(familyWhitelist.getMessage()));
+                return;
+            }
+        }
+
+
+        Callable<Boolean> notPersistent = () -> {
+            PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
+            try {
+                if(!server.validatePlayer(player))
+                    throw new RuntimeException("The server you're trying to connect to is full!");
+
+                if (!server.connect(event))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+
+                this.loadBalancer.iterate();
+
+                return true;
+            } catch (RuntimeException e) {
+                player.disconnect(Component.text(e.getMessage()));
+            }
+
+            return false;
+        };
+        Callable<Boolean> persistent = () -> {
+            int attemptsLeft = this.loadBalancer.getAttempts();
+
+            for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
+                boolean isFinal = (attempt == attemptsLeft);
+                PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
+
+                try {
+                    if(!server.validatePlayer(player))
+                        throw new RuntimeException("The server you're trying to connect to is full!");
+
+                    if(server.connect(event)) break;
                     else throw new RuntimeException("Unable to connect you to the server in time!");
                 } catch (Exception e) {
                     if(isFinal)

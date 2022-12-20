@@ -4,15 +4,15 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.EventManager;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.WhitelistConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerChangeServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerChooseInitialServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerDisconnect;
-import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerJoin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerKick;
+import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerKicked;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
 import net.kyori.adventure.text.Component;
@@ -60,8 +60,10 @@ public class Engine {
 
             plugin.getVelocityServer().getCommandManager().unregister("rc");
 
-            plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerJoin());
-            plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerJoin());
+            plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerChooseInitialServer());
+            plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerChangeServer());
+            plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerKicked());
+            plugin.getVelocityServer().getEventManager().unregisterListener(plugin, new OnPlayerDisconnect());
         } catch (Exception ignore) {}
     }
 
@@ -109,9 +111,10 @@ public class Engine {
     private static boolean initEvents(VelocityRustyConnector plugin) {
         EventManager manager = plugin.getVelocityServer().getEventManager();
         try {
-            manager.register(plugin, new OnPlayerJoin());
-            manager.register(plugin, new OnPlayerKick());
-            manager.register(plugin, new OnPlayerDisconnect());
+            manager.register(plugin, new OnPlayerChooseInitialServer());
+            manager.register(plugin, new OnPlayerChangeServer());
+            //manager.register(plugin, new OnPlayerKicked());
+            //manager.register(plugin, new OnPlayerDisconnect());
 
             return true;
         } catch (Exception e) {

@@ -38,6 +38,5 @@ public class ServerRegHandler implements MessageHandler {
         );
 
         server.register(familyName);
-        server.setPlayerCount(0);
     }
 }

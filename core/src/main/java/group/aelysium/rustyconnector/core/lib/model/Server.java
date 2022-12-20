@@ -9,12 +9,6 @@ public interface Server extends Sortable {
     int getPlayerCount();
 
     /**
-     * Set the number of players on the server
-     * @return The player count to set
-     */
-    void setPlayerCount(int playerCount);
-
-    /**
      * Get the weight of this server
      * @return The weight of this server
      */

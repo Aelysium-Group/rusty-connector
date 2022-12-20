@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.core.lib.lang_messaging;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -9,9 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static group.aelysium.rustyconnector.core.lib.lang_messaging.Lang.newlines;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.JoinConfiguration.newlines;
 
 public interface ASCIIAlphabet {
     int font_size = 6;
@@ -340,6 +341,43 @@ public interface ASCIIAlphabet {
                 generatedString.get(3),
                 generatedString.get(4),
                 generatedString.get(5)
+        );
+    }
+
+    /**
+     * Converts a string to an ASCIIAlphabet equivalent.
+     * This method does not recognize, numbers, punctuation, nor newlines.
+     * @param string
+     * @return
+     */
+    static Component generate(String string, NamedTextColor color) {
+        Map<Character, Lang.Message> map = getMap();
+        List<Component> generatedString = new ArrayList<>();
+
+        for (int i = 0; i < font_size; i++) {
+            generatedString.add(text(""));
+        }
+
+        for(char character : string.toUpperCase().toCharArray()) {
+            try {
+                Lang.Message asciiCharacter = map.get(character);
+                for (int i = 0; i < font_size; i++) {
+                    Component receivingRow = generatedString.get(i);
+                    Component rowToExtract = asciiCharacter.build().children().get(i);
+
+                    generatedString.set(i,receivingRow.append(rowToExtract));
+                }
+            } catch (Exception ignored) {}
+        }
+
+        return join(
+                newlines(),
+                generatedString.get(0).color(color),
+                generatedString.get(1).color(color),
+                generatedString.get(2).color(color),
+                generatedString.get(3).color(color),
+                generatedString.get(4).color(color),
+                generatedString.get(5).color(color)
         );
     }
 

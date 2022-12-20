@@ -15,14 +15,13 @@ import net.kyori.adventure.text.Component;
 import java.util.Date;
 
 import static net.kyori.adventure.text.Component.*;
-import static net.kyori.adventure.text.JoinConfiguration.newlines;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public interface VelocityLang extends Lang {
 
     Message WORDMARK_REGISTERED_FAMILIES = () -> // font: ANSI Shadow
             join(
-                    newlines(),
+                    Lang.newlines(),
                     ASCIIAlphabet.generate("registered"),
                     SPACING,
                     ASCIIAlphabet.generate("families")
@@ -30,14 +29,14 @@ public interface VelocityLang extends Lang {
 
     Message WORDMARK_REGISTERED_SERVERS = () -> // font: ANSI Shadow
             join(
-                    newlines(),
+                    Lang.newlines(),
                     ASCIIAlphabet.generate("registered"),
                     SPACING,
                     ASCIIAlphabet.generate("servers")
             );
 
     Message RC_ROOT_USAGE = () -> join(
-            newlines(),
+            Lang.newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build().color(AQUA),
@@ -63,7 +62,7 @@ public interface VelocityLang extends Lang {
     );
 
     Message RC_MESSAGE_ROOT_USAGE = () -> join(
-            newlines(),
+            Lang.newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build().color(AQUA),
@@ -80,7 +79,7 @@ public interface VelocityLang extends Lang {
     );
 
     Message RC_MESSAGE_GET_USAGE = () -> join(
-            newlines(),
+            Lang.newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build().color(AQUA),
@@ -94,7 +93,7 @@ public interface VelocityLang extends Lang {
     );
 
     Message RC_RELOAD_USAGE = () -> join(
-            newlines(),
+            Lang.newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build().color(AQUA),
@@ -126,7 +125,7 @@ public interface VelocityLang extends Lang {
     );
 
     Message RC_REGISTER_USAGE = () -> join(
-            newlines(),
+            Lang.newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build().color(AQUA),
@@ -146,7 +145,7 @@ public interface VelocityLang extends Lang {
     );
 
     ParameterizedMessage3<Long, Date, String> RC_MESSAGE_GET_MESSAGE = (id, date, contents) -> join(
-            newlines(),
+            Lang.newlines(),
             BORDER,
             SPACING,
             WORDMARK_MESSAGE.build().color(AQUA),
@@ -161,7 +160,7 @@ public interface VelocityLang extends Lang {
     );
 
     ParameterizedMessage1<String> RC_MESSAGE_ERROR = error -> join(
-            newlines(),
+            Lang.newlines(),
             BORDER,
             SPACING,
             WORDMARK_MESSAGE.build().color(RED),
@@ -181,7 +180,7 @@ public interface VelocityLang extends Lang {
         }
 
         return join(
-                newlines(),
+                Lang.newlines(),
                 BORDER,
                 SPACING,
                 WORDMARK_REGISTERED_FAMILIES.build().color(AQUA),
@@ -200,7 +199,7 @@ public interface VelocityLang extends Lang {
     };
 
     ParameterizedMessage1<String> RC_FAMILY_ERROR = error -> join(
-            newlines(),
+            Lang.newlines(),
             BORDER,
             SPACING,
             WORDMARK_REGISTERED_FAMILIES.build().color(RED),
@@ -213,10 +212,10 @@ public interface VelocityLang extends Lang {
     );
 
     ParameterizedMessage1<String> RC_REGISTER_ERROR = error -> join(
-            newlines(),
+            Lang.newlines(),
             BORDER,
             SPACING,
-            ASCIIAlphabet.generate("REGISTER").color(RED),
+            ASCIIAlphabet.generate("REGISTER", RED),
             SPACING,
             BORDER,
             SPACING,
@@ -253,10 +252,10 @@ public interface VelocityLang extends Lang {
 
 
         return join(
-                newlines(),
+                Lang.newlines(),
                 BORDER,
                 SPACING,
-                ASCIIAlphabet.generate(family.getName()).color(AQUA),
+                ASCIIAlphabet.generate(family.getName(), AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
@@ -285,7 +284,7 @@ public interface VelocityLang extends Lang {
     };
 
     Message PRIVATE_KEY = () -> join(
-            newlines(),
+            Lang.newlines(),
             SPACING,
             BORDER,
             SPACING,

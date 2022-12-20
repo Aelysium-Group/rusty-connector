@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import com.sun.jdi.request.DuplicateRequestException;
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -21,9 +22,9 @@ public class PaperServer implements Server {
     private final ServerInfo serverInfo;
     private String familyName;
     private int playerCount = 0;
-    private int weight = 0;
-    private int softPlayerCap = 20;
-    private int hardPlayerCap = 30;
+    private int weight;
+    private int softPlayerCap;
+    private int hardPlayerCap;
 
     public PaperServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight) {
         this.serverInfo = serverInfo;
@@ -71,7 +72,7 @@ public class PaperServer implements Server {
      * @return `true` if the server is full
      */
     public boolean isFull() {
-        return this.playerCount > softPlayerCap;
+        return this.playerCount >= softPlayerCap;
     }
 
     /**
@@ -79,19 +80,44 @@ public class PaperServer implements Server {
      * @return `true` if the server is maxed out
      */
     public boolean isMaxed() {
-        return this.playerCount > hardPlayerCap;
+        return this.playerCount >= hardPlayerCap;
+    }
+
+
+    /**
+     * Validates the player against the server's current player count.
+     * If the server is full or the player doesn't have permissions to bypass soft and hard player caps. They will be kicked
+     * @param player The player to validate
+     * @return `true` if the player is able to join. `false` otherwise.
+     */
+    public boolean validatePlayer(Player player) {
+        if(Permission.validate(
+                player,
+                "rustyconnector.hardCapBypass",
+                Permission.constructNode("rustyconnector.<family name>.hardCapBypass",this.familyName)
+        )) return true; // If the player has permission to bypass hard-player-cap, let them in.
+
+        if(this.isMaxed()) return false; // If the player count is at hard-player-cap. Boot the player.
+
+        if(Permission.validate(
+                player,
+                "rustyconnector.softCapBypass",
+                Permission.constructNode("rustyconnector.<family name>.softCapBypass",this.familyName)
+        )) return true; // If the player has permission to bypass soft-player-cap, let them in.
+
+        if(this.isFull()) return false; // If the player count is at soft-player-cap
+
+        return true; // If the player hasn't reached soft-player-bypass
     }
 
     @Override
     public int getPlayerCount() {
-        return 0;
-        //return this.playerCount;
+        //return 0;
+        return this.playerCount;
     }
 
-    @Override
     public void setPlayerCount(int playerCount) {
-        this.playerCount = 0;
-        //this.playerCount = playerCount;
+        this.playerCount = playerCount;
     }
 
     @Override
@@ -158,19 +184,39 @@ public class PaperServer implements Server {
     public boolean connect(Player player) {
         ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
         try {
-            boolean didSucceed = connection.connect().get().isSuccessful();
-            //if(didSucceed) this.playerCount += 1;
-            return didSucceed;
+            return connection.connect().get().isSuccessful();
         } catch (Exception e) {
             return false;
         }
     }
 
     /**
+     * Set's a connections initial server to the server.
+     * @param event The connection to set.
+     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
+     */
+    public boolean connect(PlayerChooseInitialServerEvent event) {
+        try {
+            event.setInitialServer(this.getRegisteredServer());
+            return true;
+        } catch(Exception ignore) {
+            return false;
+        }
+
+    }
+
+    /**
      * Reduces the player count on this server by 1.
      */
     public void playerLeft() {
-        //if(this.playerCount > 0) this.playerCount -= 1;
+        if(this.playerCount > 0) this.playerCount -= 1;
+    }
+
+    /**
+     * Increases the player count on this server by 1.
+     */
+    public void playerJoined() {
+        this.playerCount += 1;
     }
 
     @Override
