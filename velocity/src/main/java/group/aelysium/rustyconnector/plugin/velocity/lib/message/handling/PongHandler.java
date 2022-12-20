@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
@@ -29,7 +30,10 @@ public class PongHandler implements MessageHandler {
         );
 
         try {
+            PaperServer server = plugin.getProxy().findServer(serverInfo);
+            if(server == null) return;
             plugin.getProxy().reviveServer(serverInfo);
+            //server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
 
             if(plugin.logger().getGate().check(GateKey.PONG))
                 VelocityLang.PONG.send(plugin.logger(), serverInfo);

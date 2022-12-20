@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
+import com.velocitypowered.api.proxy.Player;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -26,16 +28,16 @@ public class WhitelistPlayer {
         this.ip = ip;
     }
 
-    public static boolean validate(Whitelist whitelist, WhitelistPlayer playerToValidate) {
+    public static boolean validate(Whitelist whitelist, Player playerToValidate) {
         WhitelistPlayer player = whitelist.getPlayerManager().find(playerToValidate.getUsername());
         if(player == null) return false;
 
         if(player.getUUID() != null)
-            if(!Objects.equals(player.getUUID().toString(), playerToValidate.getUUID().toString()))
+            if(!Objects.equals(player.getUUID().toString(), playerToValidate.getUniqueId().toString()))
                 return false;
 
         if(player.getIP() != null)
-            return Objects.equals(player.getIP(), playerToValidate.getIP());
+            return Objects.equals(player.getIP(), playerToValidate.getRemoteAddress().getHostString());
 
         return true;
     }

@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import com.google.gson.Gson;
+import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.WhitelistConfig;
@@ -11,19 +12,23 @@ import java.util.*;
 public class Whitelist {
     private String message = "You aren't whitelisted on this server!";
     private String name;
+    private String permission;
     private final WhitelistPlayerManager whitelistPlayerManager;
     private final List<String> countries = new ArrayList<>();
 
     private boolean usePlayers = false;
     private boolean useCountries = false;
     private boolean usePermission = false;
+    private boolean strict = false;
 
-    public Whitelist(String name, boolean usePlayers, boolean usePermission, boolean useCountries, String message) {
+    public Whitelist(String name, boolean usePlayers, boolean usePermission, boolean useCountries, String message, boolean strict) {
         this.name = name;
         this.usePlayers = usePlayers;
         this.useCountries = useCountries;
         this.usePermission = usePermission;
         this.message = message;
+        this.strict = strict;
+        this.permission = Permission.constructNode("rustyconnector.whitelist.<whitelist name>",this.name);
 
         this.whitelistPlayerManager = new WhitelistPlayerManager();
     }
@@ -58,13 +63,40 @@ public class Whitelist {
      * @param player The player to validate.
      * @return `true` if the player is whitelisted. `false` otherwise.
      */
-    public boolean validate(WhitelistPlayer player) {
-        boolean valid = false;
-        if(this.usesPlayers()) valid = WhitelistPlayer.validate(this, player);
-        // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
+    public boolean validate(Player player) {
+        if(this.strict) {
+            boolean playersValid = true;
+            boolean countryValid = true;
+            boolean permissionValid = true;
 
-        //if(this.usesPermission()) valid = false;
-        return valid;
+
+            if (this.usesPlayers())
+                if (!WhitelistPlayer.validate(this, player))
+                    playersValid = false;
+
+
+            // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
+
+
+            if (this.usesPermission())
+                if (!Permission.validate(player, this.permission))
+                    permissionValid = false;
+
+
+            return (playersValid && countryValid && permissionValid);
+        } else {
+            if (this.usesPlayers())
+                if (WhitelistPlayer.validate(this, player))
+                    return true;
+
+            // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
+
+            if (this.usesPermission())
+                if(Permission.validate(player, this.permission))
+                    return true;
+
+            return false;
+        }
     }
 
     public boolean validateCountry(String ipAddress) {
@@ -95,7 +127,8 @@ public class Whitelist {
                 whitelistConfig.getUse_players(),
                 whitelistConfig.getUse_permission(),
                 whitelistConfig.getUse_country(),
-                whitelistConfig.getMessage()
+                whitelistConfig.getMessage(),
+                whitelistConfig.isStrict()
         );
         if(whitelistConfig.getUse_players()) {
             List<Object> players = whitelistConfig.getPlayers();

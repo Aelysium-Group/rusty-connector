@@ -2,13 +2,12 @@ package group.aelysium.rustyconnector.core.lib.lang_messaging;
 
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 
-import static net.kyori.adventure.text.Component.join;
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.JoinConfiguration.newlines;
+import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY;
@@ -26,6 +25,10 @@ public interface Lang {
      * RED - For when an error has occurred.
      * ORANGE/YELLOW - For emphasis or highlighting.
      */
+    static JoinConfiguration newlines() {
+        return JoinConfiguration.separator(newline());
+    }
+
     Component BORDER = text("█████████████████████████████████████████████████████████████████████████████████████████████████", DARK_GRAY);
     ParameterizedMessage1<NamedTextColor> COLORED_BORDER = color -> text("█████████████████████████████████████████████████████████████████████████████████████████████████", color);
 
@@ -179,7 +182,7 @@ public interface Lang {
         default void send(Logger sender, A1 arg1) {
             sender.send(
                     join(
-                            newlines(),
+                            JoinConfiguration.separator(newline()),
                             text(""),
                             build(arg1)
                     )

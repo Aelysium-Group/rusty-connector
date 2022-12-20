@@ -129,14 +129,14 @@ server:
 # To allow players to join past this point, you can give them one of two permissions:
 # rustyconnector.softCapBypass - Bypass the soft cap of any server on this network
 # rustyconnector.<family name>.softCapBypass - Bypass the soft cap of any server inside of this family
-# rustyconnector.<family name>.<server name>.softCapBypass - Bypass the soft cap of only this server in particular
 #
         soft: 20
 
 #
 # The hard player cap is the point at which no more players are allowed to join the server.
 # if you wish to still allow high-level staff to access a server at hard player cap. You can grant them the permission:
-# rustyconnector.admin.hardCapBypass
+# rustyconnector.hardCapBypass - Bypass the hard cap of any server on this network
+# rustyconnector.<family name>.hardCapBypass - Bypass the hard cap of any server inside of this family. This also bypasses the soft cap too.
 #
         hard: 30
 
@@ -144,6 +144,8 @@ server:
 # NOTE: If you set soft-player-cap to be the same number as hard-player-cap.
 #       This server will run in player-limit mode. In which case, once player count
 #       reaches the defined value, no more players will be allowed to enter.
+#
+# rustyconnector.<family name>.* - Bypass the hard and soft cap of the family.
 #
 
 ############################################################

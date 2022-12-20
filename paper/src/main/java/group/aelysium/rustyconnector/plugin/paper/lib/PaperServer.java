@@ -18,7 +18,6 @@ public class PaperServer implements Server {
     private MessageCache messageCache;
     private Redis redis;
     private String family;
-    private int playerCount = 0;
     private int weight = 0;
     private int softPlayerCap = 20;
     private int hardPlayerCap = 30;
@@ -69,12 +68,7 @@ public class PaperServer implements Server {
 
     @Override
     public int getPlayerCount() {
-        return playerCount;
-    }
-
-    @Override
-    public void setPlayerCount(int playerCount) {
-        this.playerCount = playerCount;
+        return PaperRustyConnector.getInstance().getServer().getOnlinePlayers().size();
     }
 
     @Override
@@ -118,32 +112,6 @@ public class PaperServer implements Server {
         }
         this.hardPlayerCap = hardPlayerCap;
         this.softPlayerCap = softPlayerCap;
-    }
-
-    /**
-     * Validates the player against the server's current player count.
-     * If the server is full or the player doesn't have permissions to bypass soft and hard player caps. They will be kicked
-     * @param player The player to validate
-     * @return `true` if the player is able to join. `false` otherwise.
-     */
-    public boolean validatePlayer(Player player) {
-        if(this.playerCount != this.softPlayerCap) return true; // If the player count is NOT at soft-player-cap
-
-        if(!Permission.validate(
-                player,
-                "rustyconnector.softCapBypass",
-                Permission.constructNode("rustyconnector.<server name>.softCapBypass",this.name),
-                Permission.constructNode("rustyconnector.<family name>.<server name>.softCapBypass", this.family, this.name)
-                )) return false; // If soft-player-cap has been reached and the player doesn't have permission to bypass
-
-        if(this.playerCount != this.hardPlayerCap) return true; // If the player count is NOT at hard-player-cap
-
-        if(Permission.validate(
-                player,
-                "rustyconnector.admin.hardCapBypass"
-        )) return true; // If hard-player-cap has been reached and the player has permission to bypass, let them in.
-
-        return false; // If something somehow breaks with the previous checks. The method should fail to closed.
     }
 
     public void registerToProxy() {
@@ -205,6 +173,7 @@ public class PaperServer implements Server {
                 this.address.getHostName()+":"+this.address.getPort()
         );
         registrationMessage.addParameter("name", this.name);
+        //registrationMessage.addParameter("player-count", String.valueOf(this.getPlayerCount()));
 
         registrationMessage.dispatchMessage(this.redis);
     }

@@ -85,6 +85,7 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
                 }
                 case PONG -> {
                     message.setToParameter(object, "name"); // The server's identifier
+                    message.setToParameter(object, "player-count"); // The active player count on the sub-server
 
                     new PongHandler(message).execute();
                 }

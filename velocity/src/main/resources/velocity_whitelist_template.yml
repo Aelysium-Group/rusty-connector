@@ -112,6 +112,7 @@ countries:
   - CA
   - UK
 
+# !!!!!!!!! THIS FEATURE ISN'T YET IMPLEMENTED !!!!!!!!!
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -121,8 +122,12 @@ countries:
 # | If you'd only like players with a certain permission   #
 # | to join this family, enable this value!                #
 #                                                          #
-# | In order to access this family, player's will need the #
-# | permission: rustyconnector.connect.<family name>       #
+#   rustyconnector.whitelist.<whitelist name>              #
+# | Gives a player permission to pass the
+# | specific whitelist.
+#                                                          #
+#   rustyconnector.whitelist.*                             #
+# | Gives a player permission to pass all whitelists.      #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -142,3 +147,23 @@ use-permission: false
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 message: "You aren't whitelisted on this server!"
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                         Strict                           #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Set if the whitelist is strict or not.                 #
+#                                                          #
+# | If `true` then a player must match all                 #
+# | activated filters.                                     #
+#                                                          #
+# | If `false` then a player must only match one of the    #
+# | activated filters.                                     #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+strict: false
