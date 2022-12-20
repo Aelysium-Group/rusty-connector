@@ -30,6 +30,15 @@ public class OnPlayerChangeServer {
                         plugin.logger().log("The server that this player is joining doesn't seem to exist!");
                     else
                         newServer.playerJoined();
+
+                    if(event.getPreviousServer().isPresent()) {
+                        PaperServer oldServer = plugin.getProxy().findServer(event.getPreviousServer().get().getServerInfo());
+
+                        if(oldServer == null)
+                            plugin.logger().log("The server that this player is leaving doesn't seem to exist!");
+                        else
+                            oldServer.playerLeft();
+                    }
                 } catch (Exception e) {
                     VelocityRustyConnector.getInstance().logger().log(e.getMessage());
                 }

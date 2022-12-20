@@ -26,6 +26,7 @@ public class Permission {
             String adjustedNode = nodeToLower.replaceFirst("[A-z\\_\\-]*$","*");
             if(player.hasPermission(adjustedNode)) return true;
         }
+        if(player.hasPermission("rustyconnector.*")) return true; // A hardcoded "master" permission that should always grant permission.
         return false;
     }
 
