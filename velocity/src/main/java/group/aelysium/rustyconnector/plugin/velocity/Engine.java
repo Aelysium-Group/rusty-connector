@@ -113,8 +113,8 @@ public class Engine {
         try {
             manager.register(plugin, new OnPlayerChooseInitialServer());
             manager.register(plugin, new OnPlayerChangeServer());
-            //manager.register(plugin, new OnPlayerKicked());
-            //manager.register(plugin, new OnPlayerDisconnect());
+            manager.register(plugin, new OnPlayerKicked());
+            manager.register(plugin, new OnPlayerDisconnect());
 
             return true;
         } catch (Exception e) {
