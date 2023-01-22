@@ -256,8 +256,8 @@ public interface ASCIIAlphabet {
             JoinConfiguration.noSeparators(),
             text("███████╗"),
             text("╚══███╔╝"),
-            text("  ███╔╝"),
-            text(" ███╔╝"),
+            text("  ███╔╝ "),
+            text(" ███╔╝  "),
             text("███████╗"),
             text("╚══════╝")
     );
