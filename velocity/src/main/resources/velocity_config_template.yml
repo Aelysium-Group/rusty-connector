@@ -65,17 +65,11 @@ config-version: 1
 # This way external users can't appear and send messages.
 # This value should be changed periodically for security purposes.
 #
-# To generate a new keyset, set the string to be an empty value and the plugin will send a new key in console on next restart.
+# To generate a new key, set the string to be empty and the plugin will send a new key in console on next restart.
 #
 # DO NOT EVER SHARE THIS KEY!
 #
 private-key: ""
-#
-# The public key associated with the private key.
-#
-# This key will be sent in server messages.
-#
-public-key: ""
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -134,7 +128,7 @@ families:
 # Redis is required in order to provide quick and easy syncing between the proxy and sub-servers
 #
 redis:
-    host: "localhost"
+    host: ""
     port: 3306
     password: "password"
 
@@ -283,7 +277,7 @@ boot-commands:
 # If you run commands from other plugins, they might not work because those plugins may not have been booted up yet!
 #
     commands:
-      - "rc registerAll"
+      - "rc register all"
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

@@ -48,8 +48,6 @@
 #
 config-version: 1
 
-
-
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                       Registration                       #
@@ -63,12 +61,6 @@ config-version: 1
 # This value should match what is set in your proxy.
 #
 private-key: ""
-#
-# The public key associated with the private key.
-#
-# This key should match what is set in your proxy.
-#
-public-key: ""
 
 server:
 #
@@ -107,7 +99,7 @@ server:
 # The name of the family that this plugin should be registered into.
 # If this name does not match one of the names listed on your proxy; yhis server will not get registered.
 #
-    family: "lobby"
+    family: ""
 
 #########################
 #     Load Balancing    #
@@ -161,7 +153,7 @@ server:
 # so that you don't run into issues creating new servers and registering them.
 #
 redis:
-    host: "localhost"
+    host: ""
     port: 3306
     password: "password"
 

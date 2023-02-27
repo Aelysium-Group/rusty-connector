@@ -1,5 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 
 import java.io.File;
@@ -82,6 +86,8 @@ public class WhitelistConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
         this.use_players = this.getNode(this.data,"use-players",Boolean.class);
         try {
             this.players = (this.getNode(this.data,"players",List.class));
@@ -92,13 +98,14 @@ public class WhitelistConfig extends YAML {
         this.use_permission = this.getNode(this.data,"use-permission",Boolean.class);
 
         this.use_country = this.getNode(this.data,"use-country",Boolean.class);
-        try {
-            this.countries = (List<String>) (this.getNode(this.data,"countries",List.class));
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("The node [countries] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
+        if(this.use_country)
+            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false."), NamedTextColor.YELLOW);
+        this.use_country = false;
+        this.countries = new ArrayList<>();
 
         this.message = this.getNode(data,"message",String.class);
+        if(this.message.equalsIgnoreCase(""))
+            throw new IllegalStateException("Whitelist kick messages cannot be empty!");
 
         this.strict = this.getNode(data,"strict",Boolean.class);
     }

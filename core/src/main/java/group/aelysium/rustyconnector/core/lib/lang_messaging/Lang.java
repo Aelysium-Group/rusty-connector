@@ -8,11 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 
 import static net.kyori.adventure.text.Component.*;
-import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
-import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY;
-import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.YELLOW;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
  * Thank you to https://github.com/LuckPerms/LuckPerms for inspiring this implementation.
@@ -73,7 +69,7 @@ public interface Lang {
                 SPACING,
                 BORDER,
                 SPACING,
-                text("Developed by Aelysium | Nathan (SIVIN)", YELLOW),
+                text("Developed by Aelysium | Nathan M.", YELLOW),
                 text("Use: `/rc` to get started", YELLOW),
                 SPACING,
                 BORDER

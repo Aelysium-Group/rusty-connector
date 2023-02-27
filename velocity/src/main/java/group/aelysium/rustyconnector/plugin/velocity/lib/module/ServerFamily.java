@@ -4,13 +4,9 @@ import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
@@ -19,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -274,12 +269,12 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
     /**
      * Initializes all server families based on the configs.
+     * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
     public static ServerFamily<? extends PaperServerLoadBalancer> init(Proxy proxy, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         plugin.logger().log("Registering family: "+familyName);
-        if(Objects.equals(familyName, "all")) throw new RuntimeException("You can't name a server \"all\"!");
 
         FamilyConfig familyConfig = FamilyConfig.newConfig(
                 familyName,
@@ -302,34 +297,30 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
             plugin.logger().log(familyName + " doesn't have a whitelist.");
         }
 
-        try {
-            switch (Enum.valueOf(AlgorithmType.class, familyConfig.getLoadBalancing_algorithm())) {
-                case ROUND_ROBIN -> {
-                    return new ServerFamily<>(
-                            familyName,
-                            whitelist,
-                            RoundRobin.class,
-                            familyConfig.isLoadBalancing_weighted(),
-                            familyConfig.isLoadBalancing_persistence_enabled(),
-                            familyConfig.getLoadBalancing_persistence_attempts()
-                    );
-                }
-                case LEAST_CONNECTION -> {
-                    return new ServerFamily<>(
-                            familyName,
-                            whitelist,
-                            LeastConnection.class,
-                            familyConfig.isLoadBalancing_weighted(),
-                            familyConfig.isLoadBalancing_persistence_enabled(),
-                            familyConfig.getLoadBalancing_persistence_attempts()
-                    );
-                }
-                default -> {
-                    throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
-                }
+        switch (Enum.valueOf(AlgorithmType.class, familyConfig.getLoadBalancing_algorithm())) {
+            case ROUND_ROBIN -> {
+                return new ServerFamily<>(
+                        familyName,
+                        whitelist,
+                        RoundRobin.class,
+                        familyConfig.isLoadBalancing_weighted(),
+                        familyConfig.isLoadBalancing_persistence_enabled(),
+                        familyConfig.getLoadBalancing_persistence_attempts()
+                );
             }
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
+            case LEAST_CONNECTION -> {
+                return new ServerFamily<>(
+                        familyName,
+                        whitelist,
+                        LeastConnection.class,
+                        familyConfig.isLoadBalancing_weighted(),
+                        familyConfig.isLoadBalancing_persistence_enabled(),
+                        familyConfig.getLoadBalancing_persistence_attempts()
+                );
+            }
+            default -> {
+                throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
+            }
         }
     }
 

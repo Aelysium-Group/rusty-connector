@@ -33,7 +33,7 @@ public class PongHandler implements MessageHandler {
             PaperServer server = plugin.getProxy().findServer(serverInfo);
             if(server == null) return;
             plugin.getProxy().reviveServer(serverInfo);
-            //server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
+            server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
 
             if(plugin.logger().getGate().check(GateKey.PONG))
                 VelocityLang.PONG.send(plugin.logger(), serverInfo);

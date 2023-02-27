@@ -380,6 +380,7 @@ public class Proxy {
 
     /**
      * Initializes the proxy based on the configuration.
+     * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @param config The configuration file.
      */
     public static Proxy init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
@@ -459,6 +460,7 @@ public class Proxy {
 
     /**
      * Initializes the proxy based on the configuration.
+     * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @param config The configuration file.
      */
     public void reload(DefaultConfig config) {
@@ -513,6 +515,7 @@ public class Proxy {
 
     /**
      * Reload all whitelists currently active on the proxy.
+     * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @param config The default config to read.
      */
     public void reloadWhitelists(DefaultConfig config) {
