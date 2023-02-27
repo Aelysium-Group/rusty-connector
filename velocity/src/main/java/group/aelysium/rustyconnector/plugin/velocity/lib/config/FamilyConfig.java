@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
+import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,10 +80,23 @@ public class FamilyConfig extends YAML {
     public void register() throws IllegalStateException {
         this.loadBalancing_weighted = this.getNode(this.data,"load-balancing.weighted",Boolean.class);
         this.loadBalancing_algorithm = this.getNode(this.data,"load-balancing.algorithm",String.class);
+
+        try {
+            Enum.valueOf(AlgorithmType.class, this.loadBalancing_algorithm);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("The load balancing algorithm: "+this.loadBalancing_algorithm+" doesn't exist!");
+        }
+
         this.loadBalancing_persistence_enabled = this.getNode(this.data,"load-balancing.persistence.enabled",Boolean.class);
         this.loadBalancing_persistence_attempts = this.getNode(this.data,"load-balancing.persistence.attempts",Integer.class);
+        if(this.loadBalancing_persistence_enabled && this.loadBalancing_persistence_attempts <= 0)
+            throw new IllegalStateException("Load balancing persistence must allow at least 1 attempt.");
 
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
         this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
+        if(this.whitelist_enabled && this.whitelist_name.equals(""))
+            throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist in a family!");
+
+        this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
     }
 }

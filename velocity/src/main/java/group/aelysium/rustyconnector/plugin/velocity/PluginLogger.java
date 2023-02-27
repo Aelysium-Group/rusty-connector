@@ -98,12 +98,8 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.lib.lang
         );
 
         gate.registerNode(
-                GateKey.BLACKLISTED_ADDRESS_MESSAGE,
-                config.isSecurity_blacklistedAddressMessage()
-        );
-        gate.registerNode(
-                GateKey.WHITELIST_DENIED_ADDRESS_MESSAGE,
-                config.isSecurity_whitelistDeniedAddressMessage()
+                GateKey.MESSAGE_TUNNEL_FAILED_MESSAGE,
+                config.isSecurity_messageTunnelFailedMessage()
         );
 
         gate.registerNode(

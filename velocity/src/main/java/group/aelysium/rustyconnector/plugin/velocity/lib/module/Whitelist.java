@@ -110,7 +110,6 @@ public class Whitelist {
      */
     public static Whitelist init(String whitelistName) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-        whitelistName = whitelistName.replaceAll(".yml","");
 
         WhitelistConfig whitelistConfig = WhitelistConfig.newConfig(
                 whitelistName,

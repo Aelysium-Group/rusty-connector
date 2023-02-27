@@ -4,6 +4,8 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
@@ -85,8 +87,10 @@ public class Engine {
             plugin.setProxy(Proxy.init(defaultConfig));
 
             return true;
+        } catch (NoOutputException ignore) {
+            return false;
         } catch (Exception e) {
-            plugin.logger().error(e.getMessage());
+            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text(e.getMessage()), NamedTextColor.RED);
             return false;
         }
     }

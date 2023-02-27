@@ -23,6 +23,7 @@
 #                                                                                                         #
 #                                                                                                         #
 #                                        Welcome to RustyConnector!                                       #
+#                            https://github.com/Aelysium-Group/rusty-connector                            #
 #                                                                                                         #
 #                            -------------------------------------------------                            #
 #                                                                                                         #
@@ -33,9 +34,10 @@
 #                               | If you ever need assistance setting up your                             #
 #                               | plugin come join us in our discord server:                              #
 #                               | https://join.aelysium.group/                                            #
+#                                                                                                         #
 #                            -------------------------------------------------                            #
 #                                                                                                         #
-#                                          Produced by: Aelysium                                          #
+#                                     Produced by: Aelysium | Nathan M.                                   #
 #                                                                                                         #
 #                            -------------------------------------------------                            #
 #                                                                                                         #
@@ -47,8 +49,6 @@
 # And that's the last thing anyone wants :)
 #
 config-version: 1
-
-
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -64,17 +64,11 @@ config-version: 1
 # This way external users can't appear and send messages.
 # This value should be changed periodically for security purposes.
 #
-# To generate a new keyset, set the string to be an empty value and the plugin will send a new key in console on next restart.
+# To generate a new key, set the string to be empty and the plugin will send a new key in console on next restart.
 #
 # DO NOT EVER SHARE THIS KEY!
 #
 private-key: ""
-#
-# The public key associated with the private key.
-#
-# This key will be sent in server messages.
-#
-public-key: ""
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -133,7 +127,7 @@ families:
 # Redis is required in order to provide quick and easy syncing between the proxy and sub-servers
 #
 redis:
-    host: "localhost"
+    host: ""
     port: 3306
     password: "password"
 
@@ -225,15 +219,13 @@ message-tunnel:
 
 #
 # The tunnel whitelist.
-# To disable the whitelist, set it to be:
-# whitelist: []
 #
 # By listing IP addresses here. The plugin will NEVER accept messages if they don't contain one of these IP Addresses!
 # If you know exactly which IP Addresses you want to allow messages from. You can whitelist them here!
 #
 # VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
 #                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
-#                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
+  #                 This feature only exists to give you a bit more flexibility in how strict your plugin can be.
 #
     whitelist:
         enabled: false
@@ -242,8 +234,6 @@ message-tunnel:
 
 #
 # The tunnel denylist.
-# To disable the denylist, set it to be:
-# denylist: []
 #
 # By listing IP addresses here. The plugin will NEVER accept messages containing one of these IP Addresses!
 #
@@ -252,7 +242,7 @@ message-tunnel:
 #
 # VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
 #                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
-#                 This list only exists as an extra safety measure against somebody who gets access to your Redis database.
+#                 This feature only exists to give you a bit more flexibility in how strict your plugin can be.
 #
     denylist:
         enabled: false
@@ -283,9 +273,10 @@ boot-commands:
 # These commands will be sent, in order, from top to bottom.
 # Remember that these are proxy commands. You won't be able to run commands on your sub-servers from here.
 # This section doesn't care about whether other plugins on the proxy have started yet!
+# If you run commands from other plugins, they might not work because those plugins may not have been booted up yet!
 #
     commands:
-      - "rc registerAll"
+      - "rc register all"
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -318,7 +309,7 @@ hearts:
 # Should the server get unregistered?
 #
 # This is an additional life-cycle option in-case servers become unresponsive and unable to unregister themselves.
-# If a server can't unregister itself (bad shutdown, server freezing, etc) this will be able to see that it's unresponsive and unregister it.
+# If a server can't unregister itself (bad shutdown, server freezing, bad connection between server and proxy, etc) this will be able to see that it's unresponsive and unregister it.
 #
         unregister-on-ignore: false
 

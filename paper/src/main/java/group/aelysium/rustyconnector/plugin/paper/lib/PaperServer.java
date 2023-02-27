@@ -173,7 +173,7 @@ public class PaperServer implements Server {
                 this.address.getHostName()+":"+this.address.getPort()
         );
         registrationMessage.addParameter("name", this.name);
-        //registrationMessage.addParameter("player-count", String.valueOf(this.getPlayerCount()));
+        registrationMessage.addParameter("player-count", String.valueOf(this.getPlayerCount()));
 
         registrationMessage.dispatchMessage(this.redis);
     }
@@ -181,14 +181,9 @@ public class PaperServer implements Server {
     public static PaperServer init(DefaultConfig config) throws IllegalAccessException {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
-        if((config.getPrivate_key().equals(""))) throw new IllegalArgumentException("You must define a `private-key` for this server! Copy the private key from your proxy and paste it in `config.yml`!");
+        plugin.logger().log("Preparing Redis...");
 
-        if((config.getServer_address().equals(""))) throw new IllegalArgumentException("You must define an `address`. Copy the IP Address associated with this server and paste it into the `address` field in your `config.yml`");
-        if((config.getServer_name().equals(""))) throw new IllegalArgumentException("You must define a `name` for this server!");
-
-        plugin.logger().log("---------| Preparing Redis...");
         Redis redis = new Redis();
-
         redis.setConnection(
                 config.getRedis_host(),
                 config.getRedis_port(),

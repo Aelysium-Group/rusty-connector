@@ -4,6 +4,9 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -30,11 +33,7 @@ public class Redis {
     /**
      * Sets the connection
      */
-    public void setConnection(String host, int port, String password, String dataChannel) throws IllegalAccessException {
-        if(password.length() < 16) {
-            throw new IllegalAccessException("Your Redis password is to short! For security purposes, please use a longer password! "+password.length()+" < 16");
-        }
-
+    public void setConnection(String host, int port, String password, String dataChannel) {
         this.host = host;
         this.port = port;
         this.password = password;
@@ -68,8 +67,7 @@ public class Redis {
 
             this.subscriberThread.start();
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ExceptionInInitializerError();
+            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("REDIS: "+ e.getMessage()), NamedTextColor.RED);
         }
     }
 

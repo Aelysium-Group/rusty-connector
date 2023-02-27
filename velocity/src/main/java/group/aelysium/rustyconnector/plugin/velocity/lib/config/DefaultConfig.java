@@ -1,11 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.intellij.lang.annotations.RegExp;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
@@ -15,7 +21,7 @@ public class DefaultConfig extends YAML {
     private String root_family = "lobby";
     private List<String> families = new ArrayList<>();
 
-    private String redis_host = "localhost";
+    private String redis_host = "";
     private int redis_port = 3306;
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
@@ -159,52 +165,81 @@ public class DefaultConfig extends YAML {
     }
 
     @SuppressWarnings("unchecked")
-    public void register() throws IllegalStateException {
+    public void register() throws IllegalStateException, NoOutputException {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
         // General
 
         try {
             this.private_key = this.getNode(this.data,"private-key",String.class);
+            if(this.private_key.equals("")) throw new Exception("You must provide a private key!");
         } catch (Exception e) {
             VelocityLang.PRIVATE_KEY.send(plugin.logger());
+            throw new NoOutputException(e);
         }
-        this.public_key = this.getNode(this.data,"public-key",String.class);
+        this.public_key = "";
 
         this.root_family = this.getNode(this.data,"root-family",String.class);
         try {
             this.families = (List<String>) (this.getNode(this.data,"families",List.class));
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             throw new IllegalStateException("The node [families] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
 
+        this.families.forEach(familyName -> {
+            if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
+        });
+        if(!this.families.contains(this.root_family))
+            throw new IllegalStateException("`root-family` must match a family listed in `families`. "+ this.root_family + " not found.");
+
         // Redis
 
-        this.redis_host = this.getNode(this.data,"redis.host",String.class);
-        this.redis_port = this.getNode(this.data,"redis.port",Integer.class);
-        this.redis_password = this.getNode(this.data,"redis.password",String.class);
-        this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
+        this.redis_host = this.getNode(this.data, "redis.host", String.class);
+        if(this.redis_host.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
+
+        this.redis_port = this.getNode(this.data, "redis.port", Integer.class);
+        this.redis_password = this.getNode(this.data, "redis.password", String.class);
+        if(this.redis_password.equals("password") || this.redis_password.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
+        if(this.redis_password.length() < 16)
+            throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
+
+        this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
+        if(this.redis_dataChannel.equals(""))
+            throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
 
         // Whitelist
 
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
         this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
+        if(this.whitelist_enabled && this.whitelist_name.equals(""))
+            throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist on the proxy!");
+
+        this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
 
         // Message tunnel
 
         this.messageTunnel_messageCacheSize = this.getNode(this.data,"message-tunnel.message-cache-size",Integer.class);
+        if(this.messageTunnel_messageCacheSize > 500) {
+            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("Message cache size is to large! " + this.messageTunnel_messageCacheSize + " > 500. Message cache size set to 500."), NamedTextColor.YELLOW);
+            this.messageTunnel_messageCacheSize = 500;
+        }
+
         this.messageTunnel_messageMaxLength = this.getNode(this.data,"message-tunnel.message-max-length",Integer.class);
+        if(this.messageTunnel_messageMaxLength < 384) {
+            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("Max message length is to small to be effective! " + this.messageTunnel_messageMaxLength + " < 384. Max message length set to 384."), NamedTextColor.YELLOW);
+            this.messageTunnel_messageMaxLength = 384;
+        }
 
         this.messageTunnel_whitelist_enabled = this.getNode(this.data,"message-tunnel.whitelist.enabled",Boolean.class);
         try {
             this.messageTunnel_whitelist_addresses = (List<String>) this.getNode(this.data,"message-tunnel.whitelist.addresses",List.class);
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             throw new IllegalStateException("The node [message-tunnel.whitelist] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
         this.messageTunnel_denylist_enabled = this.getNode(this.data,"message-tunnel.denylist.enabled",Boolean.class);
         try {
             this.messageTunnel_denylist_addresses = (List<String>) this.getNode(this.data,"message-tunnel.denylist.addresses",List.class);
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             throw new IllegalStateException("The node [message-tunnel.denylist] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
 
@@ -213,16 +248,24 @@ public class DefaultConfig extends YAML {
         this.bootCommands_enabled = this.getNode(this.data,"boot-commands.enabled",Boolean.class);
         try {
             this.bootCommands_commands = (List<String>) this.getNode(this.data,"boot-commands.commands",List.class);
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             throw new IllegalStateException("The node [boot-commands.commands] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
 
         // Hearts
         this.hearts_serverLifecycle_enabled = this.getNode(this.data,"hearts.server-lifecycle.enabled",Boolean.class);
         this.hearts_serverLifecycle_interval = this.getNode(this.data,"hearts.server-lifecycle.interval",Integer.class);
+        if(this.hearts_serverLifecycle_interval < 10) {
+            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("Server lifecycle interval is set dangerously fast: " + this.hearts_serverLifecycle_interval + "ms. Setting to default of 30ms."), NamedTextColor.YELLOW);
+            this.messageTunnel_messageMaxLength = 30;
+        }
         this.hearts_serverLifecycle_unregisterOnIgnore = this.getNode(this.data,"hearts.server-lifecycle.unregister-on-ignore",Boolean.class);
 
         this.messageTunnel_familyServerSorting_enabled = this.getNode(this.data,"hearts.family-server-sorting.enabled",Boolean.class);
         this.messageTunnel_familyServerSorting_interval = this.getNode(this.data,"hearts.family-server-sorting.interval",Integer.class);
+        if(this.messageTunnel_familyServerSorting_interval < 7) {
+            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("Server sorting interval is set dangerously fast: " + this.messageTunnel_familyServerSorting_interval + "ms. Setting to default of 20ms."), NamedTextColor.YELLOW);
+            this.messageTunnel_familyServerSorting_interval = 20;
+        }
     }
 }

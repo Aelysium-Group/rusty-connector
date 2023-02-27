@@ -29,9 +29,6 @@ public class VelocityRustyConnector implements RustyConnector {
         if(this.proxy != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
         this.proxy = proxy;
     }
-    /**
-     * Unsets the proxy.
-     */
     public void unsetProxy() {
         this.proxy = null;
     }

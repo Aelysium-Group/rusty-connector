@@ -56,7 +56,7 @@ public class Engine {
 
             return true;
         } catch (Exception e) {
-            plugin.logger().log(e.getMessage());
+            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text(e.getMessage()), NamedTextColor.RED);
             return false;
         }
     }

@@ -47,11 +47,8 @@ messaging:
     message-parser-trash: false
 
 security:
-# Should we log when a blacklisted address tries to send a message to us?
-    blacklisted-address-message: true
-
-# Should we log when an address which hasn't been whitelisted tries to send a message to us?
-    whitelist-denied-address-message: true
+# Should we log when a message fails message tunnel validation?
+    message-tunnel-failed-message: true
 
 log:
 # Log what we do when a player joins the server

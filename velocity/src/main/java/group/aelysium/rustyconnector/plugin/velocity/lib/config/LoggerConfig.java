@@ -13,8 +13,7 @@ public class LoggerConfig extends YAML {
     private boolean messaging_pong = false;
     private boolean messaging_messageParserTrash = false;
 
-    private boolean security_blacklistedAddressMessage = true;
-    private boolean security_whitelistDeniedAddressMessage = true;
+    private boolean security_messageTunnelFailedMessage = true;
 
     private boolean log_playerJoin = false;
     private boolean log_playerLeave = false;
@@ -63,12 +62,8 @@ public class LoggerConfig extends YAML {
         return messaging_messageParserTrash;
     }
 
-    public boolean isSecurity_blacklistedAddressMessage() {
-        return security_blacklistedAddressMessage;
-    }
-
-    public boolean isSecurity_whitelistDeniedAddressMessage() {
-        return security_whitelistDeniedAddressMessage;
+    public boolean isSecurity_messageTunnelFailedMessage() {
+        return security_messageTunnelFailedMessage;
     }
 
     public boolean isLog_playerJoin() {
@@ -158,8 +153,7 @@ public class LoggerConfig extends YAML {
         this.messaging_pong = this.getNode(this.data,"messaging.pong",Boolean.class);
         this.messaging_messageParserTrash = this.getNode(this.data,"messaging.message-parser-trash",Boolean.class);
 
-        this.security_blacklistedAddressMessage = this.getNode(this.data,"security.blacklisted-address-message",Boolean.class);
-        this.security_whitelistDeniedAddressMessage = this.getNode(this.data,"security.whitelist-denied-address-message",Boolean.class);
+        this.security_messageTunnelFailedMessage = this.getNode(this.data,"security.message-tunnel-failed-message",Boolean.class);
 
         this.log_playerJoin = this.getNode(this.data,"log.player-join",Boolean.class);
         this.log_playerLeave = this.getNode(this.data,"log.player-leave",Boolean.class);
