@@ -6,7 +6,21 @@
 [![Aelysium](https://badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
 [![Build](https://badgen.net/badge/Latest%20Stable%20Release/v0.3.0%20(Beta)/orange?icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
 
-# [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)
+# [Support](https://join.aelysium.group/)  |  [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)  |  [Download](https://github.com/Aelysium-Group/rusty-connector/releases)  |  [Report Bugs](https://join.aelysium.group/)
+---
+- ### ✅ Built for large networks
+- ### ✅ Blazing fast data transmission with Redis integration
+- ### ✅ Create pre-defined whitelist configs and activate them dynamically
+- ### ✅ Register similar servers into families with family-level whitelists and load balancing
+- ### ✅ Automatically unregister frozen servers from the proxy
+- ### ✅ Set soft and hard player limits for servers
+- ### ✅ Whitelist players based on permission, Username, UUID, or IP Address
+- ### ✅ Works with LuckPerms-Velocity
+- ### ✅ Works with Kubernetes
+- ### ❌ Can't tuck you into bed
+---
+
+# Wiki
 ### [Home](https://github.com/Aelysium-Group/rusty-connector/wiki)
 ### [FAQ](https://github.com/Aelysium-Group/rusty-connector/wiki#faq)
 ### [Getting Started](https://github.com/Aelysium-Group/rusty-connector/wiki/Getting-Started-(First-Time))
