@@ -4,7 +4,7 @@
 ![PaperMC](https://badgen.net/badge/Paper/1.16%20-%201.19/F96854?icon=telegram)
 ![Maven](https://badgen.net/badge/maven/passing/green?icon=github)
 [![Aelysium](https://badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
-[![Build](https://badgen.net/badge/Latest%20Stable%20Release/v0.3.0%20(Beta)/orange?icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases/tag/v0.3.0)
+[![Build](https://badgen.net/badge/Latest%20Stable%20Release/v0.3.0%20(Beta)/orange?icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
 
 # [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)
 ### [Home](https://github.com/Aelysium-Group/rusty-connector/wiki)
