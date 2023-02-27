@@ -9,6 +9,7 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTun
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
@@ -23,6 +24,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManag
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,12 +96,11 @@ public class Proxy {
 
     /**
      * Validate a message against the message tunnel.
-     * If no message tunnel has been defined this will default to `true`
      * @param message The message to verify.
-     * @return `true` if the message is valid. `false` otherwise.
+     * @throws BlockedMessageException If the message should be blocked.
      */
-    public boolean validateMessage(RedisMessage message) {
-        return this.messageTunnel.validate(message);
+    public void validateMessage(RedisMessage message) throws BlockedMessageException {
+        this.messageTunnel.validate(message);
     }
 
     public void startServerLifecycleHeart(long heartbeat, boolean shouldUnregister) {
@@ -433,10 +434,8 @@ public class Proxy {
         );
         proxy.setMessageTunnel(messageTunnel);
 
-        if(config.isMessageTunnel_whitelist_enabled() || config.isMessageTunnel_denylist_enabled()) {
-
-            List<String> whitelist = config.getMessageTunnel_whitelist_addresses();
-            whitelist.forEach(entry -> {
+        if(config.isMessageTunnel_whitelist_enabled())
+            config.getMessageTunnel_whitelist_addresses().forEach(entry -> {
                 String[] addressSplit = entry.split(":");
 
                 InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
@@ -444,15 +443,15 @@ public class Proxy {
                 messageTunnel.whitelistAddress(address);
             });
 
-            List<String> blacklist = config.getMessageTunnel_denylist_addresses();
-            blacklist.forEach(entry -> {
+        if(config.isMessageTunnel_denylist_enabled())
+            config.getMessageTunnel_denylist_addresses().forEach(entry -> {
                 String[] addressSplit = entry.split(":");
 
                 InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
 
                 messageTunnel.blacklistAddress(address);
             });
-        }
+
         plugin.logger().log("Finished setting up message tunnel");
 
         return proxy;
@@ -490,10 +489,8 @@ public class Proxy {
         );
         this.setMessageTunnel(messageTunnel);
 
-        if(config.isMessageTunnel_whitelist_enabled() || config.isMessageTunnel_denylist_enabled()) {
-
-            List<String> whitelist = config.getMessageTunnel_whitelist_addresses();
-            whitelist.forEach(entry -> {
+        if(config.isMessageTunnel_whitelist_enabled())
+            config.getMessageTunnel_whitelist_addresses().forEach(entry -> {
                 String[] addressSplit = entry.split(":");
 
                 InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
@@ -501,15 +498,14 @@ public class Proxy {
                 messageTunnel.whitelistAddress(address);
             });
 
-            List<String> blacklist = config.getMessageTunnel_denylist_addresses();
-            blacklist.forEach(entry -> {
+        if(config.isMessageTunnel_denylist_enabled())
+            config.getMessageTunnel_denylist_addresses().forEach(entry -> {
                 String[] addressSplit = entry.split(":");
 
                 InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
 
                 messageTunnel.blacklistAddress(address);
             });
-        }
         plugin.logger().log("Message tunnel reloaded");
     }
 

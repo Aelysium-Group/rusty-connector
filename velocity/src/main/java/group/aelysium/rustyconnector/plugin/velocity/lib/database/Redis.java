@@ -5,6 +5,9 @@ import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
@@ -22,12 +25,18 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
     @Override
     public void onMessage(String rawMessage) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-        CacheableMessage cachedMessage = plugin.getProxy().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
+        MessageCache messageCache = plugin.getProxy().getMessageCache();
+
+        // If the proxy doesn't have a message cache (maybe it's in the middle of a reload.)
+        // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
+        if(messageCache == null) messageCache = new MessageCache(1);
+
+        CacheableMessage cachedMessage = messageCache.cacheMessage(rawMessage, MessageStatus.UNDEFINED);
         try {
             RedisMessage message = RedisMessage.create(rawMessage, MessageOrigin.PROXY, null);
             try {
-                if(!plugin.getProxy().validateMessage(message))
-                    throw new AuthenticationException("The message was to long!");
+                plugin.getProxy().validateMessage(message);
+
                 if (!(plugin.getProxy().validatePrivateKey(message.getKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
@@ -36,11 +45,17 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
             } catch (AuthenticationException e) {
                 cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
 
-                if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
-                else if(!plugin.logger().getGate().check(GateKey.INVALID_PRIVATE_KEY)) return;
-
-                plugin.logger().error("An incoming message from: "+message.getAddress().toString()+" was thrown away!");
+                plugin.logger().error("An incoming message from: "+message.getAddress().toString()+" had an invalid private-key!");
                 plugin.logger().log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
+            } catch (BlockedMessageException e) {
+                cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
+
+                if(!plugin.logger().getGate().check(GateKey.MESSAGE_TUNNEL_FAILED_MESSAGE)) return;
+
+                plugin.logger().error("An incoming message from: "+message.getAddress().toString()+" was blocked by the message tunnel!");
+                plugin.logger().log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
+            } catch (NoOutputException e) {
+                cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
             }
         } catch (Exception e) {
             if(plugin.logger().getGate().check(GateKey.SAVE_TRASH_MESSAGES))

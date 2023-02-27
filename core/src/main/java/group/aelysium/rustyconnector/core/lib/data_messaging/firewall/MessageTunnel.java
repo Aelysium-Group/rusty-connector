@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.data_messaging.firewall;
 
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -42,20 +43,21 @@ public class MessageTunnel {
      * This system first checks to see if the address is blacklisted. If so it returns `false`.
      * If the address is not blacklisted, it checks if the address is whitelisted. If not we return `false`.
      *
-     * Returns `true` if the address is both whitelisted and not blacklisted.
-     * Returns `true` if no whitelist or blacklist is defined.
+     * Succeeds if the address is both whitelisted and not blacklisted.
+     * Succeeds if no whitelist or blacklist is defined.
      * @param message The message to check.
-     * @return `true` If the message is valid. `false` if not.
+     * @throws BlockedMessageException If the message should be blocked.
      */
-    public boolean validate(RedisMessage message) {
-        if(message.toString().length() > this.maxLength) return false;
+    public void validate(RedisMessage message) throws BlockedMessageException {
+        if(message.toString().length() > this.maxLength)
+            throw new BlockedMessageException("The message is to long!");
 
         if(hasBlacklist)
-            if(this.blacklist.contains(message.getAddress())) return false;
+            if(this.blacklist.contains(message.getAddress()))
+                throw new BlockedMessageException("The message was sent from a blacklisted IP Address!");
 
         if(hasWhitelist)
-            return this.whitelist.contains(message.getAddress());
-
-        return true;
+            if(!this.whitelist.contains(message.getAddress()))
+                throw new BlockedMessageException("The message was sent from an IP Address that isn't whitelisted!");
     }
 }
