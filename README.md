@@ -9,6 +9,7 @@
 # [Support](https://join.aelysium.group/)  |  [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)  |  [Download](https://github.com/Aelysium-Group/rusty-connector/releases)  |  [Report Bugs](https://join.aelysium.group/)
 ---
 - ### ✅ Built for large networks
+- ### ✅ Register brand new servers to the proxy during runtime
 - ### ✅ Blazing fast data transmission with Redis integration
 - ### ✅ Create pre-defined whitelist configs and activate them dynamically
 - ### ✅ Register similar servers into families with family-level whitelists and load balancing
