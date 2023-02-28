@@ -7,6 +7,8 @@
 [![Build](https://badgen.net/badge/Latest%20Stable%20Release/v0.3.0%20(Beta)/orange?icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
 
 # [Support](https://join.aelysium.group/)  |  [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)  |  [Download](https://github.com/Aelysium-Group/rusty-connector/releases)  |  [Report Bugs](https://join.aelysium.group/)
+
+# [Modrinth](https://modrinth.com/plugin/rustyconnector) | [Paper Forums](https://forums.papermc.io/threads/rustyconnector-advanced-velocity-server-and-player-connection-manager.663/)
 ---
 - ### ✅ Built for large networks
 - ### ✅ Register brand new servers to the proxy during runtime
