@@ -1,0 +1,328 @@
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#                                                                                                         #
+#   /███████                           /██                                                                #
+#  | ██__  ██                         | ██                                                                #
+#  | ██  \ ██  /██   /██   /███████  /██████    /██   /██                                                 #
+#  | ███████/ | ██  | ██  /██_____/ |_  ██_/   | ██  | ██                                                 #
+#  | ██__  ██ | ██  | ██ |  ██████    | ██     | ██  | ██                                                 #
+#  | ██  \ ██ | ██  | ██  \____  ██   | ██ /██ | ██  | ██                                                 #
+#  | ██  | ██ |  ██████/  /███████/   |  ████/ |  ███████                                                 #
+#  |__/  |__/  \______/  |_______/     \___/    \____  ██                                                 #
+#                                               /██  | ██                                                 #
+#                                              |  ██████/                                                 #
+#    /██████                                    \______/                /██                               #
+#   /██__  ██                                                          | ██                               #
+#  | ██  \__/   /██████   /███████   /███████    /██████    /███████  /██████     /██████    /██████      #
+#  | ██        /██__  ██ | ██__  ██ | ██__  ██  /██__  ██  /██_____/ |_  ██_/    /██__  ██  /██__  ██     #
+#  | ██       | ██  \ ██ | ██  \ ██ | ██  \ ██ | ████████ | ██         | ██     | ██  \ ██ | ██  \__/     #
+#  | ██    ██ | ██  | ██ | ██  | ██ | ██  | ██ | ██_____/ | ██         | ██ /██ | ██  | ██ | ██           #
+#  |  ██████/ |  ██████/ | ██  | ██ | ██  | ██ |  ███████ |  ███████   |  ████/ |  ██████/ | ██           #
+#   \______/   \______/  |__/  |__/ |__/  |__/  \_______/  \_______/    \___/    \______/  |__/           #
+#                                                                                                         #
+#                                                                                                         #
+#                                        Welcome to RustyConnector!                                       #
+#                            https://github.com/Aelysium-Group/rusty-connector                            #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+# | RustyConnector is your go-to load-balancer and     | Built for usage on high-traffic networks;        #
+# | player manager for Minecraft networks!             | RustyConnector is meant to be scalable and easy  #
+#                                                      | to maintain!                                     #
+#                                                                                                         #
+#                               | If you ever need assistance setting up your                             #
+#                               | plugin come join us in our discord server:                              #
+#                               | https://join.aelysium.group/                                            #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+#                                     Produced by: Aelysium | Nathan M.                                   #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#
+# Do not touch this value, it might totally mess up your entire plugin!
+# And that's the last thing anyone wants :)
+#
+config-version: 1
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                         General                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#########################
+#      Private Key      #
+#########################
+#
+# Private key is used to validate messages.
+# This way external users can't appear and send messages.
+# This value should be changed periodically for security purposes.
+#
+# To generate a new key, set the string to be empty and the plugin will send a new key in console on next restart.
+#
+# DO NOT EVER SHARE THIS KEY!
+#
+private-key: ""
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Families                          #
+#                                                          #
+#               ---------------------------                #
+# | Families are a collection of servers. To register      #
+# | new servers into a family, you need to configure       #
+# | your sub-servers appropriately.                        #
+#                                                          #
+# | If your sub-servers use family names that don't match  #
+# | what you define here, they will not be registered.     #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#
+# The root family. Once a player connects and is validated.
+# This is the family that they will automatically be routed to.
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# YOUR ROOT FAMILY MUST BE DEFINED IN THE families ARRAY IN ORDER TO WORK
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+#
+root-family: "lobby"
+
+#
+# The families array.
+# Define as many families here as you'd like!
+# After defining your list of families, restart the plugin, and it will auto-generate the config files you'll need.
+# If you remove a family from this list, the plugin will no longer use that family, and you can safely delete its
+# config files from your server.
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Make sure you also list your "root-family" in this list as well!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+families:
+  - "lobby"
+  - "survival"
+  - "creative"
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Database                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+#########################
+#         Redis         #
+#########################
+#
+# Redis is required in order to provide quick and easy syncing between the proxy and sub-servers
+#
+redis:
+    host: ""
+    port: 3306
+    password: "password"
+
+#
+# The name of the data channel that sync information should be sent over.
+# If you don't know what this is, don't mess with it! The default value here is fine.
+# You probably won't break anything, but you generally just shouldn't touch things you don't understand.
+#
+    data-channel: "rustyConnector-sync"
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Whitelist                         #
+#                                                          #
+#               ---------------------------                #
+# | RustyConnector attempts to be as flexible as possible  #
+# | when configuring whitelists!                           #
+# | To setup a whitelist, you'll need to navigate to the   #
+# | "whitelists" folder and follow the directions in the   #
+# | provided whitelist-template.                           #
+#                                                          #
+# | More often than not, you will have multiple whitelist  #
+# | configurations that you may want to switch between     #
+# | during various points in your network's lifetime.      #
+# | This system allows you to set up as many pre-defined   #
+# | whitelists as you'd like, and enable or switch between #
+# | then whenever you want!                                #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+whitelist:
+#
+# If you set this to be on. You will be turning on a whitelist which will **effect your entire proxy**!
+# If you only want to effect certain families or individual servers. Look into the appropriate configuration locations!
+#
+    enabled: false
+
+#
+# The name of the whitelist configuration file in your "whitelists" folder.
+# You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
+#
+    name: "whitelist-template"
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                     Message Tunnel                       #
+#                                                          #
+#               ---------------------------                #
+# | The message tunnel allows you to have more control     #
+# | over what messages you will allow the proxy to accept  #
+# | or decline.                                            #
+# | This does NOT affect what messages are being sent over #
+# | your Redis channels. All it does is control what your  #
+# | proxy will and will not accept.                        #
+#                                                          #
+#  NOTE: This section has NOTHING to do with players!      #
+#        Instead, it is used to provide better control     #
+#        over where servers are allowed to auto-register   #
+#        from.                                             #
+#                                                          #
+#  NOTE: This section can more or less completely destroy  #
+#        the scalability that RustyConnector provides.     #
+#        While it does prevent the registration of IPs     #
+#        we don't recognize, it also prevents the          #
+#        registration of new IPs without manually adding   #
+#        them below.                                       #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+message-tunnel:
+#
+# The number of messages that will be saved into memory.
+# The message cache allows you to view messages that have recently been received by the proxy.
+# As new messages are generated, old messages will get pushed out of the cache.
+#
+# You can view cached messages using the `/rc message` command.
+#
+    message-cache-size: 50
+
+#
+# The max length that messages received over Redis are allowed to be.
+# If a message is over this value it will get thrown away!
+# The size below should work for just about everything that is sent by RustyConnector.
+# If you are defining larger addresses or names on your paper servers, you might want to increase this.
+#
+    message-max-length: 512
+
+#
+# The tunnel whitelist.
+#
+# By listing IP addresses here. The plugin will NEVER accept messages if they don't contain one of these IP Addresses!
+# If you know exactly which IP Addresses you want to allow messages from. You can whitelist them here!
+#
+# VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
+#                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
+  #                 This feature only exists to give you a bit more flexibility in how strict your plugin can be.
+#
+    whitelist:
+        enabled: false
+        addresses:
+          - "127.0.0.1"
+
+#
+# The tunnel denylist.
+#
+# By listing IP addresses here. The plugin will NEVER accept messages containing one of these IP Addresses!
+#
+# NOTE: The denylist has precedence over the whitelist. If an IP is defined in both the whitelist AND the denylist
+#       it will not be accepted.
+#
+# VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
+#                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
+#                 This feature only exists to give you a bit more flexibility in how strict your plugin can be.
+#
+    denylist:
+        enabled: false
+        addresses:
+          - "127.0.0.1"
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Boot Commands                       #
+#                                                          #
+#               ---------------------------                #
+# | You can run proxy commands when RustyConnector         #
+# | finishes booting up!                                   #
+#                                                          #
+# | This is a great way to automatically send a            #
+# | register all command through the data channel          #
+# | after a server restart!                                #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+boot-commands:
+    enabled: false
+
+#
+# The proxy commands to send on-boot.
+# These commands will be sent, in order, from top to bottom.
+# Remember that these are proxy commands. You won't be able to run commands on your sub-servers from here.
+# This section doesn't care about whether other plugins on the proxy have started yet!
+# If you run commands from other plugins, they might not work because those plugins may not have been booted up yet!
+#
+    commands:
+      - "rc register all"
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                          Hearts                          #
+#                                                          #
+#               ---------------------------                #
+# | Hearts are certain processes that run every specific   #
+# | interval! They can be enabled, disabled, and adjusted  #
+# | here.                                                  #
+#                                                          #
+# | All intervals are in seconds.                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+hearts:
+#
+# Manages the lifecycles of servers.
+#
+    server-lifecycle:
+        enabled: true
+#
+# Time, in seconds, between sending out a ping and expecting a pong.
+# Servers will also send their current player count with their pong response. This way, if the proxy
+# somehow unsyncs it's player count from the actual count, it can be corrected.
+#
+        interval: 30
+#
+# If a server doesn't respond to the most recent ping before the heart's next interval.
+# Should the server get unregistered?
+#
+# This is an additional life-cycle option in-case servers become unresponsive and unable to unregister themselves.
+# If a server can't unregister itself (bad shutdown, server freezing, bad connection between server and proxy, etc) this will be able to see that it's unresponsive and unregister it.
+#
+        unregister-on-ignore: false
+
+#
+# Manages the load balancing of the proxy's families.
+#
+    family-server-sorting:
+        enabled: true
+#
+# Time, in seconds, between when the families sort their servers. This interval will cause your proxy to sort ALL of the servers registered to it!
+# The higher this value the higher accuracy your load balancing will operate at.
+# If you have larger sets of servers on a family, setting the interval to be larger can help save resources.
+#
+# If you disable this heart, you are effectively setting load balancing for your entire network to be ROUND_ROBIN
+#
+        interval: 20
