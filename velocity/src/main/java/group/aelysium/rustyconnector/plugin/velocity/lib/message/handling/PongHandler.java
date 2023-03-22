@@ -9,7 +9,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.Velocity
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 
 import java.net.InetSocketAddress;
-import java.security.InvalidAlgorithmParameterException;
 
 public class PongHandler implements MessageHandler {
     private final RedisMessage message;

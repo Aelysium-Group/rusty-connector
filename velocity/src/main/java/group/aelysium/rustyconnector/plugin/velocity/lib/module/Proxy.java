@@ -1,7 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import com.sun.jdi.request.DuplicateRequestException;
+import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
@@ -18,15 +20,12 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.managers.PlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Proxy {
@@ -34,7 +33,6 @@ public class Proxy {
     private Redis redis;
     private final Map<ServerInfo, Boolean> lifeMatrix = new HashMap<>();
     private final FamilyManager familyManager;
-    private final PlayerManager playerManager;
     private final WhitelistManager whitelistManager;
     private final String privateKey;
     private String rootFamily;
@@ -86,7 +84,6 @@ public class Proxy {
         this.privateKey = privateKey;
 
         this.familyManager = new FamilyManager();
-        this.playerManager = new PlayerManager();
         this.whitelistManager = new WhitelistManager();
     }
 
@@ -208,9 +205,9 @@ public class Proxy {
         return null;
     }
 
-    public boolean contains(String serverName) {
+    public boolean contains(ServerInfo serverInfo) {
         for(ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
-            if(family.containsServer(serverName)) return true;
+            if(family.containsServer(serverInfo)) return true;
         }
         return false;
     }
@@ -221,14 +218,6 @@ public class Proxy {
      */
     public FamilyManager getFamilyManager() {
         return familyManager;
-    }
-
-    /**
-     * Get this proxy's player manager.
-     * @return The player manager.
-     */
-    public PlayerManager getPlayerManager() {
-        return playerManager;
     }
 
     /**
@@ -307,6 +296,52 @@ public class Proxy {
     }
 
     /**
+     * Attempts to directly connect a player to a server and then teleport that player to another player.
+     * @param source The player requesting to tpa.
+     * @param target The player to tpa to.
+     * @param targetServerInfo The server to send the player to.
+     * @throws NullPointerException If the server doesn't exist in the family.
+     */
+    public void tpaSendPlayer(Player source, Player target, ServerInfo targetServerInfo) {
+        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        ServerInfo senderServerInfo = source.getCurrentServer().orElseThrow().getServerInfo();
+
+        PaperServer targetServer = plugin.getProxy().findServer(targetServerInfo);
+        if(targetServer == null) throw new NullPointerException();
+
+        String familyName = targetServer.getFamilyName();
+
+        Callable<Boolean> queuePlayer = () -> {
+            RedisMessage message = new RedisMessage(
+                    this.privateKey,
+                    RedisMessageType.TPA_QUEUE_PLAYER,
+                    "127.0.0.1:0"
+            );
+
+            message.addParameter("target-family",familyName);
+            message.addParameter("target-address",targetServer.getAddress());
+            message.addParameter("target-name",targetServer.getServerInfo().getName());
+            message.addParameter("target-username",target.getUsername());
+            message.addParameter("source-username",source.getUsername());
+
+            message.dispatchMessage(this.redis);
+            return true;
+        };
+
+        queuePlayer.execute();
+
+        if(senderServerInfo.equals(targetServerInfo)) return;
+
+        ConnectionRequestBuilder connection = source.createConnectionRequest(targetServer.getRegisteredServer());
+        try {
+            connection.connect().get().isSuccessful();
+        } catch (Exception e) {
+            source.sendMessage(VelocityLang.TPA_FAILURE.build(target.getUsername()));
+        }
+    }
+
+    /**
      * Register a server to the proxy.
      * @param server The server to be registered.
      * @param familyName The family to register the server into.
@@ -318,7 +353,7 @@ public class Proxy {
             if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
                 VelocityLang.REGISTRATION_REQUEST.send(plugin.logger(), server.getServerInfo(), familyName);
 
-            if(plugin.getProxy().contains(server.getServerInfo().getName())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
+            if(plugin.getProxy().contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
 
             ServerFamily<? extends PaperServerLoadBalancer> family = this.familyManager.find(familyName);
             if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
@@ -366,6 +401,8 @@ public class Proxy {
             if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
                 VelocityLang.UNREGISTERED.send(plugin.logger(), serverInfo, familyName);
         } catch (Exception e) {
+            if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
+                VelocityLang.UNREGISTRATION_CANCELED.send(plugin.logger(), serverInfo, familyName);
             throw new Exception(e.getMessage());
         }
     }

@@ -60,8 +60,7 @@ public class VelocityRustyConnector implements RustyConnector {
     public void init() {
         instance = this;
 
-        int pluginId = 17972;
-        Metrics metrics = metricsFactory.make(this, pluginId);
+        metricsFactory.make(this, 17972);
 
         if(!Engine.start()) uninit();
     }

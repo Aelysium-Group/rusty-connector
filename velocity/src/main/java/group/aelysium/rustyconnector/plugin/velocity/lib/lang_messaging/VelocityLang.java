@@ -27,14 +27,6 @@ public interface VelocityLang extends Lang {
                     ASCIIAlphabet.generate("families")
             );
 
-    Message WORDMARK_REGISTERED_SERVERS = () -> // font: ANSI Shadow
-            join(
-                    Lang.newlines(),
-                    ASCIIAlphabet.generate("registered"),
-                    SPACING,
-                    ASCIIAlphabet.generate("servers")
-            );
-
     Message RC_ROOT_USAGE = () -> join(
             Lang.newlines(),
             BORDER,
@@ -57,6 +49,23 @@ public interface VelocityLang extends Lang {
             SPACING,
             text("/rc reload", AQUA),
             text("See reload options.", DARK_GRAY),
+            SPACING,
+            BORDER
+    );
+
+    Message RC_SERVER_COMMAND_CLIENT = () -> join(
+            Lang.newlines(),
+            BORDER,
+            SPACING,
+            text("The /server command is not supported on this network!",RED),
+            SPACING,
+            BORDER
+    );
+    Message RC_SERVER_COMMAND_CONSOLE = () -> join(
+            Lang.newlines(),
+            BORDER,
+            SPACING,
+            text("The /server command is not supported on this network!",RED),
             SPACING,
             BORDER
     );
@@ -283,6 +292,52 @@ public interface VelocityLang extends Lang {
         );
     };
 
+
+    Message TPA_NOT_ENABLED = () -> join(
+            Lang.newlines(),
+            text("You do not have permission to use this command.",RED)
+    );
+    ParameterizedMessage1<String> TPA_FAILURE = username -> join(
+            Lang.newlines(),
+            text("Unable to tpa to "+username+"!",RED)
+    );
+    ParameterizedMessage1<String> TPA_FAILURE_TARGET = username -> join(
+            Lang.newlines(),
+            text("Unable to tpa "+username+" to you!",RED)
+    );
+    ParameterizedMessage1<String> TPA_FAILURE_NO_USERNAME = username -> join(
+            Lang.newlines(),
+            text(username+" isn't online!",RED)
+    );
+    ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> join(
+            Lang.newlines(),
+            text("You requested to tpa to "+ username +"!",GREEN)
+    );
+    ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_SENDER = username -> join(
+            Lang.newlines(),
+            text(username +" accepted your request!",GREEN),
+            text("Attempting to teleport...",GRAY)
+    );
+    ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_TARGET = username -> join(
+            Lang.newlines(),
+            text(username +"'s TPA request has been accepted!",GREEN),
+            text("Attempting to teleport...",GRAY)
+    );
+    ParameterizedMessage1<String> TPA_REQUEST_DENIED_SENDER = username -> join(
+            Lang.newlines(),
+            text(username +" denied your request!",RED)
+    );
+    ParameterizedMessage1<String> TPA_REQUEST_DENIED_TARGET = username -> join(
+            Lang.newlines(),
+            text(username +"'s TPA request has been denied!",RED),
+            text("They've been notified...",GRAY)
+    );
+
+    Message TPA_COMPLETE = () -> join(
+            Lang.newlines(),
+            text("Teleport completed!",GREEN)
+    );
+
     Message PRIVATE_KEY = () -> join(
             Lang.newlines(),
             SPACING,
@@ -348,9 +403,9 @@ public interface VelocityLang extends Lang {
                     " "+ LoggerConfig.getConfig().getConsoleIcons_unregistered() +" "+familyName
     );
 
-    ParameterizedMessage2<PaperServer, String> UNREGISTRATION_CANCELED = (server, familyName) -> text(
-            "["+server.getServerInfo().getName()+"]" +
-                    "("+server.getServerInfo().getAddress().getHostName()+":"+server.getServerInfo().getAddress().getPort()+")" +
+    ParameterizedMessage2<ServerInfo, String> UNREGISTRATION_CANCELED = (server, familyName) -> text(
+            "["+server.getName()+"]" +
+                    "("+server.getAddress().getHostName()+":"+server.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_canceledRequest() +" "+familyName
     );
 

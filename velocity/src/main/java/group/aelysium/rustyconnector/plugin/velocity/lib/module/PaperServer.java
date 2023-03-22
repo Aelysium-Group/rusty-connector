@@ -105,9 +105,7 @@ public class PaperServer implements Server {
                 Permission.constructNode("rustyconnector.<family name>.softCapBypass",this.familyName)
         )) return true; // If the player has permission to bypass soft-player-cap, let them in.
 
-        if(this.isFull()) return false; // If the player count is at soft-player-cap
-
-        return true; // If the player hasn't reached soft-player-bypass
+        return !this.isFull();
     }
 
     @Override

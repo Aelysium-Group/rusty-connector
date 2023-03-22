@@ -3,17 +3,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.events;
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
-import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.WhitelistPlayer;
-import net.kyori.adventure.text.Component;
 
 public class OnPlayerChangeServer {
     /**

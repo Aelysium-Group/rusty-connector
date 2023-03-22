@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.commands;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -8,7 +9,6 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -17,17 +17,12 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.net.InetSocketAddress;
 import java.util.List;
 
-
-@Plugin(id = "rustyconnector-velocity")
 public final class CommandRusty {
     public static BrigadierCommand create() {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
@@ -37,12 +32,12 @@ public final class CommandRusty {
             .requires(source -> source instanceof ConsoleCommandSource)
             .executes(context -> {
                 VelocityLang.RC_ROOT_USAGE.send(plugin.logger());
-                return 1;
+                return Command.SINGLE_SUCCESS;
             })
             .then(LiteralArgumentBuilder.<CommandSource>literal("message")
                     .executes(context -> {
                         VelocityLang.RC_MESSAGE_ROOT_USAGE.send(plugin.logger());
-                        return 1;
+                        return Command.SINGLE_SUCCESS;
                     })
                     .then(LiteralArgumentBuilder.<CommandSource>literal("list")
                             .executes(context -> {
@@ -62,13 +57,12 @@ public final class CommandRusty {
 
                                         VelocityLang.RC_MESSAGE_PAGE.send(plugin.logger(),messages,1,1);
 
-                                        return;
                                     } catch (Exception e) {
                                         VelocityLang.RC_MESSAGE_ERROR.send(plugin.logger(),"There was an issue getting those messages!");
                                     }
                                 }).start();
 
-                                return 1;
+                                return Command.SINGLE_SUCCESS;
                             })
                             .then(RequiredArgumentBuilder.<CommandSource, Integer>argument("page-number", IntegerArgumentType.integer())
                                     .executes(context -> {
@@ -86,7 +80,7 @@ public final class CommandRusty {
                                             }
 
                                         }).start();
-                                        return 1;
+                                        return Command.SINGLE_SUCCESS;
                                     })
                             )
                     )
@@ -94,7 +88,7 @@ public final class CommandRusty {
                             .executes(context -> {
                                 VelocityLang.RC_MESSAGE_GET_USAGE.send(plugin.logger());
 
-                                return 1;
+                                return Command.SINGLE_SUCCESS;
                             })
                             .then(RequiredArgumentBuilder.<CommandSource, Long>argument("snowflake", LongArgumentType.longArg())
                                     .executes(context -> {
@@ -109,7 +103,7 @@ public final class CommandRusty {
                                             VelocityLang.RC_MESSAGE_ERROR.send(plugin.logger(),"There's no saved message with that ID!");
                                         }
 
-                                        return 1;
+                                        return Command.SINGLE_SUCCESS;
                                     })
                             )
                     )
@@ -122,7 +116,7 @@ public final class CommandRusty {
                         VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"Something prevented us from getting the families!");
                     }
 
-                    return 1;
+                    return Command.SINGLE_SUCCESS;
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
                         .executes(context -> {
@@ -137,7 +131,7 @@ public final class CommandRusty {
                             } catch (Exception e) {
                                 VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"Something prevented us from getting that family!");
                             }
-                            return 1;
+                            return Command.SINGLE_SUCCESS;
                         })
                         .then(LiteralArgumentBuilder.<CommandSource>literal("resetIndex")
                                 .executes(context -> {
@@ -154,7 +148,7 @@ public final class CommandRusty {
                                     } catch (Exception e) {
                                         VelocityLang.RC_FAMILY_ERROR.send(plugin.logger(),"Something prevented us from doing that!");
                                     }
-                                    return 1;
+                                    return Command.SINGLE_SUCCESS;
                                 })
                         )
                         .then(LiteralArgumentBuilder.<CommandSource>literal("sort")

@@ -7,7 +7,7 @@
     <artifactId>parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>${plugin.name}</name>
+    <name>RustyConnector</name>
 
     <modules>
         <module>velocity</module>
@@ -53,7 +53,7 @@
             <version>0.22.0</version>
         </dependency>
         <dependency>
-            <groupId>ninja.leaping.configurate</groupId>
+            <groupId>org.spongepowered</groupId>
             <artifactId>configurate-yaml</artifactId>
             <version>3.7.1</version>
         </dependency>

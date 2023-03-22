@@ -10,6 +10,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
+import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPAHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,14 +21,14 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ServerFamily<LB extends PaperServerLoadBalancer> {
-    private LB loadBalancer;
+    private final LB loadBalancer;
     private final String name;
     private String whitelist;
     protected long playerCount = 0;
+    protected boolean weighted;
+    protected TPAHandler tpaHandler;
 
-    protected boolean weighted = false;
-
-    private ServerFamily(String name, Whitelist whitelist, Class<LB> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private ServerFamily(String name, Whitelist whitelist, Class<LB> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         this.name = name;
         if(whitelist == null) this.whitelist = null;
         else this.whitelist = whitelist.getName();
@@ -35,6 +37,8 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
         this.loadBalancer.setPersistence(persistence, attempts);
         this.loadBalancer.setWeighted(weighted);
+
+        this.tpaHandler = new TPAHandler(tpaSettings);
     }
 
     public boolean isWeighted() {
@@ -46,6 +50,10 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         return this.loadBalancer;
     }
 
+    public TPAHandler getTPAHandler() {
+        return tpaHandler;
+    }
+
     /**
      * Get the whitelist for this family, or `null` if there isn't one.
      * @return The whitelist or `null` if there isn't one.
@@ -53,12 +61,6 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
     public Whitelist getWhitelist() {
         if(this.name == null) return null;
         return VelocityRustyConnector.getInstance().getProxy().getWhitelistManager().find(this.whitelist);
-    }
-
-    public void setLoadBalancer(Class<LB> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
-        this.loadBalancer.setPersistence(persistence, attempts);
-        this.loadBalancer.setWeighted(weighted);
     }
 
     public long serverCount() { return this.loadBalancer.size(); }
@@ -75,8 +77,8 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
         return this.playerCount;
     }
-    public boolean containsServer(String name) {
-        return !(this.getServer(name) == null);
+    public boolean containsServer(ServerInfo serverInfo) {
+        return !(this.getServer(serverInfo) == null);
     }
 
     /**
@@ -91,8 +93,6 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
         if(!(this.whitelist == null)) {
             Whitelist familyWhitelist = this.getWhitelist();
-
-            String ip = player.getRemoteAddress().getHostString();
 
             if (!familyWhitelist.validate(player)) {
                 player.disconnect(Component.text(familyWhitelist.getMessage()));
@@ -159,8 +159,6 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         if(!(this.whitelist == null)) {
             Whitelist familyWhitelist = this.getWhitelist();
 
-            String ip = player.getRemoteAddress().getHostString();
-
             if (!familyWhitelist.validate(player)) {
                 player.disconnect(Component.text(familyWhitelist.getMessage()));
                 return;
@@ -213,6 +211,23 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         else notPersistent.execute();
     }
 
+    /**
+     * Get all players in the family up to approximately `max`.
+     * @param max The approximate max number of players to return.
+     * @return A list of players.
+     */
+    public List<Player> getAllPlayers(int max) {
+        List<Player> players = new ArrayList<>();
+
+        for (PaperServer server : this.getRegisteredServers()) {
+            if(players.size() < max) break;
+
+            players.addAll(server.getRegisteredServer().getPlayersConnected());
+        }
+
+        return players;
+    }
+
     public List<PaperServer> getRegisteredServers() {
         return this.loadBalancer.dump();
     }
@@ -240,19 +255,11 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
     /**
      * Get a server that is a part of the family.
      * @param serverInfo The info matching the server to get.
-     */
-    public PaperServer getServer(@NotNull ServerInfo serverInfo) {
-        return this.getServer(serverInfo.getName());
-    }
-
-    /**
-     * Gets a server that is a part of the family.
-     * @param name The name of the server.
      * @return A found server or `null` if there's no match.
      */
-    public PaperServer getServer(String name) {
+    public PaperServer getServer(@NotNull ServerInfo serverInfo) {
         return this.getRegisteredServers().stream()
-                .filter(server -> Objects.equals(server.getServerInfo().getName(), name)
+                .filter(server -> Objects.equals(server.getServerInfo(), serverInfo)
                 ).findFirst().orElse(null);
     }
 
@@ -305,7 +312,8 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                         RoundRobin.class,
                         familyConfig.isLoadBalancing_weighted(),
                         familyConfig.isLoadBalancing_persistence_enabled(),
-                        familyConfig.getLoadBalancing_persistence_attempts()
+                        familyConfig.getLoadBalancing_persistence_attempts(),
+                        new TPASettings(familyConfig.isTPA_enabled(), familyConfig.shouldTPA_ignorePlayerCap())
                 );
             }
             case LEAST_CONNECTION -> {
@@ -315,12 +323,11 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                         LeastConnection.class,
                         familyConfig.isLoadBalancing_weighted(),
                         familyConfig.isLoadBalancing_persistence_enabled(),
-                        familyConfig.getLoadBalancing_persistence_attempts()
+                        familyConfig.getLoadBalancing_persistence_attempts(),
+                        new TPASettings(familyConfig.isTPA_enabled(), familyConfig.shouldTPA_ignorePlayerCap())
                 );
             }
-            default -> {
-                throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
-            }
+            default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
     }
 

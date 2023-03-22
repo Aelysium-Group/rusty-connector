@@ -92,8 +92,7 @@ public class Whitelist {
             // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
 
             if (this.usesPermission())
-                if(Permission.validate(player, this.permission))
-                    return true;
+                return Permission.validate(player, this.permission);
 
             return false;
         }

@@ -4,7 +4,6 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import ninja.leaping.configurate.ConfigurationNode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 public class WhitelistConfig extends YAML {
-
     private static Map<String,WhitelistConfig> configs = new HashMap<>();
 
     private boolean use_players = false;
@@ -54,15 +52,6 @@ public class WhitelistConfig extends YAML {
     }
     public boolean isStrict() {
         return strict;
-    }
-
-    /**
-     * Get a whitelist config.
-     * @param key The name of the whitelist config to get.
-     * @return A whtielist config.
-     */
-    public static WhitelistConfig getConfig(String key) {
-        return WhitelistConfig.configs.get(key);
     }
 
     /**

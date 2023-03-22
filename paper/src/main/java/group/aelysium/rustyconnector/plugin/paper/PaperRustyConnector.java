@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.plugin.paper;
 
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.RustyConnector;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.command.CommandSender;

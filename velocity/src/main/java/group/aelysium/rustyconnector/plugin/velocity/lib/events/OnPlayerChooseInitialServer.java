@@ -9,7 +9,6 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.WhitelistPlayer;
 import net.kyori.adventure.text.Component;
 
 public class OnPlayerChooseInitialServer {

@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.core.lib.util;
 
 import group.aelysium.rustyconnector.core.lib.model.Sortable;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 

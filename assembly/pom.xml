@@ -66,6 +66,7 @@
                                         <exclude>*.png</exclude>
                                         <exclude>*.html</exclude>
                                         <exclude>*.jpeg</exclude>
+                                        <exclude>*.java</exclude>
                                     </excludes>
                                 </filter>
                             </filters>

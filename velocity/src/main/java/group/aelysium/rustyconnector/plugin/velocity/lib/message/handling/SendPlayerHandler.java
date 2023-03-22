@@ -8,7 +8,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperSer
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import net.kyori.adventure.text.Component;
 
-import java.net.MalformedURLException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 

@@ -48,7 +48,7 @@
 # Do not touch this value, it might totally mess up your entire plugin!
 # And that's the last thing anyone wants :)
 #
-config-version: 1
+version: "0.4.0"
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

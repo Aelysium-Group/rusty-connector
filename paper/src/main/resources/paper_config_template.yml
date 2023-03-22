@@ -47,7 +47,7 @@
 # Do not touch this value, it might totally mess up your entire plugin!
 # And that's the last thing anyone wants :)
 #
-config-version: 1
+version: "0.4.0"
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -68,6 +68,8 @@ server:
 # This field is required.
 # The name of this server.
 # This is mostly used to help you identify this server when reading your proxy logs.
+#
+# Names between multiple servers are allowed to be duplicate, though this is not suggested.
 #
     name: ""
 
