@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper;
 
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
+import group.aelysium.rustyconnector.core.lib.config.MigrationDirections;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
@@ -17,6 +18,8 @@ import java.util.function.Function;
 public class Engine {
     public static boolean start() {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+
+        MigrationDirections.init();
 
         if(!initConfigs(plugin)) return false;
         if(!initCommands(plugin)) return false;

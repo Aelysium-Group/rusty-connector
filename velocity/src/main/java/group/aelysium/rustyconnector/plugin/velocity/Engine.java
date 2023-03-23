@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.core.lib.config.MigrationDirections;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
@@ -24,6 +25,8 @@ import java.io.File;
 public class Engine {
     public static boolean start() {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+        MigrationDirections.init();
 
         if(!initConfigs(plugin)) return false;
         if(!initCommands(plugin)) return false;

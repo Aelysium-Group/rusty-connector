@@ -162,7 +162,11 @@ public class DefaultConfig extends YAML {
     public void register() throws IllegalStateException, NoOutputException {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
-        // General
+        try {
+            this.processVersion();
+        } catch (Exception | UnsupportedClassVersionError e) {
+            throw new IllegalStateException(e.getMessage());
+        }
 
         try {
             this.private_key = this.getNode(this.data,"private-key",String.class);

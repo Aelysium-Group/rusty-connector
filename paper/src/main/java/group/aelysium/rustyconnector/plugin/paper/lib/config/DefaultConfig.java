@@ -106,9 +106,14 @@ public class DefaultConfig extends YAML {
         config = null;
     }
 
-    @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+
+        try {
+            this.processVersion();
+        } catch (Exception | UnsupportedClassVersionError e) {
+            throw new IllegalStateException(e.getMessage());
+        }
 
         this.private_key = this.getNode(this.data,"private-key",String.class);
         if(this.private_key.equals("")) throw new IllegalStateException("You must provide a private key in order for RustyConnector to work!");
