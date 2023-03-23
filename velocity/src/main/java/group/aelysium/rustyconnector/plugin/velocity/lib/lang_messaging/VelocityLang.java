@@ -184,7 +184,7 @@ public interface VelocityLang extends Lang {
     Message RC_FAMILY = () -> {
 
         Component families = text("");
-        for (ServerFamily<? extends PaperServerLoadBalancer> family : VelocityRustyConnector.getInstance().getProxy().getFamilyManager().dump()) {
+        for (ServerFamily<? extends PaperServerLoadBalancer> family : VelocityRustyConnector.getInstance().getVirtualServer().getFamilyManager().dump()) {
             families = families.append(text("[ "+family.getName()+" ] "));
         }
 
@@ -293,10 +293,23 @@ public interface VelocityLang extends Lang {
     };
 
 
-    Message TPA_NOT_ENABLED = () -> join(
+    Component TPA_NO_PERMISSION = text("You do not have permission to use this command.",RED);
+
+    Message TPA_USAGE = () -> join(
             Lang.newlines(),
-            text("You do not have permission to use this command.",RED)
+            text("Usage: /tpa <<username>, deny, accept>",RED)
     );
+    Message TPA_DENY_USAGE = () -> join(
+            Lang.newlines(),
+            text("Usage: /tpa deny <username>",RED),
+            text("Deny a tpa request from a user.",GRAY)
+    );
+    Message TPA_ACCEPT_USAGE = () -> join(
+            Lang.newlines(),
+            text("Usage: /tpa accept <username>",RED),
+            text("Accept a tpa request from a user.",GRAY)
+    );
+
     ParameterizedMessage1<String> TPA_FAILURE = username -> join(
             Lang.newlines(),
             text("Unable to tpa to "+username+"!",RED)
@@ -305,13 +318,28 @@ public interface VelocityLang extends Lang {
             Lang.newlines(),
             text("Unable to tpa "+username+" to you!",RED)
     );
+    Component TPA_FAILURE_SELF_TP = text("You can't teleport to yourself!",RED);
     ParameterizedMessage1<String> TPA_FAILURE_NO_USERNAME = username -> join(
             Lang.newlines(),
             text(username+" isn't online!",RED)
     );
+    ParameterizedMessage1<String> TPA_FAILURE_NO_REQUEST = username -> join(
+            Lang.newlines(),
+            text(username+" hasn't sent you any recent tpa requests!",RED)
+    );
+    ParameterizedMessage1<String> TPA_REQUEST_DUPLICATE = username -> join(
+            Lang.newlines(),
+            text("You already have a pending tpa request to "+ username +"!",RED)
+    );
+    ParameterizedMessage1<String> TPA_REQUEST_QUERY = username -> join(
+            Lang.newlines(),
+            text(username + " has requested to teleport to you!",GOLD),
+            text("Use `",GRAY).append(Component.text("/tpa accept "+username,AQUA)).append(Component.text("` to accept!", GRAY)),
+            text("Use `",GRAY).append(Component.text("/tpa deny "+username,AQUA)).append(Component.text("` to deny!", GRAY))
+    );
     ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> join(
             Lang.newlines(),
-            text("You requested to tpa to "+ username +"!",GREEN)
+            text("You requested to teleport to "+ username +"!",GREEN)
     );
     ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_SENDER = username -> join(
             Lang.newlines(),
@@ -320,7 +348,7 @@ public interface VelocityLang extends Lang {
     );
     ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_TARGET = username -> join(
             Lang.newlines(),
-            text(username +"'s TPA request has been accepted!",GREEN),
+            text(username +"'s tpa request has been accepted!",GREEN),
             text("Attempting to teleport...",GRAY)
     );
     ParameterizedMessage1<String> TPA_REQUEST_DENIED_SENDER = username -> join(
@@ -329,14 +357,14 @@ public interface VelocityLang extends Lang {
     );
     ParameterizedMessage1<String> TPA_REQUEST_DENIED_TARGET = username -> join(
             Lang.newlines(),
-            text(username +"'s TPA request has been denied!",RED),
+            text(username +"'s tpa request has been denied!",RED),
             text("They've been notified...",GRAY)
     );
-
-    Message TPA_COMPLETE = () -> join(
+    ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> join(
             Lang.newlines(),
-            text("Teleport completed!",GREEN)
+            text("Your tpa request to "+username+" has expired!",RED)
     );
+
 
     Message PRIVATE_KEY = () -> join(
             Lang.newlines(),

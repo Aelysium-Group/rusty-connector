@@ -27,6 +27,6 @@ public class ServerUnRegHandler implements MessageHandler {
                 address
         );
 
-        plugin.getProxy().unregisterServer(serverInfo, familyName, true);
+        plugin.getVirtualServer().unregisterServer(serverInfo, familyName, true);
     }
 }

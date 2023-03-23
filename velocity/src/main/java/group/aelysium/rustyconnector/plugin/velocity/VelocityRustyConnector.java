@@ -6,9 +6,9 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
 import group.aelysium.rustyconnector.core.RustyConnector;
-import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -36,7 +36,7 @@ public class VelocityRustyConnector implements RustyConnector {
     }
 
     public static VelocityRustyConnector getInstance() { return (VelocityRustyConnector) instance; }
-    public Proxy getProxy() { return this.proxy; }
+    public Proxy getVirtualServer() { return this.proxy; }
     public ProxyServer getVelocityServer() { return this.server; }
 
     @Inject

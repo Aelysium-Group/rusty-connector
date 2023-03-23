@@ -6,6 +6,8 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
 import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerJoin;
+import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerLeave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -78,6 +80,8 @@ public class Engine {
     }
 
     private static boolean initEvents(PaperRustyConnector plugin) {
+        plugin.getServer().getPluginManager().registerEvents(new OnPlayerJoin(), plugin);
+        plugin.getServer().getPluginManager().registerEvents(new OnPlayerLeave(), plugin);
         return true;
     }
 }

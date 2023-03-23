@@ -60,7 +60,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
      */
     public Whitelist getWhitelist() {
         if(this.name == null) return null;
-        return VelocityRustyConnector.getInstance().getProxy().getWhitelistManager().find(this.whitelist);
+        return VelocityRustyConnector.getInstance().getVirtualServer().getWhitelistManager().find(this.whitelist);
     }
 
     public long serverCount() { return this.loadBalancer.size(); }
@@ -220,7 +220,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         List<Player> players = new ArrayList<>();
 
         for (PaperServer server : this.getRegisteredServers()) {
-            if(players.size() < max) break;
+            if(players.size() > max) break;
 
             players.addAll(server.getRegisteredServer().getPlayersConnected());
         }
@@ -270,7 +270,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
         for (PaperServer server : this.loadBalancer.dump()) {
             if(server == null) continue;
-            plugin.getProxy().unregisterServer(server.getServerInfo(),this.name, false);
+            plugin.getVirtualServer().unregisterServer(server.getServerInfo(),this.name, false);
         }
     }
 
@@ -313,7 +313,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                         familyConfig.isLoadBalancing_weighted(),
                         familyConfig.isLoadBalancing_persistence_enabled(),
                         familyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(familyConfig.isTPA_enabled(), familyConfig.shouldTPA_ignorePlayerCap())
+                        new TPASettings(familyConfig.isTPA_enabled(), familyConfig.shouldTPA_ignorePlayerCap(), familyConfig.getTPA_requestLifetime())
                 );
             }
             case LEAST_CONNECTION -> {
@@ -324,7 +324,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                         familyConfig.isLoadBalancing_weighted(),
                         familyConfig.isLoadBalancing_persistence_enabled(),
                         familyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(familyConfig.isTPA_enabled(), familyConfig.shouldTPA_ignorePlayerCap())
+                        new TPASettings(familyConfig.isTPA_enabled(), familyConfig.shouldTPA_ignorePlayerCap(), familyConfig.getTPA_requestLifetime())
                 );
             }
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
@@ -339,7 +339,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
         Whitelist currentWhitelist = this.getWhitelist();
         if(!(currentWhitelist == null)) {
-            plugin.getProxy().getWhitelistManager().remove(currentWhitelist);
+            plugin.getVirtualServer().getWhitelistManager().remove(currentWhitelist);
         }
 
         FamilyConfig familyConfig = FamilyConfig.newConfig(
@@ -357,7 +357,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
             newWhitelist = Whitelist.init(familyConfig.getWhitelist_name());
 
             this.whitelist = familyConfig.getWhitelist_name();
-            plugin.getProxy().getWhitelistManager().add(newWhitelist);
+            plugin.getVirtualServer().getWhitelistManager().add(newWhitelist);
 
             plugin.logger().log("Finished reloading whitelist for "+this.name);
             return;

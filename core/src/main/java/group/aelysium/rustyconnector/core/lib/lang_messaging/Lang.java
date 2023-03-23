@@ -30,6 +30,8 @@ public interface Lang {
 
     Component SPACING = text("");
 
+    Component UNKNOWN_COMMAND = text("Unknown command. Type \"/help\" for help.",WHITE);
+
     Message WORDMARK_INFO = () -> ASCIIAlphabet.generate("info");
 
     Message WORDMARK_USAGE = () -> ASCIIAlphabet.generate("usage");

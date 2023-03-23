@@ -29,9 +29,9 @@ public class PongHandler implements MessageHandler {
         );
 
         try {
-            PaperServer server = plugin.getProxy().findServer(serverInfo);
+            PaperServer server = plugin.getVirtualServer().findServer(serverInfo);
             if(server == null) return;
-            plugin.getProxy().reviveServer(serverInfo);
+            plugin.getVirtualServer().reviveServer(serverInfo);
             server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
 
             if(plugin.logger().getGate().check(GateKey.PONG))

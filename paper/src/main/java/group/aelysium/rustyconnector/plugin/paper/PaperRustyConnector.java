@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.RustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
-import org.bstats.bukkit.Metrics;
+import group.aelysium.rustyconnector.plugin.paper.lib.bstats.Metrics;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -50,8 +50,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
         instance = this;
         this.logger = new PluginLogger(this.getSLF4JLogger());
 
-        int pluginId = 17973; // <-- Replace with the id of your plugin!
-        Metrics metrics = new Metrics(this, pluginId);
+        Metrics metrics = new Metrics(this, 17973);
 
         if(!Engine.start()) this.killPlugin();
     }

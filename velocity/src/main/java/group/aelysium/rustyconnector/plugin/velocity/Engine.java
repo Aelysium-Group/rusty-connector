@@ -36,7 +36,7 @@ public class Engine {
             plugin.logger().log("Issuing boot commands...");
             defaultConfig.getBootCommands_commands().forEach(command -> {
                 plugin.logger().log(">>> "+command);
-                plugin.getProxy().dispatchCommand(command);
+                plugin.getVirtualServer().dispatchCommand(command);
             });
         }
 
@@ -55,8 +55,8 @@ public class Engine {
             FamilyConfig.empty();
             LoggerConfig.empty();
 
-            plugin.getProxy().killHeartbeats();
-            plugin.getProxy().killRedis();
+            plugin.getVirtualServer().killHeartbeats();
+            plugin.getVirtualServer().killRedis();
             plugin.unsetProxy();
 
             plugin.getVelocityServer().getCommandManager().unregister("rc");

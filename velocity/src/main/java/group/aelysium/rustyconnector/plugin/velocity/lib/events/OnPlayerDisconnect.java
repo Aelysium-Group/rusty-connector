@@ -23,7 +23,7 @@ public class OnPlayerDisconnect {
                 if(player == null) return;
 
                 if(player.getCurrentServer().isPresent()) {
-                    PaperServer server = plugin.getProxy().findServer(player.getCurrentServer().get().getServerInfo());
+                    PaperServer server = plugin.getVirtualServer().findServer(player.getCurrentServer().get().getServerInfo());
                     server.playerLeft();
                 }
             } catch (Exception e) {

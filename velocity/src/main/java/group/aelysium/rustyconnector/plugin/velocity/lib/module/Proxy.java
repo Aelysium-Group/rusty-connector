@@ -39,6 +39,7 @@ public class Proxy {
     private String proxyWhitelist;
     private Clock serverLifecycleHeart;
     private Clock familyServerSorting;
+    private Clock tpaRequestCleaner;
     private MessageTunnel messageTunnel;
 
     public ServerFamily<? extends PaperServerLoadBalancer> getRootFamily() {
@@ -100,10 +101,10 @@ public class Proxy {
         this.messageTunnel.validate(message);
     }
 
-    public void startServerLifecycleHeart(long heartbeat, boolean shouldUnregister) {
+    private void startServerLifecycleHeart(long heartbeat, boolean shouldUnregister) {
         this.serverLifecycleHeart = new Clock(heartbeat);
 
-        serverLifecycleHeart.start((Callable<Boolean>) () -> {
+        this.serverLifecycleHeart.start((Callable<Boolean>) () -> {
             VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
             if(plugin.logger().getGate().check(GateKey.PING))
@@ -143,16 +144,16 @@ public class Proxy {
         });
     }
 
-    public void startFamilyServerSorting(long heartbeat) {
+    private void startFamilyServerSorting(long heartbeat) {
         this.familyServerSorting = new Clock(heartbeat);
 
-        familyServerSorting.start((Callable<Boolean>) () -> {
+        this.familyServerSorting.start((Callable<Boolean>) () -> {
             VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
             try {
                 if(plugin.logger().getGate().check(GateKey.FAMILY_BALANCING))
                     plugin.logger().log("Balancing families...");
 
-                for (ServerFamily<? extends PaperServerLoadBalancer> family : plugin.getProxy().getFamilyManager().dump()) {
+                for (ServerFamily<? extends PaperServerLoadBalancer> family : plugin.getVirtualServer().getFamilyManager().dump()) {
                     family.getLoadBalancer().completeSort();
                     if(plugin.logger().getGate().check(GateKey.FAMILY_BALANCING))
                         VelocityLang.FAMILY_BALANCING.send(plugin.logger(), family);
@@ -162,6 +163,20 @@ public class Proxy {
                     plugin.logger().log("Finished balancing families.");
             } catch (Exception e) {
                 return false;
+            }
+            return true;
+        });
+    }
+
+    private void startTPARequestCleaner(long heartbeat) {
+        this.tpaRequestCleaner = new Clock(heartbeat);
+
+        this.tpaRequestCleaner.start((Callable<Boolean>) () -> {
+            VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+
+            for(ServerFamily<? extends PaperServerLoadBalancer> family : plugin.getVirtualServer().getFamilyManager().dump()) {
+                if(!family.getTPAHandler().getSettings().isEnabled()) continue;
+                family.getTPAHandler().clearExpired();
             }
             return true;
         });
@@ -178,6 +193,10 @@ public class Proxy {
         if(this.serverLifecycleHeart != null) {
             this.serverLifecycleHeart.end();
             this.serverLifecycleHeart = null;
+        }
+        if(this.tpaRequestCleaner != null) {
+            this.tpaRequestCleaner.end();
+            this.tpaRequestCleaner = null;
         }
     }
 
@@ -307,21 +326,15 @@ public class Proxy {
 
         ServerInfo senderServerInfo = source.getCurrentServer().orElseThrow().getServerInfo();
 
-        PaperServer targetServer = plugin.getProxy().findServer(targetServerInfo);
+        PaperServer targetServer = plugin.getVirtualServer().findServer(targetServerInfo);
         if(targetServer == null) throw new NullPointerException();
-
-        String familyName = targetServer.getFamilyName();
 
         Callable<Boolean> queuePlayer = () -> {
             RedisMessage message = new RedisMessage(
                     this.privateKey,
                     RedisMessageType.TPA_QUEUE_PLAYER,
-                    "127.0.0.1:0"
+                    targetServer.getAddress()
             );
-
-            message.addParameter("target-family",familyName);
-            message.addParameter("target-address",targetServer.getAddress());
-            message.addParameter("target-name",targetServer.getServerInfo().getName());
             message.addParameter("target-username",target.getUsername());
             message.addParameter("source-username",source.getUsername());
 
@@ -353,7 +366,7 @@ public class Proxy {
             if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
                 VelocityLang.REGISTRATION_REQUEST.send(plugin.logger(), server.getServerInfo(), familyName);
 
-            if(plugin.getProxy().contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
+            if(plugin.getVirtualServer().contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
 
             ServerFamily<? extends PaperServerLoadBalancer> family = this.familyManager.find(familyName);
             if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
@@ -450,6 +463,7 @@ public class Proxy {
 
         if(config.isHearts_serverLifecycle_enabled()) proxy.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
         if(config.getMessageTunnel_familyServerSorting_enabled()) proxy.startFamilyServerSorting(config.getMessageTunnel_familyServerSorting_interval());
+        proxy.startTPARequestCleaner(10);
         plugin.logger().log("Finished setting up heartbeats");
 
         // Setup network whitelist

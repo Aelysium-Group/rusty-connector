@@ -16,6 +16,7 @@ public class FamilyConfig extends YAML {
     private String whitelist_name = "whitelist-template";
     private boolean tpa_enabled = false;
     private boolean tpa_ignorePlayerCap = false;
+    private int tpa_requestLifetime = 5;
 
     private FamilyConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -51,6 +52,9 @@ public class FamilyConfig extends YAML {
 
     public boolean shouldTPA_ignorePlayerCap() {
         return tpa_ignorePlayerCap;
+    }
+    public int getTPA_requestLifetime() {
+        return tpa_requestLifetime;
     }
 
     /**
@@ -96,5 +100,6 @@ public class FamilyConfig extends YAML {
 
         this.tpa_enabled = this.getNode(this.data,"tpa.enabled",Boolean.class);
         this.tpa_ignorePlayerCap = this.getNode(this.data,"tpa.ignore-player-cap",Boolean.class);
+        this.tpa_requestLifetime = this.getNode(this.data,"tpa.request-lifetime",Integer.class);
     }
 }

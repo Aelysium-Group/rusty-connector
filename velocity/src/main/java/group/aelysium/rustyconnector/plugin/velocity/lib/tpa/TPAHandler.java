@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.tpa;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +25,21 @@ public class TPAHandler {
                 .orElse(null);
     }
 
+    public TPARequest findRequestSender(Player sender) {
+        return this.requests.stream()
+                .filter(request -> request.getSender().equals(sender))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<TPARequest> findRequestsForTarget(Player target) {
+        return this.requests.stream()
+                .filter(request -> request.getTarget().equals(target))
+                .toList();
+    }
+
     public TPARequest newRequest(Player sender, Player target) {
-        TPARequest tpaRequest = new TPARequest(sender, target);
+        TPARequest tpaRequest = new TPARequest(sender, target, this.settings.getRequestLifetime());
         requests.add(tpaRequest);
 
         return tpaRequest;
@@ -33,5 +47,15 @@ public class TPAHandler {
 
     public void remove(TPARequest request) {
         this.requests.remove(request);
+    }
+
+    public void clearExpired() {
+        this.requests.stream().filter(TPARequest::expired).forEach(request -> {
+            request.getSender().sendMessage(VelocityLang.TPA_REQUEST_EXPIRED.build(request.getTarget().getUsername()));
+            this.requests.remove(request);
+        });
+    }
+    public List<TPARequest> dump() {
+        return this.requests;
     }
 }

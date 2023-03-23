@@ -5,5 +5,6 @@ enum TPARequestStatus {
     REQUESTED,
     ACCEPTED,
     DENIED,
+    EXPIRED,
     STALE
 }

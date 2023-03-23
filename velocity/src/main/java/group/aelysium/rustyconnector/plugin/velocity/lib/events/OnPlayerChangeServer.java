@@ -16,7 +16,7 @@ public class OnPlayerChangeServer {
             return EventTask.async(() -> {
                 try {
                     VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-                    PaperServer newServer = plugin.getProxy().findServer(event.getServer().getServerInfo());
+                    PaperServer newServer = plugin.getVirtualServer().findServer(event.getServer().getServerInfo());
 
                     if(newServer == null)
                         plugin.logger().log("The server that this player is joining doesn't seem to exist!");
@@ -24,7 +24,7 @@ public class OnPlayerChangeServer {
                         newServer.playerJoined();
 
                     if(event.getPreviousServer().isPresent()) {
-                        PaperServer oldServer = plugin.getProxy().findServer(event.getPreviousServer().get().getServerInfo());
+                        PaperServer oldServer = plugin.getVirtualServer().findServer(event.getPreviousServer().get().getServerInfo());
 
                         if(oldServer == null)
                             plugin.logger().log("The server that this player is leaving doesn't seem to exist!");
