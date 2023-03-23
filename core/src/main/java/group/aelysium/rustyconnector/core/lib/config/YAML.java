@@ -100,14 +100,20 @@ public class YAML {
                         "(v"+ version +" > v"+ YAML.getCurrentConfigVersion() +")");
 
             return;
-        } catch (IllegalStateException e) {
-            try { // Handles the legacy config version
-                this.getNode(this.data, "config-version", Integer.class);
+        } catch (IllegalStateException e1) {
+            try {
+                this.getNode(this.data, "version", String.class);
 
-                throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
-                        "(v1 < v"+ YAML.getCurrentConfigVersion() +") " +
-                        "Please refer to the following link for assistance with upgrading your config! "+MigrationDirections.findUpgradeDirections(1, 2));
-            } catch (IllegalStateException ignore) {}
+                throw new RuntimeException("You have set the value of `version` in config.yml to be a string! `version` must be an integer!");
+            } catch (IllegalStateException e2) {
+                try {
+                    this.getNode(this.data, "config-version", Integer.class);
+
+                    throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
+                            "(v1 < v"+ YAML.getCurrentConfigVersion() +") " +
+                            "Please refer to the following link for assistance with upgrading your config! "+MigrationDirections.findUpgradeDirections(1, 2));
+                } catch (IllegalStateException ignore) {}
+            }
         }
         throw new RuntimeException("Could not identify any config version! Make sure that `version` is being used in your `config.yml`!");
     }
