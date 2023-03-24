@@ -22,6 +22,13 @@
 - ### ✅ Works with Kubernetes
 - ### ❌ Can't tuck you into bed
 ---
+## Incoming Features
+- [x] `/tpa` command to teleport to players in other servers. (per-family)
+- [ ] Player routing based on client version.
+
+\*Checked boxes  indicate that the feature has been added and is awaiting release in an official version.
+
+---
 
 # Wiki
 ### [Home](https://github.com/Aelysium-Group/rusty-connector/wiki)
