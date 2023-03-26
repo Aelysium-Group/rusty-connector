@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.commands;
 
-import cloud.commandframework.velocity.arguments.PlayerArgument;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
@@ -326,7 +325,7 @@ public final class CommandRusty {
                                 VelocityLang.RC_SEND_USAGE.send(plugin.logger());
                                 return Command.SINGLE_SUCCESS;
                             })
-                            .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
+                            .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.greedyString())
                                     .executes(context -> {
                                         String familyName = context.getArgument("familyName", String.class);
                                         String username = context.getArgument("username", String.class);
@@ -359,7 +358,7 @@ public final class CommandRusty {
                                         VelocityLang.RC_SEND_USAGE.send(plugin.logger());
                                         return Command.SINGLE_SUCCESS;
                                     })
-                                    .then(RequiredArgumentBuilder.<CommandSource, String>argument("serverName", StringArgumentType.string())
+                                    .then(RequiredArgumentBuilder.<CommandSource, String>argument("serverName", StringArgumentType.greedyString())
                                             .executes(context -> {
                                                 String serverName = context.getArgument("serverName", String.class);
                                                 String username = context.getArgument("username", String.class);

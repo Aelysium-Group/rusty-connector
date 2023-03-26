@@ -1,5 +1,6 @@
 name: rustyconnector-paper
 version: '0.4.0'
 main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
-description: A player and server connection manager for Velocity based Minecraft Networks!
-api-version: '1.16'
+api-version: 1.16
+authors: [ Sivin ]
+commands: {}

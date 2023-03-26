@@ -50,6 +50,9 @@ public interface VelocityLang extends Lang {
             text("/rc reload", AQUA),
             text("See reload options.", DARK_GRAY),
             SPACING,
+            text("/rc send", AQUA),
+            text("Send players from families and server to other families or servers.", DARK_GRAY),
+            SPACING,
             BORDER
     );
 
