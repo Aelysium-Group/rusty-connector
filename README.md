@@ -24,9 +24,10 @@
 ---
 ## Incoming Features
 - [x] `/tpa` command to teleport to players in other servers. (per-family)
+- [x] Sending players to specific families or servers via console.
 - [ ] Player routing based on client version.
 
-\*Checked boxes  indicate that the feature has been added and is awaiting release in an official version.
+\*Checked boxes indicate that the feature has been added and is awaiting release in an official version.
 
 ---
 
