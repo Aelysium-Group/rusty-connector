@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageTunnel {
-    private boolean hasBlacklist = false;
-    private boolean hasWhitelist = false;
-    private int maxLength = 512;
+    private final boolean hasBlacklist;
+    private final boolean hasWhitelist;
+    private final int maxLength;
     private final List<InetSocketAddress> blacklist = new ArrayList<>();
     private final List<InetSocketAddress> whitelist = new ArrayList<>();
 
@@ -23,18 +23,8 @@ public class MessageTunnel {
     public void blacklistAddress(InetSocketAddress address) {
         this.blacklist.add(address);
     }
-    public void blacklistAddress(String hostname, int port) {
-        InetSocketAddress address = new InetSocketAddress(hostname, port);
-
-        this.blacklist.add(address);
-    }
 
     public void whitelistAddress(InetSocketAddress address) {
-        this.whitelist.add(address);
-    }
-    public void whitelistAddress(String hostname, int port) {
-        InetSocketAddress address = new InetSocketAddress(hostname, port);
-
         this.whitelist.add(address);
     }
 

@@ -4,10 +4,8 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 
 import java.net.InetSocketAddress;
-import java.security.InvalidAlgorithmParameterException;
 
 public class ServerUnRegHandler implements MessageHandler {
     private final RedisMessage message;
@@ -22,8 +20,6 @@ public class ServerUnRegHandler implements MessageHandler {
 
         String familyName = message.getParameter("family");
 
-        ServerFamily family = plugin.getProxy().getFamilyManager().find(familyName);
-
         InetSocketAddress address = message.getAddress();
 
         ServerInfo serverInfo = new ServerInfo(
@@ -31,6 +27,6 @@ public class ServerUnRegHandler implements MessageHandler {
                 address
         );
 
-        plugin.getProxy().unregisterServer(serverInfo,familyName, true);
+        plugin.getVirtualServer().unregisterServer(serverInfo, familyName, true);
     }
 }

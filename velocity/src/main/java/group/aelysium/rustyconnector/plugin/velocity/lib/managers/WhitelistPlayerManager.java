@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class WhitelistPlayerManager implements NodeManager<WhitelistPlayer> {
-    private Map<String, WhitelistPlayer> registeredPlayers = new HashMap<>();
+    private final Map<String, WhitelistPlayer> registeredPlayers = new HashMap<>();
 
     /**
      * Get a player via their username.

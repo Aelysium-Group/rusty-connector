@@ -125,7 +125,7 @@ public class RedisMessage {
             JsonElement assumedToAddress = messageObject.get("to");
 
             // If `from` is NOT null. We have a problem.
-            if(!(assumedFromAddress == null)) throw new IllegalArgumentException("`from` shouldn't be set for messages sent from the proxy!");
+            if(!(assumedFromAddress == null)) throw new IllegalArgumentException("Message is from another sub-server! Ignoring...");
 
             if(assumedPrivateKey == null) throw new NullPointerException("`private-key` is required in transit messages!");
             if(assumedType == null) throw new NullPointerException("`type` is required in transit messages!");
@@ -154,7 +154,7 @@ public class RedisMessage {
             JsonElement assumedToAddress = messageObject.get("to");
 
             // If `to` is NOT null. We have a problem.
-            if(!(assumedToAddress == null)) throw new IllegalArgumentException("`to` shouldn't be set for messages sent from sub-servers!");
+            if(!(assumedToAddress == null)) throw new IllegalArgumentException("Message is from proxy! Ignoring...");
 
             if(assumedPrivateKey == null) throw new NullPointerException("`private-key` is required in transit messages!");
             if(assumedType == null) throw new NullPointerException("`type` is required in transit messages!");

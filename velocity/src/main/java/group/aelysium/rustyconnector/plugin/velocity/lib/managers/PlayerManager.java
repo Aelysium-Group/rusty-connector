@@ -10,7 +10,7 @@ import java.util.UUID;
 
 // This is a node manager of Players. The Players are of type: Velocity Player.
 public class PlayerManager implements NodeManager<Player> {
-    private Map<UUID, Player> registeredPlayers = new HashMap<>();
+    private final Map<UUID, Player> registeredPlayers = new HashMap<>();
 
     /**
      * Get a player via their username.

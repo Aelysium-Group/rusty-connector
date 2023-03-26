@@ -9,7 +9,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.Velocity
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 
 import java.net.InetSocketAddress;
-import java.security.InvalidAlgorithmParameterException;
 
 public class PongHandler implements MessageHandler {
     private final RedisMessage message;
@@ -30,9 +29,9 @@ public class PongHandler implements MessageHandler {
         );
 
         try {
-            PaperServer server = plugin.getProxy().findServer(serverInfo);
+            PaperServer server = plugin.getVirtualServer().findServer(serverInfo);
             if(server == null) return;
-            plugin.getProxy().reviveServer(serverInfo);
+            plugin.getVirtualServer().reviveServer(serverInfo);
             server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
 
             if(plugin.logger().getGate().check(GateKey.PONG))

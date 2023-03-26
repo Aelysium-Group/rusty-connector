@@ -1,7 +1,5 @@
 package group.aelysium.rustyconnector.core.lib.data_messaging;
 
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
-
 import java.security.InvalidAlgorithmParameterException;
 
 public interface MessageHandler {

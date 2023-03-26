@@ -8,13 +8,15 @@ import java.util.Map;
 
 public class FamilyConfig extends YAML {
     private static Map<String, FamilyConfig> configs = new HashMap<>();
-
     private boolean loadBalancing_weighted = false;
     private String loadBalancing_algorithm = "ROUND_ROBIN";
     private boolean loadBalancing_persistence_enabled = false;
     private int loadBalancing_persistence_attempts = 5;
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
+    private boolean tpa_enabled = false;
+    private boolean tpa_ignorePlayerCap = false;
+    private int tpa_requestLifetime = 5;
 
     private FamilyConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -31,9 +33,6 @@ public class FamilyConfig extends YAML {
     public int getLoadBalancing_persistence_attempts() {
         return loadBalancing_persistence_attempts;
     }
-    public static Map<String, FamilyConfig> getConfigs() {
-        return configs;
-    }
 
     public String getLoadBalancing_algorithm() {
         return loadBalancing_algorithm;
@@ -47,13 +46,15 @@ public class FamilyConfig extends YAML {
         return whitelist_name;
     }
 
-    /**
-     * Get a whitelist config.
-     * @param key The name of the whitelist config to get.
-     * @return A whtielist config.
-     */
-    public static FamilyConfig getConfig(String key) {
-        return FamilyConfig.configs.get(key);
+    public boolean isTPA_enabled() {
+        return tpa_enabled;
+    }
+
+    public boolean shouldTPA_ignorePlayerCap() {
+        return tpa_ignorePlayerCap;
+    }
+    public int getTPA_requestLifetime() {
+        return tpa_requestLifetime;
     }
 
     /**
@@ -75,8 +76,6 @@ public class FamilyConfig extends YAML {
         configs = new HashMap<>();
     }
 
-
-    @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
         this.loadBalancing_weighted = this.getNode(this.data,"load-balancing.weighted",Boolean.class);
         this.loadBalancing_algorithm = this.getNode(this.data,"load-balancing.algorithm",String.class);
@@ -98,5 +97,9 @@ public class FamilyConfig extends YAML {
             throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
+
+        this.tpa_enabled = this.getNode(this.data,"tpa.enabled",Boolean.class);
+        this.tpa_ignorePlayerCap = this.getNode(this.data,"tpa.ignore-player-cap",Boolean.class);
+        this.tpa_requestLifetime = this.getNode(this.data,"tpa.request-lifetime",Integer.class);
     }
 }

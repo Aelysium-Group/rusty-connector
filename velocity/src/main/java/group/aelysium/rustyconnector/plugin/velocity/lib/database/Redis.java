@@ -25,9 +25,9 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
     @Override
     public void onMessage(String rawMessage) {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-        MessageCache messageCache = plugin.getProxy().getMessageCache();
+        MessageCache messageCache = plugin.getVirtualServer().getMessageCache();
 
-        // If the proxy doesn't have a message cache (maybe it's in the middle of a reload.)
+        // If the proxy doesn't have a message cache (maybe it's in the middle of a reload.
         // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
         if(messageCache == null) messageCache = new MessageCache(1);
 
@@ -35,9 +35,9 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
         try {
             RedisMessage message = RedisMessage.create(rawMessage, MessageOrigin.PROXY, null);
             try {
-                plugin.getProxy().validateMessage(message);
+                plugin.getVirtualServer().validateMessage(message);
 
-                if (!(plugin.getProxy().validatePrivateKey(message.getKey())))
+                if (!(plugin.getVirtualServer().validatePrivateKey(message.getKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
@@ -61,7 +61,7 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
             if(plugin.logger().getGate().check(GateKey.SAVE_TRASH_MESSAGES))
                 cachedMessage.sentenceMessage(MessageStatus.TRASHED, e.getMessage());
             else
-                plugin.getProxy().getMessageCache().removeMessage(cachedMessage.getSnowflake());
+                plugin.getVirtualServer().getMessageCache().removeMessage(cachedMessage.getSnowflake());
 
             if(!plugin.logger().getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 

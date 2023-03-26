@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import net.kyori.adventure.text.Component;
 
 import java.util.Date;
 
@@ -57,4 +58,10 @@ public interface PaperLang extends Lang {
             SPACING,
             BORDER
     );
+
+    ParameterizedMessage1<String> TPA_FAILED_TELEPORT = username -> join(
+            text("Something prevented you from teleporting to "+username+"!",RED)
+    );
+
+    Component TPA_COMPLETE = text("Teleport completed!",GREEN);
 }

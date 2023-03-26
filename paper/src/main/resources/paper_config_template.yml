@@ -44,10 +44,12 @@
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ###########################################################################################################
 #
-# Do not touch this value, it might totally mess up your entire plugin!
-# And that's the last thing anyone wants :)
+# If you need help updating your configs from an older version;
+# take a look at our config migration docs:
 #
-config-version: 1
+# https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
+#
+version: 2
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -68,6 +70,8 @@ server:
 # This field is required.
 # The name of this server.
 # This is mostly used to help you identify this server when reading your proxy logs.
+#
+# Names between multiple servers are allowed to be duplicate, though this is not suggested.
 #
     name: ""
 

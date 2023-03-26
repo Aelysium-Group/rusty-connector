@@ -8,7 +8,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperSer
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import net.kyori.adventure.text.Component;
 
-import java.net.MalformedURLException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
@@ -30,7 +29,7 @@ public class SendPlayerHandler implements MessageHandler {
         if(player == null) return;
 
         try {
-            ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getProxy().getFamilyManager().find(familyName);
+            ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getVirtualServer().getFamilyManager().find(familyName);
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
             family.connect(player);

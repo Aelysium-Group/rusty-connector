@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -23,11 +22,10 @@ public class Permission {
             /*
              * Check for wildcard variants of permissions like: rustyconnector.* or rustyconnector.admin.*
              */
-            String adjustedNode = nodeToLower.replaceFirst("[A-z\\_\\-]*$","*");
+            String adjustedNode = nodeToLower.replaceFirst("[A-z_\\-]*$","*");
             if(player.hasPermission(adjustedNode)) return true;
         }
-        if(player.hasPermission("rustyconnector.*")) return true; // A hardcoded "master" permission that should always grant permission.
-        return false;
+        return player.hasPermission("rustyconnector.*"); // A hardcoded "master" permission that should always grant permission.
     }
 
     /**
@@ -39,11 +37,10 @@ public class Permission {
      * Insertion points are replaced with the defined values in the order that they are defined.
      * @param pattern The pattern to change
      * @param insertions The insertions to add
-     * @return
      */
     public static String constructNode(String pattern, String... insertions) {
         for (String node : insertions)
-            pattern = pattern.replaceFirst("\\<[A-z\\s]*\\>",node);
+            pattern = pattern.replaceFirst("<[A-z\\s]*>",node);
         return pattern;
     }
 }

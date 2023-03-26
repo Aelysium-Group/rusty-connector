@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.config;
 
+import group.aelysium.rustyconnector.core.lib.Version;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
@@ -8,6 +9,9 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class YAML {
+    // Plugin version does not necessarily equal the current plugin version.
+    // Instead, when the configs are updated, pluginVersion should be set to the current plugin version.
+    protected static int currentVersion = 2;
     protected File configPointer;
     protected String template;
     protected ConfigurationNode data;
@@ -19,6 +23,9 @@ public class YAML {
         this.template = template;
     }
 
+    public static int getCurrentConfigVersion() {
+        return currentVersion;
+    }
     public String getName() {
         return this.configPointer.getName();
     }
@@ -72,5 +79,42 @@ public class YAML {
                 .setIndent(2)
                 .setPath(file.toPath())
                 .build().load();
+    }
+
+    /**
+     * Process the version of this config.
+     * @throws UnsupportedClassVersionError If the config version doesn't match the plugin version.
+     * @throws RuntimeException If the config version is invalid or can't be processed.
+     */
+    public void processVersion() {
+        try {
+            Integer version = this.getNode(this.data, "version", Integer.class);
+
+            if(YAML.getCurrentConfigVersion() > version)
+                throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
+                       "(v"+ version +" < v"+ YAML.getCurrentConfigVersion() +") " +
+                       "Please refer to the following link for assistance with upgrading your config! "+MigrationDirections.findUpgradeDirections(version, YAML.getCurrentConfigVersion()));
+
+            if(YAML.getCurrentConfigVersion() != version)
+                throw new UnsupportedClassVersionError("Your configuration file is from a version of RustyConnector that is newer than the version you currently have installed! We will not provide support for downgrading RustyConnector configs! " +
+                        "(v"+ version +" > v"+ YAML.getCurrentConfigVersion() +")");
+
+            return;
+        } catch (IllegalStateException e1) {
+            try {
+                this.getNode(this.data, "version", String.class);
+
+                throw new RuntimeException("You have set the value of `version` in config.yml to be a string! `version` must be an integer!");
+            } catch (IllegalStateException e2) {
+                try {
+                    this.getNode(this.data, "config-version", Integer.class);
+
+                    throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
+                            "(v1 < v"+ YAML.getCurrentConfigVersion() +") " +
+                            "Please refer to the following link for assistance with upgrading your config! "+MigrationDirections.findUpgradeDirections(1, 2));
+                } catch (IllegalStateException ignore) {}
+            }
+        }
+        throw new RuntimeException("Could not identify any config version! Make sure that `version` is being used in your `config.yml`!");
     }
 }

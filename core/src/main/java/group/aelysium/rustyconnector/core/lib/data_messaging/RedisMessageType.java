@@ -22,8 +22,7 @@ public enum RedisMessageType {
     REG_FAMILY, // Proxy > Server | An outbound request for servers of a particular family to register themselves
     REG, // Server > Proxy | A server's response to the REG_OUT message. This is also used when a server boots up and needs to register itself.
     UNREG, // Server > Proxy | A server's message to the proxy when it needs to un-register itself.
-
     SEND, // Server > Proxy | Request to send a player to a family
     RESPONSE, // Server >< Proxy | A message to be returned in response to a request made
-
+    TPA_QUEUE_PLAYER, // Add a player's teleportation to the TPA queue on a specific server.
 }

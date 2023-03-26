@@ -62,7 +62,7 @@ public class PaperServer implements Server {
     public void register(String familyName) throws Exception {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
-        this.registeredServer = plugin.getProxy().registerServer(this, familyName);
+        this.registeredServer = plugin.getVirtualServer().registerServer(this, familyName);
 
         this.familyName = familyName;
     }
@@ -105,9 +105,7 @@ public class PaperServer implements Server {
                 Permission.constructNode("rustyconnector.<family name>.softCapBypass",this.familyName)
         )) return true; // If the player has permission to bypass soft-player-cap, let them in.
 
-        if(this.isFull()) return false; // If the player count is at soft-player-cap
-
-        return true; // If the player hasn't reached soft-player-bypass
+        return !this.isFull();
     }
 
     @Override
@@ -150,7 +148,7 @@ public class PaperServer implements Server {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
-        ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getProxy().getFamilyManager().find(this.familyName);
+        ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getVirtualServer().getFamilyManager().find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;

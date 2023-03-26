@@ -9,7 +9,6 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.WhitelistPlayer;
 import net.kyori.adventure.text.Component;
 
 public class OnPlayerChooseInitialServer {
@@ -24,7 +23,7 @@ public class OnPlayerChooseInitialServer {
         return EventTask.async(() -> {
             try {
                 // Check if there's a whitelist, run it if there is.
-                Whitelist whitelist = plugin.getProxy().getProxyWhitelist();
+                Whitelist whitelist = plugin.getVirtualServer().getProxyWhitelist();
                 if(whitelist != null) {
                     if (!whitelist.validate(player)) {
                         plugin.logger().log("Player isn't whitelisted on the proxy whitelist! Kicking...");
@@ -33,7 +32,7 @@ public class OnPlayerChooseInitialServer {
                     }
                 }
 
-                ServerFamily<? extends PaperServerLoadBalancer> rootFamily = plugin.getProxy().getRootFamily();
+                ServerFamily<? extends PaperServerLoadBalancer> rootFamily = plugin.getVirtualServer().getRootFamily();
 
                 rootFamily.connect(player, event);
             } catch (Exception e) {

@@ -6,12 +6,10 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.intellij.lang.annotations.RegExp;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
@@ -75,10 +73,6 @@ public class DefaultConfig extends YAML {
 
     public String getPrivate_key() {
         return this.private_key;
-    }
-
-    public String getPublic_key() {
-        return this.public_key;
     }
 
     public String getRoot_family() {
@@ -168,7 +162,11 @@ public class DefaultConfig extends YAML {
     public void register() throws IllegalStateException, NoOutputException {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
-        // General
+        try {
+            this.processVersion();
+        } catch (Exception | UnsupportedClassVersionError e) {
+            throw new IllegalStateException(e.getMessage());
+        }
 
         try {
             this.private_key = this.getNode(this.data,"private-key",String.class);

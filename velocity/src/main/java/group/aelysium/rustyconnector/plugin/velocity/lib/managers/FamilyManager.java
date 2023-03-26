@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
 
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 
@@ -15,7 +14,7 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
     /**
      * Get a family via its name.
      * @param name The name of the family to get.
-     * @return A family.
+     * @return A family or `null` if there is no family with the defined name.
      */
     @Override
     public ServerFamily<? extends PaperServerLoadBalancer> find(String name) {

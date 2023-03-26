@@ -8,11 +8,8 @@
 # | and does not appear in your console when               #
 # | something happens!                                     #
 #                                                          #
-# | One of our biggest pet peeves is plugins that default  #
-# | with everything turned on, and then you have to spend  #
-# | hours to turn it all off. Because of this, everything  #
-# | in this config is off by default except for            #
-# | certain important messages,                            #
+# | Everything in this config is off by default            #
+# | except for certain important messages.                 #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

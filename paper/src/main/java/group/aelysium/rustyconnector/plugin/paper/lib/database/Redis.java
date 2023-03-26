@@ -12,6 +12,7 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.PingHandler;
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegAllHandler;
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegFamilyHandler;
+import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.TPAQueuePlayerHandler;
 
 import javax.naming.AuthenticationException;
 import java.net.InetSocketAddress;
@@ -23,6 +24,7 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
     public void onMessage(String rawMessage) {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
         CacheableMessage cachedMessage = plugin.getVirtualServer().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
+
         try {
             RedisMessage message = RedisMessage.create(rawMessage, MessageOrigin.SERVER, plugin.getVirtualServer().getAddress());
             try {
@@ -36,18 +38,8 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
                 plugin.logger().error("Incoming message from: " + message.getAddress().toString() + " contains an invalid private key! Throwing away...");
                 plugin.logger().log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
             }
-        } catch (NullPointerException e) {
-            cachedMessage.sentenceMessage(MessageStatus.PARSING_ERROR);
-
-            /* TODO: Uncomment and implement proper logging handling
-            PaperRustyConnector plugin = PaperRustyConnector.getInstance();
-
-            plugin.logger().error("There was an issue handling the incoming message! Throwing away...",e);
-            plugin.logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
-            */
         } catch (Exception e) {
             cachedMessage.sentenceMessage(MessageStatus.TRASHED);
-
             /* TODO: Uncomment and implement proper logging handling
             PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
@@ -70,6 +62,12 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
                     new ServerRegFamilyHandler(message).execute();
                 }
                 case PING -> new PingHandler(message).execute();
+                case TPA_QUEUE_PLAYER -> {
+                    message.setToParameter(object, "target-username");
+                    message.setToParameter(object, "source-username");
+
+                    new TPAQueuePlayerHandler(message).execute();
+                }
             }
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);

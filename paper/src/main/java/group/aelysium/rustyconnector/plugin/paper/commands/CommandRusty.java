@@ -10,6 +10,8 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMess
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;

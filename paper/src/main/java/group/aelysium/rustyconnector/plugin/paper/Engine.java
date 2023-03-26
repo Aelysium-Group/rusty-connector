@@ -2,13 +2,15 @@ package group.aelysium.rustyconnector.plugin.paper;
 
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
+import group.aelysium.rustyconnector.core.lib.config.MigrationDirections;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.lib.PaperServer;
 import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerJoin;
+import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerLeave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.ConsoleCommandSender;
 
 import java.io.File;
 import java.util.function.Function;
@@ -16,6 +18,8 @@ import java.util.function.Function;
 public class Engine {
     public static boolean start() {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+
+        MigrationDirections.init();
 
         if(!initConfigs(plugin)) return false;
         if(!initCommands(plugin)) return false;
@@ -79,6 +83,8 @@ public class Engine {
     }
 
     private static boolean initEvents(PaperRustyConnector plugin) {
+        plugin.getServer().getPluginManager().registerEvents(new OnPlayerJoin(), plugin);
+        plugin.getServer().getPluginManager().registerEvents(new OnPlayerLeave(), plugin);
         return true;
     }
 }

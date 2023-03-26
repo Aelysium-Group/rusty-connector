@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
-import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.core.lib.config.MigrationDirections;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
+import group.aelysium.rustyconnector.plugin.velocity.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
@@ -26,6 +26,8 @@ public class Engine {
     public static boolean start() {
         VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
 
+        MigrationDirections.init();
+
         if(!initConfigs(plugin)) return false;
         if(!initCommands(plugin)) return false;
         if(!initEvents(plugin)) return false;
@@ -37,7 +39,7 @@ public class Engine {
             plugin.logger().log("Issuing boot commands...");
             defaultConfig.getBootCommands_commands().forEach(command -> {
                 plugin.logger().log(">>> "+command);
-                plugin.getProxy().dispatchCommand(command);
+                plugin.getVirtualServer().dispatchCommand(command);
             });
         }
 
@@ -56,8 +58,8 @@ public class Engine {
             FamilyConfig.empty();
             LoggerConfig.empty();
 
-            plugin.getProxy().killHeartbeats();
-            plugin.getProxy().killRedis();
+            plugin.getVirtualServer().killHeartbeats();
+            plugin.getVirtualServer().killRedis();
             plugin.unsetProxy();
 
             plugin.getVelocityServer().getCommandManager().unregister("rc");
@@ -97,13 +99,21 @@ public class Engine {
     private static boolean initCommands(VelocityRustyConnector plugin) {
         CommandManager commandManager = plugin.getVelocityServer().getCommandManager();
         try {
-            CommandMeta meta = commandManager.metaBuilder("rustyconnector")
-                    .aliases("rusty", "rc")
-                    .aliases("/rustyconnector","/rusty","/rc") // Add slash varients so that they can be used in console as well
-                    .build();
-            BrigadierCommand command = CommandRusty.create();
+            commandManager.register(
+                    commandManager.metaBuilder("rustyconnector")
+                            .aliases("rusty", "rc")
+                            .aliases("/rustyconnector","/rusty","/rc") // Add slash variants so that they can be used in console as well
+                            .build(),
+                    CommandRusty.create()
+                    );
 
-            commandManager.register(meta, command);
+            commandManager.unregister("server");
+
+            commandManager.register(
+                    commandManager.metaBuilder("tpa")
+                            .build(),
+                    CommandTPA.create()
+            );
 
             return true;
         } catch (Exception e) {

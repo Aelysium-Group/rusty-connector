@@ -142,7 +142,6 @@ public class LoggerConfig extends YAML {
         config = null;
     }
 
-    @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
         this.saveTrashedMessages = this.getNode(this.data,"save-trashed-messages",Boolean.class);
 

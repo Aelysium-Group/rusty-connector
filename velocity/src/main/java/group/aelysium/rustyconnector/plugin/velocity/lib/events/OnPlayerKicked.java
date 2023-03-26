@@ -21,7 +21,7 @@ public class OnPlayerKicked {
         return EventTask.async(() -> {
             try {
                 if(player.getCurrentServer().isPresent()) {
-                    PaperServer server = plugin.getProxy().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
+                    PaperServer server = plugin.getVirtualServer().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
                     if (server == null) return;
                     server.playerLeft();
                 }

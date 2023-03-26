@@ -6,6 +6,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Proxy;
 import group.aelysium.rustyconnector.core.RustyConnector;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 
 public class VelocityRustyConnector implements RustyConnector {
+    private final Metrics.Factory metricsFactory;
     private static RustyConnector instance;
     private Proxy proxy;
     private final ProxyServer server;
@@ -34,14 +36,15 @@ public class VelocityRustyConnector implements RustyConnector {
     }
 
     public static VelocityRustyConnector getInstance() { return (VelocityRustyConnector) instance; }
-    public Proxy getProxy() { return this.proxy; }
+    public Proxy getVirtualServer() { return this.proxy; }
     public ProxyServer getVelocityServer() { return this.server; }
 
     @Inject
-    public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
+    public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder, Metrics.Factory metricsFactory) {
         this.server = server;
         this.logger = new PluginLogger(logger);
         this.dataFolder = dataFolder.toFile();
+        this.metricsFactory = metricsFactory;
     }
 
     @Subscribe
@@ -56,6 +59,9 @@ public class VelocityRustyConnector implements RustyConnector {
 
     public void init() {
         instance = this;
+
+        metricsFactory.make(this, 17972);
+
         if(!Engine.start()) uninit();
     }
 
