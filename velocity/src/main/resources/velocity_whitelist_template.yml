@@ -123,8 +123,8 @@ countries:
 # | to join this family, enable this value!                #
 #                                                          #
 #   rustyconnector.whitelist.<whitelist name>              #
-# | Gives a player permission to pass the
-# | specific whitelist.
+# | Gives a player permission to pass the                  #
+# | specific whitelist.                                    #
 #                                                          #
 #   rustyconnector.whitelist.*                             #
 # | Gives a player permission to pass all whitelists.      #
