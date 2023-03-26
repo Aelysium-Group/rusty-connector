@@ -53,23 +53,6 @@ public interface VelocityLang extends Lang {
             BORDER
     );
 
-    Message RC_SERVER_COMMAND_CLIENT = () -> join(
-            Lang.newlines(),
-            BORDER,
-            SPACING,
-            text("The /server command is not supported on this network!",RED),
-            SPACING,
-            BORDER
-    );
-    Message RC_SERVER_COMMAND_CONSOLE = () -> join(
-            Lang.newlines(),
-            BORDER,
-            SPACING,
-            text("The /server command is not supported on this network!",RED),
-            SPACING,
-            BORDER
-    );
-
     Message RC_MESSAGE_ROOT_USAGE = () -> join(
             Lang.newlines(),
             BORDER,
@@ -85,6 +68,37 @@ public interface VelocityLang extends Lang {
             text("Lists all currently cached messages! As new messages get cached, older ones will be pushed out of the cache.", DARK_GRAY),
             SPACING,
             BORDER
+    );
+
+    Message RC_SEND_USAGE = () -> join(
+            Lang.newlines(),
+            BORDER,
+            SPACING,
+            WORDMARK_USAGE.build().color(AQUA),
+            SPACING,
+            BORDER,
+            SPACING,
+            text("/rc send <username> <family name>", GOLD),
+            text("Sends a player from one family to another!", DARK_GRAY),
+            BORDER,
+            SPACING,
+            text("/rc send server <username> <server name>", GOLD),
+            text("Force a player to connect to a specific server on the proxy. This bypasses player caps and family whitelists.", DARK_GRAY),
+            text("If you have multiple servers with the same name, this feature may send players to a server other than the one you intended.", DARK_GRAY),
+            SPACING,
+            BORDER
+    );
+    ParameterizedMessage1<String> RC_SEND_NO_PLAYER = username -> join(
+            Lang.newlines(),
+            text("There is no online player with the username: "+username+"!", RED)
+    );
+    ParameterizedMessage1<String> RC_SEND_NO_FAMILY = familyName -> join(
+            Lang.newlines(),
+            text("There is no family with the name: "+familyName+"!", RED)
+    );
+    ParameterizedMessage1<String> RC_SEND_NO_SERVER = serverName -> join(
+            Lang.newlines(),
+            text("There is no server with the name: "+serverName+"!", RED)
     );
 
     Message RC_MESSAGE_GET_USAGE = () -> join(

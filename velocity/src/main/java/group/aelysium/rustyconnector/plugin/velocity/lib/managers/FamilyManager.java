@@ -14,7 +14,7 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
     /**
      * Get a family via its name.
      * @param name The name of the family to get.
-     * @return A family.
+     * @return A family or `null` if there is no family with the defined name.
      */
     @Override
     public ServerFamily<? extends PaperServerLoadBalancer> find(String name) {

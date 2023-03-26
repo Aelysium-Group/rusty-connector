@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.commands;
 
+import cloud.commandframework.velocity.arguments.PlayerArgument;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
@@ -10,6 +11,8 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
@@ -17,6 +20,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 
@@ -310,6 +314,80 @@ public final class CommandRusty {
                                 }
                                 return 0;
                             })
+                    )
+            )
+            .then(LiteralArgumentBuilder.<CommandSource>literal("send")
+                    .executes(context -> {
+                        VelocityLang.RC_SEND_USAGE.send(plugin.logger());
+                        return Command.SINGLE_SUCCESS;
+                    })
+                    .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
+                            .executes(context -> {
+                                VelocityLang.RC_SEND_USAGE.send(plugin.logger());
+                                return Command.SINGLE_SUCCESS;
+                            })
+                            .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
+                                    .executes(context -> {
+                                        String familyName = context.getArgument("familyName", String.class);
+                                        String username = context.getArgument("username", String.class);
+
+                                        Player player = plugin.getVelocityServer().getPlayer(username).orElse(null);
+                                        if(player == null) {
+                                            plugin.logger().send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
+                                            return Command.SINGLE_SUCCESS;
+                                        }
+
+                                        ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getVirtualServer().getFamilyManager().find(familyName);
+                                        if(family == null) {
+                                            plugin.logger().send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
+                                            return Command.SINGLE_SUCCESS;
+                                        }
+
+                                        family.connect(player);
+
+                                        return Command.SINGLE_SUCCESS;
+                                    })
+                            )
+                    )
+                    .then(LiteralArgumentBuilder.<CommandSource>literal("server")
+                            .executes(context -> {
+                                VelocityLang.RC_SEND_USAGE.send(plugin.logger());
+                                return Command.SINGLE_SUCCESS;
+                            })
+                            .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
+                                    .executes(context -> {
+                                        VelocityLang.RC_SEND_USAGE.send(plugin.logger());
+                                        return Command.SINGLE_SUCCESS;
+                                    })
+                                    .then(RequiredArgumentBuilder.<CommandSource, String>argument("serverName", StringArgumentType.string())
+                                            .executes(context -> {
+                                                String serverName = context.getArgument("serverName", String.class);
+                                                String username = context.getArgument("username", String.class);
+
+                                                Player player = plugin.getVelocityServer().getPlayer(username).orElse(null);
+                                                if(player == null) {
+                                                    plugin.logger().send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
+                                                    return Command.SINGLE_SUCCESS;
+                                                }
+
+                                                RegisteredServer registeredServer = plugin.getVelocityServer().getServer(serverName).orElse(null);
+                                                if(registeredServer == null) {
+                                                    plugin.logger().send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
+                                                    return Command.SINGLE_SUCCESS;
+                                                }
+
+                                                PaperServer server = plugin.getVirtualServer().findServer(registeredServer.getServerInfo());
+                                                if(server == null) {
+                                                    plugin.logger().send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
+                                                    return Command.SINGLE_SUCCESS;
+                                                }
+
+                                                server.connect(player);
+
+                                                return Command.SINGLE_SUCCESS;
+                                            })
+                                    )
+                            )
                     )
             )
             .build();
