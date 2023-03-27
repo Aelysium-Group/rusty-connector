@@ -4,7 +4,7 @@
 ![PaperMC](https://badgen.net/badge/Paper/1.16%20-%201.19/F96854?icon=telegram)
 ![Maven](https://badgen.net/badge/maven/passing/green?icon=github)
 [![Aelysium](https://badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
-[![Build](https://badgen.net/badge/Latest%20Stable%20Release/v0.3.0%20(Beta)/orange?icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
+[![Build](https://badgen.net/badge/Latest%20Stable%20Release/v0.4.0%20(Beta)/orange?icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
 
 # [Support](https://join.aelysium.group/)  |  [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)  |  [Download](https://github.com/Aelysium-Group/rusty-connector/releases)  |  [Report Bugs](https://join.aelysium.group/)
 
@@ -18,13 +18,12 @@
 - ### ✅ Automatically unregister frozen servers from the proxy
 - ### ✅ Set soft and hard player limits for servers
 - ### ✅ Whitelist players based on permission, Username, UUID, or IP Address
+- ### ✅ Allow players to /tpa between servers
 - ### ✅ Works with LuckPerms-Velocity
 - ### ✅ Works with Kubernetes
 - ### ❌ Can't tuck you into bed
 ---
 ## Incoming Features
-- [x] `/tpa` command to teleport to players in other servers. (per-family)
-- [x] Sending players to specific families or servers via console.
 - [ ] Player routing based on client version.
 
 \*Checked boxes indicate that the feature has been added and is awaiting release in an official version.
