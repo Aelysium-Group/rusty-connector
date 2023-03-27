@@ -23,8 +23,9 @@
 - ### ✅ Works with Kubernetes
 - ### ❌ Can't tuck you into bed
 ---
-## Incoming Features
+## Incoming Features/Changes
 - [ ] Player routing based on client version.
+- [ ] Propper Redis Connection Pooling (PR's welcome!)
 
 \*Checked boxes indicate that the feature has been added and is awaiting release in an official version.
 
