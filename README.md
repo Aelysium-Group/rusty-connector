@@ -40,8 +40,9 @@
   - [Families](https://github.com/Aelysium-Group/rusty-connector/wiki/Family)
   - [Whitelists](https://github.com/Aelysium-Group/rusty-connector/wiki/Whitelist)
   - [Load Balancing](https://github.com/Aelysium-Group/rusty-connector/wiki/Family#load-balancing)
-### Configs
-  - [RC-Velocity](https://github.com/Aelysium-Group/rusty-connector/wiki/RC-Velocity-Configs)
-  - [RC-Paper](https://github.com/Aelysium-Group/rusty-connector/wiki/RC-Paper-Configs)
 ### [Commands](https://github.com/Aelysium-Group/rusty-connector/wiki/Commands)
 ### [Permissions](https://github.com/Aelysium-Group/rusty-connector/wiki/Permissions)
+### [Configs](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration)
+  - [RC-Velocity](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-v2#rc-velocity)
+  - [RC-Paper](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-v2#rc-paper)
+### [Config Migration](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration)
