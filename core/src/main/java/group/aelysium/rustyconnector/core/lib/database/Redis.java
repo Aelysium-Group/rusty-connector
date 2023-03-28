@@ -27,9 +27,6 @@ public class Redis {
 
     public Redis() {}
 
-    /**
-     * Sets the connection
-     */
     public void setConnection(String host, int port, String password, String dataChannel) {
         this.host = host;
         this.port = port;
@@ -37,10 +34,8 @@ public class Redis {
         this.dataChannel = dataChannel;
     }
 
-    /**
-     * Tests the connection to the provided Redis server
-     */
-    public void connect(RustyConnector plugin) throws ExceptionInInitializerError{
+
+    public void connect(RustyConnector plugin) throws ExceptionInInitializerError {
         try{
             if(!(this.client == null)) return;
 
@@ -50,6 +45,7 @@ public class Redis {
 
             final JedisPoolConfig poolConfig = new JedisPoolConfig();
             this.pool = new JedisPool(poolConfig, this.host, this.port, 0);
+
             this.jedisSubscriber = this.pool.getResource();
             this.jedisSubscriber.auth(this.password);
             this.subscriber = new Subscriber(plugin);
@@ -72,9 +68,6 @@ public class Redis {
         this.client.publish(this.dataChannel, message);
     }
 
-    /**
-     * When redis disconnects
-     */
     public void disconnect() throws ExceptionInInitializerError {
         try {
             this.subscriber.unsubscribe();
@@ -121,6 +114,5 @@ public class Redis {
      * @param parameters Additional parameters
      * @throws IllegalArgumentException If message parameters contains parameters: `pk`, `type`, or `ip`
      */
-    public void sendMessage(String privateKey, RedisMessageType type, InetSocketAddress address, Map<String, String> parameters) throws IllegalArgumentException {
-    }
+    public void sendMessage(String privateKey, RedisMessageType type, InetSocketAddress address, Map<String, String> parameters) throws IllegalArgumentException {}
 }

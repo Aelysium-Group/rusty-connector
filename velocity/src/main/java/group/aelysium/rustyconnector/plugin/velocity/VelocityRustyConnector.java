@@ -27,11 +27,11 @@ public class VelocityRustyConnector implements RustyConnector {
      * Set the proxy for Velocity. Once this is set it cannot be changed.
      * @param proxy The proxy to set.
      */
-    public void setProxy(Proxy proxy) throws IllegalStateException {
+    public void setVirtualServer(Proxy proxy) throws IllegalStateException {
         if(this.proxy != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
         this.proxy = proxy;
     }
-    public void unsetProxy() {
+    public void unsetVirtualServer() {
         this.proxy = null;
     }
 
@@ -54,7 +54,11 @@ public class VelocityRustyConnector implements RustyConnector {
 
     @Subscribe
     public void onUnload(ProxyShutdownEvent event) {
-        this.uninit();
+        try {
+            this.uninit();
+        } catch (Exception e) {
+            this.logger().log("RustyConnector: " + e.getMessage());
+        }
     }
 
     public void init() {

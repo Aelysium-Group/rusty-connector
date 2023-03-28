@@ -168,7 +168,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text(""),
+                            text("RustyConnector:"),
                             build()
                     )
             );
@@ -181,7 +181,7 @@ public interface Lang {
             sender.send(
                     join(
                             JoinConfiguration.separator(newline()),
-                            text(""),
+                            text("RustyConnector:"),
                             build(arg1)
                     )
             );
@@ -194,7 +194,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text(""),
+                            text("RustyConnector:"),
                             build(arg1, arg2)
                     )
             );
@@ -207,7 +207,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text(""),
+                            text("RustyConnector:"),
                             build(arg1, arg2, arg3)
                     )
             );
@@ -220,7 +220,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text(""),
+                            text("RustyConnector:"),
                             build(arg1, arg2, arg3, arg4)
                     )
             );

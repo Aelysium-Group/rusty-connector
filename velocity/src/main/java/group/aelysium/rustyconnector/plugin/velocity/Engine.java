@@ -58,9 +58,11 @@ public class Engine {
             FamilyConfig.empty();
             LoggerConfig.empty();
 
-            plugin.getVirtualServer().killHeartbeats();
-            plugin.getVirtualServer().killRedis();
-            plugin.unsetProxy();
+            if(plugin.getVirtualServer() != null) {
+                plugin.getVirtualServer().killHeartbeats();
+                plugin.getVirtualServer().killRedis();
+                plugin.unsetVirtualServer();
+            }
 
             plugin.getVelocityServer().getCommandManager().unregister("rc");
 
@@ -86,7 +88,7 @@ public class Engine {
             loggerConfig.register();
             PluginLogger.init(loggerConfig);
 
-            plugin.setProxy(Proxy.init(defaultConfig));
+            plugin.setVirtualServer(Proxy.init(defaultConfig));
 
             return true;
         } catch (NoOutputException ignore) {

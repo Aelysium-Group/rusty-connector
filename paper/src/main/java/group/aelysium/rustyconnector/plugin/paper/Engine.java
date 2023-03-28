@@ -29,12 +29,13 @@ public class Engine {
     }
     public static void stop() {
         PaperRustyConnector plugin = PaperRustyConnector.getInstance();
-
-        plugin.getVirtualServer().unregisterFromProxy();
-
         DefaultConfig.empty();
 
-        plugin.getVirtualServer().killRedis();
+        if(plugin.getVirtualServer() != null) {
+            plugin.getVirtualServer().unregisterFromProxy();
+
+            plugin.getVirtualServer().killRedis();
+        }
 
         plugin.getCommandManager().deleteRootCommand("rc");
     }
@@ -47,7 +48,7 @@ public class Engine {
             }
             defaultConfig.register();
 
-            plugin.setServer(PaperServer.init(defaultConfig));
+            plugin.setVirtualServer(PaperServer.init(defaultConfig));
 
             Lang.WORDMARK_RUSTY_CONNECTOR.send(plugin.logger());
 

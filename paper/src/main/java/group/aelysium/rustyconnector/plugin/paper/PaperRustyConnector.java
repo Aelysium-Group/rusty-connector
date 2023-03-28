@@ -15,7 +15,6 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
     private PluginLogger logger;
     private PaperServer server;
     private PaperCommandManager<CommandSender> commandManager;
-    public boolean hasRegistered = false;
 
     public static PaperRustyConnector getInstance() { return PaperRustyConnector.instance; }
 
@@ -40,7 +39,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
      * Set the PaperServer handler for the plugin. Once this is set it cannot be changed.
      * @param server The PaperServer to set.
      */
-    public void setServer(PaperServer server) throws IllegalStateException {
+    public void setVirtualServer(PaperServer server) throws IllegalStateException {
         if(this.server != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
         this.server = server;
     }
@@ -57,7 +56,11 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, R
 
     @Override
     public void onDisable() {
-        Engine.stop();
+        try {
+            Engine.stop();
+        } catch (Exception e) {
+            this.logger().log("RustyConnector: " + e.getMessage());
+        }
     }
 
     @Override
