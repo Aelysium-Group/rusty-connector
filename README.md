@@ -24,10 +24,12 @@
 - ### ❌ Can't tuck you into bed
 ---
 ## Incoming Features/Changes
-- [ ] Player routing based on client version.
+- [ ] Player routing based on client version
 - [ ] Propper Redis Connection Pooling (PR's welcome!)
+- [ ] Better error and overall handling for Redis
+- [ ] Teleport players to specific coordinates on other servers
 
-\*Checked boxes indicate that the feature has been added and is awaiting release in an official version.
+\*Checked boxes indicate that the feature has been added and is awaiting release in an official version. There is no promise on when these features may be added.
 
 ---
 
