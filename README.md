@@ -2,6 +2,7 @@
 
 ![Velocity](https://badgen.net/badge/Velocity/3.1.1%20-%203.2.0/1197d1?icon=dockbit)
 ![PaperMC](https://badgen.net/badge/Paper/1.16%20-%201.19/F96854?icon=telegram)
+![Folia](https://badgen.net/badge/Folia/Coming%20Soon!/e004bc?icon=maven)
 ![Maven](https://badgen.net/badge/maven/passing/green?icon=github)
 [![Aelysium](https://badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
 [![Build](https://badgen.net/badge/Latest%20Stable%20Release/v0.4.0%20(Beta)/orange?icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
