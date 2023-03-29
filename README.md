@@ -24,6 +24,7 @@
 - ### ❌ Can't tuck you into bed
 ---
 ## Incoming Features/Changes
+- [ ] Add support for [Folia](https://github.com/PaperMC/Folia)
 - [ ] Player routing based on client version
 - [ ] Propper Redis Connection Pooling (PR's welcome!)
 - [ ] Better error and overall handling for Redis
