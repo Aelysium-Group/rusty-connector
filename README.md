@@ -11,11 +11,11 @@
 # [Modrinth](https://modrinth.com/plugin/rustyconnector) | [Paper Forums](https://forums.papermc.io/threads/rustyconnector-advanced-velocity-server-and-player-connection-manager.663/) | [Hangar](https://hangar.papermc.io/nathan-i-martin/RustyConnector)
 ---
 - ### ✅ Built for large networks
-- ### ✅ Register brand new servers to the proxy during runtime
+- ### ✅ Register brand new servers to the virtualProxyProcessor during runtime
 - ### ✅ Blazing fast data transmission with Redis integration
 - ### ✅ Create pre-defined whitelist configs and activate them dynamically
 - ### ✅ Register similar servers into families with family-level whitelists and load balancing
-- ### ✅ Automatically unregister frozen servers from the proxy
+- ### ✅ Automatically unregister frozen servers from the virtualProxyProcessor
 - ### ✅ Set soft and hard player limits for servers
 - ### ✅ Whitelist players based on permission, Username, UUID, or IP Address
 - ### ✅ Works with LuckPerms-Velocity

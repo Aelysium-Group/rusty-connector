@@ -6,9 +6,10 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import net.kyori.adventure.text.Component;
 
@@ -199,9 +200,9 @@ public interface VelocityLang extends Lang {
     );
 
     Message RC_FAMILY = () -> {
-
+        VelocityAPI api = VelocityRustyConnector.getAPI();
         Component families = text("");
-        for (ServerFamily<? extends PaperServerLoadBalancer> family : VelocityRustyConnector.getInstance().getVirtualServer().getFamilyManager().dump()) {
+        for (ServerFamily<? extends PaperServerLoadBalancer> family : api.getVirtualProcessor().getFamilyManager().dump()) {
             families = families.append(text("[ "+family.getName()+" ] "));
         }
 
@@ -257,7 +258,7 @@ public interface VelocityLang extends Lang {
 
         if(family.getRegisteredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
         else if(family.getRegisteredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
-            else for (PaperServer server : family.getRegisteredServers()) {
+            else for (PlayerServer server : family.getRegisteredServers()) {
                 if(family.getLoadBalancer().getIndex() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +

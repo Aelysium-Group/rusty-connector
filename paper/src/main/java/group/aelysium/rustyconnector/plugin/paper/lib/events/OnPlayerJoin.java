@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.events;
 
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPARequest;
 import org.bukkit.event.EventHandler;
@@ -11,9 +12,9 @@ public class OnPlayerJoin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+        PaperAPI api = PaperRustyConnector.getAPI();
 
-        TPARequest tpaRequest = plugin.getVirtualServer().getTPAQueue().findClient(event.getPlayer().getPlayerProfile().getName());
+        TPARequest tpaRequest = api.getVirtualProcessor().getTPAQueue().findClient(event.getPlayer().getPlayerProfile().getName());
         if(tpaRequest == null) return;
         try {
             tpaRequest.resolveClient();
@@ -23,10 +24,10 @@ public class OnPlayerJoin implements Listener {
             } catch (NullPointerException e) {
                 event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.getTarget().getPlayerProfile().getName()));
             }
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.getTarget().getPlayerProfile().getName()));
         }
 
-        plugin.getVirtualServer().getTPAQueue().removeAllPlayersRequests(event.getPlayer());
+        api.getVirtualProcessor().getTPAQueue().removeAllPlayersRequests(event.getPlayer());
     }
 }

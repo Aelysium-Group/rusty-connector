@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.plugin.paper.lib.config;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -107,7 +109,7 @@ public class DefaultConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
-        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
 
         try {
             this.processVersion();
@@ -133,7 +135,7 @@ public class DefaultConfig extends YAML {
         this.server_playerCap_soft = this.getNode(this.data,"server.player-cap.soft",Integer.class);
         this.server_playerCap_hard = this.getNode(this.data,"server.player-cap.hard",Integer.class);
         if(this.server_playerCap_soft >= this.server_playerCap_hard)
-            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode."), NamedTextColor.YELLOW);
 
         this.redis_host = this.getNode(this.data,"redis.host",String.class);
         if(this.redis_host.equals("")) throw new IllegalStateException("Please configure your Redis settings.");

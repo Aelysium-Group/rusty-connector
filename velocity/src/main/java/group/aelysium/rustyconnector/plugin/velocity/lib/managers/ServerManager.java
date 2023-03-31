@@ -1,14 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
 
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ServerManager implements NodeManager<PaperServer> {
-    private final Map<String, PaperServer> registeredServers = new HashMap<>();
+public class ServerManager implements NodeManager<PlayerServer> {
+    private final Map<String, PlayerServer> registeredServers = new HashMap<>();
 
 
     /**
@@ -17,7 +17,7 @@ public class ServerManager implements NodeManager<PaperServer> {
      * @return A server.
      */
     @Override
-    public PaperServer find(String name) {
+    public PlayerServer find(String name) {
         return this.registeredServers.get(name);
     }
 
@@ -26,7 +26,7 @@ public class ServerManager implements NodeManager<PaperServer> {
      * @param server The server to add to this manager.
      */
     @Override
-    public void add(PaperServer server) {
+    public void add(PlayerServer server) {
         this.registeredServers.put(server.getRegisteredServer().getServerInfo().getName(), server);
     }
 
@@ -35,12 +35,12 @@ public class ServerManager implements NodeManager<PaperServer> {
      * @param server The server to remove from this manager.
      */
     @Override
-    public void remove(PaperServer server) {
+    public void remove(PlayerServer server) {
         this.registeredServers.remove(server.getRegisteredServer().getServerInfo().getName());
     }
 
     @Override
-    public List<PaperServer> dump() {
+    public List<PlayerServer> dump() {
         return this.registeredServers.values().stream().toList();
     }
 

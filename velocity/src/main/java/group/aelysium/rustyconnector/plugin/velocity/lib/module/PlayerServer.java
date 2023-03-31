@@ -6,18 +6,19 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.database.Redis;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.model.Server;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 
 import java.security.InvalidAlgorithmParameterException;
 
-public class PaperServer implements Server {
+public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
     private String familyName;
@@ -26,7 +27,7 @@ public class PaperServer implements Server {
     private int softPlayerCap;
     private int hardPlayerCap;
 
-    public PaperServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight) {
+    public PlayerServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight) {
         this.serverInfo = serverInfo;
 
         this.weight = Math.max(weight, 0);
@@ -60,9 +61,9 @@ public class PaperServer implements Server {
      * @throws InvalidAlgorithmParameterException Of the family doesn't exist.
      */
     public void register(String familyName) throws Exception {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        this.registeredServer = plugin.getVirtualServer().registerServer(this, familyName);
+        this.registeredServer = api.getVirtualProcessor().registerServer(this, familyName);
 
         this.familyName = familyName;
     }
@@ -146,9 +147,9 @@ public class PaperServer implements Server {
      */
     public ServerFamily<? extends PaperServerLoadBalancer> getFamily() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getVirtualServer().getFamilyManager().find(this.familyName);
+        ServerFamily<? extends PaperServerLoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
@@ -159,7 +160,7 @@ public class PaperServer implements Server {
      * @param redis The redis connection to use.
      */
     public void ping(Redis redis, String privateKey) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         RedisMessage message = new RedisMessage(
                 privateKey,
@@ -169,8 +170,8 @@ public class PaperServer implements Server {
 
         message.dispatchMessage(redis);
 
-        if(plugin.logger().getGate().check(GateKey.PING))
-            VelocityLang.PING.send(plugin.logger(),this.serverInfo);
+        if(logger.getGate().check(GateKey.PING))
+            VelocityLang.PING.send(logger,this.serverInfo);
     }
 
     /**

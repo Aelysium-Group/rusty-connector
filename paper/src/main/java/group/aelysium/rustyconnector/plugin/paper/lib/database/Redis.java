@@ -9,6 +9,8 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.PingHandler;
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegAllHandler;
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegFamilyHandler;
@@ -22,21 +24,23 @@ import java.util.Objects;
 public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis {
     @Override
     public void onMessage(String rawMessage) {
-        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
-        CacheableMessage cachedMessage = plugin.getVirtualServer().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
+        PaperAPI api = PaperRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
+
+        CacheableMessage cachedMessage = api.getVirtualProcessor().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
 
         try {
-            RedisMessage message = RedisMessage.create(rawMessage, MessageOrigin.SERVER, plugin.getVirtualServer().getAddress());
+            RedisMessage message = RedisMessage.create(rawMessage, MessageOrigin.SERVER, api.getVirtualProcessor().getAddress());
             try {
-                if (!(plugin.getVirtualServer().validatePrivateKey(message.getKey())))
+                if (!(api.getVirtualProcessor().validatePrivateKey(message.getKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
 
                 Redis.processParameters(message, cachedMessage);
             } catch (AuthenticationException e) {
-                plugin.logger().error("Incoming message from: " + message.getAddress().toString() + " contains an invalid private key! Throwing away...");
-                plugin.logger().log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
+                logger.error("Incoming message from: " + message.getAddress().toString() + " contains an invalid private key! Throwing away...");
+                logger.log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
             }
         } catch (Exception e) {
             cachedMessage.sentenceMessage(MessageStatus.TRASHED);
@@ -50,6 +54,8 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
     }
 
     private static void processParameters(RedisMessage message, CacheableMessage cachedMessage) {
+        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
+
         Gson gson = new Gson();
         JsonObject object = gson.fromJson(message.toString(), JsonObject.class);
 
@@ -74,8 +80,8 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
         } catch (Exception e) {
             cachedMessage.sentenceMessage(MessageStatus.PARSING_ERROR);
 
-            PaperRustyConnector.getInstance().logger().error("Incoming message " + message.getType().toString() + " from " + message.getAddress() + " is not formatted properly. Throwing away...", e);
-            PaperRustyConnector.getInstance().logger().log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
+            logger.error("Incoming message " + message.getType().toString() + " from " + message.getAddress() + " is not formatted properly. Throwing away...", e);
+            logger.log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
         }
     }
 

@@ -46,6 +46,22 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>dev.folia</groupId>
+            <artifactId>folia-api</artifactId>
+            <version>1.19.4-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-text-serializer-gson</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>group.aelysium.rustyconnector</groupId>
             <artifactId>core</artifactId>
             <version>1.0-SNAPSHOT</version>

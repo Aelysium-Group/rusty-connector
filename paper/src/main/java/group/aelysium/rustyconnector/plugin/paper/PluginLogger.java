@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.LoggerGate;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
-public class PluginLogger implements group.aelysium.rustyconnector.core.lib.lang_messaging.Logger {
+public class PluginLogger implements group.aelysium.rustyconnector.core.central.PluginLogger {
     private final LoggerGate gate = new LoggerGate();
     private final Logger logger;
 
@@ -57,6 +57,6 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.lib.lang
 
     @Override
     public void send(Component message) {
-        PaperRustyConnector.getInstance().getServer().getConsoleSender().sendMessage(message);
+        PaperRustyConnector.getAPI().getServer().getConsoleSender().sendMessage(message);
     }
 }

@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.lang_messaging;
 
+import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -164,7 +165,7 @@ public interface Lang {
     interface Message {
         Component build();
 
-        default void send(Logger sender) {
+        default void send(PluginLogger sender) {
             sender.send(
                     join(
                             newlines(),
@@ -177,7 +178,7 @@ public interface Lang {
     interface ParameterizedMessage1<A1> {
         Component build(A1 arg1);
 
-        default void send(Logger sender, A1 arg1) {
+        default void send(PluginLogger sender, A1 arg1) {
             sender.send(
                     join(
                             JoinConfiguration.separator(newline()),
@@ -190,7 +191,7 @@ public interface Lang {
     interface ParameterizedMessage2<A1, A2> {
         Component build(A1 arg1, A2 arg2);
 
-        default void send(Logger sender, A1 arg1, A2 arg2) {
+        default void send(PluginLogger sender, A1 arg1, A2 arg2) {
             sender.send(
                     join(
                             newlines(),
@@ -203,7 +204,7 @@ public interface Lang {
     interface ParameterizedMessage3<A1, A2, A3> {
         Component build(A1 arg1, A2 arg2, A3 arg3);
 
-        default void send(Logger sender, A1 arg1, A2 arg2, A3 arg3) {
+        default void send(PluginLogger sender, A1 arg1, A2 arg2, A3 arg3) {
             sender.send(
                     join(
                             newlines(),
@@ -216,7 +217,7 @@ public interface Lang {
     interface ParameterizedMessage4<A1, A2, A3, A4> {
         Component build(A1 arg1, A2 arg2, A3 arg3, A4 arg4);
 
-        default void send(Logger sender, A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
+        default void send(PluginLogger sender, A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
             sender.send(
                     join(
                             newlines(),

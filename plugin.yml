@@ -2,5 +2,8 @@ name: rustyconnector-paper
 version: '0.4.1'
 main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
 api-version: 1.16
+website: https://github.com/Aelysium-Group/rusty-connector
 authors: [ Sivin ]
 commands: {}
+
+folia-supported: true

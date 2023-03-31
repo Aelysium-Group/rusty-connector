@@ -2,8 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 
 import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
+import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.WhitelistConfig;
 
 import java.io.File;
@@ -108,11 +111,12 @@ public class Whitelist {
      * @return A whitelist.
      */
     public static Whitelist init(String whitelistName) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
 
         WhitelistConfig whitelistConfig = WhitelistConfig.newConfig(
                 whitelistName,
-                new File(plugin.getDataFolder(), "whitelists/"+whitelistName+".yml"),
+                new File(String.valueOf(api.getDataFolder()), "whitelists/"+whitelistName+".yml"),
                 "velocity_whitelist_template.yml"
         );
         if(!whitelistConfig.generate()) {
@@ -143,7 +147,7 @@ public class Whitelist {
             countries.forEach(whitelist::registerCountry);
         };
 
-        plugin.logger().log("Loaded whitelist: "+whitelistName);
+        logger.log("Loaded whitelist: "+whitelistName);
         return whitelist;
     }
 }

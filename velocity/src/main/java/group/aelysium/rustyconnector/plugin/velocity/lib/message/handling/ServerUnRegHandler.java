@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 
 import java.net.InetSocketAddress;
 
@@ -16,7 +17,7 @@ public class ServerUnRegHandler implements MessageHandler {
 
     @Override
     public void execute() throws Exception {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
 
         String familyName = message.getParameter("family");
 
@@ -27,6 +28,6 @@ public class ServerUnRegHandler implements MessageHandler {
                 address
         );
 
-        plugin.getVirtualServer().unregisterServer(serverInfo, familyName, true);
+        api.getVirtualProcessor().unregisterServer(serverInfo, familyName, true);
     }
 }

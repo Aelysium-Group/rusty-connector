@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
@@ -13,7 +14,10 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
+import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
@@ -28,12 +32,12 @@ import java.security.InvalidAlgorithmParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Proxy {
+public class VirtualProxyProcessor implements VirtualProcessor {
     private MessageCache messageCache;
     private Redis redis;
     private final Map<ServerInfo, Boolean> lifeMatrix = new HashMap<>();
-    private final FamilyManager familyManager;
-    private final WhitelistManager whitelistManager;
+    private final FamilyManager familyManager = new FamilyManager();
+    private final WhitelistManager whitelistManager = new WhitelistManager();
     private final String privateKey;
     private String rootFamily;
     private String proxyWhitelist;
@@ -41,6 +45,10 @@ public class Proxy {
     private Clock familyServerSorting;
     private Clock tpaRequestCleaner;
     private MessageTunnel messageTunnel;
+
+    public VirtualProxyProcessor(String privateKey) {
+        this.privateKey = privateKey;
+    }
 
     public ServerFamily<? extends PaperServerLoadBalancer> getRootFamily() {
         return this.familyManager.find(this.rootFamily);
@@ -81,13 +89,6 @@ public class Proxy {
         this.messageTunnel = messageTunnel;
     }
 
-    private Proxy(String privateKey) {
-        this.privateKey = privateKey;
-
-        this.familyManager = new FamilyManager();
-        this.whitelistManager = new WhitelistManager();
-    }
-
     public MessageCache getMessageCache() {
         return this.messageCache;
     }
@@ -105,29 +106,29 @@ public class Proxy {
         this.serverLifecycleHeart = new Clock(heartbeat);
 
         this.serverLifecycleHeart.start((Callable<Boolean>) () -> {
-            VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+            PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
-            if(plugin.logger().getGate().check(GateKey.PING))
-                plugin.logger().log("Sending out pings and killing dead servers...");
+            if(logger.getGate().check(GateKey.PING))
+                logger.log("Sending out pings and killing dead servers...");
 
             try {
                 for (Map.Entry<ServerInfo, Boolean> entry : lifeMatrix.entrySet()) {
                     ServerInfo serverInfo = entry.getKey();
 
-                    PaperServer server = this.findServer(serverInfo);
+                    PlayerServer server = this.findServer(serverInfo);
                     if(server == null) {
-                        plugin.logger().log(serverInfo.getName() + " couldn't be found! Ignoring...");
+                        logger.log(serverInfo.getName() + " couldn't be found! Ignoring...");
                         continue;
                     }
 
                     if(!entry.getValue()) {
                         if(shouldUnregister) {
                             this.unregisterServer(serverInfo, server.getFamilyName(), true);
-                            if (plugin.logger().getGate().check(GateKey.PING))
-                                plugin.logger().log(server.getServerInfo().getName() + " never responded to ping! Killing it...");
+                            if (logger.getGate().check(GateKey.PING))
+                                logger.log(server.getServerInfo().getName() + " never responded to ping! Killing it...");
                         } else {
-                            if (plugin.logger().getGate().check(GateKey.PING))
-                                plugin.logger().log(server.getServerInfo().getName() + " never responded to ping!");
+                            if (logger.getGate().check(GateKey.PING))
+                                logger.log(server.getServerInfo().getName() + " never responded to ping!");
                         }
                         continue;
                     }
@@ -138,29 +139,30 @@ public class Proxy {
                 }
                 return true;
             } catch (Exception error) {
-                plugin.logger().log(error.getMessage());
+                logger.log(error.getMessage());
             }
             return false;
         });
     }
 
     private void startFamilyServerSorting(long heartbeat) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
         this.familyServerSorting = new Clock(heartbeat);
 
         this.familyServerSorting.start((Callable<Boolean>) () -> {
-            VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+            PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
             try {
-                if(plugin.logger().getGate().check(GateKey.FAMILY_BALANCING))
-                    plugin.logger().log("Balancing families...");
+                if(logger.getGate().check(GateKey.FAMILY_BALANCING))
+                    logger.log("Balancing families...");
 
-                for (ServerFamily<? extends PaperServerLoadBalancer> family : plugin.getVirtualServer().getFamilyManager().dump()) {
+                for (ServerFamily<? extends PaperServerLoadBalancer> family : api.getVirtualProcessor().getFamilyManager().dump()) {
                     family.getLoadBalancer().completeSort();
-                    if(plugin.logger().getGate().check(GateKey.FAMILY_BALANCING))
-                        VelocityLang.FAMILY_BALANCING.send(plugin.logger(), family);
+                    if(logger.getGate().check(GateKey.FAMILY_BALANCING))
+                        VelocityLang.FAMILY_BALANCING.send(logger, family);
                 }
 
-                if(plugin.logger().getGate().check(GateKey.FAMILY_BALANCING))
-                    plugin.logger().log("Finished balancing families.");
+                if(logger.getGate().check(GateKey.FAMILY_BALANCING))
+                    logger.log("Finished balancing families.");
             } catch (Exception e) {
                 return false;
             }
@@ -169,12 +171,11 @@ public class Proxy {
     }
 
     private void startTPARequestCleaner(long heartbeat) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
         this.tpaRequestCleaner = new Clock(heartbeat);
 
         this.tpaRequestCleaner.start((Callable<Boolean>) () -> {
-            VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-
-            for(ServerFamily<? extends PaperServerLoadBalancer> family : plugin.getVirtualServer().getFamilyManager().dump()) {
+            for(ServerFamily<? extends PaperServerLoadBalancer> family : api.getVirtualProcessor().getFamilyManager().dump()) {
                 if(!family.getTPAHandler().getSettings().isEnabled()) continue;
                 family.getTPAHandler().clearExpired();
             }
@@ -214,9 +215,9 @@ public class Proxy {
         this.lifeMatrix.put(serverInfo, true);
     }
 
-    public PaperServer findServer(ServerInfo serverInfo) {
+    public PlayerServer findServer(ServerInfo serverInfo) {
         for(ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
-            PaperServer server = family.getServer(serverInfo);
+            PlayerServer server = family.getServer(serverInfo);
             if(server == null) continue;
 
             return server;
@@ -278,10 +279,10 @@ public class Proxy {
      * Can be usefull if you've just restarted your proxy and need to quickly get all your servers back online.
      */
     public void registerAllServers() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
-        if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.CALL_FOR_REGISTRATION))
-            VelocityLang.CALL_FOR_REGISTRATION.send(plugin.logger());
+        if(logger.getGate().check(GateKey.CALL_FOR_REGISTRATION))
+            VelocityLang.CALL_FOR_REGISTRATION.send(logger);
 
         RedisMessage message = new RedisMessage(
                 this.privateKey,
@@ -298,10 +299,10 @@ public class Proxy {
      * @param familyName The name of the family to target.
      */
     public void registerAllServers(String familyName) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
-        if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.CALL_FOR_REGISTRATION))
-            VelocityLang.CALL_FOR_FAMILY_REGISTRATION.send(plugin.logger(), familyName);
+        if(logger.getGate().check(GateKey.CALL_FOR_REGISTRATION))
+            VelocityLang.CALL_FOR_FAMILY_REGISTRATION.send(logger, familyName);
 
         RedisMessage message = new RedisMessage(
                 this.privateKey,
@@ -322,11 +323,11 @@ public class Proxy {
      * @throws NullPointerException If the server doesn't exist in the family.
      */
     public void tpaSendPlayer(Player source, Player target, ServerInfo targetServerInfo) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
 
         ServerInfo senderServerInfo = source.getCurrentServer().orElseThrow().getServerInfo();
 
-        PaperServer targetServer = plugin.getVirtualServer().findServer(targetServerInfo);
+        PlayerServer targetServer = api.getVirtualProcessor().findServer(targetServerInfo);
         if(targetServer == null) throw new NullPointerException();
 
         Callable<Boolean> queuePlayer = () -> {
@@ -360,31 +361,32 @@ public class Proxy {
      * @param familyName The family to register the server into.
      * @return A RegisteredServer node.
      */
-    public RegisteredServer registerServer(PaperServer server, String familyName) throws Exception {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+    public RegisteredServer registerServer(PlayerServer server, String familyName) throws Exception {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
         try {
-            if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
-                VelocityLang.REGISTRATION_REQUEST.send(plugin.logger(), server.getServerInfo(), familyName);
+            if(logger.getGate().check(GateKey.REGISTRATION_REQUEST))
+                VelocityLang.REGISTRATION_REQUEST.send(logger, server.getServerInfo(), familyName);
 
-            if(plugin.getVirtualServer().contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
+            if(api.getVirtualProcessor().contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
 
             ServerFamily<? extends PaperServerLoadBalancer> family = this.familyManager.find(familyName);
             if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
-            RegisteredServer registeredServer = plugin.getVelocityServer().registerServer(server.getServerInfo());
+            RegisteredServer registeredServer = api.registerServer(server.getServerInfo());
             if(registeredServer == null) throw new NullPointerException("Unable to register the server to the proxy.");
 
             family.addServer(server);
 
             this.lifeMatrix.put(server.getServerInfo(),true);
 
-            if(VelocityRustyConnector.getInstance().logger().getGate().check(GateKey.REGISTRATION_REQUEST))
-                VelocityLang.REGISTERED.send(plugin.logger(), server.getServerInfo(), familyName);
+            if(logger.getGate().check(GateKey.REGISTRATION_REQUEST))
+                VelocityLang.REGISTERED.send(logger, server.getServerInfo(), familyName);
 
             return registeredServer;
         } catch (Exception error) {
-            if(plugin.logger().getGate().check(GateKey.REGISTRATION_REQUEST))
-                VelocityLang.REGISTRATION_CANCELED.send(plugin.logger(), server.getServerInfo(), familyName);
+            if(logger.getGate().check(GateKey.REGISTRATION_REQUEST))
+                VelocityLang.REGISTRATION_CANCELED.send(logger, server.getServerInfo(), familyName);
             throw new Exception(error.getMessage());
         }
     }
@@ -396,26 +398,27 @@ public class Proxy {
      * @param removeFromFamily Should the server be removed from it's associated family?
      */
     public void unregisterServer(ServerInfo serverInfo, String familyName, Boolean removeFromFamily) throws Exception {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
         try {
-            PaperServer server = this.findServer(serverInfo);
+            PlayerServer server = this.findServer(serverInfo);
             if(server == null) throw new NullPointerException("Server ["+serverInfo.getName()+"]("+serverInfo.getAddress()+":"+serverInfo.getAddress().getPort()+") doesn't exist! It can't be unregistered!");
 
-            if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
-                VelocityLang.UNREGISTRATION_REQUEST.send(plugin.logger(), serverInfo, familyName);
+            if(logger.getGate().check(GateKey.UNREGISTRATION_REQUEST))
+                VelocityLang.UNREGISTRATION_REQUEST.send(logger, serverInfo, familyName);
 
             ServerFamily<? extends PaperServerLoadBalancer> family = server.getFamily();
 
             this.lifeMatrix.remove(serverInfo);
-            plugin.getVelocityServer().unregisterServer(server.getServerInfo());
+            api.unregisterServer(server.getServerInfo());
             if(removeFromFamily)
                 family.removeServer(server);
 
-            if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
-                VelocityLang.UNREGISTERED.send(plugin.logger(), serverInfo, familyName);
+            if(logger.getGate().check(GateKey.UNREGISTRATION_REQUEST))
+                VelocityLang.UNREGISTERED.send(logger, serverInfo, familyName);
         } catch (Exception e) {
-            if(plugin.logger().getGate().check(GateKey.UNREGISTRATION_REQUEST))
-                VelocityLang.UNREGISTRATION_CANCELED.send(plugin.logger(), serverInfo, familyName);
+            if(logger.getGate().check(GateKey.UNREGISTRATION_REQUEST))
+                VelocityLang.UNREGISTRATION_CANCELED.send(logger, serverInfo, familyName);
             throw new Exception(e.getMessage());
         }
     }
@@ -425,7 +428,8 @@ public class Proxy {
      * @param command The command to dispatch.
      */
     public void dispatchCommand(String command) {
-        VelocityRustyConnector.getInstance().getVelocityServer().getCommandManager()
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        api.getServer().getCommandManager()
                 .executeAsync((ConsoleCommandSource) permission -> null, command);
     }
 
@@ -434,19 +438,19 @@ public class Proxy {
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @param config The configuration file.
      */
-    public static Proxy init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
-        Proxy proxy = new Proxy(config.getPrivate_key());
-
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+    public static VirtualProxyProcessor init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
+        VirtualProxyProcessor virtualProxyProcessor = new VirtualProxyProcessor(config.getPrivate_key());
 
         // Setup families
         for (String familyName: config.getFamilies())
-            proxy.getFamilyManager().add(ServerFamily.init(proxy, familyName));
+            virtualProxyProcessor.getFamilyManager().add(ServerFamily.init(virtualProxyProcessor, familyName));
 
-        plugin.logger().log("Finished setting up families");
+        logger.log("Finished setting up families");
 
-        proxy.setRootFamily(config.getRoot_family());
-        plugin.logger().log("Finished setting up root family");
+        virtualProxyProcessor.setRootFamily(config.getRoot_family());
+        logger.log("Finished setting up root family");
 
         // Setup Redis
         Redis redis = new Redis();
@@ -456,34 +460,34 @@ public class Proxy {
                 config.getRedis_password(),
                 config.getRedis_dataChannel()
         );
-        redis.connect(plugin);
+        redis.connect(api);
 
-        proxy.setRedis(redis);
-        plugin.logger().log("Finished setting up redis");
+        virtualProxyProcessor.setRedis(redis);
+        logger.log("Finished setting up redis");
 
-        if(config.isHearts_serverLifecycle_enabled()) proxy.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
-        if(config.getMessageTunnel_familyServerSorting_enabled()) proxy.startFamilyServerSorting(config.getMessageTunnel_familyServerSorting_interval());
-        proxy.startTPARequestCleaner(10);
-        plugin.logger().log("Finished setting up heartbeats");
+        if(config.isHearts_serverLifecycle_enabled()) virtualProxyProcessor.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
+        if(config.getMessageTunnel_familyServerSorting_enabled()) virtualProxyProcessor.startFamilyServerSorting(config.getMessageTunnel_familyServerSorting_interval());
+        virtualProxyProcessor.startTPARequestCleaner(10);
+        logger.log("Finished setting up heartbeats");
 
         // Setup network whitelist
         if(config.isWhitelist_enabled()) {
-            proxy.setWhitelist(config.getWhitelist_name());
+            virtualProxyProcessor.setWhitelist(config.getWhitelist_name());
 
-            proxy.whitelistManager.add(Whitelist.init(config.getWhitelist_name()));
+            virtualProxyProcessor.whitelistManager.add(Whitelist.init(config.getWhitelist_name()));
         }
-        plugin.logger().log("Finished setting up network whitelist");
+        logger.log("Finished setting up network whitelist");
 
         // Setup message tunnel
-        proxy.setMessageCache(config.getMessageTunnel_messageCacheSize());
-        plugin.logger().log("Set message cache size to be: "+config.getMessageTunnel_messageCacheSize());
+        virtualProxyProcessor.setMessageCache(config.getMessageTunnel_messageCacheSize());
+        logger.log("Set message cache size to be: "+config.getMessageTunnel_messageCacheSize());
 
         MessageTunnel messageTunnel = new MessageTunnel(
                 config.isMessageTunnel_denylist_enabled(),
                 config.isMessageTunnel_whitelist_enabled(),
                 config.getMessageTunnel_messageMaxLength()
         );
-        proxy.setMessageTunnel(messageTunnel);
+        virtualProxyProcessor.setMessageTunnel(messageTunnel);
 
         if(config.isMessageTunnel_whitelist_enabled())
             config.getMessageTunnel_whitelist_addresses().forEach(entry -> {
@@ -503,9 +507,9 @@ public class Proxy {
                 messageTunnel.blacklistAddress(address);
             });
 
-        plugin.logger().log("Finished setting up message tunnel");
+        logger.log("Finished setting up message tunnel");
 
-        return proxy;
+        return virtualProxyProcessor;
     }
 
     /**
@@ -514,23 +518,23 @@ public class Proxy {
      * @param config The configuration file.
      */
     public void reload(DefaultConfig config) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-        plugin.logger().log("Reloading config.yml");
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+        logger.log("Reloading config.yml");
 
         // Heartbeats
         this.killHeartbeats();
         if(config.isHearts_serverLifecycle_enabled()) this.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
         if(config.getMessageTunnel_familyServerSorting_enabled()) this.startFamilyServerSorting(config.getMessageTunnel_familyServerSorting_interval());
-        plugin.logger().log("Restarted heartbeats");
+        logger.log("Restarted heartbeats");
 
         this.reloadWhitelists(config);
-        plugin.logger().log("Reloaded all whitelists");
+        logger.log("Reloaded all whitelists");
 
         // Setup message tunnel
         this.messageCache.empty();
         this.messageCache = null;
         this.setMessageCache(config.getMessageTunnel_messageCacheSize());
-        plugin.logger().log("Message cache size set to: "+config.getMessageTunnel_messageCacheSize());
+        logger.log("Message cache size set to: "+config.getMessageTunnel_messageCacheSize());
 
         this.messageTunnel = null;
         MessageTunnel messageTunnel = new MessageTunnel(
@@ -557,7 +561,7 @@ public class Proxy {
 
                 messageTunnel.blacklistAddress(address);
             });
-        plugin.logger().log("Message tunnel reloaded");
+        logger.log("Message tunnel reloaded");
     }
 
     /**
@@ -566,7 +570,7 @@ public class Proxy {
      * @param config The default config to read.
      */
     public void reloadWhitelists(DefaultConfig config) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         this.proxyWhitelist = null;
         this.whitelistManager.clear();
@@ -576,15 +580,15 @@ public class Proxy {
             this.setWhitelist(config.getWhitelist_name());
 
             this.whitelistManager.add(Whitelist.init(config.getWhitelist_name()));
-            plugin.logger().log("Proxy whitelist is enabled");
+            logger.log("Proxy whitelist is enabled");
         } else {
-            plugin.logger().log("There is no proxy whitelist");
+            logger.log("There is no proxy whitelist");
         }
 
         // Reload server whitelists
         for (ServerFamily<? extends PaperServerLoadBalancer> family : this.familyManager.dump()) {
             family.reloadWhitelist();
         }
-        plugin.logger().log("Reloaded all family whitelists");
+        logger.log("Reloaded all family whitelists");
     }
 }

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.util;
 
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Logger;
+import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.model.Sortable;
 
 import java.util.*;
@@ -12,7 +12,7 @@ public class WeightedQuickSort {
      * Assumes that start is 0 and the final index is equal to size.
      * @param array The array to sort.
      */
-    public static <I extends Sortable> void sort(List<I> array, Logger logger) {
+    public static <I extends Sortable> void sort(List<I> array) {
         QuickSort.sort(array); // Put array in order of index.
 
         // Pull out different weight levels and put them into their own lists.

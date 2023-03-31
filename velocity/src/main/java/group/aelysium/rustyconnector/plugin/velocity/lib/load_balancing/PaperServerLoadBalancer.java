@@ -1,17 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
 import group.aelysium.rustyconnector.core.lib.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
+public class PaperServerLoadBalancer implements LoadBalancer<PlayerServer> {
     private boolean weighted = false;
     private boolean persistence = false;
     private int attempts = 5;
     protected int index = 0;
-    protected List<PaperServer> items = new ArrayList<>();
+    protected List<PlayerServer> items = new ArrayList<>();
 
     @Override
     public boolean isPersistent() {
@@ -30,8 +30,8 @@ public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
     }
 
     @Override
-    public PaperServer getCurrent() {
-        PaperServer item;
+    public PlayerServer getCurrent() {
+        PlayerServer item;
         if(this.index >= this.size()) {
             item = this.items.get(this.index);
             this.index = 0;
@@ -66,12 +66,12 @@ public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
     public void singleSort() {}
 
     @Override
-    public void add(PaperServer item) {
+    public void add(PlayerServer item) {
         this.items.add(item);
     }
 
     @Override
-    public void remove(PaperServer item) {
+    public void remove(PlayerServer item) {
         this.items.remove(item);
     }
 
@@ -81,7 +81,7 @@ public class PaperServerLoadBalancer implements LoadBalancer<PaperServer> {
     }
 
     @Override
-    public List<PaperServer> dump() {
+    public List<PlayerServer> dump() {
         return this.items;
     }
 

@@ -6,7 +6,8 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 
 public class OnPlayerDisconnect {
     /**
@@ -15,7 +16,7 @@ public class OnPlayerDisconnect {
      */
     @Subscribe(order = PostOrder.LAST)
     public EventTask onPlayerDisconnect(DisconnectEvent event) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
 
         return EventTask.async(() -> {
             try {
@@ -23,7 +24,7 @@ public class OnPlayerDisconnect {
                 if(player == null) return;
 
                 if(player.getCurrentServer().isPresent()) {
-                    PaperServer server = plugin.getVirtualServer().findServer(player.getCurrentServer().get().getServerInfo());
+                    PlayerServer server = api.getVirtualProcessor().findServer(player.getCurrentServer().get().getServerInfo());
                     server.playerLeft();
                 }
             } catch (Exception e) {

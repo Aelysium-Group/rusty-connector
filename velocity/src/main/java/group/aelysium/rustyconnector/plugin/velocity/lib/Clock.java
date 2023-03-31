@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib;
 
 import group.aelysium.rustyconnector.core.lib.Callable;
+import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 
 import java.util.Timer;
@@ -15,13 +16,13 @@ public class Clock {
     }
 
     public void start(Callable callback) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
         this.timer.schedule( new TimerTask() {
             public void run() {
                 try {
                     callback.execute();
                 } catch (Exception e) {
-                    plugin.logger().log(e.getMessage());
+                    logger.log(e.getMessage());
                 }
             }
         }, 0, this.delay*1000);

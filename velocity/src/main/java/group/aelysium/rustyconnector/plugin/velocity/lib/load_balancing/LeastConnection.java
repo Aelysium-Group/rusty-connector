@@ -3,16 +3,15 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 import group.aelysium.rustyconnector.core.lib.util.QuickSort;
 import group.aelysium.rustyconnector.core.lib.util.SingleSort;
 import group.aelysium.rustyconnector.core.lib.util.WeightedQuickSort;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 
 public class LeastConnection extends PaperServerLoadBalancer {
 
     @Override
     public void iterate() {
         try {
-            PaperServer thisItem = this.items.get(this.index);
-            PaperServer theNextItem = this.items.get(this.index + 1);
+            PlayerServer thisItem = this.items.get(this.index);
+            PlayerServer theNextItem = this.items.get(this.index + 1);
 
             if(thisItem.getPlayerCount() >= theNextItem.getPlayerCount()) this.index++;
         } catch (IndexOutOfBoundsException ignore) {}
@@ -21,7 +20,7 @@ public class LeastConnection extends PaperServerLoadBalancer {
     @Override
     public void completeSort() {
         this.index = 0;
-        if(this.isWeighted()) WeightedQuickSort.sort(this.items, VelocityRustyConnector.getInstance().logger());
+        if(this.isWeighted()) WeightedQuickSort.sort(this.items);
         else QuickSort.sort(this.items);
     }
 

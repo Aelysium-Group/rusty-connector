@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
+import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -75,7 +77,7 @@ public class WhitelistConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         this.use_players = this.getNode(this.data,"use-players",Boolean.class);
         try {
@@ -88,7 +90,7 @@ public class WhitelistConfig extends YAML {
 
         this.use_country = this.getNode(this.data,"use-country",Boolean.class);
         if(this.use_country)
-            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false."), NamedTextColor.YELLOW);
         this.use_country = false;
         this.countries = new ArrayList<>();
 

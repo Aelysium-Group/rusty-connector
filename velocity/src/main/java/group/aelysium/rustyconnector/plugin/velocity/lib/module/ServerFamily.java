@@ -3,9 +3,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
@@ -59,8 +62,9 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
      * @return The whitelist or `null` if there isn't one.
      */
     public Whitelist getWhitelist() {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
         if(this.name == null) return null;
-        return VelocityRustyConnector.getInstance().getVirtualServer().getWhitelistManager().find(this.whitelist);
+        return api.getVirtualProcessor().getWhitelistManager().find(this.whitelist);
     }
 
     public long serverCount() { return this.loadBalancer.size(); }
@@ -101,7 +105,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         }
 
         Callable<Boolean> notPersistent = () -> {
-            PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
+            PlayerServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
             try {
                 if(!server.validatePlayer(player))
                     throw new RuntimeException("The server you're trying to connect to is full!");
@@ -123,7 +127,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
             for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
                 boolean isFinal = (attempt == attemptsLeft);
-                PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
+                PlayerServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
 
                 try {
                     if(!server.validatePlayer(player))
@@ -167,7 +171,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
 
         Callable<Boolean> notPersistent = () -> {
-            PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
+            PlayerServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
             try {
                 if(!server.validatePlayer(player))
                     throw new RuntimeException("The server you're trying to connect to is full!");
@@ -189,7 +193,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
             for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
                 boolean isFinal = (attempt == attemptsLeft);
-                PaperServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
+                PlayerServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
 
                 try {
                     if(!server.validatePlayer(player))
@@ -219,7 +223,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
     public List<Player> getAllPlayers(int max) {
         List<Player> players = new ArrayList<>();
 
-        for (PaperServer server : this.getRegisteredServers()) {
+        for (PlayerServer server : this.getRegisteredServers()) {
             if(players.size() > max) break;
 
             players.addAll(server.getRegisteredServer().getPlayersConnected());
@@ -228,7 +232,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         return players;
     }
 
-    public List<PaperServer> getRegisteredServers() {
+    public List<PlayerServer> getRegisteredServers() {
         return this.loadBalancer.dump();
     }
 
@@ -240,7 +244,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
      * Add a server to the family.
      * @param server The server to add.
      */
-    public void addServer(PaperServer server) {
+    public void addServer(PlayerServer server) {
         this.loadBalancer.add(server);
     }
 
@@ -248,7 +252,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
      * Remove a server from this family.
      * @param server The server to remove.
      */
-    public void removeServer(PaperServer server) {
+    public void removeServer(PlayerServer server) {
         this.loadBalancer.remove(server);
     }
 
@@ -257,7 +261,7 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
      * @param serverInfo The info matching the server to get.
      * @return A found server or `null` if there's no match.
      */
-    public PaperServer getServer(@NotNull ServerInfo serverInfo) {
+    public PlayerServer getServer(@NotNull ServerInfo serverInfo) {
         return this.getRegisteredServers().stream()
                 .filter(server -> Objects.equals(server.getServerInfo(), serverInfo)
                 ).findFirst().orElse(null);
@@ -267,10 +271,10 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
      * Unregisters all servers from this family.
      */
     public void unregisterServers() throws Exception {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-        for (PaperServer server : this.loadBalancer.dump()) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        for (PlayerServer server : this.loadBalancer.dump()) {
             if(server == null) continue;
-            plugin.getVirtualServer().unregisterServer(server.getServerInfo(),this.name, false);
+            api.getVirtualProcessor().unregisterServer(server.getServerInfo(),this.name, false);
         }
     }
 
@@ -279,13 +283,14 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static ServerFamily<? extends PaperServerLoadBalancer> init(Proxy proxy, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
-        plugin.logger().log("Registering family: "+familyName);
+    public static ServerFamily<? extends PaperServerLoadBalancer> init(VirtualProxyProcessor virtualProxyProcessor, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
+        logger.log("Registering family: "+familyName);
 
         FamilyConfig familyConfig = FamilyConfig.newConfig(
                 familyName,
-                new File(plugin.getDataFolder(), "families/"+familyName+".yml"),
+                new File(String.valueOf(api.getDataFolder()), "families/"+familyName+".yml"),
                 "velocity_family_template.yml"
         );
         if(!familyConfig.generate()) {
@@ -297,11 +302,11 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
         if(familyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(familyConfig.getWhitelist_name());
 
-            proxy.getWhitelistManager().add(whitelist);
+            virtualProxyProcessor.getWhitelistManager().add(whitelist);
 
-            plugin.logger().log(familyName+" whitelist registered!");
+            logger.log(familyName+" whitelist registered!");
         } else {
-            plugin.logger().log(familyName + " doesn't have a whitelist.");
+            logger.log(familyName + " doesn't have a whitelist.");
         }
 
         switch (Enum.valueOf(AlgorithmType.class, familyConfig.getLoadBalancing_algorithm())) {
@@ -335,16 +340,17 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
      * Reloads the whitelist associated with this server.
      */
     public void reloadWhitelist() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
 
         Whitelist currentWhitelist = this.getWhitelist();
         if(!(currentWhitelist == null)) {
-            plugin.getVirtualServer().getWhitelistManager().remove(currentWhitelist);
+            api.getVirtualProcessor().getWhitelistManager().remove(currentWhitelist);
         }
 
         FamilyConfig familyConfig = FamilyConfig.newConfig(
                 this.name,
-                new File(plugin.getDataFolder(), "families/"+this.name+".yml"),
+                new File(String.valueOf(api.getDataFolder()), "families/"+this.name+".yml"),
                 "velocity_family_template.yml"
         );
         if(!familyConfig.generate()) {
@@ -357,13 +363,13 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
             newWhitelist = Whitelist.init(familyConfig.getWhitelist_name());
 
             this.whitelist = familyConfig.getWhitelist_name();
-            plugin.getVirtualServer().getWhitelistManager().add(newWhitelist);
+            api.getVirtualProcessor().getWhitelistManager().add(newWhitelist);
 
-            plugin.logger().log("Finished reloading whitelist for "+this.name);
+            logger.log("Finished reloading whitelist for "+this.name);
             return;
         }
 
         this.whitelist = null;
-        plugin.logger().log("There is no whitelist for "+this.name);
+        logger.log("There is no whitelist for "+this.name);
     }
 }

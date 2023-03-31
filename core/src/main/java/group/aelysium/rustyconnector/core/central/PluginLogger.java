@@ -1,8 +1,9 @@
-package group.aelysium.rustyconnector.core.lib.lang_messaging;
+package group.aelysium.rustyconnector.core.central;
 
+import group.aelysium.rustyconnector.core.lib.lang_messaging.LoggerGate;
 import net.kyori.adventure.text.Component;
 
-public interface Logger {
+public interface PluginLogger {
     LoggerGate getGate();
 
     void log(String message);
