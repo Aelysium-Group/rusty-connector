@@ -24,6 +24,8 @@
 - ### ✅ Works with Kubernetes
 - ### ❌ Can't tuck you into bed
 ---
+![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)
+---
 ## Incoming Features/Changes
 - [ ] Add support for [Folia](https://github.com/PaperMC/Folia)
 - [ ] Player routing based on client version
