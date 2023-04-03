@@ -1,7 +1,5 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-import cloud.commandframework.Command;
-import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.central.PluginAPI;

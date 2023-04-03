@@ -26,7 +26,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 
 public class VelocityLifecycle extends PluginLifecycle {
-
     public boolean start() throws DuplicateLifecycleException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();

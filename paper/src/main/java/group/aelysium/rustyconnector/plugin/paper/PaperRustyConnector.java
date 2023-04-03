@@ -1,17 +1,13 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
 import group.aelysium.rustyconnector.core.central.PluginRuntime;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperLifecycle;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.VirtualServerProcessor;
 import group.aelysium.rustyconnector.plugin.paper.lib.bstats.Metrics;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class PaperRustyConnector extends JavaPlugin implements Listener, PluginRuntime<PaperAPI> {
+public final class PaperRustyConnector extends JavaPlugin implements Listener, PluginRuntime {
     private static PaperLifecycle lifecycle;
     private static PaperAPI api;
 
@@ -26,9 +22,10 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, P
     public void onEnable() {
         try {
             api = new PaperAPI(this, this.getSLF4JLogger());
+            lifecycle = new PaperLifecycle();
 
             if (!lifecycle.start()) {
-                this.killPlugin();
+                this.getPluginLoader().disablePlugin(this);
                 return;
             }
 
@@ -39,7 +36,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, P
             }
         } catch (Exception e) {
             e.printStackTrace();
-            this.killPlugin();
+            this.getPluginLoader().disablePlugin(this);
         }
 
     }
@@ -51,9 +48,5 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, P
         } catch (Exception e) {
             getAPI().getLogger().log("RustyConnector: " + e.getMessage());
         }
-    }
-
-    private void killPlugin() {
-        this.getPluginLoader().disablePlugin(this);
     }
 }

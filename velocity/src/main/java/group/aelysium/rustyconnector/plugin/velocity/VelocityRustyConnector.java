@@ -15,14 +15,12 @@ import org.slf4j.Logger;
 
 import java.nio.file.Path;
 
-public class VelocityRustyConnector implements PluginRuntime<VelocityAPI> {
+public class VelocityRustyConnector implements PluginRuntime {
     private static VelocityLifecycle lifecycle;
     private static VelocityAPI api;
-
     public static VelocityAPI getAPI() {
         return api;
     }
-
     public static VelocityLifecycle getLifecycle() {
         return lifecycle;
     }

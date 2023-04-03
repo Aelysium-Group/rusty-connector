@@ -16,9 +16,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 
 public class PaperLifecycle extends PluginLifecycle {
-
     public boolean start() throws DuplicateLifecycleException {
-        if(this.isRunning()) throw new DuplicateLifecycleException("RustyConnector-Velocity is already running! You can't start it a second time!");
+        if(this.isRunning()) throw new DuplicateLifecycleException("RustyConnector-Paper is already running! You can't start it a second time!");
 
         MigrationDirections.init();
 
