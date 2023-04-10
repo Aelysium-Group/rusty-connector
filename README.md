@@ -24,6 +24,9 @@
 - ### ✅ Works with Kubernetes
 - ### ❌ Can't tuck you into bed
 ---
+# Networks Served:
+![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)
+# Sub-Servers Registered:
 ![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)
 ---
 ## Incoming Features/Changes
