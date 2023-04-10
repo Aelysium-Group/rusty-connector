@@ -27,7 +27,7 @@
 # Networks Served:
 ![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)
 # Sub-Servers Registered:
-![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)
+![RustyConnector bstats graph](https://bstats.org/signatures/bukkit/RustyConnector.svg)
 ---
 ## Incoming Features/Changes
 - [ ] Add support for [Folia](https://github.com/PaperMC/Folia)
