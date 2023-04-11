@@ -15,6 +15,5 @@ public class OnPlayerLeave implements Listener {
         PluginLogger logger = api.getLogger();
 
         api.getVirtualProcessor().getTPAQueue().removeAllPlayersRequests(event.getPlayer());
-        logger.log("Deleted player entries!");
     }
 }

@@ -56,6 +56,11 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         return this.virtualProcessor;
     }
 
+    public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
+        if(this.virtualProcessor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
+        this.virtualProcessor = VirtualProxyProcessor.init(config);
+    }
+
     /**
      * Get the velocity server
      */
@@ -90,10 +95,5 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     public VelocityRustyConnector accessPlugin() throws SyncFailedException {
         if(VelocityRustyConnector.getLifecycle().isRunning()) throw new SyncFailedException("You can't get the plugin instance while the plugin is running!");
         return this.plugin;
-    }
-
-    public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
-        if(this.virtualProcessor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
-        this.virtualProcessor = VirtualProxyProcessor.init(config);
     }
 }

@@ -6,7 +6,6 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
@@ -155,7 +154,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                 if(logger.getGate().check(GateKey.FAMILY_BALANCING))
                     logger.log("Balancing families...");
 
-                for (ServerFamily<? extends PaperServerLoadBalancer> family : api.getVirtualProcessor().getFamilyManager().dump()) {
+                for (ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
                     family.getLoadBalancer().completeSort();
                     if(logger.getGate().check(GateKey.FAMILY_BALANCING))
                         VelocityLang.FAMILY_BALANCING.send(logger, family);

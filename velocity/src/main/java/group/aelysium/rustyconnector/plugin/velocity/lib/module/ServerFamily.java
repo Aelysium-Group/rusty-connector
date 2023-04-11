@@ -49,7 +49,6 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
     }
 
     public LB getLoadBalancer() {
-        System.out.print(this.loadBalancer);
         return this.loadBalancer;
     }
 
