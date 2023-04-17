@@ -145,7 +145,6 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     }
 
     private void startFamilyServerSorting(long heartbeat) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
         this.familyServerSorting = new Clock(heartbeat);
 
         this.familyServerSorting.start((Callable<Boolean>) () -> {
@@ -170,11 +169,10 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     }
 
     private void startTPARequestCleaner(long heartbeat) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
         this.tpaRequestCleaner = new Clock(heartbeat);
 
         this.tpaRequestCleaner.start((Callable<Boolean>) () -> {
-            for(ServerFamily<? extends PaperServerLoadBalancer> family : api.getVirtualProcessor().getFamilyManager().dump()) {
+            for(ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
                 if(!family.getTPAHandler().getSettings().isEnabled()) continue;
                 family.getTPAHandler().clearExpired();
             }

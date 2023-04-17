@@ -252,7 +252,6 @@ public interface VelocityLang extends Lang {
     );
 
     ParameterizedMessage1<ServerFamily<? extends PaperServerLoadBalancer>> RC_FAMILY_INFO = (family) -> {
-
         Component servers = text("");
         int i = 0;
 

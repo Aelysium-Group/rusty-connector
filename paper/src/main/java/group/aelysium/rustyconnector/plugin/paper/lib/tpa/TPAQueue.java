@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.tpa;
 
+import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -29,10 +30,12 @@ public class TPAQueue {
      * @param player The player to search for.
      */
     public void removeAllPlayersRequests(Player player) {
-        this.requests.stream().filter(tpaRequest ->
-                Objects.equals(tpaRequest.getTarget(),         player)
-             || Objects.equals(tpaRequest.getClientUsername(), player.getPlayerProfile().getName())
-        ).forEach(this.requests::remove);
+        if(PaperRustyConnector.getAPI().isFolia()) {
+            this.requests.removeIf(tpaRequest ->
+                    Objects.equals(tpaRequest.getTarget(),         player)
+                 || Objects.equals(tpaRequest.getClientUsername(), player.getPlayerProfile().getName())
+            );
+        }
     }
 
     public void remove(TPARequest tpaRequest) {

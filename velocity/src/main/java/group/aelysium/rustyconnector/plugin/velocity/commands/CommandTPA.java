@@ -108,7 +108,7 @@ public final class CommandTPA {
                                             return builder.buildFuture();
                                         }
 
-                                        family.getTPAHandler().findRequestsForTarget(player).forEach(targetRequest -> builder.suggest(targetRequest.getTarget().getUsername()));
+                                        family.getTPAHandler().findRequestsForTarget(player).forEach(targetRequest -> builder.suggest(targetRequest.getSender().getUsername()));
 
                                         return builder.buildFuture();
                                     } catch (Exception ignored) {}
@@ -202,7 +202,7 @@ public final class CommandTPA {
                                             return builder.buildFuture();
                                         }
 
-                                        family.getTPAHandler().findRequestsForTarget(player).forEach(targetRequest -> builder.suggest(targetRequest.getTarget().getUsername()));
+                                        family.getTPAHandler().findRequestsForTarget(player).forEach(targetRequest -> builder.suggest(targetRequest.getSender().getUsername()));
 
                                         return builder.buildFuture();
                                     } catch (Exception ignored) {}

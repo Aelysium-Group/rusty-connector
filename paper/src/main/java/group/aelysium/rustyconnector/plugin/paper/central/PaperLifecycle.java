@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerLeave;
+import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -17,7 +18,10 @@ import java.io.File;
 
 public class PaperLifecycle extends PluginLifecycle {
     public boolean start() throws DuplicateLifecycleException {
-        if(this.isRunning()) throw new DuplicateLifecycleException("RustyConnector-Paper is already running! You can't start it a second time!");
+        PaperAPI api = PaperRustyConnector.getAPI();
+        if(this.isRunning()) throw new DuplicateLifecycleException(
+                PaperLang.RCNAME_PAPER_FOLIA.build(api.isFolia()).toString() +
+                " is already running! You can't start it a second time!");
 
         MigrationDirections.init();
 
