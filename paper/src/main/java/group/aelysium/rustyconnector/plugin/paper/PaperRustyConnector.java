@@ -31,6 +31,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, P
 
             try {
                 new Metrics(this, 17973);
+                getAPI().getLogger().log("Registered to bstats!");
             } catch (Exception e) {
                 getAPI().getLogger().log("Failed to register to bstats!");
             }

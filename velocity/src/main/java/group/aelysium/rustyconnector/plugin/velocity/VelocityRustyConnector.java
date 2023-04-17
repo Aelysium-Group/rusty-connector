@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import java.nio.file.Path;
 
 public class VelocityRustyConnector implements PluginRuntime {
+    private final Metrics.Factory metricsFactory;
     private static VelocityLifecycle lifecycle;
     private static VelocityAPI api;
     public static VelocityAPI getAPI() {
@@ -29,16 +30,18 @@ public class VelocityRustyConnector implements PluginRuntime {
     public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder, Metrics.Factory metricsFactory) {
         api = new VelocityAPI(this, server, logger, dataFolder);
         lifecycle = new VelocityLifecycle();
-        try {
-            metricsFactory.make(this, 17972);
-        } catch (Exception e) {
-            VelocityRustyConnector.getAPI().getLogger().log("Failed to register to bstats!");
-        }
+        this.metricsFactory = metricsFactory;
     }
 
     @Subscribe
     public void onLoad(ProxyInitializeEvent event) throws DuplicateLifecycleException {
         if(!lifecycle.start()) lifecycle.stop();
+        try {
+            metricsFactory.make(this, 17972);
+            VelocityRustyConnector.getAPI().getLogger().log("Registered to bstats!");
+        } catch (Exception e) {
+            VelocityRustyConnector.getAPI().getLogger().log("Failed to register to bstats!");
+        }
     }
 
     @Subscribe
