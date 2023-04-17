@@ -6,7 +6,8 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import net.kyori.adventure.text.Component;
 
 public class OnPlayerKicked {
@@ -15,13 +16,13 @@ public class OnPlayerKicked {
      */
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerKicked(KickedFromServerEvent event) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
         Player player = event.getPlayer();
 
         return EventTask.async(() -> {
             try {
                 if(player.getCurrentServer().isPresent()) {
-                    PaperServer server = plugin.getVirtualServer().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
+                    PlayerServer server = api.getVirtualProcessor().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
                     if (server == null) return;
                     server.playerLeft();
                 }

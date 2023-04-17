@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
-public interface Server extends Sortable {
+public interface PlayerServer extends Sortable {
 
     /**
      * Get the number of players on this server

@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
+import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,22 +16,23 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
 
     @Override
     public boolean generate() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
         if (!this.configPointer.exists()) {
             File parent = this.configPointer.getParentFile();
             if (!parent.exists())
                 parent.mkdirs();
 
-            InputStream templateStream = plugin.getResourceAsStream(this.template);
+            InputStream templateStream = api.getResourceAsStream(this.template);
             if (templateStream == null) {
-                plugin.logger().error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
+                logger.error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
                 return false;
             }
 
             try {
                 Files.copy(templateStream, this.configPointer.toPath());
             } catch (IOException e) {
-                plugin.logger().error("!!!!! Unable to setup "+this.configPointer.getName()+" !!!!!",e);
+                logger.error("!!!!! Unable to setup "+this.configPointer.getName()+" !!!!!",e);
                 return false;
             }
         }
@@ -37,10 +40,10 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
         try {
             this.data = this.loadYAML(this.configPointer);
             if(this.data == null) return false;
-            plugin.logger().log("Finished registering "+this.configPointer.getName());
+            logger.log("Finished registering "+this.configPointer.getName());
             return true;
         } catch (Exception e) {
-            plugin.logger().log("Failed to register: "+this.configPointer.getName());
+            logger.log("Failed to register: "+this.configPointer.getName());
             return false;
         }
     }

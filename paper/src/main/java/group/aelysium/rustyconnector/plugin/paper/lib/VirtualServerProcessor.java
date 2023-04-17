@@ -5,8 +5,11 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
-import group.aelysium.rustyconnector.core.lib.model.Server;
+import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
+import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.Redis;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueue;
@@ -14,12 +17,12 @@ import org.bukkit.entity.Player;
 
 import java.net.InetSocketAddress;
 
-public class PaperServer implements Server {
-    private TPAQueue tpaQueue = new TPAQueue();
+public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
+    private final TPAQueue tpaQueue = new TPAQueue();
     private MessageCache messageCache;
-    private Redis redis;
-    private String family;
-    private int weight = 0;
+    private final Redis redis;
+    private final String family;
+    private final int weight = 0;
     private int softPlayerCap = 20;
     private int hardPlayerCap = 30;
     private final String name;
@@ -27,7 +30,7 @@ public class PaperServer implements Server {
     private final String privateKey;
     private final InetSocketAddress address;
 
-    public PaperServer(String name, String privateKey, String address, String family, Redis redis) {
+    public VirtualServerProcessor(String name, String privateKey, String address, String family, Redis redis) {
         if(name.equals("")) {
             name = MD5.generatePrivateKey(); // Generate a custom string to be the server's name
         }
@@ -69,7 +72,7 @@ public class PaperServer implements Server {
 
     @Override
     public int getPlayerCount() {
-        return PaperRustyConnector.getInstance().getServer().getOnlinePlayers().size();
+        return PaperRustyConnector.getAPI().getServer().getOnlinePlayers().size();
     }
 
     @Override
@@ -102,13 +105,15 @@ public class PaperServer implements Server {
      * @param hardPlayerCap The hard player cap
      */
     public void setPlayerCap(int softPlayerCap, int hardPlayerCap) {
+        PaperAPI api = PaperRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
 
-        PaperRustyConnector.getInstance().getServer().setMaxPlayers(hardPlayerCap);
+        api.getServer().setMaxPlayers(hardPlayerCap);
 
         if(softPlayerCap >= hardPlayerCap) {
             this.hardPlayerCap = hardPlayerCap;
             this.softPlayerCap = hardPlayerCap;
-            PaperRustyConnector.getInstance().logger().log("soft-player-cap was set to be larger than hard-player-cap. Running in `player-limit` mode.");
+            logger.log("soft-player-cap was set to be larger than hard-player-cap. Running in `player-limit` mode.");
             return;
         }
         this.hardPlayerCap = hardPlayerCap;
@@ -179,10 +184,11 @@ public class PaperServer implements Server {
         registrationMessage.dispatchMessage(this.redis);
     }
 
-    public static PaperServer init(DefaultConfig config) throws IllegalAccessException {
-        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+    public static VirtualServerProcessor init(DefaultConfig config) throws IllegalAccessException {
+        PaperAPI api = PaperRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
 
-        plugin.logger().log("Preparing Redis...");
+        logger.log("Preparing Redis...");
 
         Redis redis = new Redis();
         redis.setConnection(
@@ -191,9 +197,9 @@ public class PaperServer implements Server {
                 config.getRedis_password(),
                 config.getRedis_dataChannel()
         );
-        redis.connect(plugin);
+        redis.connect(api);
 
-        PaperServer server = new PaperServer(
+        VirtualServerProcessor server = new VirtualServerProcessor(
                 config.getServer_name(),
                 config.getPrivate_key(),
                 config.getServer_address(),

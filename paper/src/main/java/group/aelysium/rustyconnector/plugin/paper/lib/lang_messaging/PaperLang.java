@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import net.kyori.adventure.text.Component;
 
 import java.util.Date;
@@ -64,4 +66,14 @@ public interface PaperLang extends Lang {
     );
 
     Component TPA_COMPLETE = text("Teleport completed!",GREEN);
+
+    ParameterizedMessage1<Boolean> RCNAME_PAPER_FOLIA = isFolia -> {
+        if(isFolia) return text("RustyConnector-Folia");
+        return text("RustyConnector-Paper");
+    };
+
+    ParameterizedMessage1<Boolean> RCNAME_PAPER_FOLIA_LOWER = isFolia -> {
+        if(isFolia) return text("rustyconnector-folia");
+        return text("rustyconnector-paper");
+    };
 }

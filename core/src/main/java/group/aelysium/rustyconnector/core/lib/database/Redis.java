@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.database;
 
+import group.aelysium.rustyconnector.core.central.PluginAPI;
+import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import net.kyori.adventure.text.Component;
@@ -8,7 +10,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
-import group.aelysium.rustyconnector.core.RustyConnector;
+import group.aelysium.rustyconnector.core.central.PluginRuntime;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -27,9 +29,6 @@ public class Redis {
 
     public Redis() {}
 
-    /**
-     * Sets the connection
-     */
     public void setConnection(String host, int port, String password, String dataChannel) {
         this.host = host;
         this.port = port;
@@ -37,10 +36,8 @@ public class Redis {
         this.dataChannel = dataChannel;
     }
 
-    /**
-     * Tests the connection to the provided Redis server
-     */
-    public void connect(RustyConnector plugin) throws ExceptionInInitializerError{
+
+    public void connect(PluginAPI api) throws ExceptionInInitializerError {
         try{
             if(!(this.client == null)) return;
 
@@ -50,9 +47,10 @@ public class Redis {
 
             final JedisPoolConfig poolConfig = new JedisPoolConfig();
             this.pool = new JedisPool(poolConfig, this.host, this.port, 0);
+
             this.jedisSubscriber = this.pool.getResource();
             this.jedisSubscriber.auth(this.password);
-            this.subscriber = new Subscriber(plugin);
+            this.subscriber = new Subscriber(api);
 
             this.subscriberThread = new Thread(() -> {
                 try {
@@ -64,7 +62,7 @@ public class Redis {
 
             this.subscriberThread.start();
         } catch (Exception e) {
-            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("REDIS: "+ e.getMessage()), NamedTextColor.RED);
+            Lang.BOXED_MESSAGE_COLORED.send(api.getLogger(), Component.text("REDIS: "+ e.getMessage()), NamedTextColor.RED);
         }
     }
 
@@ -72,9 +70,6 @@ public class Redis {
         this.client.publish(this.dataChannel, message);
     }
 
-    /**
-     * When redis disconnects
-     */
     public void disconnect() throws ExceptionInInitializerError {
         try {
             this.subscriber.unsubscribe();
@@ -97,10 +92,10 @@ public class Redis {
     public void onMessage(String rawMessage) {}
 
     public class Subscriber extends JedisPubSub {
-        private RustyConnector plugin;
+        private PluginAPI api;
 
-        public Subscriber(RustyConnector plugin) {
-            this.plugin = plugin;
+        public Subscriber(PluginAPI api) {
+            this.api = api;
         }
 
         @Override
@@ -121,6 +116,5 @@ public class Redis {
      * @param parameters Additional parameters
      * @throws IllegalArgumentException If message parameters contains parameters: `pk`, `type`, or `ip`
      */
-    public void sendMessage(String privateKey, RedisMessageType type, InetSocketAddress address, Map<String, String> parameters) throws IllegalArgumentException {
-    }
+    public void sendMessage(String privateKey, RedisMessageType type, InetSocketAddress address, Map<String, String> parameters) throws IllegalArgumentException {}
 }

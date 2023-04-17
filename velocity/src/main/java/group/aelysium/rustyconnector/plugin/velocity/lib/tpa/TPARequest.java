@@ -2,12 +2,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.tpa;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -58,7 +59,7 @@ public class TPARequest {
     }
 
     public void accept() {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
 
         this.getSender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.getTarget().getUsername()));
         this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.getSender().getUsername()));
@@ -67,11 +68,11 @@ public class TPARequest {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.getTarget().getCurrentServer().orElseThrow().getServerInfo();
-            String familyName = plugin.getVirtualServer().findServer(serverInfo).getFamilyName();
-            ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getVirtualServer().getFamilyManager().find(familyName);
+            String familyName = api.getVirtualProcessor().findServer(serverInfo).getFamilyName();
+            ServerFamily<? extends PaperServerLoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(familyName);
             if(family == null) throw new NullPointerException();
 
-            plugin.getVirtualServer().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
+            api.getVirtualProcessor().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
         } catch (Exception e) {
             this.getSender().sendMessage(VelocityLang.TPA_FAILURE.build(this.getTarget().getUsername()));
             this.getTarget().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.getSender().getUsername()));

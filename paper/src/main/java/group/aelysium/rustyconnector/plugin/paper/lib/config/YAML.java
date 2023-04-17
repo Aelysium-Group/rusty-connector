@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.config;
 
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,37 +16,38 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
 
     @Override
     public boolean generate() {
-        PaperRustyConnector plugin = PaperRustyConnector.getInstance();
+        PaperAPI api = PaperRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
 
-        plugin.logger().log("---| Registering "+this.configPointer.getName()+"...");
-        plugin.logger().log("-----| Looking for "+this.configPointer.getName()+"...");
+        logger.log("---| Registering "+this.configPointer.getName()+"...");
+        logger.log("-----| Looking for "+this.configPointer.getName()+"...");
 
         if (!this.configPointer.exists()) {
-            plugin.logger().log("-------| "+this.configPointer.getName()+" doesn't exist! Setting it up now...");
-            plugin.logger().log("-------| Preparing directory...");
+            logger.log("-------| "+this.configPointer.getName()+" doesn't exist! Setting it up now...");
+            logger.log("-------| Preparing directory...");
             File parent = this.configPointer.getParentFile();
             if (!parent.exists()) {
                 parent.mkdirs();
             }
 
-            plugin.logger().log("-------| Preparing template file...");
-            InputStream templateStream = plugin.getResourceAsStream(this.template);
+            logger.log("-------| Preparing template file...");
+            InputStream templateStream = api.getResourceAsStream(this.template);
             if (templateStream == null) {
-                plugin.logger().error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
+                logger.error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
                 return false;
             }
 
             try {
-                plugin.logger().log("-------| Cloning template file to new configuration...");
+                logger.log("-------| Cloning template file to new configuration...");
                 Files.copy(templateStream, this.configPointer.toPath());
-                plugin.logger().log("-------| Finished setting up "+this.configPointer.getName());
+                logger.log("-------| Finished setting up "+this.configPointer.getName());
 
             } catch (IOException e) {
-                plugin.logger().error("!!!!! Unable to setup "+this.configPointer.getName()+" !!!!!",e);
+                logger.error("!!!!! Unable to setup "+this.configPointer.getName()+" !!!!!",e);
                 return false;
             }
         } else {
-            plugin.logger().log("-----| Found it!");
+            logger.log("-----| Found it!");
         }
 
         try {

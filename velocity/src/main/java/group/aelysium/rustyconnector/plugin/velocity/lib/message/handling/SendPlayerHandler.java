@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
 import net.kyori.adventure.text.Component;
@@ -20,16 +21,16 @@ public class SendPlayerHandler implements MessageHandler {
 
     @Override
     public void execute() throws Exception {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
 
         String familyName = message.getParameter("family");
         UUID uuid = UUID.fromString(message.getParameter("uuid"));
 
-        Player player = VelocityRustyConnector.getInstance().getVelocityServer().getPlayer(uuid).stream().findFirst().orElse(null);
+        Player player = api.getServer().getPlayer(uuid).stream().findFirst().orElse(null);
         if(player == null) return;
 
         try {
-            ServerFamily<? extends PaperServerLoadBalancer> family = plugin.getVirtualServer().getFamilyManager().find(familyName);
+            ServerFamily<? extends PaperServerLoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(familyName);
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
             family.connect(player);

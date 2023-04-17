@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.tpa;
 
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class TPARequest {
     private String clientUsername;
@@ -37,19 +36,20 @@ public class TPARequest {
      * @throws NullPointerException If the player with `clientUsername` is not online.
      */
     public void resolveClient() {
-        Player client = PaperRustyConnector.getInstance().getServer().getPlayer(this.clientUsername);
+        PaperAPI api = PaperRustyConnector.getAPI();
+        Player client = api.getServer().getPlayer(this.clientUsername);
         if(client == null) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");
         if(!client.isOnline()) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");
 
         this.client = client;
     }
 
-    public void teleport() {
+    public void teleport() throws RuntimeException {
         if(this.client == null) throw new NullPointerException("Attempted to resolve a tpa request while the client isn't online!");
         if(!this.client.isOnline()) throw new NullPointerException("Attempted to resolve a tpa request while the client isn't online!");
 
         if(!this.target.isOnline()) throw new NullPointerException("Attempted to resolve a tpa request while the target isn't online!");
 
-        new TeleportRunnable(this.client, this.target).runTaskLater(PaperRustyConnector.getInstance(), 0);
+        this.client.teleportAsync(this.target.getLocation()).completeExceptionally(new RuntimeException("Failed to teleport "+this.client.getName()+" to "+this.target.getName()));
     }
 }

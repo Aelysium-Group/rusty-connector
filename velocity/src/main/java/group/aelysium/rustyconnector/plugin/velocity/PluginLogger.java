@@ -1,11 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.*;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
-public class PluginLogger implements group.aelysium.rustyconnector.core.lib.lang_messaging.Logger {
+public class PluginLogger implements group.aelysium.rustyconnector.core.central.PluginLogger {
     private final LoggerGate gate = new LoggerGate();
     private final Logger logger;
 
@@ -58,13 +59,14 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.lib.lang
     }
 
     public void send(Component message) {
-        VelocityRustyConnector.getInstance().getVelocityServer().getConsoleCommandSource().sendMessage(message);
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        api.getServer().getConsoleCommandSource().sendMessage(message);
     }
 
     public static void init(LoggerConfig config) {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PluginLogger pluginLogger = VelocityRustyConnector.getAPI().getLogger();
 
-        LoggerGate gate = plugin.logger().getGate();
+        LoggerGate gate = pluginLogger.getGate();
 
         gate.registerNode(
                 GateKey.SAVE_TRASH_MESSAGES,

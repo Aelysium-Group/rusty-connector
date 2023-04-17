@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.config;
 
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
@@ -15,7 +16,6 @@ public class DefaultConfig extends YAML {
     private static DefaultConfig config;
 
     private String private_key = "";
-    private String public_key = "";
     private String root_family = "lobby";
     private List<String> families = new ArrayList<>();
 
@@ -160,7 +160,7 @@ public class DefaultConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         try {
             this.processVersion();
@@ -172,10 +172,9 @@ public class DefaultConfig extends YAML {
             this.private_key = this.getNode(this.data,"private-key",String.class);
             if(this.private_key.equals("")) throw new Exception("You must provide a private key!");
         } catch (Exception e) {
-            VelocityLang.PRIVATE_KEY.send(plugin.logger());
+            VelocityLang.PRIVATE_KEY.send(logger);
             throw new NoOutputException(e);
         }
-        this.public_key = "";
 
         this.root_family = this.getNode(this.data,"root-family",String.class);
         try {
@@ -218,13 +217,13 @@ public class DefaultConfig extends YAML {
 
         this.messageTunnel_messageCacheSize = this.getNode(this.data,"message-tunnel.message-cache-size",Integer.class);
         if(this.messageTunnel_messageCacheSize > 500) {
-            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("Message cache size is to large! " + this.messageTunnel_messageCacheSize + " > 500. Message cache size set to 500."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Message cache size is to large! " + this.messageTunnel_messageCacheSize + " > 500. Message cache size set to 500."), NamedTextColor.YELLOW);
             this.messageTunnel_messageCacheSize = 500;
         }
 
         this.messageTunnel_messageMaxLength = this.getNode(this.data,"message-tunnel.message-max-length",Integer.class);
         if(this.messageTunnel_messageMaxLength < 384) {
-            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("Max message length is to small to be effective! " + this.messageTunnel_messageMaxLength + " < 384. Max message length set to 384."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Max message length is to small to be effective! " + this.messageTunnel_messageMaxLength + " < 384. Max message length set to 384."), NamedTextColor.YELLOW);
             this.messageTunnel_messageMaxLength = 384;
         }
 
@@ -254,7 +253,7 @@ public class DefaultConfig extends YAML {
         this.hearts_serverLifecycle_enabled = this.getNode(this.data,"hearts.server-lifecycle.enabled",Boolean.class);
         this.hearts_serverLifecycle_interval = this.getNode(this.data,"hearts.server-lifecycle.interval",Integer.class);
         if(this.hearts_serverLifecycle_interval < 10) {
-            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("Server lifecycle interval is set dangerously fast: " + this.hearts_serverLifecycle_interval + "ms. Setting to default of 30ms."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server lifecycle interval is set dangerously fast: " + this.hearts_serverLifecycle_interval + "ms. Setting to default of 30ms."), NamedTextColor.YELLOW);
             this.messageTunnel_messageMaxLength = 30;
         }
         this.hearts_serverLifecycle_unregisterOnIgnore = this.getNode(this.data,"hearts.server-lifecycle.unregister-on-ignore",Boolean.class);
@@ -262,7 +261,7 @@ public class DefaultConfig extends YAML {
         this.messageTunnel_familyServerSorting_enabled = this.getNode(this.data,"hearts.family-server-sorting.enabled",Boolean.class);
         this.messageTunnel_familyServerSorting_interval = this.getNode(this.data,"hearts.family-server-sorting.interval",Integer.class);
         if(this.messageTunnel_familyServerSorting_interval < 7) {
-            Lang.BOXED_MESSAGE_COLORED.send(plugin.logger(), Component.text("Server sorting interval is set dangerously fast: " + this.messageTunnel_familyServerSorting_interval + "ms. Setting to default of 20ms."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server sorting interval is set dangerously fast: " + this.messageTunnel_familyServerSorting_interval + "ms. Setting to default of 20ms."), NamedTextColor.YELLOW);
             this.messageTunnel_familyServerSorting_interval = 20;
         }
     }

@@ -1,12 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PaperServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 
 import java.net.InetSocketAddress;
 
@@ -19,7 +22,8 @@ public class PongHandler implements MessageHandler {
 
     @Override
     public void execute() throws Exception {
-        VelocityRustyConnector plugin = VelocityRustyConnector.getInstance();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
 
         InetSocketAddress address = message.getAddress();
 
@@ -29,16 +33,16 @@ public class PongHandler implements MessageHandler {
         );
 
         try {
-            PaperServer server = plugin.getVirtualServer().findServer(serverInfo);
+            PlayerServer server = api.getVirtualProcessor().findServer(serverInfo);
             if(server == null) return;
-            plugin.getVirtualServer().reviveServer(serverInfo);
+            api.getVirtualProcessor().reviveServer(serverInfo);
             server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
 
-            if(plugin.logger().getGate().check(GateKey.PONG))
-                VelocityLang.PONG.send(plugin.logger(), serverInfo);
+            if(logger.getGate().check(GateKey.PONG))
+                VelocityLang.PONG.send(logger, serverInfo);
         } catch (Exception e) {
-            if(plugin.logger().getGate().check(GateKey.PONG))
-                VelocityLang.PONG_CANCELED.send(plugin.logger(), serverInfo);
+            if(logger.getGate().check(GateKey.PONG))
+                VelocityLang.PONG_CANCELED.send(logger, serverInfo);
             throw new Exception(e.getMessage());
         }
     }
