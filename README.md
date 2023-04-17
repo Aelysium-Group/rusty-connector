@@ -22,6 +22,7 @@
 - ### ✅ Allow players to /tpa between servers
 - ### ✅ Works with LuckPerms-Velocity
 - ### ✅ Works with Kubernetes
+- ### ✅ Works with Folia
 - ### ❌ Can't tuck you into bed
 ---
 # Networks Served:
