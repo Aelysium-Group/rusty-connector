@@ -12,11 +12,11 @@
 # [Modrinth](https://modrinth.com/plugin/rustyconnector) | [Hangar](https://hangar.papermc.io/nathan-i-martin/RustyConnector)
 ---
 - ### ✅ Built for large networks
-- ### ✅ Register brand new servers to the virtualProxyProcessor during runtime
+- ### ✅ Register brand new servers to the proxy during runtime
 - ### ✅ Blazing fast data transmission with Redis integration
 - ### ✅ Create pre-defined whitelist configs and activate them dynamically
 - ### ✅ Register similar servers into families with family-level whitelists and load balancing
-- ### ✅ Automatically unregister frozen servers from the virtualProxyProcessor
+- ### ✅ Automatically unregister frozen servers from the proxy
 - ### ✅ Set soft and hard player limits for servers
 - ### ✅ Whitelist players based on permission, Username, UUID, or IP Address
 - ### ✅ Allow players to /tpa between servers
