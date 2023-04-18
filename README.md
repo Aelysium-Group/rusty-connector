@@ -31,6 +31,7 @@
 [![RustyConnector bstats graph](https://bstats.org/signatures/bukkit/RustyConnector.svg)](https://bstats.org/signatures/bukkit/RustyConnector.svg)
 ---
 ## Incoming Features/Changes
+- [ ] Kubernettes auto-scaling
 - [ ] Player routing based on client version
 - [ ] Propper Redis Connection Pooling (PR's welcome!)
 - [ ] Better error and overall handling for Redis
