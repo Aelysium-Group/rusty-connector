@@ -32,6 +32,7 @@
 ---
 ## Incoming Features/Changes
 - [ ] Kubernettes auto-scaling
+- [ ] Discord Webhook integration
 - [ ] Player routing based on client version
 - [ ] Propper Redis Connection Pooling (PR's welcome!)
 - [ ] Better error and overall handling for Redis
