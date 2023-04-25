@@ -86,23 +86,21 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
     /**
      * Connect a player to this family
      * @param player The player to connect
+     * @return A PlayerServer on successful connection.
+     * @throws RuntimeException If the connection cannot be made.
      */
-    public void connect(Player player) {
-        if(this.loadBalancer.size() == 0) {
-            player.disconnect(Component.text("There are no servers for you to connect to!"));
-            return;
-        }
+    public PlayerServer connect(Player player) {
+        if(this.loadBalancer.size() == 0)
+            throw new RuntimeException("There are no servers for you to connect to!");
 
         if(!(this.whitelist == null)) {
             Whitelist familyWhitelist = this.getWhitelist();
 
-            if (!familyWhitelist.validate(player)) {
-                player.disconnect(Component.text(familyWhitelist.getMessage()));
-                return;
-            }
+            if (!familyWhitelist.validate(player))
+                throw new RuntimeException(familyWhitelist.getMessage());
         }
 
-        Callable<Boolean> notPersistent = () -> {
+        Callable<PlayerServer> notPersistent = () -> {
             PlayerServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
             try {
                 if(!server.validatePlayer(player))
@@ -113,14 +111,12 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
                 this.loadBalancer.iterate();
 
-                return true;
+                return server;
             } catch (RuntimeException e) {
-                player.disconnect(Component.text(e.getMessage()));
+                throw new RuntimeException(e.getMessage());
             }
-
-            return false;
         };
-        Callable<Boolean> persistent = () -> {
+        Callable<PlayerServer> persistent = () -> {
             int attemptsLeft = this.loadBalancer.getAttempts();
 
             for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
@@ -131,7 +127,10 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                     if(!server.validatePlayer(player))
                         throw new RuntimeException("The server you're trying to connect to is full!");
 
-                    if(server.connect(player)) break;
+                    if(server.connect(player)) {
+                        this.loadBalancer.forceIterate();
+                        return server;
+                    }
                     else throw new RuntimeException("Unable to connect you to the server in time!");
                 } catch (Exception e) {
                     if(isFinal)
@@ -140,35 +139,33 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                 this.loadBalancer.forceIterate();
             }
 
-            return true;
+            throw new RuntimeException("There was an issue connecting you to the server!");
         };
 
-        if(this.loadBalancer.isPersistent() && this.loadBalancer.getAttempts() > 1) persistent.execute();
-        else notPersistent.execute();
+        if(this.loadBalancer.isPersistent() && this.loadBalancer.getAttempts() > 1) return persistent.execute();
+        else return notPersistent.execute();
     }
 
     /**
      * Connect a player to this family
      * @param player The player to connect
      * @param event The initial connection event of a player
+     * @return A PlayerServer on successful connection.
+     * @throws RuntimeException If the connection cannot be made.
      */
-    public void connect(Player player, PlayerChooseInitialServerEvent event) {
-        if(this.loadBalancer.size() == 0) {
-            player.disconnect(Component.text("There are no servers for you to connect to!"));
-            return;
-        }
+    public PlayerServer connect(Player player, PlayerChooseInitialServerEvent event) throws RuntimeException {
+        if(this.loadBalancer.size() == 0)
+            throw new RuntimeException("There are no servers for you to connect to!");
 
         if(!(this.whitelist == null)) {
             Whitelist familyWhitelist = this.getWhitelist();
 
-            if (!familyWhitelist.validate(player)) {
-                player.disconnect(Component.text(familyWhitelist.getMessage()));
-                return;
-            }
+            if (!familyWhitelist.validate(player))
+                throw new RuntimeException(familyWhitelist.getMessage());
         }
 
 
-        Callable<Boolean> notPersistent = () -> {
+        Callable<PlayerServer> notPersistent = () -> {
             PlayerServer server = this.loadBalancer.getCurrent(); // Get the server that is currently listed as highest priority
             try {
                 if(!server.validatePlayer(player))
@@ -179,14 +176,12 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
 
                 this.loadBalancer.iterate();
 
-                return true;
+                return server;
             } catch (RuntimeException e) {
-                player.disconnect(Component.text(e.getMessage()));
+                throw new RuntimeException(e.getMessage());
             }
-
-            return false;
         };
-        Callable<Boolean> persistent = () -> {
+        Callable<PlayerServer> persistent = () -> {
             int attemptsLeft = this.loadBalancer.getAttempts();
 
             for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
@@ -197,7 +192,10 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                     if(!server.validatePlayer(player))
                         throw new RuntimeException("The server you're trying to connect to is full!");
 
-                    if(server.connect(event)) break;
+                    if(server.connect(event)) {
+                        this.loadBalancer.forceIterate();
+                        return server;
+                    }
                     else throw new RuntimeException("Unable to connect you to the server in time!");
                 } catch (Exception e) {
                     if(isFinal)
@@ -206,11 +204,11 @@ public class ServerFamily<LB extends PaperServerLoadBalancer> {
                 this.loadBalancer.forceIterate();
             }
 
-            return true;
+            throw new RuntimeException("There was an issue connecting you to the server!");
         };
 
-        if(this.loadBalancer.isPersistent() && this.loadBalancer.getAttempts() > 1) persistent.execute();
-        else notPersistent.execute();
+        if(this.loadBalancer.isPersistent() && this.loadBalancer.getAttempts() > 1) return persistent.execute();
+        else return notPersistent.execute();
     }
 
     /**

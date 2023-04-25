@@ -4,15 +4,20 @@ import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 
 public class OnPlayerChangeServer {
     /**
-     * Runs when a player first joins the proxy
+     * Also runs when a player first joins the proxy
      */
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerChangeServer(ServerConnectedEvent event) {
@@ -22,21 +27,43 @@ public class OnPlayerChangeServer {
                 VirtualProxyProcessor virtualProcessor = api.getVirtualProcessor();
 
                 try {
-                    PlayerServer newServer = virtualProcessor.findServer(event.getServer().getServerInfo());
+                    Player player = event.getPlayer();
+
+                    RegisteredServer newRawServer = event.getServer();
+                    RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
+
+                    PlayerServer newServer = virtualProcessor.findServer(newRawServer.getServerInfo());
+
+                    if(oldRawServer == null) return; // Player just connected to proxy. This isn't a server switch.
+
+                    PlayerServer oldServer = virtualProcessor.findServer(oldRawServer.getServerInfo());
+
 
                     if(newServer == null)
                         logger.log("The server that this player is joining doesn't seem to exist!");
-                    else
+                    else {
                         newServer.playerJoined();
-
-                    if(event.getPreviousServer().isPresent()) {
-                        PlayerServer oldServer = virtualProcessor.findServer(event.getPreviousServer().get().getServerInfo());
-
-                        if(oldServer == null)
-                            logger.log("The server that this player is leaving doesn't seem to exist!");
-                        else
-                            oldServer.playerLeft();
+                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, newServer));
+                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, newServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
                     }
+
+                    if(oldServer == null)
+                        logger.log("The server that this player is leaving doesn't seem to exist!");
+                    else {
+                        oldServer.playerLeft();
+                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
+                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
+                    }
+
+
+
+                    if(newServer != null && oldServer != null)
+                        if(newServer.getFamilyName().equals(oldServer.getFamilyName()))
+                            WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH, newServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_SWITCH.build(player, oldServer, newServer));
+
+                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_SERVER, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_SERVER.build(player, oldServer, newServer));
+                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_FAMILY.build(player, oldServer, newServer));
+
                 } catch (Exception e) {
                     logger.log(e.getMessage());
                 }

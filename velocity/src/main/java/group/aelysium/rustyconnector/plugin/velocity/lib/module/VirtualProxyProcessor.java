@@ -24,6 +24,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.Velocity
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
@@ -273,7 +276,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
     /**
      * Sends a request to all servers listening on this data channel to register themselves.
-     * Can be usefull if you've just restarted your proxy and need to quickly get all your servers back online.
+     * Can be useful if you've just restarted your proxy and need to quickly get all your servers back online.
      */
     public void registerAllServers() {
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
@@ -288,6 +291,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         );
 
         message.dispatchMessage(this.redis);
+        WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, DiscordWebhookMessage.PROXY__REGISTER_ALL);
     }
 
     /**
@@ -310,6 +314,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         message.addParameter("family",familyName);
 
         message.dispatchMessage(this.redis);
+        WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, familyName, DiscordWebhookMessage.FAMILY__REGISTER_ALL.build(familyName));
     }
 
     /**
@@ -380,6 +385,8 @@ public class VirtualProxyProcessor implements VirtualProcessor {
             if(logger.getGate().check(GateKey.REGISTRATION_REQUEST))
                 VelocityLang.REGISTERED.send(logger, server.getServerInfo(), familyName);
 
+            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, DiscordWebhookMessage.PROXY__SERVER_REGISTER.build(server, familyName));
+            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, familyName, DiscordWebhookMessage.FAMILY__SERVER_REGISTER.build(server, familyName));
             return registeredServer;
         } catch (Exception error) {
             if(logger.getGate().check(GateKey.REGISTRATION_REQUEST))
@@ -413,6 +420,9 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
             if(logger.getGate().check(GateKey.UNREGISTRATION_REQUEST))
                 VelocityLang.UNREGISTERED.send(logger, serverInfo, familyName);
+
+            WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, DiscordWebhookMessage.PROXY__SERVER_UNREGISTER.build(server));
+            WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, familyName, DiscordWebhookMessage.FAMILY__SERVER_UNREGISTER.build(server));
         } catch (Exception e) {
             if(logger.getGate().check(GateKey.UNREGISTRATION_REQUEST))
                 VelocityLang.UNREGISTRATION_CANCELED.send(logger, serverInfo, familyName);

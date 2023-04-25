@@ -50,7 +50,7 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 2
+version: 3
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
