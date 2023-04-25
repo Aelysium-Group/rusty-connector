@@ -201,7 +201,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         } catch(Exception ignore) {
             return false;
         }
-
     }
 
     /**

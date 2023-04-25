@@ -10,5 +10,6 @@ public enum WebhookAlertFlag {
     PLAYER_LEAVE_FAMILY,    // PROXY
     PLAYER_SWITCH_SERVER,   // PROXY
     PLAYER_SWITCH_FAMILY,   // PROXY
-    PLAYER_SWITCH           // FAMILY
+    PLAYER_SWITCH,          // FAMILY
+    DISCONNECT_CATCH        // FAMILY
 }

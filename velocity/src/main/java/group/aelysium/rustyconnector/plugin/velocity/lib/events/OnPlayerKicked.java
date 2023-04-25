@@ -27,8 +27,9 @@ public class OnPlayerKicked {
                 if(player.getCurrentServer().isPresent()) {
                     PlayerServer server = api.getVirtualProcessor().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
                     if (server == null) return;
-
                     server.playerLeft();
+
+                    boolean wasKickedFromRootFamily = api.getVirtualProcessor().getRootFamily().getName().equals(server.getFamilyName());
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.getFamilyName(), DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, server));
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, server.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));

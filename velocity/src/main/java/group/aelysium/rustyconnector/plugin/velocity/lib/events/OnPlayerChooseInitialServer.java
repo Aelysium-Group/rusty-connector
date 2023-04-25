@@ -42,6 +42,7 @@ public class OnPlayerChooseInitialServer {
                 ServerFamily<? extends PaperServerLoadBalancer> rootFamily = api.getVirtualProcessor().getRootFamily();
 
                 PlayerServer server = rootFamily.connect(player, event);
+                server.playerJoined();
 
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, DiscordWebhookMessage.PROXY__PLAYER_JOIN.build(player, server));
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, server));

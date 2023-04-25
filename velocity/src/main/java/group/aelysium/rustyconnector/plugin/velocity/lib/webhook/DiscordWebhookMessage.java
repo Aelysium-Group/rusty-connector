@@ -9,16 +9,37 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
  * Thank you to <a href="https://github.com/LuckPerms/LuckPerms">...</a> for inspiring this implementation.
  */
 public interface DiscordWebhookMessage {
+    String IMAGE_PROXY__REGISTER_ALL = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480087037591653/PROXY__REGISTER_ALL.png";
+    String IMAGE_PROXY__SERVER_REGISTER = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480087289237537/PROXY__SERVER_REGISTER.png";
+    String IMAGE_PROXY__SERVER_UNREGISTER = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480087515734099/PROXY__SERVER_UNREGISTER.png";
+    String IMAGE_PROXY__PLAYER_JOIN = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480141227982858/PROXY__PLAYER_JOIN.png";
+    String IMAGE_PROXY__PLAYER_LEAVE = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480086454571078/PROXY__PLAYER_LEAVE.png";
+    String IMAGE_PROXY__DISCONNECT_CATCH = "https://cdn.discordapp.com/attachments/1098811303679774851/1100493810779303946/FAMILY__DISCONNECT_CATCH.png";
+    String IMAGE_FAMILY__REGISTER_ALL = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480045790797994/FAMILY__REGISTER_ALL.png";
+    String IMAGE_FAMILY__SERVER_REGISTER = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480046013100092/FAMILY__SERVER_REGISTER.png";
+    String IMAGE_FAMILY__SERVER_UNREGISTER = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480046235390033/FAMILY__SERVER_UNREGISTER.png";
+    String IMAGE_FAMILY__PLAYER_JOIN = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480045111320686/FAMILY__PLAYER_JOIN.png";
+    String IMAGE_FAMILY__PLAYER_LEAVE = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480045325234400/FAMILY__PLAYER_LEAVE.png";
+
+    String IMAGE__GENERIC_SWITCH = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480045539135508/FAMILY__PLAYER_SWITCH.png";
+    String IMAGE__PLAYER_FAMILY_SWITCH = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480086794313748/PROXY__PLAYER_SWITCH.png";
+    String IMAGE__PLAYER_SERVER_SWITCH = "https://cdn.discordapp.com/attachments/1098811303679774851/1100481467492077740/SERVER__PLAYER_SWITCH.png";
+
+    Integer COLOR_AQUA  = 0x36F5F3;
+    Integer COLOR_GREEN = 0x5DD672;
+    Integer COLOR_RED   = 0xEB4F38;
+    Integer COLOR_BLUE  = 0x7D67F5;
+    Integer COLOR_PINK  = 0xFF50B8;
 
     WebhookEmbed PROXY__REGISTER_ALL =
             new WebhookEmbedBuilder()
-                    .setColor(0x6684504)
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     "Register All Servers",
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1098813040025157652/icons8-all-128.png", null
+                                    IMAGE_PROXY__REGISTER_ALL, null
                             )
                     )
+                    .setColor(COLOR_AQUA)
                     .build();
 
     ParameterizedEmbed2<PlayerServer, String> PROXY__SERVER_REGISTER = (server, familyName) ->
@@ -26,13 +47,13 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                 "Server: " + server.getServerInfo().getName(),
-                                "https://cdn.discordapp.com/attachments/1098811303679774851/1098811341415923742/icons8-upload-96.png", null
+                                IMAGE_PROXY__SERVER_REGISTER, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Was registered into: " + familyName, null)
                     )
-                    .setColor(0x02CA90)
+                    .setColor(COLOR_GREEN)
                     .build();
 
     ParameterizedEmbed1<PlayerServer> PROXY__SERVER_UNREGISTER = (server) ->
@@ -40,13 +61,13 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     "Server: " + server.getServerInfo().getName(),
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1098811341139095562/icons8-blocked-128.png", null
+                                    IMAGE_PROXY__SERVER_UNREGISTER, null
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Was unregistered from " + server.getFamilyName(), null)
+                            new WebhookEmbed.EmbedTitle("Was unregistered from: " + server.getFamilyName(), null)
                     )
-                    .setColor(0xCC3913)
+                    .setColor(COLOR_RED)
                     .build();
 
     ParameterizedEmbed2<Player, PlayerServer> PROXY__PLAYER_JOIN = (player, server) ->
@@ -54,7 +75,7 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     "Joined the network",
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                    IMAGE_PROXY__PLAYER_JOIN, null
                             )
                     )
                     .setTitle(
@@ -62,7 +83,7 @@ public interface DiscordWebhookMessage {
                     )
                     .addField(new WebhookEmbed.EmbedField(true, "Family", server.getFamilyName()))
                     .addField(new WebhookEmbed.EmbedField(true, "Server", server.getServerInfo().getName()))
-                    .setColor(0x0CB5B1)
+                    .setColor(COLOR_GREEN)
                     .build();
 
     ParameterizedEmbed1<Player> PROXY__PLAYER_LEAVE = (player) ->
@@ -70,13 +91,13 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     "Left the network",
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                    IMAGE_PROXY__PLAYER_LEAVE, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle(player.getUsername(), null)
                     )
-                    .setColor(0xCA2525)
+                    .setColor(COLOR_RED)
                     .build();
 
     ParameterizedEmbed2<Player, PlayerServer> PROXY__PLAYER_JOIN_FAMILY = (player, server) ->
@@ -84,14 +105,14 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     player.getUsername(),
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                    IMAGE_FAMILY__PLAYER_JOIN, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Joined the family: " + server.getFamilyName(),null)
                     )
                     .addField(new WebhookEmbed.EmbedField(false, "Server", server.getServerInfo().getName()))
-                    .setColor(0x02CA90)
+                    .setColor(COLOR_GREEN)
                     .build();
 
     ParameterizedEmbed2<Player, PlayerServer> PROXY__PLAYER_LEAVE_FAMILY = (player, server) ->
@@ -99,13 +120,13 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     player.getUsername(),
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                    IMAGE_FAMILY__PLAYER_LEAVE, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Left the family: " + server.getFamilyName(), null)
                     )
-                    .setColor(0xCA2525)
+                    .setColor(COLOR_RED)
                     .build();
 
     ParameterizedEmbed3<Player, PlayerServer, PlayerServer> PROXY__PLAYER_SWITCH_SERVER = (player, oldServer, newServer) -> {
@@ -114,13 +135,13 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     player.getUsername(),
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                    IMAGE__PLAYER_SERVER_SWITCH, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Switched servers from " + oldServer.getServerInfo().getName() + " to " + newServer.getServerInfo().getName(), null)
                     )
-                    .setColor(0x0CB5B1)
+                    .setColor(COLOR_PINK)
                     .build();
 
 
@@ -128,7 +149,7 @@ public interface DiscordWebhookMessage {
                 .setAuthor(
                         new WebhookEmbed.EmbedAuthor(
                                 player.getUsername(),
-                                "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                IMAGE__PLAYER_SERVER_SWITCH, null
                         )
                 )
                 .setTitle(
@@ -136,7 +157,7 @@ public interface DiscordWebhookMessage {
                 )
                 .addField(new WebhookEmbed.EmbedField(true, "Old Family", oldServer.getServerInfo().getName()))
                 .addField(new WebhookEmbed.EmbedField(true, "New Family", newServer.getServerInfo().getName()))
-                .setColor(0x0CB5B1)
+                .setColor(COLOR_PINK)
                 .build();
     };
 
@@ -145,13 +166,27 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     player.getUsername(),
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                    IMAGE__PLAYER_FAMILY_SWITCH, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Switched families from " + oldServer.getFamilyName() + " to " + newServer.getFamilyName(), null)
                     )
-                    .setColor(0x0CB5B1)
+                    .setColor(COLOR_BLUE)
+                    .build();
+
+    ParameterizedEmbed3<Player, PlayerServer, PlayerServer> PROXY__DISCONNECT_CATCH = (player, oldServer, newServer) ->
+            new WebhookEmbedBuilder()
+                    .setAuthor(
+                            new WebhookEmbed.EmbedAuthor(
+                                    player.getUsername(),
+                                    IMAGE__PLAYER_FAMILY_SWITCH, null
+                            )
+                    )
+                    .setTitle(
+                            new WebhookEmbed.EmbedTitle("Was caught by " + newServer.getFamilyName() + " after being disconnected from " + oldServer.getFamilyName(), null)
+                    )
+                    .setColor(COLOR_BLUE)
                     .build();
 
 
@@ -159,42 +194,42 @@ public interface DiscordWebhookMessage {
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
-                                    familyName,
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1098813040025157652/icons8-all-128.png", null
+                                    "Family: " + familyName,
+                                    IMAGE_FAMILY__REGISTER_ALL, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Requested to register all of its servers",null)
                     )
-                    .setColor(0x6684504)
+                    .setColor(COLOR_AQUA)
                     .build();
     ParameterizedEmbed2<PlayerServer, String> FAMILY__SERVER_REGISTER = (server, familyName) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     "Registered",
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1098811341415923742/icons8-upload-96.png", null
+                                    IMAGE_FAMILY__SERVER_REGISTER, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle(server.getServerInfo().getName(), null)
                     )
                     .addField(new WebhookEmbed.EmbedField(false, "Family", familyName))
-                    .setColor(0x02CA90)
+                    .setColor(COLOR_GREEN)
                     .build();
     ParameterizedEmbed1<PlayerServer> FAMILY__SERVER_UNREGISTER = (server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     "Unregistered",
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1098811341139095562/icons8-blocked-128.png", null
+                                    IMAGE_FAMILY__SERVER_UNREGISTER, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle(server.getServerInfo().getName(), null)
                     )
                     .addField(new WebhookEmbed.EmbedField(false, "Family", server.getFamilyName()))
-                    .setColor(0xCC3913)
+                    .setColor(COLOR_RED)
                     .build();
 
     ParameterizedEmbed2<Player, PlayerServer> FAMILY__PLAYER_JOIN = (player, server) ->
@@ -202,7 +237,7 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     player.getUsername(),
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                    IMAGE_FAMILY__PLAYER_JOIN, null
                             )
                     )
                     .setTitle(
@@ -210,7 +245,7 @@ public interface DiscordWebhookMessage {
                     )
                     .addField(new WebhookEmbed.EmbedField(true, "Family", server.getFamilyName()))
                     .addField(new WebhookEmbed.EmbedField(true, "Server", server.getServerInfo().getName()))
-                    .setColor(0x0F8F1F)
+                    .setColor(COLOR_GREEN)
                     .build();
 
     ParameterizedEmbed2<Player, PlayerServer> FAMILY__PLAYER_LEAVE = (player, server) ->
@@ -218,7 +253,7 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     player.getUsername(),
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                    IMAGE_FAMILY__PLAYER_LEAVE, null
                             )
                     )
                     .setTitle(
@@ -226,7 +261,7 @@ public interface DiscordWebhookMessage {
                     )
                     .addField(new WebhookEmbed.EmbedField(true, "Family", server.getFamilyName()))
                     .addField(new WebhookEmbed.EmbedField(true, "Server", server.getServerInfo().getName()))
-                    .setColor(0xCA2525)
+                    .setColor(COLOR_RED)
                     .build();
 
     ParameterizedEmbed3<Player, PlayerServer, PlayerServer> FAMILY__PLAYER_SWITCH = (player, oldServer, newServer) ->
@@ -234,14 +269,14 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     player.getUsername(),
-                                    "https://cdn.discordapp.com/attachments/1098811303679774851/1100113134330580992/icons8-add-user-male-96.png", null
+                                    IMAGE__PLAYER_SERVER_SWITCH, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Switched servers from " + oldServer.getServerInfo().getName() + " to " + newServer.getServerInfo().getName(), null)
                     )
                     .addField(new WebhookEmbed.EmbedField(false, "Family", newServer.getFamilyName()))
-                    .setColor(0x0CB5B1)
+                    .setColor(COLOR_PINK)
                     .build();
 
     interface ParameterizedEmbed1<A1> {
