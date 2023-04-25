@@ -31,7 +31,7 @@
 [![RustyConnector bstats graph](https://bstats.org/signatures/bukkit/RustyConnector.svg)](https://bstats.org/signatures/bukkit/RustyConnector.svg)
 ---
 ## Incoming Features/Changes
-- [ ] Discord Webhook integration
+- [x] Discord Webhook integration
 - [ ] Static Families (For stateful gamemodes)
 - [ ] Kubernettes auto-scaling
 - [ ] Player routing based on client version
