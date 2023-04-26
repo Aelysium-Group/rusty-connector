@@ -32,7 +32,7 @@
 ---
 ## Incoming Features/Changes
 - [x] Discord Webhook integration
-- [ ] Static Families (For stateful gamemodes)
+- [x] Static Families (For stateful gamemodes)
 - [ ] Kubernettes auto-scaling
 - [ ] Player routing based on client version
 - [ ] Propper Redis Connection Pooling (PR's welcome!)
