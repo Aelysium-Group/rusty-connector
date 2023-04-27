@@ -30,6 +30,7 @@ public class OnPlayerDisconnect {
                 if(player.getCurrentServer().isPresent()) {
                     PlayerServer server = api.getVirtualProcessor().findServer(player.getCurrentServer().get().getServerInfo());
                     server.playerLeft();
+                    api.getVirtualProcessor().uncacheHomeServerMappings(player);
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, server));

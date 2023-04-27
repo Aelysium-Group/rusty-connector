@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.core.lib.util.SingleSort;
 import group.aelysium.rustyconnector.core.lib.util.WeightedQuickSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 
-public class LeastConnection extends PaperServerLoadBalancer {
+public class LeastConnection extends LoadBalancer {
 
     @Override
     public void iterate() {

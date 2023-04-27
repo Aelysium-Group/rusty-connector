@@ -6,8 +6,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FamilyConfig extends YAML {
-    private static Map<String, FamilyConfig> configs = new HashMap<>();
+public class ScalarFamilyConfig extends YAML {
+    private static Map<String, ScalarFamilyConfig> configs = new HashMap<>();
     private boolean loadBalancing_weighted = false;
     private String loadBalancing_algorithm = "ROUND_ROBIN";
     private boolean loadBalancing_persistence_enabled = false;
@@ -18,7 +18,7 @@ public class FamilyConfig extends YAML {
     private boolean tpa_ignorePlayerCap = false;
     private int tpa_requestLifetime = 5;
 
-    private FamilyConfig(File configPointer, String template) {
+    private ScalarFamilyConfig(File configPointer, String template) {
         super(configPointer, template);
     }
 
@@ -63,8 +63,8 @@ public class FamilyConfig extends YAML {
      * @param configPointer The config file.
      * @param template The path to the template config file.
      */
-    public static FamilyConfig newConfig(String name, File configPointer, String template) {
-        FamilyConfig config = new FamilyConfig(configPointer, template);
+    public static ScalarFamilyConfig newConfig(String name, File configPointer, String template) {
+        ScalarFamilyConfig config = new ScalarFamilyConfig(configPointer, template);
         configs.put(name, config);
         return config;
     }

@@ -5,8 +5,8 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 import net.kyori.adventure.text.Component;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -30,7 +30,7 @@ public class SendPlayerHandler implements MessageHandler {
         if(player == null) return;
 
         try {
-            ServerFamily<? extends PaperServerLoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(familyName);
+            BaseServerFamily<? extends LoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(familyName);
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
             family.connect(player);

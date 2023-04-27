@@ -14,7 +14,8 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 
 import java.security.InvalidAlgorithmParameterException;
 
@@ -145,11 +146,11 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @throws IllegalStateException If the server hasn't been registered yet.
      * @throws NullPointerException If the family associated with this server doesn't exist.
      */
-    public ServerFamily<? extends PaperServerLoadBalancer> getFamily() throws IllegalStateException, NullPointerException {
+    public BaseServerFamily getFamily() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        ServerFamily<? extends PaperServerLoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(this.familyName);
+        BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;

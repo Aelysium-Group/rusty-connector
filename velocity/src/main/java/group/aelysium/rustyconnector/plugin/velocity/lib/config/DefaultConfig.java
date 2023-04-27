@@ -11,18 +11,27 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
 
     private String private_key = "";
-    private String root_family = "lobby";
-    private List<String> families = new ArrayList<>();
+    private String families_rootFamily_name = "lobby";
+    private Boolean family_rootFamily_catchDisconnectiongPlayers = false;
+    private List<String> families_scalar = new ArrayList<>();
+    private List<String> families_static = new ArrayList<>();
 
     private String redis_host = "";
     private int redis_port = 3306;
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
+
+    private String mysql_host = "";
+    private int mysql_port = 3306;
+    private String mysql_user = "root";
+    private String mysql_password = "password";
+    private String mysql_database = "RustyConnector";
 
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
@@ -75,28 +84,48 @@ public class DefaultConfig extends YAML {
         return this.private_key;
     }
 
-    public String getRoot_family() {
-        return this.root_family;
+    public String getRootFamilyName() {
+        return this.families_rootFamily_name;
+    }
+    public Boolean shouldRootFamilyCatchDisconnectingPlayers() {
+        return this.family_rootFamily_catchDisconnectiongPlayers;
     }
 
-    public List<String> getFamilies() {
-        return this.families;
+    public List<String> getScalarFamilies() {
+        return this.families_scalar;
+    }
+    public List<String> getStaticFamilies() {
+        return this.families_static;
     }
 
     public String getRedis_host() {
         return this.redis_host;
     }
-
     public int getRedis_port() {
         return this.redis_port;
     }
-
     public String getRedis_password() {
         return this.redis_password;
     }
-
     public String getRedis_dataChannel() {
         return this.redis_dataChannel;
+    }
+
+
+    public String getMysql_host() {
+        return this.mysql_host;
+    }
+    public int getMysql_port() {
+        return this.mysql_port;
+    }
+    public String getMysql_password() {
+        return this.mysql_password;
+    }
+    public String getMysql_user() {
+        return this.mysql_user;
+    }
+    public String getMysql_database() {
+        return this.mysql_database;
     }
 
     public boolean isWhitelist_enabled() {
@@ -110,7 +139,6 @@ public class DefaultConfig extends YAML {
     public int getMessageTunnel_messageCacheSize() {
         return messageTunnel_messageCacheSize;
     }
-
     public int getMessageTunnel_messageMaxLength() {
         return messageTunnel_messageMaxLength;
     }
@@ -176,18 +204,39 @@ public class DefaultConfig extends YAML {
             throw new NoOutputException(e);
         }
 
-        this.root_family = this.getNode(this.data,"root-family",String.class);
+        this.families_rootFamily_name = this.getNode(this.data,"families.root-family.name",String.class);
+        this.family_rootFamily_catchDisconnectiongPlayers = this.getNode(this.data,"families.root-family.catch-disconnecting-players",Boolean.class);
         try {
-            this.families = (List<String>) (this.getNode(this.data,"families",List.class));
+            this.families_scalar = (List<String>) (this.getNode(this.data,"families.scalar",List.class));
         } catch (Exception e) {
-            throw new IllegalStateException("The node [families] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
+            throw new IllegalStateException("The node [families.scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
+        }
+        try {
+            this.families_static = (List<String>) (this.getNode(this.data,"families.static",List.class));
+        } catch (Exception e) {
+            throw new IllegalStateException("The node [families.scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
 
-        this.families.forEach(familyName -> {
+        if(this.families_rootFamily_name.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
+        this.families_scalar.forEach(familyName -> {
             if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
         });
-        if(!this.families.contains(this.root_family))
-            throw new IllegalStateException("`root-family` must match a family listed in `families`. "+ this.root_family + " not found.");
+        this.families_static.forEach(familyName -> {
+            if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
+        });
+
+        if(this.families_scalar.contains(this.families_rootFamily_name)) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.scalar] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family]. Ignoring..."), NamedTextColor.YELLOW);
+            this.families_scalar.remove(this.families_rootFamily_name);
+        }
+        if(this.families_static.contains(this.families_rootFamily_name)) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.static] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family]. Ignoring..."), NamedTextColor.YELLOW);
+            this.families_static.remove(this.families_rootFamily_name);
+        }
+
+        List<String> duplicates = this.families_scalar.stream().filter(this.families_static::contains).toList();
+        if(duplicates.size() > 0)
+            throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of if the family is scalar or static! Duplicate family names: " + duplicates);
 
         // Redis
 
@@ -196,13 +245,29 @@ public class DefaultConfig extends YAML {
 
         this.redis_port = this.getNode(this.data, "redis.port", Integer.class);
         this.redis_password = this.getNode(this.data, "redis.password", String.class);
-        if(this.redis_password.equals("password") || this.redis_password.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
-        if(this.redis_password.length() < 16)
+
+        if(this.redis_password.length() != 0 && this.redis_password.length() < 16)
             throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
 
         this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
         if(this.redis_dataChannel.equals(""))
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
+
+        // MySQL
+
+        this.mysql_host = this.getNode(this.data, "redis.host", String.class);
+        if(this.mysql_host.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
+
+        this.mysql_port = this.getNode(this.data, "redis.port", Integer.class);
+        this.mysql_user = this.getNode(this.data, "redis.user", String.class);
+        this.mysql_password = this.getNode(this.data, "redis.password", String.class);
+        if(this.mysql_password.equals("password") || this.mysql_password.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
+        if(this.mysql_password.length() < 16)
+            throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
+
+        this.mysql_database = this.getNode(this.data, "redis.data-channel", String.class);
+        if(this.mysql_database.equals(""))
+            throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
 
         // Whitelist
 

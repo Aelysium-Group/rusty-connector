@@ -9,16 +9,15 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Permission;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPARequest;
 import net.kyori.adventure.text.Component;
@@ -41,7 +40,7 @@ public final class CommandTPA {
             PlayerServer targetServer = virtualProcessor.findServer(serverInfo);
             String familyName = targetServer.getFamilyName();
 
-            ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+            BaseServerFamily<? extends LoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
             if(family == null) return false;
 
             return family.getTPAHandler().getSettings().isEnabled();
@@ -100,7 +99,7 @@ public final class CommandTPA {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                         String familyName = virtualProcessor.findServer(sendingServer).getFamilyName();
-                                        ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily<? extends LoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
                                         List<TPARequest> requests = family.getTPAHandler().findRequestsForTarget(player);
 
                                         if(requests.size() <= 0) {
@@ -140,7 +139,7 @@ public final class CommandTPA {
                                         PlayerServer targetServer = virtualProcessor.findServer(targetServerInfo);
                                         String familyName = targetServer.getFamilyName();
                                         try {
-                                            ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                            BaseServerFamily<? extends LoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
                                             if(family == null) throw new NullPointerException();
 
                                             TPARequest request = family.getTPAHandler().findRequest(senderPlayer, (Player) context.getSource());
@@ -194,7 +193,7 @@ public final class CommandTPA {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                         String familyName = virtualProcessor.findServer(sendingServer).getFamilyName();
-                                        ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily<? extends LoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
                                         List<TPARequest> requests = family.getTPAHandler().findRequestsForTarget(player);
 
                                         if(requests.size() <= 0) {
@@ -225,7 +224,7 @@ public final class CommandTPA {
                                         PlayerServer targetServer = virtualProcessor.findServer(targetServerInfo);
                                         String familyName = targetServer.getFamilyName();
                                         try {
-                                            ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                            BaseServerFamily<? extends LoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
                                             if(family == null) throw new NullPointerException();
 
                                             TPARequest request = family.getTPAHandler().findRequest(senderPlayer, (Player) context.getSource());
@@ -259,7 +258,7 @@ public final class CommandTPA {
                                 ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                 String familyName = virtualProcessor.findServer(sendingServer).getFamilyName();
-                                ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                BaseServerFamily<? extends LoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
 
                                 family.getAllPlayers(100).forEach(player -> builder.suggest(player.getUsername()));
 
@@ -299,7 +298,7 @@ public final class CommandTPA {
                                 PlayerServer sendersServer = virtualProcessor.findServer(sendersServerInfo);
                                 String familyName = sendersServer.getFamilyName();
                                 try {
-                                    ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                    BaseServerFamily<? extends LoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
                                     if(family == null) throw new NullPointerException();
                                     if(!family.getTPAHandler().getSettings().isEnabled()) throw new RuntimeException();
 

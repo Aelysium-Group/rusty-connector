@@ -11,6 +11,9 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
 import group.aelysium.rustyconnector.core.central.PluginRuntime;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -35,6 +38,9 @@ public class VelocityRustyConnector implements PluginRuntime {
 
     @Subscribe
     public void onLoad(ProxyInitializeEvent event) throws DuplicateLifecycleException {
+        if(!api.getServer().getConfiguration().isOnlineMode())
+            VelocityRustyConnector.getAPI().getLogger().log("Offline mode detected");
+
         if(!lifecycle.start()) lifecycle.stop();
         try {
             metricsFactory.make(this, 17972);
@@ -42,6 +48,9 @@ public class VelocityRustyConnector implements PluginRuntime {
         } catch (Exception e) {
             VelocityRustyConnector.getAPI().getLogger().log("Failed to register to bstats!");
         }
+
+        if(!api.getServer().getConfiguration().isOnlineMode())
+            VelocityRustyConnector.getAPI().getLogger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!"), NamedTextColor.RED));
     }
 
     @Subscribe

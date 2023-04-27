@@ -180,7 +180,7 @@ public interface DiscordWebhookMessage {
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
                                     player.getUsername(),
-                                    IMAGE__PLAYER_FAMILY_SWITCH, null
+                                    IMAGE_PROXY__DISCONNECT_CATCH, null
                             )
                     )
                     .setTitle(

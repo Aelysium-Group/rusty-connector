@@ -48,7 +48,7 @@ public class VelocityLifecycle extends PluginLifecycle {
 
         WhitelistConfig.empty();
         DefaultConfig.empty();
-        FamilyConfig.empty();
+        ScalarFamilyConfig.empty();
 
         this.isRunning = true;
         return true;
@@ -59,7 +59,7 @@ public class VelocityLifecycle extends PluginLifecycle {
 
             WhitelistConfig.empty();
             DefaultConfig.empty();
-            FamilyConfig.empty();
+            ScalarFamilyConfig.empty();
             LoggerConfig.empty();
 
             if(api.getVirtualProcessor() != null) {

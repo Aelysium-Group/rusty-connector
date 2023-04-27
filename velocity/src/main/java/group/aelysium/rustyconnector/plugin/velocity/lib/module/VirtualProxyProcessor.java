@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTun
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.database.MySQL;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
@@ -20,10 +21,12 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -32,6 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class VirtualProxyProcessor implements VirtualProcessor {
@@ -52,8 +56,8 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         this.privateKey = privateKey;
     }
 
-    public ServerFamily<? extends PaperServerLoadBalancer> getRootFamily() {
-        return this.familyManager.find(this.rootFamily);
+    public ScalarServerFamily getRootFamily() {
+        return (ScalarServerFamily) this.familyManager.find(this.rootFamily);
     }
 
     public void setRedis(Redis redis) throws IllegalStateException {
@@ -102,6 +106,19 @@ public class VirtualProxyProcessor implements VirtualProcessor {
      */
     public void validateMessage(RedisMessage message) throws BlockedMessageException {
         this.messageTunnel.validate(message);
+    }
+
+    /**
+     * Remove any home server mappings which have been cached for a specific player.
+     * @param player The player to uncache mappings for.
+     */
+    public void uncacheHomeServerMappings(Player player) {
+        List<BaseServerFamily> familyList = this.getFamilyManager().dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
+        if(familyList.size() == 0) return;
+
+        for (BaseServerFamily family : familyList) {
+            ((StaticServerFamily) family).uncacheHomeServer(player);
+        }
     }
 
     private void startServerLifecycleHeart(long heartbeat, boolean shouldUnregister) {
@@ -156,7 +173,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                 if(logger.getGate().check(GateKey.FAMILY_BALANCING))
                     logger.log("Balancing families...");
 
-                for (ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
+                for (BaseServerFamily family : this.getFamilyManager().dump()) {
                     family.getLoadBalancer().completeSort();
                     if(logger.getGate().check(GateKey.FAMILY_BALANCING))
                         VelocityLang.FAMILY_BALANCING.send(logger, family);
@@ -175,7 +192,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         this.tpaRequestCleaner = new Clock(heartbeat);
 
         this.tpaRequestCleaner.start((Callable<Boolean>) () -> {
-            for(ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
+            for(BaseServerFamily family : this.getFamilyManager().dump()) {
                 if(!family.getTPAHandler().getSettings().isEnabled()) continue;
                 family.getTPAHandler().clearExpired();
             }
@@ -216,7 +233,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     }
 
     public PlayerServer findServer(ServerInfo serverInfo) {
-        for(ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
+        for(BaseServerFamily family : this.getFamilyManager().dump()) {
             PlayerServer server = family.getServer(serverInfo);
             if(server == null) continue;
 
@@ -226,7 +243,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     }
 
     public boolean contains(ServerInfo serverInfo) {
-        for(ServerFamily<? extends PaperServerLoadBalancer> family : this.getFamilyManager().dump()) {
+        for(BaseServerFamily family : this.getFamilyManager().dump()) {
             if(family.containsServer(serverInfo)) return true;
         }
         return false;
@@ -372,7 +389,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
             if(api.getVirtualProcessor().contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
 
-            ServerFamily<? extends PaperServerLoadBalancer> family = this.familyManager.find(familyName);
+            BaseServerFamily family = this.familyManager.find(familyName);
             if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
             RegisteredServer registeredServer = api.registerServer(server.getServerInfo());
@@ -411,7 +428,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
             if(logger.getGate().check(GateKey.UNREGISTRATION_REQUEST))
                 VelocityLang.UNREGISTRATION_REQUEST.send(logger, serverInfo, familyName);
 
-            ServerFamily<? extends PaperServerLoadBalancer> family = server.getFamily();
+            BaseServerFamily family = server.getFamily();
 
             this.lifeMatrix.remove(serverInfo);
             api.unregisterServer(server.getServerInfo());
@@ -451,12 +468,16 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         VirtualProxyProcessor virtualProxyProcessor = new VirtualProxyProcessor(config.getPrivate_key());
 
         // Setup families
-        for (String familyName: config.getFamilies())
-            virtualProxyProcessor.getFamilyManager().add(ServerFamily.init(virtualProxyProcessor, familyName));
+        for (String familyName: config.getScalarFamilies())
+            virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, familyName));
+        for (String familyName: config.getStaticFamilies())
+            virtualProxyProcessor.getFamilyManager().add(StaticServerFamily.init(virtualProxyProcessor, familyName));
+
+        virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, config.getRootFamilyName()));
 
         logger.log("Finished setting up families");
 
-        virtualProxyProcessor.setRootFamily(config.getRoot_family());
+        virtualProxyProcessor.setRootFamily(config.getRootFamilyName());
         logger.log("Finished setting up root family");
 
         // Setup Redis
@@ -468,6 +489,15 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                 config.getRedis_dataChannel()
         );
         redis.connect(api);
+
+        MySQL mySQL = new MySQL.MySQLBuilder()
+                .setHost(config.getMysql_host())
+                .setPort(config.getMysql_port())
+                .setDatabase(config.getMysql_database())
+                .setUser(config.getMysql_user())
+                .setPassword(config.getMysql_password())
+                .build();
+        api.setMySQL(mySQL);
 
         virtualProxyProcessor.setRedis(redis);
         logger.log("Finished setting up redis");
@@ -571,11 +601,6 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         logger.log("Message tunnel reloaded");
     }
 
-    /**
-     * Reload all whitelists currently active on the proxy.
-     * By the time this runs, the configuration file should be able to guarantee that all values are present.
-     * @param config The default config to read.
-     */
     public void reloadWhitelists(DefaultConfig config) {
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
@@ -593,7 +618,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         }
 
         // Reload server whitelists
-        for (ServerFamily<? extends PaperServerLoadBalancer> family : this.familyManager.dump()) {
+        for (BaseServerFamily family : this.familyManager.dump()) {
             family.reloadWhitelist();
         }
         logger.log("Reloaded all family whitelists");

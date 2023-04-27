@@ -9,6 +9,8 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -39,9 +41,6 @@ public class OnPlayerChangeServer {
 
                     boolean isTheSameFamily = newServer.getFamilyName().equals(oldServer.getFamilyName());
 
-
-                    newServer.playerJoined();
-
                     oldServer.playerLeft();
 
                     // These are all family alerts, if the player doesn't move between families at all, these don't need to fire.
@@ -57,6 +56,13 @@ public class OnPlayerChangeServer {
                     }
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_SERVER, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_SERVER.build(player, oldServer, newServer));
+
+                    // Uncache any old servers in the old family.
+                    if(!isTheSameFamily) {
+                        BaseServerFamily family = oldServer.getFamily();
+                        if (!(family instanceof StaticServerFamily)) return;
+                        ((StaticServerFamily) family).uncacheHomeServer(player);
+                    }
                 } catch (Exception e) {
                     logger.log(e.getMessage());
                 }

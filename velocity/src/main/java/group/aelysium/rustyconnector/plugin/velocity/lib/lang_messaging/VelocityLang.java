@@ -8,9 +8,10 @@ import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 import net.kyori.adventure.text.Component;
 
 import java.util.Date;
@@ -202,8 +203,11 @@ public interface VelocityLang extends Lang {
     Message RC_FAMILY = () -> {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         Component families = text("");
-        for (ServerFamily<? extends PaperServerLoadBalancer> family : api.getVirtualProcessor().getFamilyManager().dump()) {
-            families = families.append(text("[ "+family.getName()+" ] "));
+        for (BaseServerFamily family : api.getVirtualProcessor().getFamilyManager().dump()) {
+            if(family instanceof ScalarServerFamily)
+                families = families.append(text("[ "+family.getName()+" ] ").color(GOLD));
+            if(family instanceof StaticServerFamily)
+                families = families.append(text("[ "+family.getName()+" ] ").color(DARK_GREEN));
         }
 
         return join(
@@ -214,7 +218,8 @@ public interface VelocityLang extends Lang {
                 SPACING,
                 BORDER,
                 SPACING,
-                families.color(GOLD),
+                text("Gold families are Scalar. Green families are Static.", GRAY),
+                families,
                 SPACING,
                 BORDER,
                 SPACING,
@@ -251,7 +256,7 @@ public interface VelocityLang extends Lang {
             BORDER
     );
 
-    ParameterizedMessage1<ServerFamily<? extends PaperServerLoadBalancer>> RC_FAMILY_INFO = (family) -> {
+    ParameterizedMessage1<BaseServerFamily> RC_FAMILY_INFO = (family) -> {
         Component servers = text("");
         int i = 0;
 
@@ -308,6 +313,9 @@ public interface VelocityLang extends Lang {
                 BORDER
         );
     };
+
+    Component MISSING_HOME_SERVER = text("The server you were meant to be connected to is unavailable! In the meantime you've been connected to a fallback server!", RED);
+    Component BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT = text("The server you were meant to be connected to is unavailable! Please try again later!", RED);
 
 
     Component TPA_NO_PERMISSION = text("You do not have permission to use this command.",RED);
@@ -457,7 +465,7 @@ public interface VelocityLang extends Lang {
     Message CALL_FOR_REGISTRATION = () -> text("[Velocity](127.0.0.1) " + LoggerConfig.getConfig().getConsoleIcons_callForRegistration() +" EVERYONE");
     ParameterizedMessage1<String> CALL_FOR_FAMILY_REGISTRATION = (familyName) -> text("[Velocity](127.0.0.1) " + LoggerConfig.getConfig().getConsoleIcons_callForRegistration() +" "+ familyName);
 
-    ParameterizedMessage1<ServerFamily<? extends PaperServerLoadBalancer>> FAMILY_BALANCING = family -> text(
+    ParameterizedMessage1<BaseServerFamily> FAMILY_BALANCING = family -> text(
             family.getName() + " " + LoggerConfig.getConfig().getConsoleIcons_familyBalancing()
     );
 }

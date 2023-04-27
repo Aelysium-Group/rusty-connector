@@ -18,10 +18,11 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
 
@@ -129,7 +130,7 @@ public final class CommandRusty {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                 if(family == null) throw new NullPointerException();
 
                                 VelocityLang.RC_FAMILY_INFO.send(logger, family);
@@ -144,7 +145,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                         if(family == null) throw new NullPointerException();
 
                                         family.getLoadBalancer().resetIndex();
@@ -162,7 +163,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                         if(family == null) throw new NullPointerException();
 
                                         family.getLoadBalancer().completeSort();
@@ -207,7 +208,7 @@ public final class CommandRusty {
                                     .executes(context -> {
                                         try {
                                             String familyName = context.getArgument("familyName", String.class);
-                                            ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                            BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                             if(family == null) throw new NullPointerException();
 
                                             virtualProcessor.registerAllServers(familyName);
@@ -256,13 +257,13 @@ public final class CommandRusty {
                                         try {
                                             String familyName = context.getArgument("familyName", String.class);
                                             logger.log("Reloading the family: "+familyName+"...");
-                                            ServerFamily<? extends PaperServerLoadBalancer> oldFamily = virtualProcessor.getFamilyManager().find(familyName);
+                                            ScalarServerFamily oldFamily = (ScalarServerFamily) virtualProcessor.getFamilyManager().find(familyName);
                                             if(oldFamily == null) {
                                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                                                 return 1;
                                             }
 
-                                            ServerFamily<? extends PaperServerLoadBalancer> newFamily = ServerFamily.init(virtualProcessor, familyName);
+                                            ScalarServerFamily newFamily = ScalarServerFamily.init(virtualProcessor, familyName);
 
                                             oldFamily.unregisterServers();
 
@@ -340,7 +341,7 @@ public final class CommandRusty {
                                             return Command.SINGLE_SUCCESS;
                                         }
 
-                                        ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                         if(family == null) {
                                             logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                                             return Command.SINGLE_SUCCESS;
