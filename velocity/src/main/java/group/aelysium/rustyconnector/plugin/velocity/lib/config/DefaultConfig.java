@@ -21,6 +21,7 @@ public class DefaultConfig extends YAML {
 
     private String redis_host = "";
     private int redis_port = 3306;
+    private String redis_user = "default";
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
@@ -93,6 +94,10 @@ public class DefaultConfig extends YAML {
 
     public String getRedis_password() {
         return this.redis_password;
+    }
+
+    public String getRedis_user() {
+        return this.redis_user;
     }
 
     public String getRedis_dataChannel() {
@@ -195,6 +200,7 @@ public class DefaultConfig extends YAML {
         if(this.redis_host.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
 
         this.redis_port = this.getNode(this.data, "redis.port", Integer.class);
+        this.redis_user = this.getNode(this.data, "redis.user", String.class);
         this.redis_password = this.getNode(this.data, "redis.password", String.class);
         if(this.redis_password.equals("password") || this.redis_password.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
         if(this.redis_password.length() < 16)

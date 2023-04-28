@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.core.central;
 
-import group.aelysium.rustyconnector.core.lib.database.Redis;
+import group.aelysium.rustyconnector.core.lib.database.RedisIO;
 
 public interface PluginRuntime {
-    Redis redis = null;
+    RedisIO redis = null;
 
     static PluginAPI<?> getAPI() {
         return null;

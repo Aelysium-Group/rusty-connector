@@ -64,7 +64,7 @@ public class VelocityLifecycle extends PluginLifecycle {
 
             if(api.getVirtualProcessor() != null) {
                 api.getVirtualProcessor().killHeartbeats();
-                api.getVirtualProcessor().killRedis();
+                api.getVirtualProcessor().closeRedis();
             }
 
             api.getServer().getCommandManager().unregister("rc");
@@ -104,6 +104,7 @@ public class VelocityLifecycle extends PluginLifecycle {
         } catch (NoOutputException ignore) {
             return false;
         } catch (Exception e) {
+            e.printStackTrace();
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);
             return false;
         }

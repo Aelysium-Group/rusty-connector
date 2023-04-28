@@ -7,7 +7,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.database.Redis;
+import group.aelysium.rustyconnector.core.lib.database.RedisIO;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
@@ -159,7 +159,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * Sends a ping to the specific server.
      * @param redis The redis connection to use.
      */
-    public void ping(Redis redis, String privateKey) {
+    public void ping(RedisIO redis, String privateKey) {
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         RedisMessage message = new RedisMessage(

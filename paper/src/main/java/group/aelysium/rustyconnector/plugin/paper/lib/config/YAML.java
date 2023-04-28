@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 
 public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
-    protected static int currentVersion = 2;
+    protected static int currentVersion = 3;
 
     public YAML(File configPointer, String template) {
         super(configPointer, template);
