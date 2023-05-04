@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper.lib;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.database.RedisSubscriptionRunnable;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
@@ -213,7 +214,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                     .setPassword(config.getRedis_password())
                     .build();
 
-        redis.subscribeToChannel(config.getRedis_dataChannel());
+        new RedisSubscriptionRunnable(redis, config.getRedis_dataChannel()).run();
 
         logger.log("Finished setting up redis");
 

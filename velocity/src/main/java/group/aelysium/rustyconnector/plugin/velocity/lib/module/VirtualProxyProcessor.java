@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTun
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.database.RedisSubscriptionRunnable;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
@@ -485,7 +486,8 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
         virtualProxyProcessor.setRedis(redis);
 
-        redis.subscribeToChannel(config.getRedis_dataChannel());
+        new RedisSubscriptionRunnable(redis, config.getRedis_dataChannel()).run();
+
         virtualProxyProcessor.setRedisDataChannel(config.getRedis_dataChannel());
 
         logger.log("Finished setting up redis");

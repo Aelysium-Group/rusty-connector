@@ -5,17 +5,16 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
+import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 
-import java.util.concurrent.CountDownLatch;
 import java.net.InetSocketAddress;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class RedisIO {
     private final RedisClient client;
-    private final CountDownLatch threadLock;
     protected RedisIO(RedisClient client) {
         this.client = client;
-        this.threadLock = new CountDownLatch(1);
     }
 
     /**
@@ -24,14 +23,17 @@ public class RedisIO {
      * @param channelName The name of the channel to subscribe to.
      */
     public void subscribeToChannel(String channelName) {
+        final CountDownLatch lock = new CountDownLatch(2);
         try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
-            RedisPubSubAsyncCommands<String, String> async = connection.async();
+            RedisPubSubCommands<String, String> sync = connection.sync();
 
             connection.addListener(new RedisListener());
 
-            async.subscribe(channelName);
+            sync.subscribe(channelName);
 
-            this.threadLock.await();
+            lock.await();
+        } catch (Exception e) {
+            lock.countDown();
         }
     }
 
@@ -74,7 +76,7 @@ public class RedisIO {
         @Override
         public void message(String channel, String message) {
             System.out.println(message);
-            RedisIO.this.onMessage(message);
+            //RedisIO.this.onMessage(message);
         }
     }
 }
