@@ -6,17 +6,21 @@ import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 
+import java.util.concurrent.CountDownLatch;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
 public class RedisIO {
     private final RedisClient client;
+    private final CountDownLatch threadLock;
     protected RedisIO(RedisClient client) {
         this.client = client;
+        this.threadLock = new CountDownLatch(1);
     }
 
     /**
      * Subscribe to a specific Redis data channel.
+     * This method is thread locking.
      * @param channelName The name of the channel to subscribe to.
      */
     public void subscribeToChannel(String channelName) {
@@ -26,6 +30,8 @@ public class RedisIO {
             connection.addListener(new RedisListener());
 
             async.subscribe(channelName);
+
+            this.threadLock.await();
         }
     }
 
