@@ -486,7 +486,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
         virtualProxyProcessor.setRedis(redis);
 
-        new RedisSubscriptionRunnable(redis, config.getRedis_dataChannel()).run();
+        new Thread(() -> redis.subscribeToChannel(config.getRedis_dataChannel())).start();
 
         virtualProxyProcessor.setRedisDataChannel(config.getRedis_dataChannel());
 

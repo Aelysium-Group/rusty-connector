@@ -214,7 +214,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                     .setPassword(config.getRedis_password())
                     .build();
 
-        new RedisSubscriptionRunnable(redis, config.getRedis_dataChannel()).run();
+        new Thread(() -> redis.subscribeToChannel(config.getRedis_dataChannel())).start();
 
         logger.log("Finished setting up redis");
 

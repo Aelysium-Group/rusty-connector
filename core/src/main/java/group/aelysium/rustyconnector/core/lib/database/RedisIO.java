@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 public class RedisIO {
+    private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
     protected RedisIO(RedisClient client) {
         this.client = client;
@@ -23,17 +24,20 @@ public class RedisIO {
      * @param channelName The name of the channel to subscribe to.
      */
     public void subscribeToChannel(String channelName) {
-        final CountDownLatch lock = new CountDownLatch(2);
+        if(this.lock.getCount() != 0) throw new RuntimeException("Channel subscription is already active for this RedisIO! Either kill it with .shutdow(). Or create a new RedisIO to use!");
+
         try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
+            this.lock = new CountDownLatch(1);
+
             RedisPubSubCommands<String, String> sync = connection.sync();
 
             connection.addListener(new RedisListener());
 
             sync.subscribe(channelName);
 
-            lock.await();
+            this.lock.await();
         } catch (Exception e) {
-            lock.countDown();
+            this.lock.countDown();
         }
     }
 
@@ -42,6 +46,7 @@ public class RedisIO {
      * This RedisIO becomes worthless after this is used.
      */
     public void shutdown() {
+        this.lock.countDown();
         this.client.shutdown();
     }
 
@@ -75,8 +80,7 @@ public class RedisIO {
     protected class RedisListener extends RedisPubSubAdapter<String, String> {
         @Override
         public void message(String channel, String message) {
-            System.out.println(message);
-            //RedisIO.this.onMessage(message);
+            RedisIO.this.onMessage(message);
         }
     }
 }
