@@ -146,6 +146,7 @@ families:
 redis:
     host: ""
     port: 3306
+    user: "default"
     password: "password"
 
 #

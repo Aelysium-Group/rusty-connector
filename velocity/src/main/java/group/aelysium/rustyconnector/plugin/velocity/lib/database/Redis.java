@@ -2,11 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.database;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.database.RedisIO;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
@@ -18,13 +18,21 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProc
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.*;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.pubsub.RedisPubSubAdapter;
+import io.lettuce.core.resource.ClientResources;
 
 import javax.naming.AuthenticationException;
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 
-public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis {
+public class Redis extends RedisIO {
+    protected Redis(RedisClient client) {
+        super(client);
+    }
 
     @Override
     public void onMessage(String rawMessage) {
@@ -131,7 +139,7 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
     }
 
     @Override
-    public void sendMessage(String privateKey, RedisMessageType type, InetSocketAddress address, Map<String, String> parameters) throws IllegalArgumentException {
+    public void sendPluginMessage(String privateKey, RedisMessageType type, InetSocketAddress address, Map<String, String> parameters) throws IllegalArgumentException {
         Gson gson = new Gson();
 
         JsonObject object = new JsonObject();
@@ -153,6 +161,55 @@ public class Redis extends group.aelysium.rustyconnector.core.lib.database.Redis
             object.addProperty(entry.getKey(),entry.getValue().getAsString());
         });
 
-        this.publish(gson.toJson(object));
+        this.publish(VelocityRustyConnector.getAPI().getVirtualProcessor().getRedisDataChannel(), gson.toJson(object));
+    }
+
+    public static class RedisConnector {
+        private String host = "localhost";
+        private int port = 3306;
+        private String user = "default";
+        private char[] password = null;
+
+        public RedisConnector() {}
+
+        public RedisConnector setHost(String host) {
+            this.host = host;
+            return this;
+        }
+
+        public RedisConnector setPort(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public RedisConnector setUser(String user) {
+            this.user = user;
+            return this;
+        }
+
+        public RedisConnector setPassword(String password) {
+            this.password = password.toCharArray();
+            return this;
+        }
+
+        public Redis build() {
+            RedisURI uri;
+            if(this.password == null)
+                uri = RedisURI.builder()
+                        .withHost(this.host)
+                        .withPort(this.port)
+                        .withAuthentication(this.user, "")
+                        .build();
+            else
+                uri = RedisURI.builder()
+                        .withHost(this.host)
+                        .withPort(this.port)
+                        .withAuthentication(this.user, this.password)
+                        .build();
+
+            ClientResources resources = ClientResources.create();
+
+            return new Redis(RedisClient.create(resources, uri));
+        }
     }
 }

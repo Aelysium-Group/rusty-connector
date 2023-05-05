@@ -39,7 +39,7 @@ public class PaperLifecycle extends PluginLifecycle {
         if(api.getVirtualProcessor() != null) {
             api.getVirtualProcessor().unregisterFromProxy();
 
-           api.getVirtualProcessor().killRedis();
+           api.getVirtualProcessor().closeRedis();
         }
 
         api.getCommandManager().deleteRootCommand("rc");

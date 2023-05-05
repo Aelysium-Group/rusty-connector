@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.database.Redis;
+import group.aelysium.rustyconnector.core.lib.database.RedisIO;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 
 import java.net.InetSocketAddress;
@@ -76,20 +76,10 @@ public class RedisMessage {
      * Sends the current message over the datachannel.
      * @throws IllegalCallerException If you try to send a message that was already received over the data channel.
      */
-    public void dispatchMessage(Redis redis) throws IllegalCallerException {
+    public void dispatchMessage(RedisIO redis) throws IllegalCallerException {
         if(this.didReceive) throw new IllegalCallerException("You can't send a message if it's already been received over the datachannel!");
 
-        redis.sendMessage(this.key, this.type, this.address, this.parameters);
-    }
-
-    /**
-     * Sends a RESPONSE message
-     * @throws IllegalCallerException If you try to respond to a message that originated here.
-     */
-    public void reply(Redis redis) throws IllegalCallerException {
-        if(!this.didReceive) throw new IllegalCallerException("You can only respond to messages received!");
-
-        redis.sendMessage(this.key, this.type, this.address, this.parameters);
+        redis.sendPluginMessage(this.key, this.type, this.address, this.parameters);
     }
 
     /**

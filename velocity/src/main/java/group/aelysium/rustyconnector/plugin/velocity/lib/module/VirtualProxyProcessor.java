@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTun
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.database.RedisSubscriptionRunnable;
 import group.aelysium.rustyconnector.core.lib.database.MySQL;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
@@ -41,6 +42,7 @@ import java.util.Map;
 public class VirtualProxyProcessor implements VirtualProcessor {
     private MessageCache messageCache;
     private Redis redis;
+    private String redisDataChannel;
     private final Map<ServerInfo, Boolean> lifeMatrix = new HashMap<>();
     private final FamilyManager familyManager = new FamilyManager();
     private final WhitelistManager whitelistManager = new WhitelistManager();
@@ -63,6 +65,17 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     public void setRedis(Redis redis) throws IllegalStateException {
         if(this.redis != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
         this.redis = redis;
+    }
+
+    public void setRedisDataChannel(String redisDataChannel) {
+        if(this.redisDataChannel != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+        this.redisDataChannel = redisDataChannel;
+    }
+    public String getRedisDataChannel() {
+        return this.redisDataChannel;
+    }
+    public void closeRedis() {
+        this.redis.shutdown();
     }
 
     /**
@@ -216,10 +229,6 @@ public class VirtualProxyProcessor implements VirtualProcessor {
             this.tpaRequestCleaner.end();
             this.tpaRequestCleaner = null;
         }
-    }
-
-    public void killRedis() {
-        this.redis.disconnect();
     }
 
     /**
@@ -481,14 +490,20 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         logger.log("Finished setting up root family");
 
         // Setup Redis
-        Redis redis = new Redis();
-        redis.setConnection(
-                config.getRedis_host(),
-                config.getRedis_port(),
-                config.getRedis_password(),
-                config.getRedis_dataChannel()
-        );
-        redis.connect(api);
+        Redis redis;
+        if(config.getRedis_password().equals(""))
+            redis = new Redis.RedisConnector()
+                    .setHost(config.getRedis_host())
+                    .setPort(config.getRedis_port())
+                    .setUser(config.getRedis_user())
+                    .build();
+        else
+            redis = new Redis.RedisConnector()
+                    .setHost(config.getRedis_host())
+                    .setPort(config.getRedis_port())
+                    .setUser(config.getRedis_user())
+                    .setPassword(config.getRedis_password())
+                    .build();
 
         MySQL mySQL = new MySQL.MySQLBuilder()
                 .setHost(config.getMysql_host())
@@ -500,6 +515,11 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         api.setMySQL(mySQL);
 
         virtualProxyProcessor.setRedis(redis);
+
+        new Thread(() -> redis.subscribeToChannel(config.getRedis_dataChannel())).start();
+
+        virtualProxyProcessor.setRedisDataChannel(config.getRedis_dataChannel());
+
         logger.log("Finished setting up redis");
 
         if(config.isHearts_serverLifecycle_enabled()) virtualProxyProcessor.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());

@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper.lib;
 import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.database.RedisSubscriptionRunnable;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
@@ -21,6 +22,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
     private final TPAQueue tpaQueue = new TPAQueue();
     private MessageCache messageCache;
     private final Redis redis;
+    private final String redisDataChannel;
     private final String family;
     private final int weight = 0;
     private int softPlayerCap = 20;
@@ -30,7 +32,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
     private final String privateKey;
     private final InetSocketAddress address;
 
-    public VirtualServerProcessor(String name, String privateKey, String address, String family, Redis redis) {
+    public VirtualServerProcessor(String name, String privateKey, String address, String family, Redis redis, String redisDataChannel) {
         if(name.equals("")) {
             name = MD5.generatePrivateKey(); // Generate a custom string to be the server's name
         }
@@ -44,6 +46,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
         this.family = family;
 
         this.redis = redis;
+        this.redisDataChannel = redisDataChannel;
     }
 
     public boolean validatePrivateKey(String keyToValidate) {
@@ -95,8 +98,8 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
         return this.hardPlayerCap;
     }
 
-    public void killRedis() {
-        this.redis.disconnect();
+    public void closeRedis() {
+        this.redis.shutdown();
     }
 
     /**
@@ -152,6 +155,10 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
         RedisMessage.create(rawMessage, MessageOrigin.SERVER, this.getAddress()).dispatchMessage(this.redis);
     }
 
+    public String getRedisDataChannel() {
+        return this.redisDataChannel;
+    }
+
     /**
      * Requests that the proxy moves this player to another server.
      * @param player The player to send.
@@ -190,21 +197,35 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
 
         logger.log("Preparing Redis...");
 
-        Redis redis = new Redis();
-        redis.setConnection(
-                config.getRedis_host(),
-                config.getRedis_port(),
-                config.getRedis_password(),
-                config.getRedis_dataChannel()
-        );
-        redis.connect(api);
+
+        // Setup Redis
+        Redis redis;
+        if(config.getRedis_password().equals(""))
+            redis = new Redis.RedisConnector()
+                    .setHost(config.getRedis_host())
+                    .setPort(config.getRedis_port())
+                    .setUser(config.getRedis_user())
+                    .build();
+        else
+            redis = new Redis.RedisConnector()
+                    .setHost(config.getRedis_host())
+                    .setPort(config.getRedis_port())
+                    .setUser(config.getRedis_user())
+                    .setPassword(config.getRedis_password())
+                    .build();
+
+        new Thread(() -> redis.subscribeToChannel(config.getRedis_dataChannel())).start();
+
+        logger.log("Finished setting up redis");
+
 
         VirtualServerProcessor server = new VirtualServerProcessor(
                 config.getServer_name(),
                 config.getPrivate_key(),
                 config.getServer_address(),
                 config.getServer_family(),
-                redis
+                redis,
+                config.getRedis_dataChannel()
         );
         server.setMessageCache(50);
 
