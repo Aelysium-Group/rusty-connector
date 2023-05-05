@@ -36,6 +36,8 @@
 - [ ] Kubernettes auto-scaling
 - [ ] Player routing based on client version
 - [x] Better Redis implementation
+- [ ] Make Redis more fault tolerant incase the sub connection fails
+- [ ] Optimize load balancing by implementing proper ExecutorService
 - [ ] Better error and overall handling for Redis
 - [ ] Teleport players to specific coordinates on other servers
 
