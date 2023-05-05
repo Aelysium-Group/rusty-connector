@@ -35,7 +35,7 @@
 - [x] Static Families (For stateful gamemodes)
 - [ ] Kubernettes auto-scaling
 - [ ] Player routing based on client version
-- [ ] Propper Redis Connection Pooling (PR's welcome!)
+- [x] Better Redis implementation
 - [ ] Better error and overall handling for Redis
 - [ ] Teleport players to specific coordinates on other servers
 
