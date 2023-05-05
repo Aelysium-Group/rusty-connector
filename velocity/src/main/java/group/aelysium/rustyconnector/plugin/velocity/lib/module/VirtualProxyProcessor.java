@@ -31,6 +31,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
@@ -505,14 +507,18 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                     .setPassword(config.getRedis_password())
                     .build();
 
-        MySQL mySQL = new MySQL.MySQLBuilder()
-                .setHost(config.getMysql_host())
-                .setPort(config.getMysql_port())
-                .setDatabase(config.getMysql_database())
-                .setUser(config.getMysql_user())
-                .setPassword(config.getMysql_password())
-                .build();
-        api.setMySQL(mySQL);
+        if(config.shouldIgnoreMysql())
+            logger.send(Component.text("No use for MySQL has been found. Ignoring MySQL configurations.", NamedTextColor.YELLOW));
+        else {
+            MySQL mySQL = new MySQL.MySQLBuilder()
+                    .setHost(config.getMysql_host())
+                    .setPort(config.getMysql_port())
+                    .setDatabase(config.getMysql_database())
+                    .setUser(config.getMysql_user())
+                    .setPassword(config.getMysql_password())
+                    .build();
+            api.setMySQL(mySQL);
+        }
 
         virtualProxyProcessor.setRedis(redis);
 

@@ -11,7 +11,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
@@ -28,6 +28,7 @@ public class DefaultConfig extends YAML {
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
+    private boolean ignore_mysql = true;
     private String mysql_host = "";
     private int mysql_port = 3306;
     private String mysql_user = "root";
@@ -119,6 +120,9 @@ public class DefaultConfig extends YAML {
         return this.redis_dataChannel;
     }
 
+    public boolean shouldIgnoreMysql() {
+        return this.ignore_mysql;
+    }
 
     public String getMysql_host() {
         return this.mysql_host;
@@ -213,6 +217,7 @@ public class DefaultConfig extends YAML {
             throw new NoOutputException(e);
         }
 
+        // Families
         this.families_rootFamily_name = this.getNode(this.data,"families.root-family.name",String.class);
         this.family_rootFamily_catchDisconnectiongPlayers = this.getNode(this.data,"families.root-family.catch-disconnecting-players",Boolean.class);
         try {
@@ -229,10 +234,27 @@ public class DefaultConfig extends YAML {
         if(this.families_rootFamily_name.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
         this.families_scalar.forEach(familyName -> {
             if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
+
+            if(familyName.length() > 32)
+                throw new IllegalStateException("All family names must be under 32 characters long! " + familyName + " was " + familyName.length());
         });
+
+        AtomicBoolean ignoreStatic = new AtomicBoolean(false);
         this.families_static.forEach(familyName -> {
+            if(familyName.equalsIgnoreCase("delete me to enable static families (Requires MySQL to be setup)"))
+                ignoreStatic.set(true);
+
             if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
+
+            if(familyName.length() > 32)
+                throw new IllegalStateException("All family names must be under 32 characters long! " + familyName + " was " + familyName.length());
         });
+        if(ignoreStatic.get())
+            this.families_static.clear(); // Clear static family list so that nothing can be operated on it.
+
+        List<String> duplicates = this.families_scalar.stream().filter(this.families_static::contains).toList();
+        if(duplicates.size() > 0)
+            throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of if the family is scalar or static! Duplicate family names: " + duplicates);
 
         if(this.families_scalar.contains(this.families_rootFamily_name)) {
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.scalar] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family]. Ignoring..."), NamedTextColor.YELLOW);
@@ -242,10 +264,6 @@ public class DefaultConfig extends YAML {
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.static] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family]. Ignoring..."), NamedTextColor.YELLOW);
             this.families_static.remove(this.families_rootFamily_name);
         }
-
-        List<String> duplicates = this.families_scalar.stream().filter(this.families_static::contains).toList();
-        if(duplicates.size() > 0)
-            throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of if the family is scalar or static! Duplicate family names: " + duplicates);
 
         // Redis
 
@@ -265,19 +283,23 @@ public class DefaultConfig extends YAML {
 
         // MySQL
 
-        this.mysql_host = this.getNode(this.data, "redis.host", String.class);
-        if(this.mysql_host.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
+        if(!ignoreStatic.get()) {
+            this.ignore_mysql = false;
 
-        this.mysql_port = this.getNode(this.data, "redis.port", Integer.class);
-        this.mysql_user = this.getNode(this.data, "redis.user", String.class);
-        this.mysql_password = this.getNode(this.data, "redis.password", String.class);
-        if(this.mysql_password.equals("password") || this.mysql_password.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
-        if(this.mysql_password.length() < 16)
-            throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
+            this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
+            if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
 
-        this.mysql_database = this.getNode(this.data, "redis.data-channel", String.class);
-        if(this.mysql_database.equals(""))
-            throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
+            this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
+            this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
+            this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
+
+            if (this.redis_password.length() != 0 && this.redis_password.length() < 16)
+                throw new IllegalStateException("Your MySQL password is to short! For security purposes, please use a longer password! " + this.redis_password.length() + " < 16");
+
+            this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
+            if (this.mysql_database.equals(""))
+                throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
+        }
 
         // Whitelist
 

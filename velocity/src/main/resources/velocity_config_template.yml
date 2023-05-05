@@ -127,6 +127,7 @@ families:
 # back into that server on future family connections as well.
 #
     static:
+        - "delete me to enable static families (Requires MySQL to be setup)"
         - "survival"
         - "creative"
 

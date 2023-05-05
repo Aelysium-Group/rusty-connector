@@ -16,6 +16,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class HomeServerMappingsDatabase {
+    private static final String FIND_HOME_SERVER_IN_FAMILY = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?";
+    private static final String CHECK_IF_PLAYER_HAS_HOME = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?";
+    private static final String DELETE_PLAYERS_HOME_SERVER = "DELETE FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?";
+    private static final String SAVE_PLAYERS_HOME_SERVER = "REPLACE INTO home_server_mappings (player_uuid, family_name, server_address, server_name, expiration) VALUES(?, ?, ?, ?, FROM_UNIXTIME(?));";
+    private static final String PURGE_FAMILY_OLD_SERVERS = "DELETE FROM home_server_mappings WHERE family_name = ? AND expiration < NOW()";
+    private static final String UPDATE_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = ? WHERE family_name = ? AND expiration IS NULL;";
+
     /**
      * Finds a home server mapping for a player.
      * @param player The player to search for.
@@ -28,7 +35,7 @@ public class HomeServerMappingsDatabase {
         MySQL mySQL = api.getMySQL();
 
         mySQL.connect();
-        PreparedStatement statement = mySQL.prepare("SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?");
+        PreparedStatement statement = mySQL.prepare(FIND_HOME_SERVER_IN_FAMILY);
         statement.setString(0, player.getUniqueId().toString());
         statement.setString(1, family.getName());
         ResultSet result = mySQL.execute(statement);
@@ -55,7 +62,7 @@ public class HomeServerMappingsDatabase {
         MySQL mySQL = api.getMySQL();
 
         mySQL.connect();
-        PreparedStatement statement = mySQL.prepare("SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?");
+        PreparedStatement statement = mySQL.prepare(CHECK_IF_PLAYER_HAS_HOME);
         statement.setString(0, player.getUniqueId().toString());
         statement.setString(1, family.getName());
         ResultSet result = mySQL.execute(statement);
@@ -75,7 +82,7 @@ public class HomeServerMappingsDatabase {
         MySQL mySQL = api.getMySQL();
 
         mySQL.connect();
-        PreparedStatement statement = mySQL.prepare("DELETE FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?");
+        PreparedStatement statement = mySQL.prepare(DELETE_PLAYERS_HOME_SERVER);
         statement.setString(0, player.getUniqueId().toString());
         statement.setString(1, family.getName());
         mySQL.execute(statement);
@@ -93,15 +100,13 @@ public class HomeServerMappingsDatabase {
         MySQL mySQL = api.getMySQL();
 
         mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(
-                "INSERT INTO table (player_uuid, family_name, server_address, server_name, expiration)" +
-                        "VALUES(?, ?, ?, ?, ?)" +
-                        "ON DUPLICATE KEY UPDATE");
+        PreparedStatement statement = mySQL.prepare(SAVE_PLAYERS_HOME_SERVER);
         statement.setString(0, mapping.player().getUniqueId().toString());
         statement.setString(1, mapping.family().getName());
         statement.setString(2, mapping.server().getAddress());
         statement.setString(3, mapping.server().getServerInfo().getName());
         statement.setString(4, String.valueOf(mapping.family().getHomeServerExpiration().getEpochFromNow()));
+
         mySQL.execute(statement);
         mySQL.close();
     }
@@ -116,7 +121,7 @@ public class HomeServerMappingsDatabase {
         MySQL mySQL = api.getMySQL();
 
         mySQL.connect();
-        PreparedStatement statement = mySQL.prepare("DELETE FROM home_server_mappings WHERE family_name = ? AND expiration < NOW()");
+        PreparedStatement statement = mySQL.prepare(PURGE_FAMILY_OLD_SERVERS);
         statement.setString(0, family.getName());
         mySQL.execute(statement);
         mySQL.close();
@@ -136,7 +141,7 @@ public class HomeServerMappingsDatabase {
         MySQL mySQL = api.getMySQL();
 
         mySQL.connect();
-        PreparedStatement statement = mySQL.prepare("UPDATE home_server_mappings SET expiration = ? WHERE family_name = ? AND expiration IS NULL;");
+        PreparedStatement statement = mySQL.prepare(UPDATE_NULL_EXPIRATIONS);
         statement.setDate(0, new Date(expiration.getEpochFromNow()));
         statement.setString(1, family.getName());
         mySQL.execute(statement);
