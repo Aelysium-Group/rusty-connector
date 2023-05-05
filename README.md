@@ -36,6 +36,7 @@
 - [ ] Kubernettes auto-scaling
 - [ ] Player routing based on client version
 - [x] Better Redis implementation
+- [ ] Implement ability to invert whitelists and use them as blacklists instead
 - [ ] Make Redis more fault tolerant incase the sub connection fails
 - [ ] Optimize load balancing by implementing proper ExecutorService
 - [ ] Better error and overall handling for Redis
