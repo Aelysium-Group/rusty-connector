@@ -37,8 +37,9 @@
 - [ ] Player routing based on client version
 - [x] Better Redis implementation
 - [x] Implement ability to invert whitelists and use them as blacklists instead
-- [ ] Make Redis more fault tolerant incase the sub connection fails
-- [ ] Optimize load balancing by implementing proper ExecutorService
+- [x] Make Redis more fault tolerant incase the sub connection fails
+- [x] Optimize load balancing by implementing proper ExecutorService
+- [x] Overhaul Redis messaging/messages system
 - [ ] Better error and overall handling for Redis
 - [ ] Teleport players to specific coordinates on other servers
 
