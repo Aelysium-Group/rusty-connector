@@ -1,7 +1,6 @@
-package group.aelysium.rustyconnector.core.lib.database;
+package group.aelysium.rustyconnector.core.lib.database.redis;
 
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
-import io.lettuce.core.RedisClient;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
@@ -21,9 +20,8 @@ public class RedisIO {
     /**
      * Subscribe to a specific Redis data channel.
      * This method is thread locking.
-     * @param channelName The name of the channel to subscribe to.
      */
-    public void subscribeToChannel(String channelName) {
+    public void subscribeToChannel() {
         if(this.lock.getCount() != 0) throw new RuntimeException("Channel subscription is already active for this RedisIO! Either kill it with .shutdow(). Or create a new RedisIO to use!");
 
         try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
@@ -33,7 +31,7 @@ public class RedisIO {
 
             connection.addListener(new RedisListener());
 
-            sync.subscribe(channelName);
+            sync.subscribe(this.client.getDataChannel());
 
             this.lock.await();
         } catch (Exception e) {
@@ -64,14 +62,13 @@ public class RedisIO {
 
     /**
      * Sends a message over a Redis data channel.
-     * @param dataChannel The data channel to send over.
      * @param message The message to send.
      */
-    protected void publish(String dataChannel, String message) {
+    protected void publish(String message) {
         try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
             RedisPubSubAsyncCommands<String, String> async = connection.async();
 
-            async.publish(dataChannel, message);
+            async.publish(this.client.getDataChannel(), message);
         } catch (Exception e) {
             e.printStackTrace();
         }

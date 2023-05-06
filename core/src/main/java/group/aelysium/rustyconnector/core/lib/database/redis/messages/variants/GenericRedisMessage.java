@@ -1,0 +1,14 @@
+package group.aelysium.rustyconnector.core.lib.database.redis.messages.variants;
+
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
+
+import java.net.InetSocketAddress;
+
+public class RedisMessageRegisterAll extends RedisMessage {
+    public RedisMessageRegisterAll(String rawMessage, char[] key, RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
+        super(rawMessage, key, type, address, origin);
+
+    }
+}

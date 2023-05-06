@@ -236,7 +236,7 @@ public class DefaultConfig extends YAML {
             if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
 
             if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! " + familyName + " was " + familyName.length());
+                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
         });
 
         AtomicBoolean ignoreStatic = new AtomicBoolean(false);
@@ -247,7 +247,7 @@ public class DefaultConfig extends YAML {
             if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
 
             if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! " + familyName + " was " + familyName.length());
+                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
         });
         if(ignoreStatic.get())
             this.families_static.clear(); // Clear static family list so that nothing can be operated on it.

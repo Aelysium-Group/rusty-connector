@@ -2,11 +2,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.database;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
-import group.aelysium.rustyconnector.core.lib.database.RedisIO;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
@@ -14,23 +15,20 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.*;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
-import io.lettuce.core.RedisClient;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.resource.ClientResources;
 
 import javax.naming.AuthenticationException;
 import java.net.InetSocketAddress;
-import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 
-public class Redis extends RedisIO {
-    protected Redis(RedisClient client) {
+public class RedisIO extends RedisSubscriber {
+    protected RedisIO(RedisClient client) {
         super(client);
     }
 
@@ -55,7 +53,7 @@ public class Redis extends RedisIO {
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
-                Redis.processParameters(message, cachedMessage);
+                RedisIO.processParameters(message, cachedMessage);
             } catch (AuthenticationException e) {
                 cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
 
@@ -161,55 +159,6 @@ public class Redis extends RedisIO {
             object.addProperty(entry.getKey(),entry.getValue().getAsString());
         });
 
-        this.publish(VelocityRustyConnector.getAPI().getVirtualProcessor().getRedisDataChannel(), gson.toJson(object));
-    }
-
-    public static class RedisConnector {
-        private String host = "localhost";
-        private int port = 3306;
-        private String user = "default";
-        private char[] password = null;
-
-        public RedisConnector() {}
-
-        public RedisConnector setHost(String host) {
-            this.host = host;
-            return this;
-        }
-
-        public RedisConnector setPort(int port) {
-            this.port = port;
-            return this;
-        }
-
-        public RedisConnector setUser(String user) {
-            this.user = user;
-            return this;
-        }
-
-        public RedisConnector setPassword(String password) {
-            this.password = password.toCharArray();
-            return this;
-        }
-
-        public Redis build() {
-            RedisURI uri;
-            if(this.password == null)
-                uri = RedisURI.builder()
-                        .withHost(this.host)
-                        .withPort(this.port)
-                        .withAuthentication(this.user, "")
-                        .build();
-            else
-                uri = RedisURI.builder()
-                        .withHost(this.host)
-                        .withPort(this.port)
-                        .withAuthentication(this.user, this.password)
-                        .build();
-
-            ClientResources resources = ClientResources.create();
-
-            return new Redis(RedisClient.create(resources, uri));
-        }
+        super.publish(gson.toJson(object));
     }
 }

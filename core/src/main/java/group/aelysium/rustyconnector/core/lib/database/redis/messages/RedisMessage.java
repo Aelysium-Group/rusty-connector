@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.database.RedisIO;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisIO;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 
 import java.net.InetSocketAddress;

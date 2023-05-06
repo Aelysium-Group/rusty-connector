@@ -7,11 +7,10 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.data_messaging.firewall.MessageTunnel;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
-import group.aelysium.rustyconnector.core.lib.database.RedisSubscriptionRunnable;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnel;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.database.MySQL;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
@@ -20,8 +19,8 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.database.Redis;
+import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisIO;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
@@ -43,7 +42,7 @@ import java.util.Map;
 
 public class VirtualProxyProcessor implements VirtualProcessor {
     private MessageCache messageCache;
-    private Redis redis;
+    private RedisIO redis;
     private String redisDataChannel;
     private final Map<ServerInfo, Boolean> lifeMatrix = new HashMap<>();
     private final FamilyManager familyManager = new FamilyManager();
@@ -64,7 +63,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         return (ScalarServerFamily) this.familyManager.find(this.rootFamily);
     }
 
-    public void setRedis(Redis redis) throws IllegalStateException {
+    public void setRedis(RedisIO redis) throws IllegalStateException {
         if(this.redis != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
         this.redis = redis;
     }
@@ -492,15 +491,15 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         logger.log("Finished setting up root family");
 
         // Setup Redis
-        Redis redis;
+        RedisIO redis;
         if(config.getRedis_password().equals(""))
-            redis = new Redis.RedisConnector()
+            redis = new RedisIO.RedisConnector()
                     .setHost(config.getRedis_host())
                     .setPort(config.getRedis_port())
                     .setUser(config.getRedis_user())
                     .build();
         else
-            redis = new Redis.RedisConnector()
+            redis = new RedisIO.RedisConnector()
                     .setHost(config.getRedis_host())
                     .setPort(config.getRedis_port())
                     .setUser(config.getRedis_user())

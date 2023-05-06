@@ -25,6 +25,7 @@ public class WhitelistConfig extends YAML {
     private List<String> countries = new ArrayList<>();
     private String message = "You aren't whitelisted on this server!";
     private boolean strict = false;
+    private boolean inverted = false;
 
     private WhitelistConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -54,6 +55,9 @@ public class WhitelistConfig extends YAML {
     }
     public boolean isStrict() {
         return strict;
+    }
+    public boolean isInverted() {
+        return inverted;
     }
 
     /**
@@ -99,5 +103,7 @@ public class WhitelistConfig extends YAML {
             throw new IllegalStateException("Whitelist kick messages cannot be empty!");
 
         this.strict = this.getNode(data,"strict",Boolean.class);
+
+        this.inverted = this.getNode(data,"inverted",Boolean.class);
     }
 }
