@@ -10,14 +10,38 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageServerUnregister extends RedisMessage {
+public class RedisMessageServerUnregisterRequest extends RedisMessage {
     private String familyName;
     private String serverName;
 
-    public RedisMessageServerUnregister(String rawMessage, char[] privateKey, RedisMessageType type, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
-        super(rawMessage, privateKey, type, address, origin);
+    public String getFamilyName() {
+        return familyName;
+    }
 
-        if(!RedisMessageServerUnregister.validateParameters(ValidParameters.toList(), parameters))
+    public String getServerName() {
+        return serverName;
+    }
+
+    public RedisMessageServerUnregisterRequest(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+        super(RedisMessageType.UNREG, address, origin);
+
+        if(!RedisMessageServerUnregisterRequest.validateParameters(ValidParameters.toList(), parameters))
+            throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
+
+        parameters.forEach(entry -> {
+            String key = entry.getKey();
+            JsonElement value = entry.getValue();
+
+            switch (key) {
+                case ValidParameters.FAMILY_NAME -> this.familyName = value.getAsString();
+                case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
+            }
+        });
+    }
+    public RedisMessageServerUnregisterRequest(String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+        super(rawMessage, privateKey, RedisMessageType.UNREG, address, origin);
+
+        if(!RedisMessageServerUnregisterRequest.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -31,7 +55,7 @@ public class RedisMessageServerUnregister extends RedisMessage {
         });
     }
 
-    protected interface ValidParameters {
+    public interface ValidParameters {
         String FAMILY_NAME = "family";
         String SERVER_NAME = "name";
 

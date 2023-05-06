@@ -68,7 +68,7 @@ public class TPARequest {
 
             ServerInfo serverInfo = this.getTarget().getCurrentServer().orElseThrow().getServerInfo();
             String familyName = api.getVirtualProcessor().findServer(serverInfo).getFamilyName();
-            BaseServerFamily<? extends LoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(familyName);
+            BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(familyName);
             if(family == null) throw new NullPointerException();
 
             api.getVirtualProcessor().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);

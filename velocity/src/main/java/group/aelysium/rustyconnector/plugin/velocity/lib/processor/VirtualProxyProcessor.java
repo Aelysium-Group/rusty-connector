@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.module;
+package group.aelysium.rustyconnector.plugin.velocity.lib.processor;
 
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
@@ -7,11 +7,17 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.Callable;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnel;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.database.MySQL;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageFamilyRegister;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageTPAQueuePlayer;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
@@ -20,13 +26,15 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisIO;
+import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -42,41 +50,31 @@ import java.util.Map;
 
 public class VirtualProxyProcessor implements VirtualProcessor {
     private MessageCache messageCache;
-    private RedisIO redis;
-    private String redisDataChannel;
+    private RedisService redisService;
     private final Map<ServerInfo, Boolean> lifeMatrix = new HashMap<>();
     private final FamilyManager familyManager = new FamilyManager();
     private final WhitelistManager whitelistManager = new WhitelistManager();
-    private final String privateKey;
     private String rootFamily;
     private String proxyWhitelist;
     private Clock serverLifecycleHeart;
-    private Clock familyServerSorting;
+    private LoadBalancingService loadBalancingService;
     private Clock tpaRequestCleaner;
     private MessageTunnel messageTunnel;
-
-    public VirtualProxyProcessor(String privateKey) {
-        this.privateKey = privateKey;
-    }
 
     public ScalarServerFamily getRootFamily() {
         return (ScalarServerFamily) this.familyManager.find(this.rootFamily);
     }
-
-    public void setRedis(RedisIO redis) throws IllegalStateException {
-        if(this.redis != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
-        this.redis = redis;
+    public RedisService getRedisService() {
+        return this.redisService;
     }
 
-    public void setRedisDataChannel(String redisDataChannel) {
-        if(this.redisDataChannel != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
-        this.redisDataChannel = redisDataChannel;
+    protected void setRedisService(RedisService redis) throws IllegalStateException {
+        if(this.redisService != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+        this.redisService = redis;
     }
-    public String getRedisDataChannel() {
-        return this.redisDataChannel;
-    }
+
     public void closeRedis() {
-        this.redis.shutdown();
+        this.redisService.kill();
     }
 
     /**
@@ -136,9 +134,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     }
 
     private void startServerLifecycleHeart(long heartbeat, boolean shouldUnregister) {
-        this.serverLifecycleHeart = new Clock(heartbeat);
-
-        this.serverLifecycleHeart.start((Callable<Boolean>) () -> {
+        Callable<Boolean> callable = () -> {
             PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
             if(logger.getGate().check(GateKey.PING))
@@ -168,59 +164,39 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
                     lifeMatrix.put(serverInfo,false);
 
-                    server.ping(this.redis,privateKey);
+                    server.ping();
                 }
                 return true;
             } catch (Exception error) {
                 logger.log(error.getMessage());
             }
             return false;
-        });
-    }
+        };
 
-    private void startFamilyServerSorting(long heartbeat) {
-        this.familyServerSorting = new Clock(heartbeat);
-
-        this.familyServerSorting.start((Callable<Boolean>) () -> {
-            PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
-            try {
-                if(logger.getGate().check(GateKey.FAMILY_BALANCING))
-                    logger.log("Balancing families...");
-
-                for (BaseServerFamily family : this.getFamilyManager().dump()) {
-                    family.getLoadBalancer().completeSort();
-                    if(logger.getGate().check(GateKey.FAMILY_BALANCING))
-                        VelocityLang.FAMILY_BALANCING.send(logger, family);
-                }
-
-                if(logger.getGate().check(GateKey.FAMILY_BALANCING))
-                    logger.log("Finished balancing families.");
-            } catch (Exception e) {
-                return false;
-            }
-            return true;
-        });
+        this.serverLifecycleHeart = new Clock(callable, heartbeat);
+        this.serverLifecycleHeart.start();
     }
 
     private void startTPARequestCleaner(long heartbeat) {
-        this.tpaRequestCleaner = new Clock(heartbeat);
-
-        this.tpaRequestCleaner.start((Callable<Boolean>) () -> {
+        Callable<Boolean> callable = () -> {
             for(BaseServerFamily family : this.getFamilyManager().dump()) {
                 if(!family.getTPAHandler().getSettings().isEnabled()) continue;
                 family.getTPAHandler().clearExpired();
             }
             return true;
-        });
+        };
+
+        this.tpaRequestCleaner = new Clock(callable, heartbeat);
+        this.tpaRequestCleaner.start();
     }
 
     /**
      * Ends the current heart lifecycles and prepares them for garbage collection.
      */
-    public void killHeartbeats() {
-        if(this.familyServerSorting != null) {
-            this.familyServerSorting.end();
-            this.familyServerSorting = null;
+    public void killServices() {
+        if(this.loadBalancingService != null) {
+            this.loadBalancingService.kill();
+            this.loadBalancingService = null;
         }
         if(this.serverLifecycleHeart != null) {
             this.serverLifecycleHeart.end();
@@ -293,15 +269,6 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     }
 
     /**
-     * Validate a private key.
-     * @param key The private key that needs to be validated.
-     * @return `true` if the key is valid. `false` otherwise.
-     */
-    public boolean validatePrivateKey(String key) {
-        return this.privateKey.equals(key);
-    }
-
-    /**
      * Sends a request to all servers listening on this data channel to register themselves.
      * Can be useful if you've just restarted your proxy and need to quickly get all your servers back online.
      */
@@ -311,13 +278,14 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         if(logger.getGate().check(GateKey.CALL_FOR_REGISTRATION))
             VelocityLang.CALL_FOR_REGISTRATION.send(logger);
 
-        RedisMessage message = new RedisMessage(
-                this.privateKey,
-                RedisMessageType.REG_ALL,
-                "127.0.0.1:0"
-        );
+        RedisMessage message = new RedisMessage.Builder()
+                .setType(RedisMessageType.REG_ALL)
+                .setOrigin(MessageOrigin.PROXY)
+                .buildSendable();
 
-        message.dispatchMessage(this.redis);
+        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
+        publisher.publish(message);
+
         WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, DiscordWebhookMessage.PROXY__REGISTER_ALL);
     }
 
@@ -332,15 +300,16 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         if(logger.getGate().check(GateKey.CALL_FOR_REGISTRATION))
             VelocityLang.CALL_FOR_FAMILY_REGISTRATION.send(logger, familyName);
 
-        RedisMessage message = new RedisMessage(
-                this.privateKey,
-                RedisMessageType.REG_FAMILY,
-                "127.0.0.1:0"
-        );
+        RedisMessage message = new RedisMessage.Builder()
+                .setType(RedisMessageType.REG_FAMILY)
+                .setOrigin(MessageOrigin.PROXY)
+                .setParameter(RedisMessageFamilyRegister.ValidParameters.FAMILY_NAME, familyName)
+                .buildSendable();
 
-        message.addParameter("family",familyName);
 
-        message.dispatchMessage(this.redis);
+        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
+        publisher.publish(message);
+
         WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, familyName, DiscordWebhookMessage.FAMILY__REGISTER_ALL.build(familyName));
     }
 
@@ -359,20 +328,18 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         PlayerServer targetServer = api.getVirtualProcessor().findServer(targetServerInfo);
         if(targetServer == null) throw new NullPointerException();
 
-        Callable<Boolean> queuePlayer = () -> {
-            RedisMessage message = new RedisMessage(
-                    this.privateKey,
-                    RedisMessageType.TPA_QUEUE_PLAYER,
-                    targetServer.getAddress()
-            );
-            message.addParameter("target-username",target.getUsername());
-            message.addParameter("source-username",source.getUsername());
 
-            message.dispatchMessage(this.redis);
-            return true;
-        };
+        RedisMessage message = new RedisMessage.Builder()
+                .setType(RedisMessageType.TPA_QUEUE_PLAYER)
+                .setOrigin(MessageOrigin.PROXY)
+                .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.TARGET_SERVER, targetServer.getAddress())
+                .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.TARGET_USERNAME, target.getUsername())
+                .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.SOURCE_USERNAME, source.getUsername())
+                .buildSendable();
 
-        queuePlayer.execute();
+        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
+        publisher.publish(message);
+
 
         if(senderServerInfo.equals(targetServerInfo)) return;
 
@@ -475,7 +442,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     public static VirtualProxyProcessor init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        VirtualProxyProcessor virtualProxyProcessor = new VirtualProxyProcessor(config.getPrivate_key());
+        VirtualProxyProcessor virtualProxyProcessor = new VirtualProxyProcessor();
 
         // Setup families
         for (String familyName: config.getScalarFamilies())
@@ -491,21 +458,21 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         logger.log("Finished setting up root family");
 
         // Setup Redis
-        RedisIO redis;
-        if(config.getRedis_password().equals(""))
-            redis = new RedisIO.RedisConnector()
-                    .setHost(config.getRedis_host())
-                    .setPort(config.getRedis_port())
-                    .setUser(config.getRedis_user())
-                    .build();
-        else
-            redis = new RedisIO.RedisConnector()
-                    .setHost(config.getRedis_host())
-                    .setPort(config.getRedis_port())
-                    .setUser(config.getRedis_user())
-                    .setPassword(config.getRedis_password())
-                    .build();
+        RedisClient.Builder redisClientBuilder = new RedisClient.Builder()
+                .setHost(config.getRedis_host())
+                .setPort(config.getRedis_port())
+                .setUser(config.getRedis_user())
+                .setPrivateKey(config.getPrivate_key())
+                .setDataChannel(config.getRedis_dataChannel());
 
+        if(!config.getRedis_password().equals(""))
+            redisClientBuilder.setPassword(config.getRedis_password());
+
+        RedisClient redisClient = redisClientBuilder.build();
+        virtualProxyProcessor.setRedisService(new RedisService(redisClient));
+        virtualProxyProcessor.getRedisService().start(RedisSubscriber.class);
+
+        // Setup MySQL
         if(config.shouldIgnoreMysql())
             logger.send(Component.text("No use for MySQL has been found. Ignoring MySQL configurations.", NamedTextColor.YELLOW));
         else {
@@ -519,18 +486,18 @@ public class VirtualProxyProcessor implements VirtualProcessor {
             api.setMySQL(mySQL);
         }
 
-        virtualProxyProcessor.setRedis(redis);
-
-        new Thread(() -> redis.subscribeToChannel(config.getRedis_dataChannel())).start();
-
-        virtualProxyProcessor.setRedisDataChannel(config.getRedis_dataChannel());
-
         logger.log("Finished setting up redis");
 
+        logger.log("Loading services...");
         if(config.isHearts_serverLifecycle_enabled()) virtualProxyProcessor.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
-        if(config.getMessageTunnel_familyServerSorting_enabled()) virtualProxyProcessor.startFamilyServerSorting(config.getMessageTunnel_familyServerSorting_interval());
+
+        if(config.getMessageTunnel_familyServerSorting_enabled()) {
+            virtualProxyProcessor.loadBalancingService = new LoadBalancingService(virtualProxyProcessor.getFamilyManager().size(), config.getMessageTunnel_familyServerSorting_interval());
+            virtualProxyProcessor.loadBalancingService.init();
+        }
+
         virtualProxyProcessor.startTPARequestCleaner(10);
-        logger.log("Finished setting up heartbeats");
+        logger.log("Finished loading services...");
 
         // Setup network whitelist
         if(config.isWhitelist_enabled()) {
@@ -584,9 +551,9 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         logger.log("Reloading config.yml");
 
         // Heartbeats
-        this.killHeartbeats();
+        this.killServices();
         if(config.isHearts_serverLifecycle_enabled()) this.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
-        if(config.getMessageTunnel_familyServerSorting_enabled()) this.startFamilyServerSorting(config.getMessageTunnel_familyServerSorting_interval());
+        if(config.getMessageTunnel_familyServerSorting_enabled()) this.loadBalancingService = new LoadBalancingService(this.getFamilyManager().size(), config.getMessageTunnel_familyServerSorting_interval());
         logger.log("Restarted heartbeats");
 
         this.reloadWhitelists(config);

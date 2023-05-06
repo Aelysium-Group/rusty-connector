@@ -6,9 +6,11 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessa
 
 import java.net.InetSocketAddress;
 
-public class RedisMessageRegisterAll extends RedisMessage {
-    public RedisMessageRegisterAll(String rawMessage, char[] key, RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
+public class GenericRedisMessage extends RedisMessage {
+    public GenericRedisMessage(RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
+        super(type, address, origin);
+    }
+    public GenericRedisMessage(String rawMessage, char[] key, RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
         super(rawMessage, key, type, address, origin);
-
     }
 }

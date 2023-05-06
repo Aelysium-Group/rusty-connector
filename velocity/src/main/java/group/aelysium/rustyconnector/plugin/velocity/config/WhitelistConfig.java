@@ -1,6 +1,5 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.config;
+package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;

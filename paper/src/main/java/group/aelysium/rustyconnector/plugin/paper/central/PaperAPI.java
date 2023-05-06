@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.core.central.PluginAPI;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.lib.VirtualServerProcessor;
-import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;

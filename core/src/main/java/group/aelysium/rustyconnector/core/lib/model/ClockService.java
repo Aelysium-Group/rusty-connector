@@ -1,16 +1,14 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.processor;
-
-import group.aelysium.rustyconnector.core.lib.Callable;
+package group.aelysium.rustyconnector.core.lib.model;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class LoadBalancingService {
-    private final ScheduledExecutorService executorService;
-    private final long heartbeat;
+public class ClockService {
+    protected final ScheduledExecutorService executorService;
+    protected final long heartbeat;
 
-    public LoadBalancingService(int threads, long heartbeat) {
+    public ClockService(int threads, long heartbeat) {
         this.executorService = Executors.newScheduledThreadPool(threads);
         this.heartbeat = heartbeat;
     }
@@ -22,7 +20,7 @@ public class LoadBalancingService {
     public void schedule(Runnable runnable) {
         this.executorService.scheduleAtFixedRate(runnable, 0, this.heartbeat, TimeUnit.SECONDS);
     }
-    
+
     public void kill() {
         this.executorService.shutdown();
         try {

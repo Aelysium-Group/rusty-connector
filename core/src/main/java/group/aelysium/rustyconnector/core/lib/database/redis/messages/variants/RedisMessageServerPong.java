@@ -10,14 +10,22 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageSendPlayer extends RedisMessage {
-    private String familyName;
-    private String uuid;
+public class RedisMessageServerPong extends RedisMessage {
+    private String serverName;
+    private int playerCount;
 
-    public RedisMessageSendPlayer(String rawMessage, char[] privateKey, RedisMessageType type, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
-        super(rawMessage, privateKey, type, address, origin);
+    public String getServerName() {
+        return serverName;
+    }
 
-        if(!RedisMessageSendPlayer.validateParameters(ValidParameters.toList(), parameters))
+    public int getPlayerCount() {
+        return playerCount;
+    }
+
+    public RedisMessageServerPong(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+        super(RedisMessageType.PONG, address, origin);
+
+        if(!RedisMessageServerPong.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -25,20 +33,36 @@ public class RedisMessageSendPlayer extends RedisMessage {
             JsonElement value = entry.getValue();
 
             switch (key) {
-                case ValidParameters.FAMILY_NAME -> this.familyName = value.getAsString();
-                case ValidParameters.PLAYER_UUID -> this.uuid = value.getAsString();
+                case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
+                case ValidParameters.PLAYER_COUNT -> this.playerCount = value.getAsInt();
+            }
+        });
+    }
+    public RedisMessageServerPong(String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+        super(rawMessage, privateKey, RedisMessageType.PONG, address, origin);
+
+        if(!RedisMessageServerPong.validateParameters(ValidParameters.toList(), parameters))
+            throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
+
+        parameters.forEach(entry -> {
+            String key = entry.getKey();
+            JsonElement value = entry.getValue();
+
+            switch (key) {
+                case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
+                case ValidParameters.PLAYER_COUNT -> this.playerCount = value.getAsInt();
             }
         });
     }
 
-    protected interface ValidParameters {
-        String FAMILY_NAME = "family";
-        String PLAYER_UUID = "uuid";
+    public interface ValidParameters {
+        String SERVER_NAME = "name";
+        String PLAYER_COUNT = "player-count";
 
         static List<String> toList() {
             List<String> list = new ArrayList<>();
-            list.add(FAMILY_NAME);
-            list.add(PLAYER_UUID);
+            list.add(SERVER_NAME);
+            list.add(PLAYER_COUNT);
 
             return list;
         }

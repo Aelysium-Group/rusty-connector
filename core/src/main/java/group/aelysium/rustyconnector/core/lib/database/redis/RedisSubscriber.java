@@ -1,19 +1,15 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
-import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 
-import java.net.InetSocketAddress;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-public class RedisIO {
+public class RedisSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
-    protected RedisIO(RedisClient client) {
+    protected RedisSubscriber(RedisClient client) {
         this.client = client;
     }
 
@@ -56,28 +52,10 @@ public class RedisIO {
         // Empty adapter method
     }
 
-    public void sendPluginMessage(String privateKey, RedisMessageType type, InetSocketAddress address, Map<String, String> parameters) throws IllegalArgumentException {
-        // Empty adapter method
-    }
-
-    /**
-     * Sends a message over a Redis data channel.
-     * @param message The message to send.
-     */
-    protected void publish(String message) {
-        try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
-            RedisPubSubAsyncCommands<String, String> async = connection.async();
-
-            async.publish(this.client.getDataChannel(), message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     protected class RedisListener extends RedisPubSubAdapter<String, String> {
         @Override
         public void message(String channel, String message) {
-            RedisIO.this.onMessage(message);
+            RedisSubscriber.this.onMessage(message);
         }
     }
 }

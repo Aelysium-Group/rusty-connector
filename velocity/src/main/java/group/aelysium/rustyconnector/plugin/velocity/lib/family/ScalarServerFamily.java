@@ -5,12 +5,12 @@ import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.ScalarFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
 import net.kyori.adventure.text.Component;
@@ -163,7 +163,7 @@ class ScalarFamilyConnector {
         return server;
     }
 
-    public PlayerServer connectSingleton() {
+    private PlayerServer connectSingleton() {
         PlayerServer server = this.family.getLoadBalancer().getCurrent(); // Get the server that is currently listed as highest priority
         try {
             if(!server.validatePlayer(player))
@@ -180,7 +180,7 @@ class ScalarFamilyConnector {
         }
     }
 
-    public PlayerServer connectPersistent() {
+    private PlayerServer connectPersistent() {
         int attemptsLeft = this.family.getLoadBalancer().getAttempts();
 
         for (int attempt = 1; attempt <= attemptsLeft; attempt++) {

@@ -47,4 +47,8 @@ public class FamilyManager implements NodeManager<BaseServerFamily> {
     public void clear() {
         this.registeredFamilies.clear();
     }
+
+    public int size() {
+        return this.registeredFamilies.size();
+    }
 }

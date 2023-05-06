@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.*;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 

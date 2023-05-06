@@ -16,12 +16,34 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class HomeServerMappingsDatabase {
-    private static final String FIND_HOME_SERVER_IN_FAMILY = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?";
-    private static final String CHECK_IF_PLAYER_HAS_HOME = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?";
-    private static final String DELETE_PLAYERS_HOME_SERVER = "DELETE FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?";
+    private static final String FIND_HOME_SERVER_IN_FAMILY = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
+    private static final String CHECK_IF_PLAYER_HAS_HOME = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
+    private static final String DELETE_PLAYERS_HOME_SERVER = "DELETE FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
     private static final String SAVE_PLAYERS_HOME_SERVER = "REPLACE INTO home_server_mappings (player_uuid, family_name, server_address, server_name, expiration) VALUES(?, ?, ?, ?, FROM_UNIXTIME(?));";
-    private static final String PURGE_FAMILY_OLD_SERVERS = "DELETE FROM home_server_mappings WHERE family_name = ? AND expiration < NOW()";
+    private static final String PURGE_FAMILY_OLD_SERVERS = "DELETE FROM home_server_mappings WHERE family_name = ? AND expiration < NOW();";
     private static final String UPDATE_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = ? WHERE family_name = ? AND expiration IS NULL;";
+    private static final String INIT_TABLE = "" +
+            "CREATE TABLE IF NOT EXISTS home_server_mappings (" +
+            "    player_uuid VARCHAR(36) NOT NULL," +
+            "    family_name VARCHAR(32) NOT NULL," +
+            "    server_address VARCHAR(128) NOT NULL," +
+            "    server_name VARCHAR(128) NOT NULL," +
+            "    expiration TIMESTAMP NULL DEFAULT NULL," +
+            "    CONSTRAINT uc_Mappings UNIQUE (player_uuid, family_name)" +
+            ");";
+
+    /**
+     * Initialize the table for home server mappings.
+     */
+    public static void init() throws SQLException {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        MySQL mySQL = api.getMySQL();
+
+        mySQL.connect();
+        PreparedStatement statement = mySQL.prepare(INIT_TABLE);
+        mySQL.execute(statement);
+        mySQL.close();
+    }
 
     /**
      * Finds a home server mapping for a player.

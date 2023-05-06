@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.config;
+package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import java.io.File;
 

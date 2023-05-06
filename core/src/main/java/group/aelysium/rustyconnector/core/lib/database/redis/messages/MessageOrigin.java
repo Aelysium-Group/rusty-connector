@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.data_messaging;
+package group.aelysium.rustyconnector.core.lib.database.redis.messages;
 
 public enum MessageOrigin {
     PROXY,

@@ -1,4 +1,4 @@
-CREATE TABLE home_server_mappings (
+CREATE TABLE IF NOT EXISTS home_server_mappings (
     player_uuid VARCHAR(36) NOT NULL,
     family_name VARCHAR(32) NOT NULL,
     server_address VARCHAR(128) NOT NULL,

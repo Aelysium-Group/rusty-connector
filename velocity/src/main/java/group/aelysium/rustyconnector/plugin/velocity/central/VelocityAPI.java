@@ -10,8 +10,8 @@ import group.aelysium.rustyconnector.core.central.PluginAPI;
 import group.aelysium.rustyconnector.core.lib.database.MySQL;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 import org.slf4j.Logger;
 
 import java.io.InputStream;

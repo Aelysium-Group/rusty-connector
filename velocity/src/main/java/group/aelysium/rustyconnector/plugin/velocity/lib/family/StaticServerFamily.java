@@ -6,15 +6,15 @@ import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.ScalarFamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.StaticFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
 import net.kyori.adventure.text.Component;
@@ -262,11 +262,28 @@ class StaticFamilyConnector {
         }
     }
 
+    /**
+     * Establish a connection to anything that's available.
+     * If a home server is available, connect to that.
+     * If not, check the load balancer and route the player into the proper server.
+     * @return The player server that this player was connected to.
+     */
     public PlayerServer establishAnyConnection() {
         try {
             return this.connectHomeServer();
         } catch (Exception ignore) {}
 
+        return establishNewConnection();
+    }
+
+    /**
+     * Establish a new connection to the family.
+     * This will ignore whether the player has a home family.
+     *
+     * After a connection is established, the player's home family will be set or updated.
+     * @return The player server that this player was connected to.
+     */
+    public PlayerServer establishNewConnection() {
         PlayerServer server;
         if(this.family.getLoadBalancer().isPersistent() && this.family.getLoadBalancer().getAttempts() > 1)
             server = this.connectPersistent();
@@ -276,25 +293,35 @@ class StaticFamilyConnector {
         this.sendPostConnectErrorMessage();
 
         try {
-            this.family.registerHomeServer(player, server);
+            this.family.registerHomeServer(this.player, server);
         } catch (Exception e) {
-            VelocityRustyConnector.getAPI().getLogger().send(Component.text("Unable to save "+ player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
+            VelocityRustyConnector.getAPI().getLogger().send(Component.text("Unable to save "+ this.player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
             e.printStackTrace();
         }
 
         return server;
     }
 
+    /**
+     * Connects the player to their home server.
+     * If the player's home server is unavailable and `UnavailableProtocol.ASSIGN_NEW_HOME` is set;
+     * this will call `.establishNewConnection()`
+     * @return The player server that this player was connected to.
+     * @throws RuntimeException If no server could be connected to.
+     */
     public PlayerServer connectHomeServer() throws RuntimeException {
         try {
-            HomeServerMapping mapping = this.family.findHomeServer(player);
+            HomeServerMapping mapping = this.family.findHomeServer(this.player);
 
             if(mapping != null) {
-                mapping.server().connect(player);
+                mapping.server().connect(this.player);
                 return mapping.server();
             }
             switch (this.family.getUnavailableProtocol()) {
-                case ASSIGN_NEW_HOME -> {}
+                case ASSIGN_NEW_HOME -> {
+                    this.family.unregisterHomeServer(this.player);
+                    return this.establishNewConnection();
+                }
                 case CONNECT_WITH_ERROR -> this.postConnectionError = VelocityLang.MISSING_HOME_SERVER;
                 case CANCEL_CONNECTION_ATTEMPT -> {
                     player.sendMessage(VelocityLang.BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT);
@@ -305,13 +332,13 @@ class StaticFamilyConnector {
         throw new RuntimeException("There was an issue connecting you to the server!");
     }
 
-    public PlayerServer connectSingleton() {
+    private PlayerServer connectSingleton() {
         PlayerServer server = this.family.getLoadBalancer().getCurrent();
         try {
-            if(!server.validatePlayer(player))
+            if(!server.validatePlayer(this.player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
 
-            if (!server.connect(player))
+            if (!server.connect(this.player))
                 throw new RuntimeException("There was an issue connecting you to the server!");
 
             this.family.getLoadBalancer().iterate();
@@ -322,7 +349,7 @@ class StaticFamilyConnector {
         }
     }
 
-    public PlayerServer connectPersistent() {
+    private PlayerServer connectPersistent() {
         int attemptsLeft = this.family.getLoadBalancer().getAttempts();
 
         for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
@@ -330,17 +357,17 @@ class StaticFamilyConnector {
             PlayerServer server = this.family.getLoadBalancer().getCurrent(); // Get the server that is currently listed as highest priority
 
             try {
-                if (!server.validatePlayer(player))
+                if (!server.validatePlayer(this.player))
                     throw new RuntimeException("The server you're trying to connect to is full!");
 
-                if (server.connect(player)) {
+                if (server.connect(this.player)) {
                     this.family.getLoadBalancer().forceIterate();
 
                     return server;
                 } else throw new RuntimeException("Unable to connect you to the server in time!");
             } catch (Exception e) {
                 if (isFinal)
-                    player.disconnect(Component.text(e.getMessage()));
+                    this.player.disconnect(Component.text(e.getMessage()));
             }
             this.family.getLoadBalancer().forceIterate();
         }

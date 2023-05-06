@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandTPA;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.*;
+import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerChangeServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerChooseInitialServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerDisconnect;
@@ -63,7 +63,7 @@ public class VelocityLifecycle extends PluginLifecycle {
             LoggerConfig.empty();
 
             if(api.getVirtualProcessor() != null) {
-                api.getVirtualProcessor().killHeartbeats();
+                api.getVirtualProcessor().killServices();
                 api.getVirtualProcessor().closeRedis();
             }
 

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.config;
+package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
@@ -40,7 +40,7 @@ public class WebhooksConfig extends YAML {
         Boolean enabled = this.getNode(this.data, "enabled", Boolean.class);
         if(!enabled) return;
 
-        YAML.get(this.data,"webhooks").getChildrenList().forEach(node -> {
+        get(this.data,"webhooks").getChildrenList().forEach(node -> {
             WebhookScope scope = WebhookScope.valueOf(this.getNode(node, "scope", String.class).toUpperCase());
             String name = this.getNode(node, "name", String.class);
             try {
@@ -64,7 +64,7 @@ public class WebhooksConfig extends YAML {
                         case FAMILY -> {
                             String familyName = this.getNode(node, "target-family", String.class);
 
-                            BaseServerFamily<? extends LoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(familyName);
+                            BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(familyName);
                             if (family == null)
                                 logger.warn("webhooks.yml is pointing a webhook at a family with the name: " + familyName + ". No family with this name exists!");
 

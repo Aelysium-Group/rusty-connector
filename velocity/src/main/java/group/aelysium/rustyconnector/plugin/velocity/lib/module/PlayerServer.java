@@ -7,14 +7,15 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.database.RedisIO;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
+import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -157,19 +158,20 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     }
 
     /**
-     * Sends a ping to the specific server.
-     * @param redis The redis connection to use.
+     * Sends a ping to this server.
      */
-    public void ping(RedisIO redis, String privateKey) {
-        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+    public void ping() {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
 
-        RedisMessage message = new RedisMessage(
-                privateKey,
-                RedisMessageType.PING,
-                this.getAddress()
-        );
+        RedisMessage message = new RedisMessage.Builder()
+                .setType(RedisMessageType.PING)
+                .setOrigin(MessageOrigin.PROXY)
+                .setAddress(this.getAddress())
+                .buildSendable();
 
-        message.dispatchMessage(redis);
+        RedisPublisher publisher = api.getVirtualProcessor().getRedisService().getMessagePublisher();
+        publisher.publish(message);
 
         if(logger.getGate().check(GateKey.PING))
             VelocityLang.PING.send(logger,this.serverInfo);

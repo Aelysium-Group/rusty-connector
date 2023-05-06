@@ -1,6 +1,6 @@
-package group.aelysium.rustyconnector.core.lib.data_messaging.cache;
+package group.aelysium.rustyconnector.core.lib.database.redis.messages.cache;
 
-import group.aelysium.rustyconnector.core.lib.data_messaging.MessageStatus;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 
 import java.util.Date;
 

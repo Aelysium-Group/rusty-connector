@@ -1,6 +1,6 @@
-package group.aelysium.rustyconnector.core.lib.data_messaging.firewall;
+package group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall;
 
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 
 import java.net.InetSocketAddress;

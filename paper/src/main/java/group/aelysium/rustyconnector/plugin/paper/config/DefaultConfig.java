@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.config;
+package group.aelysium.rustyconnector.plugin.paper.config;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;

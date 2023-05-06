@@ -9,18 +9,24 @@ import java.util.TimerTask;
 
 public class Clock {
     private final Timer timer = new Timer();
-    private long delay = 10;
+    private final long delay;
+    private final Callable callback;
 
-    public Clock(long delay) {
+    public Clock(Callable callback) {
+        this.callback = callback;
+        this.delay = 10;
+    }
+    public Clock(Callable callback, long delay) {
+        this.callback = callback;
         this.delay = delay;
     }
 
-    public void start(Callable callback) {
+    public void start() {
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
         this.timer.schedule( new TimerTask() {
             public void run() {
                 try {
-                    callback.execute();
+                    Clock.this.callback.execute();
                 } catch (Exception e) {
                     logger.log(e.getMessage());
                 }

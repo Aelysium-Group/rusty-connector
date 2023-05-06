@@ -1,18 +1,24 @@
 package group.aelysium.rustyconnector.plugin.paper.lib;
 
-import group.aelysium.rustyconnector.core.lib.data_messaging.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.database.RedisSubscriptionRunnable;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageSendPlayer;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPong;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerRegisterRequest;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerUnregisterRequest;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
 import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.paper.lib.database.Redis;
+import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueue;
 import org.bukkit.entity.Player;
 
@@ -21,23 +27,19 @@ import java.net.InetSocketAddress;
 public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
     private final TPAQueue tpaQueue = new TPAQueue();
     private MessageCache messageCache;
-    private final Redis redis;
-    private final String redisDataChannel;
+    private final RedisService redisService;
     private final String family;
     private final int weight = 0;
     private int softPlayerCap = 20;
     private int hardPlayerCap = 30;
     private final String name;
-
-    private final String privateKey;
     private final InetSocketAddress address;
 
-    public VirtualServerProcessor(String name, String privateKey, String address, String family, Redis redis, String redisDataChannel) {
+    public VirtualServerProcessor(String name, String address, String family, RedisService redisService) {
         if(name.equals("")) {
             name = MD5.generatePrivateKey(); // Generate a custom string to be the server's name
         }
         this.name = name;
-        this.privateKey = privateKey;
 
         String[] addressSplit = address.split(":");
 
@@ -45,12 +47,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
 
         this.family = family;
 
-        this.redis = redis;
-        this.redisDataChannel = redisDataChannel;
-    }
-
-    public boolean validatePrivateKey(String keyToValidate) {
-        return this.privateKey.equals(keyToValidate);
+        this.redisService = redisService;
     }
 
     /**
@@ -69,7 +66,9 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
         return this.messageCache;
     }
 
-    public InetSocketAddress getAddress() { return this.address; }
+    public String getAddress() {
+        return this.address.getHostName() + ":" + this.address.getPort();
+    }
 
     public String getFamily() { return this.family; }
 
@@ -99,8 +98,9 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
     }
 
     public void closeRedis() {
-        this.redis.shutdown();
+        this.redisService.kill();
     }
+    public RedisService getRedisService() { return this.redisService; }
 
     /**
      * Set the player cap for this server. If soft cap is larger than hard cap. Set soft cap to be the same value as hard cap.
@@ -124,39 +124,32 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
     }
 
     public void registerToProxy() {
-        RedisMessage registrationMessage = new RedisMessage(
-                this.privateKey,
-                RedisMessageType.REG,
-                this.address.getHostName()+":"+this.address.getPort()
-        );
-        registrationMessage.addParameter("family",this.family);
-        registrationMessage.addParameter("name",this.name);
-        registrationMessage.addParameter("soft-cap", String.valueOf(this.softPlayerCap));
-        registrationMessage.addParameter("hard-cap", String.valueOf(this.hardPlayerCap));
-        registrationMessage.addParameter("weight", String.valueOf(this.weight));
+        RedisMessage message = new RedisMessage.Builder()
+                .setType(RedisMessageType.REG)
+                .setOrigin(MessageOrigin.SERVER)
+                .setAddress(this.getAddress())
+                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.FAMILY_NAME, this.family)
+                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.SERVER_NAME, this.name)
+                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.SOFT_CAP,    String.valueOf(this.softPlayerCap))
+                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.HARD_CAP,    String.valueOf(this.hardPlayerCap))
+                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.WEIGHT,      String.valueOf(this.weight))
+                .buildSendable();
 
-        registrationMessage.dispatchMessage(this.redis);
+        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
+        publisher.publish(message);
     }
 
     public void unregisterFromProxy() {
-        RedisMessage registrationMessage = new RedisMessage(
-                this.privateKey,
-                RedisMessageType.UNREG,
-                this.address.getHostName()+":"+this.address.getPort()
-        );
-        registrationMessage.addParameter("family",this.family);
-        registrationMessage.addParameter("name",this.name);
+        RedisMessage message = new RedisMessage.Builder()
+                .setType(RedisMessageType.UNREG)
+                .setOrigin(MessageOrigin.SERVER)
+                .setAddress(this.getAddress())
+                .setParameter(RedisMessageServerUnregisterRequest.ValidParameters.FAMILY_NAME, this.family)
+                .setParameter(RedisMessageServerUnregisterRequest.ValidParameters.SERVER_NAME, this.name)
+                .buildSendable();
 
-        registrationMessage.dispatchMessage(this.redis);
-    }
-
-    @Deprecated
-    public void sendMessage(String rawMessage) {
-        RedisMessage.create(rawMessage, MessageOrigin.SERVER, this.getAddress()).dispatchMessage(this.redis);
-    }
-
-    public String getRedisDataChannel() {
-        return this.redisDataChannel;
+        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
+        publisher.publish(message);
     }
 
     /**
@@ -165,33 +158,35 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
      * @param familyName The name of the family to send to.
      */
     public void sendToOtherFamily(Player player, String familyName) {
-        RedisMessage registrationMessage = new RedisMessage(
-                this.privateKey,
-                RedisMessageType.SEND,
-                this.address.getHostName()+":"+this.address.getPort()
-        );
-        registrationMessage.addParameter("uuid",player.getUniqueId().toString());
-        registrationMessage.addParameter("family",familyName);
+        RedisMessage message = new RedisMessage.Builder()
+                .setType(RedisMessageType.SEND)
+                .setOrigin(MessageOrigin.SERVER)
+                .setAddress(this.getAddress())
+                .setParameter(RedisMessageSendPlayer.ValidParameters.TARGET_FAMILY_NAME, familyName)
+                .setParameter(RedisMessageSendPlayer.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
+                .buildSendable();
 
-        registrationMessage.dispatchMessage(this.redis);
+        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
+        publisher.publish(message);
     }
 
     /**
      * Sends a pong message to the proxy.
      */
     public void pong() {
-        RedisMessage registrationMessage = new RedisMessage(
-                this.privateKey,
-                RedisMessageType.PONG,
-                this.address.getHostName()+":"+this.address.getPort()
-        );
-        registrationMessage.addParameter("name", this.name);
-        registrationMessage.addParameter("player-count", String.valueOf(this.getPlayerCount()));
+        RedisMessage message = new RedisMessage.Builder()
+                .setType(RedisMessageType.PONG)
+                .setOrigin(MessageOrigin.SERVER)
+                .setAddress(this.getAddress())
+                .setParameter(RedisMessageServerPong.ValidParameters.SERVER_NAME, this.name)
+                .setParameter(RedisMessageServerPong.ValidParameters.PLAYER_COUNT, String.valueOf(this.getPlayerCount()))
+                .buildSendable();
 
-        registrationMessage.dispatchMessage(this.redis);
+        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
+        publisher.publish(message);
     }
 
-    public static VirtualServerProcessor init(DefaultConfig config) throws IllegalAccessException {
+    public static VirtualServerProcessor init(DefaultConfig config) {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
@@ -199,33 +194,26 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
 
 
         // Setup Redis
-        Redis redis;
-        if(config.getRedis_password().equals(""))
-            redis = new Redis.RedisConnector()
-                    .setHost(config.getRedis_host())
-                    .setPort(config.getRedis_port())
-                    .setUser(config.getRedis_user())
-                    .build();
-        else
-            redis = new Redis.RedisConnector()
-                    .setHost(config.getRedis_host())
-                    .setPort(config.getRedis_port())
-                    .setUser(config.getRedis_user())
-                    .setPassword(config.getRedis_password())
-                    .build();
+        RedisClient.Builder redisClientBuilder = new RedisClient.Builder()
+                .setHost(config.getRedis_host())
+                .setPort(config.getRedis_port())
+                .setUser(config.getRedis_user())
+                .setDataChannel(config.getRedis_dataChannel())
+                .setPrivateKey(config.getPrivate_key());
 
-        new Thread(() -> redis.subscribeToChannel(config.getRedis_dataChannel())).start();
+        if(!config.getRedis_password().equals(""))
+            redisClientBuilder.setPassword(config.getRedis_password());
+
+        RedisClient redisClient = redisClientBuilder.build();
 
         logger.log("Finished setting up redis");
 
 
         VirtualServerProcessor server = new VirtualServerProcessor(
                 config.getServer_name(),
-                config.getPrivate_key(),
                 config.getServer_address(),
                 config.getServer_family(),
-                redis,
-                config.getRedis_dataChannel()
+                new RedisService(redisClient)
         );
         server.setMessageCache(50);
 
@@ -233,6 +221,8 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                 config.getServer_playerCap_soft(),
                 config.getServer_playerCap_hard()
         );
+
+        server.getRedisService().start(RedisSubscriber.class);
 
         return server;
     }

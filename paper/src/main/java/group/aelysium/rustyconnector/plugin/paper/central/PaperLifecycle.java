@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
