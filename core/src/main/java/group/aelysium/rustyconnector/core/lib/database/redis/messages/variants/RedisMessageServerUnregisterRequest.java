@@ -38,8 +38,8 @@ public class RedisMessageServerUnregisterRequest extends RedisMessage {
             }
         });
     }
-    public RedisMessageServerUnregisterRequest(String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
-        super(rawMessage, privateKey, RedisMessageType.UNREG, address, origin);
+    public RedisMessageServerUnregisterRequest(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.UNREG, address, origin);
 
         if(!RedisMessageServerUnregisterRequest.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");

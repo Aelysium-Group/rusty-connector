@@ -38,8 +38,8 @@ public class RedisMessageServerPong extends RedisMessage {
             }
         });
     }
-    public RedisMessageServerPong(String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
-        super(rawMessage, privateKey, RedisMessageType.PONG, address, origin);
+    public RedisMessageServerPong(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.PONG, address, origin);
 
         if(!RedisMessageServerPong.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");

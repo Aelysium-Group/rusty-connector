@@ -38,8 +38,8 @@ public class RedisMessageSendPlayer extends RedisMessage {
             }
         });
     }
-    public RedisMessageSendPlayer(String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
-        super(rawMessage, privateKey, RedisMessageType.SEND, address, origin);
+    public RedisMessageSendPlayer(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.SEND, address, origin);
 
         if(!RedisMessageSendPlayer.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");

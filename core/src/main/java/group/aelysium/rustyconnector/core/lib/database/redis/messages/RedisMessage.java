@@ -13,9 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RedisMessage {
+    private static final int protocolVersion = 1;
 
     private final boolean sendable;
     private final String rawMessage;
+    private final int messageVersion;
 
     private char[] privateKey;
     private final RedisMessageType type;
@@ -33,6 +35,7 @@ public class RedisMessage {
      * Constructs a sendable RedisMessage.
      */
     protected RedisMessage(RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
+        this.messageVersion = protocolVersion;
         this.sendable = true;
         this.rawMessage = "";
         this.privateKey = null;
@@ -44,7 +47,8 @@ public class RedisMessage {
     /*
      * Constructs a received RedisMessage.
      */
-    protected RedisMessage(String rawMessage, char[] privateKey, RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
+    protected RedisMessage(int messageVersion, String rawMessage, char[] privateKey, RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
+        this.messageVersion = messageVersion;
         this.sendable = false;
         this.rawMessage = rawMessage;
         this.privateKey = privateKey;
@@ -88,6 +92,7 @@ public class RedisMessage {
     }
 
     public static class Builder {
+        private Integer protocolVersion;
         private String rawMessage;
         private char[] privateKey;
         private RedisMessageType type;
@@ -126,6 +131,10 @@ public class RedisMessage {
             this.origin = origin;
             return this;
         }
+        public Builder setProtocolVersion(int protocolVersion) {
+            this.protocolVersion = protocolVersion;
+            return this;
+        }
         public Builder setParameter(String key, String value) {
             this.parameters.add(KeyValue.just(key, JsonParser.parseString(value)));
             return this;
@@ -141,6 +150,7 @@ public class RedisMessage {
          * This should be a RedisMessage which was previously built as a sendable RedisMessage, and then was sent via RedisPublisher.
          *
          * ## Required Parameters:
+         * - `protocolVersion`
          * - `rawMessage`
          * - `privateKey`
          * - `type`
@@ -150,6 +160,7 @@ public class RedisMessage {
          * @throws IllegalStateException If the required parameters are not provided.
          */
         public RedisMessage buildReceived() {
+            if(this.protocolVersion == null) throw new IllegalStateException("You must provide `protocolVersion` when building a receivable RedisMessage!");
             if(this.rawMessage == null) throw new IllegalStateException("You must provide `rawMessage` when building a receivable RedisMessage!");
             if(this.privateKey == null) throw new IllegalStateException("You must provide `privateKey` when building a receivable RedisMessage!");
             if(this.type == null) throw new IllegalStateException("You must provide `type` when building a receivable RedisMessage!");
@@ -157,13 +168,13 @@ public class RedisMessage {
             if(this.origin == null) throw new IllegalStateException("You must provide `origin` when building a receivable RedisMessage!");
 
             return switch (this.type) {
-                case PING, REG_ALL ->           new GenericRedisMessage(this.rawMessage, this.privateKey, this.type, this.address, this.origin);
-                case REG ->       new RedisMessageServerRegisterRequest(this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-                case UNREG ->   new RedisMessageServerUnregisterRequest(this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-                case SEND ->                 new RedisMessageSendPlayer(this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-                case PONG ->                 new RedisMessageServerPong(this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-                case TPA_QUEUE_PLAYER -> new RedisMessageTPAQueuePlayer(this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-                case REG_FAMILY ->       new RedisMessageFamilyRegister(this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+                case PING, REG_ALL ->           new GenericRedisMessage(this.protocolVersion, this.rawMessage, this.privateKey, this.type, this.address, this.origin);
+                case REG ->       new RedisMessageServerRegisterRequest(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+                case UNREG ->   new RedisMessageServerUnregisterRequest(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+                case SEND ->                 new RedisMessageSendPlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+                case PONG ->                 new RedisMessageServerPong(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+                case TPA_QUEUE_PLAYER -> new RedisMessageTPAQueuePlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+                case REG_FAMILY ->       new RedisMessageFamilyRegister(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
                 default -> {
                     throw new IllegalStateException("Invalid RedisMessage type encountered!");
                 }
@@ -176,10 +187,14 @@ public class RedisMessage {
          * ## Required Parameters:
          * - `type`
          * - `origin`
+         *
+         * ## Not Allowed Parameters:
+         * - `protocolVersion`
          * @return A RedisMessage that can be published via the RedisPublisher.
-         * @throws IllegalStateException If the required parameters are not provided.
+         * @throws IllegalStateException If the required parameters are not provided. Or if protocolVersion is attempted to be set.
          */
         public RedisMessage buildSendable() {
+            if(this.protocolVersion != null) throw new IllegalStateException("You're not allowed to set `protocolVersion` when building a sendable RedisMessage!");
             if(this.type == null) throw new IllegalStateException("You must provide `type` when building a sendable RedisMessage!");
             if(this.origin == null) throw new IllegalStateException("You must provide `origin` when building a sendable RedisMessage!");
             // Specifically allow address to be set as `null`
@@ -217,6 +232,7 @@ public class RedisMessage {
                 JsonElement value = entry.getValue();
 
                 switch (key) {
+                    case MasterValidParameters.PROTOCOL_VERSION -> redisMessageBuilder.setProtocolVersion(value.getAsInt());
                     case MasterValidParameters.PRIVATE_KEY -> redisMessageBuilder.setPrivateKey(value.getAsString());
                     case MasterValidParameters.ADDRESS -> redisMessageBuilder.setAddress(value.getAsString());
                     case MasterValidParameters.TYPE -> redisMessageBuilder.setType(RedisMessageType.valueOf(value.getAsString()));
@@ -240,6 +256,7 @@ public class RedisMessage {
     }
 
     public interface MasterValidParameters {
+        String PROTOCOL_VERSION = "v";
         String PRIVATE_KEY = "k";
         String TYPE = "t";
         String ADDRESS = "a";
@@ -248,6 +265,7 @@ public class RedisMessage {
 
         static List<String> toList() {
             List<String> list = new ArrayList<>();
+            list.add(PROTOCOL_VERSION);
             list.add(PRIVATE_KEY);
             list.add(TYPE);
             list.add(ADDRESS);

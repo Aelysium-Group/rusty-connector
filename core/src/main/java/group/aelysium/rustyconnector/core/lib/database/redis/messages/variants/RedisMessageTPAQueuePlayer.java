@@ -44,8 +44,8 @@ public class RedisMessageTPAQueuePlayer extends RedisMessage {
             }
         });
     }
-    public RedisMessageTPAQueuePlayer(String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
-        super(rawMessage, privateKey, RedisMessageType.TPA_QUEUE_PLAYER, address, origin);
+    public RedisMessageTPAQueuePlayer(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.TPA_QUEUE_PLAYER, address, origin);
 
         if(!RedisMessageTPAQueuePlayer.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
