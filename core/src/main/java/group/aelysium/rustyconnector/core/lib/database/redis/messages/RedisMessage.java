@@ -78,6 +78,17 @@ public class RedisMessage {
         return this.rawMessage;
     }
 
+    public JsonObject toJSON() {
+        JsonObject rootObject = new JsonObject();
+        rootObject.add(MasterValidParameters.PRIVATE_KEY, this.privateKey);
+        rootObject.add(MasterValidParameters.PROTOCOL_VERSION, this.protocolVersion);
+        rootObject.add(MasterValidParameters.TYPE, this.type);
+        rootObject.add(MasterValidParameters.ORIGIN, this.origin);
+        rootObject.add(MasterValidParameters.ADDRESS, this.address);
+
+        return rootObject;
+    }
+
     /**
      * Checks if the two parameter lists (checking keys) match.
      * @param requiredParameters The parameters that are required.
