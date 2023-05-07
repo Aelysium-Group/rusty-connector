@@ -2,21 +2,19 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageSendPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 import net.kyori.adventure.text.Component;
 
 import java.security.InvalidAlgorithmParameterException;
-import java.util.UUID;
 
 public class SendPlayerHandler implements MessageHandler {
     private final RedisMessageSendPlayer message;
 
-    public SendPlayerHandler(RedisMessage message) {
+    public SendPlayerHandler(GenericRedisMessage message) {
         this.message = (RedisMessageSendPlayer) message;
     }
 
@@ -28,8 +26,8 @@ public class SendPlayerHandler implements MessageHandler {
         if(player == null) return;
 
         try {
-            BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(message.getFamilyName());
-            if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+message.getFamilyName()+"` doesn't exist!");
+            BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(message.getTargetFamilyName());
+            if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+message.getTargetFamilyName()+"` doesn't exist!");
 
             family.connect(player);
         } catch (Exception e) {

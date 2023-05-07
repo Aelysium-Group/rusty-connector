@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageSendPlayer;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPong;
@@ -12,16 +12,21 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.R
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerUnregisterRequest;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
 import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueue;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 
 public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
@@ -124,23 +129,27 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
     }
 
     public void registerToProxy() {
-        RedisMessage message = new RedisMessage.Builder()
-                .setType(RedisMessageType.REG)
-                .setOrigin(MessageOrigin.SERVER)
-                .setAddress(this.getAddress())
-                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.FAMILY_NAME, this.family)
-                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.SERVER_NAME, this.name)
-                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.SOFT_CAP,    String.valueOf(this.softPlayerCap))
-                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.HARD_CAP,    String.valueOf(this.hardPlayerCap))
-                .setParameter(RedisMessageServerRegisterRequest.ValidParameters.WEIGHT,      String.valueOf(this.weight))
-                .buildSendable();
+        try {
+            RedisMessageServerRegisterRequest message = (RedisMessageServerRegisterRequest) new GenericRedisMessage.Builder()
+                    .setType(RedisMessageType.REG)
+                    .setOrigin(MessageOrigin.SERVER)
+                    .setAddress(this.getAddress())
+                    .setParameter(RedisMessageServerRegisterRequest.ValidParameters.FAMILY_NAME, this.family)
+                    .setParameter(RedisMessageServerRegisterRequest.ValidParameters.SERVER_NAME, this.name)
+                    .setParameter(RedisMessageServerRegisterRequest.ValidParameters.SOFT_CAP, String.valueOf(this.softPlayerCap))
+                    .setParameter(RedisMessageServerRegisterRequest.ValidParameters.HARD_CAP, String.valueOf(this.hardPlayerCap))
+                    .setParameter(RedisMessageServerRegisterRequest.ValidParameters.WEIGHT, String.valueOf(this.weight))
+                    .buildSendable();
 
-        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
-        publisher.publish(message);
+            RedisPublisher publisher = this.getRedisService().getMessagePublisher();
+            publisher.publish(message);
+        } catch (Exception e) {
+            Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text(e.getMessage()), NamedTextColor.RED);
+        }
     }
 
     public void unregisterFromProxy() {
-        RedisMessage message = new RedisMessage.Builder()
+        RedisMessageServerUnregisterRequest message = (RedisMessageServerUnregisterRequest) new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.UNREG)
                 .setOrigin(MessageOrigin.SERVER)
                 .setAddress(this.getAddress())
@@ -158,7 +167,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
      * @param familyName The name of the family to send to.
      */
     public void sendToOtherFamily(Player player, String familyName) {
-        RedisMessage message = new RedisMessage.Builder()
+        RedisMessageSendPlayer message = (RedisMessageSendPlayer) new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.SEND)
                 .setOrigin(MessageOrigin.SERVER)
                 .setAddress(this.getAddress())
@@ -174,7 +183,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
      * Sends a pong message to the proxy.
      */
     public void pong() {
-        RedisMessage message = new RedisMessage.Builder()
+        RedisMessageServerPong message = (RedisMessageServerPong) new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.PONG)
                 .setOrigin(MessageOrigin.SERVER)
                 .setAddress(this.getAddress())
@@ -186,12 +195,22 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
         publisher.publish(message);
     }
 
-    public static VirtualServerProcessor init(DefaultConfig config) {
+    public static VirtualServerProcessor init(DefaultConfig config) throws IllegalAccessException {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
-        logger.log("Preparing Redis...");
+        // Setup private key
+        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "private.key"));
+        if(!privateKeyConfig.generate())
+            throw new IllegalStateException("Unable to load or create private.key!");
+        char[] privateKey = null;
+        try {
+            privateKey = privateKeyConfig.get();
+        } catch (Exception ignore) {}
+        if(privateKey == null) throw new IllegalAccessException("There was a fatal error while reading private.key!");
 
+
+        logger.log("Preparing Redis...");
 
         // Setup Redis
         RedisClient.Builder redisClientBuilder = new RedisClient.Builder()
@@ -199,7 +218,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                 .setPort(config.getRedis_port())
                 .setUser(config.getRedis_user())
                 .setDataChannel(config.getRedis_dataChannel())
-                .setPrivateKey(config.getPrivate_key());
+                .setPrivateKey(privateKey);
 
         if(!config.getRedis_password().equals(""))
             redisClientBuilder.setPassword(config.getRedis_password());

@@ -12,7 +12,6 @@ public class DefaultConfig extends YAML {
 
     private static DefaultConfig config;
 
-    private String private_key = "";
     private String server_name = "";
     private String server_address = "";
     private String server_family = "";
@@ -30,9 +29,6 @@ public class DefaultConfig extends YAML {
 
     private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
-    }
-    public String getPrivate_key() {
-        return private_key;
     }
 
     public String getServer_name() {
@@ -115,9 +111,6 @@ public class DefaultConfig extends YAML {
         } catch (Exception | UnsupportedClassVersionError e) {
             throw new IllegalStateException(e.getMessage());
         }
-
-        this.private_key = this.getNode(this.data,"private-key",String.class);
-        if(this.private_key.equals("")) throw new IllegalStateException("You must provide a private key in order for RustyConnector to work!");
 
         this.server_name = this.getNode(this.data,"server.name",String.class);
         if(this.server_name.equals("")) throw new IllegalStateException("You must provide a server name in order for RustyConnector to work!");

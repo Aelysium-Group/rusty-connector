@@ -1,9 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.database.redis.messages;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.*;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import io.lettuce.core.KeyValue;
@@ -12,17 +9,23 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessage {
+public class GenericRedisMessage {
     private static final int protocolVersion = 1;
 
+    public static int getProtocolVersion() {
+        return protocolVersion;
+    }
+
     private final boolean sendable;
-    private final String rawMessage;
+    private String rawMessage;
     private final int messageVersion;
 
     private char[] privateKey;
     private final RedisMessageType type;
     private final InetSocketAddress address;
     private final MessageOrigin origin;
+
+    public int getMessageVersion() { return this.messageVersion; }
 
     public boolean isSendable() { return this.sendable; }
     public String getRawMessage() { return this.rawMessage; }
@@ -34,10 +37,10 @@ public class RedisMessage {
     /*
      * Constructs a sendable RedisMessage.
      */
-    protected RedisMessage(RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
+    protected GenericRedisMessage(RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
         this.messageVersion = protocolVersion;
         this.sendable = true;
-        this.rawMessage = "";
+        this.rawMessage = null;
         this.privateKey = null;
         this.type = type;
         this.address = address;
@@ -47,7 +50,7 @@ public class RedisMessage {
     /*
      * Constructs a received RedisMessage.
      */
-    protected RedisMessage(int messageVersion, String rawMessage, char[] privateKey, RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
+    protected GenericRedisMessage(int messageVersion, String rawMessage, char[] privateKey, RedisMessageType type, InetSocketAddress address, MessageOrigin origin) {
         this.messageVersion = messageVersion;
         this.sendable = false;
         this.rawMessage = rawMessage;
@@ -75,18 +78,23 @@ public class RedisMessage {
      */
     @Override
     public String toString() {
+        if(this.rawMessage == null) this.rawMessage = this.toJSON().toString();
         return this.rawMessage;
     }
 
     public JsonObject toJSON() {
-        JsonObject rootObject = new JsonObject();
-        rootObject.add(MasterValidParameters.PRIVATE_KEY, this.privateKey);
-        rootObject.add(MasterValidParameters.PROTOCOL_VERSION, this.protocolVersion);
-        rootObject.add(MasterValidParameters.TYPE, this.type);
-        rootObject.add(MasterValidParameters.ORIGIN, this.origin);
-        rootObject.add(MasterValidParameters.ADDRESS, this.address);
+        JsonObject object = new JsonObject();
 
-        return rootObject;
+        object.add(MasterValidParameters.PRIVATE_KEY, new JsonPrimitive(String.valueOf(this.privateKey)));
+        object.add(MasterValidParameters.PROTOCOL_VERSION, new JsonPrimitive(this.messageVersion));
+        object.add(MasterValidParameters.TYPE, new JsonPrimitive(String.valueOf(this.type)));
+        object.add(MasterValidParameters.ORIGIN, new JsonPrimitive(String.valueOf(this.origin)));
+        if(this.origin == MessageOrigin.PROXY || this.address == null)
+            object.add(MasterValidParameters.ADDRESS, new JsonPrimitive("null"));
+        else
+            object.add(MasterValidParameters.ADDRESS, new JsonPrimitive(this.address.getHostString() + ":" + this.address.getPort()));
+
+        return object;
     }
 
     /**
@@ -95,7 +103,7 @@ public class RedisMessage {
      * @param parametersToCheck The parameter list to check.
      * @return `true` if all keys are present. `false` otherwise.
      */
-    public static boolean validateParameters(List<String> requiredParameters, List<KeyValue<String, JsonElement>> parametersToCheck) {
+    public static boolean validateParameters(List<String> requiredParameters, List<KeyValue<String, JsonPrimitive>> parametersToCheck) {
         List<String> keysToCheck = new ArrayList<>();
         parametersToCheck.forEach(entry -> keysToCheck.add(entry.getKey()));
         List<String> matches = requiredParameters.stream().filter(keysToCheck::contains).toList();
@@ -109,7 +117,7 @@ public class RedisMessage {
         private RedisMessageType type;
         private InetSocketAddress address;
         private MessageOrigin origin;
-        private final List<KeyValue<String, JsonElement>> parameters = new ArrayList<>();
+        private final List<KeyValue<String, JsonPrimitive>> parameters = new ArrayList<>();
 
         public Builder() {}
 
@@ -126,8 +134,8 @@ public class RedisMessage {
          * @param privateKey The private key to set.
          * @return Builder
          */
-        public Builder setPrivateKey(String privateKey) {
-            this.privateKey = privateKey.toCharArray();
+        public Builder setPrivateKey(char[] privateKey) {
+            this.privateKey = privateKey;
             return this;
         }
         public Builder setType(RedisMessageType type) {
@@ -146,11 +154,12 @@ public class RedisMessage {
             this.protocolVersion = protocolVersion;
             return this;
         }
+
         public Builder setParameter(String key, String value) {
-            this.parameters.add(KeyValue.just(key, JsonParser.parseString(value)));
+            this.parameters.add(KeyValue.just(key, new JsonPrimitive(value)));
             return this;
         }
-        public Builder setParameter(String key, JsonElement value) {
+        public Builder setParameter(String key, JsonPrimitive value) {
             this.parameters.add(KeyValue.just(key, value));
             return this;
         }
@@ -170,7 +179,7 @@ public class RedisMessage {
          * @return A RedisMessage that can be published via the RedisPublisher.
          * @throws IllegalStateException If the required parameters are not provided.
          */
-        public RedisMessage buildReceived() {
+        public GenericRedisMessage buildReceived() {
             if(this.protocolVersion == null) throw new IllegalStateException("You must provide `protocolVersion` when building a receivable RedisMessage!");
             if(this.rawMessage == null) throw new IllegalStateException("You must provide `rawMessage` when building a receivable RedisMessage!");
             if(this.privateKey == null) throw new IllegalStateException("You must provide `privateKey` when building a receivable RedisMessage!");
@@ -204,7 +213,7 @@ public class RedisMessage {
          * @return A RedisMessage that can be published via the RedisPublisher.
          * @throws IllegalStateException If the required parameters are not provided. Or if protocolVersion is attempted to be set.
          */
-        public RedisMessage buildSendable() {
+        public GenericRedisMessage buildSendable() {
             if(this.protocolVersion != null) throw new IllegalStateException("You're not allowed to set `protocolVersion` when building a sendable RedisMessage!");
             if(this.type == null) throw new IllegalStateException("You must provide `type` when building a sendable RedisMessage!");
             if(this.origin == null) throw new IllegalStateException("You must provide `origin` when building a sendable RedisMessage!");
@@ -231,11 +240,11 @@ public class RedisMessage {
          * @param rawMessage The raw message to parse.
          * @return A received RedisMessage.
          */
-        public RedisMessage parseReceived(String rawMessage) {
+        public GenericRedisMessage parseReceived(String rawMessage) {
             Gson gson = new Gson();
             JsonObject messageObject = gson.fromJson(rawMessage, JsonObject.class);
 
-            RedisMessage.Builder redisMessageBuilder = new RedisMessage.Builder();
+            GenericRedisMessage.Builder redisMessageBuilder = new GenericRedisMessage.Builder();
             redisMessageBuilder.setRawMessage(rawMessage);
 
             messageObject.entrySet().forEach(entry -> {
@@ -244,7 +253,7 @@ public class RedisMessage {
 
                 switch (key) {
                     case MasterValidParameters.PROTOCOL_VERSION -> redisMessageBuilder.setProtocolVersion(value.getAsInt());
-                    case MasterValidParameters.PRIVATE_KEY -> redisMessageBuilder.setPrivateKey(value.getAsString());
+                    case MasterValidParameters.PRIVATE_KEY -> redisMessageBuilder.setPrivateKey(value.getAsString().toCharArray());
                     case MasterValidParameters.ADDRESS -> redisMessageBuilder.setAddress(value.getAsString());
                     case MasterValidParameters.TYPE -> redisMessageBuilder.setType(RedisMessageType.valueOf(value.getAsString()));
                     case MasterValidParameters.ORIGIN -> redisMessageBuilder.setOrigin(MessageOrigin.valueOf(value.getAsString()));
@@ -255,10 +264,10 @@ public class RedisMessage {
             return redisMessageBuilder.buildReceived();
         }
 
-        private void parseParams(JsonObject object, RedisMessage.Builder redisMessageBuilder) {
+        private void parseParams(JsonObject object, GenericRedisMessage.Builder redisMessageBuilder) {
             object.entrySet().forEach(entry -> {
                 String key = entry.getKey();
-                JsonElement value = entry.getValue();
+                JsonPrimitive value = entry.getValue().getAsJsonPrimitive();
 
                 redisMessageBuilder.setParameter(key, value);
             });

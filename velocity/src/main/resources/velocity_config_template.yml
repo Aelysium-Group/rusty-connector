@@ -54,26 +54,6 @@ version: 3
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                         General                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-
-#########################
-#      Private Key      #
-#########################
-#
-# Private key is used to validate messages.
-# This way external users can't appear and send messages.
-# This value should be changed periodically for security purposes.
-#
-# To generate a new key, set the string to be empty and the plugin will send a new key in console on next restart.
-#
-# DO NOT EVER SHARE THIS KEY!
-#
-private-key: ""
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Families                          #
 #                                                          #
 #               ---------------------------                #
@@ -126,10 +106,13 @@ families:
 # When players join a static family, their initial server will be memorized, and they'll be connected
 # back into that server on future family connections as well.
 #
-    static:
-        - "delete me to enable static families (Requires MySQL to be setup)"
-        - "survival"
-        - "creative"
+# To define a new static family change static from `static: []` to:
+#
+# static:
+#       - "family name"
+#       - "family name"
+#
+    static: []
 
 
 ############################################################

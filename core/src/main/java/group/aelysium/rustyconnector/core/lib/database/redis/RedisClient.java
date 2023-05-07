@@ -68,8 +68,8 @@ public class RedisClient extends io.lettuce.core.RedisClient {
             return this;
         }
 
-        public Builder setPrivateKey(String privateKey) {
-            this.privateKey = privateKey.toCharArray();
+        public Builder setPrivateKey(char[] privateKey) {
+            this.privateKey = privateKey;
             return this;
         }
 

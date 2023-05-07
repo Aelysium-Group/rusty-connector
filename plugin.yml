@@ -4,6 +4,10 @@ main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
 api-version: 1.16
 website: https://github.com/Aelysium-Group/rusty-connector
 authors: [ Sivin ]
-commands: {}
+commands:
+    rc:
+        description: The main RC command.
+        permission-message: Unknown command. Type "/help" for help.
+        permission: rustyconnector.thisPermissionWillNeverWork
 
 folia-supported: true

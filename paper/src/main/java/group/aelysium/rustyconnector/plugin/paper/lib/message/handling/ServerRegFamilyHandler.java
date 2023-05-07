@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper.lib.message.handling;
 
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageFamilyRegister;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
@@ -13,7 +13,7 @@ import java.util.Objects;
 public class ServerRegFamilyHandler implements MessageHandler {
     private final RedisMessageFamilyRegister message;
 
-    public ServerRegFamilyHandler(RedisMessage message) {
+    public ServerRegFamilyHandler(GenericRedisMessage message) {
         this.message = (RedisMessageFamilyRegister) message;
     }
 

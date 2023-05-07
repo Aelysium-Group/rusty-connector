@@ -1,8 +1,9 @@
 package group.aelysium.rustyconnector.core.lib.database.redis.messages.variants;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import io.lettuce.core.KeyValue;
 
@@ -10,7 +11,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageServerRegisterRequest extends RedisMessage {
+public class RedisMessageServerRegisterRequest extends GenericRedisMessage {
     private String familyName;
     private String serverName;
     private Integer softCap;
@@ -37,7 +38,7 @@ public class RedisMessageServerRegisterRequest extends RedisMessage {
         return weight;
     }
 
-    public RedisMessageServerRegisterRequest(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+    public RedisMessageServerRegisterRequest(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(RedisMessageType.REG, address, origin);
 
         if(!RedisMessageServerRegisterRequest.validateParameters(ValidParameters.toList(), parameters))
@@ -45,7 +46,7 @@ public class RedisMessageServerRegisterRequest extends RedisMessage {
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
-            JsonElement value = entry.getValue();
+            JsonPrimitive value = entry.getValue();
 
             switch (key) {
                 case ValidParameters.FAMILY_NAME -> this.familyName = value.getAsString();
@@ -56,7 +57,7 @@ public class RedisMessageServerRegisterRequest extends RedisMessage {
             }
         });
     }
-    public RedisMessageServerRegisterRequest(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+    public RedisMessageServerRegisterRequest(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, privateKey, RedisMessageType.REG, address, origin);
 
         if(!RedisMessageServerRegisterRequest.validateParameters(ValidParameters.toList(), parameters))
@@ -64,7 +65,7 @@ public class RedisMessageServerRegisterRequest extends RedisMessage {
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
-            JsonElement value = entry.getValue();
+            JsonPrimitive value = entry.getValue();
 
             switch (key) {
                 case ValidParameters.FAMILY_NAME -> this.familyName = value.getAsString();
@@ -76,11 +77,27 @@ public class RedisMessageServerRegisterRequest extends RedisMessage {
         });
     }
 
+    @Override
+    public JsonObject toJSON() {
+        JsonObject object = super.toJSON();
+        JsonObject parameters = new JsonObject();
+
+        parameters.add(ValidParameters.FAMILY_NAME, new JsonPrimitive(this.familyName));
+        parameters.add(ValidParameters.SERVER_NAME, new JsonPrimitive(this.serverName));
+        parameters.add(ValidParameters.SOFT_CAP, new JsonPrimitive(this.softCap));
+        parameters.add(ValidParameters.HARD_CAP, new JsonPrimitive(this.hardCap));
+        parameters.add(ValidParameters.WEIGHT, new JsonPrimitive(this.weight));
+
+        object.add(MasterValidParameters.PARAMETERS, parameters);
+
+        return object;
+    }
+
     public interface ValidParameters {
-        String FAMILY_NAME = "family";
-        String SERVER_NAME = "name";
-        String SOFT_CAP = "scap";
-        String HARD_CAP = "hcap";
+        String FAMILY_NAME = "f";
+        String SERVER_NAME = "n";
+        String SOFT_CAP = "sc";
+        String HARD_CAP = "hc";
         String WEIGHT = "w";
 
         static List<String> toList() {

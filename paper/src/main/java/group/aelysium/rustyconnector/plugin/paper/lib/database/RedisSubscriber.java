@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper.lib.database;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
@@ -16,7 +16,7 @@ import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.TPAQueueP
 import javax.naming.AuthenticationException;
 
 public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber {
-    protected RedisSubscriber(RedisClient client) {
+    public RedisSubscriber(RedisClient client) {
         super(client);
     }
 
@@ -28,8 +28,8 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         CacheableMessage cachedMessage = api.getVirtualProcessor().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
 
         try {
-            RedisMessage.Serializer serializer = new RedisMessage.Serializer();
-            RedisMessage message = serializer.parseReceived(rawMessage);
+            GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
+            GenericRedisMessage message = serializer.parseReceived(rawMessage);
 
             if(message.getOrigin() == MessageOrigin.SERVER) throw new Exception("Message from a sub-server! Ignoring...");
             try {
@@ -54,7 +54,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         }
     }
 
-    private static void processParameters(RedisMessage message, CacheableMessage cachedMessage) {
+    private static void processParameters(GenericRedisMessage message, CacheableMessage cachedMessage) {
         PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
 
         try {

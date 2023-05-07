@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,24 +17,22 @@ public class RedisService {
         this.client = client;
     }
 
-    protected void launchNewRedisIO(Class<? extends RedisSubscriber> subscriber) {
+    protected void launchNewRedisSubscriber(Class<? extends RedisSubscriber> subscriber) {
         this.executorService.submit(() -> {
-
-            RedisSubscriber redis = null;
             try {
-                redis = subscriber.getDeclaredConstructor().newInstance(RedisService.this.client);
-            } catch (Exception ignore) {}
-            RedisService.this.liveRedisSubscribers.add(redis);
+                RedisSubscriber redis = subscriber.getDeclaredConstructor(RedisClient.class).newInstance(RedisService.this.client);
+                RedisService.this.liveRedisSubscribers.add(redis);
 
-            try {
                 redis.subscribeToChannel();
-            } catch (Exception ignore) {}
 
-            RedisService.this.liveRedisSubscribers.remove(redis);
-            redis.shutdown();
+                RedisService.this.liveRedisSubscribers.remove(redis);
+                redis.shutdown();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             if(RedisService.this.isAlive)
-                this.launchNewRedisIO(subscriber);
+                this.launchNewRedisSubscriber(subscriber);
         });
     }
 
@@ -50,7 +47,7 @@ public class RedisService {
 
         this.isAlive = true;
 
-        this.launchNewRedisIO(subscriber);
+        this.launchNewRedisSubscriber(subscriber);
     }
 
     /**

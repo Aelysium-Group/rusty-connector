@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPong;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
@@ -16,7 +16,7 @@ import java.net.InetSocketAddress;
 public class PongHandler implements MessageHandler {
     private final RedisMessageServerPong message;
 
-    public PongHandler(RedisMessage message) {
+    public PongHandler(GenericRedisMessage message) {
         this.message = (RedisMessageServerPong) message;
     }
 

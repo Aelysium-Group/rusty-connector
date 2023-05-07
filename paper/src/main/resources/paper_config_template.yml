@@ -51,20 +51,6 @@
 #
 version: 3
 
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                       Registration                       #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-#
-# Private key is used to validate messages.
-# This way external users can't appear and send messages.
-# This value should be changed periodically for security purposes.
-#
-# This value should match what is set in your proxy.
-#
-private-key: ""
-
 server:
 #
 # This field is required.

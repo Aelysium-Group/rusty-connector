@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
+import com.google.gson.stream.JsonReader;
 import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperLifecycle;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;

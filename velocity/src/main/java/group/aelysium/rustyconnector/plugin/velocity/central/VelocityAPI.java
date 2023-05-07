@@ -62,6 +62,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
         if(this.virtualProcessor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.virtualProcessor = VirtualProxyProcessor.init(config);
+        this.virtualProcessor.startServices();
     }
 
     /**

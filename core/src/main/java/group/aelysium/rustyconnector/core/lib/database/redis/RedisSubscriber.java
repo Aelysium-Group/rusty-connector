@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 public class RedisSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
-    protected RedisSubscriber(RedisClient client) {
+    public RedisSubscriber(RedisClient client) {
         this.client = client;
     }
 

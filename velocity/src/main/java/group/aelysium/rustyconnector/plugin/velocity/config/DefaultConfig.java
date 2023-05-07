@@ -15,8 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
-
-    private String private_key = "";
     private String families_rootFamily_name = "lobby";
     private Boolean family_rootFamily_catchDisconnectiongPlayers = false;
     private List<String> families_scalar = new ArrayList<>();
@@ -80,10 +78,6 @@ public class DefaultConfig extends YAML {
      */
     public static void empty() {
         config = null;
-    }
-
-    public String getPrivate_key() {
-        return this.private_key;
     }
 
     public String getRootFamilyName() {
@@ -209,14 +203,6 @@ public class DefaultConfig extends YAML {
             throw new IllegalStateException(e.getMessage());
         }
 
-        try {
-            this.private_key = this.getNode(this.data,"private-key",String.class);
-            if(this.private_key.equals("")) throw new Exception("You must provide a private key!");
-        } catch (Exception e) {
-            VelocityLang.PRIVATE_KEY.send(logger);
-            throw new NoOutputException(e);
-        }
-
         // Families
         this.families_rootFamily_name = this.getNode(this.data,"families.root-family.name",String.class);
         this.family_rootFamily_catchDisconnectiongPlayers = this.getNode(this.data,"families.root-family.catch-disconnecting-players",Boolean.class);
@@ -239,29 +225,25 @@ public class DefaultConfig extends YAML {
                 throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
         });
 
-        AtomicBoolean ignoreStatic = new AtomicBoolean(false);
+        boolean ignoreStatic = this.families_static.size() == 0;
         this.families_static.forEach(familyName -> {
-            if(familyName.equalsIgnoreCase("delete me to enable static families (Requires MySQL to be setup)"))
-                ignoreStatic.set(true);
 
             if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
 
             if(familyName.length() > 32)
                 throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
         });
-        if(ignoreStatic.get())
-            this.families_static.clear(); // Clear static family list so that nothing can be operated on it.
 
         List<String> duplicates = this.families_scalar.stream().filter(this.families_static::contains).toList();
         if(duplicates.size() > 0)
             throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of if the family is scalar or static! Duplicate family names: " + duplicates);
 
         if(this.families_scalar.contains(this.families_rootFamily_name)) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.scalar] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family]. Ignoring..."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.scalar] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family.name]. Ignoring..."), NamedTextColor.YELLOW);
             this.families_scalar.remove(this.families_rootFamily_name);
         }
         if(this.families_static.contains(this.families_rootFamily_name)) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.static] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family]. Ignoring..."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.static] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family.name]. Ignoring..."), NamedTextColor.YELLOW);
             this.families_static.remove(this.families_rootFamily_name);
         }
 
@@ -283,7 +265,7 @@ public class DefaultConfig extends YAML {
 
         // MySQL
 
-        if(!ignoreStatic.get()) {
+        if(!ignoreStatic) {
             this.ignore_mysql = false;
 
             this.mysql_host = this.getNode(this.data, "mysql.host", String.class);

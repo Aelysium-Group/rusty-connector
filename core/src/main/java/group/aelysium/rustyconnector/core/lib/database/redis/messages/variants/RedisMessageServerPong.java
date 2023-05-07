@@ -1,8 +1,9 @@
 package group.aelysium.rustyconnector.core.lib.database.redis.messages.variants;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import io.lettuce.core.KeyValue;
 
@@ -10,7 +11,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageServerPong extends RedisMessage {
+public class RedisMessageServerPong extends GenericRedisMessage {
     private String serverName;
     private int playerCount;
 
@@ -22,7 +23,7 @@ public class RedisMessageServerPong extends RedisMessage {
         return playerCount;
     }
 
-    public RedisMessageServerPong(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+    public RedisMessageServerPong(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(RedisMessageType.PONG, address, origin);
 
         if(!RedisMessageServerPong.validateParameters(ValidParameters.toList(), parameters))
@@ -30,7 +31,7 @@ public class RedisMessageServerPong extends RedisMessage {
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
-            JsonElement value = entry.getValue();
+            JsonPrimitive value = entry.getValue();
 
             switch (key) {
                 case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
@@ -38,7 +39,7 @@ public class RedisMessageServerPong extends RedisMessage {
             }
         });
     }
-    public RedisMessageServerPong(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+    public RedisMessageServerPong(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, privateKey, RedisMessageType.PONG, address, origin);
 
         if(!RedisMessageServerPong.validateParameters(ValidParameters.toList(), parameters))
@@ -46,7 +47,7 @@ public class RedisMessageServerPong extends RedisMessage {
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
-            JsonElement value = entry.getValue();
+            JsonPrimitive value = entry.getValue();
 
             switch (key) {
                 case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
@@ -55,9 +56,22 @@ public class RedisMessageServerPong extends RedisMessage {
         });
     }
 
+    @Override
+    public JsonObject toJSON() {
+        JsonObject object = super.toJSON();
+        JsonObject parameters = new JsonObject();
+
+        parameters.add(ValidParameters.SERVER_NAME, new JsonPrimitive(this.serverName));
+        parameters.add(ValidParameters.PLAYER_COUNT, new JsonPrimitive(this.playerCount));
+
+        object.add(MasterValidParameters.PARAMETERS, parameters);
+
+        return object;
+    }
+
     public interface ValidParameters {
-        String SERVER_NAME = "name";
-        String PLAYER_COUNT = "player-count";
+        String SERVER_NAME = "n";
+        String PLAYER_COUNT = "pc";
 
         static List<String> toList() {
             List<String> list = new ArrayList<>();

@@ -13,12 +13,12 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.*;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 
 import javax.naming.AuthenticationException;
 
 public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber {
-    protected RedisSubscriber(RedisClient client) {
+    public RedisSubscriber(RedisClient client) {
         super(client);
     }
 
@@ -29,14 +29,14 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         VirtualProxyProcessor virtualProcessor = api.getVirtualProcessor();
         MessageCache messageCache = virtualProcessor.getMessageCache();
 
-        // If the proxy doesn't have a message cache (maybe it's in the middle of a reload.
+        // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
         // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
         if(messageCache == null) messageCache = new MessageCache(1);
 
         CacheableMessage cachedMessage = messageCache.cacheMessage(rawMessage, MessageStatus.UNDEFINED);
         try {
-            RedisMessage.Serializer serializer = new RedisMessage.Serializer();
-            RedisMessage message = serializer.parseReceived(rawMessage);
+            GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
+            GenericRedisMessage message = serializer.parseReceived(rawMessage);
 
             if(message.getOrigin() == MessageOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
             try {
@@ -75,7 +75,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         }
     }
 
-    private static void processParameters(RedisMessage message, CacheableMessage cachedMessage) {
+    private static void processParameters(GenericRedisMessage message, CacheableMessage cachedMessage) {
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         try {

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 
 import java.net.InetSocketAddress;
@@ -38,7 +38,12 @@ public class MessageTunnel {
      * @param message The message to check.
      * @throws BlockedMessageException If the message should be blocked.
      */
-    public void validate(RedisMessage message) throws BlockedMessageException {
+    public void validate(GenericRedisMessage message) throws BlockedMessageException {
+        if(message.getMessageVersion() > GenericRedisMessage.getProtocolVersion())
+            throw new BlockedMessageException("The incoming message contained a protocol version greater than expected! " + message.getMessageVersion() + " > " + GenericRedisMessage.getProtocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
+        if(message.getMessageVersion() < GenericRedisMessage.getProtocolVersion())
+            throw new BlockedMessageException("The incoming message contained a protocol version that was less than expected! " + message.getMessageVersion() + " < " + GenericRedisMessage.getProtocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
+
         if(message.toString().length() > this.maxLength)
             throw new BlockedMessageException("The message is to long!");
 

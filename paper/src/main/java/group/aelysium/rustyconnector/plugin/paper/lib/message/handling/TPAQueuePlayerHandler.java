@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.message.handling;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageTPAQueuePlayer;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
@@ -14,7 +14,7 @@ import java.util.Objects;
 public class TPAQueuePlayerHandler implements MessageHandler {
     private final RedisMessageTPAQueuePlayer message;
 
-    public TPAQueuePlayerHandler(RedisMessage message) {
+    public TPAQueuePlayerHandler(GenericRedisMessage message) {
         this.message = (RedisMessageTPAQueuePlayer) message;
     }
 

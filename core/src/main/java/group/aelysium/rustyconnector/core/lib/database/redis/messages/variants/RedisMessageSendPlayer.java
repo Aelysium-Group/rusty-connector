@@ -1,8 +1,9 @@
 package group.aelysium.rustyconnector.core.lib.database.redis.messages.variants;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import io.lettuce.core.KeyValue;
 
@@ -10,19 +11,19 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageSendPlayer extends RedisMessage {
-    private String familyName;
+public class RedisMessageSendPlayer extends GenericRedisMessage {
+    private String targetFamilyName;
     private String uuid;
 
-    public String getFamilyName() {
-        return familyName;
+    public String getTargetFamilyName() {
+        return targetFamilyName;
     }
 
     public String getUUID() {
         return uuid;
     }
 
-    public RedisMessageSendPlayer(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+    public RedisMessageSendPlayer(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(RedisMessageType.SEND, address, origin);
 
         if(!RedisMessageSendPlayer.validateParameters(ValidParameters.toList(), parameters))
@@ -30,15 +31,15 @@ public class RedisMessageSendPlayer extends RedisMessage {
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
-            JsonElement value = entry.getValue();
+            JsonPrimitive value = entry.getValue();
 
             switch (key) {
-                case ValidParameters.TARGET_FAMILY_NAME -> this.familyName = value.getAsString();
+                case ValidParameters.TARGET_FAMILY_NAME -> this.targetFamilyName = value.getAsString();
                 case ValidParameters.PLAYER_UUID -> this.uuid = value.getAsString();
             }
         });
     }
-    public RedisMessageSendPlayer(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+    public RedisMessageSendPlayer(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, privateKey, RedisMessageType.SEND, address, origin);
 
         if(!RedisMessageSendPlayer.validateParameters(ValidParameters.toList(), parameters))
@@ -46,18 +47,31 @@ public class RedisMessageSendPlayer extends RedisMessage {
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
-            JsonElement value = entry.getValue();
+            JsonPrimitive value = entry.getValue();
 
             switch (key) {
-                case ValidParameters.TARGET_FAMILY_NAME -> this.familyName = value.getAsString();
+                case ValidParameters.TARGET_FAMILY_NAME -> this.targetFamilyName = value.getAsString();
                 case ValidParameters.PLAYER_UUID -> this.uuid = value.getAsString();
             }
         });
     }
 
+    @Override
+    public JsonObject toJSON() {
+        JsonObject object = super.toJSON();
+        JsonObject parameters = new JsonObject();
+
+        parameters.add(ValidParameters.TARGET_FAMILY_NAME, new JsonPrimitive(this.targetFamilyName));
+        parameters.add(ValidParameters.PLAYER_UUID, new JsonPrimitive(this.uuid));
+
+        object.add(MasterValidParameters.PARAMETERS, parameters);
+
+        return object;
+    }
+
     public interface ValidParameters {
-        String TARGET_FAMILY_NAME = "family";
-        String PLAYER_UUID = "uuid";
+        String TARGET_FAMILY_NAME = "f";
+        String PLAYER_UUID = "p";
 
         static List<String> toList() {
             List<String> list = new ArrayList<>();

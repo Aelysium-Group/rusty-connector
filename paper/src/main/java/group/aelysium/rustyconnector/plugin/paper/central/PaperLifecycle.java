@@ -68,6 +68,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);
             return false;
         }

@@ -1,8 +1,9 @@
 package group.aelysium.rustyconnector.core.lib.database.redis.messages.variants;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import io.lettuce.core.KeyValue;
 
@@ -10,7 +11,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageTPAQueuePlayer extends RedisMessage {
+public class RedisMessageTPAQueuePlayer extends GenericRedisMessage {
     private String targetUsername;
     private String targetServer;
     private String sourceUsername;
@@ -27,7 +28,7 @@ public class RedisMessageTPAQueuePlayer extends RedisMessage {
         return targetServer;
     }
 
-    public RedisMessageTPAQueuePlayer(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+    public RedisMessageTPAQueuePlayer(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(RedisMessageType.TPA_QUEUE_PLAYER, address, origin);
 
         if(!RedisMessageTPAQueuePlayer.validateParameters(ValidParameters.toList(), parameters))
@@ -35,7 +36,7 @@ public class RedisMessageTPAQueuePlayer extends RedisMessage {
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
-            JsonElement value = entry.getValue();
+            JsonPrimitive value = entry.getValue();
 
             switch (key) {
                 case ValidParameters.TARGET_SERVER -> this.targetServer = value.getAsString();
@@ -44,7 +45,7 @@ public class RedisMessageTPAQueuePlayer extends RedisMessage {
             }
         });
     }
-    public RedisMessageTPAQueuePlayer(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonElement>> parameters) {
+    public RedisMessageTPAQueuePlayer(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, privateKey, RedisMessageType.TPA_QUEUE_PLAYER, address, origin);
 
         if(!RedisMessageTPAQueuePlayer.validateParameters(ValidParameters.toList(), parameters))
@@ -52,7 +53,7 @@ public class RedisMessageTPAQueuePlayer extends RedisMessage {
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
-            JsonElement value = entry.getValue();
+            JsonPrimitive value = entry.getValue();
 
             switch (key) {
                 case ValidParameters.TARGET_SERVER -> this.targetServer = value.getAsString();
@@ -60,6 +61,20 @@ public class RedisMessageTPAQueuePlayer extends RedisMessage {
                 case ValidParameters.SOURCE_USERNAME -> this.sourceUsername = value.getAsString();
             }
         });
+    }
+
+    @Override
+    public JsonObject toJSON() {
+        JsonObject object = super.toJSON();
+        JsonObject parameters = new JsonObject();
+
+        parameters.add(ValidParameters.TARGET_SERVER, new JsonPrimitive(this.targetServer));
+        parameters.add(ValidParameters.TARGET_USERNAME, new JsonPrimitive(this.targetUsername));
+        parameters.add(ValidParameters.SOURCE_USERNAME, new JsonPrimitive(this.sourceUsername));
+
+        object.add(MasterValidParameters.PARAMETERS, parameters);
+
+        return object;
     }
 
     public interface ValidParameters {

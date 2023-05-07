@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnel;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
 import group.aelysium.rustyconnector.core.lib.database.MySQL;
@@ -24,6 +24,7 @@ import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
@@ -41,6 +42,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookM
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
@@ -57,7 +59,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     private String rootFamily;
     private String proxyWhitelist;
     private Clock serverLifecycleHeart;
-    private LoadBalancingService loadBalancingService;
+    private LoadBalancingService loadBalancingService = null;
     private Clock tpaRequestCleaner;
     private MessageTunnel messageTunnel;
 
@@ -116,7 +118,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
      * @param message The message to verify.
      * @throws BlockedMessageException If the message should be blocked.
      */
-    public void validateMessage(RedisMessage message) throws BlockedMessageException {
+    public void validateMessage(GenericRedisMessage message) throws BlockedMessageException {
         this.messageTunnel.validate(message);
     }
 
@@ -209,6 +211,29 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     }
 
     /**
+     * Ends the current heart lifecycles and prepares them for garbage collection.
+     */
+    public void startServices() {
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+        logger.log("Starting services!");
+
+        if(this.loadBalancingService != null) {
+            logger.log("Starting Load Balancing service...");
+            this.loadBalancingService.init();
+            logger.log("Finished starting Load Balancing service!");
+        } else
+            logger.send(Component.text("The Load Balancing service is set as disabled! All families will effectively operate in ROUND_ROBIN mode.", NamedTextColor.YELLOW));
+        logger.log("Starting Redis Service...");
+        this.getRedisService().start(RedisSubscriber.class);
+        logger.log("Finished starting Redis service!");
+        logger.log("Finished starting TPA Request Cleaning service!");
+        this.tpaRequestCleaner.start();
+        logger.log("Finished starting TPA Request Cleaning service!");
+
+        logger.log("Finished starting services!");
+    }
+
+    /**
      * Revive a server so that it isn't killed in the next heartbeat
      * @param serverInfo The server to revive.
      */
@@ -278,7 +303,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         if(logger.getGate().check(GateKey.CALL_FOR_REGISTRATION))
             VelocityLang.CALL_FOR_REGISTRATION.send(logger);
 
-        RedisMessage message = new RedisMessage.Builder()
+        GenericRedisMessage message = new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.REG_ALL)
                 .setOrigin(MessageOrigin.PROXY)
                 .buildSendable();
@@ -300,7 +325,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         if(logger.getGate().check(GateKey.CALL_FOR_REGISTRATION))
             VelocityLang.CALL_FOR_FAMILY_REGISTRATION.send(logger, familyName);
 
-        RedisMessage message = new RedisMessage.Builder()
+        RedisMessageFamilyRegister message = (RedisMessageFamilyRegister) new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.REG_FAMILY)
                 .setOrigin(MessageOrigin.PROXY)
                 .setParameter(RedisMessageFamilyRegister.ValidParameters.FAMILY_NAME, familyName)
@@ -329,7 +354,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         if(targetServer == null) throw new NullPointerException();
 
 
-        RedisMessage message = new RedisMessage.Builder()
+        RedisMessageTPAQueuePlayer message = (RedisMessageTPAQueuePlayer) new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.TPA_QUEUE_PLAYER)
                 .setOrigin(MessageOrigin.PROXY)
                 .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.TARGET_SERVER, targetServer.getAddress())
@@ -444,6 +469,16 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         PluginLogger logger = api.getLogger();
         VirtualProxyProcessor virtualProxyProcessor = new VirtualProxyProcessor();
 
+        // Setup private key
+        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "private.key"));
+        if(!privateKeyConfig.generate())
+            throw new IllegalStateException("Unable to load or create private.key!");
+        char[] privateKey = null;
+        try {
+            privateKey = privateKeyConfig.get();
+        } catch (Exception ignore) {}
+        if(privateKey == null) throw new IllegalAccessException("There was a fatal error while reading private.key!");
+
         // Setup families
         for (String familyName: config.getScalarFamilies())
             virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, familyName));
@@ -462,7 +497,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                 .setHost(config.getRedis_host())
                 .setPort(config.getRedis_port())
                 .setUser(config.getRedis_user())
-                .setPrivateKey(config.getPrivate_key())
+                .setPrivateKey(privateKey)
                 .setDataChannel(config.getRedis_dataChannel());
 
         if(!config.getRedis_password().equals(""))
@@ -470,7 +505,8 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
         RedisClient redisClient = redisClientBuilder.build();
         virtualProxyProcessor.setRedisService(new RedisService(redisClient));
-        virtualProxyProcessor.getRedisService().start(RedisSubscriber.class);
+
+        logger.log("Finished setting up redis");
 
         // Setup MySQL
         if(config.shouldIgnoreMysql())
@@ -484,16 +520,14 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                     .setPassword(config.getMysql_password())
                     .build();
             api.setMySQL(mySQL);
+            logger.log("Finished setting up MySQL");
+
         }
 
-        logger.log("Finished setting up redis");
-
-        logger.log("Loading services...");
         if(config.isHearts_serverLifecycle_enabled()) virtualProxyProcessor.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
 
         if(config.getMessageTunnel_familyServerSorting_enabled()) {
             virtualProxyProcessor.loadBalancingService = new LoadBalancingService(virtualProxyProcessor.getFamilyManager().size(), config.getMessageTunnel_familyServerSorting_interval());
-            virtualProxyProcessor.loadBalancingService.init();
         }
 
         virtualProxyProcessor.startTPARequestCleaner(10);
