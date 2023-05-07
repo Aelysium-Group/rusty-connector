@@ -105,7 +105,7 @@ public final class CommandRusty {
 
                                             CacheableMessage message = messageCache.getMessage(snowflake);
 
-                                            VelocityLang.RC_MESSAGE_GET_MESSAGE.send(logger,message.getSnowflake(),message.getDate(),message.getContents());
+                                            VelocityLang.RC_MESSAGE_GET_MESSAGE.send(logger, message);
                                         } catch (Exception e) {
                                             VelocityLang.RC_MESSAGE_ERROR.send(logger,"There's no saved message with that ID!");
                                         }

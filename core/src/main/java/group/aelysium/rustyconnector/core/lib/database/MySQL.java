@@ -35,7 +35,9 @@ public class MySQL {
      */
     public void close() throws SQLException {
         if(this.connection == null) return;
-        this.connection.commit();
+        try {
+            this.connection.commit();
+        } catch (Exception ignore) {} // If autocommit=true this throws an exception. Just ignore it.
         this.connection.close();
     }
 
@@ -59,7 +61,11 @@ public class MySQL {
         return connection.prepareStatement(statement);
     }
 
-    public ResultSet execute(PreparedStatement statement) throws SQLException {
+    public boolean execute(PreparedStatement statement) throws SQLException {
+        return statement.execute();
+    }
+
+    public ResultSet executeQuery(PreparedStatement statement) throws SQLException {
         return statement.executeQuery();
     }
 

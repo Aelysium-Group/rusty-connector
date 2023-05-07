@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.SyncFailedException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 
 public class VelocityAPI extends PluginAPI<Scheduler> {
     private final VelocityRustyConnector plugin;
@@ -59,7 +60,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         return this.virtualProcessor;
     }
 
-    public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
+    public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
         if(this.virtualProcessor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.virtualProcessor = VirtualProxyProcessor.init(config);
         this.virtualProcessor.startServices();

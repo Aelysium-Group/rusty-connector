@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
@@ -172,7 +173,7 @@ public interface VelocityLang extends Lang {
             BORDER
     );
 
-    ParameterizedMessage3<Long, Date, String> RC_MESSAGE_GET_MESSAGE = (id, date, contents) -> join(
+    ParameterizedMessage1<CacheableMessage> RC_MESSAGE_GET_MESSAGE = (message) -> join(
             Lang.newlines(),
             BORDER,
             SPACING,
@@ -180,11 +181,13 @@ public interface VelocityLang extends Lang {
             SPACING,
             BORDER,
             SPACING,
-            text("ID: " + id, GRAY),
-            text("Date: " + date, GRAY),
-            text("Contents: " + contents, GRAY),
+            text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
+            text("Reason: " + message.getSentenceReason(), message.getSentence().getColor()),
             SPACING,
-            BORDER
+            text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
+            text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
+            text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+            SPACING
     );
 
     ParameterizedMessage1<String> RC_MESSAGE_ERROR = error -> join(
@@ -388,21 +391,6 @@ public interface VelocityLang extends Lang {
     ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> join(
             Lang.newlines(),
             text("Your tpa request to "+username+" has expired!",RED)
-    );
-
-
-    Message PRIVATE_KEY = () -> join(
-            Lang.newlines(),
-            SPACING,
-            BORDER,
-            SPACING,
-            text("No private-key was defined! Generating one now...", RED),
-            text("Paste the key below into the `private-key` field in `config.yml`! Then restart your proxy.", RED),
-            SPACING,
-            BORDER,
-            text(MD5.generatePrivateKey(),YELLOW),
-            BORDER,
-            SPACING
     );
 
     ParameterizedMessage1<ServerInfo> PONG = serverInfo -> text(

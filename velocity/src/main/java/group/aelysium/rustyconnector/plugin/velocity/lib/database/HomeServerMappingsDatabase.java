@@ -60,7 +60,7 @@ public class HomeServerMappingsDatabase {
         PreparedStatement statement = mySQL.prepare(FIND_HOME_SERVER_IN_FAMILY);
         statement.setString(0, player.getUniqueId().toString());
         statement.setString(1, family.getName());
-        ResultSet result = mySQL.execute(statement);
+        ResultSet result = mySQL.executeQuery(statement);
         mySQL.close();
 
         if(!result.next()) return null;
@@ -87,7 +87,7 @@ public class HomeServerMappingsDatabase {
         PreparedStatement statement = mySQL.prepare(CHECK_IF_PLAYER_HAS_HOME);
         statement.setString(0, player.getUniqueId().toString());
         statement.setString(1, family.getName());
-        ResultSet result = mySQL.execute(statement);
+        ResultSet result = mySQL.executeQuery(statement);
         mySQL.close();
 
         return result.next();

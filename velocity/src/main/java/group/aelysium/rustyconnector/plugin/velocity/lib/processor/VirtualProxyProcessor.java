@@ -27,6 +27,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
@@ -46,6 +47,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -464,7 +466,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @param config The configuration file.
      */
-    public static VirtualProxyProcessor init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
+    public static VirtualProxyProcessor init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
         VirtualProxyProcessor virtualProxyProcessor = new VirtualProxyProcessor();
@@ -520,6 +522,8 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                     .setPassword(config.getMysql_password())
                     .build();
             api.setMySQL(mySQL);
+
+            HomeServerMappingsDatabase.init();
             logger.log("Finished setting up MySQL");
 
         }
