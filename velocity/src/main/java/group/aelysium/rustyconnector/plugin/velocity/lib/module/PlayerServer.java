@@ -56,10 +56,20 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     public ServerInfo getServerInfo() { return this.serverInfo; }
 
     /**
+     * Set the registered server associated with this PlayerServer.
+     * @param registeredServer The RegisteredServer
+     * @deprecated This method should never be used in production code! Use `PlayerServer#register` instead! This is only meant for code testing.
+     */
+    @Deprecated
+    public void setRegisteredServer(RegisteredServer registeredServer) {
+        this.registeredServer = registeredServer;
+    }
+
+    /**
      * Registers a server to the proxy.
      * @param familyName The family to associate the server with.
      * @throws DuplicateRequestException If the server has already been registered to the proxy.
-     * @throws InvalidAlgorithmParameterException Of the family doesn't exist.
+     * @throws InvalidAlgorithmParameterException If the family doesn't exist.
      */
     public void register(String familyName) throws Exception {
         VelocityAPI api = VelocityRustyConnector.getAPI();

@@ -18,6 +18,7 @@ public class RedisService {
     }
 
     protected void launchNewRedisSubscriber(Class<? extends RedisSubscriber> subscriber) {
+        System.out.println("New Redis subscriber started!");
         this.executorService.submit(() -> {
             try {
                 RedisSubscriber redis = subscriber.getDeclaredConstructor(RedisClient.class).newInstance(RedisService.this.client);

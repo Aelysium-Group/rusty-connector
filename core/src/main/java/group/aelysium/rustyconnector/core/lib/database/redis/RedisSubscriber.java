@@ -41,6 +41,8 @@ public class RedisSubscriber {
      */
     public void shutdown() {
         this.lock.countDown();
+        this.lock.countDown();
+        this.lock.countDown();
         this.client.shutdown();
     }
 

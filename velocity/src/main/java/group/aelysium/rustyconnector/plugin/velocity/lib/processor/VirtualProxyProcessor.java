@@ -21,6 +21,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.R
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
+import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
@@ -51,6 +52,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class VirtualProxyProcessor implements VirtualProcessor {
     private MessageCache messageCache;
@@ -338,6 +340,35 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         publisher.publish(message);
 
         WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, familyName, DiscordWebhookMessage.FAMILY__REGISTER_ALL.build(familyName));
+    }
+
+    /**
+     * Registers fake servers into the proxy to help with testing systems.
+     */
+    public void registerFakeServers() {
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+        for (BaseServerFamily family : this.getFamilyManager().dump()) {
+            logger.log("---| Starting on: " + family.getName());
+            // Register 1000 servers into each family
+            for (int i = 0; i < 1000; i++) {
+                InetSocketAddress address = AddressUtil.stringToAddress("localhost:"+i);
+                String name = "server"+i;
+
+                ServerInfo info = new ServerInfo(name, address);
+                PlayerServer server = new PlayerServer(info, 40, 50, 0);
+                server.setPlayerCount((int) (Math.random() * 50));
+
+                try {
+                    VelocityAPI api = VelocityRustyConnector.getAPI();
+                    RegisteredServer registeredServer = api.getServer().registerServer(server.getServerInfo());
+                    server.setRegisteredServer(registeredServer);
+
+                    family.addServer(server);
+
+                    logger.log("-----| Added: " + server.getServerInfo() + " to " + family.getName());
+                } catch (Exception ignore) {}
+            }
+        }
     }
 
     /**

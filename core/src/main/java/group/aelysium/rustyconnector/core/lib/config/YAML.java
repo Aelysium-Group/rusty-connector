@@ -9,9 +9,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class YAML {
-    // Plugin version does not necessarily equal the current plugin version.
-    // Instead, when the configs are updated, pluginVersion should be set to the current plugin version.
-    protected static int currentVersion = 2;
     protected File configPointer;
     protected String template;
     protected ConfigurationNode data;
@@ -21,10 +18,6 @@ public class YAML {
     public YAML(File configPointer, String template) {
         this.configPointer = configPointer;
         this.template = template;
-    }
-
-    public static int getCurrentConfigVersion() {
-        return currentVersion;
     }
     public String getName() {
         return this.configPointer.getName();
@@ -86,18 +79,18 @@ public class YAML {
      * @throws UnsupportedClassVersionError If the config version doesn't match the plugin version.
      * @throws RuntimeException If the config version is invalid or can't be processed.
      */
-    public void processVersion() {
+    public void processVersion(int currentVersion) {
         try {
             Integer version = this.getNode(this.data, "version", Integer.class);
 
-            if(YAML.getCurrentConfigVersion() > version)
+            if(currentVersion > version)
                 throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
-                       "(v"+ version +" < v"+ YAML.getCurrentConfigVersion() +") " +
-                       "Please refer to the following link for assistance with upgrading your config! "+MigrationDirections.findUpgradeDirections(version, YAML.getCurrentConfigVersion()));
+                       "(v"+ version +" < v"+ currentVersion +") " +
+                       "Please refer to the following link for assistance with upgrading your config! "+MigrationDirections.findUpgradeDirections(version, currentVersion));
 
-            if(YAML.getCurrentConfigVersion() != version)
+            if(currentVersion != version)
                 throw new UnsupportedClassVersionError("Your configuration file is from a version of RustyConnector that is newer than the version you currently have installed! We will not provide support for downgrading RustyConnector configs! " +
-                        "(v"+ version +" > v"+ YAML.getCurrentConfigVersion() +")");
+                        "(v"+ version +" > v"+ currentVersion +")");
 
             return;
         } catch (IllegalStateException e1) {
@@ -110,7 +103,7 @@ public class YAML {
                     this.getNode(this.data, "config-version", Integer.class);
 
                     throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
-                            "(v1 < v"+ YAML.getCurrentConfigVersion() +") " +
+                            "(v1 < v"+ currentVersion +") " +
                             "Please refer to the following link for assistance with upgrading your config! "+MigrationDirections.findUpgradeDirections(1, 2));
                 } catch (IllegalStateException ignore) {}
             }

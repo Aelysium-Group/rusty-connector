@@ -23,6 +23,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +32,10 @@ public class StaticServerFamily extends BaseServerFamily {
     LiquidTimestamp homeServerExpiration;
     UnavailableProtocol unavailableProtocol;
 
-    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings);
+        this.unavailableProtocol = unavailableProtocol;
+        this.homeServerExpiration = homeServerExpiration;
     }
 
     public UnavailableProtocol getUnavailableProtocol() {
@@ -85,8 +88,7 @@ public class StaticServerFamily extends BaseServerFamily {
     }
 
     /**
-     * Unregisters a home server from a player in this family.
-     *
+     * Purges all old home server mappings related to a player.
      * @param player The family whose home server is to be unregistered.
      * @throws SQLException If there was an issue with MySQL.
      */
@@ -176,7 +178,9 @@ public class StaticServerFamily extends BaseServerFamily {
                         staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                         staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                         staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                        new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime())
+                        new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
+                        staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
+                        staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
                 );
             }
             case LEAST_CONNECTION -> {
@@ -187,7 +191,9 @@ public class StaticServerFamily extends BaseServerFamily {
                         staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                         staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                         staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                        new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime())
+                        new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
+                        staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
+                        staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
                 );
             }
             default -> throw new RuntimeException("The name used for " + familyName + "'s load balancer is invalid!");
@@ -247,6 +253,7 @@ class StaticFamilyConnector {
         this.validateWhitelist();
 
         PlayerServer server = this.establishAnyConnection();
+        if(server == null) return null;
 
         server.playerJoined();
 
@@ -273,7 +280,7 @@ class StaticFamilyConnector {
             return this.connectHomeServer();
         } catch (Exception ignore) {}
 
-        return establishNewConnection();
+        return establishNewConnection(true);
     }
 
     /**
@@ -283,7 +290,7 @@ class StaticFamilyConnector {
      * After a connection is established, the player's home family will be set or updated.
      * @return The player server that this player was connected to.
      */
-    public PlayerServer establishNewConnection() {
+    public PlayerServer establishNewConnection(boolean shouldRegisterNew) {
         PlayerServer server;
         if(this.family.getLoadBalancer().isPersistent() && this.family.getLoadBalancer().getAttempts() > 1)
             server = this.connectPersistent();
@@ -291,6 +298,8 @@ class StaticFamilyConnector {
             server = this.connectSingleton();
 
         this.sendPostConnectErrorMessage();
+
+        if(!shouldRegisterNew) return server;
 
         try {
             this.family.registerHomeServer(this.player, server);
@@ -320,15 +329,20 @@ class StaticFamilyConnector {
             switch (this.family.getUnavailableProtocol()) {
                 case ASSIGN_NEW_HOME -> {
                     this.family.unregisterHomeServer(this.player);
-                    return this.establishNewConnection();
+                    return this.establishNewConnection(true);
                 }
-                case CONNECT_WITH_ERROR -> this.postConnectionError = VelocityLang.MISSING_HOME_SERVER;
+                case CONNECT_WITH_ERROR -> {
+                    this.postConnectionError = VelocityLang.MISSING_HOME_SERVER;
+                    return this.establishNewConnection(false);
+                }
                 case CANCEL_CONNECTION_ATTEMPT -> {
                     player.sendMessage(VelocityLang.BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT);
                     return null;
                 }
             }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
+        }
         throw new RuntimeException("There was an issue connecting you to the server!");
     }
 

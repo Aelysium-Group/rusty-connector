@@ -42,6 +42,7 @@ public class OnPlayerChooseInitialServer {
                 BaseServerFamily rootFamily = api.getVirtualProcessor().getRootFamily();
 
                 PlayerServer server = rootFamily.connect(player);
+                if(server == null) return;
                 event.setInitialServer(server.getRegisteredServer());
 
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, DiscordWebhookMessage.PROXY__PLAYER_JOIN.build(player, server));

@@ -198,7 +198,7 @@ public class DefaultConfig extends YAML {
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         try {
-            this.processVersion();
+            this.processVersion(YAML.currentVersion);
         } catch (Exception | UnsupportedClassVersionError e) {
             throw new IllegalStateException(e.getMessage());
         }

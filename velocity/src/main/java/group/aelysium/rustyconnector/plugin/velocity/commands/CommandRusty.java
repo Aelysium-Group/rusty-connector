@@ -65,7 +65,7 @@ public final class CommandRusty {
                                         VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
                                     } catch (Exception e) {
-                                        VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting those messages!");
+                                        VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting those messages!\n"+e.getMessage());
                                     }
                                 }).start();
 
@@ -83,7 +83,7 @@ public final class CommandRusty {
 
                                                 VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,pageNumber,numberOfPages);
                                             } catch (Exception e) {
-                                                VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting that page!");
+                                                VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting that page!\n"+e.getMessage());
                                             }
 
                                         }).start();
@@ -120,7 +120,7 @@ public final class CommandRusty {
                     try {
                         VelocityLang.RC_FAMILY.send(logger);
                     } catch (Exception e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting the families!");
+                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting the families!\n"+e.getMessage());
                     }
 
                     return Command.SINGLE_SUCCESS;
@@ -136,7 +136,7 @@ public final class CommandRusty {
                             } catch (NullPointerException e) {
                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                             } catch (Exception e) {
-                                VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting that family!");
+                                VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting that family!\n"+e.getMessage());
                             }
                             return Command.SINGLE_SUCCESS;
                         })
@@ -153,7 +153,7 @@ public final class CommandRusty {
                                     } catch (NullPointerException e) {
                                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                                     } catch (Exception e) {
-                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!");
+                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                                     }
                                     return Command.SINGLE_SUCCESS;
                                 })
@@ -171,7 +171,7 @@ public final class CommandRusty {
                                     } catch (NullPointerException e) {
                                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                                     } catch (Exception e) {
-                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!"+e.getMessage());
+                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                                     }
                                     return 1;
                                 })
@@ -183,7 +183,7 @@ public final class CommandRusty {
                         try {
                             VelocityLang.RC_REGISTER_USAGE.send(logger);
                         } catch (Exception e) {
-                            VelocityLang.RC_REGISTER_ERROR.send(logger, "Something prevented us from sending a request for registration!");
+                            VelocityLang.RC_REGISTER_ERROR.send(logger, "Something prevented us from sending a request for registration!\n"+e.getMessage());
                         }
 
                         return 1;
@@ -214,7 +214,7 @@ public final class CommandRusty {
                                         } catch (NullPointerException e) {
                                             VelocityLang.RC_REGISTER_ERROR.send(logger,"A family with that name doesn't exist!");
                                         } catch (Exception e) {
-                                            VelocityLang.RC_REGISTER_ERROR.send(logger,"Something prevented us from reloading that family!");
+                                            VelocityLang.RC_REGISTER_ERROR.send(logger,"Something prevented us from reloading that family!\n"+e.getMessage());
                                         }
                                         return 1;
                                     })

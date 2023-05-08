@@ -15,7 +15,8 @@ public class StaticFamilyConfig extends YAML {
     private String firstConnection_loadBalancing_algorithm = "ROUND_ROBIN";
     private boolean firstConnection_loadBalancing_persistence_enabled = false;
     private int firstConnection_loadBalancing_persistence_attempts = 5;
-    private UnavailableProtocol consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.CANCEL_CONNECTION_ATTEMPT;
+
+    private UnavailableProtocol consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.ASSIGN_NEW_HOME;
     private LiquidTimestamp consecutiveConnections_homeServer_expiration = null;
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
@@ -50,7 +51,12 @@ public class StaticFamilyConfig extends YAML {
     public String getWhitelist_name() {
         return whitelist_name;
     }
-
+    public UnavailableProtocol getConsecutiveConnections_homeServer_ifUnavailable() {
+        return consecutiveConnections_homeServer_ifUnavailable;
+    }
+    public LiquidTimestamp getConsecutiveConnections_homeServer_expiration() {
+        return consecutiveConnections_homeServer_expiration;
+    }
     public boolean isTPA_enabled() {
         return tpa_enabled;
     }
