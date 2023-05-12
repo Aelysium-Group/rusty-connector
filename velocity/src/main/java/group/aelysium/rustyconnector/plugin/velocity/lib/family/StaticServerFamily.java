@@ -23,7 +23,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,20 +46,6 @@ public class StaticServerFamily extends BaseServerFamily {
     }
 
     /**
-     * Check if there is a home server registered for a player in this family.
-     *
-     * @param player The player to look for.
-     * @return `true` if a home server exists. `false` otherwise.
-     * @throws SQLException If there was an issue with MySQL.
-     */
-    public boolean isHomeServerRegistered(Player player) throws SQLException {
-        if (this.mappingsCache.stream().anyMatch(item -> item.player().equals(player) && item.family().equals(this)))
-            return true;
-
-        return HomeServerMappingsDatabase.doesPlayerHaveHome(player, this);
-    }
-
-    /**
      * Registers a new home server for a player in this family.
      * If a home server already exists, this overwrites it.
      *
@@ -78,7 +63,7 @@ public class StaticServerFamily extends BaseServerFamily {
     /**
      * Unregisters a home server from a player in this family.
      *
-     * @param player The family whose home server is to be unregistered.
+     * @param player The player whose home server is to be unregistered.
      * @throws SQLException If there was an issue with MySQL.
      */
     public void unregisterHomeServer(Player player) throws SQLException {
@@ -88,14 +73,23 @@ public class StaticServerFamily extends BaseServerFamily {
     }
 
     /**
-     * Purges all old home server mappings related to a player.
-     * @param player The family whose home server is to be unregistered.
+     * If mappings related to this family have a null expiration and this family's expiration isn't null.
+     * This will update the expirations.
      * @throws SQLException If there was an issue with MySQL.
      */
-    public void purgeOldMappings(Player player) throws SQLException {
-        this.mappingsCache.removeIf(item -> item.player().equals(player) && item.family().equals(this));
+    public void updateMappingExpirations() throws SQLException {
+        if(this.homeServerExpiration == null)
+            HomeServerMappingsDatabase.updateValidExpirations(this);
+        else
+            HomeServerMappingsDatabase.updateNullExpirations(this);
+    }
 
-        HomeServerMappingsDatabase.delete(player, this);
+    /**
+     * Delete any mappings in this server that are expired.
+     * @throws SQLException If there was an issue with MySQL.
+     */
+    public void purgeExpiredMappings() throws SQLException {
+        HomeServerMappingsDatabase.purgeExpired(this);
     }
 
     /**
@@ -119,16 +113,6 @@ public class StaticServerFamily extends BaseServerFamily {
      */
     public void uncacheHomeServer(Player player) {
         this.mappingsCache.removeIf(item -> item.player().equals(player) && item.family().equals(this));
-    }
-
-    /**
-     * Checks if a player's home server is currently in the cache.
-     *
-     * @param player The player whose home server is to be searched for.
-     * @return `true` is the home server is currently cached. `false` otherwise.
-     */
-    public boolean isHomeServerCached(Player player) {
-        return this.mappingsCache.stream().anyMatch(item -> item.player().equals(player) && item.family().equals(this));
     }
 
     @Override
@@ -169,35 +153,42 @@ public class StaticServerFamily extends BaseServerFamily {
             logger.log(familyName + " doesn't have a whitelist.");
         }
 
+        StaticServerFamily family = null;
         switch (Enum.valueOf(AlgorithmType.class, staticFamilyConfig.getFirstConnection_loadBalancing_algorithm())) {
-            case ROUND_ROBIN -> {
-                return new StaticServerFamily(
-                        familyName,
-                        whitelist,
-                        RoundRobin.class,
-                        staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
-                        staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
-                        staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                        new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
-                        staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                        staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
-                );
-            }
-            case LEAST_CONNECTION -> {
-                return new StaticServerFamily(
-                        familyName,
-                        whitelist,
-                        LeastConnection.class,
-                        staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
-                        staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
-                        staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                        new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
-                        staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                        staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
-                );
-            }
-            default -> throw new RuntimeException("The name used for " + familyName + "'s load balancer is invalid!");
+            case ROUND_ROBIN -> family = new StaticServerFamily(
+                    familyName,
+                    whitelist,
+                    RoundRobin.class,
+                    staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
+                    staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
+                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
+                    new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+            );
+            case LEAST_CONNECTION -> family = new StaticServerFamily(
+                    familyName,
+                    whitelist,
+                    LeastConnection.class,
+                    staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
+                    staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
+                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
+                    new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+            );
         }
+
+        if(family == null) throw new RuntimeException("The name used for " + familyName + "'s load balancer is invalid!");
+
+        try {
+            family.updateMappingExpirations();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("There was an issue with MySQL! " + e.getMessage());
+        }
+
+        return family;
     }
 
     @Override
@@ -340,8 +331,8 @@ class StaticFamilyConnector {
                     return null;
                 }
             }
-        } catch (Exception ignore) {
-            ignore.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         throw new RuntimeException("There was an issue connecting you to the server!");
     }

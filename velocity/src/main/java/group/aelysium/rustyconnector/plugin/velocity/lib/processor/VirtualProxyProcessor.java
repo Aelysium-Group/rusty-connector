@@ -53,7 +53,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public class VirtualProxyProcessor implements VirtualProcessor {
     private MessageCache messageCache;
@@ -142,7 +141,8 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
     private void startServerLifecycleHeart(long heartbeat, boolean shouldUnregister) {
         Callable<Boolean> callable = () -> {
-            PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+            VelocityAPI api = VelocityRustyConnector.getAPI();
+            PluginLogger logger = api.getLogger();
 
             if(logger.getGate().check(GateKey.PING))
                 logger.log("Sending out pings and killing dead servers...");
@@ -173,11 +173,23 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
                     server.ping();
                 }
-                return true;
-            } catch (Exception error) {
-                logger.log(error.getMessage());
+            } catch (Exception e) {
+                logger.log(e.getMessage());
             }
-            return false;
+            try {
+                api.getVirtualProcessor().getFamilyManager().dump().forEach(family -> {
+                    if(!(family instanceof StaticServerFamily)) return;
+
+                    try {
+                        ((StaticServerFamily) family).purgeExpiredMappings();
+                    } catch (Exception e) {
+                        VelocityLang.BOXED_MESSAGE_COLORED.send(logger, Component.text("There was an issue while purging expired mappings for: "+family.getName()+". "+e.getMessage()),NamedTextColor.RED);
+                    }
+                });
+            } catch (Exception e) {
+                logger.log(e.getMessage());
+            }
+            return true;
         };
 
         this.serverLifecycleHeart = new Clock(callable, heartbeat);
@@ -513,19 +525,6 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         } catch (Exception ignore) {}
         if(privateKey == null) throw new IllegalAccessException("There was a fatal error while reading private.key!");
 
-        // Setup families
-        for (String familyName: config.getScalarFamilies())
-            virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, familyName));
-        for (String familyName: config.getStaticFamilies())
-            virtualProxyProcessor.getFamilyManager().add(StaticServerFamily.init(virtualProxyProcessor, familyName));
-
-        virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, config.getRootFamilyName()));
-
-        logger.log("Finished setting up families");
-
-        virtualProxyProcessor.setRootFamily(config.getRootFamilyName());
-        logger.log("Finished setting up root family");
-
         // Setup Redis
         RedisClient.Builder redisClientBuilder = new RedisClient.Builder()
                 .setHost(config.getRedis_host())
@@ -564,7 +563,22 @@ public class VirtualProxyProcessor implements VirtualProcessor {
             throw new IllegalAccessException("Unable to connect to MySQL! Is the server available?");
         }
 
-        if(config.isHearts_serverLifecycle_enabled()) virtualProxyProcessor.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
+        // Setup families
+        for (String familyName: config.getScalarFamilies())
+            virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, familyName));
+        for (String familyName: config.getStaticFamilies())
+            virtualProxyProcessor.getFamilyManager().add(StaticServerFamily.init(virtualProxyProcessor, familyName));
+
+        logger.log("Setting up root family");
+
+        virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, config.getRootFamilyName()));
+
+        logger.log("Finished setting up families");
+
+        virtualProxyProcessor.setRootFamily(config.getRootFamilyName());
+        logger.log("Finished setting up root family");
+
+        if(config.isHearts_serverLifecycle_enabled()) virtualProxyProcessor.startServerLifecycleHeart(config.getServices_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
 
         if(config.getMessageTunnel_familyServerSorting_enabled()) {
             virtualProxyProcessor.loadBalancingService = new LoadBalancingService(virtualProxyProcessor.getFamilyManager().size(), config.getMessageTunnel_familyServerSorting_interval());
@@ -626,7 +640,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
         // Heartbeats
         this.killServices();
-        if(config.isHearts_serverLifecycle_enabled()) this.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
+        if(config.isHearts_serverLifecycle_enabled()) this.startServerLifecycleHeart(config.getServices_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
         if(config.getMessageTunnel_familyServerSorting_enabled()) this.loadBalancingService = new LoadBalancingService(this.getFamilyManager().size(), config.getMessageTunnel_familyServerSorting_interval());
         logger.log("Restarted heartbeats");
 

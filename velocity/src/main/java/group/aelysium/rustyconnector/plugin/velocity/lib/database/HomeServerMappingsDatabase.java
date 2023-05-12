@@ -17,8 +17,9 @@ public class HomeServerMappingsDatabase {
     private static final String CHECK_IF_PLAYER_HAS_HOME = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
     private static final String DELETE_PLAYERS_HOME_SERVER = "DELETE FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
     private static final String SAVE_PLAYERS_HOME_SERVER = "REPLACE INTO home_server_mappings (player_uuid, family_name, server_address, server_name, expiration) VALUES(?, ?, ?, ?, FROM_UNIXTIME(?));";
-    private static final String PURGE_FAMILY_OLD_SERVERS = "DELETE FROM home_server_mappings WHERE family_name = ? AND expiration < NOW();";
+    private static final String PURGE_FAMILY_EXPIRED_MAPPINGS = "DELETE FROM home_server_mappings WHERE family_name = ? AND expiration < NOW();";
     private static final String UPDATE_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = ? WHERE family_name = ? AND expiration IS NULL;";
+    private static final String UPDATE_NOT_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = NULL WHERE family_name = ? AND expiration IS NOT NULL;";
     private static final String INIT_TABLE = "" +
             "CREATE TABLE IF NOT EXISTS home_server_mappings (" +
             "    player_uuid VARCHAR(36) NOT NULL," +
@@ -136,16 +137,16 @@ public class HomeServerMappingsDatabase {
     }
 
     /**
-     * Deletes all home server mappings for a family that are expired
+     * Deletes all mappings that are expired.
      * @param family The family to search in.
      * @throws SQLException If there was an issue with the query.
      */
-    public static void purge(StaticServerFamily family) throws SQLException {
+    public static void purgeExpired(StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         MySQL mySQL = api.getMySQL();
 
         mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(PURGE_FAMILY_OLD_SERVERS);
+        PreparedStatement statement = mySQL.prepare(PURGE_FAMILY_EXPIRED_MAPPINGS);
         statement.setString(1, family.getName());
         mySQL.execute(statement);
         mySQL.close();
@@ -157,17 +158,36 @@ public class HomeServerMappingsDatabase {
      * @param family The family to search in.
      * @throws SQLException If there was an issue with the query.
      */
-    public static void updateNulls(StaticServerFamily family) throws SQLException {
-        LiquidTimestamp expiration = family.getHomeServerExpiration();
-        if(expiration == null) return;
+    public static void updateNullExpirations(StaticServerFamily family) throws SQLException {
+        LiquidTimestamp liquidExpiration = family.getHomeServerExpiration();
+        if(liquidExpiration == null) return;
 
         VelocityAPI api = VelocityRustyConnector.getAPI();
         MySQL mySQL = api.getMySQL();
 
+        Timestamp expiration = new Timestamp(liquidExpiration.getEpochFromNow());
+
         mySQL.connect();
         PreparedStatement statement = mySQL.prepare(UPDATE_NULL_EXPIRATIONS);
-        statement.setDate(1, new Date(expiration.getEpochFromNow()));
+        statement.setTimestamp(1, expiration);
         statement.setString(2, family.getName());
+        mySQL.execute(statement);
+        mySQL.close();
+    }
+
+    /**
+     * If any home servers are set to expire, and if an expiration time is disabled in the family,
+     * This will update all expirations to now never expire;
+     * @param family The family to search in.
+     * @throws SQLException If there was an issue with the query.
+     */
+    public static void updateValidExpirations(StaticServerFamily family) throws SQLException {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        MySQL mySQL = api.getMySQL();
+
+        mySQL.connect();
+        PreparedStatement statement = mySQL.prepare(UPDATE_NOT_NULL_EXPIRATIONS);
+        statement.setString(1, family.getName());
         mySQL.execute(statement);
         mySQL.close();
     }

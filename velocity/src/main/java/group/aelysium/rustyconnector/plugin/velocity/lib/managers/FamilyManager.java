@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
 
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 
 import java.util.HashMap;
 import java.util.List;

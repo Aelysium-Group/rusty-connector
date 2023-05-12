@@ -4,14 +4,12 @@ import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
@@ -47,9 +45,9 @@ public class DefaultConfig extends YAML {
     private boolean bootCommands_enabled = false;
     private List<String> bootCommands_commands = new ArrayList<>();
 
-    private Boolean hearts_serverLifecycle_enabled = true;
-    private Integer hearts_serverLifecycle_interval = 30;
-    private Boolean hearts_serverLifecycle_unregisterOnIgnore = false;
+    private Boolean services_serverLifecycle_enabled = true;
+    private Integer services_serverLifecycle_interval = 30;
+    private Boolean services_serverLifecycle_unregisterOnIgnore = false;
     private Boolean messageTunnel_familyServerSorting_enabled = true;
     private Integer messageTunnel_familyServerSorting_interval = 20;
 
@@ -179,15 +177,15 @@ public class DefaultConfig extends YAML {
     }
 
     public Boolean isHearts_serverLifecycle_enabled() {
-        return hearts_serverLifecycle_enabled;
+        return services_serverLifecycle_enabled;
     }
 
-    public Integer getHearts_serverLifecycle_interval() {
-        return hearts_serverLifecycle_interval;
+    public Integer getServices_serverLifecycle_interval() {
+        return services_serverLifecycle_interval;
     }
 
     public Boolean shouldHearts_serverLifecycle_unregisterOnIgnore() {
-        return hearts_serverLifecycle_unregisterOnIgnore;
+        return services_serverLifecycle_unregisterOnIgnore;
     }
 
     public Integer getMessageTunnel_familyServerSorting_interval() {
@@ -340,16 +338,16 @@ public class DefaultConfig extends YAML {
         }
 
         // Hearts
-        this.hearts_serverLifecycle_enabled = this.getNode(this.data,"hearts.server-lifecycle.enabled",Boolean.class);
-        this.hearts_serverLifecycle_interval = this.getNode(this.data,"hearts.server-lifecycle.interval",Integer.class);
-        if(this.hearts_serverLifecycle_interval < 10) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server lifecycle interval is set dangerously fast: " + this.hearts_serverLifecycle_interval + "ms. Setting to default of 30ms."), NamedTextColor.YELLOW);
+        this.services_serverLifecycle_enabled = this.getNode(this.data,"services.server-lifecycle.enabled",Boolean.class);
+        this.services_serverLifecycle_interval = this.getNode(this.data,"services.server-lifecycle.interval",Integer.class);
+        if(this.services_serverLifecycle_interval < 10) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server lifecycle interval is set dangerously fast: " + this.services_serverLifecycle_interval + "ms. Setting to default of 30ms."), NamedTextColor.YELLOW);
             this.messageTunnel_messageMaxLength = 30;
         }
-        this.hearts_serverLifecycle_unregisterOnIgnore = this.getNode(this.data,"hearts.server-lifecycle.unregister-on-ignore",Boolean.class);
+        this.services_serverLifecycle_unregisterOnIgnore = this.getNode(this.data,"services.server-lifecycle.unregister-on-ignore",Boolean.class);
 
-        this.messageTunnel_familyServerSorting_enabled = this.getNode(this.data,"hearts.family-server-sorting.enabled",Boolean.class);
-        this.messageTunnel_familyServerSorting_interval = this.getNode(this.data,"hearts.family-server-sorting.interval",Integer.class);
+        this.messageTunnel_familyServerSorting_enabled = this.getNode(this.data,"services.family-server-sorting.enabled",Boolean.class);
+        this.messageTunnel_familyServerSorting_interval = this.getNode(this.data,"services.family-server-sorting.interval",Integer.class);
         if(this.messageTunnel_familyServerSorting_interval < 7) {
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server sorting interval is set dangerously fast: " + this.messageTunnel_familyServerSorting_interval + "ms. Setting to default of 20ms."), NamedTextColor.YELLOW);
             this.messageTunnel_familyServerSorting_interval = 20;

@@ -2,9 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
@@ -14,8 +14,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFami
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 import net.kyori.adventure.text.Component;
-
-import java.util.Date;
 
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -259,13 +257,13 @@ public interface VelocityLang extends Lang {
             BORDER
     );
 
-    ParameterizedMessage1<BaseServerFamily> RC_FAMILY_INFO = (family) -> {
+    ParameterizedMessage1<ScalarServerFamily> RC_SCALAR_FAMILY_INFO = (family) -> {
         Component servers = text("");
         int i = 0;
 
         if(family.getRegisteredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
         else if(family.getRegisteredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
-            else for (PlayerServer server : family.getRegisteredServers()) {
+        else for (PlayerServer server : family.getRegisteredServers()) {
                 if(family.getLoadBalancer().getIndex() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
@@ -284,6 +282,66 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
+        return join(
+                Lang.newlines(),
+                BORDER,
+                SPACING,
+                ASCIIAlphabet.generate(family.getName(), AQUA),
+                SPACING,
+                BORDER,
+                SPACING,
+                text("   ---| Online Players: "+family.getPlayerCount()),
+                text("   ---| Registered Servers: "+family.serverCount()),
+                text("   ---| Load Balancing:"),
+                text("      | - Algorithm: "+family.getLoadBalancer()),
+                text("      | - Weighted Sorting: "+family.isWeighted()),
+                text("      | - Persistence: "+family.getLoadBalancer().isPersistent()),
+                text("      | - Max Attempts: "+family.getLoadBalancer().getAttempts()),
+                SPACING,
+                BORDER,
+                SPACING,
+                text("Registered Servers", AQUA),
+                SPACING,
+                text("/rc family <family name> sort", GOLD),
+                text("Will cause the family to completely resort itself in accordance with it's load balancing algorithm.", DARK_GRAY),
+                SPACING,
+                text("/rc family <family name> resetIndex", GOLD),
+                text("Will reset the family's input to the first server in the family.", DARK_GRAY),
+                SPACING,
+                servers,
+                SPACING,
+                BORDER
+        );
+    };
+
+    ParameterizedMessage1<StaticServerFamily> RC_STATIC_FAMILY_INFO = (family) -> {
+        Component servers = text("");
+        int i = 0;
+
+        if(family.getRegisteredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
+        else if(family.getRegisteredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
+        else for (PlayerServer server : family.getRegisteredServers()) {
+                if(family.getLoadBalancer().getIndex() == i)
+                    servers = servers.append(
+                            text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
+                                            "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
+                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getHardPlayerCap()+") w-"+server.getWeight()+"] <<<<<"
+                                    , GREEN));
+                else
+                    servers = servers.append(
+                            text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
+                                            "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
+                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getHardPlayerCap()+") w-"+server.getWeight()+"]"
+                                    , GRAY));
+
+                servers = servers.append(newline());
+
+                i++;
+            }
+
+        LiquidTimestamp expiration = family.getHomeServerExpiration();
+        String homeServerExpiration = "NEVER";
+        if(expiration != null) homeServerExpiration = expiration.toString();
 
         return join(
                 Lang.newlines(),
@@ -295,6 +353,7 @@ public interface VelocityLang extends Lang {
                 SPACING,
                 text("   ---| Online Players: "+family.getPlayerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
+                text("   ---| Home Server Expiration: "+homeServerExpiration),
                 text("   ---| Load Balancing:"),
                 text("      | - Algorithm: "+family.getLoadBalancer()),
                 text("      | - Weighted Sorting: "+family.isWeighted()),

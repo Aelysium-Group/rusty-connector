@@ -19,6 +19,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
@@ -132,7 +133,10 @@ public final class CommandRusty {
                                 BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                 if(family == null) throw new NullPointerException();
 
-                                VelocityLang.RC_FAMILY_INFO.send(logger, family);
+                                if(family instanceof ScalarServerFamily)
+                                    VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
+                                if(family instanceof StaticServerFamily)
+                                    VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticServerFamily) family);
                             } catch (NullPointerException e) {
                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                             } catch (Exception e) {
@@ -149,7 +153,10 @@ public final class CommandRusty {
 
                                         family.getLoadBalancer().resetIndex();
 
-                                        VelocityLang.RC_FAMILY_INFO.send(logger, family);
+                                        if(family instanceof ScalarServerFamily)
+                                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
+                                        if(family instanceof StaticServerFamily)
+                                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticServerFamily) family);
                                     } catch (NullPointerException e) {
                                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                                     } catch (Exception e) {
@@ -167,7 +174,10 @@ public final class CommandRusty {
 
                                         family.getLoadBalancer().completeSort();
 
-                                        VelocityLang.RC_FAMILY_INFO.send(logger, family);
+                                        if(family instanceof ScalarServerFamily)
+                                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
+                                        if(family instanceof StaticServerFamily)
+                                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticServerFamily) family);
                                     } catch (NullPointerException e) {
                                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                                     } catch (Exception e) {
@@ -271,7 +281,7 @@ public final class CommandRusty {
 
                                             logger.log("Done reloading!");
 
-                                            VelocityLang.RC_FAMILY_INFO.send(logger, newFamily);
+                                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, newFamily);
                                             return 1;
                                         } catch (Exception e) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from reloading that family!\n"+e.getMessage());

@@ -295,21 +295,20 @@ boot-commands:
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                          Hearts                          #
+#                        Services                          #
 #                                                          #
 #               ---------------------------                #
-# | Hearts are certain processes that run every specific   #
-# | interval! They can be enabled, disabled, and adjusted  #
-# | here.                                                  #
-#                                                          #
-# | All intervals are in seconds.                          #
+# | Services are small, in-built applications that         #
+# | carry out specific duties within RustyConnector        #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-hearts:
+services:
 #
 # Manages the lifecycles of servers.
+#
+# Also manages the lifecycle of a player's home server if you are using Static Families.
 #
     server-lifecycle:
         enabled: true

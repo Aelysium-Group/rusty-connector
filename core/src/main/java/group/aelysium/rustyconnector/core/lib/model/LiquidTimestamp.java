@@ -6,10 +6,12 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
 
 public class LiquidTimestamp {
+    protected String initialValue;
     protected LiquidUnit unit;
     protected int value;
 
     public LiquidTimestamp(String stamp) throws ParseException {
+        this.initialValue = stamp;
         stamp = stamp.toLowerCase();
         int value;
         try {
@@ -59,6 +61,11 @@ public class LiquidTimestamp {
         }
 
         return time * 1000;
+    }
+
+    @Override
+    public String toString() {
+        return this.initialValue;
     }
 
     public enum LiquidUnit {
