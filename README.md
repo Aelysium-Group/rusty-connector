@@ -18,6 +18,7 @@
 - ### ✅ Register similar servers into families with family-level whitelists and load balancing
 - ### ✅ Automatically unregister frozen servers from the proxy
 - ### ✅ Set soft and hard player limits for servers
+- ### ✅ Built for stateful Minecraft servers!
 - ### ✅ Whitelist players based on permission, Username, UUID, or IP Address
 - ### ✅ Allow players to /tpa between servers
 - ### ✅ Works with LuckPerms-Velocity
