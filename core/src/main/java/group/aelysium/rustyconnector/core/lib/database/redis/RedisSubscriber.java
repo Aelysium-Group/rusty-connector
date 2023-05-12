@@ -6,6 +6,7 @@ import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class RedisSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
@@ -46,7 +47,7 @@ public class RedisSubscriber {
         this.lock.countDown();
         this.lock.countDown();
         try {
-            this.client.shutdown();
+            this.client.shutdown(2, 2, TimeUnit.SECONDS);
         } catch (Exception ignore) {}
     }
 
