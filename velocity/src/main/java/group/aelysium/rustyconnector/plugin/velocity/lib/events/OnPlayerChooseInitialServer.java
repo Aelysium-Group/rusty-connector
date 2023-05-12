@@ -29,7 +29,6 @@ public class OnPlayerChooseInitialServer {
 
         return EventTask.async(() -> {
             try {
-                // Check if there's a whitelist, run it if there is.
                 Whitelist whitelist = api.getVirtualProcessor().getProxyWhitelist();
                 if(whitelist != null) {
                     if (!whitelist.validate(player)) {
