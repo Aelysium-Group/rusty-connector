@@ -4,6 +4,7 @@ import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 public class RedisSubscriber {
@@ -31,6 +32,7 @@ public class RedisSubscriber {
 
             this.lock.await();
         } catch (Exception e) {
+            e.printStackTrace();
             this.lock.countDown();
         }
     }
@@ -43,7 +45,9 @@ public class RedisSubscriber {
         this.lock.countDown();
         this.lock.countDown();
         this.lock.countDown();
-        this.client.shutdown();
+        try {
+            this.client.shutdown();
+        } catch (Exception ignore) {}
     }
 
     /**

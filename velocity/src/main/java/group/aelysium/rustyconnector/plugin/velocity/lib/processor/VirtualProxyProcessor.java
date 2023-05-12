@@ -536,8 +536,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         if(!config.getRedis_password().equals(""))
             redisClientBuilder.setPassword(config.getRedis_password());
 
-        RedisClient redisClient = redisClientBuilder.build();
-        virtualProxyProcessor.setRedisService(new RedisService(redisClient));
+        virtualProxyProcessor.setRedisService(new RedisService(redisClientBuilder));
 
         logger.log("Finished setting up redis");
 

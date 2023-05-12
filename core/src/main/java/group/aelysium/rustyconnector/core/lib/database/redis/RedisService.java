@@ -7,30 +7,30 @@ import java.util.concurrent.TimeUnit;
 
 public class RedisService {
     private final Vector<RedisSubscriber> liveRedisSubscribers = new Vector<>();
-    private final RedisClient client;
+    private final RedisClient.Builder clientBuilder;
     private boolean isAlive = false;
     ExecutorService executorService;
 
-    public RedisService(RedisClient client) {
-        this.client = client;
+    public RedisService(RedisClient.Builder clientBuilder) {
+        this.clientBuilder = clientBuilder;
     }
 
     protected void launchNewRedisSubscriber(Class<? extends RedisSubscriber> subscriber) {
+        if(!this.isAlive) return;
+
         this.executorService.submit(() -> {
             try {
-                RedisSubscriber redis = subscriber.getDeclaredConstructor(RedisClient.class).newInstance(RedisService.this.client);
+                RedisSubscriber redis = subscriber.getDeclaredConstructor(RedisClient.class).newInstance(RedisService.this.clientBuilder.build());
                 RedisService.this.liveRedisSubscribers.add(redis);
 
                 redis.subscribeToChannel();
 
                 RedisService.this.liveRedisSubscribers.remove(redis);
-                redis.shutdown();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            if(RedisService.this.isAlive)
-                this.launchNewRedisSubscriber(subscriber);
+            RedisService.this.launchNewRedisSubscriber(subscriber);
         });
     }
 
@@ -76,7 +76,7 @@ public class RedisService {
      * @return A RedisPublisher.
      */
     public RedisPublisher getMessagePublisher() {
-        return new RedisPublisher(this.client);
+        return new RedisPublisher(this.clientBuilder.build());
     }
 
     /**
@@ -85,6 +85,6 @@ public class RedisService {
      * @return `true` if the key is valid. `false` otherwise.
      */
     public boolean validatePrivateKey(char[] privateKey) {
-        return Arrays.equals(this.client.getPrivateKey(), privateKey);
+        return Arrays.equals(this.clientBuilder.build().getPrivateKey(), privateKey);
     }
 }

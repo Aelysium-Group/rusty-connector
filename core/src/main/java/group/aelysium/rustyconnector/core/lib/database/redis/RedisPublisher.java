@@ -31,4 +31,19 @@ public class RedisPublisher {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Publish a message that will cause the subscriber to kill itself.
+     * @deprecated This method should only ever be used for testing purposes.
+     */
+    @Deprecated
+    public void publishKillable() {
+        try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
+            RedisPubSubAsyncCommands<String, String> async = connection.async();
+
+            async.publish(this.client.getDataChannel(), "DIE");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

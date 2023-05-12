@@ -223,8 +223,6 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
         if(!config.getRedis_password().equals(""))
             redisClientBuilder.setPassword(config.getRedis_password());
 
-        RedisClient redisClient = redisClientBuilder.build();
-
         logger.log("Finished setting up redis");
 
 
@@ -232,7 +230,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                 config.getServer_name(),
                 config.getServer_address(),
                 config.getServer_family(),
-                new RedisService(redisClient)
+                new RedisService(redisClientBuilder)
         );
         server.setMessageCache(50);
 
