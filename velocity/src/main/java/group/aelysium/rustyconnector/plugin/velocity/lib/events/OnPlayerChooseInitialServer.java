@@ -39,8 +39,7 @@ public class OnPlayerChooseInitialServer {
                     }
                 }
 
-                //BaseServerFamily rootFamily = api.getVirtualProcessor().getRootFamily();
-                BaseServerFamily rootFamily = api.getVirtualProcessor().getFamilyManager().find("survival");
+                BaseServerFamily rootFamily = api.getVirtualProcessor().getRootFamily();
 
                 PlayerServer server = rootFamily.connect(player);
                 if(server == null) return;
