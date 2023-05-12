@@ -24,7 +24,7 @@
 - ### ✅ Works with LuckPerms-Velocity
 - ### ✅ Works with Kubernetes
 - ### ✅ Works with Folia
-- ### ❌ Can't tuck you into bed
+- ### ❌ Can't give you a hug
 ---
 # Networks Served:
 [![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)](https://bstats.org/signatures/velocity/RustyConnector.svg)
