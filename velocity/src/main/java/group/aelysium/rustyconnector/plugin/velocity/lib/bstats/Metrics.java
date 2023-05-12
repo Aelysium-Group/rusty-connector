@@ -1,5 +1,5 @@
 /*
- * This Metrics class was auto-generated and can be copied into your project if you are
+* This Metrics class was auto-generated and can be copied into your project if you are
  * not using a build tool like Gradle or Maven for dependency management.
  *
  * IMPORTANT: You are not allowed to modify this class, except changing the package.

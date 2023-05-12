@@ -7,14 +7,15 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.database.Redis;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 
 import java.security.InvalidAlgorithmParameterException;
 
@@ -55,10 +56,20 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     public ServerInfo getServerInfo() { return this.serverInfo; }
 
     /**
+     * Set the registered server associated with this PlayerServer.
+     * @param registeredServer The RegisteredServer
+     * @deprecated This method should never be used in production code! Use `PlayerServer#register` instead! This is only meant for code testing.
+     */
+    @Deprecated
+    public void setRegisteredServer(RegisteredServer registeredServer) {
+        this.registeredServer = registeredServer;
+    }
+
+    /**
      * Registers a server to the proxy.
      * @param familyName The family to associate the server with.
      * @throws DuplicateRequestException If the server has already been registered to the proxy.
-     * @throws InvalidAlgorithmParameterException Of the family doesn't exist.
+     * @throws InvalidAlgorithmParameterException If the family doesn't exist.
      */
     public void register(String familyName) throws Exception {
         VelocityAPI api = VelocityRustyConnector.getAPI();
@@ -145,30 +156,31 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @throws IllegalStateException If the server hasn't been registered yet.
      * @throws NullPointerException If the family associated with this server doesn't exist.
      */
-    public ServerFamily<? extends PaperServerLoadBalancer> getFamily() throws IllegalStateException, NullPointerException {
+    public BaseServerFamily getFamily() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        ServerFamily<? extends PaperServerLoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(this.familyName);
+        BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
     }
 
     /**
-     * Sends a ping to the specific server.
-     * @param redis The redis connection to use.
+     * Sends a ping to this server.
      */
-    public void ping(Redis redis, String privateKey) {
-        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+    public void ping() {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
 
-        RedisMessage message = new RedisMessage(
-                privateKey,
-                RedisMessageType.PING,
-                this.getAddress()
-        );
+        GenericRedisMessage message = new GenericRedisMessage.Builder()
+                .setType(RedisMessageType.PING)
+                .setOrigin(MessageOrigin.PROXY)
+                .setAddress(this.getAddress())
+                .buildSendable();
 
-        message.dispatchMessage(redis);
+        RedisPublisher publisher = api.getVirtualProcessor().getRedisService().getMessagePublisher();
+        publisher.publish(message);
 
         if(logger.getGate().check(GateKey.PING))
             VelocityLang.PING.send(logger,this.serverInfo);
@@ -201,7 +213,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         } catch(Exception ignore) {
             return false;
         }
-
     }
 
     /**

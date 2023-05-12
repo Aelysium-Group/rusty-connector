@@ -3,34 +3,33 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.module;
 import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.central.PluginRuntime;
+import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.WhitelistConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.WhitelistConfig;
 
 import java.io.File;
 import java.util.*;
 
 public class Whitelist {
-    private String message = "You aren't whitelisted on this server!";
-    private String name;
-    private String permission;
+    private final String message;
+    private final String name;
+    private final String permission;
     private final WhitelistPlayerManager whitelistPlayerManager;
-    private final List<String> countries = new ArrayList<>();
 
-    private boolean usePlayers = false;
-    private boolean useCountries = false;
-    private boolean usePermission = false;
-    private boolean strict = false;
+    private final boolean usePlayers;
+    private final boolean usePermission;
+    private final boolean strict;
+    private final boolean inverted;
 
-    public Whitelist(String name, boolean usePlayers, boolean usePermission, boolean useCountries, String message, boolean strict) {
+    public Whitelist(String name, boolean usePlayers, boolean usePermission, String message, boolean strict, boolean inverted) {
         this.name = name;
         this.usePlayers = usePlayers;
-        this.useCountries = useCountries;
         this.usePermission = usePermission;
         this.message = message;
         this.strict = strict;
+        this.inverted = inverted;
         this.permission = Permission.constructNode("rustyconnector.whitelist.<whitelist name>",this.name);
 
         this.whitelistPlayerManager = new WhitelistPlayerManager();
@@ -39,11 +38,6 @@ public class Whitelist {
     public boolean usesPlayers() {
         return usePlayers;
     }
-
-    public boolean usesCountries() {
-        return useCountries;
-    }
-
     public boolean usesPermission() {
         return usePermission;
     }
@@ -53,12 +47,12 @@ public class Whitelist {
     public String getMessage() {
         return message;
     }
+    public boolean isInverted() {
+        return this.inverted;
+    }
 
     public WhitelistPlayerManager getPlayerManager() {
         return this.whitelistPlayerManager;
-    }
-    public void registerCountry(String country) {
-        this.countries.add(country);
     }
 
     /**
@@ -67,44 +61,53 @@ public class Whitelist {
      * @return `true` if the player is whitelisted. `false` otherwise.
      */
     public boolean validate(Player player) {
-        if(this.strict) {
-            boolean playersValid = true;
-            boolean countryValid = true;
-            boolean permissionValid = true;
+        Callable<Boolean> validate = () -> {
+            if (Whitelist.this.strict)
+                return validateStrict(player);
+            else
+                return validateSoft(player);
+        };
 
-
-            if (this.usesPlayers())
-                if (!WhitelistPlayer.validate(this, player))
-                    playersValid = false;
-
-
-            // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
-
-
-            if (this.usesPermission())
-                if (!Permission.validate(player, this.permission))
-                    permissionValid = false;
-
-
-            return (playersValid && countryValid && permissionValid);
-        } else {
-            if (this.usesPlayers())
-                if (WhitelistPlayer.validate(this, player))
-                    return true;
-
-            // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
-
-            if (this.usesPermission())
-                return Permission.validate(player, this.permission);
-
-            return false;
-        }
+        if(this.inverted)
+            return !validate.execute();
+        else
+            return validate.execute();
     }
 
-    public boolean validateCountry(String ipAddress) {
-        return this.countries.contains(ipAddress);
+    private boolean validateStrict(Player player) {
+        boolean playersValid = true;
+        boolean countryValid = true;
+        boolean permissionValid = true;
+
+
+        if (this.usesPlayers())
+            if (!WhitelistPlayer.validate(this, player))
+                playersValid = false;
+
+
+        // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
+
+
+        if (this.usesPermission())
+            if (!Permission.validate(player, this.permission))
+                permissionValid = false;
+
+
+        return (playersValid && countryValid && permissionValid);
     }
 
+    private boolean validateSoft(Player player) {
+        if (this.usesPlayers())
+            if (WhitelistPlayer.validate(this, player))
+                return true;
+
+        // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
+
+        if (this.usesPermission())
+            return Permission.validate(player, this.permission);
+
+        return false;
+    }
 
     /**
      * Initializes a whitelist based on a config.
@@ -128,9 +131,9 @@ public class Whitelist {
                 whitelistName,
                 whitelistConfig.getUse_players(),
                 whitelistConfig.getUse_permission(),
-                whitelistConfig.getUse_country(),
                 whitelistConfig.getMessage(),
-                whitelistConfig.isStrict()
+                whitelistConfig.isStrict(),
+                whitelistConfig.isInverted()
         );
         if(whitelistConfig.getUse_players()) {
             List<Object> players = whitelistConfig.getPlayers();
@@ -142,10 +145,6 @@ public class Whitelist {
                 whitelist.getPlayerManager().add(player);
             });
         }
-        if(whitelistConfig.getUse_country()) {
-            List<String> countries = whitelistConfig.getCountries();
-            countries.forEach(whitelist::registerCountry);
-        };
 
         logger.log("Loaded whitelist: "+whitelistName);
         return whitelist;

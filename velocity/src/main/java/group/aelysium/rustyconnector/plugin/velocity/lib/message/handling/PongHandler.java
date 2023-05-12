@@ -2,9 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.central.PluginRuntime;
-import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPong;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
@@ -14,10 +14,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import java.net.InetSocketAddress;
 
 public class PongHandler implements MessageHandler {
-    private final RedisMessage message;
+    private final RedisMessageServerPong message;
 
-    public PongHandler(RedisMessage message) {
-        this.message = message;
+    public PongHandler(GenericRedisMessage message) {
+        this.message = (RedisMessageServerPong) message;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class PongHandler implements MessageHandler {
         InetSocketAddress address = message.getAddress();
 
         ServerInfo serverInfo = new ServerInfo(
-                message.getParameter("name"),
+                message.getServerName(),
                 address
         );
 
@@ -36,7 +36,7 @@ public class PongHandler implements MessageHandler {
             PlayerServer server = api.getVirtualProcessor().findServer(serverInfo);
             if(server == null) return;
             api.getVirtualProcessor().reviveServer(serverInfo);
-            server.setPlayerCount(Integer.parseInt(message.getParameter("player-count")));
+            server.setPlayerCount(message.getPlayerCount());
 
             if(logger.getGate().check(GateKey.PONG))
                 VelocityLang.PONG.send(logger, serverInfo);

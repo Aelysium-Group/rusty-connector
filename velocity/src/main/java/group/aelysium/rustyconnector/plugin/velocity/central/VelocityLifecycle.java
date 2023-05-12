@@ -11,10 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandTPA;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.FamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.WhitelistConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerChangeServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerChooseInitialServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerDisconnect;
@@ -51,7 +48,7 @@ public class VelocityLifecycle extends PluginLifecycle {
 
         WhitelistConfig.empty();
         DefaultConfig.empty();
-        FamilyConfig.empty();
+        ScalarFamilyConfig.empty();
 
         this.isRunning = true;
         return true;
@@ -62,12 +59,12 @@ public class VelocityLifecycle extends PluginLifecycle {
 
             WhitelistConfig.empty();
             DefaultConfig.empty();
-            FamilyConfig.empty();
+            ScalarFamilyConfig.empty();
             LoggerConfig.empty();
 
             if(api.getVirtualProcessor() != null) {
-                api.getVirtualProcessor().killHeartbeats();
-                api.getVirtualProcessor().killRedis();
+                api.getVirtualProcessor().killServices();
+                api.getVirtualProcessor().closeRedis();
             }
 
             api.getServer().getCommandManager().unregister("rc");
@@ -86,24 +83,28 @@ public class VelocityLifecycle extends PluginLifecycle {
         PluginLogger logger = api.getLogger();
         try {
             DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "config.yml"), "velocity_config_template.yml");
-            if(!defaultConfig.generate()) {
+            if(!defaultConfig.generate())
                 throw new IllegalStateException("Unable to load or create config.yml!");
-            }
             defaultConfig.register();
 
             LoggerConfig loggerConfig = LoggerConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "logger.yml"), "velocity_logger_template.yml");
-            if(!loggerConfig.generate()) {
+            if(!loggerConfig.generate())
                 throw new IllegalStateException("Unable to load or create logger.yml!");
-            }
             loggerConfig.register();
             PluginLogger.init(loggerConfig);
 
             api.configureProcessor(defaultConfig);
 
+            WebhooksConfig webhooksConfig = WebhooksConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "webhooks.yml"), "velocity_webhooks_template.yml");
+            if(!webhooksConfig.generate())
+                throw new IllegalStateException("Unable to load or create webhooks.yml!");
+            webhooksConfig.register();
+
             return true;
         } catch (NoOutputException ignore) {
             return false;
         } catch (Exception e) {
+            e.printStackTrace();
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);
             return false;
         }

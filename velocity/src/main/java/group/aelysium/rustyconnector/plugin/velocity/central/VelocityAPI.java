@@ -1,21 +1,24 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
+import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.scheduler.Scheduler;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
+import group.aelysium.rustyconnector.core.lib.database.MySQL;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
 import java.io.SyncFailedException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 
 public class VelocityAPI extends PluginAPI<Scheduler> {
     private final VelocityRustyConnector plugin;
@@ -23,6 +26,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     private VirtualProxyProcessor virtualProcessor = null;
     private final Path dataFolder;
     private final PluginLogger pluginLogger;
+    private MySQL mySQL = null;
 
     public VelocityAPI(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
         this.plugin = plugin;
@@ -56,9 +60,10 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         return this.virtualProcessor;
     }
 
-    public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
+    public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
         if(this.virtualProcessor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.virtualProcessor = VirtualProxyProcessor.init(config);
+        this.virtualProcessor.startServices();
     }
 
     /**
@@ -95,5 +100,22 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     public VelocityRustyConnector accessPlugin() throws SyncFailedException {
         if(VelocityRustyConnector.getLifecycle().isRunning()) throw new SyncFailedException("You can't get the plugin instance while the plugin is running!");
         return this.plugin;
+    }
+
+    /**
+     * Set the MySQL database.
+     * @throws DuplicateRequestException If the MySQL database is already set.
+     */
+    public void setMySQL(MySQL mySQL) {
+        if(this.mySQL != null) throw new DuplicateRequestException("You can't set the MySQL database twice!");
+        this.mySQL = mySQL;
+    }
+
+    /**
+     * Get the MySQL database.
+     * @return The MySQL database.
+     */
+    public MySQL getMySQL() {
+        return this.mySQL;
     }
 }

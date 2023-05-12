@@ -12,18 +12,19 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
+import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 
 import java.io.File;
 import java.util.List;
@@ -65,7 +66,7 @@ public final class CommandRusty {
                                         VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
                                     } catch (Exception e) {
-                                        VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting those messages!");
+                                        VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting those messages!\n"+e.getMessage());
                                     }
                                 }).start();
 
@@ -83,7 +84,7 @@ public final class CommandRusty {
 
                                                 VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,pageNumber,numberOfPages);
                                             } catch (Exception e) {
-                                                VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting that page!");
+                                                VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting that page!\n"+e.getMessage());
                                             }
 
                                         }).start();
@@ -105,7 +106,7 @@ public final class CommandRusty {
 
                                             CacheableMessage message = messageCache.getMessage(snowflake);
 
-                                            VelocityLang.RC_MESSAGE_GET_MESSAGE.send(logger,message.getSnowflake(),message.getDate(),message.getContents());
+                                            VelocityLang.RC_MESSAGE_GET_MESSAGE.send(logger, message);
                                         } catch (Exception e) {
                                             VelocityLang.RC_MESSAGE_ERROR.send(logger,"There's no saved message with that ID!");
                                         }
@@ -120,7 +121,7 @@ public final class CommandRusty {
                     try {
                         VelocityLang.RC_FAMILY.send(logger);
                     } catch (Exception e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting the families!");
+                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting the families!\n"+e.getMessage());
                     }
 
                     return Command.SINGLE_SUCCESS;
@@ -129,14 +130,17 @@ public final class CommandRusty {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                 if(family == null) throw new NullPointerException();
 
-                                VelocityLang.RC_FAMILY_INFO.send(logger, family);
+                                if(family instanceof ScalarServerFamily)
+                                    VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
+                                if(family instanceof StaticServerFamily)
+                                    VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticServerFamily) family);
                             } catch (NullPointerException e) {
                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                             } catch (Exception e) {
-                                VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting that family!");
+                                VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting that family!\n"+e.getMessage());
                             }
                             return Command.SINGLE_SUCCESS;
                         })
@@ -144,16 +148,19 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                         if(family == null) throw new NullPointerException();
 
                                         family.getLoadBalancer().resetIndex();
 
-                                        VelocityLang.RC_FAMILY_INFO.send(logger, family);
+                                        if(family instanceof ScalarServerFamily)
+                                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
+                                        if(family instanceof StaticServerFamily)
+                                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticServerFamily) family);
                                     } catch (NullPointerException e) {
                                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                                     } catch (Exception e) {
-                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!");
+                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                                     }
                                     return Command.SINGLE_SUCCESS;
                                 })
@@ -162,16 +169,19 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                         if(family == null) throw new NullPointerException();
 
                                         family.getLoadBalancer().completeSort();
 
-                                        VelocityLang.RC_FAMILY_INFO.send(logger, family);
+                                        if(family instanceof ScalarServerFamily)
+                                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
+                                        if(family instanceof StaticServerFamily)
+                                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticServerFamily) family);
                                     } catch (NullPointerException e) {
                                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                                     } catch (Exception e) {
-                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!"+e.getMessage());
+                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                                     }
                                     return 1;
                                 })
@@ -183,7 +193,7 @@ public final class CommandRusty {
                         try {
                             VelocityLang.RC_REGISTER_USAGE.send(logger);
                         } catch (Exception e) {
-                            VelocityLang.RC_REGISTER_ERROR.send(logger, "Something prevented us from sending a request for registration!");
+                            VelocityLang.RC_REGISTER_ERROR.send(logger, "Something prevented us from sending a request for registration!\n"+e.getMessage());
                         }
 
                         return 1;
@@ -207,14 +217,14 @@ public final class CommandRusty {
                                     .executes(context -> {
                                         try {
                                             String familyName = context.getArgument("familyName", String.class);
-                                            ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                            BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                             if(family == null) throw new NullPointerException();
 
                                             virtualProcessor.registerAllServers(familyName);
                                         } catch (NullPointerException e) {
                                             VelocityLang.RC_REGISTER_ERROR.send(logger,"A family with that name doesn't exist!");
                                         } catch (Exception e) {
-                                            VelocityLang.RC_REGISTER_ERROR.send(logger,"Something prevented us from reloading that family!");
+                                            VelocityLang.RC_REGISTER_ERROR.send(logger,"Something prevented us from reloading that family!\n"+e.getMessage());
                                         }
                                         return 1;
                                     })
@@ -256,13 +266,13 @@ public final class CommandRusty {
                                         try {
                                             String familyName = context.getArgument("familyName", String.class);
                                             logger.log("Reloading the family: "+familyName+"...");
-                                            ServerFamily<? extends PaperServerLoadBalancer> oldFamily = virtualProcessor.getFamilyManager().find(familyName);
+                                            ScalarServerFamily oldFamily = (ScalarServerFamily) virtualProcessor.getFamilyManager().find(familyName);
                                             if(oldFamily == null) {
                                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                                                 return 1;
                                             }
 
-                                            ServerFamily<? extends PaperServerLoadBalancer> newFamily = ServerFamily.init(virtualProcessor, familyName);
+                                            ScalarServerFamily newFamily = ScalarServerFamily.init(virtualProcessor, familyName);
 
                                             oldFamily.unregisterServers();
 
@@ -271,7 +281,7 @@ public final class CommandRusty {
 
                                             logger.log("Done reloading!");
 
-                                            VelocityLang.RC_FAMILY_INFO.send(logger, newFamily);
+                                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, newFamily);
                                             return 1;
                                         } catch (Exception e) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from reloading that family!\n"+e.getMessage());
@@ -340,7 +350,7 @@ public final class CommandRusty {
                                             return Command.SINGLE_SUCCESS;
                                         }
 
-                                        ServerFamily<? extends PaperServerLoadBalancer> family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                         if(family == null) {
                                             logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                                             return Command.SINGLE_SUCCESS;
@@ -393,6 +403,12 @@ public final class CommandRusty {
                             )
                     )
             )
+                .then(LiteralArgumentBuilder.<CommandSource>literal("kill")
+                        .executes(context -> {
+                            VelocityRustyConnector.getAPI().getVirtualProcessor().getRedisService().getMessagePublisher().publishKillable();
+                            return 0;
+                        })
+                )
             .build();
 
         // BrigadierCommand implements Command

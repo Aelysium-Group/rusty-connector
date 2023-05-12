@@ -1,15 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
 
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FamilyManager implements NodeManager<ServerFamily<? extends PaperServerLoadBalancer>> {
-    private final Map<String, ServerFamily<? extends PaperServerLoadBalancer>> registeredFamilies = new HashMap<>();
+public class FamilyManager implements NodeManager<BaseServerFamily> {
+    private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
 
     /**
      * Get a family via its name.
@@ -17,7 +17,7 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
      * @return A family or `null` if there is no family with the defined name.
      */
     @Override
-    public ServerFamily<? extends PaperServerLoadBalancer> find(String name) {
+    public BaseServerFamily find(String name) {
         return this.registeredFamilies.get(name);
     }
 
@@ -26,7 +26,7 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
      * @param family The family to add to this manager.
      */
     @Override
-    public void add(ServerFamily<? extends PaperServerLoadBalancer> family) {
+    public void add(BaseServerFamily family) {
         this.registeredFamilies.put(family.getName(),family);
     }
 
@@ -35,17 +35,21 @@ public class FamilyManager implements NodeManager<ServerFamily<? extends PaperSe
      * @param family The family to remove from this manager.
      */
     @Override
-    public void remove(ServerFamily<? extends PaperServerLoadBalancer> family) {
+    public void remove(BaseServerFamily family) {
         this.registeredFamilies.remove(family.getName());
     }
 
     @Override
-    public List<ServerFamily<? extends PaperServerLoadBalancer>> dump() {
+    public List<BaseServerFamily> dump() {
         return this.registeredFamilies.values().stream().toList();
     }
 
     @Override
     public void clear() {
         this.registeredFamilies.clear();
+    }
+
+    public int size() {
+        return this.registeredFamilies.size();
     }
 }

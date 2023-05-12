@@ -50,27 +50,7 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 2
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                         General                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-
-#########################
-#      Private Key      #
-#########################
-#
-# Private key is used to validate messages.
-# This way external users can't appear and send messages.
-# This value should be changed periodically for security purposes.
-#
-# To generate a new key, set the string to be empty and the plugin will send a new key in console on next restart.
-#
-# DO NOT EVER SHARE THIS KEY!
-#
-private-key: ""
+version: 3
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -87,33 +67,52 @@ private-key: ""
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
+families:
 
 #
 # The root family. Once a player connects and is validated.
 # This is the family that they will automatically be routed to.
 #
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# YOUR ROOT FAMILY MUST BE DEFINED IN THE families ARRAY IN ORDER TO WORK
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# The root family will ALWAYS be defined as a `scalar` family.
+# Having a root family defined as `static` is not currently possible
 #
-#
-root-family: "lobby"
+    root-family:
+        name: "lobby"
 
 #
-# The families array.
-# Define as many families here as you'd like!
-# After defining your list of families, restart the plugin, and it will auto-generate the config files you'll need.
-# If you remove a family from this list, the plugin will no longer use that family, and you can safely delete its
-# config files from your server.
+# If a player is kicked or disconnected from a family in this proxy.
+# Should the root family catch them? If not, they will disconnect from the whole network.
+# This setting is great if you want a player to join back into the lobby if they get kicked from
+# a gamemode or sub-family.
 #
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# Make sure you also list your "root-family" in this list as well!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        catch-disconnecting-players: false
+
+#########################
+#    Scalar Families    #
+#########################
 #
-families:
-  - "lobby"
-  - "survival"
-  - "creative"
+# Families defined here are optimized for stateless minecraft gamemodes.
+# They support various load balancing algorithms and auto-scaling.
+#
+    scalar:
+        - "skywars"
+        - "kitpvp"
+
+#########################
+#    Static Families    #
+#########################
+#
+# Families defined here are optimized for stateful minecraft gamemodes.
+# When players join a static family, their initial server will be memorized, and they'll be connected
+# back into that server on future family connections as well.
+#
+# To define a new static family change static from `static: []` to:
+#
+# static:
+#       - "family name"
+#       - "family name"
+#
+    static: []
 
 
 ############################################################
@@ -131,6 +130,7 @@ families:
 redis:
     host: ""
     port: 3306
+    user: "default"
     password: "password"
 
 #
@@ -139,6 +139,19 @@ redis:
 # You probably won't break anything, but you generally just shouldn't touch things you don't understand.
 #
     data-channel: "rustyConnector-sync"
+
+#########################
+#         MySQL         #
+#########################
+#
+# MySQL is required in order for static families to operate properly
+#
+mysql:
+    host: ""
+    port: 3306
+    user: "root"
+    password: "password"
+    database: "RustyConnector"
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -282,21 +295,20 @@ boot-commands:
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                          Hearts                          #
+#                        Services                          #
 #                                                          #
 #               ---------------------------                #
-# | Hearts are certain processes that run every specific   #
-# | interval! They can be enabled, disabled, and adjusted  #
-# | here.                                                  #
-#                                                          #
-# | All intervals are in seconds.                          #
+# | Services are small, in-built applications that         #
+# | carry out specific duties within RustyConnector        #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-hearts:
+services:
 #
 # Manages the lifecycles of servers.
+#
+# Also manages the lifecycle of a player's home server if you are using Static Families.
 #
     server-lifecycle:
         enabled: true

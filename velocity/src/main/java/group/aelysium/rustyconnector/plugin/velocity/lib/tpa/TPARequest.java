@@ -2,12 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.tpa;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -69,7 +68,7 @@ public class TPARequest {
 
             ServerInfo serverInfo = this.getTarget().getCurrentServer().orElseThrow().getServerInfo();
             String familyName = api.getVirtualProcessor().findServer(serverInfo).getFamilyName();
-            ServerFamily<? extends PaperServerLoadBalancer> family = api.getVirtualProcessor().getFamilyManager().find(familyName);
+            BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(familyName);
             if(family == null) throw new NullPointerException();
 
             api.getVirtualProcessor().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);

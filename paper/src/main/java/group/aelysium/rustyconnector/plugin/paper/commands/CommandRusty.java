@@ -6,8 +6,8 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.data_messaging.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
@@ -77,19 +77,6 @@ public final class CommandRusty {
                                 api.getVirtualProcessor().unregisterFromProxy();
                             } catch (Exception e) {
                                 logger.log("An error stopped us from sending your request!", e);
-                            }
-                        }).execute())
-        ).command(builder.literal("sendmessage")
-                .senderType(ConsoleCommandSender.class)
-                .argument(StringArgument.of("message"), ArgumentDescription.of("A message"))
-                .handler(context -> manager.taskRecipe().begin(context)
-                        .asynchronous(commandContext -> {
-                            try {
-                                final String message = commandContext.get("message");
-
-                                api.getVirtualProcessor().sendMessage(message);
-                            } catch (Exception e) {
-                                logger.log("There was an error sending that!");
                             }
                         }).execute())
         );

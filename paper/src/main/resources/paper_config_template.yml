@@ -49,21 +49,7 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 2
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                       Registration                       #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-#
-# Private key is used to validate messages.
-# This way external users can't appear and send messages.
-# This value should be changed periodically for security purposes.
-#
-# This value should match what is set in your proxy.
-#
-private-key: ""
+version: 3
 
 server:
 #
@@ -160,6 +146,7 @@ server:
 redis:
     host: ""
     port: 3306
+    user: "default"
     password: "password"
 
 #

@@ -8,9 +8,13 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.PaperServerLoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.ServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import net.kyori.adventure.text.Component;
 
 public class OnPlayerChooseInitialServer {
@@ -25,7 +29,6 @@ public class OnPlayerChooseInitialServer {
 
         return EventTask.async(() -> {
             try {
-                // Check if there's a whitelist, run it if there is.
                 Whitelist whitelist = api.getVirtualProcessor().getProxyWhitelist();
                 if(whitelist != null) {
                     if (!whitelist.validate(player)) {
@@ -35,9 +38,15 @@ public class OnPlayerChooseInitialServer {
                     }
                 }
 
-                ServerFamily<? extends PaperServerLoadBalancer> rootFamily = api.getVirtualProcessor().getRootFamily();
+                BaseServerFamily rootFamily = api.getVirtualProcessor().getRootFamily();
 
-                rootFamily.connect(player, event);
+                PlayerServer server = rootFamily.connect(player);
+                if(server == null) return;
+                event.setInitialServer(server.getRegisteredServer());
+
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, DiscordWebhookMessage.PROXY__PLAYER_JOIN.build(player, server));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, server));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, server.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, server));
             } catch (Exception e) {
                 player.disconnect(Component.text("Disconnected. "+e.getMessage()));
                 e.printStackTrace();

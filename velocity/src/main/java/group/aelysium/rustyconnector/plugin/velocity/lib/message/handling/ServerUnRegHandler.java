@@ -1,33 +1,32 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.data_messaging.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.data_messaging.RedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerUnregisterRequest;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 
 import java.net.InetSocketAddress;
 
 public class ServerUnRegHandler implements MessageHandler {
-    private final RedisMessage message;
+    private final RedisMessageServerUnregisterRequest message;
 
-    public ServerUnRegHandler(RedisMessage message) {
-        this.message = message;
+    public ServerUnRegHandler(GenericRedisMessage message) {
+        this.message = (RedisMessageServerUnregisterRequest) message;
     }
 
     @Override
     public void execute() throws Exception {
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        String familyName = message.getParameter("family");
-
         InetSocketAddress address = message.getAddress();
 
         ServerInfo serverInfo = new ServerInfo(
-                message.getParameter("name"),
+                message.getServerName(),
                 address
         );
 
-        api.getVirtualProcessor().unregisterServer(serverInfo, familyName, true);
+        api.getVirtualProcessor().unregisterServer(serverInfo, message.getFamilyName(), true);
     }
 }

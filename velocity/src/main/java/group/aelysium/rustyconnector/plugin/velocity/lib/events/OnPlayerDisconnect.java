@@ -8,6 +8,9 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 
 public class OnPlayerDisconnect {
     /**
@@ -19,17 +22,24 @@ public class OnPlayerDisconnect {
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
         return EventTask.async(() -> {
+            Player player = event.getPlayer();
+
             try {
-                Player player = event.getPlayer();
                 if(player == null) return;
 
                 if(player.getCurrentServer().isPresent()) {
                     PlayerServer server = api.getVirtualProcessor().findServer(player.getCurrentServer().get().getServerInfo());
                     server.playerLeft();
+                    api.getVirtualProcessor().uncacheHomeServerMappings(player);
+
+                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
+                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, server));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));
         });
     }
 }

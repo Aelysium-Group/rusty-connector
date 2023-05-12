@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.paper.lib.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
@@ -39,7 +39,7 @@ public class PaperLifecycle extends PluginLifecycle {
         if(api.getVirtualProcessor() != null) {
             api.getVirtualProcessor().unregisterFromProxy();
 
-           api.getVirtualProcessor().killRedis();
+           api.getVirtualProcessor().closeRedis();
         }
 
         api.getCommandManager().deleteRootCommand("rc");
@@ -68,6 +68,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);
             return false;
         }
