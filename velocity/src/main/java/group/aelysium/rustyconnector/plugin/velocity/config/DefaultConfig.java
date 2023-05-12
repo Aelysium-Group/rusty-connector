@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
+    private boolean debug = false;
     private String families_rootFamily_name = "lobby";
     private Boolean family_rootFamily_catchDisconnectiongPlayers = false;
     private List<String> families_scalar = new ArrayList<>();
@@ -78,6 +79,10 @@ public class DefaultConfig extends YAML {
      */
     public static void empty() {
         config = null;
+    }
+
+    public boolean shouldDebug() {
+        return this.debug;
     }
 
     public String getRootFamilyName() {
@@ -201,6 +206,12 @@ public class DefaultConfig extends YAML {
             this.processVersion(YAML.currentVersion);
         } catch (Exception | UnsupportedClassVersionError e) {
             throw new IllegalStateException(e.getMessage());
+        }
+
+        try {
+            this.debug = this.getNode(this.data,"debug",Boolean.class);
+        } catch (Exception e) {
+            this.debug = false;
         }
 
         // Families

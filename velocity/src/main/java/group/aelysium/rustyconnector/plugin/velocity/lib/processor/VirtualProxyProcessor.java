@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.processor;
 
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
@@ -542,21 +543,25 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         logger.log("Finished setting up redis");
 
         // Setup MySQL
-        if(config.shouldIgnoreMysql())
-            logger.send(Component.text("No use for MySQL has been found. Ignoring MySQL configurations.", NamedTextColor.YELLOW));
-        else {
-            MySQL mySQL = new MySQL.MySQLBuilder()
-                    .setHost(config.getMysql_host())
-                    .setPort(config.getMysql_port())
-                    .setDatabase(config.getMysql_database())
-                    .setUser(config.getMysql_user())
-                    .setPassword(config.getMysql_password())
-                    .build();
-            api.setMySQL(mySQL);
+        try {
+            if (config.shouldIgnoreMysql())
+                logger.send(Component.text("No use for MySQL has been found. Ignoring MySQL configurations.", NamedTextColor.YELLOW));
+            else {
+                MySQL mySQL = new MySQL.MySQLBuilder()
+                        .setHost(config.getMysql_host())
+                        .setPort(config.getMysql_port())
+                        .setDatabase(config.getMysql_database())
+                        .setUser(config.getMysql_user())
+                        .setPassword(config.getMysql_password())
+                        .build();
+                api.setMySQL(mySQL);
 
-            HomeServerMappingsDatabase.init();
-            logger.log("Finished setting up MySQL");
+                HomeServerMappingsDatabase.init();
+                logger.log("Finished setting up MySQL");
 
+            }
+        } catch (CommunicationsException e) {
+            throw new IllegalAccessException("Unable to connect to MySQL! Is the server available?");
         }
 
         if(config.isHearts_serverLifecycle_enabled()) virtualProxyProcessor.startServerLifecycleHeart(config.getHearts_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());

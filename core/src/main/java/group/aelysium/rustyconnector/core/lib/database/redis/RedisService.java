@@ -1,14 +1,12 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class RedisService {
-    private final List<RedisSubscriber> liveRedisSubscribers = new ArrayList<>();
+    private final Vector<RedisSubscriber> liveRedisSubscribers = new Vector<>();
     private final RedisClient client;
     private boolean isAlive = false;
     ExecutorService executorService;
@@ -18,7 +16,6 @@ public class RedisService {
     }
 
     protected void launchNewRedisSubscriber(Class<? extends RedisSubscriber> subscriber) {
-        System.out.println("New Redis subscriber started!");
         this.executorService.submit(() -> {
             try {
                 RedisSubscriber redis = subscriber.getDeclaredConstructor(RedisClient.class).newInstance(RedisService.this.client);
@@ -44,7 +41,7 @@ public class RedisService {
      */
     public void start(Class<? extends RedisSubscriber> subscriber) {
         if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
-        this.executorService = Executors.newFixedThreadPool(2);
+        this.executorService = Executors.newFixedThreadPool(3);
 
         this.isAlive = true;
 
@@ -58,7 +55,10 @@ public class RedisService {
     public void kill() {
         this.isAlive = false;
 
-        this.liveRedisSubscribers.forEach(RedisSubscriber::shutdown);
+        for (Iterator<RedisSubscriber> it = this.liveRedisSubscribers.elements().asIterator(); it.hasNext(); ) {
+            RedisSubscriber subscriber = it.next();
+            subscriber.shutdown();
+        }
 
         this.executorService.shutdown();
         try {
@@ -66,6 +66,7 @@ public class RedisService {
                 this.executorService.shutdownNow();
             }
         } catch (InterruptedException e) {
+            e.printStackTrace();
             this.executorService.shutdownNow();
         }
     }
