@@ -26,17 +26,19 @@ import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.config.FamiliesConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Clock;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.RoundedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -542,8 +544,8 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
         // Setup MySQL
         try {
-            if (config.shouldIgnoreMysql())
-                logger.send(Component.text("No use for MySQL has been found. Ignoring MySQL configurations.", NamedTextColor.YELLOW));
+            if (config.isMysql_enabled())
+                logger.send(Component.text("MySQL is disabled! Any static families that are defined will be disabled.", NamedTextColor.YELLOW));
             else {
                 MySQL mySQL = new MySQL.MySQLBuilder()
                         .setHost(config.getMysql_host())
@@ -563,19 +565,29 @@ public class VirtualProxyProcessor implements VirtualProcessor {
         }
 
         // Setup families
-        for (String familyName: config.getScalarFamilies())
+        logger.log("Setting up Families");
+
+        FamiliesConfig familiesConfig = FamiliesConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "families.yml"), "velocity_families_template.yml");
+        if(!familiesConfig.generate())
+            throw new IllegalStateException("Unable to load or create families.yml!");
+        familiesConfig.register();
+
+        for (String familyName: familiesConfig.getScalarFamilies())
             virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, familyName));
-        for (String familyName: config.getStaticFamilies())
-            virtualProxyProcessor.getFamilyManager().add(StaticServerFamily.init(virtualProxyProcessor, familyName));
+        if(config.isMysql_enabled())
+            for (String familyName: familiesConfig.getStaticFamilies())
+                virtualProxyProcessor.getFamilyManager().add(StaticServerFamily.init(virtualProxyProcessor, familyName));
+        for (String familyName: familiesConfig.getRoundedFamilies())
+            virtualProxyProcessor.getFamilyManager().add(RoundedServerFamily.init(virtualProxyProcessor, familyName));
 
         logger.log("Setting up root family");
 
-        virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, config.getRootFamilyName()));
+        virtualProxyProcessor.getFamilyManager().add(ScalarServerFamily.init(virtualProxyProcessor, familiesConfig.getRootFamilyName()));
+
+        virtualProxyProcessor.setRootFamily(familiesConfig.getRootFamilyName());
+        logger.log("Finished setting up root family");
 
         logger.log("Finished setting up families");
-
-        virtualProxyProcessor.setRootFamily(config.getRootFamilyName());
-        logger.log("Finished setting up root family");
 
         if(config.isHearts_serverLifecycle_enabled()) virtualProxyProcessor.startServerLifecycleHeart(config.getServices_serverLifecycle_interval(),config.shouldHearts_serverLifecycle_unregisterOnIgnore());
 

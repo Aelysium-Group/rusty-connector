@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import net.kyori.adventure.text.Component;
 
 import static net.kyori.adventure.text.Component.*;

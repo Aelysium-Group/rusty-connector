@@ -14,10 +14,6 @@ import java.util.List;
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
     private boolean debug = false;
-    private String families_rootFamily_name = "lobby";
-    private Boolean family_rootFamily_catchDisconnectiongPlayers = false;
-    private List<String> families_scalar = new ArrayList<>();
-    private List<String> families_static = new ArrayList<>();
 
     private String redis_host = "";
     private int redis_port = 3306;
@@ -25,7 +21,7 @@ public class DefaultConfig extends YAML {
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
-    private boolean ignore_mysql = true;
+    private boolean mysql_enabled = false;
     private String mysql_host = "";
     private int mysql_port = 3306;
     private String mysql_user = "root";
@@ -83,20 +79,6 @@ public class DefaultConfig extends YAML {
         return this.debug;
     }
 
-    public String getRootFamilyName() {
-        return this.families_rootFamily_name;
-    }
-    public Boolean shouldRootFamilyCatchDisconnectingPlayers() {
-        return this.family_rootFamily_catchDisconnectiongPlayers;
-    }
-
-    public List<String> getScalarFamilies() {
-        return this.families_scalar;
-    }
-    public List<String> getStaticFamilies() {
-        return this.families_static;
-    }
-
     public String getRedis_host() {
         return this.redis_host;
     }
@@ -117,8 +99,8 @@ public class DefaultConfig extends YAML {
         return this.redis_dataChannel;
     }
 
-    public boolean shouldIgnoreMysql() {
-        return this.ignore_mysql;
+    public boolean isMysql_enabled() {
+        return this.mysql_enabled;
     }
 
     public String getMysql_host() {
@@ -212,50 +194,6 @@ public class DefaultConfig extends YAML {
             this.debug = false;
         }
 
-        // Families
-        this.families_rootFamily_name = this.getNode(this.data,"families.root-family.name",String.class);
-        this.family_rootFamily_catchDisconnectiongPlayers = this.getNode(this.data,"families.root-family.catch-disconnecting-players",Boolean.class);
-        try {
-            this.families_scalar = (List<String>) (this.getNode(this.data,"families.scalar",List.class));
-        } catch (Exception e) {
-            throw new IllegalStateException("The node [families.scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
-        try {
-            this.families_static = (List<String>) (this.getNode(this.data,"families.static",List.class));
-        } catch (Exception e) {
-            throw new IllegalStateException("The node [families.scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
-
-        if(this.families_rootFamily_name.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
-        this.families_scalar.forEach(familyName -> {
-            if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
-
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
-        });
-
-        boolean ignoreStatic = this.families_static.size() == 0;
-        this.families_static.forEach(familyName -> {
-
-            if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
-
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
-        });
-
-        List<String> duplicates = this.families_scalar.stream().filter(this.families_static::contains).toList();
-        if(duplicates.size() > 0)
-            throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of if the family is scalar or static! Duplicate family names: " + duplicates);
-
-        if(this.families_scalar.contains(this.families_rootFamily_name)) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.scalar] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family.name]. Ignoring..."), NamedTextColor.YELLOW);
-            this.families_scalar.remove(this.families_rootFamily_name);
-        }
-        if(this.families_static.contains(this.families_rootFamily_name)) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.static] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family.name]. Ignoring..."), NamedTextColor.YELLOW);
-            this.families_static.remove(this.families_rootFamily_name);
-        }
-
         // Redis
 
         this.redis_host = this.getNode(this.data, "redis.host", String.class);
@@ -273,24 +211,21 @@ public class DefaultConfig extends YAML {
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
 
         // MySQL
+        this.mysql_host = this.getNode(this.data, "mysql.enabled", String.class);
 
-        if(!ignoreStatic) {
-            this.ignore_mysql = false;
+        this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
+        if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
 
-            this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
-            if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
+        this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
+        this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
+        this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
 
-            this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
-            this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
-            this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
+        if (this.redis_password.length() != 0 && this.redis_password.length() < 16)
+            throw new IllegalStateException("Your MySQL password is to short! For security purposes, please use a longer password! " + this.redis_password.length() + " < 16");
 
-            if (this.redis_password.length() != 0 && this.redis_password.length() < 16)
-                throw new IllegalStateException("Your MySQL password is to short! For security purposes, please use a longer password! " + this.redis_password.length() + " < 16");
-
-            this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
-            if (this.mysql_database.equals(""))
-                throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
-        }
+        this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
+        if (this.mysql_database.equals(""))
+            throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
 
         // Whitelist
 

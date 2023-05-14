@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
@@ -12,29 +12,43 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class BaseServerFamily {
-    protected final LoadBalancer loadBalancer;
-    protected final String name;
+/**
+ * This class should never be used directly.
+ * Player-focused families offer features such as /tpa, whitelists, load-balancing, and direct connection.
+ */
+public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerServer> {
+    protected LoadBalancer loadBalancer = null;
     protected String whitelist;
-    protected long playerCount = 0;
     protected boolean weighted;
     protected TPAHandler tpaHandler;
 
-    protected BaseServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        this.name = name;
+    protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name);
         if(whitelist == null) this.whitelist = null;
         else this.whitelist = whitelist.getName();
         this.weighted = weighted;
 
-        this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
+        try {
+            this.loadBalancer = clazz.getDeclaredConstructor().newInstance();
+        } catch (Exception ignore) {}
         this.loadBalancer.setPersistence(persistence, attempts);
         this.loadBalancer.setWeighted(weighted);
 
         this.tpaHandler = new TPAHandler(tpaSettings);
     }
+
+    /**
+     * Connect a player to this family
+     * @param player The player to connect
+     * @return A PlayerServer on successful connection.
+     * @throws RuntimeException If the connection cannot be made.
+     */
+    public abstract PlayerServer connect(Player player);
 
     public boolean isWeighted() {
         return weighted;
@@ -60,37 +74,46 @@ public class BaseServerFamily {
 
     public long serverCount() { return this.loadBalancer.size(); }
 
-    /**
-     * Gets the aggregate player count across all servers in this family
-     * @return A player count
-     */
+    @Override
     public long getPlayerCount() {
         AtomicLong newPlayerCount = new AtomicLong();
         this.loadBalancer.dump().forEach(server -> newPlayerCount.addAndGet(server.getPlayerCount()));
 
-        playerCount = newPlayerCount.get();
-
-        return this.playerCount;
-    }
-    public boolean containsServer(ServerInfo serverInfo) {
-        return !(this.getServer(serverInfo) == null);
+        return newPlayerCount.get();
     }
 
-    /**
-     * Connect a player to this family
-     * @param player The player to connect
-     * @return A PlayerServer on successful connection.
-     * @throws RuntimeException If the connection cannot be made.
-     */
-    public PlayerServer connect(Player player) {
-        return null;
+    @Override
+    public List<PlayerServer> getRegisteredServers() {
+        return this.loadBalancer.dump();
     }
 
-    /**
-     * Get all players in the family up to approximately `max`.
-     * @param max The approximate max number of players to return.
-     * @return A list of players.
-     */
+    @Override
+    public void addServer(PlayerServer server) {
+        this.loadBalancer.add(server);
+    }
+
+    @Override
+    public void removeServer(PlayerServer server) {
+        this.loadBalancer.remove(server);
+    }
+
+    @Override
+    public PlayerServer getServer(@NotNull ServerInfo serverInfo) {
+        return this.getRegisteredServers().stream()
+                .filter(server -> Objects.equals(server.getServerInfo(), serverInfo)
+                ).findFirst().orElse(null);
+    }
+
+    @Override
+    public void unregisterServers() throws Exception {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        for (PlayerServer server : this.loadBalancer.dump()) {
+            if(server == null) continue;
+            api.getVirtualProcessor().unregisterServer(server.getServerInfo(),this.name, false);
+        }
+    }
+
+    @Override
     public List<Player> getAllPlayers(int max) {
         List<Player> players = new ArrayList<>();
 
@@ -102,55 +125,4 @@ public class BaseServerFamily {
 
         return players;
     }
-
-    public List<PlayerServer> getRegisteredServers() {
-        return this.loadBalancer.dump();
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * Add a server to the family.
-     * @param server The server to add.
-     */
-    public void addServer(PlayerServer server) {
-        this.loadBalancer.add(server);
-    }
-
-    /**
-     * Remove a server from this family.
-     * @param server The server to remove.
-     */
-    public void removeServer(PlayerServer server) {
-        this.loadBalancer.remove(server);
-    }
-
-    /**
-     * Get a server that is a part of the family.
-     * @param serverInfo The info matching the server to get.
-     * @return A found server or `null` if there's no match.
-     */
-    public PlayerServer getServer(@NotNull ServerInfo serverInfo) {
-        return this.getRegisteredServers().stream()
-                .filter(server -> Objects.equals(server.getServerInfo(), serverInfo)
-                ).findFirst().orElse(null);
-    }
-
-    /**
-     * Unregisters all servers from this family.
-     */
-    public void unregisterServers() throws Exception {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        for (PlayerServer server : this.loadBalancer.dump()) {
-            if(server == null) continue;
-            api.getVirtualProcessor().unregisterServer(server.getServerInfo(),this.name, false);
-        }
-    }
-
-    /**
-     * Reloads the whitelist associated with this server.
-     */
-    public void reloadWhitelist() {}
 }

@@ -5,8 +5,7 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;

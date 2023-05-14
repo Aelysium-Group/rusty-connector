@@ -9,6 +9,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
@@ -26,7 +27,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StaticServerFamily extends BaseServerFamily {
+public class StaticServerFamily extends PlayerFocusedServerFamily {
     List<HomeServerMapping> mappingsCache = new ArrayList<>();
     LiquidTimestamp homeServerExpiration;
     UnavailableProtocol unavailableProtocol;
@@ -191,7 +192,6 @@ public class StaticServerFamily extends BaseServerFamily {
         return family;
     }
 
-    @Override
     public void reloadWhitelist() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();

@@ -25,4 +25,6 @@ public enum RedisMessageType {
     SEND, // Server > Proxy | Request to send a player to a family
     RESPONSE, // Server >< Proxy | A message to be returned in response to a request made
     TPA_QUEUE_PLAYER, // Add a player's teleportation to the TPA queue on a specific server.
+    RND_PRE, // Pre-connect the player to a Rounded Family.
+    RND_CPRE, // Cancel the pre-connection of a player from a Rounded Family.
 }

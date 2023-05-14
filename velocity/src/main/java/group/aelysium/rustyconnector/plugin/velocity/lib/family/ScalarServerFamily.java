@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
@@ -18,7 +19,7 @@ import net.kyori.adventure.text.Component;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
-public class ScalarServerFamily extends BaseServerFamily {
+public class ScalarServerFamily extends PlayerFocusedServerFamily {
 
     private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings);
@@ -86,7 +87,7 @@ public class ScalarServerFamily extends BaseServerFamily {
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
     }
-    @Override
+
     public void reloadWhitelist() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();

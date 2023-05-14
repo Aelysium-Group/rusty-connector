@@ -20,9 +20,10 @@ import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 
@@ -150,8 +151,12 @@ public final class CommandRusty {
                                         String familyName = context.getArgument("familyName", String.class);
                                         BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                         if(family == null) throw new NullPointerException();
+                                        if(!(family instanceof PlayerFocusedServerFamily)) {
+                                            VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on scalar and static families!");
+                                            return Command.SINGLE_SUCCESS;
+                                        }
 
-                                        family.getLoadBalancer().resetIndex();
+                                        ((PlayerFocusedServerFamily) family).getLoadBalancer().resetIndex();
 
                                         if(family instanceof ScalarServerFamily)
                                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
@@ -171,8 +176,12 @@ public final class CommandRusty {
                                         String familyName = context.getArgument("familyName", String.class);
                                         BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
                                         if(family == null) throw new NullPointerException();
+                                        if(!(family instanceof PlayerFocusedServerFamily)) {
+                                            VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only use sort on scalar and static families!");
+                                            return Command.SINGLE_SUCCESS;
+                                        }
 
-                                        family.getLoadBalancer().completeSort();
+                                        ((PlayerFocusedServerFamily) family).getLoadBalancer().completeSort();
 
                                         if(family instanceof ScalarServerFamily)
                                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
@@ -355,8 +364,12 @@ public final class CommandRusty {
                                             logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                                             return Command.SINGLE_SUCCESS;
                                         }
+                                        if(!(family instanceof PlayerFocusedServerFamily)) {
+                                            VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
+                                            return Command.SINGLE_SUCCESS;
+                                        }
 
-                                        family.connect(player);
+                                        ((PlayerFocusedServerFamily) family).connect(player);
 
                                         return Command.SINGLE_SUCCESS;
                                     })
