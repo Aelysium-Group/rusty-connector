@@ -25,6 +25,8 @@ public class DefaultConfig extends YAML {
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
+    private boolean generateRounded = false;
+
     private boolean registerOnBoot = true;
 
     private DefaultConfig(File configPointer, String template) {
@@ -77,6 +79,10 @@ public class DefaultConfig extends YAML {
 
     public boolean isRegisterOnBoot() {
         return registerOnBoot;
+    }
+
+    public boolean isGenerateRounded() {
+        return generateRounded;
     }
 
     /**
@@ -144,5 +150,12 @@ public class DefaultConfig extends YAML {
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
 
         this.registerOnBoot = this.getNode(this.data,"register-on-boot",Boolean.class);
+
+        try {
+            this.generateRounded = this.getNode(this.data, "generate-rounded", Boolean.class);
+        } catch (Exception ignore) {
+            this.generateRounded = false;
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("No configuration option `generate-rounded` was found! If this server is running in a Rounded Family, you should enable this feature. Otherwise you can ignore this message."), NamedTextColor.YELLOW);
+        }
     }
 }

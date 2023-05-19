@@ -20,6 +20,7 @@ import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.config.PrivateKeyConfig;
+import group.aelysium.rustyconnector.plugin.paper.config.RoundedLifecycleConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueue;
 import net.kyori.adventure.text.Component;
@@ -240,6 +241,9 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
         );
 
         server.getRedisService().start(RedisSubscriber.class);
+
+        if(config.isGenerateRounded()) {
+        }
 
         return server;
     }

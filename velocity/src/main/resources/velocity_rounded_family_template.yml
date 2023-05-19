@@ -65,52 +65,10 @@ rounds:
     max-players: 14
 
     #
-    # Once the round is ready to start a session, how long should it wait
-    # before attempting to do so?
-    #
-    # Set to `NONE` if you want the round to instantly try starting a session as soon as possible.
-    #
-    # This data value is a Liquid Timestamp. Read more here: https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps
-    #
-    session-start-cooldown: NONE
-
-    #
     # If the round is waiting for a session to open, and the player count drops below `min-players`
     # should the round withdraw its session attempt?
     #
     cancel-on-player-loss: false
-
-#############################################################
-#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                Session Lifecycle Commands                 #
-#                                                           #
-#               ----------------------------                #
-# | Configure what commands you want the session to         #
-# | run during its lifetime.                                #
-#                                                           #
-# | Commands will be run, in order, on the sub-server that  #
-# | the session is active on.                               #
-#                                                           #
-# | This way you can run custom scripts and commands when   #
-# | a session has begun or ends!                            #
-#                                                           #
-# | Commands are run by the console.                        #
-#               ----------------------------                #
-#                                                           #
-#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#############################################################
-session-lifecycle-commands:
-    #
-    # Triggers when the session first begins.
-    # There's no promise that all players will be connected to the server yet
-    # when this is triggered.
-    #
-    start: []
-    #
-    # Triggers when the session ends.
-    # Players will already be disconnecting or disconnected by the time this triggers.
-    #
-    end: []
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
