@@ -1,5 +1,6 @@
 ![Aelysium Wordmark Image](https://github.com/Aelysium-Group/.github/blob/main/images/rustyconnector-wordmark.png?raw=true)
 
+# RustyConnector
 ![Velocity](https://badgen.net/badge/Velocity/3.1.1%20-%203.2.0/1197d1?icon=dockbit)
 ![PaperMC](https://badgen.net/badge/Paper/1.16%20-%201.19/F96854?icon=telegram)
 ![Folia](https://badgen.net/badge/Folia/Supported/E004BC?icon=maven)
@@ -7,10 +8,18 @@
 [![Aelysium](https://badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
 [![Build](https://badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
 
-# [Support](https://join.aelysium.group/)  |  [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)  |  [Download](https://github.com/Aelysium-Group/rusty-connector/releases)  |  [Report Bugs](https://join.aelysium.group/)
+RustyConnector is a Velocity network backbone plugin. It let's you register brand new servers to the proxy during runtime and load balance players between them.
 
-# [Modrinth](https://modrinth.com/plugin/rustyconnector) | [Hangar](https://hangar.papermc.io/nathan-i-martin/RustyConnector)
+<br>
+
+## [Support](https://join.aelysium.group/)  |  [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)  |  [Download](https://github.com/Aelysium-Group/rusty-connector/releases)  |  [Report Bugs](https://join.aelysium.group/)
+
+## [Modrinth](https://modrinth.com/plugin/rustyconnector) | [Hangar](https://hangar.papermc.io/nathan-i-martin/RustyConnector)
+
+<br>
+
 ---
+# Features
 - ### ✅ Built for large networks
 - ### ✅ Register brand new servers to the proxy during runtime
 - ### ✅ Blazing fast data transmission with Redis integration
