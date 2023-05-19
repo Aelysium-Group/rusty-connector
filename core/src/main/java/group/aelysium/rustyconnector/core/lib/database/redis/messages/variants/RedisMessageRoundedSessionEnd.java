@@ -10,7 +10,6 @@ import io.lettuce.core.KeyValue;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class RedisMessageRoundedSessionEnd extends GenericRedisMessage {
     private String familyName;
@@ -40,7 +39,7 @@ public class RedisMessageRoundedSessionEnd extends GenericRedisMessage {
         });
     }
     public RedisMessageRoundedSessionEnd(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.UNREG, address, origin);
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.UNREGISTER_SERVER, address, origin);
 
         if(!RedisMessageRoundedSessionEnd.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");

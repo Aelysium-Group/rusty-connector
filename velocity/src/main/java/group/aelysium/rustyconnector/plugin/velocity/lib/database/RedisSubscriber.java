@@ -17,6 +17,8 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRed
 
 import javax.naming.AuthenticationException;
 
+import static group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType.*;
+
 public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber {
     public RedisSubscriber(RedisClient client) {
         super(client);
@@ -79,14 +81,12 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         try {
-            switch (message.getType()) {
-                case REG -> new ServerRegHandler(message).execute();
-                case UNREG -> new ServerUnRegHandler(message).execute();
-                case SEND -> new SendPlayerHandler(message).execute();
-                case PONG -> new PongHandler(message).execute();
-                case RND_PRE -> new RoundedFamilyPreConnectHandler(message).execute();
-                case RND_CPRE -> new RoundedFamilyCancelPreConnectHandler(message).execute();
-            }
+            if(message.getType() == REGISTER_SERVER)    new ServerRegHandler(message).execute();
+            if(message.getType() == UNREGISTER_SERVER)  new ServerUnRegHandler(message).execute();
+            if(message.getType() == SEND_PLAYER)        new SendPlayerHandler(message).execute();
+            if(message.getType() == PONG)               new PongHandler(message).execute();
+            if(message.getType() == RND_PRE)            new RoundedFamilyPreConnectHandler(message).execute();
+            if(message.getType() == RND_CPRE)           new RoundedFamilyCancelPreConnectHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (NullPointerException e) {

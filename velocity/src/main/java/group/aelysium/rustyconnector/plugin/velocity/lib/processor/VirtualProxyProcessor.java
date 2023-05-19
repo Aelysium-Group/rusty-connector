@@ -323,7 +323,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
             VelocityLang.CALL_FOR_REGISTRATION.send(logger);
 
         GenericRedisMessage message = new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.REG_ALL)
+                .setType(RedisMessageType.REGISTER_ALL_SERVERS_TO_PROXY)
                 .setOrigin(MessageOrigin.PROXY)
                 .buildSendable();
 
@@ -345,7 +345,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
             VelocityLang.CALL_FOR_FAMILY_REGISTRATION.send(logger, familyName);
 
         RedisMessageFamilyRegister message = (RedisMessageFamilyRegister) new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.REG_FAMILY)
+                .setType(RedisMessageType.REGISTER_ALL_SERVERS_TO_FAMILY)
                 .setOrigin(MessageOrigin.PROXY)
                 .setParameter(RedisMessageFamilyRegister.ValidParameters.FAMILY_NAME, familyName)
                 .buildSendable();

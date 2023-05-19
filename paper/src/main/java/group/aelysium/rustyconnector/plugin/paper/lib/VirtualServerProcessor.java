@@ -20,7 +20,6 @@ import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.plugin.paper.config.RoundedLifecycleConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueue;
 import net.kyori.adventure.text.Component;
@@ -132,7 +131,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
     public void registerToProxy() {
         try {
             RedisMessageServerRegisterRequest message = (RedisMessageServerRegisterRequest) new GenericRedisMessage.Builder()
-                    .setType(RedisMessageType.REG)
+                    .setType(RedisMessageType.REGISTER_SERVER)
                     .setOrigin(MessageOrigin.SERVER)
                     .setAddress(this.getAddress())
                     .setParameter(RedisMessageServerRegisterRequest.ValidParameters.FAMILY_NAME, this.family)
@@ -151,7 +150,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
 
     public void unregisterFromProxy() {
         RedisMessageServerUnregisterRequest message = (RedisMessageServerUnregisterRequest) new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.UNREG)
+                .setType(RedisMessageType.UNREGISTER_SERVER)
                 .setOrigin(MessageOrigin.SERVER)
                 .setAddress(this.getAddress())
                 .setParameter(RedisMessageServerUnregisterRequest.ValidParameters.FAMILY_NAME, this.family)
@@ -169,7 +168,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
      */
     public void sendToOtherFamily(Player player, String familyName) {
         RedisMessageSendPlayer message = (RedisMessageSendPlayer) new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.SEND)
+                .setType(RedisMessageType.SEND_PLAYER)
                 .setOrigin(MessageOrigin.SERVER)
                 .setAddress(this.getAddress())
                 .setParameter(RedisMessageSendPlayer.ValidParameters.TARGET_FAMILY_NAME, familyName)

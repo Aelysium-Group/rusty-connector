@@ -39,7 +39,7 @@ public class RedisMessageServerRegisterRequest extends GenericRedisMessage {
     }
 
     public RedisMessageServerRegisterRequest(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(RedisMessageType.REG, address, origin);
+        super(RedisMessageType.REGISTER_SERVER, address, origin);
 
         if(!RedisMessageServerRegisterRequest.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
@@ -58,7 +58,7 @@ public class RedisMessageServerRegisterRequest extends GenericRedisMessage {
         });
     }
     public RedisMessageServerRegisterRequest(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.REG, address, origin);
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.REGISTER_SERVER, address, origin);
 
         if(!RedisMessageServerRegisterRequest.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");

@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
@@ -14,6 +15,8 @@ import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerReg
 import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.TPAQueuePlayerHandler;
 
 import javax.naming.AuthenticationException;
+
+import static group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType.*;
 
 public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber {
     public RedisSubscriber(RedisClient client) {
@@ -58,18 +61,16 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
 
         try {
-            switch (message.getType()) {
-                case REG_ALL -> new ServerRegAllHandler(message).execute();
-                case REG_FAMILY -> new ServerRegFamilyHandler(message).execute();
-                case PING -> new PingHandler(message).execute();
-                case TPA_QUEUE_PLAYER -> new TPAQueuePlayerHandler(message).execute();
-            }
+            if(message.getType() == REGISTER_ALL_SERVERS_TO_PROXY)  new ServerRegAllHandler(message).execute();
+            if(message.getType() == REGISTER_ALL_SERVERS_TO_FAMILY) new ServerRegFamilyHandler(message).execute();
+            if(message.getType() == PING)                           new PingHandler(message).execute();
+            if(message.getType() == TPA_QUEUE_PLAYER)               new TPAQueuePlayerHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (Exception e) {
             cachedMessage.sentenceMessage(MessageStatus.PARSING_ERROR);
 
-            logger.error("Incoming message " + message.getType().toString() + " from " + message.getAddress() + " is not formatted properly. Throwing away...", e);
+            logger.error("Incoming message " + message.getType().name() + " from " + message.getAddress() + " is not formatted properly. Throwing away...", e);
             logger.log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
         }
     }
