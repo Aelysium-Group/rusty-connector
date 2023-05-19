@@ -33,6 +33,8 @@
 ---
 ## Incoming Features/Changes
 - [ ] Kubernettes auto-scaling
+- [ ] Player parties (join your friend's party and follow them around the network as they connect to differnet families!)
+- [ ] Rounded families (families built for round based gamemodes!)
 - [ ] Player routing based on client version
 - [ ] Better error and overall handling for Redis
 - [ ] Teleport players to specific coordinates on other servers
