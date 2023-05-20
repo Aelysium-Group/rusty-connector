@@ -42,6 +42,7 @@ RustyConnector is a Velocity network backbone plugin. It let's you register bran
 ## Incoming Features/Changes
 - [ ] Kubernettes auto-scaling
 - [ ] Player parties (join your friend's party and follow them around the network as they connect to differnet families!)
+- [ ] Websocket as a backup for if Redis fails
 - [ ] Rounded families (families built for round based gamemodes!)
 - [ ] Player routing based on client version
 - [ ] Better error and overall handling for Redis
