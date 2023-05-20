@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class RedisMessageRoundedFamilyPreConnect extends GenericRedisMessage {
+public class RedisMessageRoundedPreConnect extends GenericRedisMessage {
     private String familyName;
     private UUID uuid;
 
@@ -24,10 +24,10 @@ public class RedisMessageRoundedFamilyPreConnect extends GenericRedisMessage {
         return uuid;
     }
 
-    public RedisMessageRoundedFamilyPreConnect(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(RedisMessageType.RND_PRE, address, origin);
+    public RedisMessageRoundedPreConnect(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(RedisMessageType.ROUNDED_PRECONNECT_PLAYER, address, origin);
 
-        if(!RedisMessageRoundedFamilyPreConnect.validateParameters(ValidParameters.toList(), parameters))
+        if(!RedisMessageRoundedPreConnect.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -40,10 +40,10 @@ public class RedisMessageRoundedFamilyPreConnect extends GenericRedisMessage {
             }
         });
     }
-    public RedisMessageRoundedFamilyPreConnect(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.UNREGISTER_SERVER, address, origin);
+    public RedisMessageRoundedPreConnect(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.ROUNDED_PRECONNECT_PLAYER, address, origin);
 
-        if(!RedisMessageRoundedFamilyPreConnect.validateParameters(ValidParameters.toList(), parameters))
+        if(!RedisMessageRoundedPreConnect.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {

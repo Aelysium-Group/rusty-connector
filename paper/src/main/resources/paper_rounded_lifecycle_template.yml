@@ -23,6 +23,8 @@
 #
 # Options pertaining to a session's start.
 #
+# There is no guarantee that any or all players will be connected to the server by the time this fires.
+#
 start:
     #
     # The number of seconds that we should wait after the session "starts" and when we run these commands.

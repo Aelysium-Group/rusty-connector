@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageRoundedFamilyCancelPreConnect;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageRoundedCancelPreConnect;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RoundedServerFamily;
@@ -11,10 +11,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServer
 import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 
 public class RoundedFamilyCancelPreConnectHandler implements MessageHandler {
-    private final RedisMessageRoundedFamilyCancelPreConnect message;
+    private final RedisMessageRoundedCancelPreConnect message;
 
     public RoundedFamilyCancelPreConnectHandler(GenericRedisMessage message) {
-        this.message = (RedisMessageRoundedFamilyCancelPreConnect) message;
+        this.message = (RedisMessageRoundedCancelPreConnect) message;
     }
 
     @Override

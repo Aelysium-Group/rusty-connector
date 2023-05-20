@@ -1,13 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded;
-import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
-import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RoundedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import net.kyori.adventure.text.Component;
 
-import java.util.Collection;
+import java.util.List;
 
 public class RoundedServer extends PlayerServer {
     private RoundedSession session;
@@ -17,34 +21,38 @@ public class RoundedServer extends PlayerServer {
         this.session = NullRoundedSession.get();
     }
 
+    /**
+     * Gets the current session.
+     * @return Gets the current session. If no session is active, will return {@link NullRoundedSession} if no session is currently assigned here.
+     */
     public RoundedSession getSession() {
         return this.session;
     }
 
     /**
      * Start a new session with the provided round.
-     * @param round The round to start a session with.
+     * @param session The session to assign to this server.
      */
-    public void newSession(RoundedSessionGroup round) {
+    public void assignSession(RoundedSession session) {
         if(!(this.session instanceof NullRoundedSession)) throw new IllegalStateException("You can't start a new session while one is active!");
-        this.session = new RoundedSession(round);
+        this.session = session;
     }
 
     /**
-     * End the current session.
+     * Close the current session.
      * This method will kick all current players out into the parent family.
      *
      * Additionally, this server will inform its family that it is now open for another session to join.
      */
-    public void endSession() {
+    public void closeSession() {
         if(this.session instanceof NullRoundedSession) return;
         this.session = NullRoundedSession.get();
 
         RoundedServerFamily family = (RoundedServerFamily) this.getFamily();
 
-        Collection<Player> players = this.getRegisteredServer().getPlayersConnected();
+        List<Player> players = this.session.getPlayers();
 
-        for (Player player: players) {
+        for (Player player : players) {
             try {
                 family.getParentFamily().connect(player);
             } catch (Exception e) {
@@ -52,7 +60,27 @@ public class RoundedServer extends PlayerServer {
             }
         }
 
-        ((RoundedServerFamily) this.getFamily()).startSessions();
+        this.session.decompose();
+
+        ((RoundedServerFamily) this.getFamily()).startAvailableSessions();
+    }
+
+    public void startSession() {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+
+        if(this.session instanceof NullRoundedSession) throw new NullPointerException("There was no available session to start!");
+
+        session.assignServer(this);
+        this.session.connect();
+
+        RedisPublisher publisher = api.getVirtualProcessor().getRedisService().getMessagePublisher();
+        GenericRedisMessage message = new GenericRedisMessage.Builder()
+                .setType(RedisMessageType.ROUNDED_SESSION_START_EVENT)
+                .setOrigin(MessageOrigin.PROXY)
+                .setAddress(this.getServerInfo().getAddress())
+                .buildSendable();
+
+        publisher.publish(message);
     }
 
 
@@ -68,54 +96,5 @@ public class RoundedServer extends PlayerServer {
     @Override
     public boolean validatePlayer(Player player) {
         return false;
-    }
-
-    /**
-     * Connects a round of players to the server.
-     * This also increases the player count on this server by 1.
-     * @param round The round of players to connect.
-     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
-     */
-    public boolean connect(RoundedSessionGroup round) {
-        try {
-            round.forEach(player -> {
-                ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
-                try {
-                    connection.connect().get().isSuccessful();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * Connects a player to the server.
-     * This also increases the player count on this server by 1.
-     * @param player The player to connect.
-     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
-     * @deprecated Use {@link #connect(RoundedSessionGroup)} instead.
-     */
-    @Deprecated
-    @Override
-    public boolean connect(Player player) {
-        throw new RuntimeException("You can't connect specific players to a RoundedServer!");
-    }
-
-    /**
-     * Set's a connections initial server to the server.
-     * @param event The connection to set.
-     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
-     * @deprecated Use {@link #connect(RoundedSessionGroup)} instead.
-     */
-    @Deprecated
-    @Override
-    public boolean connect(PlayerChooseInitialServerEvent event) {
-        throw new RuntimeException("You can't connect specific players to a RoundedServer!");
     }
 }

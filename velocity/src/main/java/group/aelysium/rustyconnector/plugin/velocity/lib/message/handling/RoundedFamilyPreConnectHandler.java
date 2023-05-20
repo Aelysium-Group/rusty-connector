@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageRoundedFamilyPreConnect;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageRoundedPreConnect;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RoundedServerFamily;
@@ -11,10 +11,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServer
 import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
 
 public class RoundedFamilyPreConnectHandler implements MessageHandler {
-    private final RedisMessageRoundedFamilyPreConnect message;
+    private final RedisMessageRoundedPreConnect message;
 
     public RoundedFamilyPreConnectHandler(GenericRedisMessage message) {
-        this.message = (RedisMessageRoundedFamilyPreConnect) message;
+        this.message = (RedisMessageRoundedPreConnect) message;
     }
 
     @Override

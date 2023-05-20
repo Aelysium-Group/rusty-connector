@@ -144,8 +144,27 @@ public class GenericRedisMessage {
             this.type = type;
             return this;
         }
+
+        /**
+         * Address has two contexts:
+         * If {@link MessageOrigin} is {@link MessageOrigin#PROXY}: Address is the recipient of the message.
+         * If {@link MessageOrigin} is a {@link MessageOrigin#SERVER}: Address is referring to the sender of the message.
+         * @param address The address of this message.
+         * @return The Builder.
+         */
         public Builder setAddress(String address) {
             this.address = AddressUtil.stringToAddress(address);
+            return this;
+        }
+        /**
+         * Address has two contexts:
+         * If {@link MessageOrigin} is {@link MessageOrigin#PROXY}: Address is the recipient of the message.
+         * If {@link MessageOrigin} is a {@link MessageOrigin#SERVER}: Address is referring to the sender of the message.
+         * @param address The address of this message.
+         * @return The Builder.
+         */
+        public Builder setAddress(InetSocketAddress address) {
+            this.address = address;
             return this;
         }
         public Builder setOrigin(MessageOrigin origin) {

@@ -35,6 +35,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscribe
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RoundedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.FamilyManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistManager;
@@ -201,8 +202,10 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     private void startTPARequestCleaner(long heartbeat) {
         Callable<Boolean> callable = () -> {
             for(BaseServerFamily family : this.getFamilyManager().dump()) {
-                if(!family.getTPAHandler().getSettings().isEnabled()) continue;
-                family.getTPAHandler().clearExpired();
+                if(!(family instanceof PlayerFocusedServerFamily)) continue;
+
+                if(!((PlayerFocusedServerFamily) family).getTPAHandler().getSettings().isEnabled()) continue;
+                ((PlayerFocusedServerFamily) family).getTPAHandler().clearExpired();
             }
             return true;
         };
@@ -710,7 +713,8 @@ public class VirtualProxyProcessor implements VirtualProcessor {
 
         // Reload server whitelists
         for (BaseServerFamily family : this.familyManager.dump()) {
-            family.reloadWhitelist();
+            if(!(family instanceof PlayerFocusedServerFamily)) continue;
+            ((PlayerFocusedServerFamily) family).reloadWhitelist();
         }
         logger.log("Reloaded all family whitelists");
     }

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class RedisMessageRoundedFamilyCancelPreConnect extends GenericRedisMessage {
+public class RedisMessageRoundedCancelPreConnect extends GenericRedisMessage {
     private String familyName;
     private UUID uuid;
 
@@ -24,10 +24,10 @@ public class RedisMessageRoundedFamilyCancelPreConnect extends GenericRedisMessa
         return uuid;
     }
 
-    public RedisMessageRoundedFamilyCancelPreConnect(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(RedisMessageType.RND_CPRE, address, origin);
+    public RedisMessageRoundedCancelPreConnect(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(RedisMessageType.ROUNDED_CANCEL_PRECONNECT_PLAYER, address, origin);
 
-        if(!RedisMessageRoundedFamilyCancelPreConnect.validateParameters(ValidParameters.toList(), parameters))
+        if(!RedisMessageRoundedCancelPreConnect.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -40,10 +40,10 @@ public class RedisMessageRoundedFamilyCancelPreConnect extends GenericRedisMessa
             }
         });
     }
-    public RedisMessageRoundedFamilyCancelPreConnect(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.UNREGISTER_SERVER, address, origin);
+    public RedisMessageRoundedCancelPreConnect(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.ROUNDED_CANCEL_PRECONNECT_PLAYER, address, origin);
 
-        if(!RedisMessageRoundedFamilyCancelPreConnect.validateParameters(ValidParameters.toList(), parameters))
+        if(!RedisMessageRoundedCancelPreConnect.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {

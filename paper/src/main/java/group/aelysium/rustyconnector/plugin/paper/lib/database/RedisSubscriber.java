@@ -65,6 +65,9 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(message.getType() == REGISTER_ALL_SERVERS_TO_FAMILY) new ServerRegFamilyHandler(message).execute();
             if(message.getType() == PING)                           new PingHandler(message).execute();
             if(message.getType() == TPA_QUEUE_PLAYER)               new TPAQueuePlayerHandler(message).execute();
+            if(message.getType() == ROUNDED_SESSION_START_EVENT)        new ServerRegAllHandler(message).execute();
+            if(message.getType() == ROUNDED_SESSION_END_EVENT)          new ServerRegAllHandler(message).execute();
+            if(message.getType() == ROUNDED_SESSION_CLOSE_EVENT)        new ServerRegAllHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (Exception e) {
