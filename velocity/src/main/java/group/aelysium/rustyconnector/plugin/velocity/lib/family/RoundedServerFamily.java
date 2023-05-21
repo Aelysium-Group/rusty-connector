@@ -73,6 +73,7 @@ public class RoundedServerFamily extends SystemFocusedServerFamily<RoundedServer
             RoundedSession session = this.roundedSessionManager.popSessionFromQueue();
             if (session == null) return;
 
+
             server.assignSession(session);
 
             server.startSession();

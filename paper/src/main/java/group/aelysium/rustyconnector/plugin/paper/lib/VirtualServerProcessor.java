@@ -21,6 +21,7 @@ import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
+import group.aelysium.rustyconnector.plugin.paper.lib.rounded.RoundedSessionLifecycle;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueue;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -31,6 +32,7 @@ import java.net.InetSocketAddress;
 
 public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
     private final TPAQueue tpaQueue = new TPAQueue();
+    private RoundedSessionLifecycle roundedSessionLifecycle = null;
     private MessageCache messageCache;
     private final RedisService redisService;
     private final String family;
@@ -67,12 +69,28 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
         this.messageCache = new MessageCache(max);
     }
 
+    /**
+     * Set the rounded session lifecycle manager for the server. Once this is set it cannot be changed.
+     * @param roundedSessionLifecycle The rounded session lifecycle manager for this server.
+     */
+    public void setRoundedSessionLifecycle(RoundedSessionLifecycle roundedSessionLifecycle) throws IllegalStateException {
+        if(this.roundedSessionLifecycle != null) throw new IllegalStateException("This has already been set! You can't set it twice!");
+
+        this.roundedSessionLifecycle = roundedSessionLifecycle;
+    }
+
+    public RoundedSessionLifecycle getRoundedSessionLifecycle() { return this.roundedSessionLifecycle; }
+
     public MessageCache getMessageCache() {
         return this.messageCache;
     }
 
     public String getAddress() {
         return this.address.getHostName() + ":" + this.address.getPort();
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public String getFamily() { return this.family; }
@@ -241,7 +259,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
 
         server.getRedisService().start(RedisSubscriber.class);
 
-        if(config.isGenerateRounded()) {
+        if(config.shouldGenerateRounded()) {
         }
 
         return server;

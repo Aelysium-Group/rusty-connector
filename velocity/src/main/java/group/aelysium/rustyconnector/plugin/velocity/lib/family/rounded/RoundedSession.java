@@ -3,7 +3,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.function.Consumer;
@@ -11,7 +13,14 @@ import java.util.function.Consumer;
 public class RoundedSession {
     private final UUID sessionID = UUID.randomUUID();
     private final Vector<Player> players = new Vector<>();
-    private RoundedServer server = null;
+
+    /*
+     * RoundedServer also refers to it's currently active RoundedSession.
+     * This could theoretically create a reference loop where the GC can't collect the server or session.
+     *
+     * This WeakReference is intended to prevent this.
+     */
+    private WeakReference<RoundedServer> server = null;
     private final int minPlayers;
     private final int maxPlayers;
 
@@ -22,7 +31,7 @@ public class RoundedSession {
 
     public void assignServer(RoundedServer server) throws IllegalStateException {
         if(this.server != null) throw new IllegalStateException("You can't set the server if one is already set!");
-        this.server = server;
+        this.server = new WeakReference<>(server);
     }
 
     public UUID getUUID() { return this.sessionID; }
@@ -41,7 +50,7 @@ public class RoundedSession {
 
     public List<Player> getPlayers() { return this.players.stream().toList(); }
 
-    public RoundedServer getServer() { return this.server; }
+    public RoundedServer getServer() { return this.server.get(); }
 
     public boolean add(Player player) {
         if(this.players.contains(player)) return true;
@@ -65,9 +74,11 @@ public class RoundedSession {
      * Requires that a server has been assigned.
      */
     public boolean connect() {
+        if(this.server.get() == null) throw new IllegalStateException("You must assign a server to this session before you can connect to it!");
+
         try {
             this.players.forEach(player -> {
-                ConnectionRequestBuilder connection = player.createConnectionRequest(this.server.getRegisteredServer());
+                ConnectionRequestBuilder connection = player.createConnectionRequest(Objects.requireNonNull(this.server.get()).getRegisteredServer());
                 try {
                     connection.connect().get().isSuccessful();
                 } catch (Exception e) {

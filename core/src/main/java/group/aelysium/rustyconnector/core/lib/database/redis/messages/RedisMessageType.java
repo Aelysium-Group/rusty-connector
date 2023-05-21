@@ -19,63 +19,68 @@ public class RedisMessageType {
      * Messages cannot contain both `to` and `from` parameters. Additionally, these parameters cannot be set manually.
      */
 
-    public static Mapping PING = new Mapping(0, "PING");
-    public static Mapping PONG = new Mapping(1, "PONG");
+    public static Mapping PING = new Mapping(100, "PING");
+    public static Mapping PONG = new Mapping(200, "PONG");
 
     /**
      * `Proxy > Server` | An outbound request for servers to register themselves
      */
-    public static Mapping REGISTER_ALL_SERVERS_TO_PROXY = new Mapping(2, "REGISTER_ALL_SERVERS_TO_PROXY");
+    public static Mapping REGISTER_ALL_SERVERS_TO_PROXY = new Mapping(300, "REGISTER_ALL_SERVERS_TO_PROXY");
 
     /**
      * `Proxy > Server` | An outbound request for servers of a particular family to register themselves
      */
-    public static Mapping REGISTER_ALL_SERVERS_TO_FAMILY = new Mapping(3, "REGISTER_ALL_SERVERS_TO_FAMILY");
+    public static Mapping REGISTER_ALL_SERVERS_TO_FAMILY = new Mapping(400, "REGISTER_ALL_SERVERS_TO_FAMILY");
 
     /**
      * `Server > Proxy` | A server's response to the REG_OUT message. This is also used when a server boots up and needs to register itself.
      */
-    public static Mapping REGISTER_SERVER = new Mapping(4, "REGISTER_SERVER");
+    public static Mapping REGISTER_SERVER = new Mapping(500, "REGISTER_SERVER");
 
     /**
      * `Server > Proxy` | A server's message to the proxy when it needs to un-register itself.
      */
-    public static Mapping UNREGISTER_SERVER = new Mapping(5, "UNREGISTER_SERVER");
+    public static Mapping UNREGISTER_SERVER = new Mapping(600, "UNREGISTER_SERVER");
 
     /**
      * `Server > Proxy` | Request to send a player to a family
      */
-    public static Mapping SEND_PLAYER = new Mapping(6, "SEND_PLAYER");
+    public static Mapping SEND_PLAYER = new Mapping(700, "SEND_PLAYER");
 
     /**
      * `Proxy > Server` | Add a player's teleportation to the TPA queue on a specific server.
      */
-    public static Mapping TPA_QUEUE_PLAYER = new Mapping(7, "TPA_QUEUE_PLAYER");
+    public static Mapping TPA_QUEUE_PLAYER = new Mapping(800, "TPA_QUEUE_PLAYER");
 
     /**
      * `Server > Proxy` | Pre-connect the player to a Rounded Family.
      */
-    public static Mapping ROUNDED_PRECONNECT_PLAYER = new Mapping(8, "ROUNDED_PRECONNECT_PLAYER");
+    public static Mapping ROUNDED_PRECONNECT_PLAYER = new Mapping(900, "ROUNDED_PRECONNECT_PLAYER");
 
     /**
      * `Server > Proxy` | Cancel the pre-connection of a player from a Rounded Family.
      */
-    public static Mapping ROUNDED_CANCEL_PRECONNECT_PLAYER = new Mapping(9, "ROUNDED_CANCEL_PRECONNECT_PLAYER");
+    public static Mapping ROUNDED_CANCEL_PRECONNECT_PLAYER = new Mapping(1000, "ROUNDED_CANCEL_PRECONNECT_PLAYER");
+
+    /**
+     * `Proxy > Server` | Ask a sub-server if it is capable of starting a session.
+     */
+    public static Mapping ROUNDED_SESSION_START_REQUEST = new Mapping(1100, "ROUNDED_SESSION_START_REQUEST");
+
+    /**
+     * `Server > Proxy` | Respond to the proxy's request to start a session on the server.
+     */
+    public static Mapping ROUNDED_SESSION_START_REQUEST_RESPONSE = new Mapping(1101, "ROUNDED_SESSION_START_REQUEST_RESPONSE");
 
     /**
      * `Proxy > Server` | Event indicating the start of a session.
      */
-    public static Mapping ROUNDED_SESSION_START_EVENT = new Mapping(10, "ROUNDED_SESSION_START_EVENT");
+    public static Mapping ROUNDED_SESSION_START_EVENT = new Mapping(1102, "ROUNDED_SESSION_START_EVENT");
 
     /**
-     * `Proxy > Server` | Event indicating the end of a session.
+     * `Server > Proxy` | Event indicating that a session should be closed.
      */
-    public static Mapping ROUNDED_SESSION_END_EVENT = new Mapping(11, "ROUNDED_SESSION_END_EVENT");
-
-    /**
-     * `Proxy > Server` | Event indicating the close of a session.
-     */
-    public static Mapping ROUNDED_SESSION_CLOSE_EVENT = new Mapping(12, "ROUNDED_SESSION_CLOSE_EVENT");
+    public static Mapping ROUNDED_SESSION_CLOSE_REQUEST = new Mapping(1200, "ROUNDED_SESSION_CLOSE_EVENT");
 
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();
@@ -90,8 +95,9 @@ public class RedisMessageType {
         list.add(ROUNDED_PRECONNECT_PLAYER);
         list.add(ROUNDED_CANCEL_PRECONNECT_PLAYER);
         list.add(ROUNDED_SESSION_START_EVENT);
-        list.add(ROUNDED_SESSION_END_EVENT);
-        list.add(ROUNDED_SESSION_CLOSE_EVENT);
+        list.add(ROUNDED_SESSION_START_REQUEST);
+        list.add(ROUNDED_SESSION_START_REQUEST_RESPONSE);
+        list.add(ROUNDED_SESSION_CLOSE_REQUEST);
 
         return list;
     }

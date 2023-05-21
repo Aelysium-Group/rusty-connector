@@ -81,7 +81,7 @@ public class DefaultConfig extends YAML {
         return registerOnBoot;
     }
 
-    public boolean isGenerateRounded() {
+    public boolean shouldGenerateRounded() {
         return generateRounded;
     }
 

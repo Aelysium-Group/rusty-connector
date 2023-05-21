@@ -23,7 +23,7 @@ public class RedisMessageRoundedSessionCloseRequest extends GenericRedisMessage 
     }
 
     public RedisMessageRoundedSessionCloseRequest(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(RedisMessageType.ROUNDED_SESSION_CLOSE_EVENT, address, origin);
+        super(RedisMessageType.ROUNDED_SESSION_CLOSE_REQUEST, address, origin);
 
         if(!RedisMessageRoundedSessionCloseRequest.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
@@ -39,7 +39,7 @@ public class RedisMessageRoundedSessionCloseRequest extends GenericRedisMessage 
         });
     }
     public RedisMessageRoundedSessionCloseRequest(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.ROUNDED_SESSION_CLOSE_EVENT, address, origin);
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.ROUNDED_SESSION_CLOSE_REQUEST, address, origin);
 
         if(!RedisMessageRoundedSessionCloseRequest.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");

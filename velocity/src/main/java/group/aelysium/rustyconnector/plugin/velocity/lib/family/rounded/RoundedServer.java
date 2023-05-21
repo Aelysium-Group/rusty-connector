@@ -12,6 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import net.kyori.adventure.text.Component;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 public class RoundedServer extends PlayerServer {
     private RoundedSession session;
@@ -36,6 +37,22 @@ public class RoundedServer extends PlayerServer {
     public void assignSession(RoundedSession session) {
         if(!(this.session instanceof NullRoundedSession)) throw new IllegalStateException("You can't start a new session while one is active!");
         this.session = session;
+    }
+
+    /**
+     * Ask the server if it is able to accept a session.
+     */
+    public void requestSession() {
+        if(!(this.session instanceof NullRoundedSession)) throw new IllegalStateException("You can't start a new session while one is active!");
+
+        RedisPublisher publisher = VelocityRustyConnector.getAPI().getVirtualProcessor().getRedisService().getMessagePublisher();
+        GenericRedisMessage message = new GenericRedisMessage.Builder()
+                .setType(RedisMessageType.ROUNDED_SESSION_START_REQUEST)
+                .setOrigin(MessageOrigin.PROXY)
+                .setAddress(this.getServerInfo().getAddress())
+                .buildSendable();
+
+        publisher.publish(message);
     }
 
     /**

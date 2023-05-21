@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 
 import java.util.List;
 import java.util.Stack;
+import java.util.UUID;
 import java.util.Vector;
 
 public class RoundedSessionManager {
@@ -64,12 +65,10 @@ public class RoundedSessionManager {
      */
     public RoundedSession popSessionFromQueue() {
         try {
-            RoundedSession group = this.readySessions.pop();
+            return this.readySessions.pop();
+        } catch (Exception ignore) {}
 
-            return group;
-        } catch (Exception ignore) {
-            return null;
-        }
+        return null;
     }
 
     public int getPendingGroups() {

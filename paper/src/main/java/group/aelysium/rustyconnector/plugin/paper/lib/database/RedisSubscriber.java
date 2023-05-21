@@ -4,15 +4,11 @@ import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.PingHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegAllHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.ServerRegFamilyHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.TPAQueuePlayerHandler;
+import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.*;
 
 import javax.naming.AuthenticationException;
 
@@ -61,13 +57,12 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
 
         try {
-            if(message.getType() == REGISTER_ALL_SERVERS_TO_PROXY)  new ServerRegAllHandler(message).execute();
-            if(message.getType() == REGISTER_ALL_SERVERS_TO_FAMILY) new ServerRegFamilyHandler(message).execute();
-            if(message.getType() == PING)                           new PingHandler(message).execute();
-            if(message.getType() == TPA_QUEUE_PLAYER)               new TPAQueuePlayerHandler(message).execute();
-            if(message.getType() == ROUNDED_SESSION_START_EVENT)        new ServerRegAllHandler(message).execute();
-            if(message.getType() == ROUNDED_SESSION_END_EVENT)          new ServerRegAllHandler(message).execute();
-            if(message.getType() == ROUNDED_SESSION_CLOSE_EVENT)        new ServerRegAllHandler(message).execute();
+            if(message.getType() == REGISTER_ALL_SERVERS_TO_PROXY)      new ServerRegAllHandler(message).execute();
+            if(message.getType() == REGISTER_ALL_SERVERS_TO_FAMILY)     new ServerRegFamilyHandler(message).execute();
+            if(message.getType() == PING)                               new PingHandler(message).execute();
+            if(message.getType() == TPA_QUEUE_PLAYER)                   new TPAQueuePlayerHandler(message).execute();
+            if(message.getType() == ROUNDED_SESSION_START_REQUEST)      new RoundedStartRequestHandler(message).execute();
+            if(message.getType() == ROUNDED_SESSION_START_EVENT)        new RoundedStartEventHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (Exception e) {

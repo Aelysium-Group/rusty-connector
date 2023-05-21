@@ -6,27 +6,33 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 
 public class LoadBalancingService extends ClockService {
+    protected final long heartbeat;
     public LoadBalancingService(int threads, long heartbeat) {
-        super(threads, heartbeat);
+        super(threads);
+        this.heartbeat = heartbeat;
     }
 
     public void init() {
         VirtualProxyProcessor processor = VelocityRustyConnector.getAPI().getVirtualProcessor();
-        for (BaseServerFamily family : processor.getFamilyManager().dump())
-            this.schedule(() -> {
+        for (BaseServerFamily family : processor.getFamilyManager().dump()) {
+            if (!(family instanceof PlayerFocusedServerFamily)) continue;
+
+            this.scheduleRecurring(() -> {
                 try {
                     VelocityAPI api = VelocityRustyConnector.getAPI();
                     PluginLogger logger = api.getLogger();
 
-                    family.getLoadBalancer().completeSort();
-                    if(logger.getGate().check(GateKey.FAMILY_BALANCING))
+                    ((PlayerFocusedServerFamily) family).getLoadBalancer().completeSort();
+                    if (logger.getGate().check(GateKey.FAMILY_BALANCING))
                         VelocityLang.FAMILY_BALANCING.send(logger, family);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            });
+            }, this.heartbeat);
+        }
     }
 }
