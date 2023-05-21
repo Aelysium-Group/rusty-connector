@@ -40,13 +40,14 @@ RustyConnector is a Velocity network backbone plugin. It let's you register bran
 [![RustyConnector bstats graph](https://bstats.org/signatures/bukkit/RustyConnector.svg)](https://bstats.org/signatures/bukkit/RustyConnector.svg)
 ---
 ## Incoming Features/Changes
-- [ ] Kubernettes auto-scaling
-- [ ] Player parties (join your friend's party and follow them around the network as they connect to differnet families!)
-- [ ] Websocket as a backup for if Redis fails
-- [ ] Rounded families (families built for round based gamemodes!)
-- [ ] Player routing based on client version
-- [ ] Better error and overall handling for Redis
-- [ ] Teleport players to specific coordinates on other servers
+- [ ] Rounded families (families built for round based gamemodes!) [Under Development]
+- [ ] Kubernettes auto-scaling [Under Development]
+- [ ] Player parties (join your friend's party and follow them around the network as they connect to differnet families!) [Under Development]
+- [ ] Websocket as a backup for if Redis fails [Under Development]
+- [ ] Example RustyConnector Networks for Documentation Purposes
+- [ ] RustyConnector API (May not come out for a while!)
+- [ ] Player routing based on client version (Low Priority)
+- [ ] Teleport players to specific coordinates on other servers (Low Priority)
 
 \*Checked boxes indicate that the feature has been added and is awaiting release in an official version. There is no promise on when these features may be added.
 
