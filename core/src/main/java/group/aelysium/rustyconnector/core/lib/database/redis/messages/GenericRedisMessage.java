@@ -216,8 +216,6 @@ public class GenericRedisMessage {
             if(this.type == PONG)                           return new RedisMessageServerPong(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if(this.type == TPA_QUEUE_PLAYER)               return new RedisMessageTPAQueuePlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if(this.type == REGISTER_ALL_SERVERS_TO_FAMILY) return new RedisMessageFamilyRegister(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if(this.type == ROUNDED_SESSION_START_REQUEST)  return new GenericRedisMessage(this.protocolVersion, this.rawMessage, this.privateKey, this.type, this.address, this.origin);
-            if(this.type == ROUNDED_SESSION_START_REQUEST_RESPONSE)  return new RedisMessageRoundedSessionStartRequestResponse(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if(this.type == ROUNDED_SESSION_START_EVENT)    return new RedisMessageRoundedSessionStartEvent(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if(this.type == ROUNDED_SESSION_CLOSE_REQUEST)  return new RedisMessageRoundedSessionCloseRequest(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
 
@@ -249,9 +247,7 @@ public class GenericRedisMessage {
             if(this.type == SEND_PLAYER)                    return new RedisMessageSendPlayer(this.address, this.origin, this.parameters);
             if(this.type == PONG)                           return new RedisMessageServerPong(this.address, this.origin, this.parameters);
             if(this.type == TPA_QUEUE_PLAYER)               return new RedisMessageTPAQueuePlayer(this.address, this.origin, this.parameters);
-            if(this.type == ROUNDED_SESSION_START_REQUEST)  return new GenericRedisMessage(this.type, this.address, this.origin);
             if(this.type == REGISTER_ALL_SERVERS_TO_FAMILY) return new RedisMessageFamilyRegister(this.address, this.origin, this.parameters);
-            if(this.type == ROUNDED_SESSION_START_REQUEST_RESPONSE)  return new RedisMessageRoundedSessionStartRequestResponse(this.address, this.origin, this.parameters);
             if(this.type == ROUNDED_SESSION_START_EVENT)    return new RedisMessageRoundedSessionStartEvent(this.address, this.origin, this.parameters);
             if(this.type == ROUNDED_SESSION_CLOSE_REQUEST)  return new RedisMessageRoundedSessionCloseRequest(this.address, this.origin, this.parameters);
 

@@ -63,19 +63,9 @@ public class RedisMessageType {
     public static Mapping ROUNDED_CANCEL_PRECONNECT_PLAYER = new Mapping(1000, "ROUNDED_CANCEL_PRECONNECT_PLAYER");
 
     /**
-     * `Proxy > Server` | Ask a sub-server if it is capable of starting a session.
-     */
-    public static Mapping ROUNDED_SESSION_START_REQUEST = new Mapping(1100, "ROUNDED_SESSION_START_REQUEST");
-
-    /**
-     * `Server > Proxy` | Respond to the proxy's request to start a session on the server.
-     */
-    public static Mapping ROUNDED_SESSION_START_REQUEST_RESPONSE = new Mapping(1101, "ROUNDED_SESSION_START_REQUEST_RESPONSE");
-
-    /**
      * `Proxy > Server` | Event indicating the start of a session.
      */
-    public static Mapping ROUNDED_SESSION_START_EVENT = new Mapping(1102, "ROUNDED_SESSION_START_EVENT");
+    public static Mapping ROUNDED_SESSION_START_EVENT = new Mapping(1100, "ROUNDED_SESSION_START_EVENT");
 
     /**
      * `Server > Proxy` | Event indicating that a session should be closed.
@@ -95,8 +85,6 @@ public class RedisMessageType {
         list.add(ROUNDED_PRECONNECT_PLAYER);
         list.add(ROUNDED_CANCEL_PRECONNECT_PLAYER);
         list.add(ROUNDED_SESSION_START_EVENT);
-        list.add(ROUNDED_SESSION_START_REQUEST);
-        list.add(ROUNDED_SESSION_START_REQUEST_RESPONSE);
         list.add(ROUNDED_SESSION_CLOSE_REQUEST);
 
         return list;

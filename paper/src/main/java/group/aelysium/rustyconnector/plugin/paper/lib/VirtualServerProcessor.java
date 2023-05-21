@@ -259,8 +259,8 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
 
         server.getRedisService().start(RedisSubscriber.class);
 
-        if(config.shouldGenerateRounded()) {
-        }
+        if(config.shouldGenerateRounded())
+            server.setRoundedSessionLifecycle(RoundedSessionLifecycle.init());
 
         return server;
     }
