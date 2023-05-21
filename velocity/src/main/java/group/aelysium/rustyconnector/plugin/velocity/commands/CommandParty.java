@@ -63,8 +63,8 @@ public final class CommandParty {
         PluginLogger logger = api.getLogger();
         VirtualProxyProcessor virtualProcessor = api.getVirtualProcessor();
 
-        LiteralCommandNode<CommandSource> tpa = LiteralArgumentBuilder
-                .<CommandSource>literal("tpa")
+        LiteralCommandNode<CommandSource> party = LiteralArgumentBuilder
+                .<CommandSource>literal("party")
                 .requires(source -> source instanceof Player)
                 .executes(context -> {
                     if(!(context.getSource() instanceof Player player)) {
@@ -85,7 +85,7 @@ public final class CommandParty {
                     context.getSource().sendMessage(VelocityLang.TPA_USAGE.build());
                     return Command.SINGLE_SUCCESS;
                 })
-                .then(LiteralArgumentBuilder.<CommandSource>literal("deny")
+                .then(LiteralArgumentBuilder.<CommandSource>literal("create")
                         .executes(context -> {
                             if(!(context.getSource() instanceof Player)) {
                                 logger.log("/tpa must be sent as a player!");
@@ -97,83 +97,13 @@ public final class CommandParty {
                                 return Command.SINGLE_SUCCESS;
                             }
 
+                            Player player = (Player) context.getSource(); 
 
-                            context.getSource().sendMessage(VelocityLang.TPA_DENY_USAGE.build());
+                            if(virtualProcessor.getPartyService().find(player) != null) throw new REPLACEME();
+
+                            virtualProcessor.getPartyService().create(player);
                             return Command.SINGLE_SUCCESS;
                         })
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
-                                .suggests((context, builder) -> {
-                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
-
-                                    try {
-                                        ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
-
-                                        String familyName = virtualProcessor.findServer(sendingServer).getFamilyName();
-                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
-                                        List<TPARequest> requests = family.getTPAHandler().findRequestsForTarget(player);
-
-                                        if(requests.size() <= 0) {
-                                            builder.suggest("You have no pending TPA requests!");
-                                            return builder.buildFuture();
-                                        }
-
-                                        family.getTPAHandler().findRequestsForTarget(player).forEach(targetRequest -> builder.suggest(targetRequest.getSender().getUsername()));
-
-                                        return builder.buildFuture();
-                                    } catch (Exception ignored) {}
-
-                                    builder.suggest("Searching for players...");
-                                    return builder.buildFuture();
-                                })
-                                .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
-                                        logger.log("/tpa must be sent as a player!");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    if(!CommandParty.tpaEnabled(player)) {
-                                        context.getSource().sendMessage(Lang.UNKNOWN_COMMAND);
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-                                    if(!Permission.validate(player, "rustyconnector.command.tpa")) {
-                                        player.sendMessage(VelocityLang.TPA_NO_PERMISSION);
-                                        return 0;
-                                    }
-
-                                    String username = context.getArgument("username", String.class);
-
-                                    try {
-                                        Player senderPlayer = api.getServer().getPlayer(username).orElseThrow();
-                                        ServerInfo targetServerInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
-
-                                        PlayerServer targetServer = virtualProcessor.findServer(targetServerInfo);
-                                        String familyName = targetServer.getFamilyName();
-                                        try {
-                                            BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
-                                            if(family == null) throw new NullPointerException();
-
-                                            TPARequest request = family.getTPAHandler().findRequest(senderPlayer, (Player) context.getSource());
-                                            if(request == null) {
-                                                context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_REQUEST.build(username));
-                                                return Command.SINGLE_SUCCESS;
-                                            }
-
-                                            request.deny();
-                                            family.getTPAHandler().remove(request);
-                                            return Command.SINGLE_SUCCESS;
-                                        } catch (NullPointerException e) {
-                                            logger.send(Component.text("Player attempted to use /tpa deny from a family that doesn't exist! (How?)", NamedTextColor.RED));
-                                            context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
-                                        }
-                                    } catch (NoSuchElementException e) {
-                                        context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_USERNAME.build(username));
-                                    } catch (Exception e) {
-                                        context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
-                                    }
-
-                                    return Command.SINGLE_SUCCESS;
-                                })
-                        )
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
                         .executes(context -> {

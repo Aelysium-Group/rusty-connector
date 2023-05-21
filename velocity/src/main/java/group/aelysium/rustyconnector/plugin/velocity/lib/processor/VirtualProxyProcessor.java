@@ -69,12 +69,16 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     private LoadBalancingService loadBalancingService = null;
     private Clock tpaRequestCleaner;
     private MessageTunnel messageTunnel;
+    private PartyService partyService;
 
     public ScalarServerFamily getRootFamily() {
         return (ScalarServerFamily) this.familyManager.find(this.rootFamily);
     }
     public RedisService getRedisService() {
         return this.redisService;
+    }
+    public PartyService getPartyService() {
+        return this.partyService;
     }
 
     protected void setRedisService(RedisService redis) throws IllegalStateException {

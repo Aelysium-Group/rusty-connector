@@ -10,11 +10,19 @@ public class Party {
     private final Vector<Player> players;
     private final int size;
     private Player host;
+    private WeakReference<PlayerServer> server;
 
     public Party(int size, Player host) {
         this.players = new Vector<>(size);
         this.size = size;
         this.setHost(host);
+    }
+
+    public void setServer(PlayerServer server) {
+        this.server = new WeakReference<>(server);
+    }
+    public PlayerServer getServer() {
+        return this.server;
     }
 
     public Player getHost() {
@@ -47,6 +55,10 @@ public class Party {
 
         if(this.players.size() <= 0)
             this.decompose();
+    }
+
+    public boolean contains(Player player) {
+        return this.players.contains(player);
     }
 
     private void decompose() {
