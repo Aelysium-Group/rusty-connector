@@ -11,4 +11,9 @@ public enum AlgorithmType {
      * Used when the proxy should fill the servers that have the least number of players, first.
      */
     LEAST_CONNECTION,
+
+    /**
+     * Used when the proxy should fill the servers that have the highest number of players, first.
+     */
+    MOST_CONNECTION
 }

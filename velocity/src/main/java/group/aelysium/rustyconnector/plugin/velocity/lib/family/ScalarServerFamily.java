@@ -9,6 +9,7 @@ import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
@@ -78,6 +79,17 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         familyName,
                         whitelist,
                         LeastConnection.class,
+                        scalarFamilyConfig.isLoadBalancing_weighted(),
+                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
+                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
+                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                );
+            }
+            case MOST_CONNECTION -> {
+                return new ScalarServerFamily(
+                        familyName,
+                        whitelist,
+                        MostConnection.class,
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
