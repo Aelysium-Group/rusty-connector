@@ -4,7 +4,7 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerRegisterRequest;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.net.InetSocketAddress;
 

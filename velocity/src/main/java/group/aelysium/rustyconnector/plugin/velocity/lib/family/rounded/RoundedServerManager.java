@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.RoundedServer;
+
 import java.util.List;
 import java.util.Vector;
 import java.util.function.Consumer;

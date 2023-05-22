@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.module;
+package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
 import com.velocitypowered.api.proxy.Player;
 

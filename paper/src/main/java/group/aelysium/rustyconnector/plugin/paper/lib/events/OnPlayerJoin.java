@@ -14,7 +14,7 @@ public class OnPlayerJoin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         PaperAPI api = PaperRustyConnector.getAPI();
 
-        TPARequest tpaRequest = api.getVirtualProcessor().getTPAQueue().findClient(event.getPlayer().getPlayerProfile().getName());
+        TPARequest tpaRequest = api.getProcessor().getTPAQueue().findClient(event.getPlayer().getPlayerProfile().getName());
         if(tpaRequest == null) return;
         try {
             tpaRequest.resolveClient();
@@ -28,6 +28,6 @@ public class OnPlayerJoin implements Listener {
             event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.getTarget().getPlayerProfile().getName()));
         }
 
-        api.getVirtualProcessor().getTPAQueue().removeAllPlayersRequests(event.getPlayer());
+        api.getProcessor().getTPAQueue().removeAllPlayersRequests(event.getPlayer());
     }
 }

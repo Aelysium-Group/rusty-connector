@@ -2,19 +2,22 @@ package group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
+import group.aelysium.rustyconnector.core.lib.model.Service;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageTunnel {
+public class MessageTunnelService extends Service {
     private final boolean hasBlacklist;
     private final boolean hasWhitelist;
     private final int maxLength;
     private final List<InetSocketAddress> blacklist = new ArrayList<>();
     private final List<InetSocketAddress> whitelist = new ArrayList<>();
 
-    public MessageTunnel(boolean hasBlacklist, boolean hasWhitelist, int maxLength) {
+    public MessageTunnelService(boolean hasBlacklist, boolean hasWhitelist, int maxLength) {
+        super(true);
+
         this.hasBlacklist = hasBlacklist;
         this.hasWhitelist = hasWhitelist;
         this.maxLength = maxLength;

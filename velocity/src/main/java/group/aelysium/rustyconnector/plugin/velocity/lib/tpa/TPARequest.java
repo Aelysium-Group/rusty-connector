@@ -66,11 +66,11 @@ public class TPARequest {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.getTarget().getCurrentServer().orElseThrow().getServerInfo();
-            String familyName = api.getVirtualProcessor().findServer(serverInfo).getFamilyName();
-            BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(familyName);
+            String familyName = api.getProcessor().findServer(serverInfo).getFamilyName();
+            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
             if(family == null) throw new NullPointerException();
 
-            api.getVirtualProcessor().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
+            api.getProcessor().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
         } catch (Exception e) {
             this.getSender().sendMessage(VelocityLang.TPA_FAILURE.build(this.getTarget().getUsername()));
             this.getTarget().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.getSender().getUsername()));

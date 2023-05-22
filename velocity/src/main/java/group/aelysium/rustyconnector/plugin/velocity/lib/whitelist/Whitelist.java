@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.module;
+package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
 import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.config.WhitelistConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 
 import java.io.File;
 import java.util.*;

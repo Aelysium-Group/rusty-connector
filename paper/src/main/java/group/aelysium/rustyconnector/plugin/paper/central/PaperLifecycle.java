@@ -36,10 +36,10 @@ public class PaperLifecycle extends PluginLifecycle {
 
         DefaultConfig.empty();
 
-        if(api.getVirtualProcessor() != null) {
-            api.getVirtualProcessor().unregisterFromProxy();
+        if(api.getProcessor() != null) {
+            api.getProcessor().unregisterFromProxy();
 
-           api.getVirtualProcessor().closeRedis();
+           api.getProcessor().closeRedis();
         }
 
         api.getCommandManager().deleteRootCommand("rc");
@@ -61,7 +61,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
             if(defaultConfig.isRegisterOnBoot()) {
                 Lang.BOXED_MESSAGE.send(logger, Component.text("Sent a registration request over the data-channel...", NamedTextColor.GREEN));
-                api.getVirtualProcessor().registerToProxy();
+                api.getProcessor().registerToProxy();
             }
 
             DefaultConfig.empty();

@@ -24,7 +24,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
-        CacheableMessage cachedMessage = api.getVirtualProcessor().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
+        CacheableMessage cachedMessage = api.getProcessor().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
 
         try {
             GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
@@ -32,7 +32,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
 
             if(message.getOrigin() == MessageOrigin.SERVER) throw new Exception("Message from a sub-server! Ignoring...");
             try {
-                if (!(api.getVirtualProcessor().getRedisService().validatePrivateKey(message.getPrivateKey())))
+                if (!(api.getProcessor().getRedisService().validatePrivateKey(message.getPrivateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);

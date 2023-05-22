@@ -16,6 +16,6 @@ public class PingHandler implements MessageHandler {
     public void execute() {
         PaperAPI api = PaperRustyConnector.getAPI();
 
-        api.getVirtualProcessor().pong();
+        api.getProcessor().pong();
     }
 }

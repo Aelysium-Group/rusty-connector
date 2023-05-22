@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRed
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerUnregisterRequest;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.net.InetSocketAddress;
 
@@ -27,6 +28,6 @@ public class ServerUnRegHandler implements MessageHandler {
                 address
         );
 
-        api.getVirtualProcessor().unregisterServer(serverInfo, message.getFamilyName(), true);
+        api.getService(ServerService.class).unregisterServer(serverInfo, message.getFamilyName(), true);
     }
 }

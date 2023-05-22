@@ -18,7 +18,7 @@ public class RoundedStartEventHandler implements MessageHandler {
     public void execute() {
         PaperAPI api = PaperRustyConnector.getAPI();
 
-        RoundedSessionLifecycle sessionLifecycle = api.getVirtualProcessor().getRoundedSessionLifecycle();
+        RoundedSessionLifecycle sessionLifecycle = api.getProcessor().getRoundedSessionLifecycle();
         if(sessionLifecycle == null) throw new IllegalStateException("This server doesn't have a rounded session lifecycle manager!");
 
         sessionLifecycle.start(message.getSessionID());

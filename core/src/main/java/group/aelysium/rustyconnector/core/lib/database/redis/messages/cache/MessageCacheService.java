@@ -2,16 +2,22 @@ package group.aelysium.rustyconnector.core.lib.database.redis.messages.cache;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
+import group.aelysium.rustyconnector.core.lib.model.Service;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MessageCache {
+public class MessageCacheService extends Service {
     private final Snowflake snowflakeGenerator = new Snowflake();
     private int max = 25;
 
-    public MessageCache(Integer max) {
+    public MessageCacheService(Integer max) {
+        super(true);
+
+        if(max <= 0) max = 0;
+        if(max > 500) max = 500;
+
         this.max = max;
     }
 

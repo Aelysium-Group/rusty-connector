@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.lang.reflect.InvocationTargetException;
 

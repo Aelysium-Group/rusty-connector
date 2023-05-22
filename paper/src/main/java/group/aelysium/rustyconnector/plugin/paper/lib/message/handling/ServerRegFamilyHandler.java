@@ -22,9 +22,9 @@ public class ServerRegFamilyHandler implements MessageHandler {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
-        if(Objects.equals(this.message.getFamilyName(), api.getVirtualProcessor().getFamily())) {
+        if(Objects.equals(this.message.getFamilyName(), api.getProcessor().getFamily())) {
             logger.log("Server has been requested to register itself...");
-            api.getVirtualProcessor().registerToProxy();
+            api.getProcessor().registerToProxy();
             logger.log("Server has submitted its registration request.");
         }
     }

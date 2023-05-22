@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.core.central;
 
+import group.aelysium.rustyconnector.core.lib.model.IRKLifecycle;
+import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
 
 import java.io.InputStream;
@@ -16,7 +18,7 @@ public abstract class PluginAPI<S> {
 
     abstract public PluginLogger getLogger();
 
-    abstract public VirtualProcessor getVirtualProcessor();
+    abstract public IRKLifecycle getProcessor();
 
     abstract public String getDataFolder();
 }

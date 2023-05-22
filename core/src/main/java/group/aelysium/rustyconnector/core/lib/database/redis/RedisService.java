@@ -1,17 +1,20 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
+import group.aelysium.rustyconnector.core.lib.model.Service;
+
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class RedisService {
+public class RedisService extends Service {
     private final Vector<RedisSubscriber> liveRedisSubscribers = new Vector<>();
     private final RedisClient.Builder clientBuilder;
     private boolean isAlive = false;
     ExecutorService executorService;
 
     public RedisService(RedisClient.Builder clientBuilder) {
+        super(true);
         this.clientBuilder = clientBuilder;
     }
 

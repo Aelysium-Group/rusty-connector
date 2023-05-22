@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.Service;
+import group.aelysium.rustyconnector.core.lib.model.Service;
 
 import java.util.List;
 import java.util.Vector;
@@ -11,7 +11,8 @@ public class PartyService extends Service {
     private final Vector<PartyInvite> invites = new Vector<>();
     private final int partySize;
 
-    public PartyService(int partySize) {
+    public PartyService(boolean enable, int partySize) {
+        super(enable);
         this.partySize = partySize;
     }
 

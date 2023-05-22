@@ -1,18 +1,20 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded;
+package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RoundedServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded.NullRoundedSession;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded.RoundedSession;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 
 import java.util.List;
-import java.util.concurrent.Future;
 
 public class RoundedServer extends PlayerServer {
     private RoundedSession session;
@@ -37,22 +39,6 @@ public class RoundedServer extends PlayerServer {
     public void assignSession(RoundedSession session) {
         if(!(this.session instanceof NullRoundedSession)) throw new IllegalStateException("You can't start a new session while one is active!");
         this.session = session;
-    }
-
-    /**
-     * Ask the server if it is able to accept a session.
-     */
-    public void requestSession() {
-        if(!(this.session instanceof NullRoundedSession)) throw new IllegalStateException("You can't start a new session while one is active!");
-
-        RedisPublisher publisher = VelocityRustyConnector.getAPI().getVirtualProcessor().getRedisService().getMessagePublisher();
-        GenericRedisMessage message = new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.ROUNDED_SESSION_START_REQUEST)
-                .setOrigin(MessageOrigin.PROXY)
-                .setAddress(this.getServerInfo().getAddress())
-                .buildSendable();
-
-        publisher.publish(message);
     }
 
     /**
@@ -90,7 +76,7 @@ public class RoundedServer extends PlayerServer {
         session.assignServer(this);
         this.session.connect();
 
-        RedisPublisher publisher = api.getVirtualProcessor().getRedisService().getMessagePublisher();
+        RedisPublisher publisher = api.getService(RedisService.class).getMessagePublisher();
         GenericRedisMessage message = new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.ROUNDED_SESSION_START_EVENT)
                 .setOrigin(MessageOrigin.PROXY)

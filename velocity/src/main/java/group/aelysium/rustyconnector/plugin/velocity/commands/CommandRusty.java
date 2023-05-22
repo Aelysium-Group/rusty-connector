@@ -12,20 +12,22 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
-import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
+import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
 
 import java.io.File;
 import java.util.List;
@@ -34,7 +36,7 @@ public final class CommandRusty {
     public static BrigadierCommand create() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        VirtualProxyProcessor virtualProcessor = api.getVirtualProcessor();
+        Processor virtualProcessor = api.getProcessor();
 
         LiteralCommandNode<CommandSource> rusty = LiteralArgumentBuilder
             .<CommandSource>literal("rc")
@@ -52,17 +54,17 @@ public final class CommandRusty {
                             .executes(context -> {
                                 new Thread(() -> {
                                     try {
-                                        if(virtualProcessor.getMessageCache().getSize() > 10) {
-                                            int numberOfPages = Math.floorDiv(virtualProcessor.getMessageCache().getSize(),10) + 1;
+                                        if(virtualProcessor.getService(MessageCacheService.class).getSize() > 10) {
+                                            int numberOfPages = Math.floorDiv(virtualProcessor.getService(MessageCacheService.class).getSize(),10) + 1;
 
-                                            List<CacheableMessage> messagesPage = virtualProcessor.getMessageCache().getMessagesPage(1);
+                                            List<CacheableMessage> messagesPage = virtualProcessor.getService(MessageCacheService.class).getMessagesPage(1);
 
                                             VelocityLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
                                             return;
                                         }
 
-                                        List<CacheableMessage> messages = virtualProcessor.getMessageCache().getMessages();
+                                        List<CacheableMessage> messages = virtualProcessor.getService(MessageCacheService.class).getMessages();
 
                                         VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
@@ -79,9 +81,9 @@ public final class CommandRusty {
                                             try {
                                                 int pageNumber = context.getArgument("page-number", Integer.class);
 
-                                                List<CacheableMessage> messages = virtualProcessor.getMessageCache().getMessagesPage(pageNumber);
+                                                List<CacheableMessage> messages = virtualProcessor.getService(MessageCacheService.class).getMessagesPage(pageNumber);
 
-                                                int numberOfPages = Math.floorDiv(virtualProcessor.getMessageCache().getSize(),10) + 1;
+                                                int numberOfPages = Math.floorDiv(virtualProcessor.getService(MessageCacheService.class).getSize(),10) + 1;
 
                                                 VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,pageNumber,numberOfPages);
                                             } catch (Exception e) {
@@ -103,9 +105,9 @@ public final class CommandRusty {
                                     .executes(context -> {
                                         try {
                                             Long snowflake = context.getArgument("snowflake", Long.class);
-                                            MessageCache messageCache = virtualProcessor.getMessageCache();
+                                            MessageCacheService messageCacheService = virtualProcessor.getService(MessageCacheService.class);
 
-                                            CacheableMessage message = messageCache.getMessage(snowflake);
+                                            CacheableMessage message = messageCacheService.getMessage(snowflake);
 
                                             VelocityLang.RC_MESSAGE_GET_MESSAGE.send(logger, message);
                                         } catch (Exception e) {
@@ -131,7 +133,7 @@ public final class CommandRusty {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+                                BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
                                 if(family == null) throw new NullPointerException();
 
                                 if(family instanceof ScalarServerFamily)
@@ -149,7 +151,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
                                         if(family == null) throw new NullPointerException();
                                         if(!(family instanceof PlayerFocusedServerFamily)) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on scalar and static families!");
@@ -174,7 +176,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
                                         if(family == null) throw new NullPointerException();
                                         if(!(family instanceof PlayerFocusedServerFamily)) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only use sort on scalar and static families!");
@@ -226,7 +228,7 @@ public final class CommandRusty {
                                     .executes(context -> {
                                         try {
                                             String familyName = context.getArgument("familyName", String.class);
-                                            BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+                                            BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
                                             if(family == null) throw new NullPointerException();
 
                                             virtualProcessor.registerAllServers(familyName);
@@ -275,7 +277,7 @@ public final class CommandRusty {
                                         try {
                                             String familyName = context.getArgument("familyName", String.class);
                                             logger.log("Reloading the family: "+familyName+"...");
-                                            ScalarServerFamily oldFamily = (ScalarServerFamily) virtualProcessor.getFamilyManager().find(familyName);
+                                            ScalarServerFamily oldFamily = (ScalarServerFamily) virtualProcessor.getService(FamilyService.class).find(familyName);
                                             if(oldFamily == null) {
                                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                                                 return 1;
@@ -285,8 +287,8 @@ public final class CommandRusty {
 
                                             oldFamily.unregisterServers();
 
-                                            virtualProcessor.getFamilyManager().remove(oldFamily);
-                                            virtualProcessor.getFamilyManager().add(newFamily);
+                                            virtualProcessor.getService(FamilyService.class).remove(oldFamily);
+                                            virtualProcessor.getService(FamilyService.class).add(newFamily);
 
                                             logger.log("Done reloading!");
 
@@ -359,7 +361,7 @@ public final class CommandRusty {
                                             return Command.SINGLE_SUCCESS;
                                         }
 
-                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+                                        BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
                                         if(family == null) {
                                             logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                                             return Command.SINGLE_SUCCESS;
@@ -418,7 +420,7 @@ public final class CommandRusty {
             )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("kill")
                         .executes(context -> {
-                            VelocityRustyConnector.getAPI().getVirtualProcessor().getRedisService().getMessagePublisher().publishKillable();
+                            VelocityRustyConnector.getAPI().getService(RedisService.class).getMessagePublisher().publishKillable();
                             return 0;
                         })
                 )

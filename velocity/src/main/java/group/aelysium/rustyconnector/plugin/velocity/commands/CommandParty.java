@@ -13,12 +13,16 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.Permission;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPARequest;
+import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPAService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -33,13 +37,13 @@ public final class CommandParty {
      * @return `true` is /tpa is allowed. `false` otherwise.
      */
     public static boolean tpaEnabled(Player sender) {
-        VirtualProxyProcessor virtualProcessor = VelocityRustyConnector.getAPI().getVirtualProcessor();
+        Processor virtualProcessor = VelocityRustyConnector.getAPI().getProcessor();
         try {
             ServerInfo serverInfo = sender.getCurrentServer().orElseThrow().getServerInfo();
             PlayerServer targetServer = virtualProcessor.findServer(serverInfo);
             String familyName = targetServer.getFamilyName();
 
-            BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+            BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
             if(family == null) return false;
 
             return family.getTPAHandler().getSettings().isEnabled();
@@ -61,7 +65,7 @@ public final class CommandParty {
     public static BrigadierCommand create() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        VirtualProxyProcessor virtualProcessor = api.getVirtualProcessor();
+        Processor virtualProcessor = api.getProcessor();
 
         LiteralCommandNode<CommandSource> party = LiteralArgumentBuilder
                 .<CommandSource>literal("party")
@@ -99,9 +103,9 @@ public final class CommandParty {
 
                             Player player = (Player) context.getSource(); 
 
-                            if(virtualProcessor.getPartyService().find(player) != null) throw new REPLACEME();
+                            if(virtualProcessor.getService(PartyService.class).find(player) != null) throw new REPLACEME();
 
-                            virtualProcessor.getPartyService().create(player);
+                            virtualProcessor.getService(PartyService.class).create(player);
                             return Command.SINGLE_SUCCESS;
                         })
                 )
@@ -132,9 +136,9 @@ public final class CommandParty {
                                     try {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        String familyName = virtualProcessor.findServer(sendingServer).getFamilyName();
-                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
-                                        List<TPARequest> requests = family.getTPAHandler().findRequestsForTarget(player);
+                                        String familyName = api.getService(ServerService.class).findServer(sendingServer).getFamilyName();
+                                        BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
+                                        List<TPARequest> requests = api.getService(TPAService.class).findRequestsForTarget(player);
 
                                         if(requests.size() <= 0) {
                                             builder.suggest("You have no pending TPA requests!");
@@ -164,7 +168,7 @@ public final class CommandParty {
                                         PlayerServer targetServer = virtualProcessor.findServer(targetServerInfo);
                                         String familyName = targetServer.getFamilyName();
                                         try {
-                                            BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+                                            BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
                                             if(family == null) throw new NullPointerException();
 
                                             TPARequest request = family.getTPAHandler().findRequest(senderPlayer, (Player) context.getSource());
@@ -198,7 +202,7 @@ public final class CommandParty {
                                 ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                 String familyName = virtualProcessor.findServer(sendingServer).getFamilyName();
-                                BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+                                BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
 
                                 family.getAllPlayers(100).forEach(player -> builder.suggest(player.getUsername()));
 
@@ -238,7 +242,7 @@ public final class CommandParty {
                                 PlayerServer sendersServer = virtualProcessor.findServer(sendersServerInfo);
                                 String familyName = sendersServer.getFamilyName();
                                 try {
-                                    BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+                                    BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
                                     if(family == null) throw new NullPointerException();
                                     if(!family.getTPAHandler().getSettings().isEnabled()) throw new RuntimeException();
 

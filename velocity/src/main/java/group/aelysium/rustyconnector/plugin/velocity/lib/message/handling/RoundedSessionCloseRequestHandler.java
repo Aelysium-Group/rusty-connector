@@ -6,8 +6,9 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHan
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageRoundedSessionCloseRequest;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RoundedServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded.RoundedServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.RoundedServer;
 
 public class RoundedSessionCloseRequestHandler implements MessageHandler {
     private final RedisMessageRoundedSessionCloseRequest message;
@@ -20,7 +21,7 @@ public class RoundedSessionCloseRequestHandler implements MessageHandler {
     public void execute() throws Exception {
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        RoundedServerFamily family = (RoundedServerFamily) api.getVirtualProcessor().getFamilyManager().find(message.getFamilyName());
+        RoundedServerFamily family = (RoundedServerFamily) api.getService(FamilyService.class).find(message.getFamilyName());
 
         RoundedServer server = family.getServer(new ServerInfo(message.getServerName(), message.getAddress()));
         if(server == null) throw new Exception("The server that was attempted to be found doesn't exist on this family!");

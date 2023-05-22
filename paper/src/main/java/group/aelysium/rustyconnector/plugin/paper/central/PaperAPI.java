@@ -52,7 +52,7 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     }
 
     @Override
-    public VirtualServerProcessor getVirtualProcessor() {
+    public VirtualServerProcessor getProcessor() {
         return this.virtualProcessor;
     }
 

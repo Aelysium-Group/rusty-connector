@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;

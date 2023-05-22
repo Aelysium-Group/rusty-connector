@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.webhook;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 /**
  * Thank you to <a href="https://github.com/LuckPerms/LuckPerms">...</a> for inspiring this implementation.

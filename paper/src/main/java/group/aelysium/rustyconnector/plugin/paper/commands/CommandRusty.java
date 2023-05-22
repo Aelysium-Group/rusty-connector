@@ -7,7 +7,7 @@ import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
@@ -31,9 +31,9 @@ public final class CommandRusty {
                         try {
                             final Long snowflake = commandContext.get("snowflake");
 
-                            MessageCache messageCache = api.getVirtualProcessor().getMessageCache();
+                            MessageCacheService messageCacheService = api.getProcessor().getMessageCache();
 
-                            CacheableMessage message = messageCache.getMessage(snowflake);
+                            CacheableMessage message = messageCacheService.getMessage(snowflake);
 
                             PaperLang.RC_MESSAGE_GET_MESSAGE.send(logger, message.getSnowflake(), message.getDate(), message.getContents());
                         } catch (NullPointerException e) {
@@ -52,7 +52,7 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                api.getVirtualProcessor().sendToOtherFamily(player,familyName);
+                                api.getProcessor().sendToOtherFamily(player,familyName);
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
@@ -64,7 +64,7 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .synchronous(commandContext -> {
                             try {
-                                api.getVirtualProcessor().registerToProxy();
+                                api.getProcessor().registerToProxy();
                             } catch (Exception e) {
                                 logger.log("An error stopped us from sending your request!", e);
                             }
@@ -74,7 +74,7 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .synchronous(commandContext -> {
                             try {
-                                api.getVirtualProcessor().unregisterFromProxy();
+                                api.getProcessor().unregisterFromProxy();
                             } catch (Exception e) {
                                 logger.log("An error stopped us from sending your request!", e);
                             }

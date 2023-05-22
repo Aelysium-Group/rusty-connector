@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
-public abstract class LifeCycled {
+public abstract class IRKLifecycle {
     public abstract static class Builder {
         public Builder() {}
-        abstract LifeCycled build();
+        abstract IRKLifecycle build();
     }
 
     public abstract static class Lifecycle {

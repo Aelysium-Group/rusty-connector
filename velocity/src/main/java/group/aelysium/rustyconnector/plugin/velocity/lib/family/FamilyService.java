@@ -1,14 +1,35 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.core.lib.model.Service;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FamilyManager implements NodeManager<BaseServerFamily> {
+public class FamilyService extends Service implements NodeManager<BaseServerFamily> {
     private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
+    private WeakReference<ScalarServerFamily> rootFamily;
+
+    public FamilyService() {
+        super(true);
+    }
+
+    public void setRootFamily(ScalarServerFamily family) {
+        this.rootFamily = new WeakReference<>(family);
+    }
+
+    /**
+     * Get the root family of this FamilyService.
+     * If root family hasn't been set, or the family it references has been garbage collected,
+     * this will return `null`.
+     * @return A {@link BaseServerFamily} or `null`
+     */
+    public ScalarServerFamily getRootFamily() {
+        return this.rootFamily.get();
+    }
 
     /**
      * Get a family via its name.

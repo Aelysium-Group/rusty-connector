@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.core.lib.database;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
+import group.aelysium.rustyconnector.core.lib.model.Service;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -11,11 +12,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MySQL {
+public class MySQLService extends Service {
     private DataSource dataSource;
     private Connection connection;
 
-    private MySQL(DataSource dataSource) {
+    private MySQLService() {
+        super(false);
+    }
+    private MySQLService(DataSource dataSource) {
+        super(true);
         this.dataSource = dataSource;
     }
 
@@ -76,6 +81,7 @@ public class MySQL {
     }
 
     public static class MySQLBuilder {
+        private boolean enabled = true;
 
         private String host;
         private int port;
@@ -111,7 +117,14 @@ public class MySQL {
             return this;
         }
 
-        public MySQL build(){
+        public MySQLBuilder setDisabled() {
+            this.enabled = false;
+            return this;
+        }
+
+        public MySQLService build(){
+            if(this.enabled == false) return new MySQLService();
+
             MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
             dataSource.setServerName(this.host);
             dataSource.setPortNumber(this.port);
@@ -125,7 +138,7 @@ public class MySQL {
             if(this.password != null)
                 dataSource.setPassword(this.password);
 
-            return new MySQL(dataSource);
+            return new MySQLService(dataSource);
         }
 
     }

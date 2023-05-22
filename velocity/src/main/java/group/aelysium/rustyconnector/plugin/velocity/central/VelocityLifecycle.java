@@ -4,6 +4,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.EventManager;
 import group.aelysium.rustyconnector.core.central.PluginLifecycle;
 import group.aelysium.rustyconnector.core.lib.config.MigrationDirections;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.exception.DuplicateLifecycleException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
@@ -42,7 +43,7 @@ public class VelocityLifecycle extends PluginLifecycle {
             logger.log("Issuing boot commands...");
             defaultConfig.getBootCommands_commands().forEach(command -> {
                 logger.log(">>> "+command);
-                api.getVirtualProcessor().dispatchCommand(command);
+                api.getProcessor().dispatchCommand(command);
             });
         }
 
@@ -62,9 +63,9 @@ public class VelocityLifecycle extends PluginLifecycle {
             ScalarFamilyConfig.empty();
             LoggerConfig.empty();
 
-            if(api.getVirtualProcessor() != null) {
-                api.getVirtualProcessor().killServices();
-                api.getVirtualProcessor().closeRedis();
+            if(api.getProcessor() != null) {
+                api.getProcessor().killServices();
+                api.getService(RedisService.class).kill();
             }
 
             api.getServer().getCommandManager().unregister("rc");

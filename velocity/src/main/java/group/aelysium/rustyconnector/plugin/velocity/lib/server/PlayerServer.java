@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.module;
+package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
@@ -8,14 +8,17 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 
 import java.security.InvalidAlgorithmParameterException;
 
@@ -74,7 +77,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     public void register(String familyName) throws Exception {
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        this.registeredServer = api.getVirtualProcessor().registerServer(this, familyName);
+        this.registeredServer = api.getService(ServerService.class).registerServer(this, familyName);
 
         this.familyName = familyName;
     }
@@ -160,7 +163,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(this.familyName);
+        BaseServerFamily family = api.getService(FamilyService.class).find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
@@ -179,7 +182,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
                 .setAddress(this.getAddress())
                 .buildSendable();
 
-        RedisPublisher publisher = api.getVirtualProcessor().getRedisService().getMessagePublisher();
+        RedisPublisher publisher = api.getService(RedisService.class).getMessagePublisher();
         publisher.publish(message);
 
         if(logger.getGate().check(GateKey.PING))

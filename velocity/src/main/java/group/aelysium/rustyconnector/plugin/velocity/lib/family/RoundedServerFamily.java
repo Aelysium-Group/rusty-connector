@@ -8,10 +8,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocu
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.SystemFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded.RoundedServerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded.RoundedSession;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded.RoundedSessionManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded.RoundedServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.RoundedServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -85,7 +85,7 @@ public class RoundedServerFamily extends SystemFocusedServerFamily<RoundedServer
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static RoundedServerFamily init(VirtualProxyProcessor virtualProxyProcessor, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {        VelocityAPI api = VelocityRustyConnector.getAPI();
+    public static RoundedServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {        VelocityAPI api = VelocityRustyConnector.getAPI();
         return null;
     }
 
@@ -124,7 +124,7 @@ public class RoundedServerFamily extends SystemFocusedServerFamily<RoundedServer
         VelocityAPI api = VelocityRustyConnector.getAPI();
         for (PlayerServer server : this.servers.dump()) {
             if(server == null) continue;
-            api.getVirtualProcessor().unregisterServer(server.getServerInfo(),this.name, false);
+            api.getService(ServerService.class).unregisterServer(server.getServerInfo(),this.name, false);
         }
     }
 

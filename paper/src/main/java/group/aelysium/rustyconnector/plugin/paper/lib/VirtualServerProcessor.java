@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.R
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerRegisterRequest;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerUnregisterRequest;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
 import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
@@ -33,7 +33,7 @@ import java.net.InetSocketAddress;
 public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
     private final TPAQueue tpaQueue = new TPAQueue();
     private RoundedSessionLifecycle roundedSessionLifecycle = null;
-    private MessageCache messageCache;
+    private MessageCacheService messageCacheService;
     private final RedisService redisService;
     private final String family;
     private final int weight = 0;
@@ -62,11 +62,11 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
      * @param max The max number of messages the cache will accept.
      */
     public void setMessageCache(int max) throws IllegalStateException {
-        if(this.messageCache != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
+        if(this.messageCacheService != null) throw new IllegalStateException("This has already been set! You can't set this twice!");
 
         if(max <= 0) max = 0;
         if(max > 500) max = 500;
-        this.messageCache = new MessageCache(max);
+        this.messageCacheService = new MessageCacheService(max);
     }
 
     /**
@@ -81,8 +81,8 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
 
     public RoundedSessionLifecycle getRoundedSessionLifecycle() { return this.roundedSessionLifecycle; }
 
-    public MessageCache getMessageCache() {
-        return this.messageCache;
+    public MessageCacheService getMessageCache() {
+        return this.messageCacheService;
     }
 
     public String getAddress() {

@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded;
 
 public class NullRoundedSession extends RoundedSession {
-    private static final NullRoundedSession session = new NullRoundedSession(null);
+    private static final NullRoundedSession session = new NullRoundedSession();
 
-    public NullRoundedSession(RoundedSession group) {
-        super(group);
+    private NullRoundedSession() {
+        super(0, 0);
     }
 
     public static NullRoundedSession get() {

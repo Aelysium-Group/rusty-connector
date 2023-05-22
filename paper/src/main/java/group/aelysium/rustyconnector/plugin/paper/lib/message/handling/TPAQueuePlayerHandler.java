@@ -22,14 +22,14 @@ public class TPAQueuePlayerHandler implements MessageHandler {
     public void execute() {
         PaperAPI api = PaperRustyConnector.getAPI();
 
-        if(!Objects.equals(this.message.getTargetServer(), api.getVirtualProcessor().getAddress()))
+        if(!Objects.equals(this.message.getTargetServer(), api.getProcessor().getAddress()))
             throw new IllegalStateException("Message is not addressed to me!");
 
         Player target = api.getServer().getPlayer(message.getTargetUsername());
         if(target == null) return;
         if(!target.isOnline()) return;
 
-        TPARequest tpaRequest = api.getVirtualProcessor().getTPAQueue().newRequest(message.getSourceUsername(), target);
+        TPARequest tpaRequest = api.getProcessor().getTPAQueue().newRequest(message.getSourceUsername(), target);
 
         // Attempt to resolve the tpa right away! If the player isn't on the server, this should fail silently.
         try {

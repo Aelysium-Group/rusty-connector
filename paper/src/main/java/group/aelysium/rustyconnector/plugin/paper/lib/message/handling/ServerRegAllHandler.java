@@ -20,7 +20,7 @@ public class ServerRegAllHandler implements MessageHandler {
         PluginLogger logger = api.getLogger();
 
         logger.log("Server has been requested to register itself...");
-        api.getVirtualProcessor().registerToProxy();
+        api.getProcessor().registerToProxy();
         logger.log("Server has submitted its registration request.");
     }
 }

@@ -11,8 +11,8 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -26,7 +26,7 @@ public class OnPlayerChangeServer {
             return EventTask.async(() -> {
                 VelocityAPI api = VelocityRustyConnector.getAPI();
                 PluginLogger logger = api.getLogger();
-                VirtualProxyProcessor virtualProcessor = api.getVirtualProcessor();
+                Processor virtualProcessor = api.getProcessor();
 
                 try {
                     Player player = event.getPlayer();

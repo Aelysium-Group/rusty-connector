@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.rounded;
 
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.RoundedServer;
 
 import java.lang.ref.WeakReference;
 import java.util.List;

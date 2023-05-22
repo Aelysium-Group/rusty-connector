@@ -12,6 +12,6 @@ public class OnPlayerLeave implements Listener {
     public void onPlayerLeave(PlayerQuitEvent event) {
         PaperAPI api = PaperRustyConnector.getAPI();
 
-        api.getVirtualProcessor().getTPAQueue().removeAllPlayersRequests(event.getPlayer());
+        api.getProcessor().getTPAQueue().removeAllPlayersRequests(event.getPlayer());
     }
 }

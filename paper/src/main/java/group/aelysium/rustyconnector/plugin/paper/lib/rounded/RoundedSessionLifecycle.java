@@ -93,7 +93,7 @@ public class RoundedSessionLifecycle {
         this.currentSession = null;
 
 
-        VirtualServerProcessor processor = PaperRustyConnector.getAPI().getVirtualProcessor();
+        VirtualServerProcessor processor = PaperRustyConnector.getAPI().getProcessor();
         RedisPublisher publisher = processor.getRedisService().getMessagePublisher();
         GenericRedisMessage message = new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.ROUNDED_SESSION_CLOSE_REQUEST)

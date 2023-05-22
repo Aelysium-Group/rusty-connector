@@ -63,7 +63,7 @@ public class WebhooksConfig extends YAML {
                         case FAMILY -> {
                             String familyName = this.getNode(node, "target-family", String.class);
 
-                            BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(familyName);
+                            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
                             if (family == null)
                                 logger.warn("webhooks.yml is pointing a webhook at a family with the name: " + familyName + ". No family with this name exists!");
 

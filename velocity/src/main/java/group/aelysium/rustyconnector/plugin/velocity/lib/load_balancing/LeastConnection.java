@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 import group.aelysium.rustyconnector.core.lib.util.QuickSort;
 import group.aelysium.rustyconnector.core.lib.util.SingleSort;
 import group.aelysium.rustyconnector.core.lib.util.WeightedQuickSort;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 public class LeastConnection extends LoadBalancer {
 
