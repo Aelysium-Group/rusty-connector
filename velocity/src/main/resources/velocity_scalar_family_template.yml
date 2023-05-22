@@ -60,8 +60,7 @@ load-balancing:
 #             Connects players to the server with the      #
 #             the most players currently connected.        #
 #             This mode is best if you want to fill        #
-#             servers up as quickly as possible. An        #
-#             example would be a minigame server.          #
+#             servers up as quickly as possible.           #
 #  ⚫ ROUND_ROBIN -                                        #
 #             Every time a connection occurs, the next     #
 #             server in the load balancer will be queued   #
