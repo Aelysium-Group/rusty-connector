@@ -7,18 +7,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 
 import java.util.Collections;
 
-public class MostConnection extends LoadBalancer {
-
-    @Override
-    public void iterate() {
-        try {
-            PlayerServer thisItem = this.items.get(this.index);
-            PlayerServer theNextItem = this.items.get(this.index + 1);
-
-            if(thisItem.getPlayerCount() >= theNextItem.getPlayerCount()) this.index++;
-        } catch (IndexOutOfBoundsException ignore) {}
-    }
-
+public class MostConnection extends LeastConnection {
     @Override
     public void completeSort() {
         this.index = 0;
@@ -27,12 +16,6 @@ public class MostConnection extends LoadBalancer {
             QuickSort.sort(this.items);
             Collections.reverse(this.items);
         }
-    }
-
-    @Override
-    public void singleSort() {
-        this.index = 0;
-        SingleSort.sort(this.items, this.index);
     }
 
     @Override
