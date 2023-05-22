@@ -1,9 +1,17 @@
-public class PartyService {
+package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
+
+import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.module.Service;
+
+import java.util.List;
+import java.util.Vector;
+
+public class PartyService extends Service {
     private final Vector<Party> parties = new Vector<>();
     private final Vector<PartyInvite> invites = new Vector<>();
     private final int partySize;
 
-    public ParyService(int partySize) {
+    public PartyService(int partySize) {
         this.partySize = partySize;
     }
 
@@ -26,16 +34,16 @@ public class PartyService {
     }
 
     public PartyInvite invitePlayer(Party party, Player player) {
-        PartyInvite invite = new ParyInvite(party, player);
+        PartyInvite invite = new PartyInvite(party, player);
         this.invites.add(invite);
         return invite;
     }
 
     public List<PartyInvite> findInvites(Player player) {
-        return this.invites.stream().filter(invite -> invite.getPlayer() == player).findAll().toList();
+        return this.invites.stream().filter(invite -> invite.getPlayer() == player).toList();
     }
 
-    public void closeInvite(ParyInvite invite) {
+    public void closeInvite(PartyInvite invite) {
         this.invites.remove(invite);
     }
 }

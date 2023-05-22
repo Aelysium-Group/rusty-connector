@@ -1,3 +1,10 @@
+package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
+
+import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
+
+import java.lang.ref.WeakReference;
+
 public class PartyInvite {
     private final WeakReference<Party> party;
     private final Player player;
