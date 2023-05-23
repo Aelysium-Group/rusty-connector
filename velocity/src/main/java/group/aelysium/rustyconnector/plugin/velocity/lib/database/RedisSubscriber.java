@@ -29,8 +29,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
     public void onMessage(String rawMessage) {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        Processor virtualProcessor = api.getProcessor();
-        MessageCacheService messageCacheService = virtualProcessor.getService(MessageCacheService.class);
+        MessageCacheService messageCacheService = api.getService(MessageCacheService.class);
 
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
         // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
@@ -43,9 +42,9 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
 
             if(message.getOrigin() == MessageOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
             try {
-                virtualProcessor.getService(RedisService.class).validatePrivateKey(message.getPrivateKey());
+                api.getService(RedisService.class).validatePrivateKey(message.getPrivateKey());
 
-                if (!(virtualProcessor.getService(RedisService.class).validatePrivateKey(message.getPrivateKey())))
+                if (!(api.getService(RedisService.class).validatePrivateKey(message.getPrivateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
@@ -69,7 +68,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(logger.getGate().check(GateKey.SAVE_TRASH_MESSAGES))
                 cachedMessage.sentenceMessage(MessageStatus.TRASHED, e.getMessage());
             else
-                virtualProcessor.getService(MessageCacheService.class).removeMessage(cachedMessage.getSnowflake());
+                api.getService(MessageCacheService.class).removeMessage(cachedMessage.getSnowflake());
 
             if(!logger.getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 

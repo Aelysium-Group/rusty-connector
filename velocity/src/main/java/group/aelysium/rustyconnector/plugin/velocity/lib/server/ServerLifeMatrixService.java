@@ -71,12 +71,12 @@ public class ServerLifeMatrixService extends ClockService {
     public void startHeartbeat() {
         this.throwIfDisabled();
 
-        Processor processor = VelocityRustyConnector.getAPI().getProcessor();
-        for (BaseServerFamily family : processor.getService(FamilyService.class).dump()) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+
+        for (BaseServerFamily family : api.getService(FamilyService.class).dump()) {
             if (!(family instanceof PlayerFocusedServerFamily)) continue;
 
             this.scheduleRecurring(() -> {
-                VelocityAPI api = VelocityRustyConnector.getAPI();
                 PluginLogger logger = api.getLogger();
 
                 if(logger.getGate().check(GateKey.PING))

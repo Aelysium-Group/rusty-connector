@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMappin
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.sql.*;
 
@@ -50,8 +51,7 @@ public class HomeServerMappingsDatabase {
      */
     public static HomeServerMapping find(Player player, StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        Processor processor = api.getProcessor();
-        MySQLService mySQLService = processor.getService(MySQLService.class);
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(FIND_HOME_SERVER_IN_FAMILY);
@@ -63,7 +63,7 @@ public class HomeServerMappingsDatabase {
 
         RegisteredServer registeredServer = api.getServer().getServer(result.getString("server_name")).orElse(null);
         if(registeredServer == null) return null;
-        PlayerServer server = api.getProcessor().findServer(registeredServer.getServerInfo());
+        PlayerServer server = api.getService(ServerService.class).findServer(registeredServer.getServerInfo());
 
         mySQLService.close();
         return new HomeServerMapping(player, server, family);
@@ -78,8 +78,7 @@ public class HomeServerMappingsDatabase {
      */
     public static boolean doesPlayerHaveHome(Player player, StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        Processor processor = api.getProcessor();
-        MySQLService mySQLService = processor.getService(MySQLService.class);
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(CHECK_IF_PLAYER_HAS_HOME);
@@ -99,8 +98,7 @@ public class HomeServerMappingsDatabase {
      */
     public static void delete(Player player, StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        Processor processor = api.getProcessor();
-        MySQLService mySQLService = processor.getService(MySQLService.class);
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(DELETE_PLAYERS_HOME_SERVER);
@@ -118,8 +116,7 @@ public class HomeServerMappingsDatabase {
      */
     public static void save(HomeServerMapping mapping) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        Processor processor = api.getProcessor();
-        MySQLService mySQLService = processor.getService(MySQLService.class);
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
         LiquidTimestamp expiration = mapping.family().getHomeServerExpiration();
 
@@ -145,8 +142,7 @@ public class HomeServerMappingsDatabase {
      */
     public static void purgeExpired(StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        Processor processor = api.getProcessor();
-        MySQLService mySQLService = processor.getService(MySQLService.class);
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(PURGE_FAMILY_EXPIRED_MAPPINGS);
@@ -166,8 +162,7 @@ public class HomeServerMappingsDatabase {
         if(liquidExpiration == null) return;
 
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        Processor processor = api.getProcessor();
-        MySQLService mySQLService = processor.getService(MySQLService.class);
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
         Timestamp expiration = new Timestamp(liquidExpiration.getEpochFromNow());
 
@@ -187,8 +182,7 @@ public class HomeServerMappingsDatabase {
      */
     public static void updateValidExpirations(StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        Processor processor = api.getProcessor();
-        MySQLService mySQLService = processor.getService(MySQLService.class);
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(UPDATE_NOT_NULL_EXPIRATIONS);

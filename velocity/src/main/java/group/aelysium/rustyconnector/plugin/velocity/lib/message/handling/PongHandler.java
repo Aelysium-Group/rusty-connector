@@ -10,6 +10,8 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerLifeMatrixService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.net.InetSocketAddress;
 
@@ -33,9 +35,9 @@ public class PongHandler implements MessageHandler {
         );
 
         try {
-            PlayerServer server = api.getProcessor().findServer(serverInfo);
+            PlayerServer server = api.getService(ServerService.class).findServer(serverInfo);
             if(server == null) return;
-            api.getProcessor().reviveServer(serverInfo);
+            api.getService(ServerLifeMatrixService.class).reviveServer(serverInfo);
             server.setPlayerCount(message.getPlayerCount());
 
             if(logger.getGate().check(GateKey.PONG))

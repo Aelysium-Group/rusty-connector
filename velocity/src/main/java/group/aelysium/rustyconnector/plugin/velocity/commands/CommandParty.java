@@ -15,14 +15,14 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPARequest;
-import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPAService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPACleaningService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -37,13 +37,13 @@ public final class CommandParty {
      * @return `true` is /tpa is allowed. `false` otherwise.
      */
     public static boolean tpaEnabled(Player sender) {
-        Processor virtualProcessor = VelocityRustyConnector.getAPI().getProcessor();
+        VelocityAPI api = VelocityRustyConnector.getAPI();
         try {
             ServerInfo serverInfo = sender.getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer targetServer = virtualProcessor.findServer(serverInfo);
+            PlayerServer targetServer = api.getService(ServerService.class).findServer(serverInfo);
             String familyName = targetServer.getFamilyName();
 
-            BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
+            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
             if(family == null) return false;
 
             return family.getTPAHandler().getSettings().isEnabled();
@@ -65,7 +65,6 @@ public final class CommandParty {
     public static BrigadierCommand create() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        Processor virtualProcessor = api.getProcessor();
 
         LiteralCommandNode<CommandSource> party = LiteralArgumentBuilder
                 .<CommandSource>literal("party")
@@ -103,9 +102,9 @@ public final class CommandParty {
 
                             Player player = (Player) context.getSource(); 
 
-                            if(virtualProcessor.getService(PartyService.class).find(player) != null) throw new REPLACEME();
+                            if(api.getService(PartyService.class).find(player) != null) throw new REPLACEME();
 
-                            virtualProcessor.getService(PartyService.class).create(player);
+                            api.getService(PartyService.class).create(player);
                             return Command.SINGLE_SUCCESS;
                         })
                 )
@@ -137,8 +136,9 @@ public final class CommandParty {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                         String familyName = api.getService(ServerService.class).findServer(sendingServer).getFamilyName();
-                                        BaseServerFamily family = virtualProcessor.getService(FamilyService.class).find(familyName);
-                                        List<TPARequest> requests = api.getService(TPAService.class).findRequestsForTarget(player);
+                                        BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                        if(!(family instanceof PlayerFocusedServerFamily)) return builder.buildFuture();
+                                        List<TPARequest> requests = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequestsForTarget(player);
 
                                         if(requests.size() <= 0) {
                                             builder.suggest("You have no pending TPA requests!");

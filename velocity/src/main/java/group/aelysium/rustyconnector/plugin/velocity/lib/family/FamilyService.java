@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
+import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 
@@ -71,5 +73,18 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
 
     public int size() {
         return this.registeredFamilies.size();
+    }
+
+    /**
+     * Remove any home server mappings which have been cached for a specific player.
+     * @param player The player to uncache mappings for.
+     */
+    public void uncacheHomeServerMappings(Player player) {
+        List<BaseServerFamily> familyList = VelocityRustyConnector.getAPI().getService(FamilyService.class).dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
+        if(familyList.size() == 0) return;
+
+        for (BaseServerFamily family : familyList) {
+            ((StaticServerFamily) family).uncacheHomeServer(player);
+        }
     }
 }

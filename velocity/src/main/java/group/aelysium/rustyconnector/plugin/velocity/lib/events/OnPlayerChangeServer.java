@@ -13,6 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServer
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -26,7 +27,6 @@ public class OnPlayerChangeServer {
             return EventTask.async(() -> {
                 VelocityAPI api = VelocityRustyConnector.getAPI();
                 PluginLogger logger = api.getLogger();
-                Processor virtualProcessor = api.getProcessor();
 
                 try {
                     Player player = event.getPlayer();
@@ -34,10 +34,10 @@ public class OnPlayerChangeServer {
                     RegisteredServer newRawServer = event.getServer();
                     RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
 
-                    PlayerServer newServer = virtualProcessor.findServer(newRawServer.getServerInfo());
+                    PlayerServer newServer = api.getService(ServerService.class).findServer(newRawServer.getServerInfo());
 
                     if(oldRawServer == null) return; // Player just connected to proxy. This isn't a server switch.
-                    PlayerServer oldServer = virtualProcessor.findServer(oldRawServer.getServerInfo());
+                    PlayerServer oldServer = api.getService(ServerService.class).findServer(oldRawServer.getServerInfo());
 
                     boolean isTheSameFamily = newServer.getFamilyName().equals(oldServer.getFamilyName());
 

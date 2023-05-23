@@ -43,7 +43,7 @@ public class VelocityLifecycle extends PluginLifecycle {
             logger.log("Issuing boot commands...");
             defaultConfig.getBootCommands_commands().forEach(command -> {
                 logger.log(">>> "+command);
-                api.getProcessor().dispatchCommand(command);
+                api.dispatchCommand(command);
             });
         }
 
@@ -63,12 +63,12 @@ public class VelocityLifecycle extends PluginLifecycle {
             ScalarFamilyConfig.empty();
             LoggerConfig.empty();
 
-            if(api.getProcessor() != null) {
-                api.getProcessor().killServices();
-                api.getService(RedisService.class).kill();
-            }
+            try {
+                api.killServices();
+            } catch (Exception ignore) {}
 
             api.getServer().getCommandManager().unregister("rc");
+            api.getServer().getCommandManager().unregister("tpa");
 
             this.isRunning = false;
 

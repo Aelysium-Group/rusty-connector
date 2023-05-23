@@ -9,6 +9,7 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -26,7 +27,7 @@ public class OnPlayerKicked {
         return EventTask.async(() -> {
             try {
                 if(player.getCurrentServer().isPresent()) {
-                    PlayerServer oldServer = api.getProcessor().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
+                    PlayerServer oldServer = api.getService(ServerService.class).findServer(player.getCurrentServer().orElseThrow().getServerInfo());
                     if (oldServer == null) return;
                     oldServer.playerLeft();
 
@@ -49,7 +50,7 @@ public class OnPlayerKicked {
                 else
                     player.disconnect(Component.text("Kicked by server."));
 
-                api.getProcessor().uncacheHomeServerMappings(player);
+                api.getService(FamilyService.class).uncacheHomeServerMappings(player);
 
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));
             } catch (Exception e) {

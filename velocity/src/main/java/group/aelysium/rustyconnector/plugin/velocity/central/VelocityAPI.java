@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
@@ -54,19 +55,24 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         return String.valueOf(this.dataFolder);
     }
 
-    @Override
-    public Processor getProcessor() {
-        return this.processor;
-    }
-
     public <S extends Service> S getService(Class<S> type) {
         return this.processor.getService(type);
     }
 
+    public void killServices() {
+        this.processor.kill();
+    }
+
+    public void reloadServices() {
+        this.processor.kill();
+        this.processor = null;
+
+        VelocityRustyConnector.getLifecycle().loadConfigs();
+    }
+
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
-        this.processor = Processor.Lifecycle.init(config);
-        this.processor.startServices();
+        this.processor = Processor.init(config);
     }
 
     /**
@@ -103,5 +109,15 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     public VelocityRustyConnector accessPlugin() throws SyncFailedException {
         if(VelocityRustyConnector.getLifecycle().isRunning()) throw new SyncFailedException("You can't get the plugin instance while the plugin is running!");
         return this.plugin;
+    }
+
+    /**
+     * Attempt to dispatch a command as the Proxy
+     * @param command The command to dispatch.
+     */
+    public void dispatchCommand(String command) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        api.getServer().getCommandManager()
+                .executeAsync((ConsoleCommandSource) permission -> null, command);
     }
 }

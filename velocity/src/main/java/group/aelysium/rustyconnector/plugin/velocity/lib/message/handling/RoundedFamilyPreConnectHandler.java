@@ -21,9 +21,8 @@ public class RoundedFamilyPreConnectHandler implements MessageHandler {
     @Override
     public void execute() throws Exception {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        Processor processor = api.getProcessor();
 
-        BaseServerFamily family = processor.getService(FamilyService.class).find(this.message.getFamilyName());
+        BaseServerFamily family = api.getService(FamilyService.class).find(this.message.getFamilyName());
         if(family == null) throw new Exception("The requested family doesn't exist!");
         if(!(family instanceof RoundedServerFamily)) throw new Exception("The requested family must be a Rounded Family!");
 
