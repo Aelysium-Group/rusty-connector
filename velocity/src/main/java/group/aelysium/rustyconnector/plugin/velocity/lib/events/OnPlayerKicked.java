@@ -26,33 +26,45 @@ public class OnPlayerKicked {
             try {
                 if(player.getCurrentServer().isPresent()) {
                     PlayerServer oldServer = api.getVirtualProcessor().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
-                    if (oldServer == null) return;
-                    oldServer.playerLeft();
+                    if (oldServer != null) {
+                        oldServer.playerLeft();
 
-                    boolean wasKickedFromRootFamily = api.getVirtualProcessor().getRootFamily().getName().equals(oldServer.getFamilyName());
+                        boolean wasKickedFromRootFamily = api.getVirtualProcessor().getRootFamily().getName().equals(oldServer.getFamilyName());
 
-                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.getFamilyName(), DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
-                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, oldServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
+                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.getFamilyName(), DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
+                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, oldServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
 
-                    if(!wasKickedFromRootFamily) {
-                        PlayerServer newServer = api.getVirtualProcessor().getRootFamily().connect(player);
+                        if (!wasKickedFromRootFamily && api.getVirtualProcessor().catchDisconnectingPlayers) {
+                            PlayerServer newServer = api.getVirtualProcessor().getRootFamily().fetchAny(player);
 
-                        WebhookEventManager.fire(WebhookAlertFlag.DISCONNECT_CATCH, api.getVirtualProcessor().getRootFamily().getName(), DiscordWebhookMessage.PROXY__DISCONNECT_CATCH.build(player, oldServer, newServer));
-                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, api.getVirtualProcessor().getRootFamily().getName(), DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, newServer));
-                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, api.getVirtualProcessor().getRootFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
+                            try {
+                                event.setResult(KickedFromServerEvent.RedirectPlayer.create(newServer.getRegisteredServer(), event.getServerKickReason().get()));
+                            } catch (Exception ignore) {
+                                event.setResult(KickedFromServerEvent.RedirectPlayer.create(newServer.getRegisteredServer()));
+                            }
+
+                            newServer.playerJoined();
+
+                            WebhookEventManager.fire(WebhookAlertFlag.DISCONNECT_CATCH, api.getVirtualProcessor().getRootFamily().getName(), DiscordWebhookMessage.PROXY__DISCONNECT_CATCH.build(player, oldServer, newServer));
+                            WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, api.getVirtualProcessor().getRootFamily().getName(), DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, newServer));
+                            WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, api.getVirtualProcessor().getRootFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
+
+                            return;
+                        }
                     }
                 }
 
                 if(event.getServerKickReason().isPresent())
-                    player.disconnect(event.getServerKickReason().get());
+                    event.setResult(KickedFromServerEvent.DisconnectPlayer.create(event.getServerKickReason().get()));
                 else
-                    player.disconnect(Component.text("Kicked by server."));
+                    event.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("Kicked by server.")));
 
                 api.getVirtualProcessor().uncacheHomeServerMappings(player);
 
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));
             } catch (Exception e) {
-                player.disconnect(Component.text("Kicked by server. "+e.getMessage()));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));
+                event.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("Kicked by server. "+e.getMessage())));
                 e.printStackTrace();
             }
         });

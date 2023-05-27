@@ -69,6 +69,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
     private LoadBalancingService loadBalancingService = null;
     private Clock tpaRequestCleaner;
     private MessageTunnel messageTunnel;
+    public boolean catchDisconnectingPlayers = false;
 
     public ScalarServerFamily getRootFamily() {
         return (ScalarServerFamily) this.familyManager.find(this.rootFamily);
@@ -529,6 +530,9 @@ public class VirtualProxyProcessor implements VirtualProcessor {
             privateKey = privateKeyConfig.get();
         } catch (Exception ignore) {}
         if(privateKey == null) throw new IllegalAccessException("There was a fatal error while reading private.key!");
+
+        logger.log("Should the root family catch players that are disconnected from sub-servers: "+ config.shouldRootFamilyCatchDisconnectingPlayers());
+        virtualProxyProcessor.catchDisconnectingPlayers = config.shouldRootFamilyCatchDisconnectingPlayers();
 
         // Setup Redis
         RedisClient.Builder redisClientBuilder = new RedisClient.Builder()

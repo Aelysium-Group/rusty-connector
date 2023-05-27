@@ -31,6 +31,11 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
         return connector.connect();
     }
 
+    public PlayerServer fetchAny(Player player) throws RuntimeException {
+        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
+        return connector.fetchAny();
+    }
+
     /**
      * Initializes all server families based on the configs.
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
@@ -155,6 +160,15 @@ class ScalarFamilyConnector {
         server.playerJoined();
 
         return server;
+    }
+
+    public PlayerServer fetchAny() throws RuntimeException {
+        if(this.family.getLoadBalancer().size() == 0)
+            throw new RuntimeException("There are no servers for you to connect to!");
+
+        this.validateWhitelist();
+
+        return this.family.getLoadBalancer().getCurrent();
     }
 
     public void validateWhitelist() throws RuntimeException {

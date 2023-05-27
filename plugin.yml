@@ -1,5 +1,5 @@
 name: rustyconnector-paper
-version: '0.5.0'
+version: '0.5.1'
 main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
 api-version: 1.16
 website: https://github.com/Aelysium-Group/rusty-connector
