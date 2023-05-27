@@ -85,6 +85,10 @@ families:
 # This setting is great if you want a player to join back into the lobby if they get kicked from
 # a gamemode or sub-family.
 #
+# Currently, this method will only work for certain if all servers in the root-family are guaranteed to
+# allow players to join. (i.e. they can't have a whitelist set).
+# If some servers in your root family have whitelists set, a player may not be able to connect to the family!
+#
         catch-disconnecting-players: false
 
 #########################

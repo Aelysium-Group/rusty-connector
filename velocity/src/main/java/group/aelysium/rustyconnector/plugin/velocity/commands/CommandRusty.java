@@ -25,6 +25,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
 import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.List;
@@ -341,22 +343,26 @@ public final class CommandRusty {
                             })
                             .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.greedyString())
                                     .executes(context -> {
-                                        String familyName = context.getArgument("familyName", String.class);
-                                        String username = context.getArgument("username", String.class);
+                                        try {
+                                            String familyName = context.getArgument("familyName", String.class);
+                                            String username = context.getArgument("username", String.class);
 
-                                        Player player = api.getServer().getPlayer(username).orElse(null);
-                                        if(player == null) {
-                                            logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
-                                            return Command.SINGLE_SUCCESS;
+                                            Player player = api.getServer().getPlayer(username).orElse(null);
+                                            if (player == null) {
+                                                logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
+                                                return Command.SINGLE_SUCCESS;
+                                            }
+
+                                            BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
+                                            if (family == null) {
+                                                logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
+                                                return Command.SINGLE_SUCCESS;
+                                            }
+
+                                            family.connect(player);
+                                        } catch (Exception e) {
+                                            logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There was an issue using that command! "+e.getMessage()), NamedTextColor.RED));
                                         }
-
-                                        BaseServerFamily family = virtualProcessor.getFamilyManager().find(familyName);
-                                        if(family == null) {
-                                            logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
-                                            return Command.SINGLE_SUCCESS;
-                                        }
-
-                                        family.connect(player);
 
                                         return Command.SINGLE_SUCCESS;
                                     })
@@ -374,28 +380,32 @@ public final class CommandRusty {
                                     })
                                     .then(RequiredArgumentBuilder.<CommandSource, String>argument("serverName", StringArgumentType.greedyString())
                                             .executes(context -> {
-                                                String serverName = context.getArgument("serverName", String.class);
-                                                String username = context.getArgument("username", String.class);
+                                                try {
+                                                    String serverName = context.getArgument("serverName", String.class);
+                                                    String username = context.getArgument("username", String.class);
 
-                                                Player player = api.getServer().getPlayer(username).orElse(null);
-                                                if(player == null) {
-                                                    logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
-                                                    return Command.SINGLE_SUCCESS;
+                                                    Player player = api.getServer().getPlayer(username).orElse(null);
+                                                    if (player == null) {
+                                                        logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
+                                                        return Command.SINGLE_SUCCESS;
+                                                    }
+
+                                                    RegisteredServer registeredServer = api.getServer().getServer(serverName).orElse(null);
+                                                    if (registeredServer == null) {
+                                                        logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
+                                                        return Command.SINGLE_SUCCESS;
+                                                    }
+
+                                                    PlayerServer server = virtualProcessor.findServer(registeredServer.getServerInfo());
+                                                    if (server == null) {
+                                                        logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
+                                                        return Command.SINGLE_SUCCESS;
+                                                    }
+
+                                                    server.connect(player);
+                                                } catch (Exception e) {
+                                                    logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There was an issue using that command! "+e.getMessage()), NamedTextColor.RED));
                                                 }
-
-                                                RegisteredServer registeredServer = api.getServer().getServer(serverName).orElse(null);
-                                                if(registeredServer == null) {
-                                                    logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
-                                                    return Command.SINGLE_SUCCESS;
-                                                }
-
-                                                PlayerServer server = virtualProcessor.findServer(registeredServer.getServerInfo());
-                                                if(server == null) {
-                                                    logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
-                                                    return Command.SINGLE_SUCCESS;
-                                                }
-
-                                                server.connect(player);
 
                                                 return Command.SINGLE_SUCCESS;
                                             })
