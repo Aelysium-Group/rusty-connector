@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerLeave;
+import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerPreLogin;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -94,6 +95,7 @@ public class PaperLifecycle extends PluginLifecycle {
         try {
             api.getServer().getPluginManager().registerEvents(new OnPlayerJoin(), api.accessPlugin());
             api.getServer().getPluginManager().registerEvents(new OnPlayerLeave(), api.accessPlugin());
+            api.getServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), api.accessPlugin());
 
             return true;
         } catch (Exception e) {
