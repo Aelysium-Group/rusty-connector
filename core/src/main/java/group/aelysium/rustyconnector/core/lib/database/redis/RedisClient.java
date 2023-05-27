@@ -34,6 +34,7 @@ public class RedisClient extends io.lettuce.core.RedisClient {
     }
 
     public static class Builder {
+        private static final ClientResources resources = ClientResources.create();
         private String host = "localhost";
         private int port = 3306;
         private String user = "default";
@@ -87,8 +88,6 @@ public class RedisClient extends io.lettuce.core.RedisClient {
                         .withPort(this.port)
                         .withAuthentication(this.user, this.password)
                         .build();
-
-            ClientResources resources = ClientResources.create();
 
             return RedisClient.create(resources, uri, dataChannel, privateKey);
         }

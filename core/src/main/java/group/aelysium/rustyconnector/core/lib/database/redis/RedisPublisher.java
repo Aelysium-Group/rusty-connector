@@ -13,6 +13,7 @@ public class RedisPublisher {
     /**
      * Sends a message over a Redis data channel.
      * If a message is not already, this method will sign messages with the private key provided via the RedisClient used to init this RedisPublisher.
+     * Kills the client after it's been used.
      * @param message The message to send.
      * @throws IllegalStateException If you attempt to send a received RedisMessage.
      */
@@ -30,10 +31,13 @@ public class RedisPublisher {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        this.client.shutdown();
     }
 
     /**
      * Publish a message that will cause the subscriber to kill itself.
+     * Kills the client after it's been used.
      * @deprecated This method should only ever be used for testing purposes.
      */
     @Deprecated
@@ -45,5 +49,7 @@ public class RedisPublisher {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        this.client.shutdown();
     }
 }

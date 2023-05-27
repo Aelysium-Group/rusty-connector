@@ -129,15 +129,23 @@ public class DefaultConfig extends YAML {
         if(this.server_playerCap_soft >= this.server_playerCap_hard)
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode."), NamedTextColor.YELLOW);
 
-        this.redis_host = this.getNode(this.data,"redis.host",String.class);
+
+        // Redis
+        this.redis_host = this.getNode(this.data, "redis.host", String.class);
         if(this.redis_host.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
 
-        this.redis_port = this.getNode(this.data,"redis.port",Integer.class);
-        this.redis_user = this.getNode(this.data,"redis.user",String.class);
-        this.redis_password = this.getNode(this.data,"redis.password",String.class);
-        if(this.redis_password.equals("password") || this.redis_password.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
-        if(this.redis_password.length() < 16)
+        this.redis_port = this.getNode(this.data, "redis.port", Integer.class);
+        this.redis_user = this.getNode(this.data, "redis.user", String.class);
+        this.redis_password = this.getNode(this.data, "redis.password", String.class);
+
+        if(this.redis_password.length() != 0 && this.redis_password.length() < 16)
             throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
+
+
+
+        this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
+        if(this.redis_dataChannel.equals(""))
+            throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
 
         this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
         if(this.redis_dataChannel.equals(""))
