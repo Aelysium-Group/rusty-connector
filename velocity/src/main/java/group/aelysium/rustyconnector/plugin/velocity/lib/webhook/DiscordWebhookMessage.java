@@ -175,7 +175,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_BLUE)
                     .build();
 
-    ParameterizedEmbed3<Player, PlayerServer, PlayerServer> PROXY__DISCONNECT_CATCH = (player, oldServer, newServer) ->
+    ParameterizedEmbed2<Player, PlayerServer> PROXY__DISCONNECT_CATCH = (player, newServer) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -184,7 +184,7 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Was caught by " + newServer.getFamilyName() + " after being disconnected from " + oldServer.getFamilyName(), null)
+                            new WebhookEmbed.EmbedTitle("Was caught by " + newServer.getFamilyName() + " after being disconnected from another server", null)
                     )
                     .setColor(COLOR_BLUE)
                     .build();
