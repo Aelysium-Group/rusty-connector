@@ -38,6 +38,7 @@ public class OnPlayerKicked {
             try {
                 if (api.getVirtualProcessor().catchDisconnectingPlayers) {
                     PlayerServer newServer = api.getVirtualProcessor().getRootFamily().fetchAny(player);
+                    if(newServer == null) throw new RuntimeException("Server closed.");
 
                     try {
                         event.setResult(KickedFromServerEvent.RedirectPlayer.create(newServer.getRegisteredServer(), event.getServerKickReason().get()));
