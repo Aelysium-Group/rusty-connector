@@ -1,8 +1,17 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
+import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
+import io.lettuce.core.SocketOptions;
+import io.lettuce.core.TimeoutOptions;
 import io.lettuce.core.resource.ClientResources;
+import io.lettuce.core.resource.NettyCustomizer;
+import io.netty.bootstrap.Bootstrap;
 import org.jetbrains.annotations.NotNull;
+
+import java.time.Duration;
+
+import static jdk.net.ExtendedSocketOptions.TCP_KEEPIDLE;
 
 public class RedisClient extends io.lettuce.core.RedisClient {
     private final char[] privateKey;
@@ -75,6 +84,20 @@ public class RedisClient extends io.lettuce.core.RedisClient {
         }
 
         public RedisClient build() {
+            SocketOptions socket = SocketOptions.builder()
+                    .keepAlive(true)
+                    .build();
+
+            TimeoutOptions timeout = TimeoutOptions.builder()
+                    .fixedTimeout(Duration.ofMinutes(1))
+                    .build();
+
+            ClientOptions options = ClientOptions.builder()
+                    .autoReconnect(true)
+                    .socketOptions(socket)
+                    .timeoutOptions(timeout)
+                    .build();
+
             RedisURI uri;
             if(this.password == null)
                 uri = RedisURI.builder()
@@ -89,7 +112,10 @@ public class RedisClient extends io.lettuce.core.RedisClient {
                         .withAuthentication(this.user, this.password)
                         .build();
 
-            return RedisClient.create(resources, uri, dataChannel, privateKey);
+            RedisClient client = RedisClient.create(resources, uri, dataChannel, privateKey);
+            client.setOptions(options);
+
+            return client;
         }
     }
 }

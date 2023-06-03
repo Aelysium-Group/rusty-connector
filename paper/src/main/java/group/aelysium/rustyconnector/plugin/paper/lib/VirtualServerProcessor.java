@@ -130,6 +130,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
 
     public void registerToProxy() {
         try {
+            System.out.println("building...");
             RedisMessageServerRegisterRequest message = (RedisMessageServerRegisterRequest) new GenericRedisMessage.Builder()
                     .setType(RedisMessageType.REG)
                     .setOrigin(MessageOrigin.SERVER)
@@ -140,9 +141,10 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                     .setParameter(RedisMessageServerRegisterRequest.ValidParameters.HARD_CAP, String.valueOf(this.hardPlayerCap))
                     .setParameter(RedisMessageServerRegisterRequest.ValidParameters.WEIGHT, String.valueOf(this.weight))
                     .buildSendable();
+            System.out.println("built.");
 
-            RedisPublisher publisher = this.getRedisService().getMessagePublisher();
-            publisher.publish(message);
+            System.out.println("sending...");
+            this.getRedisService().publish(message);
         } catch (Exception e) {
             Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text(e.getMessage()), NamedTextColor.RED);
         }
@@ -157,8 +159,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                 .setParameter(RedisMessageServerUnregisterRequest.ValidParameters.SERVER_NAME, this.name)
                 .buildSendable();
 
-        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
-        publisher.publish(message);
+        this.getRedisService().publish(message);
     }
 
     /**
@@ -175,8 +176,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                 .setParameter(RedisMessageSendPlayer.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
                 .buildSendable();
 
-        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
-        publisher.publish(message);
+        this.getRedisService().publish(message);
     }
 
     /**
@@ -191,8 +191,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                 .setParameter(RedisMessageServerPong.ValidParameters.PLAYER_COUNT, String.valueOf(this.getPlayerCount()))
                 .buildSendable();
 
-        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
-        publisher.publish(message);
+        this.getRedisService().publish(message);
     }
 
     public static VirtualServerProcessor init(DefaultConfig config) throws IllegalAccessException {
@@ -217,8 +216,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                 .setHost(config.getRedis_host())
                 .setPort(config.getRedis_port())
                 .setUser(config.getRedis_user())
-                .setDataChannel(config.getRedis_dataChannel())
-                .setPrivateKey(privateKey);
+                .setDataChannel(config.getRedis_dataChannel());
 
         if(!config.getRedis_password().equals(""))
             redisClientBuilder.setPassword(config.getRedis_password());
@@ -230,7 +228,7 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                 config.getServer_name(),
                 config.getServer_address(),
                 config.getServer_family(),
-                new RedisService(redisClientBuilder)
+                new RedisService(redisClientBuilder, privateKey)
         );
         server.setMessageCache(50);
 

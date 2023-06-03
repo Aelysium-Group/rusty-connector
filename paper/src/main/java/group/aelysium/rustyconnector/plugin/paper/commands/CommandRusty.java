@@ -8,10 +8,13 @@ import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -65,6 +68,7 @@ public final class CommandRusty {
                         .synchronous(commandContext -> {
                             try {
                                 api.getVirtualProcessor().registerToProxy();
+                                Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text("Send registration request!"), NamedTextColor.GREEN);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from sending your request!", e);
                             }
@@ -75,6 +79,7 @@ public final class CommandRusty {
                         .synchronous(commandContext -> {
                             try {
                                 api.getVirtualProcessor().unregisterFromProxy();
+                                Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text("Send unregister request!"), NamedTextColor.GREEN);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from sending your request!", e);
                             }

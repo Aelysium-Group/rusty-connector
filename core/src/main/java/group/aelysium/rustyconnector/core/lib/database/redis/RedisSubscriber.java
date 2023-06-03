@@ -1,10 +1,12 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
+import io.lettuce.core.RedisChannelHandler;
+import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 
-import java.util.Objects;
+import java.net.SocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +15,7 @@ public class RedisSubscriber {
     private final RedisClient client;
     public RedisSubscriber(RedisClient client) {
         this.client = client;
+        this.client.addListener(new RedisSubscriberListener());
     }
 
     /**
@@ -27,7 +30,7 @@ public class RedisSubscriber {
 
             RedisPubSubCommands<String, String> sync = connection.sync();
 
-            connection.addListener(new RedisListener());
+            connection.addListener(new RedisMessageListener());
 
             sync.subscribe(this.client.getDataChannel());
 
@@ -59,10 +62,27 @@ public class RedisSubscriber {
         // Empty adapter method
     }
 
-    protected class RedisListener extends RedisPubSubAdapter<String, String> {
+    protected class RedisMessageListener extends RedisPubSubAdapter<String, String> {
         @Override
         public void message(String channel, String message) {
             RedisSubscriber.this.onMessage(message);
+        }
+    }
+
+    class RedisSubscriberListener extends RedisConnectionStateAdapter {
+
+        @Override
+        public void onRedisConnected(RedisChannelHandler<?, ?> connection, SocketAddress socketAddress) {
+            System.out.println("sub-Redis connected!");
+        }
+        @Override
+        public void onRedisDisconnected(RedisChannelHandler<?, ?> connection) {
+            System.out.println("sub-Redis closed!");
+        }
+
+        @Override
+        public void onRedisExceptionCaught(RedisChannelHandler<?, ?> connection, Throwable cause) {
+            cause.printStackTrace();
         }
     }
 }
