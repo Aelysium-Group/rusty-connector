@@ -13,11 +13,11 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 
 import java.net.InetSocketAddress;
 
-public class PongHandler implements MessageHandler {
-    private final RedisMessageServerPong message;
+public class PingHandler implements MessageHandler {
+    private final RedisMessageServerPing message;
 
-    public PongHandler(GenericRedisMessage message) {
-        this.message = (RedisMessageServerPong) message;
+    public PingHandler(GenericRedisMessage message) {
+        this.message = (RedisMessageServerPing) message;
     }
 
     @Override
@@ -38,11 +38,11 @@ public class PongHandler implements MessageHandler {
             api.getVirtualProcessor().reviveServer(serverInfo);
             server.setPlayerCount(message.getPlayerCount());
 
-            if(logger.getGate().check(GateKey.PONG))
-                VelocityLang.PONG.send(logger, serverInfo);
+            if(logger.getGate().check(GateKey.PING))
+                VelocityLang.PING.send(logger, serverInfo);
         } catch (Exception e) {
-            if(logger.getGate().check(GateKey.PONG))
-                VelocityLang.PONG_CANCELED.send(logger, serverInfo);
+            if(logger.getGate().check(GateKey.PING))
+                VelocityLang.PING_CANCELED.send(logger, serverInfo);
             throw new Exception(e.getMessage());
         }
     }

@@ -251,26 +251,23 @@ services:
 # Also manages the lifecycle of a player's home server if you are using Static Families.
 #
     server-lifecycle:
-        enabled: true
 #
-# Time, in seconds, between sending out a ping and expecting a pong.
-# Servers will also send their current player count with their pong response. This way, if the proxy
-# somehow unsyncs it's player count from the actual count, it can be corrected.
+# Amount of time, in seconds, that a server can go without pinging the proxy.
+# If a server diesnt ping the proxy in this time, it will be declared stale
+# and be unregistered from the proxy.
 #
-        interval: 30
+        server-timeout: 15
+
 #
-# If a server doesn't respond to the most recent ping before the heart's next interval.
-# Should the server get unregistered?
+# Amount of time, in seconds, that a server should wait to ping the proxy.
+# This setting cannot be higher than "server-timeout".
 #
-# This is an additional life-cycle option in-case servers become unresponsive and unable to unregister themselves.
-# If a server can't unregister itself (bad shutdown, server freezing, bad connection between server and proxy, etc) this will be able to see that it's unresponsive and unregister it.
-#
-        unregister-on-ignore: false
+        server-ping-interval: 10
 
 #
 # Manages the load balancing of the proxy's families.
 #
-    family-server-sorting:
+    load-balancing:
         enabled: true
 #
 # Time, in seconds, between when the families sort their servers. This interval will cause your proxy to sort ALL of the servers registered to it!

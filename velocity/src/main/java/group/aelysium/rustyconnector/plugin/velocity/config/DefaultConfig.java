@@ -41,11 +41,10 @@ public class DefaultConfig extends YAML {
     private boolean bootCommands_enabled = false;
     private List<String> bootCommands_commands = new ArrayList<>();
 
-    private Boolean services_serverLifecycle_enabled = true;
-    private Integer services_serverLifecycle_interval = 30;
-    private Boolean services_serverLifecycle_unregisterOnIgnore = false;
-    private Boolean messageTunnel_familyServerSorting_enabled = true;
-    private Integer messageTunnel_familyServerSorting_interval = 20;
+    private Integer services_serverLifecycle_serverTimeout = 15;
+    private Integer services_serverLifecycle_serverPingInterval = 10;
+    private Boolean messageTunnel_loadBalancing_enabled = true;
+    private Integer messageTunnel_loadBalancing_interval = 20;
 
     private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -158,24 +157,20 @@ public class DefaultConfig extends YAML {
         return bootCommands_commands;
     }
 
-    public Boolean isHearts_serverLifecycle_enabled() {
-        return services_serverLifecycle_enabled;
+    public Integer getServices_serverLifecycle_serverTimeout() {
+        return services_serverLifecycle_serverTimeout;
     }
 
-    public Integer getServices_serverLifecycle_interval() {
-        return services_serverLifecycle_interval;
+    public Integer getServices_serverLifecycle_serverPingInterval() {
+        return services_serverLifecycle_serverPingInterval;
     }
 
-    public Boolean shouldHearts_serverLifecycle_unregisterOnIgnore() {
-        return services_serverLifecycle_unregisterOnIgnore;
+    public Integer getMessageTunnel_loadBalancing_interval() {
+        return messageTunnel_loadBalancing_interval;
     }
 
-    public Integer getMessageTunnel_familyServerSorting_interval() {
-        return messageTunnel_familyServerSorting_interval;
-    }
-
-    public Boolean getMessageTunnel_familyServerSorting_enabled() {
-        return messageTunnel_familyServerSorting_enabled;
+    public Boolean getMessageTunnel_loadBalancing_enabled() {
+        return messageTunnel_loadBalancing_enabled;
     }
 
     @SuppressWarnings("unchecked")
@@ -273,19 +268,27 @@ public class DefaultConfig extends YAML {
         }
 
         // Hearts
-        this.services_serverLifecycle_enabled = this.getNode(this.data,"services.server-lifecycle.enabled",Boolean.class);
-        this.services_serverLifecycle_interval = this.getNode(this.data,"services.server-lifecycle.interval",Integer.class);
-        if(this.services_serverLifecycle_interval < 10) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server lifecycle interval is set dangerously fast: " + this.services_serverLifecycle_interval + "ms. Setting to default of 30ms."), NamedTextColor.YELLOW);
-            this.messageTunnel_messageMaxLength = 30;
+        this.services_serverLifecycle_serverTimeout = this.getNode(this.data,"services.server-lifecycle.server-timeout",Integer.class);
+        if(this.services_serverLifecycle_serverTimeout < 5) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server timeout is set dangerously fast: " + this.services_serverLifecycle_serverTimeout + "s. Setting to default of 5s."), NamedTextColor.YELLOW);
+            this.services_serverLifecycle_serverTimeout= 5;
         }
-        this.services_serverLifecycle_unregisterOnIgnore = this.getNode(this.data,"services.server-lifecycle.unregister-on-ignore",Boolean.class);
+        this.services_serverLifecycle_serverPingInterval = this.getNode(this.data,"services.server-lifecycle.server-ping-interval",Integer.class);
+        if(this.services_serverLifecycle_serverPingInterval < 5) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server ping interval is set dangerously fast: " + this.services_serverLifecycle_serverPingInterval + "s. Setting to default of 5s."), NamedTextColor.YELLOW);
+            this.services_serverLifecycle_serverPingInterval = 5;
+        }
+        if(this.services_serverLifecycle_serverTimeout > this.services_serverLifecycle_serverPingInterval) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server ping interval cant be less that server timeout!"), NamedTextColor.YELLOW);
+            this.services_serverLifecycle_serverPingInterval = this.services_serverLifecycle_serverTimeout - 2;
+        }
 
-        this.messageTunnel_familyServerSorting_enabled = this.getNode(this.data,"services.family-server-sorting.enabled",Boolean.class);
-        this.messageTunnel_familyServerSorting_interval = this.getNode(this.data,"services.family-server-sorting.interval",Integer.class);
-        if(this.messageTunnel_familyServerSorting_interval < 7) {
+
+        this.messageTunnel_loadBalancing_enabled = this.getNode(this.data,"services.load-balancing.enabled",Boolean.class);
+        this.messageTunnel_loadBalancing_interval = this.getNode(this.data,"services.load-balancing.interval",Integer.class);
+        if(this.messageTunnel_loadBalancing_interval < 7) {
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server sorting interval is set dangerously fast: " + this.messageTunnel_familyServerSorting_interval + "ms. Setting to default of 20ms."), NamedTextColor.YELLOW);
-            this.messageTunnel_familyServerSorting_interval = 20;
+            this.messageTunnel_loadBalancing_interval = 20;
         }
     }
 }
