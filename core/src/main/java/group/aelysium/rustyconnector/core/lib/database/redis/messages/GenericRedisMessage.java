@@ -208,17 +208,11 @@ public class GenericRedisMessage {
             if(this.address == null) throw new IllegalStateException("You must provide `address` when building a receivable RedisMessage!");
             if(this.origin == null) throw new IllegalStateException("You must provide `origin` when building a receivable RedisMessage!");
 
-            if(this.type == REGISTER_ALL_SERVERS_TO_PROXY)  return new GenericRedisMessage(this.protocolVersion, this.rawMessage, this.privateKey, this.type, this.address, this.origin);
-            if(this.type == PING)                           return new GenericRedisMessage(this.protocolVersion, this.rawMessage, this.privateKey, this.type, this.address, this.origin);
-            if(this.type == REGISTER_SERVER)                return new RedisMessageServerRegisterRequest(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if(this.type == UNREGISTER_SERVER)              return new RedisMessageServerUnregisterRequest(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if(this.type == PING)                           return new RedisMessageServerPing(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if(this.type == SEND_PLAYER)                    return new RedisMessageSendPlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if(this.type == PONG)                           return new RedisMessageServerPong(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if(this.type == TPA_QUEUE_PLAYER)               return new RedisMessageTPAQueuePlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if(this.type == REGISTER_ALL_SERVERS_TO_FAMILY) return new RedisMessageFamilyRegister(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
-        }
 
         /**
          * Build a RedisMessage which can be sent via the RedisPublisher.
@@ -238,14 +232,9 @@ public class GenericRedisMessage {
             if(this.origin == null) throw new IllegalStateException("You must provide `origin` when building a sendable RedisMessage!");
             // Specifically allow address to be set as `null`
 
-            if(this.type == PING)                           return new GenericRedisMessage(this.type, this.address, this.origin);
-            if(this.type == REGISTER_ALL_SERVERS_TO_PROXY)  return new GenericRedisMessage(this.type, this.address, this.origin);
-            if(this.type == REGISTER_SERVER)                return new RedisMessageServerRegisterRequest(this.address, this.origin, this.parameters);
-            if(this.type == UNREGISTER_SERVER)              return new RedisMessageServerUnregisterRequest(this.address, this.origin, this.parameters);
+            if(this.type == PING)                           return new RedisMessageServerPing(this.address, this.origin, this.parameters);
             if(this.type == SEND_PLAYER)                    return new RedisMessageSendPlayer(this.address, this.origin, this.parameters);
-            if(this.type == PONG)                           return new RedisMessageServerPong(this.address, this.origin, this.parameters);
             if(this.type == TPA_QUEUE_PLAYER)               return new RedisMessageTPAQueuePlayer(this.address, this.origin, this.parameters);
-            if(this.type == REGISTER_ALL_SERVERS_TO_FAMILY) return new RedisMessageFamilyRegister(this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
         }

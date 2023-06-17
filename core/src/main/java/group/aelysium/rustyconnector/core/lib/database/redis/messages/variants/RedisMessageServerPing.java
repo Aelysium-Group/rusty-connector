@@ -11,7 +11,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageServerRegisterRequest extends GenericRedisMessage {
+public class RedisMessageServerPing extends GenericRedisMessage {
     private String familyName;
     private String serverName;
     private Integer softCap;
@@ -38,10 +38,10 @@ public class RedisMessageServerRegisterRequest extends GenericRedisMessage {
         return weight;
     }
 
-    public RedisMessageServerRegisterRequest(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public RedisMessageServerPing(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(RedisMessageType.REGISTER_SERVER, address, origin);
 
-        if(!RedisMessageServerRegisterRequest.validateParameters(ValidParameters.toList(), parameters))
+        if(!RedisMessageServerPing.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -57,10 +57,10 @@ public class RedisMessageServerRegisterRequest extends GenericRedisMessage {
             }
         });
     }
-    public RedisMessageServerRegisterRequest(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public RedisMessageServerPing(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, privateKey, RedisMessageType.REGISTER_SERVER, address, origin);
 
-        if(!RedisMessageServerRegisterRequest.validateParameters(ValidParameters.toList(), parameters))
+        if(!RedisMessageServerPing.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
