@@ -1,3 +1,10 @@
+package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
+
+import com.velocitypowered.api.proxy.Player;
+
+import java.lang.ref.WeakReference;
+import java.util.Objects;
+
 public class PartyInvite {
     private final WeakReference<Party> party;
     private final Player player;
@@ -13,14 +20,14 @@ public class PartyInvite {
     }
 
     public void accept() {
-        if(this.isAccepted != null) throw new IllegalStateException("This invite has already been acknowledged! You should close it using `ParyService#closeInvite`");
+        if(this.isAccepted != null) throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
 
         this.isAccepted = true;
-        this.party.get().getServer().connect(this.player);
+        Objects.requireNonNull(this.party.get()).getServer().connect(this.player);
     }
 
     public void deny() {
-        if(this.isAccepted != null) throw new IllegalStateException("This invite has already been acknowledged! You should close it using `ParyService#closeInvite`");
+        if(this.isAccepted != null) throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
 
         this.isAccepted = false;
     }

@@ -18,7 +18,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
 
     public FamilyService(boolean catchDisconnectingPlayers) {
         super(true);
-        this.catchDisconnectingPlayers = catchDisconnectingPlayers
+        this.catchDisconnectingPlayers = catchDisconnectingPlayers;
     }
 
     public boolean shouldCatchDisconnectingPlayers() {

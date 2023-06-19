@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.lang.ref.WeakReference;
 import java.util.Vector;
@@ -22,7 +23,7 @@ public class Party {
         this.server = new WeakReference<>(server);
     }
     public PlayerServer getServer() {
-        return this.server;
+        return this.server.get();
     }
 
     public Player getHost() {
