@@ -71,8 +71,6 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                logger.log(player.getName());
-                                logger.log(familyName);
                                 api.getVirtualProcessor().sendToOtherFamily(player,familyName);
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
