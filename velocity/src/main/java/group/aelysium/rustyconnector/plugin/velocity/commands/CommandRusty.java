@@ -282,7 +282,7 @@ public final class CommandRusty {
                                             String username = context.getArgument("username", String.class);
 
                                             Player player = api.getServer().getPlayer(username).orElse(null);
-                                            if (player == null) {
+                                            if(player == null) {
                                                 logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
                                                 return Command.SINGLE_SUCCESS;
                                             }
@@ -301,7 +301,6 @@ public final class CommandRusty {
                                         } catch (Exception e) {
                                             logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There was an issue using that command! "+e.getMessage()), NamedTextColor.RED));
                                         }
-
                                         return Command.SINGLE_SUCCESS;
                                     })
                             )

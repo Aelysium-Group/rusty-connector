@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.util;
+package group.aelysium.rustyconnector.core.lib.algorithm;
 
 import group.aelysium.rustyconnector.core.lib.model.Sortable;
 

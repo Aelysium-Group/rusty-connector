@@ -13,6 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocu
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
@@ -171,6 +172,17 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     familyName,
                     whitelist,
                     LeastConnection.class,
+                    staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
+                    staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
+                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
+                    new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+            );
+            case MOST_CONNECTION -> family = new StaticServerFamily(
+                    familyName,
+                    whitelist,
+                    MostConnection.class,
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
