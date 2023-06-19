@@ -116,9 +116,8 @@ public class VelocityLifecycle extends PluginLifecycle {
         CommandManager commandManager = api.getServer().getCommandManager();
         try {
             commandManager.register(
-                    commandManager.metaBuilder("rustyconnector")
-                            .aliases("rusty", "rc")
-                            .aliases("/rustyconnector","/rusty","/rc") // Add slash variants so that they can be used in console as well
+                    commandManager.metaBuilder("rc")
+                            .aliases("/rc") // Add slash variants so that they can be used in console as well
                             .build(),
                     CommandRusty.create()
                     );
