@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.lib;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
@@ -130,7 +129,6 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
 
     public void registerToProxy() {
         try {
-            System.out.println("building...");
             RedisMessageServerRegisterRequest message = (RedisMessageServerRegisterRequest) new GenericRedisMessage.Builder()
                     .setType(RedisMessageType.REG)
                     .setOrigin(MessageOrigin.SERVER)
@@ -141,9 +139,6 @@ public class VirtualServerProcessor implements PlayerServer, VirtualProcessor {
                     .setParameter(RedisMessageServerRegisterRequest.ValidParameters.HARD_CAP, String.valueOf(this.hardPlayerCap))
                     .setParameter(RedisMessageServerRegisterRequest.ValidParameters.WEIGHT, String.valueOf(this.weight))
                     .buildSendable();
-            System.out.println("built.");
-
-            System.out.println("sending...");
             this.getRedisService().publish(message);
         } catch (Exception e) {
             Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text(e.getMessage()), NamedTextColor.RED);

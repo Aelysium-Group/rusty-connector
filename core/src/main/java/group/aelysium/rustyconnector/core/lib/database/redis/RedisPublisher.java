@@ -25,24 +25,18 @@ public class RedisPublisher {
      * @throws IllegalStateException If you attempt to send a received RedisMessage.
      */
     public void publish(GenericRedisMessage message) {
-        System.out.println("making sure is sendable");
         if(!message.isSendable()) throw new IllegalStateException("Attempted to send a RedisMessage that isn't sendable!");
 
         try {
-            System.out.println("Signing message...");
             message.signMessage(client.getPrivateKey());
         } catch (IllegalStateException ignore) {} // If there's an issue it's because the message is already signed. Thus ready to send.
 
-        System.out.println("Connecting...");
         if(this.connection == null) this.connection = this.client.connectPubSub();
         if(!this.connection.isOpen()) this.connection = this.client.connectPubSub();
 
         RedisPubSubAsyncCommands<String, String> async = connection.async();
 
-        System.out.println("Publishing...");
         async.publish(this.client.getDataChannel(), message.toString());
-
-        System.out.println("Done.");
     }
 
     /**
@@ -61,16 +55,6 @@ public class RedisPublisher {
     }
 
     static class RedisPublisherListener extends RedisConnectionStateAdapter {
-
-        @Override
-        public void onRedisConnected(RedisChannelHandler<?, ?> connection, SocketAddress socketAddress) {
-            System.out.println("pub-Redis connected!");
-        }
-        @Override
-        public void onRedisDisconnected(RedisChannelHandler<?, ?> connection) {
-            System.out.println("pub-Redis closed!");
-        }
-
         @Override
         public void onRedisExceptionCaught(RedisChannelHandler<?, ?> connection, Throwable cause) {
             cause.printStackTrace();

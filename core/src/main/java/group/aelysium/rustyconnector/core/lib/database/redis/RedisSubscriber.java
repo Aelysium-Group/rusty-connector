@@ -69,17 +69,7 @@ public class RedisSubscriber {
         }
     }
 
-    class RedisSubscriberListener extends RedisConnectionStateAdapter {
-
-        @Override
-        public void onRedisConnected(RedisChannelHandler<?, ?> connection, SocketAddress socketAddress) {
-            System.out.println("sub-Redis connected!");
-        }
-        @Override
-        public void onRedisDisconnected(RedisChannelHandler<?, ?> connection) {
-            System.out.println("sub-Redis closed!");
-        }
-
+    static class RedisSubscriberListener extends RedisConnectionStateAdapter {
         @Override
         public void onRedisExceptionCaught(RedisChannelHandler<?, ?> connection, Throwable cause) {
             cause.printStackTrace();
