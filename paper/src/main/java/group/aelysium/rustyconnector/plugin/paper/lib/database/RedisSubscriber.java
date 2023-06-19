@@ -1,10 +1,12 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.database;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
@@ -24,7 +26,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
-        CacheableMessage cachedMessage = api.getVirtualProcessor().getMessageCache().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
+        CacheableMessage cachedMessage = api.getService(MessageCacheService.class).cacheMessage(rawMessage, MessageStatus.UNDEFINED);
 
         try {
             GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
@@ -32,7 +34,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
 
             if(message.getOrigin() == MessageOrigin.SERVER) throw new Exception("Message from a sub-server! Ignoring...");
             try {
-                if (!(api.getVirtualProcessor().getRedisService().validatePrivateKey(message.getPrivateKey())))
+                if (!(api.getService(RedisService.class).validatePrivateKey(message.getPrivateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
@@ -61,8 +63,6 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(message.getType() == REGISTER_ALL_SERVERS_TO_FAMILY)     new ServerRegFamilyHandler(message).execute();
             if(message.getType() == PING)                               new PingHandler(message).execute();
             if(message.getType() == TPA_QUEUE_PLAYER)                   new TPAQueuePlayerHandler(message).execute();
-            if(message.getType() == ROUNDED_SESSION_START_REQUEST)      new RoundedStartRequestHandler(message).execute();
-            if(message.getType() == ROUNDED_SESSION_START_EVENT)        new RoundedStartEventHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (Exception e) {

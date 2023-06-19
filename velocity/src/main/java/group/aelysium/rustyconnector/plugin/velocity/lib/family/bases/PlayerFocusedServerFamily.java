@@ -5,10 +5,12 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPAHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -69,7 +71,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public Whitelist getWhitelist() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         if(this.name == null) return null;
-        return api.getVirtualProcessor().getWhitelistManager().find(this.whitelist);
+        return api.getService(WhitelistService.class).find(this.whitelist);
     }
 
     public long serverCount() { return this.loadBalancer.size(); }
@@ -109,7 +111,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         VelocityAPI api = VelocityRustyConnector.getAPI();
         for (PlayerServer server : this.loadBalancer.dump()) {
             if(server == null) continue;
-            api.getVirtualProcessor().unregisterServer(server.getServerInfo(),this.name, false);
+            api.getService(ServerService.class).unregisterServer(server.getServerInfo(),this.name, false);
         }
     }
 

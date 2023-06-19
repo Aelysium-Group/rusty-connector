@@ -8,9 +8,11 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerJoin;
-import group.aelysium.rustyconnector.plugin.paper.lib.events.OnPlayerLeave;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -36,11 +38,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
         DefaultConfig.empty();
 
-        if(api.getVirtualProcessor() != null) {
-            api.getVirtualProcessor().unregisterFromProxy();
-
-           api.getVirtualProcessor().closeRedis();
-        }
+        api.killServices();
 
         api.getCommandManager().deleteRootCommand("rc");
     }
@@ -61,7 +59,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
             if(defaultConfig.isRegisterOnBoot()) {
                 Lang.BOXED_MESSAGE.send(logger, Component.text("Sent a registration request over the data-channel...", NamedTextColor.GREEN));
-                api.getVirtualProcessor().registerToProxy();
+                api.getService(RedisMessagerService.class).registerToProxy();
             }
 
             DefaultConfig.empty();
@@ -94,6 +92,7 @@ public class PaperLifecycle extends PluginLifecycle {
         try {
             api.getServer().getPluginManager().registerEvents(new OnPlayerJoin(), api.accessPlugin());
             api.getServer().getPluginManager().registerEvents(new OnPlayerLeave(), api.accessPlugin());
+            api.getServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), api.accessPlugin());
 
             return true;
         } catch (Exception e) {

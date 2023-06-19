@@ -1,11 +1,13 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-import cloud.commandframework.execution.CommandExecutionCoordinator;
+import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber;
+import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.lib.VirtualServerProcessor;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -19,21 +21,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 public class PaperAPI extends PluginAPI<BukkitScheduler> {
-    private final PaperCommandManager<CommandSender> commandManager;
+    private PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
-    private VirtualServerProcessor virtualProcessor = null;
+    private Processor processor = null;
     private final PluginLogger pluginLogger;
 
 
     public PaperAPI(PaperRustyConnector plugin, Logger logger) throws Exception {
         this.plugin = plugin;
         this.pluginLogger = new PluginLogger(logger);
+
         this.commandManager = new PaperCommandManager<>(
-                        plugin,
-                        CommandExecutionCoordinator.simpleCoordinator(),
-                        Function.identity(),
-                        Function.identity()
-                );
+                plugin,
+                AsynchronousCommandExecutionCoordinator.<CommandSender>builder().build(),
+                Function.identity(),
+                Function.identity()
+        );
     }
 
     @Override
@@ -52,11 +55,6 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     }
 
     @Override
-    public VirtualServerProcessor getVirtualProcessor() {
-        return this.virtualProcessor;
-    }
-
-    @Override
     public String getDataFolder() {
         return plugin.getDataFolder().getPath();
     }
@@ -66,6 +64,21 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
      */
     public Server getServer() {
         return this.plugin.getServer();
+    }
+
+    public <S extends Service> S getService(Class<S> type) {
+        return this.processor.getService(type);
+    }
+
+    public void killServices() {
+        this.processor.kill();
+    }
+
+    public void reloadServices() {
+        this.processor.kill();
+        this.processor = null;
+
+        PaperRustyConnector.getLifecycle().loadConfigs();
     }
 
     /**
@@ -83,8 +96,9 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     }
 
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
-        if(this.virtualProcessor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
-        this.virtualProcessor = VirtualServerProcessor.init(config);
+        if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
+        this.processor = Processor.init(config);
+        this.processor.getService(RedisService.class).start(RedisSubscriber.class);
     }
 
     public boolean isFolia() {

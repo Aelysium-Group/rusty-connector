@@ -25,8 +25,6 @@ public class DefaultConfig extends YAML {
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
-    private boolean generateRounded = false;
-
     private boolean registerOnBoot = true;
 
     private DefaultConfig(File configPointer, String template) {
@@ -81,10 +79,6 @@ public class DefaultConfig extends YAML {
         return registerOnBoot;
     }
 
-    public boolean shouldGenerateRounded() {
-        return generateRounded;
-    }
-
     /**
      * Get the current config.
      * @return The config.
@@ -135,27 +129,28 @@ public class DefaultConfig extends YAML {
         if(this.server_playerCap_soft >= this.server_playerCap_hard)
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode."), NamedTextColor.YELLOW);
 
-        this.redis_host = this.getNode(this.data,"redis.host",String.class);
+
+        // Redis
+        this.redis_host = this.getNode(this.data, "redis.host", String.class);
         if(this.redis_host.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
 
-        this.redis_port = this.getNode(this.data,"redis.port",Integer.class);
-        this.redis_user = this.getNode(this.data,"redis.user",String.class);
-        this.redis_password = this.getNode(this.data,"redis.password",String.class);
-        if(this.redis_password.equals("password") || this.redis_password.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
-        if(this.redis_password.length() < 16)
+        this.redis_port = this.getNode(this.data, "redis.port", Integer.class);
+        this.redis_user = this.getNode(this.data, "redis.user", String.class);
+        this.redis_password = this.getNode(this.data, "redis.password", String.class);
+
+        if(this.redis_password.length() != 0 && this.redis_password.length() < 16)
             throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
+
+
+
+        this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
+        if(this.redis_dataChannel.equals(""))
+            throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
 
         this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
         if(this.redis_dataChannel.equals(""))
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
 
         this.registerOnBoot = this.getNode(this.data,"register-on-boot",Boolean.class);
-
-        try {
-            this.generateRounded = this.getNode(this.data, "generate-rounded", Boolean.class);
-        } catch (Exception ignore) {
-            this.generateRounded = false;
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("No configuration option `generate-rounded` was found! If this server is running in a Rounded Family, you should enable this feature. Otherwise you can ignore this message."), NamedTextColor.YELLOW);
-        }
     }
 }

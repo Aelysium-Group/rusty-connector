@@ -15,10 +15,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastCon
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -129,7 +129,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticServerFamily init(VirtualProxyProcessor virtualProxyProcessor, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static StaticServerFamily init(WhitelistService whitelistService, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
         logger.log("Registering family: " + familyName);
@@ -148,7 +148,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
         if (staticFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name());
 
-            virtualProxyProcessor.getWhitelistManager().add(whitelist);
+            whitelistService.add(whitelist);
 
             logger.log(familyName + " whitelist registered!");
         } else {
@@ -210,7 +210,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
 
         Whitelist currentWhitelist = this.getWhitelist();
         if (!(currentWhitelist == null)) {
-            api.getVirtualProcessor().getWhitelistManager().remove(currentWhitelist);
+            api.getService(WhitelistService.class).remove(currentWhitelist);
         }
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
@@ -228,7 +228,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
             newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
             this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getVirtualProcessor().getWhitelistManager().add(newWhitelist);
+            api.getService(WhitelistService.class).add(newWhitelist);
 
             logger.log("Finished reloading whitelist for " + this.name);
             return;

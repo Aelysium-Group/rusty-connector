@@ -1,17 +1,18 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.database;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCache;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.*;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 
@@ -28,23 +29,22 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
     public void onMessage(String rawMessage) {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        VirtualProxyProcessor virtualProcessor = api.getVirtualProcessor();
-        MessageCache messageCache = virtualProcessor.getMessageCache();
+        MessageCacheService messageCacheService = api.getService(MessageCacheService.class);
 
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
         // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
-        if(messageCache == null) messageCache = new MessageCache(1);
+        if(messageCacheService == null) messageCacheService = new MessageCacheService(1);
 
-        CacheableMessage cachedMessage = messageCache.cacheMessage(rawMessage, MessageStatus.UNDEFINED);
+        CacheableMessage cachedMessage = messageCacheService.cacheMessage(rawMessage, MessageStatus.UNDEFINED);
         try {
             GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
             GenericRedisMessage message = serializer.parseReceived(rawMessage);
 
             if(message.getOrigin() == MessageOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
             try {
-                virtualProcessor.validateMessage(message);
+                api.getService(RedisService.class).validatePrivateKey(message.getPrivateKey());
 
-                if (!(virtualProcessor.getRedisService().validatePrivateKey(message.getPrivateKey())))
+                if (!(api.getService(RedisService.class).validatePrivateKey(message.getPrivateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
@@ -68,7 +68,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(logger.getGate().check(GateKey.SAVE_TRASH_MESSAGES))
                 cachedMessage.sentenceMessage(MessageStatus.TRASHED, e.getMessage());
             else
-                virtualProcessor.getMessageCache().removeMessage(cachedMessage.getSnowflake());
+                api.getService(MessageCacheService.class).removeMessage(cachedMessage.getSnowflake());
 
             if(!logger.getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 
@@ -85,9 +85,6 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(message.getType() == UNREGISTER_SERVER)                  new ServerUnRegHandler(message).execute();
             if(message.getType() == SEND_PLAYER)                        new SendPlayerHandler(message).execute();
             if(message.getType() == PONG)                               new PongHandler(message).execute();
-            if(message.getType() == ROUNDED_PRECONNECT_PLAYER)          new RoundedFamilyPreConnectHandler(message).execute();
-            if(message.getType() == ROUNDED_CANCEL_PRECONNECT_PLAYER)   new RoundedFamilyCancelPreConnectHandler(message).execute();
-            if(message.getType() == ROUNDED_SESSION_CLOSE_REQUEST)        new RoundedSessionCloseRequestHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (NullPointerException e) {

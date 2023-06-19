@@ -1,13 +1,31 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import io.lettuce.core.RedisChannelHandler;
+import io.lettuce.core.RedisConnectionStateAdapter;
+import io.lettuce.core.RedisConnectionStateListener;
+import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 
+import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
+
 public class RedisPublisher {
     private final RedisClient client;
+    private StatefulRedisPubSubConnection<String, String> connection;
     protected RedisPublisher(RedisClient client) {
         this.client = client;
+        this.client.addListener(new RedisPublisherListener());
+    }
+
+    /**
+     * This RedisPublisher becomes worthless after this is used.
+     */
+    public void shutdown() {
+        try {
+            this.client.shutdownAsync(2, 2, TimeUnit.SECONDS);
+        } catch (Exception ignore) {}
     }
 
     /**
@@ -23,13 +41,12 @@ public class RedisPublisher {
             message.signMessage(client.getPrivateKey());
         } catch (IllegalStateException ignore) {} // If there's an issue it's because the message is already signed. Thus ready to send.
 
-        try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
-            RedisPubSubAsyncCommands<String, String> async = connection.async();
+        if(this.connection == null) this.connection = this.client.connectPubSub();
+        if(!this.connection.isOpen()) this.connection = this.client.connectPubSub();
 
-            async.publish(this.client.getDataChannel(), message.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RedisPubSubAsyncCommands<String, String> async = connection.async();
+
+        async.publish(this.client.getDataChannel(), message.toString());
     }
 
     /**
@@ -44,6 +61,13 @@ public class RedisPublisher {
             async.publish(this.client.getDataChannel(), "DIE");
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    static class RedisPublisherListener extends RedisConnectionStateAdapter {
+        @Override
+        public void onRedisExceptionCaught(RedisChannelHandler<?, ?> connection, Throwable cause) {
+            cause.printStackTrace();
         }
     }
 }

@@ -6,6 +6,8 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.R
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
+import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueueService;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPARequest;
 import org.bukkit.entity.Player;
 
@@ -22,14 +24,14 @@ public class TPAQueuePlayerHandler implements MessageHandler {
     public void execute() {
         PaperAPI api = PaperRustyConnector.getAPI();
 
-        if(!Objects.equals(this.message.getTargetServer(), api.getVirtualProcessor().getAddress()))
+        if(!Objects.equals(this.message.getTargetServer(), api.getService(ServerInfoService.class).getAddress()))
             throw new IllegalStateException("Message is not addressed to me!");
 
         Player target = api.getServer().getPlayer(message.getTargetUsername());
         if(target == null) return;
         if(!target.isOnline()) return;
 
-        TPARequest tpaRequest = api.getVirtualProcessor().getTPAQueue().newRequest(message.getSourceUsername(), target);
+        TPARequest tpaRequest = api.getService(TPAQueueService.class).newRequest(message.getSourceUsername(), target);
 
         // Attempt to resolve the tpa right away! If the player isn't on the server, this should fail silently.
         try {

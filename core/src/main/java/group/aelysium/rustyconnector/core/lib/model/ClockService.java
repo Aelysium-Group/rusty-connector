@@ -4,10 +4,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class ClockService {
+public class ClockService extends Service {
     protected final ScheduledExecutorService executorService;
 
-    public ClockService(int threads) {
+    public ClockService(boolean enabled, int threads) {
+        super(enabled);
+
         this.executorService = Executors.newScheduledThreadPool(threads);
     }
 

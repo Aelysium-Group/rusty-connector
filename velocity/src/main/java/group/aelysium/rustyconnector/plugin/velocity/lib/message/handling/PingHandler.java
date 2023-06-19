@@ -9,7 +9,9 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerLifeMatrixService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.net.InetSocketAddress;
 
@@ -33,9 +35,9 @@ public class PingHandler implements MessageHandler {
         );
 
         try {
-            PlayerServer server = api.getVirtualProcessor().findServer(serverInfo);
+            PlayerServer server = api.getService(ServerService.class).findServer(serverInfo);
             if(server == null) return;
-            api.getVirtualProcessor().reviveServer(serverInfo);
+            api.getService(ServerLifeMatrixService.class).reviveServer(serverInfo);
             server.setPlayerCount(message.getPlayerCount());
 
             if(logger.getGate().check(GateKey.PING))

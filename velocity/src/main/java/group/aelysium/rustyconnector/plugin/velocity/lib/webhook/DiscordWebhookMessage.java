@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.webhook;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 /**
  * Thank you to <a href="https://github.com/LuckPerms/LuckPerms">...</a> for inspiring this implementation.
@@ -175,7 +175,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_BLUE)
                     .build();
 
-    ParameterizedEmbed3<Player, PlayerServer, PlayerServer> PROXY__DISCONNECT_CATCH = (player, oldServer, newServer) ->
+    ParameterizedEmbed2<Player, PlayerServer> PROXY__DISCONNECT_CATCH = (player, newServer) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -184,7 +184,7 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Was caught by " + newServer.getFamilyName() + " after being disconnected from " + oldServer.getFamilyName(), null)
+                            new WebhookEmbed.EmbedTitle("Was caught by " + newServer.getFamilyName() + " after being disconnected from another server", null)
                     )
                     .setColor(COLOR_BLUE)
                     .build();

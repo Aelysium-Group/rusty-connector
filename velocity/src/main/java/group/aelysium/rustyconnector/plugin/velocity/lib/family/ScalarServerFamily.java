@@ -11,10 +11,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastCon
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
@@ -31,12 +31,17 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
         return connector.connect();
     }
 
+    public PlayerServer fetchAny(Player player) throws RuntimeException {
+        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
+        return connector.fetchAny();
+    }
+
     /**
      * Initializes all server families based on the configs.
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static ScalarServerFamily init(VirtualProxyProcessor virtualProxyProcessor, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static ScalarServerFamily init(WhitelistService whitelistService, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
         logger.log("Registering family: "+familyName);
@@ -55,7 +60,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
         if(scalarFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
-            virtualProxyProcessor.getWhitelistManager().add(whitelist);
+            api.getService(WhitelistService.class).add(whitelist);
 
             logger.log(familyName+" whitelist registered!");
         } else {
@@ -106,7 +111,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
 
         Whitelist currentWhitelist = this.getWhitelist();
         if(!(currentWhitelist == null)) {
-            api.getVirtualProcessor().getWhitelistManager().remove(currentWhitelist);
+            api.getService(WhitelistService.class).remove(currentWhitelist);
         }
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
@@ -124,7 +129,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
             newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
             this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getVirtualProcessor().getWhitelistManager().add(newWhitelist);
+            api.getService(WhitelistService.class).add(newWhitelist);
 
             logger.log("Finished reloading whitelist for "+this.name);
             return;
@@ -155,6 +160,15 @@ class ScalarFamilyConnector {
         server.playerJoined();
 
         return server;
+    }
+
+    public PlayerServer fetchAny() throws RuntimeException {
+        if(this.family.getLoadBalancer().size() == 0)
+            throw new RuntimeException("There are no servers for you to connect to!");
+
+        this.validateWhitelist();
+
+        return this.family.getLoadBalancer().getCurrent();
     }
 
     public void validateWhitelist() throws RuntimeException {
