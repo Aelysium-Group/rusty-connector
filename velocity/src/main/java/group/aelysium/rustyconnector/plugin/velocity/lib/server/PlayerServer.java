@@ -182,8 +182,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
                 .setAddress(this.getAddress())
                 .buildSendable();
 
-        RedisPublisher publisher = api.getService(RedisService.class).getMessagePublisher();
-        publisher.publish(message);
+        api.getService(RedisService.class).publish(message);
 
         if(logger.getGate().check(GateKey.PING))
             VelocityLang.PING.send(logger,this.serverInfo);

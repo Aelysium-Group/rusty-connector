@@ -8,4 +8,7 @@ public class NoOutputException
     public NoOutputException(Throwable err) {
         super("", err);
     }
+    public NoOutputException() {
+        super("", new Exception());
+    }
 }

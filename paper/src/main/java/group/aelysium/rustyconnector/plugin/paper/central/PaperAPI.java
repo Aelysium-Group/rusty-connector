@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
+import cloud.commandframework.CommandTree;
+import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
@@ -19,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 public class PaperAPI extends PluginAPI<BukkitScheduler> {
-    private final PaperCommandManager<CommandSender> commandManager;
+    private PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
     private VirtualServerProcessor virtualProcessor = null;
     private final PluginLogger pluginLogger;
@@ -28,12 +30,13 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     public PaperAPI(PaperRustyConnector plugin, Logger logger) throws Exception {
         this.plugin = plugin;
         this.pluginLogger = new PluginLogger(logger);
+
         this.commandManager = new PaperCommandManager<>(
-                        plugin,
-                        CommandExecutionCoordinator.simpleCoordinator(),
-                        Function.identity(),
-                        Function.identity()
-                );
+                plugin,
+                AsynchronousCommandExecutionCoordinator.<CommandSender>builder().build(),
+                Function.identity(),
+                Function.identity()
+        );
     }
 
     @Override
