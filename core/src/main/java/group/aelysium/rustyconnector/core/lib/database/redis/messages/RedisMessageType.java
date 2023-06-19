@@ -52,26 +52,6 @@ public class RedisMessageType {
      */
     public static Mapping TPA_QUEUE_PLAYER = new Mapping(800, "TPA_QUEUE_PLAYER");
 
-    /**
-     * `Server > Proxy` | Pre-connect the player to a Rounded Family.
-     */
-    public static Mapping ROUNDED_PRECONNECT_PLAYER = new Mapping(900, "ROUNDED_PRECONNECT_PLAYER");
-
-    /**
-     * `Server > Proxy` | Cancel the pre-connection of a player from a Rounded Family.
-     */
-    public static Mapping ROUNDED_CANCEL_PRECONNECT_PLAYER = new Mapping(1000, "ROUNDED_CANCEL_PRECONNECT_PLAYER");
-
-    /**
-     * `Proxy > Server` | Event indicating the start of a session.
-     */
-    public static Mapping ROUNDED_SESSION_START_EVENT = new Mapping(1100, "ROUNDED_SESSION_START_EVENT");
-
-    /**
-     * `Server > Proxy` | Event indicating that a session should be closed.
-     */
-    public static Mapping ROUNDED_SESSION_CLOSE_REQUEST = new Mapping(1200, "ROUNDED_SESSION_CLOSE_EVENT");
-
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();
         list.add(PING);
@@ -82,10 +62,6 @@ public class RedisMessageType {
         list.add(UNREGISTER_SERVER);
         list.add(SEND_PLAYER);
         list.add(TPA_QUEUE_PLAYER);
-        list.add(ROUNDED_PRECONNECT_PLAYER);
-        list.add(ROUNDED_CANCEL_PRECONNECT_PLAYER);
-        list.add(ROUNDED_SESSION_START_EVENT);
-        list.add(ROUNDED_SESSION_CLOSE_REQUEST);
 
         return list;
     }

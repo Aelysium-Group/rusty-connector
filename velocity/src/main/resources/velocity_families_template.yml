@@ -56,17 +56,3 @@ scalar: []
 # Static families require that MySQL is set up.
 #
 static: []
-
-#########################
-#   Rounded Families    #
-#########################
-#
-# Families defined here are optimized for round/session based minecraft gamemodes.
-# Players can get registered into a "Round" and then once a threshold is reached, the round will start
-# and all the player's registered to the round, will be connected to the family.
-#
-# This family will keep track of any active sessions already running. If all servers
-# have active sessions, this family will wait until a session is finished before connecting the next round
-# and starting another session.
-#
-rounded: []

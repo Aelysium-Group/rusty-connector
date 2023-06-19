@@ -17,7 +17,6 @@ public class FamiliesConfig extends YAML {
     private Boolean rootFamily_catchDisconnectingPlayers = false;
     private List<String> scalar = new ArrayList<>();
     private List<String> staticF = new ArrayList<>();
-    private List<String> rounded = new ArrayList<>();
 
     private FamiliesConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -60,9 +59,6 @@ public class FamiliesConfig extends YAML {
     public List<String> getStaticFamilies() {
         return this.staticF;
     }
-    public List<String> getRoundedFamilies() {
-        return this.rounded;
-    }
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
@@ -78,11 +74,6 @@ public class FamiliesConfig extends YAML {
         }
         try {
             this.staticF = (List<String>) (this.getNode(this.data,"static",List.class));
-        } catch (Exception e) {
-            throw new IllegalStateException("The node [scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
-        try {
-            this.rounded = (List<String>) (this.getNode(this.data,"rounded",List.class));
         } catch (Exception e) {
             throw new IllegalStateException("The node [scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
@@ -107,24 +98,21 @@ public class FamiliesConfig extends YAML {
             Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.rootFamily_name + " was found duplicated in your family nodes. This is no longer supported. Instead, ONLY place the name of your root family in [root-family.name]. Ignoring..."), NamedTextColor.YELLOW);
             this.scalar.remove(this.rootFamily_name);
             this.staticF.remove(this.rootFamily_name);
-            this.rounded.remove(this.rootFamily_name);
         }
     }
 
     private boolean doDuplicatesExist() {
-        return this.scalar.stream().filter(this.staticF::contains).filter(this.rounded::contains).toList().size() > 0;
+        return this.scalar.stream().filter(this.staticF::contains).toList().size() > 0;
     }
 
     private boolean isRootFamilyDuplicated() {
         return this.scalar.contains(this.rootFamily_name) ||
-               this.staticF.contains(this.rootFamily_name) ||
-               this.rounded.contains(this.rootFamily_name);
+               this.staticF.contains(this.rootFamily_name);
     }
 
     private boolean checkForAll() {
         return this.rootFamily_name.equalsIgnoreCase("all") ||
                this.scalar.contains("all") ||
-               this.staticF.contains("all") ||
-               this.rounded.contains("all");
+               this.staticF.contains("all");
     }
 }
