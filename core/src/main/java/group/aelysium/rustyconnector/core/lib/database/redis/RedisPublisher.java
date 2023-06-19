@@ -9,6 +9,7 @@ import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 public class RedisPublisher {
     private final RedisClient client;
@@ -16,6 +17,15 @@ public class RedisPublisher {
     protected RedisPublisher(RedisClient client) {
         this.client = client;
         this.client.addListener(new RedisPublisherListener());
+    }
+
+    /**
+     * This RedisPublisher becomes worthless after this is used.
+     */
+    public void shutdown() {
+        try {
+            this.client.shutdownAsync(2, 2, TimeUnit.SECONDS);
+        } catch (Exception ignore) {}
     }
 
     /**

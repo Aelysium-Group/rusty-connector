@@ -81,6 +81,10 @@ public class RedisService {
                 this.executorService.shutdownNow();
             }
         } catch (Exception ignore) {}
+
+        try {
+            this.publisher.shutdown();
+        } catch (Exception ignore) {}
     }
 
     public void publish(GenericRedisMessage message) {
