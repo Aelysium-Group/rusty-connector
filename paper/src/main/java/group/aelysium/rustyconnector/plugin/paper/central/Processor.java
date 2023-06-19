@@ -2,15 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageSendPlayer;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPong;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerRegisterRequest;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerUnregisterRequest;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.model.IKLifecycle;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
@@ -20,10 +12,7 @@ import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
-import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueue;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Player;
+import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueueService;
 
 import java.io.File;
 import java.util.HashMap;
@@ -31,7 +20,6 @@ import java.util.Map;
 
 public class Processor extends IKLifecycle {
     private final Map<Class<? extends Service>, Service> services;
-    private final TPAQueue tpaQueue = new TPAQueue();
     protected Processor(Map<Class<? extends Service>, Service> services) {
         this.services = services;
     }
@@ -92,6 +80,8 @@ public class Processor extends IKLifecycle {
         logger.log("Set message cache size to be: 50");
 
         builder.addService(new RedisMessagerService());
+
+        builder.addService(new TPAQueueService());
 
         return builder.build();
     }

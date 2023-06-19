@@ -76,7 +76,7 @@ public class RedisMessageType {
     public record Mapping (Integer id, String name) {
         @Override
         public String toString() {
-            return name+"-"+id;
+            return String.valueOf(id);
         }
     }
 }

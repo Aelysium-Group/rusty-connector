@@ -26,6 +26,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
     }
 
     public void setRootFamily(ScalarServerFamily family) {
+        this.registeredFamilies.put(family.getName(), family);
         this.rootFamily = new WeakReference<>(family);
     }
 

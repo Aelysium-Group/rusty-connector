@@ -1,9 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
 import group.aelysium.rustyconnector.core.lib.algorithm.QuickSort;
-import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.core.lib.algorithm.WeightedQuickSort;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
 
 import java.util.Collections;
 

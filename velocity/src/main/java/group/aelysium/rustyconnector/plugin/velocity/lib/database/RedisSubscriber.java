@@ -85,9 +85,6 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(message.getType() == UNREGISTER_SERVER)                  new ServerUnRegHandler(message).execute();
             if(message.getType() == SEND_PLAYER)                        new SendPlayerHandler(message).execute();
             if(message.getType() == PONG)                               new PongHandler(message).execute();
-            if(message.getType() == ROUNDED_PRECONNECT_PLAYER)          new RoundedFamilyPreConnectHandler(message).execute();
-            if(message.getType() == ROUNDED_CANCEL_PRECONNECT_PLAYER)   new RoundedFamilyCancelPreConnectHandler(message).execute();
-            if(message.getType() == ROUNDED_SESSION_CLOSE_REQUEST)        new RoundedSessionCloseRequestHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (NullPointerException e) {

@@ -211,7 +211,7 @@ public class DefaultConfig extends YAML {
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
 
         // MySQL
-        this.mysql_host = this.getNode(this.data, "mysql.enabled", String.class);
+        this.mysql_enabled = this.getNode(this.data, "mysql.enabled", Boolean.class);
 
         this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
         if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");

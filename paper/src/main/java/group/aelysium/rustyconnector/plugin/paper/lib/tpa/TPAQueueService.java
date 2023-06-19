@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.tpa;
 
+import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import org.bukkit.entity.Player;
 
@@ -7,8 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TPAQueue {
+public class TPAQueueService extends Service {
     private final List<TPARequest> requests = new ArrayList<>();
+
+    public TPAQueueService() {
+        super(true);
+    }
 
     public TPARequest newRequest(String client_username, Player target) {
         TPARequest tpaRequest = new TPARequest(client_username, target);
@@ -40,5 +45,10 @@ public class TPAQueue {
 
     public void remove(TPARequest tpaRequest) {
         this.requests.remove(tpaRequest);
+    }
+
+    @Override
+    public void kill() {
+        this.requests.clear();
     }
 }

@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnelService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.database.MySQLService;
@@ -12,12 +13,12 @@ import group.aelysium.rustyconnector.plugin.velocity.config.FamiliesConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.RoundedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerLifeMatrixService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPACleaningService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
@@ -76,18 +77,13 @@ public class Processor extends IKLifecycle {
         if(!config.getRedis_password().equals(""))
             redisClientBuilder.setPassword(config.getRedis_password());
 
+        builder.addService(new RedisService(redisClientBuilder, privateKey));
+
         logger.log("Finished setting up redis");
 
         // Setup MySQL
         try {
             if (config.isMysql_enabled()) {
-                MySQLService mySQLService = new MySQLService.MySQLBuilder()
-                        .setDisabled()
-                        .build();
-
-                builder.addService(mySQLService);
-                logger.send(Component.text("MySQL is disabled! Any static families that are defined will be disabled.", NamedTextColor.YELLOW));
-            } else {
                 MySQLService mySQLService = new MySQLService.MySQLBuilder()
                         .setHost(config.getMysql_host())
                         .setPort(config.getMysql_port())
@@ -100,7 +96,13 @@ public class Processor extends IKLifecycle {
 
                 HomeServerMappingsDatabase.init(mySQLService);
                 logger.log("Finished setting up MySQL");
+            } else {
+                MySQLService mySQLService = new MySQLService.MySQLBuilder()
+                        .setDisabled()
+                        .build();
 
+                builder.addService(mySQLService);
+                logger.send(Component.text("MySQL is disabled! Any static families that are defined will be disabled.", NamedTextColor.YELLOW));
             }
         } catch (CommunicationsException e) {
             throw new IllegalAccessException("Unable to connect to MySQL! Is the server available?");
@@ -125,8 +127,6 @@ public class Processor extends IKLifecycle {
         if(config.isMysql_enabled())
             for (String familyName: familiesConfig.getStaticFamilies())
                 familyService.add(StaticServerFamily.init(whitelistService, familyName));
-        for (String familyName: familiesConfig.getRoundedFamilies())
-            familyService.add(RoundedServerFamily.init(familyName));
 
         logger.log("Setting up root family");
 
@@ -183,6 +183,8 @@ public class Processor extends IKLifecycle {
             });
 
         logger.log("Finished setting up message tunnel");
+
+        builder.addService(new ServerService());
 
         return builder.build();
     }

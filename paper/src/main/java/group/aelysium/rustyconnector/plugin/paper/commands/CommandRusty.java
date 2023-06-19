@@ -43,7 +43,7 @@ public final class CommandRusty {
                             try {
                                 final Long snowflake = commandContext.get("snowflake");
 
-                                MessageCacheService messageCacheService = api.getProcessor().getMessageCache();
+                                MessageCacheService messageCacheService = api.getService(MessageCacheService.class);
 
                                 CacheableMessage message = messageCacheService.getMessage(snowflake);
 

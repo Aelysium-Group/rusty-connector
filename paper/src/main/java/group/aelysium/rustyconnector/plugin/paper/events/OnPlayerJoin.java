@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper.events;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueueService;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPARequest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,7 +15,7 @@ public class OnPlayerJoin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         PaperAPI api = PaperRustyConnector.getAPI();
 
-        TPARequest tpaRequest = api.getProcessor().getTPAQueue().findClient(event.getPlayer().getPlayerProfile().getName());
+        TPARequest tpaRequest = api.getService(TPAQueueService.class).findClient(event.getPlayer().getPlayerProfile().getName());
         if(tpaRequest == null) return;
         try {
             tpaRequest.resolveClient();
@@ -28,6 +29,6 @@ public class OnPlayerJoin implements Listener {
             event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.getTarget().getPlayerProfile().getName()));
         }
 
-        api.getProcessor().getTPAQueue().removeAllPlayersRequests(event.getPlayer());
+        api.getService(TPAQueueService.class).removeAllPlayersRequests(event.getPlayer());
     }
 }
