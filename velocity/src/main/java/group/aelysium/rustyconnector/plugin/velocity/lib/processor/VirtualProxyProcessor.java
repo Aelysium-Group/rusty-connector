@@ -331,8 +331,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                 .setOrigin(MessageOrigin.PROXY)
                 .buildSendable();
 
-        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
-        publisher.publish(message);
+        this.getRedisService().publish(message);
 
         WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, DiscordWebhookMessage.PROXY__REGISTER_ALL);
     }
@@ -355,8 +354,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                 .buildSendable();
 
 
-        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
-        publisher.publish(message);
+        this.getRedisService().publish(message);
 
         WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, familyName, DiscordWebhookMessage.FAMILY__REGISTER_ALL.build(familyName));
     }
@@ -414,8 +412,7 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                 .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        RedisPublisher publisher = this.getRedisService().getMessagePublisher();
-        publisher.publish(message);
+        this.getRedisService().publish(message);
 
 
         if(senderServerInfo.equals(targetServerInfo)) return;
@@ -539,13 +536,12 @@ public class VirtualProxyProcessor implements VirtualProcessor {
                 .setHost(config.getRedis_host())
                 .setPort(config.getRedis_port())
                 .setUser(config.getRedis_user())
-                .setPrivateKey(privateKey)
                 .setDataChannel(config.getRedis_dataChannel());
 
         if(!config.getRedis_password().equals(""))
             redisClientBuilder.setPassword(config.getRedis_password());
 
-        virtualProxyProcessor.setRedisService(new RedisService(redisClientBuilder));
+        virtualProxyProcessor.setRedisService(new RedisService(redisClientBuilder, privateKey));
 
         logger.log("Finished setting up redis");
 
