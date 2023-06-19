@@ -413,12 +413,6 @@ public final class CommandRusty {
                             )
                     )
             )
-            .then(LiteralArgumentBuilder.<CommandSource>literal("restartRedis")
-                    .executes(context -> {
-                        VelocityRustyConnector.getAPI().getVirtualProcessor().getRedisService().getMessagePublisher().publishKillable();
-                        return 0;
-                    })
-            )
             .build();
 
         // BrigadierCommand implements Command

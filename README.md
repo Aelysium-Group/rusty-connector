@@ -11,7 +11,7 @@ RustyConnector is a Velocity network backbone plugin. It let's you register bran
 
 <br>
 
-## [Support](https://join.aelysium.group/)  |  [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)  |  [Download](https://github.com/Aelysium-Group/rusty-connector/releases)  |  [Report Bugs](https://join.aelysium.group/)
+## [Support](https://join.aelysium.group/)  |  [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)  |  [Download](https://github.com/Aelysium-Group/rusty-connector/releases)  |  [Report Bugs](https://github.com/Aelysium-Group/rusty-connector/issues)
 
 ## [Modrinth](https://modrinth.com/plugin/rustyconnector) | [Hangar](https://hangar.papermc.io/nathan-i-martin/RustyConnector)
 
@@ -20,7 +20,7 @@ RustyConnector is a Velocity network backbone plugin. It let's you register bran
 ---
 # Features
 - ### ✅ Built for large networks
-- ### ✅ Register brand new servers to the proxy during runtime
+- ### ✅ Register brand-new servers to the proxy during runtime
 - ### ✅ Blazing fast data transmission with Redis integration
 - ### ✅ Create pre-defined whitelist configs and activate them dynamically
 - ### ✅ Register similar servers into families with family-level whitelists and load balancing
@@ -41,10 +41,10 @@ RustyConnector is a Velocity network backbone plugin. It let's you register bran
 ---
 ## Incoming Features/Changes
 - [ ] Rounded families (families built for round based gamemodes!) [__Under Development__]
-- [ ] Kubernettes auto-scaling [__Under Development__]
-- [ ] Player parties (join your friend's party and follow them around the network as they connect to differnet families!) [__Under Development__]
-- [ ] Websocket as a backup for if Redis fails [__Under Development__]
+- [ ] Player parties (join your friend's party and follow them around the network as they connect to different families!) [__Under Development__]
+- [ ] Websocket as a backup for if Redis fails [__Under Research__]
 - [ ] Example RustyConnector Networks for Documentation Purposes [__Under Development__]
+- [ ] Kubernetes auto-scaling [__Under Research__]
 - [ ] RustyConnector API (May not come out for a while!)
 - [ ] Player routing based on client version (Low Priority)
 - [ ] Teleport players to specific coordinates on other servers (Low Priority)
