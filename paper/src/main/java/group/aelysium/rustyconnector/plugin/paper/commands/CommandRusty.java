@@ -23,7 +23,6 @@ public final class CommandRusty {
     public static void create(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperRustyConnector.getAPI();
 
-
         manager.command(message(manager));
         manager.command(send(manager));
         manager.command(register(manager));
@@ -33,7 +32,7 @@ public final class CommandRusty {
     private static Command.Builder<CommandSender> message(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rcp", "/rpc");
+        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("message")
                 .senderType(ConsoleCommandSender.class)
@@ -59,7 +58,7 @@ public final class CommandRusty {
     private static Command.Builder<CommandSender> send(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rcp", "/rpc");
+        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("send")
                 .senderType(ConsoleCommandSender.class)
@@ -83,7 +82,7 @@ public final class CommandRusty {
     private static Command.Builder<CommandSender> register(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rcp", "/rpc");
+        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("register")
                 .senderType(ConsoleCommandSender.class)
@@ -101,7 +100,7 @@ public final class CommandRusty {
     private static Command.Builder<CommandSender> unregister(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rcp", "/rpc");
+        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("unregister")
                 .senderType(ConsoleCommandSender.class)
