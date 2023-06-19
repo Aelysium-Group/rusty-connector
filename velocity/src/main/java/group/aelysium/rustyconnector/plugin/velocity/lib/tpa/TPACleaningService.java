@@ -58,8 +58,7 @@ public class TPACleaningService extends ClockService {
                 .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        RedisPublisher publisher = api.getService(RedisService.class).getMessagePublisher();
-        publisher.publish(message);
+        api.getService(RedisService.class).publish(message);
 
 
         if(senderServerInfo.equals(targetServerInfo)) return;

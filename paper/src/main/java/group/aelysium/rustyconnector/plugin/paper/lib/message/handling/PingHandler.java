@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHan
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
 
 public class PingHandler implements MessageHandler {
     private final GenericRedisMessage message;
@@ -16,6 +17,6 @@ public class PingHandler implements MessageHandler {
     public void execute() {
         PaperAPI api = PaperRustyConnector.getAPI();
 
-        api.getProcessor().pong();
+        api.getService(RedisMessagerService.class).pong();
     }
 }

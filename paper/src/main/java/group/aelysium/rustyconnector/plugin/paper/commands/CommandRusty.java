@@ -13,6 +13,7 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
@@ -70,7 +71,7 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                api.getProcessor().sendToOtherFamily(player,familyName);
+                                api.getService(RedisMessagerService.class).sendToOtherFamily(player,familyName);
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
@@ -89,7 +90,7 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                             try {
-                                api.getProcessor().registerToProxy();
+                                api.getService(RedisMessagerService.class).registerToProxy();
                                 Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text("Send registration request!"), NamedTextColor.GREEN);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from sending your request!", e);
@@ -107,7 +108,7 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                             try {
-                                api.getProcessor().unregisterFromProxy();
+                                api.getService(RedisMessagerService.class).unregisterFromProxy();
                                 Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text("Send unregister request!"), NamedTextColor.GREEN);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from sending your request!", e);

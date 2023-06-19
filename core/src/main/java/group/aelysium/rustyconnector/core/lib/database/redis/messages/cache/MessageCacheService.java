@@ -93,4 +93,9 @@ public class MessageCacheService extends Service {
     public int getSize() { return this.messages.size(); }
 
     public void empty() { this.messages.clear(); }
+
+    @Override
+    public void kill() {
+        this.messages.clear();
+    }
 }

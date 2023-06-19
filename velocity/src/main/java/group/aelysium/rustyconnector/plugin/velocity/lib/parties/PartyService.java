@@ -47,4 +47,10 @@ public class PartyService extends Service {
     public void closeInvite(PartyInvite invite) {
         this.invites.remove(invite);
     }
+
+    @Override
+    public void kill() {
+        this.invites.clear();
+        this.parties.clear();
+    }
 }

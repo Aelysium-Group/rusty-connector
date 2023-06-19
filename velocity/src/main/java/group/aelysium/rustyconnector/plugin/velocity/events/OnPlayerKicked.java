@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.events;
+package group.aelysium.rustyconnector.plugin.velocity.events;
 
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
@@ -40,11 +40,11 @@ public class OnPlayerKicked {
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.getFamilyName(), DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, oldServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
 
-                isFromRootFamily = oldServer.getFamily() == api.getVirtualProcessor().getRootFamily();
+                isFromRootFamily = oldServer.getFamily() == api.getService(FamilyService.class).getRootFamily();
             } catch (Exception ignore) {}
 
             try {
-                if (!api.getVirtualProcessor().catchDisconnectingPlayers) throw new NoOutputException();
+                if (!api.getService(FamilyService.class).catchDisconnectingPlayers) throw new NoOutputException();
 
                 ScalarServerFamily rootFamily = api.getService(FamilyService.class).getRootFamily();
                 if(rootFamily.getRegisteredServers().isEmpty()) throw new RuntimeException("There are no available servers for you to connect to!");

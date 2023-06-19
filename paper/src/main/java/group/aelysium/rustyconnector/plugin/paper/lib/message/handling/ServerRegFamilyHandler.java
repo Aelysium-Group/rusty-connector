@@ -7,6 +7,8 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.R
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
 
 import java.util.Objects;
 
@@ -22,9 +24,9 @@ public class ServerRegFamilyHandler implements MessageHandler {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
-        if(Objects.equals(this.message.getFamilyName(), api.getProcessor().getFamily())) {
+        if(Objects.equals(this.message.getFamilyName(), api.getService(ServerInfoService.class).getFamily())) {
             logger.log("Server has been requested to register itself...");
-            api.getProcessor().registerToProxy();
+            api.getService(RedisMessagerService.class).registerToProxy();
             logger.log("Server has submitted its registration request.");
         }
     }

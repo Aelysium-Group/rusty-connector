@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.events;
+package group.aelysium.rustyconnector.plugin.paper.events;
 
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;

@@ -80,6 +80,15 @@ public class MySQLService extends Service {
         }
     }
 
+    @Override
+    public void kill() {
+        try {
+            this.connection.close();
+        } catch (Exception ignore) {}
+
+        this.dataSource = null;
+    }
+
     public static class MySQLBuilder {
         private boolean enabled = true;
 

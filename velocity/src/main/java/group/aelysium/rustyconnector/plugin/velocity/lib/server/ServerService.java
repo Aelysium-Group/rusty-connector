@@ -67,8 +67,7 @@ public class ServerService extends Service {
                 .setOrigin(MessageOrigin.PROXY)
                 .buildSendable();
 
-        RedisPublisher publisher = api.getService(RedisService.class).getMessagePublisher();
-        publisher.publish(message);
+        api.getService(RedisService.class).publish(message);
 
         WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, DiscordWebhookMessage.PROXY__REGISTER_ALL);
     }
@@ -91,9 +90,7 @@ public class ServerService extends Service {
                 .setParameter(RedisMessageFamilyRegister.ValidParameters.FAMILY_NAME, familyName)
                 .buildSendable();
 
-
-        RedisPublisher publisher = api.getService(RedisService.class).getMessagePublisher();
-        publisher.publish(message);
+        api.getService(RedisService.class).publish(message);
 
         WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, familyName, DiscordWebhookMessage.FAMILY__REGISTER_ALL.build(familyName));
     }
@@ -201,4 +198,7 @@ public class ServerService extends Service {
             throw new Exception(e.getMessage());
         }
     }
+
+    @Override
+    public void kill() {}
 }

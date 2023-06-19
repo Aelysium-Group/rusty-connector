@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.rounded;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.config.RoundedLifecycleConfig;
-import group.aelysium.rustyconnector.plugin.paper.lib.VirtualServerProcessor;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class RoundedSessionLifecycle {
-    private final ClockService clockService = new ClockService(3);
+    private final ClockService clockService = new ClockService(true, 3);
     private UUID currentSession = null;
     private final Map<String, List<String>> commands;
     private final int startDelay;
@@ -91,20 +91,17 @@ public class RoundedSessionLifecycle {
      */
     private void close() {
         this.currentSession = null;
+        PaperAPI api = PaperRustyConnector.getAPI();
 
-
-        VirtualServerProcessor processor = PaperRustyConnector.getAPI().getProcessor();
-        RedisPublisher publisher = processor.getRedisService().getMessagePublisher();
         GenericRedisMessage message = new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.ROUNDED_SESSION_CLOSE_REQUEST)
                 .setOrigin(MessageOrigin.PROXY)
-                .setAddress(processor.getAddress())
-                .setParameter(RedisMessageRoundedSessionCloseRequest.ValidParameters.SERVER_NAME, processor.getName())
-                .setParameter(RedisMessageRoundedSessionCloseRequest.ValidParameters.FAMILY_NAME, processor.getFamily())
+                .setAddress(api.getService(ServerInfoService.class).getAddress())
+                .setParameter(RedisMessageRoundedSessionCloseRequest.ValidParameters.SERVER_NAME, api.getService(ServerInfoService.class).getName())
+                .setParameter(RedisMessageRoundedSessionCloseRequest.ValidParameters.FAMILY_NAME, api.getService(ServerInfoService.class).getFamily())
                 .buildSendable();
 
-        publisher.publish(message);
-
+        PaperRustyConnector.getAPI().getService(RedisService.class).publish(message);
 
         ConsoleCommandSender sender = Bukkit.getConsoleSender();
 

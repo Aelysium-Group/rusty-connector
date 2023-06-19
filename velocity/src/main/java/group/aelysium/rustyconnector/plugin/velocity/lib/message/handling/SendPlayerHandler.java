@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import net.kyori.adventure.text.Component;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -29,7 +29,7 @@ public class SendPlayerHandler implements MessageHandler {
         if(player == null) return;
 
         try {
-            BaseServerFamily family = api.getService(FamilyService.class).find(message.getTargetFamilyName());
+            PlayerFocusedServerFamily family = (PlayerFocusedServerFamily) api.getService(FamilyService.class).find(message.getTargetFamilyName());
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+message.getTargetFamilyName()+"` doesn't exist!");
 
             family.connect(player);

@@ -58,4 +58,10 @@ public class MessageTunnelService extends Service {
             if(!this.whitelist.contains(message.getAddress()))
                 throw new BlockedMessageException("The message was sent from an IP Address that isn't whitelisted!");
     }
+
+    @Override
+    public void kill() {
+        this.blacklist.clear();
+        this.whitelist.clear();
+    }
 }

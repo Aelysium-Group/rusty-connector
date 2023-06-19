@@ -50,19 +50,6 @@ public class Processor extends IKLifecycle {
         this.services.clear();
     }
 
-    protected static class Builder {
-        private final Map<Class<? extends Service>, Service> services = new HashMap<>();
-
-        public Builder addService(Service service) {
-            this.services.put(service.getClass(), service);
-            return this;
-        }
-        
-        public Processor build() {
-            return new Processor(this.services);
-        }
-    }
-
     public static Processor init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
@@ -198,5 +185,18 @@ public class Processor extends IKLifecycle {
         logger.log("Finished setting up message tunnel");
 
         return builder.build();
+    }
+
+    protected static class Builder {
+        private final Map<Class<? extends Service>, Service> services = new HashMap<>();
+
+        public Builder addService(Service service) {
+            this.services.put(service.getClass(), service);
+            return this;
+        }
+
+        public Processor build() {
+            return new Processor(this.services);
+        }
     }
 }

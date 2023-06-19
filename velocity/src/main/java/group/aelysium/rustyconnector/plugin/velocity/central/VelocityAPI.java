@@ -9,10 +9,12 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.scheduler.Scheduler;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
 import group.aelysium.rustyconnector.core.lib.database.MySQLService;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
@@ -73,6 +75,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
+        this.processor.getService(RedisService.class).start(RedisSubscriber.class);
     }
 
     /**

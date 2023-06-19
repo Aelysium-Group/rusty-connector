@@ -76,14 +76,13 @@ public class RoundedServer extends PlayerServer {
         session.assignServer(this);
         this.session.connect();
 
-        RedisPublisher publisher = api.getService(RedisService.class).getMessagePublisher();
         GenericRedisMessage message = new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.ROUNDED_SESSION_START_EVENT)
                 .setOrigin(MessageOrigin.PROXY)
                 .setAddress(this.getServerInfo().getAddress())
                 .buildSendable();
 
-        publisher.publish(message);
+        api.getService(RedisService.class).publish(message);
     }
 
 

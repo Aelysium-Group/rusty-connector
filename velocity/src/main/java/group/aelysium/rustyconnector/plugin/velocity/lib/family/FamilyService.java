@@ -87,4 +87,10 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
             ((StaticServerFamily) family).uncacheHomeServer(player);
         }
     }
+
+    @Override
+    public void kill() {
+        this.registeredFamilies.clear();
+        this.rootFamily.clear();
+    }
 }
