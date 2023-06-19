@@ -44,7 +44,7 @@ public class OnPlayerKicked {
             } catch (Exception ignore) {}
 
             try {
-                if (!api.getService(FamilyService.class).catchDisconnectingPlayers) throw new NoOutputException();
+                if (!api.getService(FamilyService.class).shouldCatchDisconnectingPlayers()) throw new NoOutputException();
 
                 ScalarServerFamily rootFamily = api.getService(FamilyService.class).getRootFamily();
                 if(rootFamily.getRegisteredServers().isEmpty()) throw new RuntimeException("There are no available servers for you to connect to!");

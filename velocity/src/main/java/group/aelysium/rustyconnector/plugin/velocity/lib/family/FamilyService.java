@@ -14,9 +14,15 @@ import java.util.Map;
 public class FamilyService extends Service implements NodeManager<BaseServerFamily> {
     private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
     private WeakReference<ScalarServerFamily> rootFamily;
+    private final boolean catchDisconnectingPlayers;
 
-    public FamilyService() {
+    public FamilyService(boolean catchDisconnectingPlayers) {
         super(true);
+        this.catchDisconnectingPlayers = catchDisconnectingPlayers
+    }
+
+    public boolean shouldCatchDisconnectingPlayers() {
+        return this.catchDisconnectingPlayers;
     }
 
     public void setRootFamily(ScalarServerFamily family) {

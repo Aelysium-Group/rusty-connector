@@ -114,7 +114,7 @@ public class Processor extends IKLifecycle {
             throw new IllegalStateException("Unable to load or create families.yml!");
         familiesConfig.register();
 
-        FamilyService familyService = new FamilyService();
+        FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers());
         builder.addService(familyService);
 
         WhitelistService whitelistService = new WhitelistService();
