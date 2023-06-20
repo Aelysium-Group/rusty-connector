@@ -17,6 +17,7 @@ RustyConnector是一款可运行于Velocity/Paper群组网络的负载均衡插�
 <th width="2000" colspan="2">
 </th>
 </tr>
+<h2>🧭 快速链接</h2>
 </thead>
 <tbody>
 <tr>
@@ -76,6 +77,7 @@ RustyConnector是一款可运行于Velocity/Paper群组网络的负载均衡插�
 <th width="2000" colspan="2">
 </th>
 </tr>
+<h2>🚀 插件发布页</h2>
 </thead>
 <tbody>
 <tr>
