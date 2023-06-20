@@ -47,12 +47,12 @@ RustyConnector是一款可运行于Velocity/Paper群组网络的负载均衡插�
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://nuxt.com/docs/examples/hello-world"><img src="../images/logo/rc-logo.webp"></a>
+    <a href="https://join.aelysium.group"><img src="../images/logo/rc-logo.webp"></a>
   </td>
   <td>
     <h3>帮助支持</h3>
     <p>
-      您可<a href="https://nuxt.com/docs/examples/essentials/hello-world">点击此链接</a>加入我们的Discord社区获得更多帮助。
+      您可<a href="https://join.aelysium.group">点击此链接</a>加入我们的Discord社区获得更多帮助。
     </p>
   </td>
 </tr>
