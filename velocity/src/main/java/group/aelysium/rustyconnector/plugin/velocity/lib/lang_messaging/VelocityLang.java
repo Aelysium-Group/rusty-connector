@@ -46,9 +46,6 @@ public interface VelocityLang extends Lang {
             text("/rc message", AQUA),
             text("Access recently sent rusty-connector messages.", DARK_GRAY),
             SPACING,
-            text("/rc register", AQUA),
-            text("See server registration options.", DARK_GRAY),
-            SPACING,
             text("/rc reload", AQUA),
             text("See reload options.", DARK_GRAY),
             SPACING,
@@ -148,26 +145,6 @@ public interface VelocityLang extends Lang {
             text("/rc reload whitelists", GOLD),
             text("Reloads all active whitelists. Will also register if the proxy or a family's whitelist settings change.", DARK_GRAY),
             text("Players already connected to servers will NOT be kicked out if a whitelist is activated.", RED),
-            SPACING,
-            BORDER
-    );
-
-    Message RC_REGISTER_USAGE = () -> join(
-            Lang.newlines(),
-            BORDER,
-            SPACING,
-            WORDMARK_USAGE.build().color(AQUA),
-            SPACING,
-            text("Blue commands will return information or data to you! They will not cause changes to be made.",GRAY),
-            text("Orange commands will make the plugin do something. Make sure you know what these commands do before using them!",GRAY),
-            SPACING,
-            BORDER,
-            SPACING,
-            text("/rc register all", GOLD),
-            text("Register all servers to the proxy.", DARK_GRAY),
-            SPACING,
-            text("/rc register family <family name>", GOLD),
-            text("Register all servers associate with a specific family.", DARK_GRAY),
             SPACING,
             BORDER
     );
@@ -453,20 +430,6 @@ public interface VelocityLang extends Lang {
             text("Your tpa request to "+username+" has expired!",RED)
     );
 
-    ParameterizedMessage1<ServerInfo> PONG = serverInfo -> text(
-            "Proxy" +
-                    " "+ LoggerConfig.getConfig().getConsoleIcons_pong() +" " +
-                    "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
-    );
-
-    ParameterizedMessage1<ServerInfo> PONG_CANCELED = serverInfo -> text(
-            "Proxy" +
-                    " "+ LoggerConfig.getConfig().getConsoleIcons_canceledRequest() +" " +
-                    "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
-    );
-
     ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(
             "Proxy" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_ping() +" " +
@@ -477,7 +440,7 @@ public interface VelocityLang extends Lang {
     ParameterizedMessage2<ServerInfo, String> REGISTRATION_REQUEST = (serverInfo, familyName) -> text(
             "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                    " "+ LoggerConfig.getConfig().getConsoleIcons_requestingRegistration() +" "+familyName
+                    " "+ LoggerConfig.getConfig().getConsoleIcons_attemptingRegistration() +" "+familyName
     );
 
     ParameterizedMessage2<ServerInfo, String> REGISTERED = (serverInfo, familyName) -> text(
@@ -495,7 +458,7 @@ public interface VelocityLang extends Lang {
     ParameterizedMessage2<ServerInfo, String> UNREGISTRATION_REQUEST = (serverInfo, familyName) -> text(
             "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                    " "+ LoggerConfig.getConfig().getConsoleIcons_requestingUnregistration() +" "+familyName
+                    " "+ LoggerConfig.getConfig().getConsoleIcons_attemptingUnregistration() +" "+familyName
     );
 
     ParameterizedMessage2<ServerInfo, String> UNREGISTERED = (serverInfo, familyName) -> text(
@@ -509,9 +472,6 @@ public interface VelocityLang extends Lang {
                     "("+server.getAddress().getHostName()+":"+server.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_canceledRequest() +" "+familyName
     );
-
-    Message CALL_FOR_REGISTRATION = () -> text("[Velocity](127.0.0.1) " + LoggerConfig.getConfig().getConsoleIcons_callForRegistration() +" EVERYONE");
-    ParameterizedMessage1<String> CALL_FOR_FAMILY_REGISTRATION = (familyName) -> text("[Velocity](127.0.0.1) " + LoggerConfig.getConfig().getConsoleIcons_callForRegistration() +" "+ familyName);
 
     ParameterizedMessage1<BaseServerFamily> FAMILY_BALANCING = family -> text(
             family.getName() + " " + LoggerConfig.getConfig().getConsoleIcons_familyBalancing()

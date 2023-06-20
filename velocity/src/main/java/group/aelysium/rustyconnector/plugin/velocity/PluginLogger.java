@@ -74,24 +74,16 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
         );
 
         gate.registerNode(
-                GateKey.REGISTRATION_REQUEST,
-                config.isMessaging_registrationRequest()
+                GateKey.REGISTRATION_ATTEMPT,
+                config.isMessaging_registration()
         );
         gate.registerNode(
-                GateKey.UNREGISTRATION_REQUEST,
-                config.isMessaging_unregistrationRequest()
-        );
-        gate.registerNode(
-                GateKey.CALL_FOR_REGISTRATION,
-                config.isMessaging_callForRegistration()
+                GateKey.UNREGISTRATION_ATTEMPT,
+                config.isMessaging_unregistration()
         );
         gate.registerNode(
                 GateKey.PING,
                 config.isMessaging_ping()
-        );
-        gate.registerNode(
-                GateKey.PONG,
-                config.isMessaging_pong()
         );
         gate.registerNode(
                 GateKey.MESSAGE_PARSER_TRASH,

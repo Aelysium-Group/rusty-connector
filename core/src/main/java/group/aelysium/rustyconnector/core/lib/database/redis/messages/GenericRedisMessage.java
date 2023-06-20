@@ -12,7 +12,7 @@ import java.util.List;
 import static group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType.*;
 
 public class GenericRedisMessage {
-    private static final int protocolVersion = 1;
+    private static final int protocolVersion = 2;
 
     public static int getProtocolVersion() {
         return protocolVersion;
@@ -189,7 +189,7 @@ public class GenericRedisMessage {
         /**
          * Build a RedisMessage which was received via the RedisSubscriber.
          * This should be a RedisMessage which was previously built as a sendable RedisMessage, and then was sent via RedisPublisher.
-         *
+         * <p>
          * ## Required Parameters:
          * - `protocolVersion`
          * - `rawMessage`
@@ -201,26 +201,34 @@ public class GenericRedisMessage {
          * @throws IllegalStateException If the required parameters are not provided.
          */
         public GenericRedisMessage buildReceived() {
-            if(this.protocolVersion == null) throw new IllegalStateException("You must provide `protocolVersion` when building a receivable RedisMessage!");
-            if(this.rawMessage == null) throw new IllegalStateException("You must provide `rawMessage` when building a receivable RedisMessage!");
-            if(this.privateKey == null) throw new IllegalStateException("You must provide `privateKey` when building a receivable RedisMessage!");
-            if(this.type == null) throw new IllegalStateException("You must provide `type` when building a receivable RedisMessage!");
-            if(this.address == null) throw new IllegalStateException("You must provide `address` when building a receivable RedisMessage!");
-            if(this.origin == null) throw new IllegalStateException("You must provide `origin` when building a receivable RedisMessage!");
+            if (this.protocolVersion == null)
+                throw new IllegalStateException("You must provide `protocolVersion` when building a receivable RedisMessage!");
+            if (this.rawMessage == null)
+                throw new IllegalStateException("You must provide `rawMessage` when building a receivable RedisMessage!");
+            if (this.privateKey == null)
+                throw new IllegalStateException("You must provide `privateKey` when building a receivable RedisMessage!");
+            if (this.type == null)
+                throw new IllegalStateException("You must provide `type` when building a receivable RedisMessage!");
+            if (this.address == null)
+                throw new IllegalStateException("You must provide `address` when building a receivable RedisMessage!");
+            if (this.origin == null)
+                throw new IllegalStateException("You must provide `origin` when building a receivable RedisMessage!");
 
-            if(this.type == PING)                           return new RedisMessageServerPing(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if(this.type == SEND_PLAYER)                    return new RedisMessageSendPlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if(this.type == TPA_QUEUE_PLAYER)               return new RedisMessageTPAQueuePlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == PING)              return new RedisMessageServerPing(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == PING_RESPONSE)              return new RedisMessageServerPingResponse(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == SEND_PLAYER)       return new RedisMessageSendPlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == TPA_QUEUE_PLAYER)  return new RedisMessageTPAQueuePlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
+        }
 
         /**
          * Build a RedisMessage which can be sent via the RedisPublisher.
-         *
+         * <p>
          * ## Required Parameters:
          * - `type`
          * - `origin`
-         *
+         * <p>
          * ## Not Allowed Parameters:
          * - `protocolVersion`
          * @return A RedisMessage that can be published via the RedisPublisher.
@@ -232,9 +240,10 @@ public class GenericRedisMessage {
             if(this.origin == null) throw new IllegalStateException("You must provide `origin` when building a sendable RedisMessage!");
             // Specifically allow address to be set as `null`
 
-            if(this.type == PING)                           return new RedisMessageServerPing(this.address, this.origin, this.parameters);
-            if(this.type == SEND_PLAYER)                    return new RedisMessageSendPlayer(this.address, this.origin, this.parameters);
-            if(this.type == TPA_QUEUE_PLAYER)               return new RedisMessageTPAQueuePlayer(this.address, this.origin, this.parameters);
+            if(this.type == PING)               return new RedisMessageServerPing(this.address, this.origin, this.parameters);
+            if(this.type == PING_RESPONSE)      return new RedisMessageServerPingResponse(this.address, this.origin, this.parameters);
+            if(this.type == SEND_PLAYER)        return new RedisMessageSendPlayer(this.address, this.origin, this.parameters);
+            if(this.type == TPA_QUEUE_PLAYER)   return new RedisMessageTPAQueuePlayer(this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
         }
@@ -301,6 +310,5 @@ public class GenericRedisMessage {
             return list;
         }
     }
-
 }
 

@@ -201,49 +201,6 @@ public final class CommandRusty {
                         )
                 )
             )
-            .then(LiteralArgumentBuilder.<CommandSource>literal("register")
-                    .executes(context -> {
-                        try {
-                            VelocityLang.RC_REGISTER_USAGE.send(logger);
-                        } catch (Exception e) {
-                            VelocityLang.RC_REGISTER_ERROR.send(logger, "Something prevented us from sending a request for registration!\n"+e.getMessage());
-                        }
-
-                        return 1;
-                    })
-                    .then(LiteralArgumentBuilder.<CommandSource>literal("all")
-                            .executes(context -> {
-                                try {
-                                    api.getService(ServerService.class).registerAllServers();
-                                    return 1;
-                                } catch (Exception e) {
-                                    VelocityLang.RC_REGISTER_ERROR.send(logger, e.getMessage());
-                                }
-                                return 0;
-                            })
-                    )
-                    .then(LiteralArgumentBuilder.<CommandSource>literal("family")
-                            .executes(context -> {
-                                VelocityLang.RC_REGISTER_USAGE.send(logger);
-                                return 1;
-                            }).then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
-                                    .executes(context -> {
-                                        try {
-                                            String familyName = context.getArgument("familyName", String.class);
-                                            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
-                                            if(family == null) throw new NullPointerException();
-
-                                            api.getService(ServerService.class).registerAllServers(familyName);
-                                        } catch (NullPointerException e) {
-                                            VelocityLang.RC_REGISTER_ERROR.send(logger,"A family with that name doesn't exist!");
-                                        } catch (Exception e) {
-                                            VelocityLang.RC_REGISTER_ERROR.send(logger,"Something prevented us from reloading that family!\n"+e.getMessage());
-                                        }
-                                        return 1;
-                                    })
-                            )
-                    )
-            )
             .then(LiteralArgumentBuilder.<CommandSource>literal("reload")
                     .executes(context -> {
                         logger.log("Reloading the proxy...");

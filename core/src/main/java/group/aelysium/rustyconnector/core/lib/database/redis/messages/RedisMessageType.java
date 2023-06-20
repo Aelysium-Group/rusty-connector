@@ -18,8 +18,8 @@ public class RedisMessageType {
      * If a message contains the `to` parameter it is from the proxy.
      * Messages cannot contain both `to` and `from` parameters. Additionally, these parameters cannot be set manually.
      */
-
     public static Mapping PING = new Mapping(100, "PING");
+    public static Mapping PING_RESPONSE = new Mapping(101, "PING_RESPONSE");
 
     /**
      * `Server > Proxy` | Request to send a player to a family
@@ -34,6 +34,7 @@ public class RedisMessageType {
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();
         list.add(PING);
+        list.add(PING_RESPONSE);
         list.add(SEND_PLAYER);
         list.add(TPA_QUEUE_PLAYER);
 

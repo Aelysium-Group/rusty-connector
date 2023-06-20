@@ -50,7 +50,7 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 3
+version: 4
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -230,8 +230,7 @@ boot-commands:
 # This section doesn't care about whether other plugins on the proxy have started yet!
 # If you run commands from other plugins, they might not work because those plugins may not have been booted up yet!
 #
-    commands:
-      - "rc register all"
+    commands: []
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -253,7 +252,7 @@ services:
     server-lifecycle:
 #
 # Amount of time, in seconds, that a server can go without pinging the proxy.
-# If a server diesnt ping the proxy in this time, it will be declared stale
+# If a server doesn't ping the proxy in this time, it will be declared stale
 # and be unregistered from the proxy.
 #
         server-timeout: 15

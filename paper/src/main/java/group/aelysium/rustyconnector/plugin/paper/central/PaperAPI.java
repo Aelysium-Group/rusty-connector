@@ -4,11 +4,12 @@ import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.ProxyConnectorService;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -99,6 +100,7 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
         this.processor.getService(RedisService.class).start(RedisSubscriber.class);
+        this.processor.getService(ProxyConnectorService.class).startHeartbeat();
     }
 
     public boolean isFolia() {

@@ -21,6 +21,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServer
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 
 import java.security.InvalidAlgorithmParameterException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
     private RegisteredServer registeredServer = null;
@@ -31,7 +32,9 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     private int softPlayerCap;
     private int hardPlayerCap;
 
-    public PlayerServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight) {
+    private AtomicInteger timeout;
+
+    public PlayerServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight, int timeout) {
         this.serverInfo = serverInfo;
 
         this.weight = Math.max(weight, 0);
@@ -41,6 +44,24 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
 
         // Soft player cap MUST be at most the same value as hard player cap.
         if(this.softPlayerCap > this.hardPlayerCap) this.softPlayerCap = this.hardPlayerCap;
+
+        this.timeout = new AtomicInteger(timeout);
+    }
+
+    public boolean isStale() {
+        return this.timeout.get() <= 0;
+    }
+
+    public void setTimeout(int newTimeout) {
+        if(newTimeout < 0) throw new IndexOutOfBoundsException("New timeout must be at least 0!");
+        this.timeout.set(newTimeout);
+    }
+
+    public int decreaseTimeout() {
+        this.timeout.decrementAndGet();
+        if(this.timeout.get() < 0) this.timeout.set(0);
+
+        return this.timeout.get();
     }
 
     public String getAddress() {
@@ -167,25 +188,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
-    }
-
-    /**
-     * Sends a ping to this server.
-     */
-    public void ping() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-
-        GenericRedisMessage message = new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.PING)
-                .setOrigin(MessageOrigin.PROXY)
-                .setAddress(this.getAddress())
-                .buildSendable();
-
-        api.getService(RedisService.class).publish(message);
-
-        if(logger.getGate().check(GateKey.PING))
-            VelocityLang.PING.send(logger,this.serverInfo);
     }
 
     /**

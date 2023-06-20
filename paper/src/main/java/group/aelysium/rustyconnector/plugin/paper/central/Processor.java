@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.config.PrivateKeyConfig;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.ProxyConnectorService;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueueService;
@@ -19,13 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Processor extends IKLifecycle {
-    private final Map<Class<? extends Service>, Service> services;
     protected Processor(Map<Class<? extends Service>, Service> services) {
-        this.services = services;
-    }
-
-    public <S extends Service> S getService(Class<S> type) {
-        return (S) this.services.get(type);
+        super(services);
     }
 
     @Override
@@ -82,6 +78,8 @@ public class Processor extends IKLifecycle {
         builder.addService(new RedisMessagerService());
 
         builder.addService(new TPAQueueService());
+
+        builder.addService(new ProxyConnectorService(3));
 
         return builder.build();
     }

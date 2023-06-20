@@ -47,10 +47,9 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         } catch (Exception e) {
             cachedMessage.sentenceMessage(MessageStatus.TRASHED);
             /* TODO: Uncomment and implement proper logging handling
-            PaperRustyConnector plugin = PaperRustyConnector.getInstance();
 
-            plugin.logger().error("There was an issue handling the incoming message! Throwing away...",e);
-            plugin.logger().log("To view the thrown away message use: /rc message get "+messageSnowflake.toString());
+            logger.error("There was an issue handling the incoming message! Throwing away...",e);
+            logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake().toString());
             */
         }
     }
@@ -59,10 +58,8 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
 
         try {
-            if(message.getType() == REGISTER_ALL_SERVERS_TO_PROXY)      new ServerRegAllHandler(message).execute();
-            if(message.getType() == REGISTER_ALL_SERVERS_TO_FAMILY)     new ServerRegFamilyHandler(message).execute();
-            if(message.getType() == PING)                               new PingHandler(message).execute();
-            if(message.getType() == TPA_QUEUE_PLAYER)                   new TPAQueuePlayerHandler(message).execute();
+            if(message.getType() == PING_RESPONSE)      new PingResponseHandler(message).execute();
+            if(message.getType() == TPA_QUEUE_PLAYER)   new TPAQueuePlayerHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (Exception e) {

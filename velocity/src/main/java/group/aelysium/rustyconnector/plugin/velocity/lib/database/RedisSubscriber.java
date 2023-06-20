@@ -81,10 +81,8 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         try {
-            if(message.getType() == REGISTER_SERVER)                    new ServerRegHandler(message).execute();
-            if(message.getType() == UNREGISTER_SERVER)                  new ServerUnRegHandler(message).execute();
-            if(message.getType() == SEND_PLAYER)                        new SendPlayerHandler(message).execute();
-            if(message.getType() == PONG)                               new PongHandler(message).execute();
+            if(message.getType() == PING)           new PingHandler(message).execute();
+            if(message.getType() == SEND_PLAYER)    new SendPlayerHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (NullPointerException e) {

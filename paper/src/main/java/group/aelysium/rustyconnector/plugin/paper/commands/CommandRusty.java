@@ -26,8 +26,6 @@ public final class CommandRusty {
 
         manager.command(message(manager));
         manager.command(send(manager));
-        manager.command(register(manager));
-        manager.command(unregister(manager));
     }
 
     private static Command.Builder<CommandSender> message(PaperCommandManager<CommandSender> manager) {
@@ -76,42 +74,6 @@ public final class CommandRusty {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from processing the request!", e);
-                            }
-                        }).execute());
-    }
-
-    private static Command.Builder<CommandSender> register(PaperCommandManager<CommandSender> manager) {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
-
-        return builder.literal("register")
-                .senderType(ConsoleCommandSender.class)
-                .handler(context -> manager.taskRecipe().begin(context)
-                        .asynchronous(commandContext -> {
-                            try {
-                                api.getService(RedisMessagerService.class).registerToProxy();
-                                Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text("Send registration request!"), NamedTextColor.GREEN);
-                            } catch (Exception e) {
-                                logger.log("An error stopped us from sending your request!", e);
-                            }
-                        }).execute());
-    }
-
-    private static Command.Builder<CommandSender> unregister(PaperCommandManager<CommandSender> manager) {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
-
-        return builder.literal("unregister")
-                .senderType(ConsoleCommandSender.class)
-                .handler(context -> manager.taskRecipe().begin(context)
-                        .asynchronous(commandContext -> {
-                            try {
-                                api.getService(RedisMessagerService.class).unregisterFromProxy();
-                                Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text("Send unregister request!"), NamedTextColor.GREEN);
-                            } catch (Exception e) {
-                                logger.log("An error stopped us from sending your request!", e);
                             }
                         }).execute());
     }

@@ -1,23 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
 import com.sun.jdi.request.DuplicateRequestException;
-import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageFamilyRegister;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageTPAQueuePlayer;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
@@ -26,12 +17,31 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookM
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 
+import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
-public class ServerService extends Service {
-    public ServerService() {
-        super(true);
+public class ServerService extends ServiceableService {
+    private final Vector<WeakReference<PlayerServer>> servers =  new Vector<>();
+
+    private final int serverTimeout;
+    private final int serverInterval;
+
+    protected ServerService(Map<Class<? extends Service>, Service> services, int serverTimeout, int serverInterval) {
+        super(true, services);
+        this.serverTimeout = serverTimeout;
+        this.serverInterval = serverInterval;
+    }
+
+    public int getServerTimeout() {
+        return this.serverTimeout;
+    }
+
+    public int getServerInterval() {
+        return this.serverInterval;
     }
 
     public PlayerServer findServer(ServerInfo serverInfo) {
@@ -44,55 +54,15 @@ public class ServerService extends Service {
         return null;
     }
 
+    public Vector<WeakReference<PlayerServer>> getServers() {
+        return this.servers;
+    }
+
     public boolean contains(ServerInfo serverInfo) {
         for(BaseServerFamily family : VelocityRustyConnector.getAPI().getService(FamilyService.class).dump()) {
             if(family.containsServer(serverInfo)) return true;
         }
         return false;
-    }
-
-    /**
-     * Sends a request to all servers listening on this data channel to register themselves.
-     * Can be useful if you've just restarted your proxy and need to quickly get all your servers back online.
-     */
-    public void registerAllServers() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-
-        if(logger.getGate().check(GateKey.CALL_FOR_REGISTRATION))
-            VelocityLang.CALL_FOR_REGISTRATION.send(logger);
-
-        GenericRedisMessage message = new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.REGISTER_ALL_SERVERS_TO_PROXY)
-                .setOrigin(MessageOrigin.PROXY)
-                .buildSendable();
-
-        api.getService(RedisService.class).publish(message);
-
-        WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, DiscordWebhookMessage.PROXY__REGISTER_ALL);
-    }
-
-    /**
-     * Sends a request to all servers associated with a specific family asking them to register themselves.
-     * Can be usefull if you've just reloaded a family and need to quickly get all your servers back online.
-     * @param familyName The name of the family to target.
-     */
-    public void registerAllServers(String familyName) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-
-        if(logger.getGate().check(GateKey.CALL_FOR_REGISTRATION))
-            VelocityLang.CALL_FOR_FAMILY_REGISTRATION.send(logger, familyName);
-
-        RedisMessageFamilyRegister message = (RedisMessageFamilyRegister) new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.REGISTER_ALL_SERVERS_TO_FAMILY)
-                .setOrigin(MessageOrigin.PROXY)
-                .setParameter(RedisMessageFamilyRegister.ValidParameters.FAMILY_NAME, familyName)
-                .buildSendable();
-
-        api.getService(RedisService.class).publish(message);
-
-        WebhookEventManager.fire(WebhookAlertFlag.REGISTER_ALL, familyName, DiscordWebhookMessage.FAMILY__REGISTER_ALL.build(familyName));
     }
 
     /**
@@ -110,7 +80,7 @@ public class ServerService extends Service {
                 String name = "server"+i;
 
                 ServerInfo info = new ServerInfo(name, address);
-                PlayerServer server = new PlayerServer(info, 40, 50, 0);
+                PlayerServer server = new PlayerServer(info, 40, 50, 0, this.serverTimeout);
                 server.setPlayerCount((int) (Math.random() * 50));
 
                 try {
@@ -136,7 +106,7 @@ public class ServerService extends Service {
         PluginLogger logger = api.getLogger();
 
         try {
-            if(logger.getGate().check(GateKey.REGISTRATION_REQUEST))
+            if(logger.getGate().check(GateKey.REGISTRATION_ATTEMPT))
                 VelocityLang.REGISTRATION_REQUEST.send(logger, server.getServerInfo(), familyName);
 
             if(this.contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
@@ -149,16 +119,16 @@ public class ServerService extends Service {
 
             family.addServer(server);
 
-            api.getService(ServerLifeMatrixService.class).registerServer(server.getServerInfo());
+            this.servers.add(new WeakReference<>(server));
 
-            if(logger.getGate().check(GateKey.REGISTRATION_REQUEST))
+            if(logger.getGate().check(GateKey.REGISTRATION_ATTEMPT))
                 VelocityLang.REGISTERED.send(logger, server.getServerInfo(), familyName);
 
             WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, DiscordWebhookMessage.PROXY__SERVER_REGISTER.build(server, familyName));
             WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, familyName, DiscordWebhookMessage.FAMILY__SERVER_REGISTER.build(server, familyName));
             return registeredServer;
         } catch (Exception error) {
-            if(logger.getGate().check(GateKey.REGISTRATION_REQUEST))
+            if(logger.getGate().check(GateKey.REGISTRATION_ATTEMPT))
                 VelocityLang.REGISTRATION_CANCELED.send(logger, server.getServerInfo(), familyName);
             throw new Exception(error.getMessage());
         }
@@ -177,23 +147,22 @@ public class ServerService extends Service {
             PlayerServer server = this.findServer(serverInfo);
             if(server == null) throw new NullPointerException("Server ["+serverInfo.getName()+"]("+serverInfo.getAddress()+":"+serverInfo.getAddress().getPort()+") doesn't exist! It can't be unregistered!");
 
-            if(logger.getGate().check(GateKey.UNREGISTRATION_REQUEST))
+            if(logger.getGate().check(GateKey.UNREGISTRATION_ATTEMPT))
                 VelocityLang.UNREGISTRATION_REQUEST.send(logger, serverInfo, familyName);
 
             BaseServerFamily family = server.getFamily();
 
-            api.getService(ServerLifeMatrixService.class).unregisterServer(serverInfo);
             api.unregisterServer(server.getServerInfo());
             if(removeFromFamily)
                 family.removeServer(server);
 
-            if(logger.getGate().check(GateKey.UNREGISTRATION_REQUEST))
+            if(logger.getGate().check(GateKey.UNREGISTRATION_ATTEMPT))
                 VelocityLang.UNREGISTERED.send(logger, serverInfo, familyName);
 
             WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, DiscordWebhookMessage.PROXY__SERVER_UNREGISTER.build(server));
             WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, familyName, DiscordWebhookMessage.FAMILY__SERVER_UNREGISTER.build(server));
         } catch (Exception e) {
-            if(logger.getGate().check(GateKey.UNREGISTRATION_REQUEST))
+            if(logger.getGate().check(GateKey.UNREGISTRATION_ATTEMPT))
                 VelocityLang.UNREGISTRATION_CANCELED.send(logger, serverInfo, familyName);
             throw new Exception(e.getMessage());
         }
@@ -201,4 +170,75 @@ public class ServerService extends Service {
 
     @Override
     public void kill() {}
+
+    public static class Builder {
+        protected final Map<Class<? extends Service>, Service> services = new HashMap<>();
+        protected int timeout = 15;
+        protected int interval = 10;
+
+        public ServerService.Builder setServerTimeout(int timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+
+        public ServerService.Builder setServerInterval(int interval) {
+            this.interval = interval;
+            return this;
+        }
+
+        public ServerService.Builder addService(Service service) {
+            this.services.put(service.getClass(), service);
+            return this;
+        }
+
+        public ServerService build() {
+            return new ServerService(this.services, timeout, interval);
+        }
+    }
+
+    public static class ServerBuilder {
+        private ServerInfo serverInfo;
+        private String familyName;
+        private int playerCount = 0;
+        private int weight;
+        private int softPlayerCap;
+        private int hardPlayerCap;
+        protected int initialTimeout = 15;
+
+        public ServerService.ServerBuilder setServerInfo(ServerInfo serverInfo) {
+            this.serverInfo = serverInfo;
+            return this;
+        }
+
+        public ServerService.ServerBuilder setFamilyName(String familyName) {
+            this.familyName = familyName;
+            return this;
+        }
+
+        public ServerService.ServerBuilder setPlayerCount(int playerCount) {
+            this.playerCount = playerCount;
+            return this;
+        }
+
+        public ServerService.ServerBuilder setWeight(int weight) {
+            this.weight = weight;
+            return this;
+        }
+
+        public ServerService.ServerBuilder setSoftPlayerCap(int softPlayerCap) {
+            this.softPlayerCap = softPlayerCap;
+            return this;
+        }
+
+        public ServerService.ServerBuilder setHardPlayerCap(int hardPlayerCap) {
+            this.hardPlayerCap = hardPlayerCap;
+            return this;
+        }
+
+        public PlayerServer build() {
+            this.initialTimeout = VelocityRustyConnector.getAPI().getService(ServerService.class).getServerTimeout();
+
+            return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
+        }
+    }
 }

@@ -17,7 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFami
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerLifeMatrixService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPACleaningService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
@@ -31,18 +31,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Processor extends IKLifecycle {
-    private final Map<Class<? extends Service>, Service> services;
-    
     protected Processor(Map<Class<? extends Service>, Service> services) {
-        this.services = services;
-    }
-
-    public <S extends Service> S getService(Class<S> type) {
-        return (S) this.services.get(type);
+        super(services);
     }
 
     @Override
@@ -136,13 +129,8 @@ public class Processor extends IKLifecycle {
 
         logger.log("Finished setting up families");
 
-        if(config.isHearts_serverLifecycle_enabled()) {
-            ServerLifeMatrixService lifeMatrixService = new ServerLifeMatrixService(familyService.size(), config.getServices_serverLifecycle_interval(), config.shouldHearts_serverLifecycle_unregisterOnIgnore());
-            builder.addService(lifeMatrixService);
-        } else builder.addService(new ServerLifeMatrixService());
-
-        if(config.getMessageTunnel_familyServerSorting_enabled()) {
-            builder.addService(new LoadBalancingService(familyService.size(), config.getMessageTunnel_familyServerSorting_interval()));
+        if(config.getServices_loadBalancing_enabled()) {
+            builder.addService(new LoadBalancingService(familyService.size(), config.getServices_loadBalancing_interval()));
         }
 
         builder.addService(new TPACleaningService(10));
@@ -184,13 +172,21 @@ public class Processor extends IKLifecycle {
 
         logger.log("Finished setting up message tunnel");
 
-        builder.addService(new ServerService());
+
+        ServerLifecycle lifeMatrixService = new ServerLifecycle(5, config.getServices_serverLifecycle_serverPingInterval());
+
+        ServerService.Builder serverServiceBuilder = new ServerService.Builder()
+                .setServerTimeout(config.getServices_serverLifecycle_serverTimeout())
+                .setServerInterval(config.getServices_serverLifecycle_serverPingInterval())
+                .addService(lifeMatrixService);
+
+        builder.addService(serverServiceBuilder.build());
 
         return builder.build();
     }
 
     protected static class Builder {
-        private final Map<Class<? extends Service>, Service> services = new HashMap<>();
+        protected final Map<Class<? extends Service>, Service> services = new HashMap<>();
 
         public Builder addService(Service service) {
             this.services.put(service.getClass(), service);

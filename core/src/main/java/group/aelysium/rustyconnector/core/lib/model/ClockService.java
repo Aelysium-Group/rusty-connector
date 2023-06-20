@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.core.lib.model;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class ClockService extends Service {
@@ -18,8 +19,8 @@ public class ClockService extends Service {
      * @param runnable The runnable task to run.
      * @param period The intervals in seconds to wait before executing the runnable again.
      */
-    public void scheduleRecurring(Runnable runnable, long period) {
-        this.executorService.scheduleAtFixedRate(runnable, 0, period, TimeUnit.SECONDS);
+    public ScheduledFuture<?> scheduleRecurring(Runnable runnable, long period) {
+        return this.executorService.scheduleAtFixedRate(runnable, 0, period, TimeUnit.SECONDS);
     }
 
     /**

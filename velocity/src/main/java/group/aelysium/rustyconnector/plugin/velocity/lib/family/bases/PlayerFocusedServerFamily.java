@@ -108,10 +108,11 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
     @Override
     public void unregisterServers() throws Exception {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        ServerService serverService = VelocityRustyConnector.getAPI().getService(ServerService.class);
+
         for (PlayerServer server : this.loadBalancer.dump()) {
             if(server == null) continue;
-            api.getService(ServerService.class).unregisterServer(server.getServerInfo(),this.name, false);
+            serverService.unregisterServer(server.getServerInfo(),this.name, false);
         }
     }
 

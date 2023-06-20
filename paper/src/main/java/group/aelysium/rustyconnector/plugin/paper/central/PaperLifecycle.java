@@ -57,11 +57,6 @@ public class PaperLifecycle extends PluginLifecycle {
 
             Lang.WORDMARK_RUSTY_CONNECTOR.send(logger);
 
-            if(defaultConfig.isRegisterOnBoot()) {
-                Lang.BOXED_MESSAGE.send(logger, Component.text("Sent a registration request over the data-channel...", NamedTextColor.GREEN));
-                api.getService(RedisMessagerService.class).registerToProxy();
-            }
-
             DefaultConfig.empty();
 
             return true;
