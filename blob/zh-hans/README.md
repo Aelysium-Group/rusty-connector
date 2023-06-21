@@ -8,7 +8,7 @@
 [![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
 [![License](https://flat.badgen.net/badge/License/MIT/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE)
 
-[RustyConnector]是一款可运行于[Velocity]/[Paper]/[Folia]群组网络的负载均衡插件，它可以让你的服务器在运行状态下自动向代理端注册或注销子服务器，并实现玩家间的负载均衡
+[RustyConnector]是一款可运行于[Velocity]/[Paper]/[Folia]群组网络的负载均衡插件，它可以让你的服务器在运行状态下自动向代理端注册或取消注册子服务器，并实现玩家间的负载均衡。
 
 <!-- Table-1 -->
 <table>
