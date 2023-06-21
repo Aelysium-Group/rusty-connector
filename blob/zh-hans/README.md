@@ -165,7 +165,7 @@
 ---
 ## 🌐 语言切换
 
-Need to switch languages?
+语言切换 / Need to switch languages?
 
 [![English](https://flat.badgen.net/badge/English/Click%20me/blue)](https://github.com/Aelysium-Group/rusty-connector/blob/main/README.md)
 [![简体中文](https://flat.badgen.net/badge/简体中文/Click%20me/blue)](https://Aelysium-Group/rusty-connector/blob/main/blob/zh-hans/README.md)

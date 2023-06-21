@@ -1,24 +1,115 @@
 ![Aelysium Wordmark Image](https://github.com/Aelysium-Group/.github/blob/main/images/rustyconnector-wordmark.png?raw=true)
 
-# RustyConnector
-![Velocity](https://badgen.net/badge/Velocity/3.1.1%20-%203.2.0/1197d1?icon=dockbit)
-![PaperMC](https://badgen.net/badge/Paper/1.16%20-%201.20.1/F96854?icon=telegram)
-![Folia](https://badgen.net/badge/Folia/Supported/E004BC?icon=maven)
-[![Aelysium](https://badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
-[![Build](https://badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
+# 👋 Welcome to RustyConnector
+![Velocity](https://flat.badgen.net/badge/Velocity/3.1.1%20-%203.2.0/1197d1?icon=dockbit)
+![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.20.1/F96854?icon=telegram)
+![Folia](https://flat.badgen.net/badge/Folia/Supported/E004BC?icon=maven)
+[![Aelysium](https://flat.badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
+[![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
+[![License](https://flat.badgen.net/badge/License/MIT/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE)
 
-RustyConnector is a Velocity network backbone plugin. It lets you register brand-new servers to the proxy during runtime and load balance players between them.
+[RustyConnector] is a load balancing plugin that can run on [Velocity]/[Paper]/[Folia] networks, which allows your server to automatically register or unregister sub-servers with the proxy side in a running state, and enables load balancing between players.
 
-<br>
+<!-- Table-1 -->
+<table>
+<thead>
+<tr>
+<th width="2000" colspan="2">
+</th>
+</tr>
+<h2>🧭 Links</h2>
+</thead>
+<tbody>
+<tr>
+  <td width="80" align="center" valign="top">
+    <br>
+    <a href="https://github.com/Aelysium-Group/rusty-connector/wiki"><img src="./blob/images/logo/rc-logo.webp"></a>
+  </td>
+  <td valign="top">
+    <h3>Wiki</h3>
+    <p>
+      Don't know how to use this plugin? <a href="https://github.com/Aelysium-Group/rusty-connector/wiki">Click this link</a> to teach you a quick start.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td width="80" align="center" valign="top">
+    <br>
+    <a href="https://github.com/Aelysium-Group/rusty-connector/releases"><img src="./blob/images/logo/rc-logo.webp"></a>
+  </td>
+  <td valign="top">
+    <h3>Download</h3>
+    <p>
+      <a href="https://github.com/Aelysium-Group/rusty-connector/releases">Click to go to Github Releases to download</a>, or go to the plugin release page.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td width="80" align="center" valign="top">
+    <br>
+    <a href="https://join.aelysium.group"><img src="./blob/images/logo/rc-logo.webp"></a>
+  </td>
+  <td>
+    <h3>Support</h3>
+    <p>
+      You can <a href="https://join.aelysium.group">click this link</a> to join our Discord community for more help.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td width="80" align="center" valign="top">
+    <br>
+    <a href="https://github.com/Aelysium-Group/rusty-connector/issues"><img src="./blob/images/logo/rc-logo.webp"></a>
+  </td>
+  <td>
+    <h3>Report Bugs</h3>
+    <p>
+    Experiencing annoying bugs while using the plugin? Please <a href="https://github.com/Aelysium-Group/rusty-connector/issues">click this link</a> to feedback with us.
+    </p>
+  </td>
+</tr>
+</tbody>
+</table>
 
-## [Support](https://join.aelysium.group/)  |  [Wiki](https://github.com/Aelysium-Group/rusty-connector/wiki)  |  [Download](https://github.com/Aelysium-Group/rusty-connector/releases)  |  [Report Bugs](https://github.com/Aelysium-Group/rusty-connector/issues)
-
-## [Modrinth](https://modrinth.com/plugin/rustyconnector) | [Hangar](https://hangar.papermc.io/nathan-i-martin/RustyConnector)
-
-<br>
+<!-- Table-2 -->
+<table>
+<thead>
+<tr>
+<th width="2000" colspan="2">
+</th>
+</tr>
+<h2>🚀 Plugin Release Page</h2>
+</thead>
+<tbody>
+<tr>
+  <td width="80" align="center" valign="top">
+    <br>
+    <a href="https://modrinth.com/plugin/rustyconnector"><img src="./blob/images/logo/modrinth.svg"></a>
+  </td>
+  <td valign="top">
+    <h3>Modrinth</h3>
+    <p>
+      <a href="https://modrinth.com/plugin/rustyconnector">Click to go to Modrinth plugin release page.</a>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td width="80" align="center" valign="top">
+    <br>
+    <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector"><img src="./blob/images/logo/hanger.svg"></a>
+  </td>
+  <td valign="top">
+    <h3>Hanger</h3>
+    <p>
+      <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector">Click to go to Hanger plugin release page.</a>
+    </p>
+  </td>
+</tr>
+</tbody>
+</table>
 
 ---
-# Features
+# ✨ Features
 - ### ✅ Built for large networks
 - ### ✅ Register brand-new servers to the proxy during runtime
 - ### ✅ Blazing fast data transmission with Redis integration
@@ -34,12 +125,14 @@ RustyConnector is a Velocity network backbone plugin. It lets you register brand
 - ### ✅ Works with Folia
 - ### ❌ Can't give you a hug
 ---
-# Networks Served:
+# 🎨 Statistics
+
+## 🌌 Networks Served ([Click to view](https://bstats.org/plugin/velocity/RustyConnector/17972)):
 [![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)](https://bstats.org/signatures/velocity/RustyConnector.svg)
-# Sub-Servers Served:
+## 🌌 Sub-Servers Served ([Click to view](https://bstats.org/plugin/bukkit/RustyConnector/17973)):
 [![RustyConnector bstats graph](https://bstats.org/signatures/bukkit/RustyConnector.svg)](https://bstats.org/signatures/bukkit/RustyConnector.svg)
 ---
-## Incoming Features/Changes
+## 🛠 Incoming Features/Changes
 - [ ] Rounded families (families built for round based gamemodes!) [__Under Development__]
 - [ ] Player parties (join your friend's party and follow them around the network as they connect to different families!) [__Under Development__]
 - [ ] Websocket as a backup for if Redis fails [__Under Research__]
@@ -53,7 +146,7 @@ RustyConnector is a Velocity network backbone plugin. It lets you register brand
 
 ---
 
-# Wiki
+# 📖 Wiki
 ### [Home](https://github.com/Aelysium-Group/rusty-connector/wiki)
 ### [FAQ](https://github.com/Aelysium-Group/rusty-connector/wiki#faq)
 ### [Getting Started](https://github.com/Aelysium-Group/rusty-connector/wiki/Getting-Started-(First-Time))
@@ -68,3 +161,19 @@ RustyConnector is a Velocity network backbone plugin. It lets you register brand
   - [RC-Velocity](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-v2#rc-velocity)
   - [RC-Paper](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-v2#rc-paper)
 ### [Config Migration](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration)
+
+## 🌐 Language Switch
+
+语言切换 / Need to switch languages?
+
+[![English](https://flat.badgen.net/badge/English/Click%20me/blue)](https://github.com/Aelysium-Group/rusty-connector/blob/main/README.md)
+[![简体中文](https://flat.badgen.net/badge/简体中文/Click%20me/blue)](https://Aelysium-Group/rusty-connector/blob/main/blob/zh-hans/README.md)
+[![繁體中文](https://flat.badgen.net/badge/繁體中文/Click%20me/blue)](https://github.com/Aelysium-Group/rusty-connector/blob/main/blob/zh-hant/README.md)
+
+2023 © [Aelysium](https://www.aelysium.group)
+
+<!-- URL LIST -->
+[Folia]:https://github.com/PaperMC/Folia
+[Paper]: https://papermc.io
+[Velocity]: https://velocitypowered.com
+[RustyConnector]: https://github.com/Aelysium-Group/rusty-connector
