@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.services;
 
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
@@ -43,7 +44,7 @@ public class ProxyConnectorService extends ClockService {
             try {
                 if(this.status == Status.SEARCHING)
                     logger.log("Searching for proxy...");
-                service.pingProxy();
+                service.pingProxy(RedisMessageServerPing.ConnectionIntent.CONNECT);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -64,5 +65,15 @@ public class ProxyConnectorService extends ClockService {
         CONNECTED,
         SEARCHING,
         DENIED
+    }
+
+    public void disconnect() {
+        RedisMessagerService service = PaperRustyConnector.getAPI().getService(RedisMessagerService.class);
+        service.pingProxy(RedisMessageServerPing.ConnectionIntent.DISCONNECT);
+    }
+
+    @Override
+    public void kill() {
+        super.kill();
     }
 }

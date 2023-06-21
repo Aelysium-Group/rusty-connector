@@ -20,7 +20,7 @@ public class RedisMessagerService extends Service {
         super(true);
     }
 
-    public void pingProxy() {
+    public void pingProxy(RedisMessageServerPing.ConnectionIntent intent) {
         PaperAPI api = PaperRustyConnector.getAPI();
 
         try {
@@ -28,6 +28,7 @@ public class RedisMessagerService extends Service {
                     .setType(RedisMessageType.PING)
                     .setOrigin(MessageOrigin.SERVER)
                     .setAddress(api.getService(ServerInfoService.class).getAddress())
+                    .setParameter(RedisMessageServerPing.ValidParameters.INTENT, intent.toString())
                     .setParameter(RedisMessageServerPing.ValidParameters.FAMILY_NAME, api.getService(ServerInfoService.class).getFamily())
                     .setParameter(RedisMessageServerPing.ValidParameters.SERVER_NAME, api.getService(ServerInfoService.class).getName())
                     .setParameter(RedisMessageServerPing.ValidParameters.SOFT_CAP, String.valueOf(api.getService(ServerInfoService.class).getSoftPlayerCap()))

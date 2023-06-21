@@ -161,10 +161,14 @@ public class ServerService extends ServiceableService {
 
             WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, DiscordWebhookMessage.PROXY__SERVER_UNREGISTER.build(server));
             WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, familyName, DiscordWebhookMessage.FAMILY__SERVER_UNREGISTER.build(server));
+        } catch (NullPointerException e) {
+            if(logger.getGate().check(GateKey.UNREGISTRATION_ATTEMPT))
+                VelocityLang.UNREGISTRATION_CANCELED.send(logger, serverInfo, familyName);
+            throw new NullPointerException(e.getMessage());
         } catch (Exception e) {
             if(logger.getGate().check(GateKey.UNREGISTRATION_ATTEMPT))
                 VelocityLang.UNREGISTRATION_CANCELED.send(logger, serverInfo, familyName);
-            throw new Exception(e.getMessage());
+            throw new Exception(e);
         }
     }
 

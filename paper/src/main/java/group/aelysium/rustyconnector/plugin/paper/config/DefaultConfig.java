@@ -25,8 +25,6 @@ public class DefaultConfig extends YAML {
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
-    private boolean registerOnBoot = true;
-
     private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
     }
@@ -73,10 +71,6 @@ public class DefaultConfig extends YAML {
 
     public String getRedis_dataChannel() {
         return redis_dataChannel;
-    }
-
-    public boolean isRegisterOnBoot() {
-        return registerOnBoot;
     }
 
     /**
@@ -150,7 +144,5 @@ public class DefaultConfig extends YAML {
         this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
         if(this.redis_dataChannel.equals(""))
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
-
-        this.registerOnBoot = this.getNode(this.data,"register-on-boot",Boolean.class);
     }
 }

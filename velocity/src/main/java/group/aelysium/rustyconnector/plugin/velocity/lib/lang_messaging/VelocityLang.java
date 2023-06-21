@@ -431,8 +431,7 @@ public interface VelocityLang extends Lang {
     );
 
     ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(
-            "Proxy" +
-                    " "+ LoggerConfig.getConfig().getConsoleIcons_ping() +" " +
+             LoggerConfig.getConfig().getConsoleIcons_ping() + " " +
                     "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
     );

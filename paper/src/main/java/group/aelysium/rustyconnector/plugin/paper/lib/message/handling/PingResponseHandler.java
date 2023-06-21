@@ -25,7 +25,7 @@ public class PingResponseHandler implements MessageHandler {
         ProxyConnectorService service = api.getService(ProxyConnectorService.class);
 
         if(message.getStatus() == RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED) {
-            logger.send(PaperLang.BOXED_MESSAGE_COLORED.build(Component.text(message.getMessage()), message.getColor()));
+            logger.send(Component.text(message.getMessage(), message.getColor()));
 
             if(message.getPingInterval().isPresent()) {
                 service.setUpcomingPingDelay(message.getPingInterval().get());
@@ -39,7 +39,7 @@ public class PingResponseHandler implements MessageHandler {
         }
 
         if(message.getStatus() == RedisMessageServerPingResponse.PingResponseStatus.DENIED) {
-            logger.send(PaperLang.BOXED_MESSAGE_COLORED.build(Component.text(message.getMessage()), message.getColor()));
+            logger.send(Component.text(message.getMessage(), message.getColor()));
             logger.send(Component.text("Waiting 1 minute before trying again...", NamedTextColor.GRAY));
             service.setUpcomingPingDelay(60);
             service.setNextcomingPingDelay(10);

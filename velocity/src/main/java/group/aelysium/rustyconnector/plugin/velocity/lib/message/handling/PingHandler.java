@@ -29,7 +29,6 @@ public class PingHandler implements MessageHandler {
     public void execute() throws Exception {
         InetSocketAddress address = message.getAddress();
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        ServerService serverService = api.getService(ServerService.class);
 
         ServerInfo serverInfo = new ServerInfo(
                 message.getServerName(),
@@ -39,46 +38,70 @@ public class PingHandler implements MessageHandler {
         if(api.getLogger().getGate().check(GateKey.PING))
             api.getLogger().send(VelocityLang.PING.build(serverInfo));
 
-        {
-            PlayerServer server = serverService.findServer(serverInfo);
-            if (server != null) {
-                server.setTimeout(serverService.getServerTimeout());
-                return;
-            }
-        }
-        {
-            try {
-                PlayerServer server = new ServerService.ServerBuilder()
-                        .setServerInfo(serverInfo)
-                        .setFamilyName(message.getFamilyName())
-                        .setSoftPlayerCap(message.getSoftCap())
-                        .setHardPlayerCap(message.getHardCap())
-                        .setWeight(message.getWeight())
-                        .build();
+        if(message.getIntent() == RedisMessageServerPing.ConnectionIntent.CONNECT)
+            this.reviveOrConnectServer(address, serverInfo);
+        if(message.getIntent() == RedisMessageServerPing.ConnectionIntent.DISCONNECT)
+            this.disconnectServer(serverInfo);
+    }
 
-                server.register(message.getFamilyName());
+    private boolean connectServer(InetSocketAddress address, ServerInfo serverInfo) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        ServerService serverService = api.getService(ServerService.class);
 
-                RedisMessageServerPingResponse message = (RedisMessageServerPingResponse) new GenericRedisMessage.Builder()
-                        .setType(RedisMessageType.PING_RESPONSE)
-                        .setAddress(address)
-                        .setOrigin(MessageOrigin.PROXY)
-                        .setParameter(RedisMessageServerPingResponse.ValidParameters.STATUS, String.valueOf(RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED))
-                        .setParameter(RedisMessageServerPingResponse.ValidParameters.MESSAGE, "Connected to the proxy!")
-                        .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.GREEN.toString())
-                        .setParameter(RedisMessageServerPingResponse.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.getServerInterval()))
-                        .buildSendable();
-                VelocityRustyConnector.getAPI().getService(RedisService.class).publish(message);
-            } catch(Exception e) {
-                RedisMessageServerPingResponse message = (RedisMessageServerPingResponse) new GenericRedisMessage.Builder()
-                        .setType(RedisMessageType.PING_RESPONSE)
-                        .setAddress(address)
-                        .setOrigin(MessageOrigin.PROXY)
-                        .setParameter(RedisMessageServerPingResponse.ValidParameters.STATUS, String.valueOf(RedisMessageServerPingResponse.PingResponseStatus.DENIED))
-                        .setParameter(RedisMessageServerPingResponse.ValidParameters.MESSAGE, "Attempt to connect to proxy failed! " + e.getMessage())
-                        .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.RED.toString())
-                        .buildSendable();
-                VelocityRustyConnector.getAPI().getService(RedisService.class).publish(message);
-            }
+        try {
+            PlayerServer server = new ServerService.ServerBuilder()
+                    .setServerInfo(serverInfo)
+                    .setFamilyName(message.getFamilyName())
+                    .setSoftPlayerCap(message.getSoftCap())
+                    .setHardPlayerCap(message.getHardCap())
+                    .setWeight(message.getWeight())
+                    .build();
+
+            server.register(message.getFamilyName());
+
+            RedisMessageServerPingResponse message = (RedisMessageServerPingResponse) new GenericRedisMessage.Builder()
+                    .setType(RedisMessageType.PING_RESPONSE)
+                    .setAddress(address)
+                    .setOrigin(MessageOrigin.PROXY)
+                    .setParameter(RedisMessageServerPingResponse.ValidParameters.STATUS, String.valueOf(RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED))
+                    .setParameter(RedisMessageServerPingResponse.ValidParameters.MESSAGE, "Connected to the proxy!")
+                    .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.GREEN.toString())
+                    .setParameter(RedisMessageServerPingResponse.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.getServerInterval()))
+                    .buildSendable();
+            api.getService(RedisService.class).publish(message);
+
+            return true;
+        } catch(Exception e) {
+            RedisMessageServerPingResponse message = (RedisMessageServerPingResponse) new GenericRedisMessage.Builder()
+                    .setType(RedisMessageType.PING_RESPONSE)
+                    .setAddress(address)
+                    .setOrigin(MessageOrigin.PROXY)
+                    .setParameter(RedisMessageServerPingResponse.ValidParameters.STATUS, String.valueOf(RedisMessageServerPingResponse.PingResponseStatus.DENIED))
+                    .setParameter(RedisMessageServerPingResponse.ValidParameters.MESSAGE, "Attempt to connect to proxy failed! " + e.getMessage())
+                    .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.RED.toString())
+                    .buildSendable();
+            api.getService(RedisService.class).publish(message);
         }
+        return false;
+    }
+
+    private boolean disconnectServer(ServerInfo serverInfo) throws Exception {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        api.getService(ServerService.class).unregisterServer(serverInfo, message.getFamilyName(), true);
+
+        return true;
+    }
+
+    private boolean reviveOrConnectServer(InetSocketAddress address, ServerInfo serverInfo) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        ServerService serverService = api.getService(ServerService.class);
+
+        PlayerServer server = serverService.findServer(serverInfo);
+        if (server == null) {
+            return this.connectServer(address, serverInfo);
+        }
+
+        server.setTimeout(serverService.getServerTimeout());
+        return true;
     }
 }

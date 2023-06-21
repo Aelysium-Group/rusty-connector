@@ -122,6 +122,6 @@ console-icons:
 
     #
     #   Symbol used when the proxy pings a server
-    #   Example: Proxy |>>>> [family name] [server name](127.0.0.1:25565)
+    #   Example: <<<<| [family name] [server name](127.0.0.1:25565)
     #
-    ping: "|>>>>"
+    ping: "<<<<|"
