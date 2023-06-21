@@ -1,23 +1,23 @@
 ![Aelysium Wordmark Image](https://github.com/Aelysium-Group/.github/blob/main/images/rustyconnector-wordmark.png?raw=true)
 
 # 👋 欢迎使用RustyConnector
-![Velocity](https://badgen.net/badge/Velocity/3.1.1%20-%203.2.0/1197d1?icon=dockbit)
-![PaperMC](https://badgen.net/badge/Paper/1.16%20-%201.20.1/F96854?icon=telegram)
-![Folia](https://badgen.net/badge/Folia/Supported/E004BC?icon=maven)
-[![Aelysium](https://badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
-[![Build](https://badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
+![Velocity](https://flat.badgen.net/badge/Velocity/3.1.1%20-%203.2.0/1197d1?icon=dockbit)
+![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.20.1/F96854?icon=telegram)
+![Folia](https://flat.badgen.net/badge/Folia/Supported/E004BC?icon=maven)
+[![Aelysium](https://flat.badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
+[![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
+[![License](https://flat.badgen.net/badge/License/MIT/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE)
 
-RustyConnector是一款可运行于Velocity/Paper群组网络的负载均衡插件，它可以让你的服务器在运行状态下自动向代理端注册或注销子服务器，并实现玩家之间的负载均衡
+[RustyConnector]是一款可运行于[Velocity]/[Paper]/[Folia]群组网络的负载均衡插件，它可以让你的服务器在运行状态下自动向代理端注册或注销子服务器，并实现玩家间的负载均衡
 
-<br>
-
+<!-- Table-1 -->
 <table>
 <thead>
 <tr>
 <th width="2000" colspan="2">
 </th>
 </tr>
-<h2>🧭 快速链接</h2>
+<h2>🧭 快捷链接</h2>
 </thead>
 <tbody>
 <tr>
@@ -71,6 +71,7 @@ RustyConnector是一款可运行于Velocity/Paper群组网络的负载均衡插�
 </tbody>
 </table>
 
+<!-- Table-2 -->
 <table>
 <thead>
 <tr>
@@ -107,8 +108,6 @@ RustyConnector是一款可运行于Velocity/Paper群组网络的负载均衡插�
 </tbody>
 </table>
 
-<br>
-
 ---
 # ✨ 特色功能
 - ### ✅ 为构建大型群组服而生
@@ -129,27 +128,24 @@ RustyConnector是一款可运行于Velocity/Paper群组网络的负载均衡插�
 ---
 # 🎨 数据统计
 
-
-## 🌌 代理端数据统计:
+## 🌌 代理端数据统计 ([点击查看](https://bstats.org/plugin/velocity/RustyConnector/17972)):
 [![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)](https://bstats.org/signatures/velocity/RustyConnector.svg)
-## 🌌 子服务器数据统计:
+## 🌌 子服务器数据统计 ([点击查看](https://bstats.org/plugin/bukkit/RustyConnector/17973)):
 [![RustyConnector bstats graph](https://bstats.org/signatures/bukkit/RustyConnector.svg)](https://bstats.org/signatures/bukkit/RustyConnector.svg)
 ---
 ## 🛠 开发中的功能
-- [ ] Rounded families (families built for round based gamemodes!) [__Under Development__]
-- [ ] Player parties (join your friend's party and follow them around the network as they connect to different families!) [__Under Development__]
-- [ ] Websocket as a backup for if Redis fails [__研究中__]
-- [ ] Example RustyConnector Networks for Documentation Purposes [__Under Development__]
+- [ ] Rounded families (families built for round based gamemodes!) [__开发中__]
+- [ ] 玩家派对 (可用于加入好友的派对，并跟随TA们在群组服上连接到不同的家族!) [__开发中__]
+- [ ] Websocket作为Redis故障时的备份 [__研究中__]
+- [ ] 用于文档示例的RustyConnector网络示例 [__开发中__]
 - [ ] Kubernetes自动伸缩 [__研究中__]
 - [ ] RustyConnector API (可能暂时需要咕咕咕了!)
-- [ ] Player routing based on client version (低优先级)
-- [ ] Teleport players to specific coordinates on other servers (低优先级)
+- [ ] 基于客户端版本的玩家路由 (低优先级)
+- [ ] 可将玩家传送至其它服务器的特定坐标上 (低优先级)
 
-\*Checked boxes indicate that the feature has been added and is awaiting release in an official version. There is no promise on when these features may be added.
-\*
+\*勾选的方框表示该功能已经被添加，正在等待正式版的发布。（注: 目前还没有关于这些功能何时会被添加的承诺）
 
 ---
-
 # 📖 Wiki
 ### [Home](https://github.com/Aelysium-Group/rusty-connector/wiki)
 ### [FAQ](https://github.com/Aelysium-Group/rusty-connector/wiki#faq)
@@ -167,8 +163,18 @@ RustyConnector是一款可运行于Velocity/Paper群组网络的负载均衡插�
 ### [Config Migration | 配置迁移](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration)
 
 ---
-# <a id=""></a>🌐 语言切换
+## 🌐 语言切换
 
-Need to switch lang?
+Need to switch languages?
+
+[![English](https://flat.badgen.net/badge/English/Click%20me/blue)](https://github.com/Aelysium-Group/rusty-connector/blob/main/README.md)
+[![简体中文](https://flat.badgen.net/badge/简体中文/Click%20me/blue)](https://Aelysium-Group/rusty-connector/blob/main/blob/zh-hans/README.md)
+[![繁體中文](https://flat.badgen.net/badge/繁體中文/Click%20me/blue)](https://github.com/Aelysium-Group/rusty-connector/blob/main/blob/zh-hant/README.md)
 
 2023 © [Aelysium](https://www.aelysium.group)
+
+<!-- URL LIST -->
+[Folia]:https://github.com/PaperMC/Folia
+[Paper]: https://papermc.io
+[Velocity]: https://velocitypowered.com
+[RustyConnector]: https://github.com/Aelysium-Group/rusty-connector
