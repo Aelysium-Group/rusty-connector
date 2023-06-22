@@ -85,6 +85,11 @@ first-connection:
 #             the fewest players currently connected.      #
 #             This mode is best if you want evenly         #
 #             distributed players across all servers.      #
+#  ⚫ MOST_CONNECTION -                                     #
+#             Connects players to the server with the      #
+#             the most players currently connected.        #
+#             This mode is best if you want to fill        #
+#             servers up as quickly as possible.           #
 #  ⚫ ROUND_ROBIN -                                        #
 #             Every time a connection occurs, the next     #
 #             server in the load balancer will be queued   #
@@ -171,41 +176,31 @@ consecutive-connections:
     home-server:
         if-unavailable: CANCEL_CONNECTION_ATTEMPT
 
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                        Expiration                        #
-#                                                          #
-#               ---------------------------                #
-# | Set whether a player's home server should expire       #
-# | after a certain amount of time.                        #
-# | Set to "NEVER" if you don't want a player's home       #
-# | server to ever expire.                                 #
-# | Otherwise, set it as a number of months,               #
-# | days, or hours.                                        #
-#                                                          #
-#   The time formats don't care if you:                    #
-#       - Use shorthand versions ("d" instead of "day")    #
-#       - Use plurals ("Day" versus "Days")                #
-#       - Use caps ("day" versus "DAY")                    #
-#       - Use whitespaces ("1d" versus "1 d")              #
-#               ---------------------------                #
-#                         Examples                         #
-#                                                          #
-#       "30 Months" - To expire after 30 months.           #
-#       "2d" - To expire after 2 days.                     #
-#       "1 hour" - To expire after 1 hour.                 #
-#                                                          #
-#               ---------------------------                #
-#                           NOTE                           #
-#       If you activate expiration (changing it from       #
-#       `NEVER` to an actual value.)                       #
-#       Any already existing home servers which were       #
-#       originally set as `NEVER` will be updated to       #
-#       expire at `expiration` amount of time from now.    #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
+############################################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                                Expiration                                #
+#                                                                          #
+#                       ---------------------------                        #
+# | Set whether a player's home server should expire                       #
+# | after a certain amount of time.                                        #
+#                                                                          #
+# | Set to "NEVER" if you don't want a player's home                       #
+# | server to ever expire.                                                 #
+#                                                                          #
+# | This data value is a Liquid Timestamp. Read more here:                 #
+# https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
+#                                                                          #
+#                       ---------------------------                        #
+#                                   NOTE                                   #
+#               If you activate expiration (changing it from               #
+#               `NEVER` to an actual value.)                               #
+#               Any already existing home servers which were               #
+#               originally set as `NEVER` will be updated to               #
+#               expire at `expiration` amount of time from now.            #
+#                       ---------------------------                        #
+#                                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################################
         expiration: NEVER
 
 whitelist:

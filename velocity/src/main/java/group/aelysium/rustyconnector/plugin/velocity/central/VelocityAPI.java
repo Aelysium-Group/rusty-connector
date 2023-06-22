@@ -2,16 +2,21 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.scheduler.Scheduler;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
-import group.aelysium.rustyconnector.core.lib.database.MySQL;
+import group.aelysium.rustyconnector.core.lib.database.MySQLService;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerLifecycle;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
@@ -23,10 +28,9 @@ import java.sql.SQLException;
 public class VelocityAPI extends PluginAPI<Scheduler> {
     private final VelocityRustyConnector plugin;
     private final ProxyServer server;
-    private VirtualProxyProcessor virtualProcessor = null;
+    private Processor processor = null;
     private final Path dataFolder;
     private final PluginLogger pluginLogger;
-    private MySQL mySQL = null;
 
     public VelocityAPI(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
         this.plugin = plugin;
@@ -55,15 +59,26 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         return String.valueOf(this.dataFolder);
     }
 
-    @Override
-    public VirtualProxyProcessor getVirtualProcessor() {
-        return this.virtualProcessor;
+    public <S extends Service> S getService(Class<S> type) {
+        return this.processor.getService(type);
+    }
+
+    public void killServices() {
+        this.processor.kill();
+    }
+
+    public void reloadServices() {
+        this.processor.kill();
+        this.processor = null;
+
+        VelocityRustyConnector.getLifecycle().loadConfigs();
     }
 
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
-        if(this.virtualProcessor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
-        this.virtualProcessor = VirtualProxyProcessor.init(config);
-        this.virtualProcessor.startServices();
+        if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
+        this.processor = Processor.init(config);
+        this.processor.getService(RedisService.class).start(RedisSubscriber.class);
+        this.processor.getService(ServerService.class).getService(ServerLifecycle.class).startHeartbeat();
     }
 
     /**
@@ -103,19 +118,12 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     }
 
     /**
-     * Set the MySQL database.
-     * @throws DuplicateRequestException If the MySQL database is already set.
+     * Attempt to dispatch a command as the Proxy
+     * @param command The command to dispatch.
      */
-    public void setMySQL(MySQL mySQL) {
-        if(this.mySQL != null) throw new DuplicateRequestException("You can't set the MySQL database twice!");
-        this.mySQL = mySQL;
-    }
-
-    /**
-     * Get the MySQL database.
-     * @return The MySQL database.
-     */
-    public MySQL getMySQL() {
-        return this.mySQL;
+    public void dispatchCommand(String command) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        api.getServer().getCommandManager()
+                .executeAsync((ConsoleCommandSource) permission -> null, command);
     }
 }

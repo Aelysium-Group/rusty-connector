@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
+import group.aelysium.rustyconnector.core.lib.model.Service;
+
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
@@ -10,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class RedisService {
+public class RedisService extends Service {
     private final Vector<RedisSubscriber> liveRedisSubscribers = new Vector<>();
     private RedisPublisher publisher;
     private char[] privateKey;
@@ -19,6 +21,7 @@ public class RedisService {
     ExecutorService executorService;
 
     public RedisService(RedisClient.Builder clientBuilder, char[] privateKey) {
+        super(true);
         this.clientBuilder = clientBuilder.setPrivateKey(privateKey);
         this.privateKey = privateKey;
 

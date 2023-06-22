@@ -2,13 +2,15 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.database;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.core.lib.database.MySQL;
+import group.aelysium.rustyconnector.core.lib.database.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.sql.*;
 
@@ -33,14 +35,11 @@ public class HomeServerMappingsDatabase {
     /**
      * Initialize the table for home server mappings.
      */
-    public static void init() throws SQLException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQL mySQL = api.getMySQL();
-
-        mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(INIT_TABLE);
-        mySQL.execute(statement);
-        mySQL.close();
+    public static void init(MySQLService service) throws SQLException {
+        service.connect();
+        PreparedStatement statement = service.prepare(INIT_TABLE);
+        service.execute(statement);
+        service.close();
     }
 
     /**
@@ -52,21 +51,21 @@ public class HomeServerMappingsDatabase {
      */
     public static HomeServerMapping find(Player player, StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQL mySQL = api.getMySQL();
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
-        mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(FIND_HOME_SERVER_IN_FAMILY);
+        mySQLService.connect();
+        PreparedStatement statement = mySQLService.prepare(FIND_HOME_SERVER_IN_FAMILY);
         statement.setString(1, player.getUniqueId().toString());
         statement.setString(2, family.getName());
-        ResultSet result = mySQL.executeQuery(statement);
+        ResultSet result = mySQLService.executeQuery(statement);
 
         if(!result.next()) return null;
 
         RegisteredServer registeredServer = api.getServer().getServer(result.getString("server_name")).orElse(null);
         if(registeredServer == null) return null;
-        PlayerServer server = api.getVirtualProcessor().findServer(registeredServer.getServerInfo());
+        PlayerServer server = api.getService(ServerService.class).findServer(registeredServer.getServerInfo());
 
-        mySQL.close();
+        mySQLService.close();
         return new HomeServerMapping(player, server, family);
     }
 
@@ -79,14 +78,14 @@ public class HomeServerMappingsDatabase {
      */
     public static boolean doesPlayerHaveHome(Player player, StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQL mySQL = api.getMySQL();
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
-        mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(CHECK_IF_PLAYER_HAS_HOME);
+        mySQLService.connect();
+        PreparedStatement statement = mySQLService.prepare(CHECK_IF_PLAYER_HAS_HOME);
         statement.setString(1, player.getUniqueId().toString());
         statement.setString(2, family.getName());
-        ResultSet result = mySQL.executeQuery(statement);
-        mySQL.close();
+        ResultSet result = mySQLService.executeQuery(statement);
+        mySQLService.close();
 
         return result.next();
     }
@@ -99,14 +98,14 @@ public class HomeServerMappingsDatabase {
      */
     public static void delete(Player player, StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQL mySQL = api.getMySQL();
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
-        mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(DELETE_PLAYERS_HOME_SERVER);
+        mySQLService.connect();
+        PreparedStatement statement = mySQLService.prepare(DELETE_PLAYERS_HOME_SERVER);
         statement.setString(1, player.getUniqueId().toString());
         statement.setString(2, family.getName());
-        mySQL.execute(statement);
-        mySQL.close();
+        mySQLService.execute(statement);
+        mySQLService.close();
     }
 
     /**
@@ -117,12 +116,12 @@ public class HomeServerMappingsDatabase {
      */
     public static void save(HomeServerMapping mapping) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQL mySQL = api.getMySQL();
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
         LiquidTimestamp expiration = mapping.family().getHomeServerExpiration();
 
-        mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(SAVE_PLAYERS_HOME_SERVER);
+        mySQLService.connect();
+        PreparedStatement statement = mySQLService.prepare(SAVE_PLAYERS_HOME_SERVER);
         statement.setString(1, mapping.player().getUniqueId().toString());
         statement.setString(2, mapping.family().getName());
         statement.setString(3, mapping.server().getAddress());
@@ -132,8 +131,8 @@ public class HomeServerMappingsDatabase {
         else
             statement.setLong(5, expiration.getEpochFromNow());
 
-        mySQL.execute(statement);
-        mySQL.close();
+        mySQLService.execute(statement);
+        mySQLService.close();
     }
 
     /**
@@ -143,13 +142,13 @@ public class HomeServerMappingsDatabase {
      */
     public static void purgeExpired(StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQL mySQL = api.getMySQL();
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
-        mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(PURGE_FAMILY_EXPIRED_MAPPINGS);
+        mySQLService.connect();
+        PreparedStatement statement = mySQLService.prepare(PURGE_FAMILY_EXPIRED_MAPPINGS);
         statement.setString(1, family.getName());
-        mySQL.execute(statement);
-        mySQL.close();
+        mySQLService.execute(statement);
+        mySQLService.close();
     }
 
     /**
@@ -163,16 +162,16 @@ public class HomeServerMappingsDatabase {
         if(liquidExpiration == null) return;
 
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQL mySQL = api.getMySQL();
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
         Timestamp expiration = new Timestamp(liquidExpiration.getEpochFromNow());
 
-        mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(UPDATE_NULL_EXPIRATIONS);
+        mySQLService.connect();
+        PreparedStatement statement = mySQLService.prepare(UPDATE_NULL_EXPIRATIONS);
         statement.setTimestamp(1, expiration);
         statement.setString(2, family.getName());
-        mySQL.execute(statement);
-        mySQL.close();
+        mySQLService.execute(statement);
+        mySQLService.close();
     }
 
     /**
@@ -183,12 +182,12 @@ public class HomeServerMappingsDatabase {
      */
     public static void updateValidExpirations(StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQL mySQL = api.getMySQL();
+        MySQLService mySQLService = api.getService(MySQLService.class);
 
-        mySQL.connect();
-        PreparedStatement statement = mySQL.prepare(UPDATE_NOT_NULL_EXPIRATIONS);
+        mySQLService.connect();
+        PreparedStatement statement = mySQLService.prepare(UPDATE_NOT_NULL_EXPIRATIONS);
         statement.setString(1, family.getName());
-        mySQL.execute(statement);
-        mySQL.close();
+        mySQLService.execute(statement);
+        mySQLService.close();
     }
 }

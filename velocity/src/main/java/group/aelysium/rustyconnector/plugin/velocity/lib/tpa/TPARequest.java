@@ -4,9 +4,10 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -67,11 +68,11 @@ public class TPARequest {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.getTarget().getCurrentServer().orElseThrow().getServerInfo();
-            String familyName = api.getVirtualProcessor().findServer(serverInfo).getFamilyName();
-            BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(familyName);
+            String familyName = api.getService(ServerService.class).findServer(serverInfo).getFamilyName();
+            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
             if(family == null) throw new NullPointerException();
 
-            api.getVirtualProcessor().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
+            api.getService(TPACleaningService.class).tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
         } catch (Exception e) {
             this.getSender().sendMessage(VelocityLang.TPA_FAILURE.build(this.getTarget().getUsername()));
             this.getTarget().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.getSender().getUsername()));

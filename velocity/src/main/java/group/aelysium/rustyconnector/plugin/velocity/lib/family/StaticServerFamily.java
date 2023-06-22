@@ -9,14 +9,16 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.processor.VirtualProxyProcessor;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.Whitelist;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -26,7 +28,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StaticServerFamily extends BaseServerFamily {
+public class StaticServerFamily extends PlayerFocusedServerFamily {
     List<HomeServerMapping> mappingsCache = new ArrayList<>();
     LiquidTimestamp homeServerExpiration;
     UnavailableProtocol unavailableProtocol;
@@ -127,7 +129,7 @@ public class StaticServerFamily extends BaseServerFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticServerFamily init(VirtualProxyProcessor virtualProxyProcessor, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static StaticServerFamily init(WhitelistService whitelistService, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
         logger.log("Registering family: " + familyName);
@@ -146,7 +148,7 @@ public class StaticServerFamily extends BaseServerFamily {
         if (staticFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name());
 
-            virtualProxyProcessor.getWhitelistManager().add(whitelist);
+            whitelistService.add(whitelist);
 
             logger.log(familyName + " whitelist registered!");
         } else {
@@ -177,6 +179,17 @@ public class StaticServerFamily extends BaseServerFamily {
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
             );
+            case MOST_CONNECTION -> family = new StaticServerFamily(
+                    familyName,
+                    whitelist,
+                    MostConnection.class,
+                    staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
+                    staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
+                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
+                    new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+            );
         }
 
         if(family == null) throw new RuntimeException("The name used for " + familyName + "'s load balancer is invalid!");
@@ -191,14 +204,13 @@ public class StaticServerFamily extends BaseServerFamily {
         return family;
     }
 
-    @Override
     public void reloadWhitelist() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
         Whitelist currentWhitelist = this.getWhitelist();
         if (!(currentWhitelist == null)) {
-            api.getVirtualProcessor().getWhitelistManager().remove(currentWhitelist);
+            api.getService(WhitelistService.class).remove(currentWhitelist);
         }
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
@@ -216,7 +228,7 @@ public class StaticServerFamily extends BaseServerFamily {
             newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
             this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getVirtualProcessor().getWhitelistManager().add(newWhitelist);
+            api.getService(WhitelistService.class).add(newWhitelist);
 
             logger.log("Finished reloading whitelist for " + this.name);
             return;

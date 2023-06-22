@@ -14,10 +14,6 @@ import java.util.List;
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
     private boolean debug = false;
-    private String families_rootFamily_name = "lobby";
-    private Boolean family_rootFamily_catchDisconnectiongPlayers = false;
-    private List<String> families_scalar = new ArrayList<>();
-    private List<String> families_static = new ArrayList<>();
 
     private String redis_host = "";
     private int redis_port = 3306;
@@ -25,7 +21,7 @@ public class DefaultConfig extends YAML {
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
-    private boolean ignore_mysql = true;
+    private boolean mysql_enabled = false;
     private String mysql_host = "";
     private int mysql_port = 3306;
     private String mysql_user = "root";
@@ -45,11 +41,10 @@ public class DefaultConfig extends YAML {
     private boolean bootCommands_enabled = false;
     private List<String> bootCommands_commands = new ArrayList<>();
 
-    private Boolean services_serverLifecycle_enabled = true;
-    private Integer services_serverLifecycle_interval = 30;
-    private Boolean services_serverLifecycle_unregisterOnIgnore = false;
-    private Boolean messageTunnel_familyServerSorting_enabled = true;
-    private Integer messageTunnel_familyServerSorting_interval = 20;
+    private Integer services_serverLifecycle_serverTimeout = 15;
+    private Integer services_serverLifecycle_serverPingInterval = 10;
+    private Boolean services_loadBalancing_enabled = true;
+    private Integer services_loadBalancing_interval = 20;
 
     private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -83,20 +78,6 @@ public class DefaultConfig extends YAML {
         return this.debug;
     }
 
-    public String getRootFamilyName() {
-        return this.families_rootFamily_name;
-    }
-    public Boolean shouldRootFamilyCatchDisconnectingPlayers() {
-        return this.family_rootFamily_catchDisconnectiongPlayers;
-    }
-
-    public List<String> getScalarFamilies() {
-        return this.families_scalar;
-    }
-    public List<String> getStaticFamilies() {
-        return this.families_static;
-    }
-
     public String getRedis_host() {
         return this.redis_host;
     }
@@ -117,8 +98,8 @@ public class DefaultConfig extends YAML {
         return this.redis_dataChannel;
     }
 
-    public boolean shouldIgnoreMysql() {
-        return this.ignore_mysql;
+    public boolean isMysql_enabled() {
+        return this.mysql_enabled;
     }
 
     public String getMysql_host() {
@@ -176,24 +157,20 @@ public class DefaultConfig extends YAML {
         return bootCommands_commands;
     }
 
-    public Boolean isHearts_serverLifecycle_enabled() {
-        return services_serverLifecycle_enabled;
+    public Integer getServices_serverLifecycle_serverTimeout() {
+        return services_serverLifecycle_serverTimeout;
     }
 
-    public Integer getServices_serverLifecycle_interval() {
-        return services_serverLifecycle_interval;
+    public Integer getServices_serverLifecycle_serverPingInterval() {
+        return services_serverLifecycle_serverPingInterval;
     }
 
-    public Boolean shouldHearts_serverLifecycle_unregisterOnIgnore() {
-        return services_serverLifecycle_unregisterOnIgnore;
+    public Integer getServices_loadBalancing_interval() {
+        return services_loadBalancing_interval;
     }
 
-    public Integer getMessageTunnel_familyServerSorting_interval() {
-        return messageTunnel_familyServerSorting_interval;
-    }
-
-    public Boolean getMessageTunnel_familyServerSorting_enabled() {
-        return messageTunnel_familyServerSorting_enabled;
+    public Boolean getServices_loadBalancing_enabled() {
+        return services_loadBalancing_enabled;
     }
 
     @SuppressWarnings("unchecked")
@@ -210,50 +187,6 @@ public class DefaultConfig extends YAML {
             this.debug = this.getNode(this.data,"debug",Boolean.class);
         } catch (Exception e) {
             this.debug = false;
-        }
-
-        // Families
-        this.families_rootFamily_name = this.getNode(this.data,"families.root-family.name",String.class);
-        this.family_rootFamily_catchDisconnectiongPlayers = this.getNode(this.data,"families.root-family.catch-disconnecting-players",Boolean.class);
-        try {
-            this.families_scalar = (List<String>) (this.getNode(this.data,"families.scalar",List.class));
-        } catch (Exception e) {
-            throw new IllegalStateException("The node [families.scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
-        try {
-            this.families_static = (List<String>) (this.getNode(this.data,"families.static",List.class));
-        } catch (Exception e) {
-            throw new IllegalStateException("The node [families.scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
-
-        if(this.families_rootFamily_name.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
-        this.families_scalar.forEach(familyName -> {
-            if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
-
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
-        });
-
-        boolean ignoreStatic = this.families_static.size() == 0;
-        this.families_static.forEach(familyName -> {
-
-            if(familyName.equalsIgnoreCase("all")) throw new IllegalStateException("You can't name a family: `all`");
-
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
-        });
-
-        List<String> duplicates = this.families_scalar.stream().filter(this.families_static::contains).toList();
-        if(duplicates.size() > 0)
-            throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of if the family is scalar or static! Duplicate family names: " + duplicates);
-
-        if(this.families_scalar.contains(this.families_rootFamily_name)) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.scalar] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family.name]. Ignoring..."), NamedTextColor.YELLOW);
-            this.families_scalar.remove(this.families_rootFamily_name);
-        }
-        if(this.families_static.contains(this.families_rootFamily_name)) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.families_rootFamily_name + " was found included in [families.static] in config.yml. This is no longer supported. Instead, ONLY place the name of your root family in [families.root-family.name]. Ignoring..."), NamedTextColor.YELLOW);
-            this.families_static.remove(this.families_rootFamily_name);
         }
 
         // Redis
@@ -273,24 +206,21 @@ public class DefaultConfig extends YAML {
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
 
         // MySQL
+        this.mysql_enabled = this.getNode(this.data, "mysql.enabled", Boolean.class);
 
-        if(!ignoreStatic) {
-            this.ignore_mysql = false;
+        this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
+        if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
 
-            this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
-            if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
+        this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
+        this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
+        this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
 
-            this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
-            this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
-            this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
+        if (this.redis_password.length() != 0 && this.redis_password.length() < 16)
+            throw new IllegalStateException("Your MySQL password is to short! For security purposes, please use a longer password! " + this.redis_password.length() + " < 16");
 
-            if (this.redis_password.length() != 0 && this.redis_password.length() < 16)
-                throw new IllegalStateException("Your MySQL password is to short! For security purposes, please use a longer password! " + this.redis_password.length() + " < 16");
-
-            this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
-            if (this.mysql_database.equals(""))
-                throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
-        }
+        this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
+        if (this.mysql_database.equals(""))
+            throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
 
         // Whitelist
 
@@ -338,19 +268,27 @@ public class DefaultConfig extends YAML {
         }
 
         // Hearts
-        this.services_serverLifecycle_enabled = this.getNode(this.data,"services.server-lifecycle.enabled",Boolean.class);
-        this.services_serverLifecycle_interval = this.getNode(this.data,"services.server-lifecycle.interval",Integer.class);
-        if(this.services_serverLifecycle_interval < 10) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server lifecycle interval is set dangerously fast: " + this.services_serverLifecycle_interval + "ms. Setting to default of 30ms."), NamedTextColor.YELLOW);
-            this.messageTunnel_messageMaxLength = 30;
+        this.services_serverLifecycle_serverTimeout = this.getNode(this.data,"services.server-lifecycle.server-timeout",Integer.class);
+        if(this.services_serverLifecycle_serverTimeout < 5) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server timeout is set dangerously fast: " + this.services_serverLifecycle_serverTimeout + "s. Setting to default of 5s."), NamedTextColor.YELLOW);
+            this.services_serverLifecycle_serverTimeout= 5;
         }
-        this.services_serverLifecycle_unregisterOnIgnore = this.getNode(this.data,"services.server-lifecycle.unregister-on-ignore",Boolean.class);
+        this.services_serverLifecycle_serverPingInterval = this.getNode(this.data,"services.server-lifecycle.server-ping-interval",Integer.class);
+        if(this.services_serverLifecycle_serverPingInterval < 5) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server ping interval is set dangerously fast: " + this.services_serverLifecycle_serverPingInterval + "s. Setting to default of 5s."), NamedTextColor.YELLOW);
+            this.services_serverLifecycle_serverPingInterval = 5;
+        }
+        if(this.services_serverLifecycle_serverTimeout < this.services_serverLifecycle_serverPingInterval) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server timeout can't be less that server ping interval!"), NamedTextColor.YELLOW);
+            this.services_serverLifecycle_serverPingInterval = this.services_serverLifecycle_serverTimeout - 2;
+        }
 
-        this.messageTunnel_familyServerSorting_enabled = this.getNode(this.data,"services.family-server-sorting.enabled",Boolean.class);
-        this.messageTunnel_familyServerSorting_interval = this.getNode(this.data,"services.family-server-sorting.interval",Integer.class);
-        if(this.messageTunnel_familyServerSorting_interval < 7) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server sorting interval is set dangerously fast: " + this.messageTunnel_familyServerSorting_interval + "ms. Setting to default of 20ms."), NamedTextColor.YELLOW);
-            this.messageTunnel_familyServerSorting_interval = 20;
+
+        this.services_loadBalancing_enabled = this.getNode(this.data,"services.load-balancing.enabled",Boolean.class);
+        this.services_loadBalancing_interval = this.getNode(this.data,"services.load-balancing.interval",Integer.class);
+        if(this.services_loadBalancing_interval < 7) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server sorting interval is set dangerously fast: " + this.services_loadBalancing_interval + "ms. Setting to default of 20ms."), NamedTextColor.YELLOW);
+            this.services_loadBalancing_interval = 20;
         }
     }
 }

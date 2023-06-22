@@ -12,10 +12,10 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
-import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerChangeServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerChooseInitialServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerDisconnect;
-import group.aelysium.rustyconnector.plugin.velocity.lib.events.OnPlayerKicked;
+import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer;
+import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
+import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerDisconnect;
+import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerKicked;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -42,7 +42,7 @@ public class VelocityLifecycle extends PluginLifecycle {
             logger.log("Issuing boot commands...");
             defaultConfig.getBootCommands_commands().forEach(command -> {
                 logger.log(">>> "+command);
-                api.getVirtualProcessor().dispatchCommand(command);
+                api.dispatchCommand(command);
             });
         }
 
@@ -62,12 +62,12 @@ public class VelocityLifecycle extends PluginLifecycle {
             ScalarFamilyConfig.empty();
             LoggerConfig.empty();
 
-            if(api.getVirtualProcessor() != null) {
-                api.getVirtualProcessor().killServices();
-                api.getVirtualProcessor().closeRedis();
-            }
+            try {
+                api.killServices();
+            } catch (Exception ignore) {}
 
             api.getServer().getCommandManager().unregister("rc");
+            api.getServer().getCommandManager().unregister("tpa");
 
             this.isRunning = false;
 

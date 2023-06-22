@@ -9,10 +9,11 @@ import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import net.kyori.adventure.text.Component;
 
 import static net.kyori.adventure.text.Component.*;
@@ -44,9 +45,6 @@ public interface VelocityLang extends Lang {
             SPACING,
             text("/rc message", AQUA),
             text("Access recently sent rusty-connector messages.", DARK_GRAY),
-            SPACING,
-            text("/rc register", AQUA),
-            text("See server registration options.", DARK_GRAY),
             SPACING,
             text("/rc reload", AQUA),
             text("See reload options.", DARK_GRAY),
@@ -151,26 +149,6 @@ public interface VelocityLang extends Lang {
             BORDER
     );
 
-    Message RC_REGISTER_USAGE = () -> join(
-            Lang.newlines(),
-            BORDER,
-            SPACING,
-            WORDMARK_USAGE.build().color(AQUA),
-            SPACING,
-            text("Blue commands will return information or data to you! They will not cause changes to be made.",GRAY),
-            text("Orange commands will make the plugin do something. Make sure you know what these commands do before using them!",GRAY),
-            SPACING,
-            BORDER,
-            SPACING,
-            text("/rc register all", GOLD),
-            text("Register all servers to the proxy.", DARK_GRAY),
-            SPACING,
-            text("/rc register family <family name>", GOLD),
-            text("Register all servers associate with a specific family.", DARK_GRAY),
-            SPACING,
-            BORDER
-    );
-
     ParameterizedMessage1<CacheableMessage> RC_MESSAGE_GET_MESSAGE = (message) -> join(
             Lang.newlines(),
             BORDER,
@@ -204,7 +182,7 @@ public interface VelocityLang extends Lang {
     Message RC_FAMILY = () -> {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         Component families = text("");
-        for (BaseServerFamily family : api.getVirtualProcessor().getFamilyManager().dump()) {
+        for (BaseServerFamily family : api.getService(FamilyService.class).dump()) {
             if(family instanceof ScalarServerFamily)
                 families = families.append(text("[ "+family.getName()+" ] ").color(GOLD));
             if(family instanceof StaticServerFamily)
@@ -452,20 +430,6 @@ public interface VelocityLang extends Lang {
             text("Your tpa request to "+username+" has expired!",RED)
     );
 
-    ParameterizedMessage1<ServerInfo> PONG = serverInfo -> text(
-            "Proxy" +
-                    " "+ LoggerConfig.getConfig().getConsoleIcons_pong() +" " +
-                    "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
-    );
-
-    ParameterizedMessage1<ServerInfo> PONG_CANCELED = serverInfo -> text(
-            "Proxy" +
-                    " "+ LoggerConfig.getConfig().getConsoleIcons_canceledRequest() +" " +
-                    "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
-    );
-
     ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(
             "Proxy" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_ping() +" " +
@@ -476,7 +440,7 @@ public interface VelocityLang extends Lang {
     ParameterizedMessage2<ServerInfo, String> REGISTRATION_REQUEST = (serverInfo, familyName) -> text(
             "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                    " "+ LoggerConfig.getConfig().getConsoleIcons_requestingRegistration() +" "+familyName
+                    " "+ LoggerConfig.getConfig().getConsoleIcons_attemptingRegistration() +" "+familyName
     );
 
     ParameterizedMessage2<ServerInfo, String> REGISTERED = (serverInfo, familyName) -> text(
@@ -494,7 +458,7 @@ public interface VelocityLang extends Lang {
     ParameterizedMessage2<ServerInfo, String> UNREGISTRATION_REQUEST = (serverInfo, familyName) -> text(
             "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                    " "+ LoggerConfig.getConfig().getConsoleIcons_requestingUnregistration() +" "+familyName
+                    " "+ LoggerConfig.getConfig().getConsoleIcons_attemptingUnregistration() +" "+familyName
     );
 
     ParameterizedMessage2<ServerInfo, String> UNREGISTERED = (serverInfo, familyName) -> text(
@@ -508,9 +472,6 @@ public interface VelocityLang extends Lang {
                     "("+server.getAddress().getHostName()+":"+server.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_canceledRequest() +" "+familyName
     );
-
-    Message CALL_FOR_REGISTRATION = () -> text("[Velocity](127.0.0.1) " + LoggerConfig.getConfig().getConsoleIcons_callForRegistration() +" EVERYONE");
-    ParameterizedMessage1<String> CALL_FOR_FAMILY_REGISTRATION = (familyName) -> text("[Velocity](127.0.0.1) " + LoggerConfig.getConfig().getConsoleIcons_callForRegistration() +" "+ familyName);
 
     ParameterizedMessage1<BaseServerFamily> FAMILY_BALANCING = family -> text(
             family.getName() + " " + LoggerConfig.getConfig().getConsoleIcons_familyBalancing()

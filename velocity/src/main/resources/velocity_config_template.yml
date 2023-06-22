@@ -50,74 +50,7 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 3
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                        Families                          #
-#                                                          #
-#               ---------------------------                #
-# | Families are a collection of servers. To register      #
-# | new servers into a family, you need to configure       #
-# | your sub-servers appropriately.                        #
-#                                                          #
-# | If your sub-servers use family names that don't match  #
-# | what you define here, they will not be registered.     #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-families:
-
-#
-# The root family. Once a player connects and is validated.
-# This is the family that they will automatically be routed to.
-#
-# The root family will ALWAYS be defined as a `scalar` family.
-# Having a root family defined as `static` is not currently possible
-#
-    root-family:
-        name: "lobby"
-
-#
-# If a player is kicked or disconnected from a family in this proxy.
-# Should the root family catch them? If not, they will disconnect from the whole network.
-# This setting is great if you want a player to join back into the lobby if they get kicked from
-# a gamemode or sub-family.
-#
-# Currently, this method will only work for certain if all servers in the root-family are guaranteed to
-# allow players to join. (i.e. they can't have a whitelist set).
-# If some servers in your root family have whitelists set, a player may not be able to connect to the family!
-#
-        catch-disconnecting-players: false
-
-#########################
-#    Scalar Families    #
-#########################
-#
-# Families defined here are optimized for stateless minecraft gamemodes.
-# They support various load balancing algorithms and auto-scaling.
-#
-    scalar:
-        - "skywars"
-        - "kitpvp"
-
-#########################
-#    Static Families    #
-#########################
-#
-# Families defined here are optimized for stateful minecraft gamemodes.
-# When players join a static family, their initial server will be memorized, and they'll be connected
-# back into that server on future family connections as well.
-#
-# To define a new static family change static from `static: []` to:
-#
-# static:
-#       - "family name"
-#       - "family name"
-#
-    static: []
-
+version: 4
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -148,9 +81,12 @@ redis:
 #         MySQL         #
 #########################
 #
-# MySQL is required in order for static families to operate properly
+# MySQL is required in order for static families to operate.
+#
+# Make sure that if you set up static families, that you enabled and configure MySQL!
 #
 mysql:
+    enabled: false
     host: ""
     port: 3306
     user: "root"
@@ -294,8 +230,7 @@ boot-commands:
 # This section doesn't care about whether other plugins on the proxy have started yet!
 # If you run commands from other plugins, they might not work because those plugins may not have been booted up yet!
 #
-    commands:
-      - "rc register all"
+    commands: []
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -315,26 +250,23 @@ services:
 # Also manages the lifecycle of a player's home server if you are using Static Families.
 #
     server-lifecycle:
-        enabled: true
 #
-# Time, in seconds, between sending out a ping and expecting a pong.
-# Servers will also send their current player count with their pong response. This way, if the proxy
-# somehow unsyncs it's player count from the actual count, it can be corrected.
+# Amount of time, in seconds, that a server can go without pinging the proxy.
+# If a server doesn't ping the proxy in this time, it will be declared stale
+# and be unregistered from the proxy.
 #
-        interval: 30
+        server-timeout: 15
+
 #
-# If a server doesn't respond to the most recent ping before the heart's next interval.
-# Should the server get unregistered?
+# Amount of time, in seconds, that a server should wait to ping the proxy.
+# This setting cannot be higher than "server-timeout".
 #
-# This is an additional life-cycle option in-case servers become unresponsive and unable to unregister themselves.
-# If a server can't unregister itself (bad shutdown, server freezing, bad connection between server and proxy, etc) this will be able to see that it's unresponsive and unregister it.
-#
-        unregister-on-ignore: false
+        server-ping-interval: 10
 
 #
 # Manages the load balancing of the proxy's families.
 #
-    family-server-sorting:
+    load-balancing:
         enabled: true
 #
 # Time, in seconds, between when the families sort their servers. This interval will cause your proxy to sort ALL of the servers registered to it!
