@@ -8,15 +8,11 @@
 [![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
 [![License](https://flat.badgen.net/badge/License/MIT/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE)
 
-[RustyConnector] is a load balancing plugin that can run on [Velocity]/[Paper]/[Folia] networks, which allows your server to automatically register or unregister sub-servers with the proxy side in a running state, and enables load balancing between players.
+[RustyConnector] is a load-balancing plugin that can run on [Velocity]/[Paper]/[Folia] networks, which allows your proxy to automatically register or unregister sub-servers while is state.
 
 <!-- Table-1 -->
 <table>
 <thead>
-<tr>
-<th width="2000" colspan="2">
-</th>
-</tr>
 <h2>🧭 Links</h2>
 </thead>
 <tbody>
@@ -28,7 +24,7 @@
   <td valign="top">
     <h3>Wiki</h3>
     <p>
-      Don't know how to use this plugin? <a href="https://github.com/Aelysium-Group/rusty-connector/wiki">Click this link</a> to teach you a quick start.
+      Wanna learn how to get started? <a href="https://github.com/Aelysium-Group/rusty-connector/wiki">Look here</a>!
     </p>
   </td>
 </tr>
@@ -40,7 +36,7 @@
   <td valign="top">
     <h3>Download</h3>
     <p>
-      <a href="https://github.com/Aelysium-Group/rusty-connector/releases">Click to go to Github Releases to download</a>, or go to the plugin release page.
+      <a href="https://github.com/Aelysium-Group/rusty-connector/releases">Download from GitHub</a>, or check out the plugin release pages.
     </p>
   </td>
 </tr>
@@ -52,7 +48,9 @@
   <td>
     <h3>Support</h3>
     <p>
-      You can <a href="https://join.aelysium.group">click this link</a> to join our Discord community for more help.
+      Join our Discord community <a href="https://join.aelysium.group">here</a> for support!
+      <br>
+      <sup>(Support is offered to paying server members only)</sup>
     </p>
   </td>
 </tr>
@@ -64,7 +62,7 @@
   <td>
     <h3>Report Bugs</h3>
     <p>
-    Experiencing annoying bugs while using the plugin? Please <a href="https://github.com/Aelysium-Group/rusty-connector/issues">click this link</a> to feedback with us.
+    Experiencing annoying bugs while using the plugin? Report them <a href="https://github.com/Aelysium-Group/rusty-connector/issues"> here</a> to help us squash them.
     </p>
   </td>
 </tr>
@@ -74,15 +72,11 @@
 <!-- Table-2 -->
 <table>
 <thead>
-<tr>
-<th width="2000" colspan="2">
-</th>
-</tr>
 <h2>🚀 Plugin Release Page</h2>
 </thead>
 <tbody>
 <tr>
-  <td width="80" align="center" valign="top">
+  <td width="80" align="center" valign="center">
     <br>
     <a href="https://modrinth.com/plugin/rustyconnector"><img src="./blob/images/logo/modrinth.svg"></a>
   </td>
@@ -96,12 +90,12 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector"><img src="./blob/images/logo/hanger.svg"></a>
+    <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector"><img src="./blob/images/logo/hangar.svg"></a>
   </td>
   <td valign="top">
-    <h3>Hanger</h3>
+    <h3>Hangar</h3>
     <p>
-      <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector">Click to go to Hanger plugin release page.</a>
+      <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector">Click to go to Hangar plugin release page.</a>
     </p>
   </td>
 </tr>
@@ -133,7 +127,6 @@
 [![RustyConnector bstats graph](https://bstats.org/signatures/bukkit/RustyConnector.svg)](https://bstats.org/signatures/bukkit/RustyConnector.svg)
 ---
 ## 🛠 Incoming Features/Changes
-- [ ] Rounded families (families built for round based gamemodes!) [__Under Development__]
 - [ ] Player parties (join your friend's party and follow them around the network as they connect to different families!) [__Under Development__]
 - [ ] Websocket as a backup for if Redis fails [__Under Research__]
 - [ ] Example RustyConnector Networks for Documentation Purposes [__Under Development__]
@@ -167,8 +160,10 @@
 语言切换 / Need to switch languages?
 
 [![English](https://flat.badgen.net/badge/English/Click%20me/blue)](https://github.com/Aelysium-Group/rusty-connector/blob/main/README.md)
-[![简体中文](https://flat.badgen.net/badge/简体中文/Click%20me/blue)](https://Aelysium-Group/rusty-connector/blob/main/blob/zh-hans/README.md)
-[![繁體中文](https://flat.badgen.net/badge/繁體中文/Click%20me/blue)](https://github.com/Aelysium-Group/rusty-connector/blob/main/blob/zh-hant/README.md)
+![简体中文](https://flat.badgen.net/badge/简体中文/Coming%20soon/blue)
+![繁體中文](https://flat.badgen.net/badge/繁體中文/Coming%20soon/blue)
+<!--[![简体中文](https://flat.badgen.net/badge/简体中文/Click%20me/blue)](https://Aelysium-Group/rusty-connector/blob/main/blob/zh-hans/README.md)-->
+<!--[![繁體中文](https://flat.badgen.net/badge/繁體中文/Click%20me/blue)](https://github.com/Aelysium-Group/rusty-connector/blob/main/blob/zh-hant/README.md)-->
 
 2023 © [Aelysium](https://www.aelysium.group)
 
