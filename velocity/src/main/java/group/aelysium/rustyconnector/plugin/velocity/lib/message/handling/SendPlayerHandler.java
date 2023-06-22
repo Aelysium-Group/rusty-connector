@@ -33,7 +33,7 @@ public class SendPlayerHandler implements MessageHandler {
 
             family.connect(player);
         } catch (Exception e) {
-            player.sendMessage(Component.text("There was an issue connecting you to that server! "+ e.getMessage()));
+            player.sendMessage(Component.text(e.getMessage()));
         }
     }
 }
