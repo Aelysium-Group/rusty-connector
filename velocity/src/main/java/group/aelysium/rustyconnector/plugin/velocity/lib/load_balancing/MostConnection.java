@@ -6,14 +6,14 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.util.Collections;
 
-public class MostConnection extends LoadBalancer {
+public class MostConnection extends LeastConnection { // Extends LeastConnection to fill in some gaps that LoadBalancer leaves open
 
     @Override
     public void iterate() {
         try {
-            PlayerServer thisItem = this.items.get(this.index);
+            PlayerServer currentItem = this.items.get(this.index);
 
-            if (thisItem.getPlayerCount() + 1 >= thisItem.getHardPlayerCap()) this.index++;
+            if(currentItem.getPlayerCount() + 1 >= currentItem.getHardPlayerCap()) this.index++;
             if(this.index >= this.items.size()) this.index = 0;
         } catch (IndexOutOfBoundsException ignore) {}
     }
