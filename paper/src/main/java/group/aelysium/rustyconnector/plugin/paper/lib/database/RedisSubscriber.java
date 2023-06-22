@@ -10,7 +10,8 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.Mess
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.*;
+import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers.TPAQueuePlayerHandler;
+import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers.MagicLink_PingResponseHandler;
 
 import javax.naming.AuthenticationException;
 
@@ -58,7 +59,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
 
         try {
-            if(message.getType() == PING_RESPONSE)      new PingResponseHandler(message).execute();
+            if(message.getType() == PING_RESPONSE)      new MagicLink_PingResponseHandler(message).execute();
             if(message.getType() == TPA_QUEUE_PLAYER)   new TPAQueuePlayerHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);

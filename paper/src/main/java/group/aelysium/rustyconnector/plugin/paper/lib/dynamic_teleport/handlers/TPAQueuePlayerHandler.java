@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.message.handling;
+package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
@@ -7,8 +7,8 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
-import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueueService;
-import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPARequest;
+import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;
+import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.DynamicTeleport_TPARequest;
 import org.bukkit.entity.Player;
 
 import java.util.Objects;
@@ -31,7 +31,7 @@ public class TPAQueuePlayerHandler implements MessageHandler {
         if(target == null) return;
         if(!target.isOnline()) return;
 
-        TPARequest tpaRequest = api.getService(TPAQueueService.class).newRequest(message.getSourceUsername(), target);
+        DynamicTeleport_TPARequest tpaRequest = api.getService(DynamicTeleportService.class).newRequest(message.getSourceUsername(), target);
 
         // Attempt to resolve the tpa right away! If the player isn't on the server, this should fail silently.
         try {

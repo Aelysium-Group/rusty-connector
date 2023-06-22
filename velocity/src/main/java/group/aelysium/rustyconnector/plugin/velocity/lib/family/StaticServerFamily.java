@@ -17,7 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConn
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPASettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -33,7 +33,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
     LiquidTimestamp homeServerExpiration;
     UnavailableProtocol unavailableProtocol;
 
-    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, DynamicTeleport_TPASettings tpaSettings, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings);
         this.unavailableProtocol = unavailableProtocol;
         this.homeServerExpiration = homeServerExpiration;
@@ -164,7 +164,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
+                    new DynamicTeleport_TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
             );
@@ -175,7 +175,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
+                    new DynamicTeleport_TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
             );
@@ -186,7 +186,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
+                    new DynamicTeleport_TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
             );

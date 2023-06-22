@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -8,14 +7,13 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.scheduler.Scheduler;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
-import group.aelysium.rustyconnector.core.lib.database.MySQLService;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerLifecycle;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import org.slf4j.Logger;
 
@@ -78,7 +76,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
         this.processor.getService(RedisService.class).start(RedisSubscriber.class);
-        this.processor.getService(ServerService.class).getService(ServerLifecycle.class).startHeartbeat();
+        this.processor.getService(ServerService.class).getService(MagicLinkService.class).startHeartbeat();
     }
 
     /**

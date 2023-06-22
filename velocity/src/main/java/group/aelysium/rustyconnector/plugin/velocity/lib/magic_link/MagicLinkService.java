@@ -1,15 +1,17 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.server;
+package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link;
 
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.util.Objects;
 
-public class ServerLifecycle extends ClockService {
+public class MagicLinkService extends ClockService {
     protected final long interval;
 
-    public ServerLifecycle(int threads, long interval) {
+    public MagicLinkService(int threads, long interval) {
         super(true, threads);
         this.interval = interval;
     }

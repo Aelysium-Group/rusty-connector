@@ -1,9 +1,8 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.tpa;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
@@ -19,15 +18,15 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.Velocity
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
-public class TPACleaningService extends ClockService {
+public class DynamicTeleport_TPACleaningService extends ClockService {
     protected final long heartbeat;
 
-    public TPACleaningService(long heartbeat) {
+    public DynamicTeleport_TPACleaningService(long heartbeat) {
         super(true, 3);
         this.heartbeat = heartbeat;
     }
 
-    public TPACleaningService() {
+    public DynamicTeleport_TPACleaningService() {
         super(false, 0);
         this.heartbeat = 0;
     }

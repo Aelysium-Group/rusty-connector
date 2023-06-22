@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.ProxyConnectorService;
+import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -100,7 +100,7 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
         this.processor.getService(RedisService.class).start(RedisSubscriber.class);
-        this.processor.getService(ProxyConnectorService.class).startHeartbeat();
+        this.processor.getService(MagicLinkService.class).startHeartbeat();
     }
 
     public boolean isFolia() {

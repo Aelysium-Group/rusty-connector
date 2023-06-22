@@ -1,6 +1,6 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.tpa;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
-public class TPASettings {
+public class DynamicTeleport_TPASettings {
     private boolean enabled = false;
     private boolean ignorePlayerCap = false;
     private int requestLifetime = 5;
@@ -14,7 +14,7 @@ public class TPASettings {
     }
     public int getRequestLifetime() { return this.requestLifetime; }
 
-    public TPASettings(boolean enabled, boolean ignorePlayerCap, int requestLifetime) {
+    public DynamicTeleport_TPASettings(boolean enabled, boolean ignorePlayerCap, int requestLifetime) {
         this.enabled = enabled;
         this.ignorePlayerCap = ignorePlayerCap;
         this.requestLifetime = requestLifetime;

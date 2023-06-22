@@ -17,9 +17,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFami
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerLifecycle;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPACleaningService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPACleaningService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
@@ -133,7 +133,7 @@ public class Processor extends IKLifecycle {
             builder.addService(new LoadBalancingService(familyService.size(), config.getServices_loadBalancing_interval()));
         }
 
-        builder.addService(new TPACleaningService(10));
+        builder.addService(new DynamicTeleport_TPACleaningService(10));
         logger.log("Finished loading services...");
 
         // Setup network whitelist
@@ -173,7 +173,7 @@ public class Processor extends IKLifecycle {
         logger.log("Finished setting up message tunnel");
 
 
-        ServerLifecycle lifeMatrixService = new ServerLifecycle(5, config.getServices_serverLifecycle_serverPingInterval());
+        MagicLinkService lifeMatrixService = new MagicLinkService(5, config.getServices_serverLifecycle_serverPingInterval());
 
         ServerService.Builder serverServiceBuilder = new ServerService.Builder()
                 .setServerTimeout(config.getServices_serverLifecycle_serverTimeout())

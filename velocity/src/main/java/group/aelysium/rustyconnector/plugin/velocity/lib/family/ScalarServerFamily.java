@@ -13,7 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConn
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPASettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 
@@ -22,7 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class ScalarServerFamily extends PlayerFocusedServerFamily {
 
-    private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, DynamicTeleport_TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings);
     }
 
@@ -76,7 +76,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                        new DynamicTeleport_TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
                 );
             }
             case LEAST_CONNECTION -> {
@@ -87,7 +87,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                        new DynamicTeleport_TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
                 );
             }
             case MOST_CONNECTION -> {
@@ -98,7 +98,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                        new DynamicTeleport_TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
                 );
             }
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");

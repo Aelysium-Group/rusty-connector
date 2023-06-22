@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers.MagicLinkPingHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.*;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 
@@ -81,7 +81,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         try {
-            if(message.getType() == PING)           new PingHandler(message).execute();
+            if(message.getType() == PING)           new MagicLinkPingHandler(message).execute();
             if(message.getType() == SEND_PLAYER)    new SendPlayerHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);

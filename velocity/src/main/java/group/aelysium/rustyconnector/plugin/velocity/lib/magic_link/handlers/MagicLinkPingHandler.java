@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
+package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
@@ -18,10 +18,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.net.InetSocketAddress;
 
-public class PingHandler implements MessageHandler {
+public class MagicLinkPingHandler implements MessageHandler {
     private final RedisMessageServerPing message;
 
-    public PingHandler(GenericRedisMessage message) {
+    public MagicLinkPingHandler(GenericRedisMessage message) {
         this.message = (RedisMessageServerPing) message;
     }
 

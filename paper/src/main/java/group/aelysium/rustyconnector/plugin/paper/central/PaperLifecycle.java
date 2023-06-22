@@ -12,8 +12,7 @@ import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.ProxyConnectorService;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
+import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -39,7 +38,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
         DefaultConfig.empty();
 
-        api.getService(ProxyConnectorService.class).disconnect();
+        api.getService(MagicLinkService.class).disconnect();
 
         api.killServices();
 

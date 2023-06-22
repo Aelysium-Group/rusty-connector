@@ -1,15 +1,15 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.tpa;
+package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models;
 
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import org.bukkit.entity.Player;
 
-public class TPARequest {
+public class DynamicTeleport_TPARequest {
     private String clientUsername;
     private Player client = null;
     private Player target;
 
-    public TPARequest(String clientUsername, Player target) {
+    public DynamicTeleport_TPARequest(String clientUsername, Player target) {
         this.clientUsername = clientUsername;
         this.target = target;
     }

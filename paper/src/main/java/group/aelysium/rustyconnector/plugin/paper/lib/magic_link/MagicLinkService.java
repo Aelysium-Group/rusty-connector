@@ -1,18 +1,19 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.services;
+package group.aelysium.rustyconnector.plugin.paper.lib.magic_link;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ProxyConnectorService extends ClockService {
+public class MagicLinkService extends ClockService {
     private AtomicInteger upcomingPingDelay = new AtomicInteger(0);
     private AtomicInteger nextcomingPingDelay = new AtomicInteger(5);
     private Status status = Status.SEARCHING;
 
-    public ProxyConnectorService(int threads) {
+    public MagicLinkService(int threads) {
         super(true, threads);
     }
 
@@ -49,7 +50,7 @@ public class ProxyConnectorService extends ClockService {
                 e.printStackTrace();
             }
 
-            ProxyConnectorService.this.scheduleNextPing();
+            MagicLinkService.this.scheduleNextPing();
         }, this.upcomingPingDelay.get());
 
         if(this.upcomingPingDelay.get() != this.nextcomingPingDelay.get()) this.upcomingPingDelay = this.nextcomingPingDelay;

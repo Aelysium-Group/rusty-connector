@@ -10,7 +10,7 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.velocity.commands.CommandTPA;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
