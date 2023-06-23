@@ -1,0 +1,82 @@
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#                                                                                                         #
+#                    ______   ______     ______     ______   __     ______     ______                     #
+#                   /\  == \ /\  __ \   /\  == \   /\__  _\ /\ \   /\  ___\   /\  ___\                    #
+#                   \ \  _-/ \ \  __ \  \ \  __<   \/_/\ \/ \ \ \  \ \  __\   \ \___  \                   #
+#                    \ \_\    \ \_\ \_\  \ \_\ \_\    \ \_\  \ \_\  \ \_____\  \/\_____\                  #
+#                     \/_/     \/_/\/_/   \/_/ /_/     \/_/   \/_/   \/_____/   \/_____/                  #
+#                                                                                                         #
+#                                                                                                         #
+#                                            Welcome to Parties!                                          #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+#                        | Allow your users to teleport around your network together                      #
+#                        | in parties!                                                                    #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+enabled: false
+
+#
+# How many members can be in a party?
+#
+max-members: 5
+
+#
+# Should only friends be allowed to be invited to a party?
+#
+friends-only: true
+
+party-leader:
+    #
+    # Should the leader be the only one allowed to invite new members to the party?
+    #
+    only-leader-can-invite: true
+
+    #
+    # Should the leader be the only one allowed to kick members from the party?
+    #
+    only-leader-can-kick: true
+
+    #
+    # Should the party disband if the leader leaves the network?
+    # If disabled, a new leader will be randomly selected from among the members.
+    #
+    disband-on-leader-quit: true
+
+switching-servers:
+    #
+    # Should the party leader be the only one allowed to switch between servers?
+    #
+    only-leader-can-switch: true
+
+    ############################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                       Switch Power                       #
+    #                                                          #
+    #               ---------------------------                #
+    # | Set the amount of power a server switch should hold.   #
+    #                                                          #
+    #  ⚫ MINIMAL -                                            #
+    #             Minimal power. Members of the party will be  #
+    #             kicked from the party if the target server   #
+    #             is at max capacity (soft-cap)                #
+    #  ⚫ MODERATE -                                           #
+    #             Moderate power. Members of the party will be #
+    #             kicked from the party if the target server   #
+    #             is at max capacity (hard-cap)                #
+    #  ⚫ AGGRESSIVE -                                         #
+    #             Aggressive power. Assuming there are no      #
+    #             errors during connection; all party members  #
+    #             will join the target server no matter what.  #
+    #               ---------------------------                #
+    #                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################
+    switch-power: MODERATE

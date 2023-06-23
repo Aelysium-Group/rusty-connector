@@ -42,5 +42,8 @@ mysql:
     password: "password"
     database: "RustyConnector"
 
-parties:
-    enabled: false
+#
+# REQUIRES THAT `tpa` IN `dynamic-teleport.yml` IS ENABLED.
+# Should players only be allowed to `tpa` to friends?
+#
+only-tpa-to-friends: false
