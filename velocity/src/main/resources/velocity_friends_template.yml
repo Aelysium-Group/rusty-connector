@@ -29,13 +29,12 @@ enabled: false
 # If a user reaches this limit, they will be required to remove a friend
 # before they can add new ones.
 #
-max-friends: 50
+max-friends: 25
 
 #
 # Set the MySQL database to use for storing friends in.
 #
 mysql:
-    enabled: false
     host: ""
     port: 3306
     user: "root"

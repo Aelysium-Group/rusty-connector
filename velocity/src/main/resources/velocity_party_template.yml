@@ -29,9 +29,10 @@ enabled: false
 max-members: 5
 
 #
+# Requires `friends.yml` to be setup.
 # Should only friends be allowed to be invited to a party?
 #
-friends-only: true
+friends-only: false
 
 party-leader:
     #
@@ -45,17 +46,17 @@ party-leader:
     only-leader-can-kick: true
 
     #
+    # Should the party leader be the only one allowed to switch between servers?
+    #
+    only-leader-can-switch-servers: true
+
+    #
     # Should the party disband if the leader leaves the network?
     # If disabled, a new leader will be randomly selected from among the members.
     #
     disband-on-leader-quit: true
 
 switching-servers:
-    #
-    # Should the party leader be the only one allowed to switch between servers?
-    #
-    only-leader-can-switch: true
-
     ############################################################
     #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
     #                       Switch Power                       #

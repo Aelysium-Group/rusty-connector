@@ -13,16 +13,17 @@ import java.util.List;
 
 public class FriendsConfig extends YAML {
     private static FriendsConfig config;
-    private String rootFamily_name = "lobby";
-    private Boolean rootFamily_catchDisconnectingPlayers = false;
-    private List<String> scalar = new ArrayList<>();
-    private List<String> staticF = new ArrayList<>();
+
+    private boolean enabled = false;
+    private int maxFriends = 25;
 
     private String mysql_host = "";
     private int mysql_port = 3306;
     private String mysql_user = "root";
     private String mysql_password = "password";
     private String mysql_database = "RustyConnector";
+
+    private boolean onlyTPAToFriends = false;
 
     private FriendsConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -52,18 +53,12 @@ public class FriendsConfig extends YAML {
         config = null;
     }
 
-    public String getRootFamilyName() {
-        return this.rootFamily_name;
-    }
-    public Boolean shouldRootFamilyCatchDisconnectingPlayers() {
-        return this.rootFamily_catchDisconnectingPlayers;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public List<String> getScalarFamilies() {
-        return this.scalar;
-    }
-    public List<String> getStaticFamilies() {
-        return this.staticF;
+    public int getMaxFriends() {
+        return maxFriends;
     }
 
     public String getMysql_host() {
@@ -82,48 +77,19 @@ public class FriendsConfig extends YAML {
         return this.mysql_database;
     }
 
+    public boolean isOnlyTPAToFriends() {
+        return onlyTPAToFriends;
+    }
+
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
-        // Families
-        this.rootFamily_name = this.getNode(this.data,"root-family.name",String.class);
-        this.rootFamily_catchDisconnectingPlayers = this.getNode(this.data,"root-family.catch-disconnecting-players",Boolean.class);
-        try {
-            this.scalar = (List<String>) (this.getNode(this.data,"scalar",List.class));
-        } catch (Exception e) {
-            throw new IllegalStateException("The node [scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
-        try {
-            this.staticF = (List<String>) (this.getNode(this.data,"static",List.class));
-        } catch (Exception e) {
-            throw new IllegalStateException("The node [scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
+        this.enabled = this.getNode(this.data, "enabled", Boolean.class);
+        if(!this.enabled) return;
 
-        this.scalar.forEach(familyName -> {
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
-        });
+        this.maxFriends = this.getNode(this.data, "max-friends", Integer.class);
 
-        this.staticF.forEach(familyName -> {
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
-        });
-
-        if(this.checkForAll())
-            throw new IllegalStateException("You can't name a family: `all`");
-
-        if(this.doDuplicatesExist())
-            throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of what type the family is!");
-
-        if(this.isRootFamilyDuplicated()) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.rootFamily_name + " was found duplicated in your family nodes. This is no longer supported. Instead, ONLY place the name of your root family in [root-family.name]. Ignoring..."), NamedTextColor.YELLOW);
-            this.scalar.remove(this.rootFamily_name);
-            this.staticF.remove(this.rootFamily_name);
-        }
-
-
-        if(this.staticF.isEmpty()) return;
         // MySQL
 
         this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
@@ -139,20 +105,8 @@ public class FriendsConfig extends YAML {
         this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
         if (this.mysql_database.equals(""))
             throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
-    }
 
-    private boolean doDuplicatesExist() {
-        return this.scalar.stream().filter(this.staticF::contains).toList().size() > 0;
-    }
 
-    private boolean isRootFamilyDuplicated() {
-        return this.scalar.contains(this.rootFamily_name) ||
-               this.staticF.contains(this.rootFamily_name);
-    }
-
-    private boolean checkForAll() {
-        return this.rootFamily_name.equalsIgnoreCase("all") ||
-               this.scalar.contains("all") ||
-               this.staticF.contains("all");
+        this.onlyTPAToFriends = this.getNode(this.data, "only-tpa-to-friends", Boolean.class);
     }
 }
