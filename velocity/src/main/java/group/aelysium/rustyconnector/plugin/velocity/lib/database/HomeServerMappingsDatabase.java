@@ -12,6 +12,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 
 public class HomeServerMappingsDatabase {
@@ -22,22 +24,17 @@ public class HomeServerMappingsDatabase {
     private static final String PURGE_FAMILY_EXPIRED_MAPPINGS = "DELETE FROM home_server_mappings WHERE family_name = ? AND expiration < NOW();";
     private static final String UPDATE_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = ? WHERE family_name = ? AND expiration IS NULL;";
     private static final String UPDATE_NOT_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = NULL WHERE family_name = ? AND expiration IS NOT NULL;";
-    private static final String INIT_TABLE = "" +
-            "CREATE TABLE IF NOT EXISTS home_server_mappings (" +
-            "    player_uuid VARCHAR(36) NOT NULL," +
-            "    family_name VARCHAR(32) NOT NULL," +
-            "    server_address VARCHAR(128) NOT NULL," +
-            "    server_name VARCHAR(128) NOT NULL," +
-            "    expiration TIMESTAMP NULL DEFAULT NULL," +
-            "    CONSTRAINT uc_Mappings UNIQUE (player_uuid, family_name)" +
-            ");";
 
     /**
      * Initialize the table for home server mappings.
      */
-    public static void init(MySQLService service) throws SQLException {
+    public static void init(MySQLService service) throws SQLException, IOException {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        InputStream stream = api.getResourceAsStream("home_server_mappings.yml");
+        String file = new String(stream.readAllBytes());
+
         service.connect();
-        PreparedStatement statement = service.prepare(INIT_TABLE);
+        PreparedStatement statement = service.prepare(file);
         service.execute(statement);
         service.close();
     }

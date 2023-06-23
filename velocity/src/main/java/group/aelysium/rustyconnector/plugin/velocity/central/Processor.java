@@ -27,6 +27,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
@@ -99,6 +100,8 @@ public class Processor extends IKLifecycle {
             }
         } catch (CommunicationsException e) {
             throw new IllegalAccessException("Unable to connect to MySQL! Is the server available?");
+        } catch (IOException e) {
+            throw new IllegalAccessException("Unable to connect to initialize MySQL for Static Families! How did this even happen?");
         }
 
         // Setup families
