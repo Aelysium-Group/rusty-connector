@@ -9,14 +9,13 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
 
-public class HomeServerMappingsDatabase {
+public class FriendsDatabase {
     private static final String FIND_HOME_SERVER_IN_FAMILY = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
     private static final String CHECK_IF_PLAYER_HAS_HOME = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
     private static final String DELETE_PLAYERS_HOME_SERVER = "DELETE FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
@@ -30,7 +29,7 @@ public class HomeServerMappingsDatabase {
      */
     public static void init(MySQLService service) throws SQLException, IOException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        InputStream stream = api.getResourceAsStream("home_server_mappings.sql");
+        InputStream stream = api.getResourceAsStream("friends.sql");
         String file = new String(stream.readAllBytes());
 
         service.connect();
