@@ -75,15 +75,23 @@ public class Processor extends IKLifecycle {
 
         logger.log("Finished setting up redis");
 
+        // Setup families
+        logger.log("Setting up Families");
+
+        FamiliesConfig familiesConfig = FamiliesConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "families.yml"), "velocity_families_template.yml");
+        if(!familiesConfig.generate())
+            throw new IllegalStateException("Unable to load or create families.yml!");
+        familiesConfig.register();
+
         // Setup MySQL
         try {
-            if (config.isMysql_enabled()) {
+            if (!familiesConfig.getStaticFamilies().isEmpty()) {
                 MySQLService mySQLService = new MySQLService.MySQLBuilder()
-                        .setHost(config.getMysql_host())
-                        .setPort(config.getMysql_port())
-                        .setDatabase(config.getMysql_database())
-                        .setUser(config.getMysql_user())
-                        .setPassword(config.getMysql_password())
+                        .setHost(familiesConfig.getMysql_host())
+                        .setPort(familiesConfig.getMysql_port())
+                        .setDatabase(familiesConfig.getMysql_database())
+                        .setUser(familiesConfig.getMysql_user())
+                        .setPassword(familiesConfig.getMysql_password())
                         .build();
 
                 builder.addService(mySQLService);
@@ -104,14 +112,6 @@ public class Processor extends IKLifecycle {
             throw new IllegalAccessException("Unable to connect to initialize MySQL for Static Families! How did this even happen?");
         }
 
-        // Setup families
-        logger.log("Setting up Families");
-
-        FamiliesConfig familiesConfig = FamiliesConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "families.yml"), "velocity_families_template.yml");
-        if(!familiesConfig.generate())
-            throw new IllegalStateException("Unable to load or create families.yml!");
-        familiesConfig.register();
-
         FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers());
         builder.addService(familyService);
 
@@ -120,9 +120,8 @@ public class Processor extends IKLifecycle {
 
         for (String familyName: familiesConfig.getScalarFamilies())
             familyService.add(ScalarServerFamily.init(whitelistService, familyName));
-        if(config.isMysql_enabled())
-            for (String familyName: familiesConfig.getStaticFamilies())
-                familyService.add(StaticServerFamily.init(whitelistService, familyName));
+        for (String familyName: familiesConfig.getStaticFamilies())
+            familyService.add(StaticServerFamily.init(whitelistService, familyName));
 
         logger.log("Setting up root family");
 

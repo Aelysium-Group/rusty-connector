@@ -77,22 +77,6 @@ redis:
 #
     data-channel: "rustyConnector-sync"
 
-#########################
-#         MySQL         #
-#########################
-#
-# MySQL is required in order for static families to operate.
-#
-# Make sure that if you set up static families, that you enabled and configure MySQL!
-#
-mysql:
-    enabled: false
-    host: ""
-    port: 3306
-    user: "root"
-    password: "password"
-    database: "RustyConnector"
-
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Whitelist                         #

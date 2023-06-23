@@ -11,8 +11,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FamiliesConfig extends YAML {
-    private static FamiliesConfig config;
+public class FriendsConfig extends YAML {
+    private static FriendsConfig config;
     private String rootFamily_name = "lobby";
     private Boolean rootFamily_catchDisconnectingPlayers = false;
     private List<String> scalar = new ArrayList<>();
@@ -24,7 +24,7 @@ public class FamiliesConfig extends YAML {
     private String mysql_password = "password";
     private String mysql_database = "RustyConnector";
 
-    private FamiliesConfig(File configPointer, String template) {
+    private FriendsConfig(File configPointer, String template) {
         super(configPointer, template);
     }
 
@@ -32,7 +32,7 @@ public class FamiliesConfig extends YAML {
      * Get the current config.
      * @return The config.
      */
-    public static FamiliesConfig getConfig() {
+    public static FriendsConfig getConfig() {
         return config;
     }
 
@@ -40,9 +40,9 @@ public class FamiliesConfig extends YAML {
      * Create a new config for the proxy, this will delete the old config.
      * @return The newly created config.
      */
-    public static FamiliesConfig newConfig(File configPointer, String template) {
-        config = new FamiliesConfig(configPointer, template);
-        return FamiliesConfig.getConfig();
+    public static FriendsConfig newConfig(File configPointer, String template) {
+        config = new FriendsConfig(configPointer, template);
+        return FriendsConfig.getConfig();
     }
 
     /**
@@ -123,6 +123,7 @@ public class FamiliesConfig extends YAML {
         }
 
 
+        if(this.staticF.isEmpty()) return;
         // MySQL
 
         this.mysql_host = this.getNode(this.data, "mysql.host", String.class);

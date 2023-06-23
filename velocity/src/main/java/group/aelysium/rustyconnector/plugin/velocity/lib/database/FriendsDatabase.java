@@ -16,13 +16,13 @@ import java.io.InputStream;
 import java.sql.*;
 
 public class FriendsDatabase {
-    private static final String FIND_HOME_SERVER_IN_FAMILY = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
-    private static final String CHECK_IF_PLAYER_HAS_HOME = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
-    private static final String DELETE_PLAYERS_HOME_SERVER = "DELETE FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
-    private static final String SAVE_PLAYERS_HOME_SERVER = "REPLACE INTO home_server_mappings (player_uuid, family_name, server_address, server_name, expiration) VALUES(?, ?, ?, ?, FROM_UNIXTIME(?));";
-    private static final String PURGE_FAMILY_EXPIRED_MAPPINGS = "DELETE FROM home_server_mappings WHERE family_name = ? AND expiration < NOW();";
-    private static final String UPDATE_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = ? WHERE family_name = ? AND expiration IS NULL;";
-    private static final String UPDATE_NOT_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = NULL WHERE family_name = ? AND expiration IS NOT NULL;";
+    private static final String FIND_FRIEND = "SELECT * FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
+    private static final String GET_FRIEND_COUNT = "SELECT * FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
+    private static final String DELETE_FRIEND = "DELETE FROM friends WHERE player1_uuid = ? AND player2_uuid = ?;";
+    private static final String ADD_FRIEND = "INSERT INTO friends (player1_uuid, player2_uuid) VALUES(?, ?);";
+
+    private static final String SEND_FRIEND_REQUEST = "INSERT INTO requests (sender_UUID, target_UUID) VALUES(?, ?);";
+    private static final String DELETE_FRIEND_REQUEST = "DELETE FROM requests WHERE sender_UUID = ? AND target_UUID = ?;";
 
     /**
      * Initialize the table for home server mappings.
