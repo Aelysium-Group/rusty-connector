@@ -9,6 +9,7 @@ import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.commands.CommandHub;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
@@ -128,6 +129,12 @@ public class VelocityLifecycle extends PluginLifecycle {
                     commandManager.metaBuilder("tpa")
                             .build(),
                     CommandTPA.create()
+            );
+
+            commandManager.register(
+                    commandManager.metaBuilder("hub")
+                            .build(),
+                    CommandHub.create()
             );
 
             return true;

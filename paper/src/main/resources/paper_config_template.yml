@@ -93,6 +93,15 @@ server:
     family: ""
 
 #########################
+#     Parent Family     #
+#########################
+#
+# This is the family a player will be sent to when they run /hub.
+# If this value is not set, or the parent is unavailable, players will be sent to the root family instead.
+#
+    parent-family: ""
+
+#########################
 #     Load Balancing    #
 #########################
 #

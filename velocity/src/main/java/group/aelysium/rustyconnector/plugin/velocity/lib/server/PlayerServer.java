@@ -6,17 +6,9 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 
@@ -32,9 +24,11 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     private int softPlayerCap;
     private int hardPlayerCap;
 
+    private String parentFamilyName;
+
     private AtomicInteger timeout;
 
-    public PlayerServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight, int timeout) {
+    public PlayerServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight, int timeout, String parentFamilyName) {
         this.serverInfo = serverInfo;
 
         this.weight = Math.max(weight, 0);
@@ -46,6 +40,8 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(this.softPlayerCap > this.hardPlayerCap) this.softPlayerCap = this.hardPlayerCap;
 
         this.timeout = new AtomicInteger(timeout);
+
+        this.parentFamilyName = parentFamilyName;
     }
 
     public boolean isStale() {
@@ -70,6 +66,10 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
 
     public String getFamilyName() {
         return this.familyName;
+    }
+
+    public String getParentFamilyName() {
+        return this.parentFamilyName;
     }
 
     public RegisteredServer getRegisteredServer() {

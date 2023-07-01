@@ -15,6 +15,8 @@ public class DefaultConfig extends YAML {
     private String server_name = "";
     private String server_address = "";
     private String server_family = "";
+
+    private String server_parentFamilyName = "";
     private int server_weight = 0;
     private int server_playerCap_soft = 20;
     private int server_playerCap_hard = 30;
@@ -41,6 +43,10 @@ public class DefaultConfig extends YAML {
 
     public String getServer_family() {
         return server_family;
+    }
+
+    public String getServer_parentFamilyName() {
+        return server_parentFamilyName;
     }
 
     public int getServer_weight() {
@@ -121,6 +127,10 @@ public class DefaultConfig extends YAML {
         this.server_family = this.getNode(this.data,"server.family",String.class);
         if(this.server_family.equals("")) throw new IllegalStateException("You must provide a family name in order for RustyConnector to work! The family name must also exist on your Velocity configuration.");
 
+        this.server_parentFamilyName = this.getNode(this.data,"server.parent-family",String.class);
+        if(this.server_parentFamilyName.equals(""))
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("No parent family is set, using root family."), NamedTextColor.YELLOW);
+
         this.server_weight = this.getNode(this.data,"server.weight",Integer.class);
         if(this.server_weight < 0) throw new IllegalStateException("Server weight cannot be a negative number.");
 
@@ -140,7 +150,6 @@ public class DefaultConfig extends YAML {
 
         if(this.redis_password.length() != 0 && this.redis_password.length() < 16)
             throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
-
 
 
         this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);

@@ -80,7 +80,7 @@ public class ServerService extends ServiceableService {
                 String name = "server"+i;
 
                 ServerInfo info = new ServerInfo(name, address);
-                PlayerServer server = new PlayerServer(info, 40, 50, 0, this.serverTimeout);
+                PlayerServer server = new PlayerServer(info, 40, 50, 0, this.serverTimeout, "");
                 server.setPlayerCount((int) (Math.random() * 50));
 
                 try {
@@ -203,6 +203,9 @@ public class ServerService extends ServiceableService {
         private int weight;
         private int softPlayerCap;
         private int hardPlayerCap;
+
+        private String parentFamilyName;
+
         protected int initialTimeout = 15;
 
         public ServerService.ServerBuilder setServerInfo(ServerInfo serverInfo) {
@@ -212,6 +215,11 @@ public class ServerService extends ServiceableService {
 
         public ServerService.ServerBuilder setFamilyName(String familyName) {
             this.familyName = familyName;
+            return this;
+        }
+
+        public ServerService.ServerBuilder setParentFamilyName(String parentFamilyName) {
+            this.parentFamilyName = parentFamilyName;
             return this;
         }
 
@@ -238,7 +246,7 @@ public class ServerService extends ServiceableService {
         public PlayerServer build() {
             this.initialTimeout = VelocityRustyConnector.getAPI().getService(ServerService.class).getServerTimeout();
 
-            return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
+            return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout, parentFamilyName);
         }
     }
 }

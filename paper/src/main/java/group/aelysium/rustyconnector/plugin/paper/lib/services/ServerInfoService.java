@@ -13,11 +13,12 @@ public class ServerInfoService extends Service implements PlayerServer {
     private String name;
     private InetSocketAddress address;
     private String family;
+    private String parentFamilyName;
     private Integer softPlayerCap;
     private Integer hardPlayerCap;
     private Integer weight;
 
-    public ServerInfoService(String name, InetSocketAddress address, String family, int softPlayerCap, int hardPlayerCap, int weight) {
+    public ServerInfoService(String name, InetSocketAddress address, String family, String parentFamilyName, int softPlayerCap, int hardPlayerCap, int weight) {
         super(true);
 
         if(name.equals(""))
@@ -26,6 +27,8 @@ public class ServerInfoService extends Service implements PlayerServer {
 
         this.address = address;
         this.family = family;
+
+        this.parentFamilyName = parentFamilyName;
 
         this.setPlayerCap(softPlayerCap, hardPlayerCap);
 
@@ -62,6 +65,8 @@ public class ServerInfoService extends Service implements PlayerServer {
     }
 
     public String getFamily() { return this.family; }
+
+    public String getParentFamilyName() { return this.parentFamilyName; }
 
     @Override
     public int getPlayerCount() {
