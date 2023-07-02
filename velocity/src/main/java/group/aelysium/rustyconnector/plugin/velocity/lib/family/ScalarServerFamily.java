@@ -22,8 +22,8 @@ import java.lang.reflect.InvocationTargetException;
 
 public class ScalarServerFamily extends PlayerFocusedServerFamily {
 
-    private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings);
+    private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings, parentFamily);
     }
 
     public PlayerServer connect(Player player) throws RuntimeException {
@@ -76,7 +76,8 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime()),
+                        scalarFamilyConfig.getParent_family()
                 );
             }
             case LEAST_CONNECTION -> {
@@ -87,7 +88,8 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime()),
+                        scalarFamilyConfig.getParent_family()
                 );
             }
             case MOST_CONNECTION -> {
@@ -98,7 +100,8 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime()),
+                        scalarFamilyConfig.getParent_family()
                 );
             }
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");

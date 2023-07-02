@@ -29,7 +29,9 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     protected boolean weighted;
     protected TPAHandler tpaHandler;
 
-    protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    protected String parentFamily;
+
+    protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name);
         if(whitelist == null) this.whitelist = null;
         else this.whitelist = whitelist.getName();
@@ -42,6 +44,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         this.loadBalancer.setWeighted(weighted);
 
         this.tpaHandler = new TPAHandler(tpaSettings);
+
+        this.parentFamily = parentFamily;
     }
 
     /**
@@ -63,6 +67,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public TPAHandler getTPAHandler() {
         return tpaHandler;
     }
+
+    public String getParentFamily() { return parentFamily; }
 
     /**
      * Get the whitelist for this family, or `null` if there isn't one.

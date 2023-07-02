@@ -54,7 +54,6 @@ public class PingHandler implements MessageHandler {
                         .setSoftPlayerCap(message.getSoftCap())
                         .setHardPlayerCap(message.getHardCap())
                         .setWeight(message.getWeight())
-                        .setParentFamilyName(message.getParentFamilyName())
                         .build();
 
                 server.register(message.getFamilyName());

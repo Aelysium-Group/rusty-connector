@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class ScalarFamilyConfig extends YAML {
     private static Map<String, ScalarFamilyConfig> configs = new HashMap<>();
+    private String parent_family = "";
     private boolean loadBalancing_weighted = false;
     private String loadBalancing_algorithm = "ROUND_ROBIN";
     private boolean loadBalancing_persistence_enabled = false;
@@ -21,6 +22,8 @@ public class ScalarFamilyConfig extends YAML {
     private ScalarFamilyConfig(File configPointer, String template) {
         super(configPointer, template);
     }
+
+    public String getParent_family() { return parent_family; }
 
     public boolean isLoadBalancing_weighted() {
         return loadBalancing_weighted;
@@ -77,6 +80,8 @@ public class ScalarFamilyConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
+        this.parent_family = this.getNode(this.data, "parent-family", String.class);
+
         this.loadBalancing_weighted = this.getNode(this.data,"load-balancing.weighted",Boolean.class);
         this.loadBalancing_algorithm = this.getNode(this.data,"load-balancing.algorithm",String.class);
 

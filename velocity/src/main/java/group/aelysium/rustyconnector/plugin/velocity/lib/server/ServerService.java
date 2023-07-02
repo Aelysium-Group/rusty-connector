@@ -80,7 +80,7 @@ public class ServerService extends ServiceableService {
                 String name = "server"+i;
 
                 ServerInfo info = new ServerInfo(name, address);
-                PlayerServer server = new PlayerServer(info, 40, 50, 0, this.serverTimeout, "");
+                PlayerServer server = new PlayerServer(info, 40, 50, 0, this.serverTimeout);
                 server.setPlayerCount((int) (Math.random() * 50));
 
                 try {
@@ -246,7 +246,7 @@ public class ServerService extends ServiceableService {
         public PlayerServer build() {
             this.initialTimeout = VelocityRustyConnector.getAPI().getService(ServerService.class).getServerTimeout();
 
-            return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout, parentFamilyName);
+            return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
         }
     }
 }

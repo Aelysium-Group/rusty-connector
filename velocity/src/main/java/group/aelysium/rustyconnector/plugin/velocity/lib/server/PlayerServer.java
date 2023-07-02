@@ -24,11 +24,9 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     private int softPlayerCap;
     private int hardPlayerCap;
 
-    private String parentFamilyName;
-
     private AtomicInteger timeout;
 
-    public PlayerServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight, int timeout, String parentFamilyName) {
+    public PlayerServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight, int timeout) {
         this.serverInfo = serverInfo;
 
         this.weight = Math.max(weight, 0);
@@ -40,8 +38,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(this.softPlayerCap > this.hardPlayerCap) this.softPlayerCap = this.hardPlayerCap;
 
         this.timeout = new AtomicInteger(timeout);
-
-        this.parentFamilyName = parentFamilyName;
     }
 
     public boolean isStale() {
@@ -66,10 +62,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
 
     public String getFamilyName() {
         return this.familyName;
-    }
-
-    public String getParentFamilyName() {
-        return this.parentFamilyName;
     }
 
     public RegisteredServer getRegisteredServer() {

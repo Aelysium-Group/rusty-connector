@@ -33,8 +33,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
     LiquidTimestamp homeServerExpiration;
     UnavailableProtocol unavailableProtocol;
 
-    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings);
+    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings, parentFamily);
         this.unavailableProtocol = unavailableProtocol;
         this.homeServerExpiration = homeServerExpiration;
     }
@@ -166,7 +166,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
                     new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
+                    staticFamilyConfig.getParent_family()
             );
             case LEAST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
@@ -177,7 +178,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
                     new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
+                    staticFamilyConfig.getParent_family()
             );
             case MOST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
@@ -188,7 +190,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
                     new TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
+                    staticFamilyConfig.getParent_family()
             );
         }
 
