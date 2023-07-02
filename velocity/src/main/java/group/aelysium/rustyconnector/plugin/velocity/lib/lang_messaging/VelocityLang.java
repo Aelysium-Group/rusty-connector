@@ -16,6 +16,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import net.kyori.adventure.text.Component;
 
+import java.util.Objects;
+
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
@@ -260,6 +262,10 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
+        String parentFamilyName = family.getParentFamily();
+        if (Objects.equals(parentFamilyName, ""))
+            parentFamilyName = VelocityRustyConnector.getAPI().getService(FamilyService.class).getRootFamily().getName();
+
         return join(
                 Lang.newlines(),
                 BORDER,
@@ -270,6 +276,7 @@ public interface VelocityLang extends Lang {
                 SPACING,
                 text("   ---| Online Players: "+family.getPlayerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
+                text("   ---| Parent Family: "+ parentFamilyName),
                 text("   ---| Load Balancing:"),
                 text("      | - Algorithm: "+family.getLoadBalancer()),
                 text("      | - Weighted Sorting: "+family.isWeighted()),
@@ -317,6 +324,10 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
+        String parentFamilyName = family.getParentFamily();
+        if (Objects.equals(parentFamilyName, ""))
+            parentFamilyName = VelocityRustyConnector.getAPI().getService(FamilyService.class).getRootFamily().getName();
+
         LiquidTimestamp expiration = family.getHomeServerExpiration();
         String homeServerExpiration = "NEVER";
         if(expiration != null) homeServerExpiration = expiration.toString();
@@ -331,6 +342,7 @@ public interface VelocityLang extends Lang {
                 SPACING,
                 text("   ---| Online Players: "+family.getPlayerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
+                text("   ---| Parent Family: "+ parentFamilyName),
                 text("   ---| Home Server Expiration: "+homeServerExpiration),
                 text("   ---| Load Balancing:"),
                 text("      | - Algorithm: "+family.getLoadBalancer()),
