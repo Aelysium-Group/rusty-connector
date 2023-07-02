@@ -210,7 +210,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
 
         Whitelist currentWhitelist = this.getWhitelist();
         if (!(currentWhitelist == null)) {
-            api.getService(WhitelistService.class).remove(currentWhitelist);
+            api.getService(WhitelistService.class).orElseThrow().remove(currentWhitelist);
         }
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
@@ -228,7 +228,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
             newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
             this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getService(WhitelistService.class).add(newWhitelist);
+            api.getService(WhitelistService.class).orElseThrow().add(newWhitelist);
 
             logger.log("Finished reloading whitelist for " + this.name);
             return;

@@ -11,6 +11,8 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
@@ -34,10 +36,10 @@ public class OnPlayerChangeServer {
                     RegisteredServer newRawServer = event.getServer();
                     RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
 
-                    PlayerServer newServer = api.getService(ServerService.class).findServer(newRawServer.getServerInfo());
+                    PlayerServer newServer = api.getService(ServerService.class).orElseThrow().findServer(newRawServer.getServerInfo());
 
                     if(oldRawServer == null) return; // Player just connected to proxy. This isn't a server switch.
-                    PlayerServer oldServer = api.getService(ServerService.class).findServer(oldRawServer.getServerInfo());
+                    PlayerServer oldServer = api.getService(ServerService.class).orElseThrow().findServer(oldRawServer.getServerInfo());
 
                     boolean isTheSameFamily = newServer.getFamilyName().equals(oldServer.getFamilyName());
 
@@ -57,15 +59,36 @@ public class OnPlayerChangeServer {
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_SERVER, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_SERVER.build(player, oldServer, newServer));
 
-                    // Uncache any old servers in the old family.
-                    if(!isTheSameFamily) {
-                        BaseServerFamily family = oldServer.getFamily();
-                        if (!(family instanceof StaticServerFamily)) return;
-                        ((StaticServerFamily) family).uncacheHomeServer(player);
-                    }
+                    if(!isTheSameFamily) handleHomeServerCache(oldServer.getFamily(), player);
+
+                    partyFollow(player, newServer);
                 } catch (Exception e) {
                     logger.log(e.getMessage());
                 }
             });
+    }
+
+    public void handleHomeServerCache(BaseServerFamily family, Player player) {
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+
+        try {
+            if (!(family instanceof StaticServerFamily)) return;
+            ((StaticServerFamily) family).uncacheHomeServer(player);
+        } catch (Exception e) {
+            logger.log(e.getMessage());
+        }
+    }
+
+    public void partyFollow(Player player, PlayerServer server) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        PluginLogger logger = api.getLogger();
+
+        PartyService parties = api.getService(PartyService.class).orElse(null);
+        if(parties == null) return;
+
+        Party party = parties.find(player).orElse(null);
+        if(party == null) return;
+
+        server.connect(party);
     }
 }

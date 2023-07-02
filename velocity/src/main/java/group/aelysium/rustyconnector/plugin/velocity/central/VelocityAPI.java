@@ -22,6 +22,7 @@ import java.io.SyncFailedException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class VelocityAPI extends PluginAPI<Scheduler> {
     private final VelocityRustyConnector plugin;
@@ -57,8 +58,9 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         return String.valueOf(this.dataFolder);
     }
 
-    public <S extends Service> S getService(Class<S> type) {
-        return this.processor.getService(type);
+    public <S extends Service> Optional<S> getService(Class<S> type) {
+        if(this.processor.getService(type) == null) return Optional.empty();
+        return Optional.of(this.processor.getService(type));
     }
 
     public void killServices() {

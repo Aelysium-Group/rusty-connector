@@ -1,16 +1,19 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.model.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Vector;
 
-public class PartyService {
+public class PartyService extends Service {
     private final Vector<Party> parties = new Vector<>();
     private final Vector<PartyInvite> invites = new Vector<>();
     private final int partySize;
 
     public PartyService(int partySize) {
+        super(true);
         this.partySize = partySize;
     }
 
@@ -25,11 +28,11 @@ public class PartyService {
     }
 
     /**
-     * Find a party based on it's member.
+     * Find a party based on its member.
      * @return A party, or `null` if the player doesn't exist in any.
      */
-    public Party find(Player member) {
-        return this.parties.stream().filter(party -> party.contains(member)).findFirst().orElse(null);
+    public Optional<Party> find(Player member) {
+        return this.parties.stream().filter(party -> party.contains(member)).findFirst();
     }
 
     public PartyInvite invitePlayer(Party party, Player player) {
@@ -44,5 +47,11 @@ public class PartyService {
 
     public void closeInvite(PartyInvite invite) {
         this.invites.remove(invite);
+    }
+
+    @Override
+    public void kill() {
+        this.parties.clear();
+        this.invites.clear();
     }
 }

@@ -41,6 +41,10 @@ public class Party {
         return this.empty;
     }
 
+    public Vector<Player> players() {
+        return this.players;
+    }
+
     public void join(Player player) {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
 

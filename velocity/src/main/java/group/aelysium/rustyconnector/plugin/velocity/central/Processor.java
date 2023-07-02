@@ -86,7 +86,7 @@ public class Processor extends IKLifecycle {
         // Setup MySQL
         try {
             if (!familiesConfig.getStaticFamilies().isEmpty()) {
-                MySQLService mySQLService = new MySQLService.MySQLBuilder()
+                MySQLService mySQLService = new MySQLService.Builder()
                         .setHost(familiesConfig.getMysql_host())
                         .setPort(familiesConfig.getMysql_port())
                         .setDatabase(familiesConfig.getMysql_database())
@@ -99,7 +99,7 @@ public class Processor extends IKLifecycle {
                 HomeServerMappingsDatabase.init(mySQLService);
                 logger.log("Finished setting up MySQL");
             } else {
-                MySQLService mySQLService = new MySQLService.MySQLBuilder()
+                MySQLService mySQLService = new MySQLService.Builder()
                         .setDisabled()
                         .build();
 
