@@ -19,6 +19,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 
+import java.util.Objects;
+
 public class CommandHub {
     public static BrigadierCommand create() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
@@ -37,8 +39,32 @@ public class CommandHub {
 
                     PlayerServer sendersServer = api.getService(ServerService.class).findServer(sendersServerInfo);
 
-                    BaseServerFamily parentFamily = api.getService(FamilyService.class).find(sendersServer.getParentFamilyName());
+                    BaseServerFamily senderFamily = sendersServer.getFamily();
                     ScalarServerFamily rootFamily = api.getService(FamilyService.class).getRootFamily();
+
+                    if (!(senderFamily instanceof PlayerFocusedServerFamily)) {
+                        // Attempt to connect to root family if we're not in a PlayerFocusedServerFamily
+                        if (rootFamily != null) {
+                            try {
+                                ((PlayerFocusedServerFamily) rootFamily).connect(player);
+                                return Command.SINGLE_SUCCESS;
+                            } catch (RuntimeException err) {
+                                VelocityLang.RC_FAMILY_ERROR.send(logger, "Failed to connect player to parent family!");
+                                context.getSource().sendMessage(Component.text("Failed to connect to root family!"));
+                            }
+                        } else {
+                            VelocityLang.RC_FAMILY_ERROR.send(logger, "You can only scalar and static families for family parents!");
+                            context.getSource().sendMessage(Component.text("Failed to connect to root family!"));
+                        }
+
+                        return Command.SINGLE_SUCCESS;
+                    }
+
+                    String parentFamilyName = ((PlayerFocusedServerFamily) senderFamily).getParentFamily();
+                    BaseServerFamily parentFamily;
+
+                    if (Objects.equals(parentFamilyName, "")) parentFamily = rootFamily;
+                    else parentFamily = api.getService(FamilyService.class).find(parentFamilyName);
 
                     // Attempt to connect to parent family.
                     if (parentFamily instanceof PlayerFocusedServerFamily) {
@@ -48,7 +74,7 @@ public class CommandHub {
                         } catch (RuntimeException err) {
                             VelocityLang.RC_FAMILY_ERROR.send(logger, "Failed to connect player to parent family!");
                         }
-                    } else VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only scalar and static families for family parents!");
+                    } else VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only set scalar and static families for family parents!");
 
                     // Attempt to connect to root family if that fails.
                     if (rootFamily != null) {
