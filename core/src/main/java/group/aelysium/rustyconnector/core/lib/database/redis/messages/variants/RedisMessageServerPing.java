@@ -14,8 +14,6 @@ import java.util.List;
 public class RedisMessageServerPing extends GenericRedisMessage {
     private String familyName;
     private String serverName;
-
-    private String parentFamilyName;
     private Integer softCap;
     private Integer hardCap;
     private Integer weight;
@@ -26,10 +24,6 @@ public class RedisMessageServerPing extends GenericRedisMessage {
 
     public String getServerName() {
         return serverName;
-    }
-
-    public String getParentFamilyName() {
-        return parentFamilyName;
     }
 
     public Integer getSoftCap() {
@@ -57,7 +51,6 @@ public class RedisMessageServerPing extends GenericRedisMessage {
             switch (key) {
                 case ValidParameters.FAMILY_NAME -> this.familyName = value.getAsString();
                 case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
-                case ValidParameters.PARENT_FAMILY_NAME -> this.parentFamilyName = value.getAsString();
                 case ValidParameters.SOFT_CAP -> this.softCap = value.getAsInt();
                 case ValidParameters.HARD_CAP -> this.hardCap = value.getAsInt();
                 case ValidParameters.WEIGHT -> this.weight = value.getAsInt();
@@ -77,7 +70,6 @@ public class RedisMessageServerPing extends GenericRedisMessage {
             switch (key) {
                 case ValidParameters.FAMILY_NAME -> this.familyName = value.getAsString();
                 case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
-                case ValidParameters.PARENT_FAMILY_NAME -> this.parentFamilyName = value.getAsString();
                 case ValidParameters.SOFT_CAP -> this.softCap = value.getAsInt();
                 case ValidParameters.HARD_CAP -> this.hardCap = value.getAsInt();
                 case ValidParameters.WEIGHT -> this.weight = value.getAsInt();
@@ -92,7 +84,6 @@ public class RedisMessageServerPing extends GenericRedisMessage {
 
         parameters.add(ValidParameters.FAMILY_NAME, new JsonPrimitive(this.familyName));
         parameters.add(ValidParameters.SERVER_NAME, new JsonPrimitive(this.serverName));
-        parameters.add(ValidParameters.PARENT_FAMILY_NAME, new JsonPrimitive(this.parentFamilyName));
         parameters.add(ValidParameters.SOFT_CAP, new JsonPrimitive(this.softCap));
         parameters.add(ValidParameters.HARD_CAP, new JsonPrimitive(this.hardCap));
         parameters.add(ValidParameters.WEIGHT, new JsonPrimitive(this.weight));
@@ -105,8 +96,6 @@ public class RedisMessageServerPing extends GenericRedisMessage {
     public interface ValidParameters {
         String FAMILY_NAME = "f";
         String SERVER_NAME = "n";
-
-        String PARENT_FAMILY_NAME = "pf";
         String SOFT_CAP = "sc";
         String HARD_CAP = "hc";
         String WEIGHT = "w";

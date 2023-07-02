@@ -65,7 +65,6 @@ public class Processor extends IKLifecycle {
                 config.getServer_name(),
                 AddressUtil.parseAddress(config.getServer_address()),
                 config.getServer_family(),
-                config.getServer_parentFamilyName(),
                 config.getServer_playerCap_soft(),
                 config.getServer_playerCap_hard(),
                 config.getServer_weight()

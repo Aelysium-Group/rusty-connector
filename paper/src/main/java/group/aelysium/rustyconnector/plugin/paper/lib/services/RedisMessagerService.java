@@ -30,14 +30,13 @@ public class RedisMessagerService extends Service {
                     .setAddress(api.getService(ServerInfoService.class).getAddress())
                     .setParameter(RedisMessageServerPing.ValidParameters.FAMILY_NAME, api.getService(ServerInfoService.class).getFamily())
                     .setParameter(RedisMessageServerPing.ValidParameters.SERVER_NAME, api.getService(ServerInfoService.class).getName())
-                    .setParameter(RedisMessageServerPing.ValidParameters.PARENT_FAMILY_NAME, api.getService(ServerInfoService.class).getParentFamilyName())
                     .setParameter(RedisMessageServerPing.ValidParameters.SOFT_CAP, String.valueOf(api.getService(ServerInfoService.class).getSoftPlayerCap()))
                     .setParameter(RedisMessageServerPing.ValidParameters.HARD_CAP, String.valueOf(api.getService(ServerInfoService.class).getHardPlayerCap()))
                     .setParameter(RedisMessageServerPing.ValidParameters.WEIGHT, String.valueOf(api.getService(ServerInfoService.class).getWeight()))
                     .buildSendable();
             api.getService(RedisService.class).publish(message);
         } catch (Exception e) {
-            Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text(e.getMessage()), NamedTextColor.RED);
+            Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text(e.toString()), NamedTextColor.RED);
         }
     }
 
