@@ -87,7 +87,14 @@ public class FamiliesConfig extends YAML {
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
 
         // Families
-        this.rootFamily_name = this.getNode(this.data,"root-family.name",String.class);
+        try {
+            this.rootFamily_name = this.getNode(this.data, "root-family.name", String.class);
+            if (this.rootFamily_name.equals("") || this.rootFamily_name.length() < 1) throw new Exception();
+        } catch (Exception ignore) {
+            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Your [root-family.name] is empty or unparseable. It has been set to the default of \"lobby\""), NamedTextColor.YELLOW);
+            this.rootFamily_name = "lobby";
+        }
+
         this.rootFamily_catchDisconnectingPlayers = this.getNode(this.data,"root-family.catch-disconnecting-players",Boolean.class);
         try {
             this.scalar = (List<String>) (this.getNode(this.data,"scalar",List.class));
