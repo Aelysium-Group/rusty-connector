@@ -64,7 +64,7 @@ public class Party {
 
         this.players.remove(player);
 
-        if(this.players.size() <= 0)
+        if(this.players.size() == 0)
             this.decompose();
     }
 
@@ -76,7 +76,7 @@ public class Party {
         return this.players.contains(player);
     }
 
-    private void decompose() {
+    public void decompose() {
         this.empty = true;
         this.players.clear();
         this.leader.clear();

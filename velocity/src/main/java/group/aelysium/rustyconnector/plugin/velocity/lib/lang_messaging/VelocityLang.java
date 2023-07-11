@@ -437,7 +437,7 @@ public interface VelocityLang extends Lang {
 
     Message PARTY_USAGE_PARTY_LEADER = () -> join(
             Lang.newlines(),
-            text("Usage: /party <disband, invite>",RED)
+            text("Usage: /party <disband, invite, kick>",RED)
     );
 
     Message PARTY_USAGE_PARTY_MEMBER = () -> join(
@@ -448,6 +448,21 @@ public interface VelocityLang extends Lang {
     Message PARTY_USAGE_INVITES = () -> join(
             Lang.newlines(),
             text("Usage: /party invites <username> <accept, deny>",RED)
+    );
+
+    Message PARTY_USAGE_INVITE = () -> join(
+            Lang.newlines(),
+            text("Usage: /party invite <username>",RED)
+    );
+
+    Message PARTY_USAGE_KICK = () -> join(
+            Lang.newlines(),
+            text("Usage: /party kick <username>",RED)
+    );
+
+    Message PARTY_DISBANDED = () -> join(
+            Lang.newlines(),
+            text("Your party has been disbanded.",GRAY)
     );
 
     ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(
