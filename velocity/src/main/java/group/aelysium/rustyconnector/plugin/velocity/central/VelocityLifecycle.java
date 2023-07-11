@@ -1,6 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
+import cloud.commandframework.annotations.AnnotationParser;
+import cloud.commandframework.meta.SimpleCommandMeta;
 import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.EventManager;
 import group.aelysium.rustyconnector.core.central.PluginLifecycle;
 import group.aelysium.rustyconnector.core.lib.config.MigrationDirections;

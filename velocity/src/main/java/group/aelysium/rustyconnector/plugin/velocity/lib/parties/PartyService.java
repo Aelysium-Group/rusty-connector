@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.model.Service;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,15 +12,19 @@ import java.util.Vector;
 public class PartyService extends Service {
     private final Vector<Party> parties = new Vector<>();
     private final Vector<PartyInvite> invites = new Vector<>();
-    private final int partySize;
+    private final PartySettings settings;
 
-    public PartyService(int partySize) {
+    public PartyService(PartySettings settings) {
         super(true);
-        this.partySize = partySize;
+        this.settings = settings;
+    }
+
+    public PartySettings getSettings() {
+        return this.settings;
     }
 
     public Party create(Player host) {
-        Party party = new Party(this.partySize, host);
+        Party party = new Party(this.settings.maxMembers, host);
         this.parties.add(party);
         return party;
     }
@@ -29,20 +35,23 @@ public class PartyService extends Service {
 
     /**
      * Find a party based on its member.
-     * @return A party, or `null` if the player doesn't exist in any.
+     * @return A party.
      */
     public Optional<Party> find(Player member) {
         return this.parties.stream().filter(party -> party.contains(member)).findFirst();
     }
 
-    public PartyInvite invitePlayer(Party party, Player player) {
-        PartyInvite invite = new PartyInvite(party, player);
+    public PartyInvite invitePlayer(Party party, Player sender, Player target) {
+        if(party.getLeader() != sender && this.settings.onlyLeaderCanInvite)
+            sender.sendMessage(Component.text("Hey! Only the party leader can invite other players!", NamedTextColor.RED));
+
+        PartyInvite invite = new PartyInvite(sender, target);
         this.invites.add(invite);
         return invite;
     }
 
-    public List<PartyInvite> findInvites(Player player) {
-        return this.invites.stream().filter(invite -> invite.getPlayer() == player).findAny().stream().toList();
+    public List<PartyInvite> findInvitesToTarget(Player target) {
+        return this.invites.stream().filter(invite -> invite.getTarget() == target).findAny().stream().toList();
     }
 
     public void closeInvite(PartyInvite invite) {
@@ -54,4 +63,14 @@ public class PartyService extends Service {
         this.parties.clear();
         this.invites.clear();
     }
+
+    public record PartySettings(
+                                int maxMembers,
+                                boolean friendsOnly,
+                                boolean onlyLeaderCanInvite,
+                                boolean onlyLeaderCanKick,
+                                boolean onlyLeaderCanSwitchServers,
+                                boolean disbandOnLeaderQuit,
+                                SwitchPower switchPower
+                                ) {}
 }

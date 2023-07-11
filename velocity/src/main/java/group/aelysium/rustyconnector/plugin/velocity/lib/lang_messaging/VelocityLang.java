@@ -182,7 +182,7 @@ public interface VelocityLang extends Lang {
     Message RC_FAMILY = () -> {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         Component families = text("");
-        for (BaseServerFamily family : api.getService(FamilyService.class).dump()) {
+        for (BaseServerFamily family : api.getService(FamilyService.class).orElseThrow().dump()) {
             if(family instanceof ScalarServerFamily)
                 families = families.append(text("[ "+family.getName()+" ] ").color(GOLD));
             if(family instanceof StaticServerFamily)
@@ -358,7 +358,7 @@ public interface VelocityLang extends Lang {
     Component BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT = text("The server you were meant to be connected to is unavailable! Please try again later!", RED);
 
 
-    Component TPA_NO_PERMISSION = text("You do not have permission to use this command.",RED);
+    Component COMMAND_NO_PERMISSION = text("You do not have permission to use this command.",RED);
 
     Message TPA_USAGE = () -> join(
             Lang.newlines(),
@@ -428,6 +428,26 @@ public interface VelocityLang extends Lang {
     ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> join(
             Lang.newlines(),
             text("Your tpa request to "+username+" has expired!",RED)
+    );
+
+    Message PARTY_USAGE_NO_PARTY = () -> join(
+            Lang.newlines(),
+            text("Usage: /party <create, invites>",RED)
+    );
+
+    Message PARTY_USAGE_PARTY_LEADER = () -> join(
+            Lang.newlines(),
+            text("Usage: /party <disband, invite>",RED)
+    );
+
+    Message PARTY_USAGE_PARTY_MEMBER = () -> join(
+            Lang.newlines(),
+            text("Usage: /party <leave, invites>",RED)
+    );
+
+    Message PARTY_USAGE_INVITES = () -> join(
+            Lang.newlines(),
+            text("Usage: /party invites <username> <accept, deny>",RED)
     );
 
     ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(

@@ -6,17 +6,20 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 public class PartyInvite {
-    private final WeakReference<Party> party;
-    private final Player player;
+    private final WeakReference<Player> sender;
+    private final Player target;
     private Boolean isAccepted = null;
 
-    public PartyInvite(Party party, Player player) {
-        this.party = new WeakReference<>(party);
-        this.player = player;
+    public PartyInvite(Player sender, Player target) {
+        this.sender = new WeakReference<>(sender);
+        this.target = target;
     }
 
-    public Player getPlayer() {
-        return this.player;
+    public Player getSender() {
+        return this.sender.get();
+    }
+    public Player getTarget() {
+        return this.target;
     }
 
     public void accept() {

@@ -68,7 +68,7 @@ public final class CommandTPA {
                         return Command.SINGLE_SUCCESS;
                     }
                     if(!Permission.validate(player, "rustyconnector.command.tpa")) {
-                        player.sendMessage(VelocityLang.TPA_NO_PERMISSION);
+                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
@@ -128,7 +128,7 @@ public final class CommandTPA {
                                         return Command.SINGLE_SUCCESS;
                                     }
                                     if(!Permission.validate(player, "rustyconnector.command.tpa")) {
-                                        player.sendMessage(VelocityLang.TPA_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                         return 0;
                                     }
 
@@ -180,7 +180,7 @@ public final class CommandTPA {
                                 return Command.SINGLE_SUCCESS;
                             }
                             if(!Permission.validate(player, "rustyconnector.command.tpa")) {
-                                player.sendMessage(VelocityLang.TPA_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -283,7 +283,7 @@ public final class CommandTPA {
                                 return Command.SINGLE_SUCCESS;
                             }
                             if(!Permission.validate(player, "rustyconnector.command.tpa")) {
-                                player.sendMessage(VelocityLang.TPA_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
