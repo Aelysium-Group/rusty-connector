@@ -465,6 +465,12 @@ public interface VelocityLang extends Lang {
             text("Your party has been disbanded.",GRAY)
     );
 
+
+    Message FRIEND_USAGE = () -> join(
+            Lang.newlines(),
+            text("Usage: /friend <username>",RED)
+    );
+
     ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(
              LoggerConfig.getConfig().getConsoleIcons_ping() + " " +
                     "["+serverInfo.getName()+"]" +

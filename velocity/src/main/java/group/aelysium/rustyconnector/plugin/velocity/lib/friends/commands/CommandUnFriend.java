@@ -17,7 +17,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -25,7 +24,7 @@ import java.util.List;
 
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FRIENDS_SERVICE;
 
-public final class CommandFriend {
+public final class CommandUnFriend {
     public static BrigadierCommand create() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
@@ -34,12 +33,12 @@ public final class CommandFriend {
         try {
             FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
         } catch (Exception ignore) {
-            logger.send(Component.text("The Friends service must be enabled to load the /friend command.", NamedTextColor.YELLOW));
+            logger.send(Component.text("The Friends service must be enabled to load the /unfriend command.", NamedTextColor.YELLOW));
             return null;
         }
 
         LiteralCommandNode<CommandSource> friend = LiteralArgumentBuilder
-                .<CommandSource>literal("friend")
+                .<CommandSource>literal("unfriend")
                 .requires(source -> source instanceof Player)
                 .executes(context -> {
                     if(!(context.getSource() instanceof Player player)) {
@@ -52,19 +51,6 @@ public final class CommandFriend {
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    Party party = partyService.find(player).orElse(null);
-                    if(party == null) {
-                        context.getSource().sendMessage(VelocityLang.PARTY_USAGE_NO_PARTY.build());
-                        return Command.SINGLE_SUCCESS;
-                    }
-
-                    if(party.getLeader() == player) {
-                        context.getSource().sendMessage(VelocityLang.PARTY_USAGE_PARTY_LEADER.build());
-                        return Command.SINGLE_SUCCESS;
-                    } else {
-                        context.getSource().sendMessage(VelocityLang.PARTY_USAGE_PARTY_MEMBER.build());
-                        return Command.SINGLE_SUCCESS;
-                    }
                 })
                 .then(LiteralArgumentBuilder.<CommandSource>literal("invites")
                         .executes(context -> {

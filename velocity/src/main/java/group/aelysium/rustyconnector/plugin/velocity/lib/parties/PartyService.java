@@ -56,6 +56,12 @@ public class PartyService extends Service {
 
         PartyInvite invite = new PartyInvite(party, sender, target);
         this.invites.add(invite);
+
+        sender.sendMessage(Component.text("You invited " + target.getUsername() + " to your party!", NamedTextColor.GREEN));
+
+        target.sendMessage(Component.text("Hey! "+ sender.getUsername() +" wants you to join their party!", NamedTextColor.GRAY));
+        target.sendMessage(Component.text("Accept with: ", NamedTextColor.GRAY).append(Component.text("/party invite "+sender.getUsername()+" accept", NamedTextColor.GREEN)));
+        target.sendMessage(Component.text("Deny with: ", NamedTextColor.GRAY).append(Component.text("/party invite "+sender.getUsername()+" deny", NamedTextColor.RED)));
         return invite;
     }
 
