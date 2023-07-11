@@ -16,7 +16,6 @@ public class PartyService extends Service {
     private final PartySettings settings;
 
     public PartyService(PartySettings settings) {
-        super(true);
         this.settings = settings;
     }
 

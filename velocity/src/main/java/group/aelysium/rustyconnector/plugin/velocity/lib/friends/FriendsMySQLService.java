@@ -13,9 +13,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class FriendsMySQLService extends MySQLService {
-    private static final String FIND_FRIEND = "SELECT * FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
+    private static final String FIND_FRIENDS = "SELECT * FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
+    private static final String FIND_FRIEND = "SELECT * FROM friends WHERE player1_uuid = ? AND player2_uuid = ? OR player1_uuid = ? AND player2_uuid = ?;";
     private static final String GET_FRIEND_COUNT = "SELECT COUNT(*) FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
     private static final String DELETE_FRIEND = "DELETE FROM friends WHERE player1_uuid = ? AND player2_uuid = ?;";
     private static final String ADD_FRIEND = "INSERT INTO friends (player1_uuid, player2_uuid) VALUES(?, ?);";
@@ -36,29 +38,33 @@ public class FriendsMySQLService extends MySQLService {
      * @return A list of friends.
      * @throws SQLException If there was an issue.
      */
-    public List<FriendMapping> findFriends(Player player) throws SQLException {
+    public Optional<List<FriendMapping>> findFriends(Player player) {
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        this.connect();
-        PreparedStatement statement = this.prepare(FIND_FRIEND);
-        statement.setString(1, player.getUniqueId().toString());
-        statement.setString(2, player.getUniqueId().toString());
+        try {
+            this.connect();
+            PreparedStatement statement = this.prepare(FIND_FRIENDS);
+            statement.setString(1, player.getUniqueId().toString());
+            statement.setString(2, player.getUniqueId().toString());
 
-        ResultSet result = this.executeQuery(statement);
+            ResultSet result = this.executeQuery(statement);
 
-        List<FriendMapping> friends = new ArrayList<>();
-        while (result.next()) {
-            Player player1 = api.getServer().getPlayer(result.getString("player1_uuid")).orElse(null);
-            Player player2 = api.getServer().getPlayer(result.getString("player2_uuid")).orElse(null);
+            List<FriendMapping> friends = new ArrayList<>();
+            while (result.next()) {
+                Player player1 = api.getServer().getPlayer(result.getString("player1_uuid")).orElse(null);
+                Player player2 = api.getServer().getPlayer(result.getString("player2_uuid")).orElse(null);
 
-            if (player1 == null) continue;
-            if (player2 == null) continue;
+                if (player1 == null) continue;
+                if (player2 == null) continue;
 
-            friends.add(new FriendMapping(player1, player2));
-        }
+                friends.add(new FriendMapping(player1, player2));
+            }
 
-        this.close();
-        return friends;
+            this.close();
+            return Optional.of(friends);
+        } catch (Exception ignore) {}
+
+        return Optional.empty();
     }
 
     /**
@@ -79,6 +85,29 @@ public class FriendsMySQLService extends MySQLService {
 
         this.close();
         return friendCount;
+    }
+
+    public FriendMapping addFriend(Player player1, Player player2) throws SQLException {
+        this.connect();
+        PreparedStatement statement = this.prepare(ADD_FRIEND);
+        statement.setString(1, player1.getUniqueId().toString());
+        statement.setString(2, player2.getUniqueId().toString());
+
+        ResultSet result = this.executeQuery(statement);
+
+        this.close();
+        return new FriendMapping(player1, player2);
+    }
+
+    public void removeFriend(Player player1, Player player2) throws SQLException {
+        this.connect();
+        PreparedStatement statement = this.prepare(DELETE_FRIEND);
+        statement.setString(1, player1.getUniqueId().toString());
+        statement.setString(2, player2.getUniqueId().toString());
+
+        this.executeQuery(statement);
+
+        this.close();
     }
 
     public static class Builder {

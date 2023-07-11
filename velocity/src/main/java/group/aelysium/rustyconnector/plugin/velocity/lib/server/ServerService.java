@@ -33,7 +33,7 @@ public class ServerService extends ServiceableService {
     private final int serverInterval;
 
     protected ServerService(Map<Class<? extends Service>, Service> services, int serverTimeout, int serverInterval) {
-        super(true, services);
+        super(services);
         this.serverTimeout = serverTimeout;
         this.serverInterval = serverInterval;
     }

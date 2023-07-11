@@ -432,22 +432,22 @@ public interface VelocityLang extends Lang {
 
     Message PARTY_USAGE_NO_PARTY = () -> join(
             Lang.newlines(),
-            text("Usage: /party <create, invites>",RED)
+            text("Usage: /party <create / invites>",RED)
     );
 
     Message PARTY_USAGE_PARTY_LEADER = () -> join(
             Lang.newlines(),
-            text("Usage: /party <disband, invite, kick>",RED)
+            text("Usage: /party <disband / invite / kick>",RED)
     );
 
     Message PARTY_USAGE_PARTY_MEMBER = () -> join(
             Lang.newlines(),
-            text("Usage: /party <leave, invites>",RED)
+            text("Usage: /party <leave / invites>",RED)
     );
 
     Message PARTY_USAGE_INVITES = () -> join(
             Lang.newlines(),
-            text("Usage: /party invites <username> <accept, deny>",RED)
+            text("Usage: /party invites <username> <accept / deny>",RED)
     );
 
     Message PARTY_USAGE_INVITE = () -> join(
@@ -468,7 +468,15 @@ public interface VelocityLang extends Lang {
 
     Message FRIEND_USAGE = () -> join(
             Lang.newlines(),
-            text("Usage: /friend <username>",RED)
+            text("Usage: /friend <<username> / requests>",RED)
+    );
+    Message FRIEND_REQUEST_USAGE = () -> join(
+            Lang.newlines(),
+            text("Usage: /friend requests <username> <accept / deny>",RED)
+    );
+    Message UNFRIEND_USAGE = () -> join(
+            Lang.newlines(),
+            text("Usage: /unfriend <username>",RED)
     );
 
     ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(

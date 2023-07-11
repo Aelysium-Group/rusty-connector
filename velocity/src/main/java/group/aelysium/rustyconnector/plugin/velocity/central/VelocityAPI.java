@@ -64,6 +64,9 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     public <S extends Service> Optional<S> getService(Class<S> type) {
         return this.processor.getService(type);
     }
+    public <S extends Service> boolean isEnabled(Class<S> type) {
+        return this.processor.isEnabled(type);
+    }
 
     public void killServices() {
         this.processor.kill();

@@ -8,11 +8,14 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -30,10 +33,8 @@ public final class CommandFriend {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
-        // If this command class loads, then PartyService MUST be set.
-        try {
-            FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
-        } catch (Exception ignore) {
+        FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElse(null);
+        if (friendsService == null) {
             logger.send(Component.text("The Friends service must be enabled to load the /friend command.", NamedTextColor.YELLOW));
             return null;
         }
@@ -52,33 +53,61 @@ public final class CommandFriend {
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    Party party = partyService.find(player).orElse(null);
-                    if(party == null) {
-                        context.getSource().sendMessage(VelocityLang.PARTY_USAGE_NO_PARTY.build());
-                        return Command.SINGLE_SUCCESS;
-                    }
-
-                    if(party.getLeader() == player) {
-                        context.getSource().sendMessage(VelocityLang.PARTY_USAGE_PARTY_LEADER.build());
-                        return Command.SINGLE_SUCCESS;
-                    } else {
-                        context.getSource().sendMessage(VelocityLang.PARTY_USAGE_PARTY_MEMBER.build());
-                        return Command.SINGLE_SUCCESS;
-                    }
+                    return closeMessage(player, VelocityLang.FRIEND_USAGE.build());
                 })
-                .then(LiteralArgumentBuilder.<CommandSource>literal("invites")
+                .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
+                        .suggests((context, builder) -> {
+                            if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+
+                            try {
+                                RegisteredServer server = player.getCurrentServer().orElseThrow().getServer();
+
+                                server.getPlayersConnected().forEach(localPlayer -> {
+                                    if(localPlayer.equals(player)) return;
+
+                                    builder.suggest(localPlayer.getUsername());
+                                });
+
+                                return builder.buildFuture();
+                            } catch (Exception ignored) {}
+
+                            return builder.buildFuture();
+                        })
                         .executes(context -> {
                             if(!(context.getSource() instanceof Player player)) {
                                 logger.log("/party must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            if(!Permission.validate(player, "rustyconnector.command.party")) {
+                            if(!Permission.validate(player, "rustyconnector.command.friend")) {
                                 player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            context.getSource().sendMessage(VelocityLang.PARTY_USAGE_INVITES.build());
+                            String username = context.getArgument("username", String.class);
+                            Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
+
+                            if(targetPlayer == null)
+                                return closeMessage(player, Component.text(username + " isn't available to send requests to!", NamedTextColor.RED));
+
+                            friendsService.sendRequest(player, targetPlayer);
+
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
+                .then(LiteralArgumentBuilder.<CommandSource>literal("requests")
+                        .executes(context -> {
+                            if(!(context.getSource() instanceof Player player)) {
+                                logger.log("/friend must be sent as a player!");
+                                return Command.SINGLE_SUCCESS;
+                            }
+
+                            if(!Permission.validate(player, "rustyconnector.command.friend")) {
+                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                return Command.SINGLE_SUCCESS;
+                            }
+
+                            context.getSource().sendMessage(VelocityLang.FRIEND_REQUEST_USAGE.build());
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
@@ -86,21 +115,21 @@ public final class CommandFriend {
                                     if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                                     try {
-                                        List<PartyInvite> invites = partyService.findInvitesToTarget(player);
+                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(player);
 
-                                        if(invites.size() == 0) {
-                                            builder.suggest("You have no pending party invites!");
+                                        if(requests.size() == 0) {
+                                            builder.suggest("You have no pending friend requests!");
                                             return builder.buildFuture();
                                         }
 
-                                        invites.forEach(invite -> {
+                                        requests.forEach(invite -> {
                                             builder.suggest(invite.getSender().getUsername());
                                         });
 
                                         return builder.buildFuture();
                                     } catch (Exception ignored) {}
 
-                                    builder.suggest("Searching for invites...");
+                                    builder.suggest("Searching for friend requests...");
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
@@ -114,68 +143,68 @@ public final class CommandFriend {
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    context.getSource().sendMessage(VelocityLang.PARTY_USAGE_INVITES.build());
+                                    context.getSource().sendMessage(VelocityLang.FRIEND_REQUEST_USAGE.build());
                                     return Command.SINGLE_SUCCESS;
                                 })
-                                .then(LiteralArgumentBuilder.<CommandSource>literal("deny")
+                                .then(LiteralArgumentBuilder.<CommandSource>literal("ignore")
                                         .executes(context -> {
                                             if(!(context.getSource() instanceof Player player)) {
-                                                logger.log("/party must be sent as a player!");
+                                                logger.log("/friend must be sent as a player!");
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            if(!Permission.validate(player, "rustyconnector.command.party")) {
+                                            if(!Permission.validate(player, "rustyconnector.command.friend")) {
                                                 player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
                                             String username = context.getArgument("username", String.class);
                                             Player senderPlayer = api.getServer().getPlayer(username).orElse(null);
-
                                             if(senderPlayer == null)
                                                 return closeMessage(player, Component.text(username + " doesn't seem to exist on this server! (How did this happen?)", NamedTextColor.RED));
 
                                             try {
-                                                PartyInvite invite = partyService.findInvite(player, senderPlayer).orElse(null);
+                                                FriendRequest invite = friendsService.findRequest(player, senderPlayer).orElse(null);
                                                 if(invite == null) throw new NoOutputException();
 
                                                 try {
-                                                    invite.deny();
+                                                    invite.ignore();
+                                                    return closeMessage(player, Component.text("Ignored the friend request from "+senderPlayer.getUsername(), NamedTextColor.GREEN));
                                                 } catch (Exception ignore) {
-                                                    partyService.closeInvite(invite);
+                                                    friendsService.closeInvite(invite);
                                                 }
                                             } catch (Exception ignore) {}
 
-                                            return closeMessage(player, Component.text("There was an issue accepting that invite!", NamedTextColor.RED));
+                                            return closeMessage(player, Component.text("There was an issue ignoring the friend request from "+senderPlayer.getUsername(), NamedTextColor.RED));
                                         })
                                 )
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
                                         .executes(context -> {
                                             if(!(context.getSource() instanceof Player player)) {
-                                                logger.log("/party must be sent as a player!");
+                                                logger.log("/friend must be sent as a player!");
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            if(!Permission.validate(player, "rustyconnector.command.party")) {
+                                            if(!Permission.validate(player, "rustyconnector.command.friend")) {
                                                 player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
                                             String username = context.getArgument("username", String.class);
                                             Player senderPlayer = api.getServer().getPlayer(username).orElse(null);
-                                            if(senderPlayer == null || !senderPlayer.isActive())
-                                                return closeMessage(player, Component.text(senderPlayer + " isn't online for you to join their party!", NamedTextColor.RED));
+                                            if(senderPlayer == null)
+                                                return closeMessage(player, Component.text(username + " doesn't seem to exist on this server! (How did this happen?)", NamedTextColor.RED));
 
-                                            PartyInvite invite = partyService.findInvite(player, senderPlayer).orElse(null);
+                                            FriendRequest invite = friendsService.findRequest(player, senderPlayer).orElse(null);
                                             if(invite == null)
-                                                return closeMessage(player, Component.text("The invite from " + senderPlayer + " has expired!", NamedTextColor.RED));
+                                                return closeMessage(player, Component.text("The friend request from " + senderPlayer + " has expired!", NamedTextColor.RED));
 
                                             try {
                                                 invite.accept();
                                             } catch (IllegalStateException e) {
                                                 return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
                                             } catch (Exception ignore) {
-                                                return closeMessage(player, Component.text("There was an issue accepting that invite!", NamedTextColor.RED));
+                                                return closeMessage(player, Component.text("There was an issue accepting that friend request!", NamedTextColor.RED));
                                             }
 
                                             return Command.SINGLE_SUCCESS;
@@ -183,184 +212,10 @@ public final class CommandFriend {
                                 )
                         )
                 )
-                .then(LiteralArgumentBuilder.<CommandSource>literal("create")
-                        .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
-                                logger.log("/party must be sent as a player!");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            if(partyService.find(player).orElse(null) == null)
-                                return closeMessage(player, Component.text("You can't start a party if you're already in one!", NamedTextColor.RED));
-
-                            partyService.create(player);
-                            player.sendMessage(Component.text("You created a new party!",NamedTextColor.GREEN));
-
-                            return Command.SINGLE_SUCCESS;
-                        })
-                )
-                .then(LiteralArgumentBuilder.<CommandSource>literal("disband")
-                        .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
-                                logger.log("/party must be sent as a player!");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            Party party = partyService.find(player).orElse(null);
-                            if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
-
-                            if(party.getLeader().equals(player))
-                                return closeMessage(player, Component.text("Only the party leader can disband the party!", NamedTextColor.RED));
-
-                            partyService.disband(party);
-                            return Command.SINGLE_SUCCESS;
-                        })
-                )
-                .then(LiteralArgumentBuilder.<CommandSource>literal("leave")
-                        .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
-                                logger.log("/party must be sent as a player!");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            Party party = partyService.find(player).orElse(null);
-                            if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
-
-                            party.leave(player);
-
-                            return closeMessage(player, Component.text("You left the party.", NamedTextColor.GREEN));
-                        })
-                )
-                .then(LiteralArgumentBuilder.<CommandSource>literal("invite")
-                        .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
-                                logger.log("/party must be sent as a player!");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            context.getSource().sendMessage(VelocityLang.PARTY_USAGE_INVITE.build());
-                            return Command.SINGLE_SUCCESS;
-                        })
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
-                                .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
-                                        logger.log("/party must be sent as a player!");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    Party party = partyService.find(player).orElse(null);
-                                    if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
-
-                                    if(partyService.getSettings().onlyLeaderCanInvite())
-                                        if(!party.getLeader().equals(player))
-                                            return closeMessage(player, Component.text("Only the party leader can invite people!", NamedTextColor.RED));
-
-                                    String username = context.getArgument("username", String.class);
-                                    Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
-                                    if(targetPlayer == null || !targetPlayer.isActive()) return closeMessage(player, Component.text(username + " isn't available to send an invite to!", NamedTextColor.RED));
-
-                                    partyService.invitePlayer(party, player, targetPlayer);
-                                    return Command.SINGLE_SUCCESS;
-                                })
-                        )
-                )
-                .then(LiteralArgumentBuilder.<CommandSource>literal("kick")
-                        .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
-                                logger.log("/party must be sent as a player!");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            context.getSource().sendMessage(VelocityLang.PARTY_USAGE_KICK.build());
-                            return Command.SINGLE_SUCCESS;
-                        })
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
-                                .suggests((context, builder) -> {
-                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
-
-                                    try {
-                                        Party party = partyService.find(player).orElse(null);
-                                        if(party == null) {
-                                            builder.suggest("You aren't in a party!");
-                                            return builder.buildFuture();
-                                        }
-
-                                        party.players().forEach(partyMember -> {
-                                            if(partyMember.equals(player)) return;
-                                            builder.suggest(partyMember.getUsername());
-                                        });
-
-                                        return builder.buildFuture();
-                                    } catch (Exception ignored) {}
-
-                                    builder.suggest("Searching for players...");
-                                    return builder.buildFuture();
-                                })
-                                .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
-                                        logger.log("/party must be sent as a player!");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    Party party = partyService.find(player).orElse(null);
-                                    if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
-
-                                    if(partyService.getSettings().onlyLeaderCanKick())
-                                        if(!party.getLeader().equals(player))
-                                            return closeMessage(player, Component.text("Only the party leader can kick people!", NamedTextColor.RED));
-
-                                    String username = context.getArgument("username", String.class);
-                                    Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
-                                    if(targetPlayer == null)
-                                        return closeMessage(player, Component.text(username + " hasn't played on the server!", NamedTextColor.RED));
-                                    if(!party.contains(targetPlayer))
-                                        return closeMessage(player, Component.text(username + " isn't in your party!", NamedTextColor.RED));
-
-                                    party.leave(targetPlayer);
-                                    targetPlayer.sendMessage(Component.text("You were kicked from your party.",NamedTextColor.YELLOW));
-                                    return Command.SINGLE_SUCCESS;
-                                })
-                        )
-                )
                 .build();
 
         // BrigadierCommand implements Command
-        return new BrigadierCommand(tpa);
+        return new BrigadierCommand(friend);
     }
 
     public static int closeMessage(Player player, Component message) {

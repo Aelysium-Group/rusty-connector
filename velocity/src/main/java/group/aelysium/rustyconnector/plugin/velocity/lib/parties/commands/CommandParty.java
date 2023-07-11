@@ -162,6 +162,9 @@ public final class CommandParty {
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
+                                            if(partyService.find(player).orElse(null) != null)
+                                                return closeMessage(player, Component.text("You must leave your current party before joining another party.", NamedTextColor.RED));
+
                                             String username = context.getArgument("username", String.class);
                                             Player senderPlayer = api.getServer().getPlayer(username).orElse(null);
                                             if(senderPlayer == null || !senderPlayer.isActive())
