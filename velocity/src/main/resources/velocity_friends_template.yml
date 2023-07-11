@@ -2,20 +2,20 @@
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ###########################################################################################################
 #                                                                                                         #
-#                 ______   ______     __     ______     __   __     _____     ______                      #
-#                /\  ___\ /\  == \   /\ \   /\  ___\   /\ "-.\ \   /\  __-.  /\  ___\                     #
-#                \ \  __\ \ \  __<   \ \ \  \ \  __\   \ \ \-.  \  \ \ \/\ \ \ \___  \                    #
-#                 \ \_\    \ \_\ \_\  \ \_\  \ \_____\  \ \_\\"\_\  \ \____-  \/\_____\                   #
-#                  \/_/     \/_/ /_/   \/_/   \/_____/   \/_/ \/_/   \/____/   \/_____/                   #
+#                      ______   ______    __    ______    __   __    _____    ______                      #
+#                     /\  ___\ /\  == \  /\ \  /\  ___\  /\ "-.\ \  /\  __-. /\  ___\                     #
+#                     \ \  __\ \ \  __<  \ \ \ \ \  __\  \ \ \-.  \ \ \ \/\ \\ \___  \                    #
+#                      \ \_\    \ \_\ \_\ \ \_\ \ \_____\ \ \_\\"\_\ \ \____- \/\_____\                   #
+#                       \/_/     \/_/ /_/  \/_/  \/_____/  \/_/ \/_/  \/____/  \/_____/                   #
 #                                                                                                         #
 #                                                                                                         #
 #                                            Welcome to Friends!                                          #
 #                                                                                                         #
 #                            -------------------------------------------------                            #
 #                                                                                                         #
-#                        | Allow your users to build a group of friends to hang out with                  #
-#                        | Friends can then create parties and play together across your                  #
-#                        | RustyConnector network!                                                        #
+#                      | Allow your users to build groups of friends to hang out with!                    #
+#                      | Friends can then create parties and play together across your                    #
+#                      | RustyConnector network!                                                          #
 #                                                                                                         #
 #                            -------------------------------------------------                            #
 #                                                                                                         #
@@ -40,9 +40,3 @@ mysql:
     user: "root"
     password: "password"
     database: "RustyConnector"
-
-#
-# REQUIRES THAT `tpa` IN `dynamic-teleport.yml` IS ENABLED.
-# Should players only be allowed to `tpa` to friends?
-#
-only-tpa-to-friends: false
