@@ -30,9 +30,9 @@ public class OnPlayerKicked {
             boolean isFromRootFamily = false;
 
             try {
-                if (!player.getCurrentServer().isPresent()) throw new NoOutputException();
+                if (player.getCurrentServer().isEmpty()) throw new NoOutputException();
 
-                PlayerServer oldServer = api.getService(ServerService.class).findServer(player.getCurrentServer().orElseThrow().getServerInfo());
+                PlayerServer oldServer = api.getService(ServerService.class).orElseThrow().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
                 if (oldServer == null) throw new NoOutputException();
 
                 oldServer.playerLeft();
@@ -40,13 +40,13 @@ public class OnPlayerKicked {
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.getFamilyName(), DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, oldServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
 
-                isFromRootFamily = oldServer.getFamily() == api.getService(FamilyService.class).getRootFamily();
+                isFromRootFamily = oldServer.getFamily() == api.getService(FamilyService.class).orElseThrow().getRootFamily();
             } catch (Exception ignore) {}
 
             try {
-                if (!api.getService(FamilyService.class).shouldCatchDisconnectingPlayers()) throw new NoOutputException();
+                if (!api.getService(FamilyService.class).orElseThrow().shouldCatchDisconnectingPlayers()) throw new NoOutputException();
 
-                ScalarServerFamily rootFamily = api.getService(FamilyService.class).getRootFamily();
+                ScalarServerFamily rootFamily = api.getService(FamilyService.class).orElseThrow().getRootFamily();
                 if(rootFamily.getRegisteredServers().isEmpty()) throw new RuntimeException("There are no available servers for you to connect to!");
                 if(isFromRootFamily) throw new NoOutputException();
 
@@ -61,9 +61,9 @@ public class OnPlayerKicked {
 
                 newServer.playerJoined();
 
-                WebhookEventManager.fire(WebhookAlertFlag.DISCONNECT_CATCH, api.getService(FamilyService.class).getRootFamily().getName(), DiscordWebhookMessage.PROXY__DISCONNECT_CATCH.build(player, newServer));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, api.getService(FamilyService.class).getRootFamily().getName(), DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, newServer));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, api.getService(FamilyService.class).getRootFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
+                WebhookEventManager.fire(WebhookAlertFlag.DISCONNECT_CATCH, api.getService(FamilyService.class).orElseThrow().getRootFamily().getName(), DiscordWebhookMessage.PROXY__DISCONNECT_CATCH.build(player, newServer));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, api.getService(FamilyService.class).orElseThrow().getRootFamily().getName(), DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, newServer));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, api.getService(FamilyService.class).orElseThrow().getRootFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
 
                 return;
             }
@@ -80,7 +80,7 @@ public class OnPlayerKicked {
                 else
                     event.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("Kicked by server.")));
 
-                api.getService(FamilyService.class).uncacheHomeServerMappings(player);
+                api.getService(FamilyService.class).orElseThrow().uncacheHomeServerMappings(player);
 
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));
             } catch (Exception e) {

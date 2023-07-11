@@ -222,14 +222,16 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
      */
     public void connect(Party party) {
+        party.setServer(this);
+
         party.players().forEach(player -> {
             try {
-                if(player.getCurrentServer().orElseThrow().equals(this)) return;
+                if(player.getCurrentServer().orElseThrow().getServer().equals(this.registeredServer)) return;
 
                 ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
                 connection.connect().get().isSuccessful();
             } catch (Exception e) {
-                player.sendMessage(Component.text("There was an issue following your party! "+e.getMessage(), NamedTextColor.RED));
+                player.sendMessage(Component.text("There was an issue following your party! You've been kicked. "+e.getMessage(), NamedTextColor.RED));
                 party.leave(player);
             }
         });

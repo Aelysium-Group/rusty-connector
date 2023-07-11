@@ -79,14 +79,13 @@ public class OnPlayerChangeServer {
         }
     }
 
-    public void partyFollow(Player player, PlayerServer server) {
+    public void partyFollow(Player player, PlayerServer server) throws IllegalAccessException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
 
-        PartyService parties = api.getService(PartyService.class).orElse(null);
-        if(parties == null) return;
+        PartyService partyService = api.getService(PartyService.class).orElse(null);
+        if(partyService == null) return;
 
-        Party party = parties.find(player).orElse(null);
+        Party party = partyService.find(player).orElse(null);
         if(party == null) return;
 
         server.connect(party);
