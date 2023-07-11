@@ -10,9 +10,9 @@ import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -23,6 +23,8 @@ import java.security.InvalidAlgorithmParameterException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
 
 public class ServerService extends ServiceableService {
     private final Vector<WeakReference<PlayerServer>> servers =  new Vector<>();
@@ -45,7 +47,7 @@ public class ServerService extends ServiceableService {
     }
 
     public PlayerServer findServer(ServerInfo serverInfo) {
-        for(BaseServerFamily family : VelocityRustyConnector.getAPI().getService(FamilyService.class).dump()) {
+        for(BaseServerFamily family : VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().dump()) {
             PlayerServer server = family.getServer(serverInfo);
             if(server == null) continue;
 
@@ -59,7 +61,7 @@ public class ServerService extends ServiceableService {
     }
 
     public boolean contains(ServerInfo serverInfo) {
-        for(BaseServerFamily family : VelocityRustyConnector.getAPI().getService(FamilyService.class).dump()) {
+        for(BaseServerFamily family : VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().dump()) {
             if(family.containsServer(serverInfo)) return true;
         }
         return false;
@@ -72,7 +74,7 @@ public class ServerService extends ServiceableService {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
-        for (BaseServerFamily family : api.getService(FamilyService.class).dump()) {
+        for (BaseServerFamily family : api.getService(FAMILY_SERVICE).orElseThrow().dump()) {
             logger.log("---| Starting on: " + family.getName());
             // Register 1000 servers into each family
             for (int i = 0; i < 1000; i++) {
@@ -111,7 +113,7 @@ public class ServerService extends ServiceableService {
 
             if(this.contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
 
-            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+            BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
             if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
             RegisteredServer registeredServer = api.registerServer(server.getServerInfo());
@@ -240,9 +242,16 @@ public class ServerService extends ServiceableService {
         }
 
         public PlayerServer build() {
-            this.initialTimeout = VelocityRustyConnector.getAPI().getService(ServerService.class).getServerTimeout();
+            this.initialTimeout = VelocityRustyConnector.getAPI().getService(ServerService.class).orElseThrow().getServerTimeout();
 
             return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
         }
+    }
+
+    /**
+     * The services that are valid for this service provider.
+     */
+    public static class ValidServices {
+        public static Class<MagicLinkService> MAGIC_LINK_SERVICE = MagicLinkService.class;
     }
 }

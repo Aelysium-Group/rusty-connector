@@ -15,9 +15,11 @@ import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPACleaningService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
@@ -175,12 +177,12 @@ public class Processor extends IKLifecycle {
         logger.log("Finished setting up message tunnel");
 
 
-        MagicLinkService lifeMatrixService = new MagicLinkService(5, config.getServices_serverLifecycle_serverPingInterval());
+        MagicLinkService magicLinkService = new MagicLinkService(5, config.getServices_serverLifecycle_serverPingInterval());
 
         ServerService.Builder serverServiceBuilder = new ServerService.Builder()
                 .setServerTimeout(config.getServices_serverLifecycle_serverTimeout())
                 .setServerInterval(config.getServices_serverLifecycle_serverPingInterval())
-                .addService(lifeMatrixService);
+                .addService(magicLinkService);
 
         builder.addService(serverServiceBuilder.build());
 
@@ -198,5 +200,21 @@ public class Processor extends IKLifecycle {
         public Processor build() {
             return new Processor(this.services);
         }
+    }
+
+    /**
+     * The services that are valid for this service provider.
+     */
+    public static class ValidServices {
+        public static Class<FamilyService> FAMILY_SERVICE = FamilyService.class;
+        public static Class<ServerService> SERVER_SERVICE = ServerService.class;
+        public static Class<RedisService> REDIS_SERVICE = RedisService.class;
+        public static Class<MessageTunnelService> MESSAGE_TUNNEL_SERVICE = MessageTunnelService.class;
+        public static Class<MessageCacheService> MESSAGE_CACHE_SERVICE = MessageCacheService.class;
+        public static Class<WhitelistService> WHITELIST_SERVICE = WhitelistService.class;
+        public static Class<DynamicTeleport_TPACleaningService> DYNAMIC_TELEPORT_TPA_CLEANING_SERVICE = DynamicTeleport_TPACleaningService.class;
+        public static Class<LoadBalancingService> LOAD_BALANCING_SERVICE = LoadBalancingService.class;
+        public static Class<PartyService> PARTY_SERVICE = PartyService.class;
+        public static Class<FriendsService> FRIENDS_SERVICE = FriendsService.class;
     }
 }

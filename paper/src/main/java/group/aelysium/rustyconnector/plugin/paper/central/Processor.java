@@ -97,4 +97,17 @@ public class Processor extends IKLifecycle {
             return new Processor(this.services);
         }
     }
+
+    /**
+     * The services that are valid for this service provider.
+     */
+    public static class ValidServices {
+        public static Class<MessageCacheService> MESSAGE_CACHE_SERVICE = MessageCacheService.class;
+        public static Class<DynamicTeleportService> DYNAMIC_TELEPORT_SERVICE = DynamicTeleportService.class;
+        public static Class<MagicLinkService> MAGIC_LINK_SERVICE = MagicLinkService.class;
+        public static Class<RedisService> REDIS_SERVICE = RedisService.class;
+        public static Class<RedisMessagerService> REDIS_MESSAGER_SERVICE = RedisMessagerService.class;
+        public static Class<ServerInfoService> SERVER_INFO_SERVICE = ServerInfoService.class;
+        public static Class<MessageCacheService> MYSQL_SERVICE = MessageCacheService.class;
+    }
 }

@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.core.lib.database.redis.messages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RedisMessageType {
     /**
@@ -42,7 +43,7 @@ public class RedisMessageType {
     }
 
     public static Mapping getMapping(String name) {
-        return toList().stream().filter(entry -> entry.name() == name).findFirst().orElseThrow(NullPointerException::new);
+        return toList().stream().filter(entry -> Objects.equals(entry.name(), name)).findFirst().orElseThrow(NullPointerException::new);
     }
     public static Mapping getMapping(int id) {
         return toList().stream().filter(entry -> entry.id() == id).findFirst().orElseThrow(NullPointerException::new);

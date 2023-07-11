@@ -18,6 +18,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.MAGIC_LINK_SERVICE;
+
 public class PaperLifecycle extends PluginLifecycle {
     public boolean start() throws DuplicateLifecycleException {
         PaperAPI api = PaperRustyConnector.getAPI();
@@ -38,7 +40,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
         DefaultConfig.empty();
 
-        api.getService(MagicLinkService.class).disconnect();
+        api.getService(MAGIC_LINK_SERVICE).orElseThrow().disconnect();
 
         api.killServices();
 

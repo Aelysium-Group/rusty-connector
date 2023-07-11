@@ -24,6 +24,9 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.REDIS_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
+
 public class VelocityAPI extends PluginAPI<Scheduler> {
     private final VelocityRustyConnector plugin;
     private final ProxyServer server;
@@ -59,8 +62,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     }
 
     public <S extends Service> Optional<S> getService(Class<S> type) {
-        if(this.processor.getService(type) == null) return Optional.empty();
-        return Optional.of(this.processor.getService(type));
+        return this.processor.getService(type);
     }
 
     public void killServices() {
@@ -77,8 +79,8 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
-        this.processor.getService(RedisService.class).start(RedisSubscriber.class);
-        this.processor.getService(ServerService.class).getService(MagicLinkService.class).startHeartbeat();
+        this.processor.getService(REDIS_SERVICE).orElseThrow().start(RedisSubscriber.class);
+        this.processor.getService(SERVER_SERVICE).orElseThrow().getService(MagicLinkService.class).startHeartbeat();
     }
 
     /**

@@ -31,7 +31,12 @@ public final class CommandFriend {
         PluginLogger logger = api.getLogger();
 
         // If this command class loads, then PartyService MUST be set.
-        FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
+        try {
+            FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
+        } catch (Exception ignore) {
+            logger.send(Component.text("The Friends service must be enabled to load the /friend command.", NamedTextColor.YELLOW));
+            return null;
+        }
 
         LiteralCommandNode<CommandSource> friend = LiteralArgumentBuilder
                 .<CommandSource>literal("friend")

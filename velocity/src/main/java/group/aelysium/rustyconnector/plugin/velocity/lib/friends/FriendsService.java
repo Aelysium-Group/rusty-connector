@@ -1,8 +1,18 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
+import group.aelysium.rustyconnector.core.lib.database.MySQLService;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnelService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.config.FriendsConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPACleaningService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
@@ -47,5 +57,12 @@ public class FriendsService extends ServiceableService {
             if(this.services.get(FriendsMySQLService.class) == null) throw new NullPointerException("You must provide a MySQL service for the Friends service to use!");
             return new FriendsService(true, this.services);
         }
+    }
+
+    /**
+     * The services that are valid for this service provider.
+     */
+    public static class ValidServices {
+        public static Class<FriendsMySQLService> MYSQL_SERVICE = FriendsMySQLService.class;
     }
 }
