@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Vector;
 
 public class Party {
@@ -56,6 +57,10 @@ public class Party {
 
         if(this.players.size() > this.maxSize) throw new RuntimeException("The party is already full! Try again later!");
 
+        this.getServer().connect(player);
+        this.getServer().playerJoined();
+
+        this.players.forEach(partyMember -> player.sendMessage(Component.text(player.getUsername() + " joined the party.", NamedTextColor.YELLOW)));
         this.players.add(player);
     }
 
@@ -63,6 +68,8 @@ public class Party {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
 
         this.players.remove(player);
+
+        this.players.forEach(partyMember -> player.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
 
         if(this.players.size() == 0)
             this.decompose();

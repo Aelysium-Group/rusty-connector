@@ -53,8 +53,7 @@ public class PartyInvite {
             if(!Objects.requireNonNull(party.get()).players().contains(sender.get()))
                 throw new IllegalStateException("The member that invited you to their party is no longer in it!");
 
-        Objects.requireNonNull(this.party.get()).getServer().connect(this.target);
-        Objects.requireNonNull(this.party.get()).getServer().playerJoined();
+        Objects.requireNonNull(this.party.get()).join(this.target);
         partyService.closeInvite(this);
         this.isAcknowledged = true;
     }
