@@ -16,6 +16,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import net.kyori.adventure.text.Component;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
@@ -182,7 +183,7 @@ public interface VelocityLang extends Lang {
     Message RC_FAMILY = () -> {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         Component families = text("");
-        for (BaseServerFamily family : api.getService(FamilyService.class).orElseThrow().dump()) {
+        for (BaseServerFamily family : api.getService(FAMILY_SERVICE).orElseThrow().dump()) {
             if(family instanceof ScalarServerFamily)
                 families = families.append(text("[ "+family.getName()+" ] ").color(GOLD));
             if(family instanceof StaticServerFamily)

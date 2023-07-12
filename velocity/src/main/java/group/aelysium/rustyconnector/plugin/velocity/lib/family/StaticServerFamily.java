@@ -28,6 +28,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
+
 public class StaticServerFamily extends PlayerFocusedServerFamily {
     List<HomeServerMapping> mappingsCache = new ArrayList<>();
     LiquidTimestamp homeServerExpiration;
@@ -202,40 +204,6 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
         }
 
         return family;
-    }
-
-    public void reloadWhitelist() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-
-        Whitelist currentWhitelist = this.getWhitelist();
-        if (!(currentWhitelist == null)) {
-            api.getService(WhitelistService.class).orElseThrow().remove(currentWhitelist);
-        }
-
-        ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
-                this.name,
-                new File(String.valueOf(api.getDataFolder()), "families/" + this.name + ".static.yml"),
-                "velocity_static_family_template.yml"
-        );
-        if (!scalarFamilyConfig.generate()) {
-            throw new IllegalStateException("Unable to load or create families/" + this.name + ".static.yml!");
-        }
-        scalarFamilyConfig.register();
-
-        Whitelist newWhitelist;
-        if (scalarFamilyConfig.isWhitelist_enabled()) {
-            newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
-
-            this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getService(WhitelistService.class).orElseThrow().add(newWhitelist);
-
-            logger.log("Finished reloading whitelist for " + this.name);
-            return;
-        }
-
-        this.whitelist = null;
-        logger.log("There is no whitelist for " + this.name);
     }
 }
 

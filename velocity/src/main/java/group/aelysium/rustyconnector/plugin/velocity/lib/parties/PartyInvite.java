@@ -7,6 +7,8 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.PARTY_SERVICE;
+
 public class PartyInvite {
     private final WeakReference<Party> party;
     private final WeakReference<Player> sender;
@@ -33,7 +35,7 @@ public class PartyInvite {
      */
     public synchronized void accept() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        PartyService partyService = api.getService(PartyService.class).orElse(null);
+        PartyService partyService = api.getService(PARTY_SERVICE).orElse(null);
         if(partyService == null)
             throw new IllegalStateException("The party module is disabled!");
 
@@ -65,7 +67,7 @@ public class PartyInvite {
     public synchronized void deny() {
         if(this.isAcknowledged != null) throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
 
-        PartyService partyService = VelocityRustyConnector.getAPI().getService(PartyService.class).orElse(null);
+        PartyService partyService = VelocityRustyConnector.getAPI().getService(PARTY_SERVICE).orElse(null);
         if(partyService == null)
             throw new IllegalStateException("The party module is disabled!");
 

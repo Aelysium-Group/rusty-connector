@@ -20,6 +20,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFla
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.PARTY_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
+
 public class OnPlayerChangeServer {
     /**
      * Also runs when a player first joins the proxy
@@ -36,10 +39,10 @@ public class OnPlayerChangeServer {
                     RegisteredServer newRawServer = event.getServer();
                     RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
 
-                    PlayerServer newServer = api.getService(ServerService.class).orElseThrow().findServer(newRawServer.getServerInfo());
+                    PlayerServer newServer = api.getService(SERVER_SERVICE).orElseThrow().findServer(newRawServer.getServerInfo());
 
                     if(oldRawServer == null) return; // Player just connected to proxy. This isn't a server switch.
-                    PlayerServer oldServer = api.getService(ServerService.class).orElseThrow().findServer(oldRawServer.getServerInfo());
+                    PlayerServer oldServer = api.getService(SERVER_SERVICE).orElseThrow().findServer(oldRawServer.getServerInfo());
 
                     boolean isTheSameFamily = newServer.getFamilyName().equals(oldServer.getFamilyName());
 
@@ -79,10 +82,10 @@ public class OnPlayerChangeServer {
         }
     }
 
-    public void partyFollow(Player player, PlayerServer server) throws IllegalAccessException {
+    public void partyFollow(Player player, PlayerServer server) {
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        PartyService partyService = api.getService(PartyService.class).orElse(null);
+        PartyService partyService = api.getService(PARTY_SERVICE).orElse(null);
         if(partyService == null) return;
 
         Party party = partyService.find(player).orElse(null);

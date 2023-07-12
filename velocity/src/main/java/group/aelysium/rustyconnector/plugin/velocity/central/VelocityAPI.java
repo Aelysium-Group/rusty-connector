@@ -83,7 +83,8 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
         this.processor.getService(REDIS_SERVICE).orElseThrow().start(RedisSubscriber.class);
-        this.processor.getService(SERVER_SERVICE).orElseThrow().getService(MagicLinkService.class).startHeartbeat();
+        this.processor.getService(SERVER_SERVICE).orElseThrow()
+                      .getService(ServerService.ValidServices.MAGIC_LINK_SERVICE).orElseThrow().startHeartbeat();
     }
 
     /**

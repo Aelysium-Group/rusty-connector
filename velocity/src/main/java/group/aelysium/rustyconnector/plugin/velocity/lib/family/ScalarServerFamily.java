@@ -20,6 +20,8 @@ import net.kyori.adventure.text.Component;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
+
 public class ScalarServerFamily extends PlayerFocusedServerFamily {
 
     private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, DynamicTeleport_TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -60,7 +62,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
         if(scalarFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
-            api.getService(WhitelistService.class).orElseThrow().add(whitelist);
+            api.getService(WHITELIST_SERVICE).orElseThrow().add(whitelist);
 
             logger.log(familyName+" whitelist registered!");
         } else {
@@ -111,7 +113,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
 
         Whitelist currentWhitelist = this.getWhitelist();
         if(!(currentWhitelist == null)) {
-            api.getService(WhitelistService.class).orElseThrow().remove(currentWhitelist);
+            api.getService(WHITELIST_SERVICE).orElseThrow().remove(currentWhitelist);
         }
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
@@ -129,7 +131,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
             newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
             this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getService(WhitelistService.class).orElseThrow().add(newWhitelist);
+            api.getService(WHITELIST_SERVICE).orElseThrow().add(newWhitelist);
 
             logger.log("Finished reloading whitelist for "+this.name);
             return;

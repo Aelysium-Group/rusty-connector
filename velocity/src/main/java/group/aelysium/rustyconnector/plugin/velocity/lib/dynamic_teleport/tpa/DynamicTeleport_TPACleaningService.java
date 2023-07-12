@@ -18,17 +18,14 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.Velocity
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
+
 public class DynamicTeleport_TPACleaningService extends ClockService {
     protected final long heartbeat;
 
     public DynamicTeleport_TPACleaningService(long heartbeat) {
-        super(true, 3);
+        super(3);
         this.heartbeat = heartbeat;
-    }
-
-    public DynamicTeleport_TPACleaningService() {
-        super(false, 0);
-        this.heartbeat = 0;
     }
 
     /**
@@ -39,13 +36,11 @@ public class DynamicTeleport_TPACleaningService extends ClockService {
      * @throws NullPointerException If the server doesn't exist in the family.
      */
     public void tpaSendPlayer(Player source, Player target, ServerInfo targetServerInfo) {
-        this.throwIfDisabled();
-
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
         ServerInfo senderServerInfo = source.getCurrentServer().orElseThrow().getServerInfo();
 
-        PlayerServer targetServer = api.getService(ServerService.class).findServer(targetServerInfo);
+        PlayerServer targetServer = api.getService(SERVER_SERVICE).orElseThrow().findServer(targetServerInfo);
         if(targetServer == null) throw new NullPointerException();
 
 
@@ -57,7 +52,7 @@ public class DynamicTeleport_TPACleaningService extends ClockService {
                 .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        api.getService(RedisService.class).publish(message);
+        api.getService(REDIS_SERVICE).orElseThrow().publish(message);
 
 
         if(senderServerInfo.equals(targetServerInfo)) return;
@@ -71,11 +66,9 @@ public class DynamicTeleport_TPACleaningService extends ClockService {
     }
 
     public void startHeartbeat() {
-        this.throwIfDisabled();
-
         VelocityAPI api = VelocityRustyConnector.getAPI();
         this.scheduleRecurring(() -> {
-            for(BaseServerFamily family : api.getService(FamilyService.class).dump()) {
+            for(BaseServerFamily family : api.getService(FAMILY_SERVICE).orElseThrow().dump()) {
                 if(!(family instanceof PlayerFocusedServerFamily)) continue;
 
                 if(!((PlayerFocusedServerFamily) family).getTPAHandler().getSettings().isEnabled()) continue;

@@ -35,6 +35,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 import java.util.List;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
+
 public final class CommandRusty {
     public static BrigadierCommand create() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
@@ -56,17 +58,18 @@ public final class CommandRusty {
                             .executes(context -> {
                                 new Thread(() -> {
                                     try {
-                                        if(api.getService(MessageCacheService.class).getSize() > 10) {
-                                            int numberOfPages = Math.floorDiv(api.getService(MessageCacheService.class).getSize(),10) + 1;
+                                        MessageCacheService messageCacheService = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow();
+                                        if(messageCacheService.getSize() > 10) {
+                                            int numberOfPages = Math.floorDiv(messageCacheService.getSize(),10) + 1;
 
-                                            List<CacheableMessage> messagesPage = api.getService(MessageCacheService.class).getMessagesPage(1);
+                                            List<CacheableMessage> messagesPage = messageCacheService.getMessagesPage(1);
 
                                             VelocityLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
                                             return;
                                         }
 
-                                        List<CacheableMessage> messages = api.getService(MessageCacheService.class).getMessages();
+                                        List<CacheableMessage> messages = messageCacheService.getMessages();
 
                                         VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
@@ -83,9 +86,10 @@ public final class CommandRusty {
                                             try {
                                                 int pageNumber = context.getArgument("page-number", Integer.class);
 
-                                                List<CacheableMessage> messages = api.getService(MessageCacheService.class).getMessagesPage(pageNumber);
+                                                MessageCacheService messageCacheService = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow();
+                                                List<CacheableMessage> messages = messageCacheService.getMessagesPage(pageNumber);
 
-                                                int numberOfPages = Math.floorDiv(api.getService(MessageCacheService.class).getSize(),10) + 1;
+                                                int numberOfPages = Math.floorDiv(messageCacheService.getSize(),10) + 1;
 
                                                 VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,pageNumber,numberOfPages);
                                             } catch (Exception e) {
@@ -107,7 +111,7 @@ public final class CommandRusty {
                                     .executes(context -> {
                                         try {
                                             Long snowflake = context.getArgument("snowflake", Long.class);
-                                            MessageCacheService messageCacheService = api.getService(MessageCacheService.class);
+                                            MessageCacheService messageCacheService = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow();
 
                                             CacheableMessage message = messageCacheService.getMessage(snowflake);
 
@@ -135,7 +139,7 @@ public final class CommandRusty {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
                                 if(family == null) throw new NullPointerException();
 
                                 if(family instanceof ScalarServerFamily)
@@ -153,7 +157,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                        BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
                                         if(family == null) throw new NullPointerException();
                                         if(!(family instanceof PlayerFocusedServerFamily)) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on scalar and static families!");
@@ -178,7 +182,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                        BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
                                         if(family == null) throw new NullPointerException();
                                         if(!(family instanceof PlayerFocusedServerFamily)) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only use sort on scalar and static families!");
@@ -244,7 +248,7 @@ public final class CommandRusty {
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                            BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
                                             if(family == null) {
                                                 logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                                                 return Command.SINGLE_SUCCESS;
@@ -290,7 +294,7 @@ public final class CommandRusty {
                                                         return Command.SINGLE_SUCCESS;
                                                     }
 
-                                                    PlayerServer server = api.getService(ServerService.class).findServer(registeredServer.getServerInfo());
+                                                    PlayerServer server = api.getService(SERVER_SERVICE).orElseThrow().findServer(registeredServer.getServerInfo());
                                                     if (server == null) {
                                                         logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
                                                         return Command.SINGLE_SUCCESS;

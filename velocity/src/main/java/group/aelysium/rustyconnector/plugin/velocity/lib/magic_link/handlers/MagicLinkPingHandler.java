@@ -18,6 +18,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.net.InetSocketAddress;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.REDIS_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
+
 public class MagicLinkPingHandler implements MessageHandler {
     private final RedisMessageServerPing message;
 
@@ -46,7 +49,8 @@ public class MagicLinkPingHandler implements MessageHandler {
 
     private boolean connectServer(InetSocketAddress address, ServerInfo serverInfo) {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        ServerService serverService = api.getService(ServerService.class);
+        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
+        RedisService redisService = api.getService(REDIS_SERVICE).orElseThrow();
 
         try {
             PlayerServer server = new ServerService.ServerBuilder()
@@ -68,7 +72,7 @@ public class MagicLinkPingHandler implements MessageHandler {
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.GREEN.toString())
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.getServerInterval()))
                     .buildSendable();
-            api.getService(RedisService.class).publish(message);
+            redisService.publish(message);
 
             return true;
         } catch(Exception e) {
@@ -80,21 +84,21 @@ public class MagicLinkPingHandler implements MessageHandler {
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.MESSAGE, "Attempt to connect to proxy failed! " + e.getMessage())
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.RED.toString())
                     .buildSendable();
-            api.getService(RedisService.class).publish(message);
+            redisService.publish(message);
         }
         return false;
     }
 
     private boolean disconnectServer(ServerInfo serverInfo) throws Exception {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        api.getService(ServerService.class).unregisterServer(serverInfo, message.getFamilyName(), true);
+        api.getService(SERVER_SERVICE).orElseThrow().unregisterServer(serverInfo, message.getFamilyName(), true);
 
         return true;
     }
 
     private boolean reviveOrConnectServer(InetSocketAddress address, ServerInfo serverInfo) {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        ServerService serverService = api.getService(ServerService.class);
+        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
 
         PlayerServer server = serverService.findServer(serverInfo);
         if (server == null) {

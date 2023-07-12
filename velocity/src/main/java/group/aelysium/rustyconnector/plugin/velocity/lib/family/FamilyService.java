@@ -11,13 +11,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
+
 public class FamilyService extends Service implements NodeManager<BaseServerFamily> {
     private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
     private WeakReference<ScalarServerFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
 
     public FamilyService(boolean catchDisconnectingPlayers) {
-        super(true);
         this.catchDisconnectingPlayers = catchDisconnectingPlayers;
     }
 
@@ -87,7 +88,8 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * @param player The player to uncache mappings for.
      */
     public void uncacheHomeServerMappings(Player player) {
-        List<BaseServerFamily> familyList = VelocityRustyConnector.getAPI().getService(FamilyService.class).dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
+        FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
+        List<BaseServerFamily> familyList = familyService.dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
         if(familyList.size() == 0) return;
 
         for (BaseServerFamily family : familyList) {

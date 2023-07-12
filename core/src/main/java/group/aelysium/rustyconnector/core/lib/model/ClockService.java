@@ -8,9 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class ClockService extends Service {
     protected final ScheduledExecutorService executorService;
 
-    public ClockService(boolean enabled, int threads) {
-        super(enabled);
-
+    public ClockService(int threads) {
         this.executorService = Executors.newScheduledThreadPool(threads);
     }
 

@@ -27,6 +27,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
+
 public final class CommandTPA {
 
     /**
@@ -38,10 +41,10 @@ public final class CommandTPA {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         try {
             ServerInfo serverInfo = sender.getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer targetServer = api.getService(ServerService.class).findServer(serverInfo);
+            PlayerServer targetServer = api.getService(SERVER_SERVICE).orElseThrow().findServer(serverInfo);
             String familyName = targetServer.getFamilyName();
 
-            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+            BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
             if(family == null) return false;
             if(!(family instanceof PlayerFocusedServerFamily)) return false;
 
@@ -53,6 +56,9 @@ public final class CommandTPA {
     public static BrigadierCommand create() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
+
+        FamilyService familyService = api.getService(FAMILY_SERVICE).orElseThrow();
+        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
 
         LiteralCommandNode<CommandSource> tpa = LiteralArgumentBuilder
                 .<CommandSource>literal("tpa")
@@ -99,8 +105,8 @@ public final class CommandTPA {
                                     try {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        String familyName = api.getService(ServerService.class).findServer(sendingServer).getFamilyName();
-                                        BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                        String familyName = serverService.findServer(sendingServer).getFamilyName();
+                                        BaseServerFamily family = familyService.find(familyName);
                                         if(!(family instanceof PlayerFocusedServerFamily)) return builder.buildFuture();
                                         List<DynamicTeleport_TPARequest> requests = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequestsForTarget(player);
 
@@ -138,10 +144,10 @@ public final class CommandTPA {
                                         Player senderPlayer = api.getServer().getPlayer(username).orElseThrow();
                                         ServerInfo targetServerInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        PlayerServer targetServer = api.getService(ServerService.class).findServer(targetServerInfo);
+                                        PlayerServer targetServer = serverService.findServer(targetServerInfo);
                                         String familyName = targetServer.getFamilyName();
                                         try {
-                                            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                            BaseServerFamily family = familyService.find(familyName);
                                             if(family == null) throw new NullPointerException();
                                             if(!(family instanceof PlayerFocusedServerFamily)) throw new NullPointerException();
 
@@ -195,8 +201,8 @@ public final class CommandTPA {
                                     try {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        String familyName = api.getService(ServerService.class).findServer(sendingServer).getFamilyName();
-                                        BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                        String familyName = serverService.findServer(sendingServer).getFamilyName();
+                                        BaseServerFamily family = familyService.find(familyName);
                                         if(!(family instanceof PlayerFocusedServerFamily)) return builder.buildFuture();
                                         List<DynamicTeleport_TPARequest> requests = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequestsForTarget(player);
 
@@ -225,10 +231,10 @@ public final class CommandTPA {
                                         Player senderPlayer = api.getServer().getPlayer(username).orElseThrow();
                                         ServerInfo targetServerInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        PlayerServer targetServer = api.getService(ServerService.class).findServer(targetServerInfo);
+                                        PlayerServer targetServer = serverService.findServer(targetServerInfo);
                                         String familyName = targetServer.getFamilyName();
                                         try {
-                                            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                            BaseServerFamily family = familyService.find(familyName);
                                             if(family == null) throw new NullPointerException();
 
                                             DynamicTeleport_TPARequest request = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequest(senderPlayer, (Player) context.getSource());
@@ -261,8 +267,8 @@ public final class CommandTPA {
                             try {
                                 ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                String familyName = api.getService(ServerService.class).findServer(sendingServer).getFamilyName();
-                                BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                String familyName = serverService.findServer(sendingServer).getFamilyName();
+                                BaseServerFamily family = familyService.find(familyName);
 
                                 family.getAllPlayers(100).forEach(player -> builder.suggest(((Player) player).getUsername()));
 
@@ -299,10 +305,10 @@ public final class CommandTPA {
 
                                 ServerInfo sendersServerInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                PlayerServer sendersServer = api.getService(ServerService.class).findServer(sendersServerInfo);
+                                PlayerServer sendersServer = serverService.findServer(sendersServerInfo);
                                 String familyName = sendersServer.getFamilyName();
                                 try {
-                                    BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                                    BaseServerFamily family = familyService.find(familyName);
                                     if(family == null) throw new NullPointerException();
                                     if(!(family instanceof PlayerFocusedServerFamily)) throw new NullPointerException();
                                     if(!((PlayerFocusedServerFamily) family).getTPAHandler().getSettings().isEnabled()) throw new RuntimeException();

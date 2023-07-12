@@ -28,8 +28,9 @@ public class FriendsService extends ServiceableService {
     private final Vector<FriendRequest> friendRequests = new Vector<>();
     private final FriendsSettings settings;
 
-    private FriendsService(Map<Class<? extends Service>, Service> services) {
+    private FriendsService(Map<Class<? extends Service>, Service> services, FriendsSettings settings) {
         super(services);
+        this.settings = settings;
     }
 
     public FriendsSettings getSettings() {
@@ -107,15 +108,22 @@ public class FriendsService extends ServiceableService {
 
     protected static class Builder {
         protected final Map<Class<? extends Service>, Service> services = new HashMap<>();
+        protected FriendsSettings settings;
 
         public FriendsService.Builder setMySQLService(FriendsMySQLService service) {
             this.services.put(FriendsMySQLService.class, service);
             return this;
         }
 
+        public FriendsService.Builder setSettings(FriendsSettings settings) {
+            this.settings = settings;
+            return this;
+        }
+
         public FriendsService build() {
-            if(this.services.get(FriendsMySQLService.class) == null) throw new NullPointerException("You must provide a MySQL service for the Friends service to use!");
-            return new FriendsService(true, this.services);
+            if(this.services.get(ValidServices.MYSQL_SERVICE) == null) throw new NullPointerException("You must provide a MySQL service for the Friends service to use!");
+            if(this.settings == null) throw new NullPointerException("You must provide a settings for the Friends service to use!");
+            return new FriendsService(this.services, this.settings);
         }
     }
 

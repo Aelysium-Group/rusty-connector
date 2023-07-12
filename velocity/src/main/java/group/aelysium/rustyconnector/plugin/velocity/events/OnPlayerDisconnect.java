@@ -16,6 +16,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFla
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
+
 public class OnPlayerDisconnect {
     /**
      * Runs when a player disconnects from the proxy
@@ -32,9 +34,9 @@ public class OnPlayerDisconnect {
             // Handle servers when player leaves
             try {
                 if(player.getCurrentServer().isPresent()) {
-                    PlayerServer server = api.getService(ServerService.class).orElseThrow().findServer(player.getCurrentServer().get().getServerInfo());
+                    PlayerServer server = api.getService(SERVER_SERVICE).orElseThrow().findServer(player.getCurrentServer().get().getServerInfo());
                     server.playerLeft();
-                    api.getService(FamilyService.class).orElseThrow().uncacheHomeServerMappings(player);
+                    api.getService(FAMILY_SERVICE).orElseThrow().uncacheHomeServerMappings(player);
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, server));
@@ -45,7 +47,7 @@ public class OnPlayerDisconnect {
 
             // Handle party when player leaves
             try {
-                PartyService partyService = api.getService(PartyService.class).orElseThrow();
+                PartyService partyService = api.getService(PARTY_SERVICE).orElseThrow();
                 Party party = partyService.find(player).orElseThrow();
                 try {
                     boolean wasPartyLeader = party.getLeader().equals(player);

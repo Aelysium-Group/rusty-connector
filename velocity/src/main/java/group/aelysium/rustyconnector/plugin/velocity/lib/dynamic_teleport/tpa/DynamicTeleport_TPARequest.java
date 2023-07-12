@@ -12,6 +12,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
+
 public class DynamicTeleport_TPARequest {
     private final Player sender;
     private final Player target;
@@ -68,11 +70,11 @@ public class DynamicTeleport_TPARequest {
             this.updateStatus(DynamicTeleport_TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.getTarget().getCurrentServer().orElseThrow().getServerInfo();
-            String familyName = api.getService(ServerService.class).findServer(serverInfo).getFamilyName();
-            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+            String familyName = api.getService(SERVER_SERVICE).orElseThrow().findServer(serverInfo).getFamilyName();
+            BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
             if(family == null) throw new NullPointerException();
 
-            api.getService(DynamicTeleport_TPACleaningService.class).tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
+            api.getService(DYNAMIC_TELEPORT_TPA_CLEANING_SERVICE).orElseThrow().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
         } catch (Exception e) {
             this.getSender().sendMessage(VelocityLang.TPA_FAILURE.build(this.getTarget().getUsername()));
             this.getTarget().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.getSender().getUsername()));

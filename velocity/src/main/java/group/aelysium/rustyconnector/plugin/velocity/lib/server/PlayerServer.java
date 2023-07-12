@@ -18,6 +18,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
+
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
@@ -93,7 +96,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     public void register(String familyName) throws Exception {
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        this.registeredServer = api.getService(ServerService.class).orElseThrow().registerServer(this, familyName);
+        this.registeredServer = api.getService(SERVER_SERVICE).orElseThrow().registerServer(this, familyName);
 
         this.familyName = familyName;
     }
@@ -179,7 +182,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        BaseServerFamily family = api.getService(FamilyService.class).orElseThrow().find(this.familyName);
+        BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;

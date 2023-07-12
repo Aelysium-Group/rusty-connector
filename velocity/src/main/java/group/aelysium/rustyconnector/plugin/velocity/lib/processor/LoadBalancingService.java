@@ -9,18 +9,19 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
+
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
 
 public class LoadBalancingService extends ClockService {
     protected final long heartbeat;
     public LoadBalancingService(int threads, long heartbeat) {
-        super(true, threads);
+        super(threads);
         this.heartbeat = heartbeat;
     }
 
     public void init() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
-        for (BaseServerFamily family : api.getService(FamilyService.class).dump()) {
+        for (BaseServerFamily family : api.getService(FAMILY_SERVICE).orElseThrow().dump()) {
             if (!(family instanceof PlayerFocusedServerFamily)) continue;
 
             this.scheduleRecurring(() -> {

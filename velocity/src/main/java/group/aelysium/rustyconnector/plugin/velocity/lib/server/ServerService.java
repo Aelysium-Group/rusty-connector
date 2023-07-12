@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
 
 public class ServerService extends ServiceableService {
     private final Vector<WeakReference<PlayerServer>> servers =  new Vector<>();
@@ -242,7 +243,7 @@ public class ServerService extends ServiceableService {
         }
 
         public PlayerServer build() {
-            this.initialTimeout = VelocityRustyConnector.getAPI().getService(ServerService.class).orElseThrow().getServerTimeout();
+            this.initialTimeout = VelocityRustyConnector.getAPI().getService(SERVER_SERVICE).orElseThrow().getServerTimeout();
 
             return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
         }

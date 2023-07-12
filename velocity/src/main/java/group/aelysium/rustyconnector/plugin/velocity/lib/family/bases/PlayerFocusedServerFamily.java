@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
+
 /**
  * This class should never be used directly.
  * Player-focused families offer features such as /tpa, whitelists, load-balancing, and direct connection.
@@ -71,7 +74,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public Whitelist getWhitelist() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         if(this.name == null) return null;
-        return api.getService(WhitelistService.class).find(this.whitelist);
+        return api.getService(WHITELIST_SERVICE).orElseThrow().find(this.whitelist);
     }
 
     public long serverCount() { return this.loadBalancer.size(); }
@@ -108,7 +111,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
     @Override
     public void unregisterServers() throws Exception {
-        ServerService serverService = VelocityRustyConnector.getAPI().getService(ServerService.class);
+        ServerService serverService = VelocityRustyConnector.getAPI().getService(SERVER_SERVICE).orElseThrow();
 
         for (PlayerServer server : this.loadBalancer.dump()) {
             if(server == null) continue;
