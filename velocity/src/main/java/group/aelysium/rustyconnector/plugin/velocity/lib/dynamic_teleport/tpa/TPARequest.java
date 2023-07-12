@@ -72,7 +72,7 @@ public class TPARequest {
             BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
             if(family == null) throw new NullPointerException();
 
-            api.getService(DYNAMIC_TELEPORT_TPA_CLEANING_SERVICE).orElseThrow().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
+            api.getService(TPACleaningService.class).orElseThrow().tpaSendPlayer(this.getSender(), this.getTarget(), serverInfo);
         } catch (Exception e) {
             this.getSender().sendMessage(VelocityLang.TPA_FAILURE.build(this.getTarget().getUsername()));
             this.getTarget().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.getSender().getUsername()));

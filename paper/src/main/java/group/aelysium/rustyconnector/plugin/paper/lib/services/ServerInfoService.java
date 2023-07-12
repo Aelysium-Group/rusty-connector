@@ -18,8 +18,6 @@ public class ServerInfoService extends Service implements PlayerServer {
     private Integer weight;
 
     public ServerInfoService(String name, InetSocketAddress address, String family, int softPlayerCap, int hardPlayerCap, int weight) {
-        super(true);
-
         if(name.equals(""))
             name = family + "-" + MD5.generateMD5(); // Generate a custom string to be the server's name
         this.name = name;

@@ -16,11 +16,7 @@ public class MySQLService extends Service {
     private DataSource dataSource;
     private Connection connection;
 
-    protected MySQLService() {
-        super(false);
-    }
     protected MySQLService(DataSource dataSource) {
-        super(true);
         this.dataSource = dataSource;
     }
 
@@ -90,8 +86,6 @@ public class MySQLService extends Service {
     }
 
     public static class Builder {
-        protected boolean enabled = true;
-
         protected String host;
         protected int port;
 
@@ -126,14 +120,7 @@ public class MySQLService extends Service {
             return this;
         }
 
-        public Builder setDisabled() {
-            this.enabled = false;
-            return this;
-        }
-
         public MySQLService build(){
-            if(!this.enabled) return new MySQLService();
-
             MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
             dataSource.setServerName(this.host);
             dataSource.setPortNumber(this.port);

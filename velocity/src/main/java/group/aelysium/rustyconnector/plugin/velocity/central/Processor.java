@@ -27,8 +27,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TP
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,9 +86,10 @@ public class Processor extends IKLifecycle {
         familiesConfig.register();
 
         // Setup MySQL
+        java.util.Optional<MySQLService> mySQLService = java.util.Optional.empty();
         try {
             if (!familiesConfig.getStaticFamilies().isEmpty()) {
-                MySQLService mySQLService = new MySQLService.Builder()
+                MySQLService builtMySQLService = new MySQLService.Builder()
                         .setHost(familiesConfig.getMysql_host())
                         .setPort(familiesConfig.getMysql_port())
                         .setDatabase(familiesConfig.getMysql_database())
@@ -98,25 +97,19 @@ public class Processor extends IKLifecycle {
                         .setPassword(familiesConfig.getMysql_password())
                         .build();
 
-                builder.addService(mySQLService);
+                HomeServerMappingsDatabase.init(builtMySQLService);
 
-                HomeServerMappingsDatabase.init(mySQLService);
+                mySQLService = java.util.Optional.of(builtMySQLService);
                 logger.log("Finished setting up MySQL");
-            } else {
-                MySQLService mySQLService = new MySQLService.Builder()
-                        .setDisabled()
-                        .build();
-
-                builder.addService(mySQLService);
-                logger.send(Component.text("MySQL is disabled! Any static families that are defined will be disabled.", NamedTextColor.YELLOW));
             }
+
         } catch (CommunicationsException e) {
             throw new IllegalAccessException("Unable to connect to MySQL! Is the server available?");
-        } catch (IOException e) {
-            throw new IllegalAccessException("Unable to connect to initialize MySQL for Static Families! How did this even happen?");
+        } catch (Exception e) {
+            throw new IllegalAccessException("Unable to connect to initialize MySQL for Static Families!");
         }
 
-        FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers());
+        FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers(), mySQLService);
         builder.addService(familyService);
 
         WhitelistService whitelistService = new WhitelistService();

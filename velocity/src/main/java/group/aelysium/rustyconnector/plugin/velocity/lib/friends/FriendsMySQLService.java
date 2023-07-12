@@ -25,9 +25,6 @@ public class FriendsMySQLService extends MySQLService {
     private static final String SEND_FRIEND_REQUEST = "INSERT INTO requests (sender_UUID, target_UUID) VALUES(?, ?);";
     private static final String DELETE_FRIEND_REQUEST = "DELETE FROM requests WHERE sender_UUID = ? AND target_UUID = ?;";
 
-    private FriendsMySQLService() {
-        super();
-    }
     private FriendsMySQLService(DataSource dataSource) {
         super(dataSource);
     }
@@ -111,8 +108,6 @@ public class FriendsMySQLService extends MySQLService {
     }
 
     public static class Builder {
-        protected boolean enabled = true;
-
         protected String host;
         protected int port;
 
@@ -147,14 +142,7 @@ public class FriendsMySQLService extends MySQLService {
             return this;
         }
 
-        public FriendsMySQLService.Builder setDisabled() {
-            this.enabled = false;
-            return this;
-        }
-
         public FriendsMySQLService build(){
-            if(!this.enabled) return new FriendsMySQLService();
-
             MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
             dataSource.setServerName(this.host);
             dataSource.setPortNumber(this.port);

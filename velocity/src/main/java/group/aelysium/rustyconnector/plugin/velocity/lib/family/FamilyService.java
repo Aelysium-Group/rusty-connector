@@ -1,8 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.database.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 
@@ -10,6 +12,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
 
@@ -17,9 +20,15 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
     private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
     private WeakReference<ScalarServerFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
+    private final Optional<MySQLService> mySQLService;
 
-    public FamilyService(boolean catchDisconnectingPlayers) {
+    public FamilyService(boolean catchDisconnectingPlayers, Optional<MySQLService> mySQLService) {
         this.catchDisconnectingPlayers = catchDisconnectingPlayers;
+        this.mySQLService = mySQLService;
+    }
+
+    public Optional<MySQLService> getMySQLService() {
+        return this.mySQLService;
     }
 
     public boolean shouldCatchDisconnectingPlayers() {

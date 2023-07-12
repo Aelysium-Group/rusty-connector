@@ -12,10 +12,6 @@ import java.util.Objects;
 public class DynamicTeleportService extends Service {
     private final List<DynamicTeleport_TPARequest> requests = new ArrayList<>();
 
-    public DynamicTeleportService() {
-        super(true);
-    }
-
     public DynamicTeleport_TPARequest newRequest(String client_username, Player target) {
         DynamicTeleport_TPARequest tpaRequest = new DynamicTeleport_TPARequest(client_username, target);
         requests.add(tpaRequest);

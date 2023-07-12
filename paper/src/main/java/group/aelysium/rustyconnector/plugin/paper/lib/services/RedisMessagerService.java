@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.services;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
@@ -18,10 +17,6 @@ import static group.aelysium.rustyconnector.plugin.paper.central.Processor.Valid
 import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.SERVER_INFO_SERVICE;
 
 public class RedisMessagerService extends Service {
-
-    public RedisMessagerService() {
-        super(true);
-    }
 
     public void pingProxy(RedisMessageServerPing.ConnectionIntent intent) {
         PaperAPI api = PaperRustyConnector.getAPI();

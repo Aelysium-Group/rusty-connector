@@ -3,16 +3,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
-import java.util.Objects;
 
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FRIENDS_SERVICE;
-import static group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService.ValidServices.MYSQL_SERVICE;
 
 public class FriendRequest {
     private final WeakReference<Player> sender;
@@ -58,7 +54,7 @@ public class FriendRequest {
             throw new IllegalStateException("The sender of this friend request doesn't exist! (How did this happen?)");
 
         try {
-            friendsService.getService(MYSQL_SERVICE).orElseThrow().addFriend(this.sender.get(), this.target);
+            friendsService.getService(FriendsService.ValidServices.DATA_ENCLAVE).orElseThrow().addFriend(this.sender.get(), this.target);
 
             try {
                 this.getTarget().sendMessage(Component.text("You and " + this.getSender().getUsername() + " are now friends!", NamedTextColor.GREEN));

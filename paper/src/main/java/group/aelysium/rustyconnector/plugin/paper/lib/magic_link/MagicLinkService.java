@@ -16,7 +16,7 @@ public class MagicLinkService extends ClockService {
     private Status status = Status.SEARCHING;
 
     public MagicLinkService(int threads) {
-        super(true, threads);
+        super(threads);
     }
 
     public void setStatus(Status status) {
@@ -59,8 +59,6 @@ public class MagicLinkService extends ClockService {
     }
 
     public void startHeartbeat() {
-        this.throwIfDisabled();
-
         this.scheduleNextPing();
     }
 
