@@ -15,7 +15,7 @@ public class FriendsService extends ServiceableService {
     private final Vector<FriendRequest> friendRequests = new Vector<>();
     private final FriendsSettings settings;
 
-    private FriendsService(FriendsMySQLService friendsMySQLService, FriendsSettings settings) {
+    public FriendsService(FriendsSettings settings, FriendsMySQLService friendsMySQLService) {
         super(new HashMap<>());
         this.services.put(FriendsDataEnclaveService.class, new FriendsDataEnclaveService(friendsMySQLService));
         this.settings = settings;
@@ -73,19 +73,6 @@ public class FriendsService extends ServiceableService {
     @Override
     public void kill() {
 
-    }
-
-    public static FriendsService init(FriendsConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException {
-
-        FriendsMySQLService mySQLService = new FriendsMySQLService.Builder()
-                .setHost(config.getMysql_host())
-                .setPort(config.getMysql_port())
-                .setDatabase(config.getMysql_database())
-                .setUser(config.getMysql_user())
-                .setPassword(config.getMysql_password())
-                .build();
-
-        return new FriendsService(mySQLService, new FriendsSettings(config.getMaxFriends()));
     }
 
     /**

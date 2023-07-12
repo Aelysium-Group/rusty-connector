@@ -1,23 +1,23 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
-import com.typesafe.config.Optional;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnelService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.database.MySQLService;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.IKLifecycle;
+import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.config.FamiliesConfig;
-import group.aelysium.rustyconnector.plugin.velocity.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsMySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
@@ -27,14 +27,17 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TP
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public class Processor extends IKLifecycle {
     protected Processor(Map<Class<? extends Service>, Service> services) {
@@ -132,7 +135,6 @@ public class Processor extends IKLifecycle {
             builder.addService(new LoadBalancingService(familyService.size(), config.getServices_loadBalancing_interval()));
         }
 
-        builder.addService(new TPACleaningService(10));
         logger.log("Finished loading services...");
 
         // Setup network whitelist
@@ -172,7 +174,7 @@ public class Processor extends IKLifecycle {
         logger.log("Finished setting up message tunnel");
 
 
-        MagicLinkService magicLinkService = new MagicLinkService(5, config.getServices_serverLifecycle_serverPingInterval());
+        MagicLinkService magicLinkService = new MagicLinkService(3, config.getServices_serverLifecycle_serverPingInterval());
 
         ServerService.Builder serverServiceBuilder = new ServerService.Builder()
                 .setServerTimeout(config.getServices_serverLifecycle_serverTimeout())
@@ -181,7 +183,93 @@ public class Processor extends IKLifecycle {
 
         builder.addService(serverServiceBuilder.build());
 
+
+        try {
+            builder.addService(Initializer.buildFriendsService().orElseThrow());
+        } catch (Exception ignore) {}
+        try {
+            builder.addService(Initializer.buildPartyService().orElseThrow());
+        } catch (Exception ignore) {}
+        try {
+            builder.addService(Initializer.buildFriendsService().orElseThrow());
+        } catch (Exception ignore) {}
+        try {
+            builder.addService(Initializer.buildDynamicTeleportService().orElseThrow());
+        } catch (Exception ignore) {}
+
         return builder.build();
+    }
+
+    protected static class Initializer {
+        public static Optional<PartyService> buildPartyService() {
+            VelocityAPI api = VelocityRustyConnector.getAPI();
+            PluginLogger logger = api.getLogger();
+            try {
+                PartyConfig config = PartyConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "party.yml"), "velocity_party_template.yml");
+                if (!config.generate())
+                    throw new IllegalStateException("Unable to load or create party.yml!");
+                config.register();
+
+                PartyService.PartySettings settings = new PartyService.PartySettings(
+                        config.getMaxMembers(),
+                        config.isFriendsOnly(),
+                        config.isPartyLeader_onlyLeaderCanInvite(),
+                        config.isPartyLeader_onlyLeaderCanKick(),
+                        config.isPartyLeader_onlyLeaderCanSwitchServers(),
+                        config.isPartyLeader_disbandOnLeaderQuit(),
+                        config.getSwitchingServers_switchPower()
+                );
+
+                return Optional.of(new PartyService(settings));
+            } catch (Exception e) {
+                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+            }
+            return Optional.empty();
+        }
+
+        public static Optional<FriendsService> buildFriendsService() {
+            VelocityAPI api = VelocityRustyConnector.getAPI();
+            PluginLogger logger = api.getLogger();
+            try {
+                FriendsConfig config = FriendsConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "friends.yml"), "velocity_friends_template.yml");
+                if (!config.generate())
+                    throw new IllegalStateException("Unable to load or create friends.yml!");
+                config.register();
+
+                FriendsService.FriendsSettings settings = new FriendsService.FriendsSettings(
+                        config.getMaxFriends()
+                );
+
+                FriendsMySQLService mySQLService = new FriendsMySQLService.Builder()
+                        .setHost(config.getMysql_host())
+                        .setPort(config.getMysql_port())
+                        .setDatabase(config.getMysql_database())
+                        .setUser(config.getMysql_user())
+                        .setPassword(config.getMysql_password())
+                        .build();
+
+                return Optional.of(new FriendsService(settings, mySQLService));
+            } catch (Exception e) {
+                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+            }
+            return Optional.empty();
+        }
+
+        public static Optional<DynamicTeleportService> buildDynamicTeleportService() {
+            VelocityAPI api = VelocityRustyConnector.getAPI();
+            PluginLogger logger = api.getLogger();
+            try {
+                DynamicTeleportConfig config = DynamicTeleportConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "dynamic_teleport.yml"), "velocity_dynamic_teleport_template.yml");
+                if (!config.generate())
+                    throw new IllegalStateException("Unable to load or create dynamic_teleport.yml!");
+                config.register();
+
+                return DynamicTeleportService.init(config);
+            } catch (Exception e) {
+                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+            }
+            return Optional.empty();
+        }
     }
 
     protected static class Builder {
@@ -211,13 +299,19 @@ public class Processor extends IKLifecycle {
         public static Class<WhitelistService> WHITELIST_SERVICE = WhitelistService.class;
         public static Class<LoadBalancingService> LOAD_BALANCING_SERVICE = LoadBalancingService.class;
 
-        @Optional
+        /**
+         * Optional
+         */
         public static Class<PartyService> PARTY_SERVICE = PartyService.class;
 
-        @Optional
+        /**
+         * Optional
+         */
         public static Class<FriendsService> FRIENDS_SERVICE = FriendsService.class;
 
-        @Optional
+        /**
+         * Optional
+         */
         public static Class<DynamicTeleportService> DYNAMIC_TELEPORT_SERVICE = DynamicTeleportService.class;
 
         public static boolean isOptional(Class<? extends Service> clazz) {

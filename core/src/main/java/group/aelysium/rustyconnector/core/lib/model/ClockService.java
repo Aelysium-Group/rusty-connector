@@ -24,6 +24,15 @@ public class ClockService extends Service {
     /**
      * Schedule a new task to run every `heartbeat`
      * @param runnable The runnable task to run.
+     * @param period The intervals in seconds to wait before executing the runnable again.
+     */
+    public ScheduledFuture<?> scheduleRecurring(Runnable runnable, LiquidTimestamp period) {
+        return this.executorService.scheduleAtFixedRate(runnable, 0, period.getValue(), period.getUnit());
+    }
+
+    /**
+     * Schedule a new task to run every `heartbeat`
+     * @param runnable The runnable task to run.
      * @param delay The amount of time in seconds to wait before executing the runnable.
      */
     public void scheduleDelayed(Runnable runnable, long delay) {

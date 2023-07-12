@@ -35,60 +35,6 @@ enabled: false
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                     Dynamic Teleport                     #
-#                                                          #
-#               ---------------------------                #
-# | Teleport players to specific coordinates on            #
-# | other servers!                                         #
-#                                                          #
-#   NOTE: This command is console only!                    #
-#                                                          #
-#               ----------------------------               #
-#                          Usage:                          #
-#    /dtp <username> <server> <x> <y> <z> [pitch] [yaw]    #
-#               ----------------------------               #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-dtp:
-    enabled: false
-
-    #
-    # Should players only be allowed to tpa to their friends?
-    # Requires the friends module be enabled.
-    #
-    only-tpa-to-friends: false
-
-    #
-    # List the families that you'd like players to be able to tpa in.
-    # Players are not able to tpa between families, instead they can
-    # only tpa between servers inside a family.
-    #
-    enabled-families: []
-
-    #
-    # Should the tpa consider player caps before attempting to teleport?
-    # If false, the player must match the player caps of the server they
-    # are attempting to connect to.
-    #
-    ignore-player-cap: false
-
-    #
-    # How many minutes a pending tpa request can exist for before it expires.
-    # Players are not allowed to issue new tpa requests if they already have one pending.
-    #
-    # If a player's tpa request is accepted or denied before it expires, they will
-    # be able to issue a new tpa request immediately.
-    # Otherwise, they must wait for their current request to expire before issuing a new one.
-    #
-    # Players will receive a notification in-chat once their request expires.
-    #
-    # `request-lifetime` is in minutes.
-    #
-    request-lifetime: 5
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                           TPA                            #
 #                                                          #
 #               ---------------------------                #
@@ -120,7 +66,7 @@ tpa:
     # Should players only be allowed to tpa to their friends?
     # Requires the friends module be enabled.
     #
-    only-tpa-to-friends: false
+    friends-only: false
 
     #
     # List the families that you'd like players to be able to tpa in.
@@ -136,16 +82,25 @@ tpa:
     #
     ignore-player-cap: false
 
-    #
-    # How many minutes a pending tpa request can exist for before it expires.
-    # Players are not allowed to issue new tpa requests if they already have one pending.
-    #
-    # If a player's tpa request is accepted or denied before it expires, they will
-    # be able to issue a new tpa request immediately.
-    # Otherwise, they must wait for their current request to expire before issuing a new one.
-    #
-    # Players will receive a notification in-chat once their request expires.
-    #
-    # `request-lifetime` is in minutes.
-    #
-    request-lifetime: 5
+    ############################################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                                Expiration                                #
+    #                                                                          #
+    #                       ---------------------------                        #
+    # | How many minutes a pending tpa request can exist for before            #
+    # | it expires. Players are not allowed to issue new tpa requests if       #
+    # | they already have one pending.                                         #
+    #                                                                          #
+    # | If a player's tpa request is accepted or denied before it expires,     #
+    # | they will be able to issue a new tpa request immediately.              #
+    # | Otherwise, they must wait for their current request to expire          #
+    # | before issuing a new one.                                              #
+    #                                                                          #
+    # | Players will receive a notification in-chat if their request expires.  #
+    #                                                                          #
+    # | This data value is a Liquid Timestamp. Read more here:                 #
+    # https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
+    #                                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################################
+    expiration: NEVER

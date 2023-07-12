@@ -39,7 +39,7 @@ public class TPAHandler {
     }
 
     public TPARequest newRequest(Player sender, Player target) {
-        TPARequest tpaRequest = new TPARequest(sender, target, this.settings.getRequestLifetime());
+        TPARequest tpaRequest = new TPARequest(sender, target, this.settings.expiration());
         requests.add(tpaRequest);
 
         return tpaRequest;

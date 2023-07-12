@@ -102,40 +102,6 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
     }
-
-    public void reloadWhitelist() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-
-        Whitelist currentWhitelist = this.getWhitelist();
-        if(!(currentWhitelist == null)) {
-            api.getService(WHITELIST_SERVICE).orElseThrow().remove(currentWhitelist);
-        }
-
-        ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
-                this.name,
-                new File(String.valueOf(api.getDataFolder()), "families/"+this.name+".scalar.yml"),
-                "velocity_scalar_family_template.yml"
-        );
-        if(!scalarFamilyConfig.generate()) {
-            throw new IllegalStateException("Unable to load or create families/"+this.name+".scalar.yml!");
-        }
-        scalarFamilyConfig.register();
-
-        Whitelist newWhitelist;
-        if(scalarFamilyConfig.isWhitelist_enabled()) {
-            newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
-
-            this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getService(WHITELIST_SERVICE).orElseThrow().add(newWhitelist);
-
-            logger.log("Finished reloading whitelist for "+this.name);
-            return;
-        }
-
-        this.whitelist = null;
-        logger.log("There is no whitelist for "+this.name);
-    }
 }
 
 class ScalarFamilyConnector {

@@ -18,7 +18,7 @@ public class PartyConfig extends YAML {
     private boolean partyLeader_onlyLeaderCanSwitchServers = true;
     private boolean partyLeader_disbandOnLeaderQuit = true;
 
-    private String switchingServers_switchPower = "MODERATE";
+    private SwitchPower switchingServers_switchPower = SwitchPower.MODERATE;
 
     private PartyConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -76,7 +76,7 @@ public class PartyConfig extends YAML {
         return partyLeader_disbandOnLeaderQuit;
     }
 
-    public String getSwitchingServers_switchPower() {
+    public SwitchPower getSwitchingServers_switchPower() {
         return switchingServers_switchPower;
     }
 
@@ -94,10 +94,8 @@ public class PartyConfig extends YAML {
         this.partyLeader_onlyLeaderCanSwitchServers = this.getNode(this.data, "party-leader.only-leader-can-switch-servers", Boolean.class);
         this.partyLeader_disbandOnLeaderQuit = this.getNode(this.data, "party-leader.disband-on-leader-quit", Boolean.class);
 
-        this.switchingServers_switchPower = this.getNode(this.data, "switching-servers.switch-power", String.class);
-
         try {
-            Enum.valueOf(SwitchPower.class, this.switchingServers_switchPower);
+            this.switchingServers_switchPower = Enum.valueOf(SwitchPower.class, this.getNode(this.data, "switching-servers.switch-power", String.class));
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Switch power: "+this.switchingServers_switchPower+" isn't valid! Please review `party.yml` again!");
         }

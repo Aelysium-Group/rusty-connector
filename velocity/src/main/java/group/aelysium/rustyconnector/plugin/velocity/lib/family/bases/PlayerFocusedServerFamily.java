@@ -28,7 +28,6 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     protected LoadBalancer loadBalancer = null;
     protected String whitelist;
     protected boolean weighted;
-    protected TPAHandler tpaHandler;
 
     protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name);
@@ -57,10 +56,6 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
     public LoadBalancer getLoadBalancer() {
         return this.loadBalancer;
-    }
-
-    public TPAHandler getTPAHandler() {
-        return tpaHandler;
     }
 
     /**
