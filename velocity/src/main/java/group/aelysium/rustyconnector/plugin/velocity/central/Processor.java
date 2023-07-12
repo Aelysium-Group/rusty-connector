@@ -7,7 +7,6 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.M
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.IKLifecycle;
-import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
@@ -23,7 +22,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPACleaningService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
@@ -189,9 +187,6 @@ public class Processor extends IKLifecycle {
         } catch (Exception ignore) {}
         try {
             builder.addService(Initializer.buildPartyService().orElseThrow());
-        } catch (Exception ignore) {}
-        try {
-            builder.addService(Initializer.buildFriendsService().orElseThrow());
         } catch (Exception ignore) {}
         try {
             builder.addService(Initializer.buildDynamicTeleportService().orElseThrow());

@@ -1,22 +1,18 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.DYNAMIC_TELEPORT_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService.ValidServices.TPA_SERVICE;
+
 public class TPAHandler {
     private final List<TPARequest> requests = new ArrayList<>();
-    private final TPASettings settings;
-
-    public TPAHandler(TPASettings settings) {
-        this.settings = settings;
-    }
-
-    public TPASettings getSettings() {
-        return settings;
-    }
 
     public TPARequest findRequest(Player sender, Player target) {
         return this.requests.stream()
@@ -39,7 +35,10 @@ public class TPAHandler {
     }
 
     public TPARequest newRequest(Player sender, Player target) {
-        TPARequest tpaRequest = new TPARequest(sender, target, this.settings.expiration());
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        TPAService tpaService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow().getService(TPA_SERVICE).orElseThrow();
+
+        TPARequest tpaRequest = new TPARequest(sender, target, tpaService.getSettings().expiration());
         requests.add(tpaRequest);
 
         return tpaRequest;
@@ -57,5 +56,9 @@ public class TPAHandler {
     }
     public List<TPARequest> dump() {
         return this.requests;
+    }
+
+    public void decompose() {
+        this.requests.clear();
     }
 }

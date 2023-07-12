@@ -24,8 +24,9 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.REDIS_SERVICE;
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
+import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService.ValidServices.TPA_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService.ValidServices.TPA_CLEANING_SERVICE;
 
 public class VelocityAPI extends PluginAPI<Scheduler> {
     private final VelocityRustyConnector plugin;
@@ -85,6 +86,12 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         this.processor.getService(REDIS_SERVICE).orElseThrow().start(RedisSubscriber.class);
         this.processor.getService(SERVER_SERVICE).orElseThrow()
                       .getService(ServerService.ValidServices.MAGIC_LINK_SERVICE).orElseThrow().startHeartbeat();
+        try {
+            this.processor.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow()
+                          .getService(TPA_SERVICE).orElseThrow()
+                          .getService(TPA_CLEANING_SERVICE).orElseThrow()
+                          .startHeartbeat();
+        } catch (Exception ignore) {}
     }
 
     /**

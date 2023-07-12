@@ -22,11 +22,6 @@ public class DynamicTeleportService extends ServiceableService {
         this.services.put(TPAService.class, tpaService);
     }
 
-    @Override
-    public void kill() {
-
-    }
-
     public static Optional<DynamicTeleportService> init(DynamicTeleportConfig config) {
         try {
             if(!config.isEnabled()) throw new NoOutputException();

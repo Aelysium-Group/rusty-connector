@@ -30,4 +30,10 @@ public abstract class ServiceableService extends Service {
         } catch (Exception ignore) {}
         return false;
     }
+
+    @Override
+    public void kill() {
+        this.services.values().forEach(Service::kill);
+        this.services.clear();
+    }
 }

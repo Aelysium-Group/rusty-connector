@@ -72,7 +72,8 @@ public class FriendsService extends ServiceableService {
 
     @Override
     public void kill() {
-
+        this.friendRequests.clear();
+        super.kill();
     }
 
     /**

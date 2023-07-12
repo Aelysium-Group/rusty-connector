@@ -175,9 +175,6 @@ public class ServerService extends ServiceableService {
         }
     }
 
-    @Override
-    public void kill() {}
-
     public static class Builder {
         protected final Map<Class<? extends Service>, Service> services = new HashMap<>();
         protected int timeout = 15;

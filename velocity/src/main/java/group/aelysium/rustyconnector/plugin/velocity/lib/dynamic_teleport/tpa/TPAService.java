@@ -82,6 +82,9 @@ public class TPAService extends ServiceableService {
 
     @Override
     public void kill() {
+        this.getAllTPAHandlers().forEach(TPAHandler::decompose);
+        this.tpaHandlers.clear();
+        super.kill();
     }
 
     /**
