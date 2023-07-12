@@ -8,9 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBala
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPAHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPASettings;
-import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -30,9 +28,9 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     protected LoadBalancer loadBalancer = null;
     protected String whitelist;
     protected boolean weighted;
-    protected DynamicTeleport_TPAHandler tpaHandler;
+    protected TPAHandler tpaHandler;
 
-    protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, DynamicTeleport_TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name);
         if(whitelist == null) this.whitelist = null;
         else this.whitelist = whitelist.getName();
@@ -43,8 +41,6 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         } catch (Exception ignore) {}
         this.loadBalancer.setPersistence(persistence, attempts);
         this.loadBalancer.setWeighted(weighted);
-
-        this.tpaHandler = new DynamicTeleport_TPAHandler(tpaSettings);
     }
 
     /**
@@ -63,7 +59,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         return this.loadBalancer;
     }
 
-    public DynamicTeleport_TPAHandler getTPAHandler() {
+    public TPAHandler getTPAHandler() {
         return tpaHandler;
     }
 

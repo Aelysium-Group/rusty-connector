@@ -1,7 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -9,6 +14,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
+
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FRIENDS_SERVICE;
 
 public class PartyService extends Service {
     private final Vector<Party> parties = new Vector<>();
@@ -50,8 +57,26 @@ public class PartyService extends Service {
     }
 
     public PartyInvite invitePlayer(Party party, Player sender, Player target) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+
         if(party.getLeader() != sender && this.settings.onlyLeaderCanInvite)
-            sender.sendMessage(Component.text("Hey! Only the party leader can invite other players!", NamedTextColor.RED));
+            throw new IllegalStateException("Hey! Only the party leader can invite other players!");
+
+        if(this.settings.friendsOnly())
+            try {
+                FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElse(null);
+                if(friendsService == null) {
+                    api.getLogger().send(Component.text("You have parties set to only allow players to invite their friends! But the Friends module is disabled! Ignoring...", NamedTextColor.YELLOW));
+                    throw new NoOutputException();
+                }
+
+                for (FriendMapping friendMapping : friendsService.findFriends(sender).orElseThrow())
+                    if(friendMapping.getFriendOf(sender).equals(target)) throw new NoOutputException();
+
+                throw new IllegalStateException("You are only allowed to invite friends to join your party!");
+            } catch (IllegalStateException e) {
+                throw e;
+            } catch (Exception ignore) {}
 
         PartyInvite invite = new PartyInvite(party, sender, target);
         this.invites.add(invite);

@@ -13,6 +13,8 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
@@ -22,6 +24,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FRIENDS_SERVICE;
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.PARTY_SERVICE;
 
 public final class CommandParty {
@@ -259,6 +262,31 @@ public final class CommandParty {
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
+                                .suggests((context, builder) -> {
+                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+
+                                    try {
+                                        if(!partyService.getSettings().friendsOnly()) return builder.buildFuture();
+
+                                        FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
+                                        List<FriendMapping> friends = friendsService.findFriends(player).orElseThrow();
+                                        if(friends.size() == 0) {
+                                            builder.suggest("You don't have any friends you can invite to your party!");
+                                            return builder.buildFuture();
+                                        }
+
+                                        friends.forEach(friendMapping -> {
+                                            try {
+                                                builder.suggest(friendMapping.getFriendOf(player).getUsername());
+                                            } catch (Exception ignore) {}
+                                        });
+
+                                        return builder.buildFuture();
+                                    } catch (Exception ignored) {}
+
+                                    builder.suggest("Searching for players...");
+                                    return builder.buildFuture();
+                                })
                                 .executes(context -> {
                                     if(!(context.getSource() instanceof Player player)) {
                                         logger.log("/party must be sent as a player!");
@@ -281,7 +309,11 @@ public final class CommandParty {
                                     Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null || !targetPlayer.isActive()) return closeMessage(player, Component.text(username + " isn't available to send an invite to!", NamedTextColor.RED));
 
-                                    partyService.invitePlayer(party, player, targetPlayer);
+                                    try {
+                                        partyService.invitePlayer(party, player, targetPlayer);
+                                    } catch (IllegalStateException e) {
+                                        return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
+                                    }
                                     return Command.SINGLE_SUCCESS;
                                 })
                         )

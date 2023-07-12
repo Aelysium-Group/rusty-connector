@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
+import com.typesafe.config.Optional;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnelService;
@@ -13,6 +14,7 @@ import group.aelysium.rustyconnector.plugin.velocity.config.FamiliesConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
@@ -21,7 +23,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPACleaningService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPACleaningService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
@@ -137,7 +139,7 @@ public class Processor extends IKLifecycle {
             builder.addService(new LoadBalancingService(familyService.size(), config.getServices_loadBalancing_interval()));
         }
 
-        builder.addService(new DynamicTeleport_TPACleaningService(10));
+        builder.addService(new TPACleaningService(10));
         logger.log("Finished loading services...");
 
         // Setup network whitelist
@@ -204,6 +206,8 @@ public class Processor extends IKLifecycle {
 
     /**
      * The services that are valid for this service provider.
+     * Services marked as @Optional should be handled accordingly.
+     * If a service is not marked @Optional it should be impossible for that service to be unavailable.
      */
     public static class ValidServices {
         public static Class<FamilyService> FAMILY_SERVICE = FamilyService.class;
@@ -212,9 +216,23 @@ public class Processor extends IKLifecycle {
         public static Class<MessageTunnelService> MESSAGE_TUNNEL_SERVICE = MessageTunnelService.class;
         public static Class<MessageCacheService> MESSAGE_CACHE_SERVICE = MessageCacheService.class;
         public static Class<WhitelistService> WHITELIST_SERVICE = WhitelistService.class;
-        public static Class<DynamicTeleport_TPACleaningService> DYNAMIC_TELEPORT_TPA_CLEANING_SERVICE = DynamicTeleport_TPACleaningService.class;
         public static Class<LoadBalancingService> LOAD_BALANCING_SERVICE = LoadBalancingService.class;
+
+        @Optional
         public static Class<PartyService> PARTY_SERVICE = PartyService.class;
+
+        @Optional
         public static Class<FriendsService> FRIENDS_SERVICE = FriendsService.class;
+
+        @Optional
+        public static Class<DynamicTeleportService> DYNAMIC_TELEPORT_SERVICE = DynamicTeleportService.class;
+
+        public static boolean isOptional(Class<? extends Service> clazz) {
+            if(clazz == PARTY_SERVICE) return true;
+            if(clazz == FRIENDS_SERVICE) return true;
+            if(clazz == DYNAMIC_TELEPORT_SERVICE) return true;
+
+            return false;
+        }
     }
 }

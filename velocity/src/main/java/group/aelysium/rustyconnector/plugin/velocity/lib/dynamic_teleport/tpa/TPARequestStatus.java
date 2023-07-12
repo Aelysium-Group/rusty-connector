@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
-enum DynamicTeleport_TPARequestStatus {
+enum TPARequestStatus {
     NOT_SENT,
     REQUESTED,
     ACCEPTED,

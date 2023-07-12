@@ -1,22 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.database.MySQLService;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnelService;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.config.FriendsConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPACleaningService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.SwitchPower;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -28,8 +15,9 @@ public class FriendsService extends ServiceableService {
     private final Vector<FriendRequest> friendRequests = new Vector<>();
     private final FriendsSettings settings;
 
-    private FriendsService(Map<Class<? extends Service>, Service> services, FriendsSettings settings) {
-        super(services);
+    private FriendsService(FriendsMySQLService friendsMySQLService, FriendsSettings settings) {
+        super(new HashMap<>());
+        this.services.put(FriendsDataEnclaveService.class, new FriendsDataEnclaveService(friendsMySQLService));
         this.settings = settings;
     }
 
@@ -45,7 +33,7 @@ public class FriendsService extends ServiceableService {
     }
 
     public Optional<List<FriendMapping>> findFriends(Player player) {
-        return this.getService(ValidServices.MYSQL_SERVICE).orElseThrow().findFriends(player);
+        return this.getService(ValidServices.DATA_ENCLAVE).orElseThrow().findFriends(player);
     }
 
     public FriendMapping sendRequest(Player sender, Player target) {
@@ -65,7 +53,7 @@ public class FriendsService extends ServiceableService {
 
     public boolean removeFriend(Player sender, Player target) {
         try {
-            this.getService(ValidServices.MYSQL_SERVICE).orElseThrow().removeFriend(sender, target);
+            this.getService(ValidServices.DATA_ENCLAVE).orElseThrow().removeFriend(sender, target);
             return true;
         } catch (IllegalStateException e) {
             throw e;
@@ -79,10 +67,7 @@ public class FriendsService extends ServiceableService {
     }
 
     public Optional<Integer> getFriendCount(Player player) {
-        try {
-            return Optional.of(this.getService(ValidServices.MYSQL_SERVICE).orElseThrow().getFriendCount(player));
-        } catch (Exception ignore) {}
-        return Optional.empty();
+        return this.getService(ValidServices.DATA_ENCLAVE).orElseThrow().getFriendCount(player);
     }
 
     @Override
@@ -91,7 +76,6 @@ public class FriendsService extends ServiceableService {
     }
 
     public static FriendsService init(FriendsConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException {
-        FriendsService.Builder builder = new FriendsService.Builder();
 
         FriendsMySQLService mySQLService = new FriendsMySQLService.Builder()
                 .setHost(config.getMysql_host())
@@ -101,37 +85,14 @@ public class FriendsService extends ServiceableService {
                 .setPassword(config.getMysql_password())
                 .build();
 
-        builder.setMySQLService(mySQLService);
-
-        return builder.build();
-    }
-
-    protected static class Builder {
-        protected final Map<Class<? extends Service>, Service> services = new HashMap<>();
-        protected FriendsSettings settings;
-
-        public FriendsService.Builder setMySQLService(FriendsMySQLService service) {
-            this.services.put(FriendsMySQLService.class, service);
-            return this;
-        }
-
-        public FriendsService.Builder setSettings(FriendsSettings settings) {
-            this.settings = settings;
-            return this;
-        }
-
-        public FriendsService build() {
-            if(this.services.get(ValidServices.MYSQL_SERVICE) == null) throw new NullPointerException("You must provide a MySQL service for the Friends service to use!");
-            if(this.settings == null) throw new NullPointerException("You must provide a settings for the Friends service to use!");
-            return new FriendsService(this.services, this.settings);
-        }
+        return new FriendsService(mySQLService, new FriendsSettings(config.getMaxFriends()));
     }
 
     /**
      * The services that are valid for this service provider.
      */
     public static class ValidServices {
-        public static Class<FriendsMySQLService> MYSQL_SERVICE = FriendsMySQLService.class;
+        public static Class<FriendsDataEnclaveService> DATA_ENCLAVE = FriendsDataEnclaveService.class;
     }
 
     public record FriendsSettings(

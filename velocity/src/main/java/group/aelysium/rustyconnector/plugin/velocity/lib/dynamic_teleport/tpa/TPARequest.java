@@ -4,29 +4,27 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
 
-public class DynamicTeleport_TPARequest {
+public class TPARequest {
     private final Player sender;
     private final Player target;
     private final Date expiration;
-    private DynamicTeleport_TPARequestStatus status = DynamicTeleport_TPARequestStatus.NOT_SENT;
+    private TPARequestStatus status = TPARequestStatus.NOT_SENT;
 
-    public DynamicTeleport_TPARequest(Player sender, Player target, int lifetime) {
+    public TPARequest(Player sender, Player target, int lifetime) {
         this.sender = sender;
         this.target = target;
         this.expiration = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(lifetime));
     }
 
-    private void updateStatus(DynamicTeleport_TPARequestStatus status) {
+    private void updateStatus(TPARequestStatus status) {
         this.status = status;
     }
 
@@ -40,7 +38,7 @@ public class DynamicTeleport_TPARequest {
 
     public boolean expired() {
         if((new Date()).after(this.expiration)) {
-            this.status = DynamicTeleport_TPARequestStatus.EXPIRED;
+            this.status = TPARequestStatus.EXPIRED;
             return true;
         }
 
@@ -50,14 +48,14 @@ public class DynamicTeleport_TPARequest {
     public void submit() {
         this.getSender().sendMessage(VelocityLang.TPA_REQUEST_SUBMISSION.build(this.getTarget().getUsername()));
         this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_QUERY.build(this.getSender().getUsername()));
-        this.updateStatus(DynamicTeleport_TPARequestStatus.REQUESTED);
+        this.updateStatus(TPARequestStatus.REQUESTED);
     }
 
     public void deny() {
         this.getSender().sendMessage(VelocityLang.TPA_REQUEST_DENIED_SENDER.build(this.getTarget().getUsername()));
         this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_DENIED_TARGET.build(this.getSender().getUsername()));
 
-        this.updateStatus(DynamicTeleport_TPARequestStatus.DENIED);
+        this.updateStatus(TPARequestStatus.DENIED);
     }
 
     public void accept() {
@@ -67,7 +65,7 @@ public class DynamicTeleport_TPARequest {
         this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.getSender().getUsername()));
 
         try {
-            this.updateStatus(DynamicTeleport_TPARequestStatus.ACCEPTED);
+            this.updateStatus(TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.getTarget().getCurrentServer().orElseThrow().getServerInfo();
             String familyName = api.getService(SERVER_SERVICE).orElseThrow().findServer(serverInfo).getFamilyName();
@@ -79,7 +77,7 @@ public class DynamicTeleport_TPARequest {
             this.getSender().sendMessage(VelocityLang.TPA_FAILURE.build(this.getTarget().getUsername()));
             this.getTarget().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.getSender().getUsername()));
 
-            this.updateStatus(DynamicTeleport_TPARequestStatus.STALE);
+            this.updateStatus(TPARequestStatus.STALE);
         }
     }
 

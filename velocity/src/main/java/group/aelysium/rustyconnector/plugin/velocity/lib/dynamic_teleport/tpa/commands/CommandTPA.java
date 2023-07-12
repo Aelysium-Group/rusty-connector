@@ -20,7 +20,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPARequest;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPARequest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -108,7 +108,7 @@ public final class CommandTPA {
                                         String familyName = serverService.findServer(sendingServer).getFamilyName();
                                         BaseServerFamily family = familyService.find(familyName);
                                         if(!(family instanceof PlayerFocusedServerFamily)) return builder.buildFuture();
-                                        List<DynamicTeleport_TPARequest> requests = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequestsForTarget(player);
+                                        List<TPARequest> requests = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequestsForTarget(player);
 
                                         if(requests.size() <= 0) {
                                             builder.suggest("You have no pending TPA requests!");
@@ -151,7 +151,7 @@ public final class CommandTPA {
                                             if(family == null) throw new NullPointerException();
                                             if(!(family instanceof PlayerFocusedServerFamily)) throw new NullPointerException();
 
-                                            DynamicTeleport_TPARequest request = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequest(senderPlayer, (Player) context.getSource());
+                                            TPARequest request = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequest(senderPlayer, (Player) context.getSource());
                                             if(request == null) {
                                                 context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_REQUEST.build(username));
                                                 return Command.SINGLE_SUCCESS;
@@ -204,7 +204,7 @@ public final class CommandTPA {
                                         String familyName = serverService.findServer(sendingServer).getFamilyName();
                                         BaseServerFamily family = familyService.find(familyName);
                                         if(!(family instanceof PlayerFocusedServerFamily)) return builder.buildFuture();
-                                        List<DynamicTeleport_TPARequest> requests = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequestsForTarget(player);
+                                        List<TPARequest> requests = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequestsForTarget(player);
 
                                         if(requests.size() <= 0) {
                                             builder.suggest("You have no pending TPA requests!");
@@ -237,7 +237,7 @@ public final class CommandTPA {
                                             BaseServerFamily family = familyService.find(familyName);
                                             if(family == null) throw new NullPointerException();
 
-                                            DynamicTeleport_TPARequest request = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequest(senderPlayer, (Player) context.getSource());
+                                            TPARequest request = ((PlayerFocusedServerFamily) family).getTPAHandler().findRequest(senderPlayer, (Player) context.getSource());
                                             if(request == null) {
                                                 context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_REQUEST.build(username));
                                                 return Command.SINGLE_SUCCESS;
@@ -318,7 +318,7 @@ public final class CommandTPA {
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    DynamicTeleport_TPARequest request = ((PlayerFocusedServerFamily) family).getTPAHandler().newRequest((Player) context.getSource(), targetPlayer);
+                                    TPARequest request = ((PlayerFocusedServerFamily) family).getTPAHandler().newRequest((Player) context.getSource(), targetPlayer);
                                     request.submit();
 
                                     return Command.SINGLE_SUCCESS;

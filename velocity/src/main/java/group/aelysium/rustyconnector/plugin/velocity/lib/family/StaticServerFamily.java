@@ -6,7 +6,6 @@ import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -17,7 +16,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConn
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPASettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -28,15 +26,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
-
 public class StaticServerFamily extends PlayerFocusedServerFamily {
     List<HomeServerMapping> mappingsCache = new ArrayList<>();
     LiquidTimestamp homeServerExpiration;
     UnavailableProtocol unavailableProtocol;
 
-    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, DynamicTeleport_TPASettings tpaSettings, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings);
+    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, whitelist, clazz, weighted, persistence, attempts);
         this.unavailableProtocol = unavailableProtocol;
         this.homeServerExpiration = homeServerExpiration;
     }
@@ -166,7 +162,6 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    new DynamicTeleport_TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
             );
@@ -177,7 +172,6 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    new DynamicTeleport_TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
             );
@@ -188,7 +182,6 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    new DynamicTeleport_TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
             );

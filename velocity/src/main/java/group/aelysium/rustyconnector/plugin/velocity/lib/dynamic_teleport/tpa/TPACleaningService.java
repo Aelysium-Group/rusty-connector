@@ -3,7 +3,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
@@ -11,19 +10,17 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.R
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
 
-public class DynamicTeleport_TPACleaningService extends ClockService {
+public class TPACleaningService extends ClockService {
     protected final long heartbeat;
 
-    public DynamicTeleport_TPACleaningService(long heartbeat) {
+    public TPACleaningService(long heartbeat) {
         super(3);
         this.heartbeat = heartbeat;
     }
