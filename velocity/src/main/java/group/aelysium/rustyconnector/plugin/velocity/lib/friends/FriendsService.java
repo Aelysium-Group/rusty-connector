@@ -1,9 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
+import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.FriendsConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriend;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -19,6 +24,26 @@ public class FriendsService extends ServiceableService {
         super(new HashMap<>());
         this.services.put(FriendsDataEnclaveService.class, new FriendsDataEnclaveService(friendsMySQLService));
         this.settings = settings;
+
+        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
+        if(!commandManager.hasCommand("friend"))
+            try {
+                commandManager.register(
+                        commandManager.metaBuilder("friend").build(),
+                        CommandFriend.create()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        if(!commandManager.hasCommand("unfriend"))
+            try {
+                commandManager.register(
+                        commandManager.metaBuilder("unfriend").build(),
+                        CommandUnFriend.create()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
     public FriendsSettings getSettings() {

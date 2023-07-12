@@ -1,6 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
+import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriend;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,6 +24,17 @@ public class Party {
         this.players = new Vector<>(maxSize);
         this.maxSize = maxSize;
         this.setLeader(host);
+
+        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
+        if(!commandManager.hasCommand("party"))
+            try {
+                commandManager.register(
+                        commandManager.metaBuilder("party").build(),
+                        CommandParty.create()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
     public void setServer(PlayerServer server) {

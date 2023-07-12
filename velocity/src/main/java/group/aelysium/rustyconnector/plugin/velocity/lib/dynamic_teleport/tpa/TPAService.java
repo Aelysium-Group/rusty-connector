@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
+import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
@@ -11,6 +12,7 @@ import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -27,6 +29,17 @@ public class TPAService extends ServiceableService {
         super(new HashMap<>());
         this.services.put(TPACleaningService.class, new TPACleaningService(settings.expiration()));
         this.settings = settings;
+
+        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
+        if(commandManager.hasCommand("tpa"))
+            try {
+                commandManager.register(
+                        commandManager.metaBuilder("tpa").build(),
+                        CommandTPA.create()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
     public TPASettings getSettings() {

@@ -124,12 +124,7 @@ public class VelocityLifecycle extends PluginLifecycle {
 
             commandManager.unregister("server");
 
-            commandManager.register(
-                    commandManager.metaBuilder("tpa")
-                            .build(),
-                    CommandTPA.create()
-            );
-
+            // Commands for specific services can be found in the constructors for those services
             return true;
         } catch (Exception e) {
             VelocityLang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);
