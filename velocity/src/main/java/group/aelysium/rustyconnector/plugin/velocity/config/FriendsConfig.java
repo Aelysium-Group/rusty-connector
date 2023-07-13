@@ -94,7 +94,6 @@ public class FriendsConfig extends YAML {
         this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
         this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
         this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
-
         this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
         if (this.mysql_database.equals(""))
             throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");

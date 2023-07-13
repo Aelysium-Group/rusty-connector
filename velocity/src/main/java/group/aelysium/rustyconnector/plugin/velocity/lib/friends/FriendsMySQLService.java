@@ -6,8 +6,13 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,6 +34,19 @@ public class FriendsMySQLService extends MySQLService {
         super(dataSource);
     }
 
+    /**
+     * Initialize the table for home server mappings.
+     */
+    public void init() throws SQLException, IOException {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+        InputStream stream = api.getResourceAsStream("friends.sql");
+        String file = new String(stream.readAllBytes());
+
+        this.connect();
+        PreparedStatement statement = this.prepare(file);
+        this.execute(statement);
+        this.close();
+    }
     /**
      * Find all friends of a player.
      * @param player The player to find friends of.
@@ -59,7 +77,9 @@ public class FriendsMySQLService extends MySQLService {
 
             this.close();
             return Optional.of(friends);
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            api.getLogger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+        }
 
         return Optional.empty();
     }

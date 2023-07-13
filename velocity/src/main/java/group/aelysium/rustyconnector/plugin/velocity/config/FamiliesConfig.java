@@ -138,10 +138,6 @@ public class FamiliesConfig extends YAML {
             this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
             this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
             this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
-
-            if (this.mysql_password.length() != 0 && this.mysql_password.length() < 16)
-                throw new IllegalStateException("Your MySQL password is to short! For security purposes, please use a longer password! " + this.mysql_password.length() + " < 16");
-
             this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
             if (this.mysql_database.equals(""))
                 throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");

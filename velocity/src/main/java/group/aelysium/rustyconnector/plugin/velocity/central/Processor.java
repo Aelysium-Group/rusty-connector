@@ -240,6 +240,8 @@ public class Processor extends IKLifecycle {
                         .setPassword(config.getMysql_password())
                         .build();
 
+                mySQLService.init();
+
                 return Optional.of(new FriendsService(settings, mySQLService));
             } catch (Exception e) {
                 logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
