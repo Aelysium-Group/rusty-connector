@@ -26,6 +26,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
+
 public class StaticServerFamily extends PlayerFocusedServerFamily {
     List<HomeServerMapping> mappingsCache = new ArrayList<>();
     LiquidTimestamp homeServerExpiration;
@@ -127,7 +129,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticServerFamily init(WhitelistService whitelistService, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static StaticServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
         logger.log("Registering family: " + familyName);
@@ -146,7 +148,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
         if (staticFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name());
 
-            whitelistService.add(whitelist);
+            api.getService(WHITELIST_SERVICE).orElseThrow().add(whitelist);
 
             logger.log(familyName + " whitelist registered!");
         } else {

@@ -42,7 +42,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static ScalarServerFamily init(WhitelistService whitelistService, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static ScalarServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
         logger.log("Registering family: "+familyName);

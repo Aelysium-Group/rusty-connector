@@ -31,14 +31,14 @@ public class OnPlayerChooseInitialServer {
 
         return EventTask.async(() -> {
             try {
-                Whitelist whitelist = api.getService(WHITELIST_SERVICE).orElseThrow().getProxyWhitelist();
-                if(whitelist != null) {
+                try {
+                    Whitelist whitelist = api.getService(WHITELIST_SERVICE).orElseThrow().getProxyWhitelist().orElseThrow();
                     if (!whitelist.validate(player)) {
                         logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
                         player.disconnect(Component.text(whitelist.getMessage()));
                         return;
                     }
-                }
+                } catch (Exception ignore) {}
 
                 ScalarServerFamily rootFamily = api.getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
 

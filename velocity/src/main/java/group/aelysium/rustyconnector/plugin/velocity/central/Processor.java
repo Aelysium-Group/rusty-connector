@@ -117,13 +117,13 @@ public class Processor extends IKLifecycle {
         builder.addService(whitelistService);
 
         for (String familyName: familiesConfig.getScalarFamilies())
-            familyService.add(ScalarServerFamily.init(whitelistService, familyName));
+            familyService.add(ScalarServerFamily.init(familyName));
         for (String familyName: familiesConfig.getStaticFamilies())
-            familyService.add(StaticServerFamily.init(whitelistService, familyName));
+            familyService.add(StaticServerFamily.init(familyName));
 
         logger.log("Setting up root family");
 
-        familyService.setRootFamily(ScalarServerFamily.init(whitelistService, familiesConfig.getRootFamilyName()));
+        familyService.setRootFamily(ScalarServerFamily.init(familiesConfig.getRootFamilyName()));
 
         logger.log("Finished setting up root family");
 
@@ -205,6 +205,8 @@ public class Processor extends IKLifecycle {
                     throw new IllegalStateException("Unable to load or create party.yml!");
                 config.register();
 
+                if(!config.isEnabled()) throw new IllegalStateException();
+
                 PartyService.PartySettings settings = new PartyService.PartySettings(
                         config.getMaxMembers(),
                         config.isFriendsOnly(),
@@ -230,6 +232,8 @@ public class Processor extends IKLifecycle {
                 if (!config.generate())
                     throw new IllegalStateException("Unable to load or create friends.yml!");
                 config.register();
+
+                if(!config.isEnabled()) throw new IllegalStateException();
 
                 FriendsService.FriendsSettings settings = new FriendsService.FriendsSettings(
                         config.getMaxFriends()
@@ -258,6 +262,8 @@ public class Processor extends IKLifecycle {
                 if (!config.generate())
                     throw new IllegalStateException("Unable to load or create dynamic_teleport.yml!");
                 config.register();
+
+                if(!config.isEnabled()) throw new IllegalStateException();
 
                 return DynamicTeleportService.init(config);
             } catch (Exception e) {

@@ -7,13 +7,19 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class WhitelistService extends Service implements NodeManager<Whitelist> {
     private final Map<String, Whitelist> registeredWhitelists = new HashMap<>();
     private WeakReference<Whitelist> proxyWhitelist;
 
-    public Whitelist getProxyWhitelist() {
-        return this.proxyWhitelist.get();
+    public Optional<Whitelist> getProxyWhitelist() {
+        try {
+            Whitelist whitelist = this.proxyWhitelist.get();
+            if(whitelist != null) return Optional.of(whitelist);
+        } catch (Exception ignore) {}
+
+        return Optional.empty();
     }
 
     public void setProxyWhitelist(Whitelist whitelist) {

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.commands;
+package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;

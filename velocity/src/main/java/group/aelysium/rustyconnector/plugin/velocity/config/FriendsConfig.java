@@ -77,10 +77,6 @@ public class FriendsConfig extends YAML {
         return this.mysql_database;
     }
 
-    public boolean isOnlyTPAToFriends() {
-        return onlyTPAToFriends;
-    }
-
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
         PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
@@ -105,8 +101,5 @@ public class FriendsConfig extends YAML {
         this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
         if (this.mysql_database.equals(""))
             throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
-
-
-        this.onlyTPAToFriends = this.getNode(this.data, "only-tpa-to-friends", Boolean.class);
     }
 }
