@@ -88,7 +88,7 @@ public final class CommandUnFriend {
 
                             try {
                                 if(friendsService.removeFriend(player, targetPlayer))
-                                    throw new Exception();
+                                    return closeMessage(player, Component.text("You are no longer friends with "+username, NamedTextColor.GREEN));
                             } catch (IllegalStateException e) {
                                 return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
                             } catch (Exception ignore) {}

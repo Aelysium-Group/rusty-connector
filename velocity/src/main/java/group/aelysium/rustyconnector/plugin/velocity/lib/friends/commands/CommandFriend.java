@@ -169,10 +169,11 @@ public final class CommandFriend {
 
                                                 try {
                                                     invite.ignore();
-                                                    return closeMessage(player, Component.text("Ignored the friend request from "+username, NamedTextColor.GREEN));
                                                 } catch (Exception ignore) {
                                                     friendsService.closeInvite(invite);
                                                 }
+
+                                                return closeMessage(player, Component.text("Ignored the friend request from "+username, NamedTextColor.GREEN));
                                             } catch (Exception ignore) {}
 
                                             return closeMessage(player, Component.text("There was an issue ignoring the friend request from "+username, NamedTextColor.RED));
