@@ -32,7 +32,7 @@ public class TPAService extends ServiceableService {
     }
     public void initCommand() {
         CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
-        if (commandManager.hasCommand("tpa"))
+        if(!commandManager.hasCommand("tpa"))
             try {
                 commandManager.register(
                         commandManager.metaBuilder("tpa").build(),

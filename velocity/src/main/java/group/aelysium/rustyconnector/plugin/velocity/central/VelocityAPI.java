@@ -96,18 +96,14 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
             this.processor.addService(friendsService);
 
             friendsService.initCommand();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignore) {}
         try {
             PartyService partyService = Processor.Initializer.buildPartyService().orElseThrow();
 
             this.processor.addService(partyService);
 
             partyService.initCommand();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignore) {}
         try {
             DynamicTeleportService dynamicTeleportService = Processor.Initializer.buildDynamicTeleportService().orElseThrow();
 
