@@ -198,7 +198,7 @@ public class Processor extends IKLifecycle {
                     throw new IllegalStateException("Unable to load or create party.yml!");
                 config.register();
 
-                if(!config.isEnabled()) throw new IllegalStateException();
+                if(!config.isEnabled()) return Optional.empty();
 
                 PartyService.PartySettings settings = new PartyService.PartySettings(
                         config.getMaxMembers(),
@@ -226,7 +226,7 @@ public class Processor extends IKLifecycle {
                     throw new IllegalStateException("Unable to load or create friends.yml!");
                 config.register();
 
-                if(!config.isEnabled()) throw new IllegalStateException();
+                if(!config.isEnabled()) return Optional.empty();
 
                 FriendsService.FriendsSettings settings = new FriendsService.FriendsSettings(
                         config.getMaxFriends()
@@ -256,7 +256,7 @@ public class Processor extends IKLifecycle {
                     throw new IllegalStateException("Unable to load or create dynamic_teleport.yml!");
                 config.register();
 
-                if(!config.isEnabled()) throw new IllegalStateException();
+                if(!config.isEnabled()) return Optional.empty();
 
                 return DynamicTeleportService.init(config);
             } catch (Exception e) {

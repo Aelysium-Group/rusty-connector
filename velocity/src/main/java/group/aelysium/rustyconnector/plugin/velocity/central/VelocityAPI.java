@@ -96,14 +96,18 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
             this.processor.addService(friendsService);
 
             friendsService.initCommand();
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try {
             PartyService partyService = Processor.Initializer.buildPartyService().orElseThrow();
 
             this.processor.addService(partyService);
 
             partyService.initCommand();
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try {
             DynamicTeleportService dynamicTeleportService = Processor.Initializer.buildDynamicTeleportService().orElseThrow();
 
@@ -113,10 +117,9 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
                     .getService(TPA_CLEANING_SERVICE).orElseThrow()
                     .startHeartbeat();
             dynamicTeleportService.getService(TPA_SERVICE).orElseThrow().initCommand();
-        } catch (Exception ignore) {}
-
-        try {
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
