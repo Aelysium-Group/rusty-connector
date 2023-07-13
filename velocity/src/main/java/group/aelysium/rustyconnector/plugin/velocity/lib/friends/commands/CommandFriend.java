@@ -44,7 +44,7 @@ public final class CommandFriend {
                 .requires(source -> source instanceof Player)
                 .executes(context -> {
                     if(!(context.getSource() instanceof Player player)) {
-                        logger.log("/party must be sent as a player!");
+                        logger.log("/friend must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
 
@@ -75,7 +75,7 @@ public final class CommandFriend {
                         })
                         .executes(context -> {
                             if(!(context.getSource() instanceof Player player)) {
-                                logger.log("/party must be sent as a player!");
+                                logger.log("/friend must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -134,11 +134,11 @@ public final class CommandFriend {
                                 })
                                 .executes(context -> {
                                     if(!(context.getSource() instanceof Player player)) {
-                                        logger.log("/party must be sent as a player!");
+                                        logger.log("/friend must be sent as a player!");
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    if(!Permission.validate(player, "rustyconnector.command.party")) {
+                                    if(!Permission.validate(player, "rustyconnector.command.friend")) {
                                         player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }

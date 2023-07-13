@@ -29,9 +29,10 @@ public class TPAService extends ServiceableService {
         super(new HashMap<>());
         this.services.put(TPACleaningService.class, new TPACleaningService(settings.expiration()));
         this.settings = settings;
-
+    }
+    public void initCommand() {
         CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
-        if(commandManager.hasCommand("tpa"))
+        if (commandManager.hasCommand("tpa"))
             try {
                 commandManager.register(
                         commandManager.metaBuilder("tpa").build(),

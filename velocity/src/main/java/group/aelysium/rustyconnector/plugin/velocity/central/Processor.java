@@ -48,6 +48,10 @@ public class Processor extends IKLifecycle {
         this.services.clear();
     }
 
+    public void addService(Service service) {
+        this.services.put(service.getClass(), service);
+    }
+
     public static Processor init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
@@ -181,21 +185,10 @@ public class Processor extends IKLifecycle {
 
         builder.addService(serverServiceBuilder.build());
 
-
-        try {
-            builder.addService(Initializer.buildFriendsService().orElseThrow());
-        } catch (Exception ignore) {}
-        try {
-            builder.addService(Initializer.buildPartyService().orElseThrow());
-        } catch (Exception ignore) {}
-        try {
-            builder.addService(Initializer.buildDynamicTeleportService().orElseThrow());
-        } catch (Exception ignore) {}
-
         return builder.build();
     }
 
-    protected static class Initializer {
+    public static class Initializer {
         public static Optional<PartyService> buildPartyService() {
             VelocityAPI api = VelocityRustyConnector.getAPI();
             PluginLogger logger = api.getLogger();

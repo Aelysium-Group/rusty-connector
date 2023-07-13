@@ -24,17 +24,6 @@ public class Party {
         this.players = new Vector<>(maxSize);
         this.maxSize = maxSize;
         this.setLeader(host);
-
-        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
-        if(!commandManager.hasCommand("party"))
-            try {
-                commandManager.register(
-                        commandManager.metaBuilder("party").build(),
-                        CommandParty.create()
-                );
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
     }
 
     public void setServer(PlayerServer server) {

@@ -13,7 +13,10 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import org.slf4j.Logger;
 
@@ -86,11 +89,33 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         this.processor.getService(REDIS_SERVICE).orElseThrow().start(RedisSubscriber.class);
         this.processor.getService(SERVER_SERVICE).orElseThrow()
                       .getService(ServerService.ValidServices.MAGIC_LINK_SERVICE).orElseThrow().startHeartbeat();
+
         try {
-            this.processor.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow()
-                          .getService(TPA_SERVICE).orElseThrow()
-                          .getService(TPA_CLEANING_SERVICE).orElseThrow()
-                          .startHeartbeat();
+            FriendsService friendsService = Processor.Initializer.buildFriendsService().orElseThrow();
+
+            this.processor.addService(friendsService);
+
+            friendsService.initCommand();
+        } catch (Exception ignore) {}
+        try {
+            PartyService partyService = Processor.Initializer.buildPartyService().orElseThrow();
+
+            this.processor.addService(partyService);
+
+            partyService.initCommand();
+        } catch (Exception ignore) {}
+        try {
+            DynamicTeleportService dynamicTeleportService = Processor.Initializer.buildDynamicTeleportService().orElseThrow();
+
+            this.processor.addService(dynamicTeleportService);
+
+            dynamicTeleportService.getService(TPA_SERVICE).orElseThrow()
+                    .getService(TPA_CLEANING_SERVICE).orElseThrow()
+                    .startHeartbeat();
+            dynamicTeleportService.getService(TPA_SERVICE).orElseThrow().initCommand();
+        } catch (Exception ignore) {}
+
+        try {
         } catch (Exception ignore) {}
     }
 

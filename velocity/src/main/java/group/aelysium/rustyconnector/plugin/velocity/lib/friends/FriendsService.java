@@ -24,12 +24,14 @@ public class FriendsService extends ServiceableService {
         super(new HashMap<>());
         this.services.put(FriendsDataEnclaveService.class, new FriendsDataEnclaveService(friendsMySQLService));
         this.settings = settings;
+    }
 
+    public void initCommand() {
         CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
         if(!commandManager.hasCommand("friend"))
             try {
                 commandManager.register(
-                        commandManager.metaBuilder("friend").build(),
+                        commandManager.metaBuilder("friend").aliases("/friend").build(),
                         CommandFriend.create()
                 );
             } catch (Exception e) {
@@ -38,7 +40,7 @@ public class FriendsService extends ServiceableService {
         if(!commandManager.hasCommand("unfriend"))
             try {
                 commandManager.register(
-                        commandManager.metaBuilder("unfriend").build(),
+                        commandManager.metaBuilder("unfriend").aliases("/unfriend").build(),
                         CommandUnFriend.create()
                 );
             } catch (Exception e) {

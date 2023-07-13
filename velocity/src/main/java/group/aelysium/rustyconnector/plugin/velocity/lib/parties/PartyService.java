@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
+import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.Service;
@@ -7,7 +8,9 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -24,6 +27,19 @@ public class PartyService extends Service {
 
     public PartyService(PartySettings settings) {
         this.settings = settings;
+    }
+
+    public void initCommand() {
+        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
+        if(!commandManager.hasCommand("party"))
+            try {
+                commandManager.register(
+                        commandManager.metaBuilder("party").aliases("/party").build(),
+                        CommandParty.create()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
     public PartySettings getSettings() {
