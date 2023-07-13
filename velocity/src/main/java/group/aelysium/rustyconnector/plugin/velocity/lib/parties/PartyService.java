@@ -117,6 +117,10 @@ public class PartyService extends Service {
         invite.decompose();
     }
 
+    public List<Party> dump() {
+        return this.parties.stream().toList();
+    }
+
     @Override
     public void kill() {
         this.parties.clear();

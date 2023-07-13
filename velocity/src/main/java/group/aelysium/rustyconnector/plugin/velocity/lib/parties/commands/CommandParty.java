@@ -195,7 +195,7 @@ public final class CommandParty {
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            if(partyService.find(player).orElse(null) == null)
+                            if(partyService.find(player).orElse(null) != null)
                                 return closeMessage(player, Component.text("You can't start a party if you're already in one!", NamedTextColor.RED));
 
                             partyService.create(player);
@@ -219,7 +219,7 @@ public final class CommandParty {
                             Party party = partyService.find(player).orElse(null);
                             if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
 
-                            if(party.getLeader().equals(player))
+                            if(!party.getLeader().equals(player))
                                 return closeMessage(player, Component.text("Only the party leader can disband the party!", NamedTextColor.RED));
 
                             partyService.disband(party);
@@ -308,6 +308,8 @@ public final class CommandParty {
                                     String username = context.getArgument("username", String.class);
                                     Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null || !targetPlayer.isActive()) return closeMessage(player, Component.text(username + " isn't available to send an invite to!", NamedTextColor.RED));
+                                    if(targetPlayer.equals(player))
+                                        return closeMessage(player, Component.text("You can't invite yourself to your own party!", NamedTextColor.RED));
 
                                     try {
                                         partyService.invitePlayer(party, player, targetPlayer);
@@ -377,11 +379,88 @@ public final class CommandParty {
                                     Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null)
                                         return closeMessage(player, Component.text(username + " hasn't played on the server!", NamedTextColor.RED));
+                                    if(targetPlayer.equals(player))
+                                        return closeMessage(player, Component.text("You can't kick yourself! Use `/party leave` instead!", NamedTextColor.RED));
                                     if(!party.contains(targetPlayer))
                                         return closeMessage(player, Component.text(username + " isn't in your party!", NamedTextColor.RED));
 
                                     party.leave(targetPlayer);
                                     targetPlayer.sendMessage(Component.text("You were kicked from your party.",NamedTextColor.YELLOW));
+                                    return Command.SINGLE_SUCCESS;
+                                })
+                        )
+                )
+                .then(LiteralArgumentBuilder.<CommandSource>literal("promote")
+                        .executes(context -> {
+                            if(!(context.getSource() instanceof Player player)) {
+                                logger.log("/party must be sent as a player!");
+                                return Command.SINGLE_SUCCESS;
+                            }
+
+                            if(!Permission.validate(player, "rustyconnector.command.party")) {
+                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                return Command.SINGLE_SUCCESS;
+                            }
+
+                            context.getSource().sendMessage(VelocityLang.PARTY_USAGE_PROMOTE.build());
+                            return Command.SINGLE_SUCCESS;
+                        })
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
+                                .suggests((context, builder) -> {
+                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+
+                                    try {
+                                        Party party = partyService.find(player).orElse(null);
+                                        if(party == null) {
+                                            builder.suggest("You aren't in a party!");
+                                            return builder.buildFuture();
+                                        }
+
+                                        party.players().forEach(partyMember -> {
+                                            if(partyMember.equals(player)) return;
+                                            builder.suggest(partyMember.getUsername());
+                                        });
+
+                                        return builder.buildFuture();
+                                    } catch (Exception ignored) {}
+
+                                    builder.suggest("Searching for players...");
+                                    return builder.buildFuture();
+                                })
+                                .executes(context -> {
+                                    if(!(context.getSource() instanceof Player player)) {
+                                        logger.log("/party must be sent as a player!");
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+
+                                    if(!Permission.validate(player, "rustyconnector.command.party")) {
+                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+
+                                    Party party = partyService.find(player).orElse(null);
+                                    if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
+
+                                    if(partyService.getSettings().onlyLeaderCanKick())
+                                        if(!party.getLeader().equals(player))
+                                            return closeMessage(player, Component.text("Only the party leader can promote people!", NamedTextColor.RED));
+
+                                    String username = context.getArgument("username", String.class);
+                                    Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
+                                    if(targetPlayer == null)
+                                        return closeMessage(player, Component.text(username + " hasn't played on the server!", NamedTextColor.RED));
+                                    if(targetPlayer.equals(player))
+                                        return closeMessage(player, Component.text("You can't promote yourself! You're already the leader.", NamedTextColor.RED));
+                                    if(!party.contains(targetPlayer))
+                                        return closeMessage(player, Component.text(username + " isn't in your party!", NamedTextColor.RED));
+
+                                    try {
+                                        party.setLeader(targetPlayer);
+                                        targetPlayer.sendMessage(Component.text("You were promoted to party leader.",NamedTextColor.YELLOW));
+                                        targetPlayer.sendMessage(Component.text("You are no longer party leader.",NamedTextColor.YELLOW));
+                                    } catch (Exception e) {
+                                        return closeMessage(player, Component.text(username + "There was an issue doing that!", NamedTextColor.RED));
+                                    }
                                     return Command.SINGLE_SUCCESS;
                                 })
                         )

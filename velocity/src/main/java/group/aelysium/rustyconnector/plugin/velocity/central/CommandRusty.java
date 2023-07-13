@@ -205,6 +205,19 @@ public final class CommandRusty {
                         )
                 )
             )
+            .then(LiteralArgumentBuilder.<CommandSource>literal("parties")
+                    .executes(context -> {
+                        try {
+                            api.getService(PARTY_SERVICE).orElseThrow().dump().forEach(party -> {
+                                logger.log(party.toString());
+                            });
+                        } catch (Exception e) {
+                            VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting the parties!\n"+e.getMessage());
+                        }
+
+                        return Command.SINGLE_SUCCESS;
+                    })
+            )
             .then(LiteralArgumentBuilder.<CommandSource>literal("reload")
                     .executes(context -> {
                         logger.log("Reloading the proxy...");

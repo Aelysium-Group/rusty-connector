@@ -13,8 +13,9 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Vector;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.PARTY_SERVICE;
+
 public class Party {
-    private boolean empty = false;
     private final Vector<Player> players;
     private final int maxSize;
     private WeakReference<Player> leader;
@@ -44,12 +45,14 @@ public class Party {
         return this.leader.get();
     }
 
-    private void setLeader(Player player) {
+    public void setLeader(Player player) {
+        if(!this.players.contains(player))
+            this.players.add(player);
         this.leader = new WeakReference<>(player);
     }
 
     public boolean isEmpty() {
-        return this.empty;
+        return this.players().isEmpty();
     }
 
     public Vector<Player> players() {
@@ -75,8 +78,8 @@ public class Party {
 
         this.players.forEach(partyMember -> player.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
 
-        if(this.players.size() == 0)
-            this.decompose();
+        if(this.isEmpty())
+            VelocityRustyConnector.getAPI().getService(PARTY_SERVICE).orElseThrow().disband(this);
     }
 
     public void broadcast(Component message) {
@@ -88,9 +91,17 @@ public class Party {
     }
 
     public void decompose() {
-        this.empty = true;
         this.players.clear();
         this.leader.clear();
         this.leader = null;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return "<Party players=" + this.players.size() + " leader=" + Objects.requireNonNull(this.leader.get()).getUsername() + ">";
+        } catch (Exception ignore) {
+            return "<Party players=" + this.players.size() + " leader=null>";
+        }
     }
 }

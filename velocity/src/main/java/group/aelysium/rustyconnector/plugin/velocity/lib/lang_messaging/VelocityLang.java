@@ -438,7 +438,7 @@ public interface VelocityLang extends Lang {
 
     Message PARTY_USAGE_PARTY_LEADER = () -> join(
             Lang.newlines(),
-            text("Usage: /party <disband / invite / kick>",RED)
+            text("Usage: /party <disband / invite / kick / promote>",RED)
     );
 
     Message PARTY_USAGE_PARTY_MEMBER = () -> join(
@@ -459,6 +459,11 @@ public interface VelocityLang extends Lang {
     Message PARTY_USAGE_KICK = () -> join(
             Lang.newlines(),
             text("Usage: /party kick <username>",RED)
+    );
+
+    Message PARTY_USAGE_PROMOTE = () -> join(
+            Lang.newlines(),
+            text("Usage: /party promote <username>",RED)
     );
 
     Message PARTY_DISBANDED = () -> join(
