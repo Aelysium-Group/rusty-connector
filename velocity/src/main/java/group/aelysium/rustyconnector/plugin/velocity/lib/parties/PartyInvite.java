@@ -68,7 +68,7 @@ public class PartyInvite {
      * Deny the party invite.
      * This will subsequently decompose the invite and remove it from the PartyService that it belongs to.
      */
-    public synchronized void deny() {
+    public synchronized void ignore() {
         if(this.isAcknowledged != null) throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
 
         PartyService partyService = VelocityRustyConnector.getAPI().getService(PARTY_SERVICE).orElse(null);

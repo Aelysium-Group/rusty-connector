@@ -114,7 +114,7 @@ public final class CommandParty {
                                     context.getSource().sendMessage(VelocityLang.PARTY_USAGE_INVITES.build());
                                     return Command.SINGLE_SUCCESS;
                                 })
-                                .then(LiteralArgumentBuilder.<CommandSource>literal("deny")
+                                .then(LiteralArgumentBuilder.<CommandSource>literal("ignore")
                                         .executes(context -> {
                                             if(!(context.getSource() instanceof Player player)) {
                                                 logger.log("/party must be sent as a player!");
@@ -137,12 +137,12 @@ public final class CommandParty {
                                                 if(invite == null) throw new NoOutputException();
 
                                                 try {
-                                                    invite.deny();
+                                                    invite.ignore();
                                                 } catch (Exception ignore) {
                                                     partyService.closeInvite(invite);
                                                 }
                                             } catch (Exception ignore) {
-                                                return closeMessage(player, Component.text("There was an issue denying that invite!", NamedTextColor.RED));
+                                                return closeMessage(player, Component.text("There was an issue ignoring that invite!", NamedTextColor.RED));
                                             }
                                             return Command.SINGLE_SUCCESS;
                                         })

@@ -448,7 +448,7 @@ public interface VelocityLang extends Lang {
 
     Message PARTY_USAGE_INVITES = () -> join(
             Lang.newlines(),
-            text("Usage: /party invites <username> <accept / deny>",RED)
+            text("Usage: /party invites <username> <accept / ignore>",RED)
     );
 
     Message PARTY_USAGE_INVITE = () -> join(
