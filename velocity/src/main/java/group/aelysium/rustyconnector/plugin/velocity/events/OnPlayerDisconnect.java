@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -58,6 +59,12 @@ public class OnPlayerDisconnect {
 
                     party.leave(player);
                 } catch (Exception e) {}
+            } catch (Exception ignore) {}
+
+            // Handle friends when player leaves
+            try {
+                FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
+                friendsService.getService(FriendsService.ValidServices.DATA_ENCLAVE).orElseThrow().unCachePlayer(player);
             } catch (Exception ignore) {}
 
             WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));

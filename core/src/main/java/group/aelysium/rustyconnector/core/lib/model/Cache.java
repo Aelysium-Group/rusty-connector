@@ -45,7 +45,7 @@ public class Cache<D> extends Service {
      * Removes an item from the cache.
      * @param messageSnowflake The snowflake of the cached item.
      */
-    public synchronized void removeMessage(Long messageSnowflake) {
+    public synchronized void remove(Long messageSnowflake) {
         this.items.remove(messageSnowflake);
     }
 

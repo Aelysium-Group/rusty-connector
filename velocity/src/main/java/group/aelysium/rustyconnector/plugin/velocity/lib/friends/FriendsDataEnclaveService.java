@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.core.lib.model.Cache;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.*;
 
 /**
@@ -24,9 +25,30 @@ public class FriendsDataEnclaveService extends Service {
 
     private Optional<List<FriendMapping>> getPlayersCacheEntry(Player player) {
         try {
-            return Optional.of(this.cache.get(this.players.get(player)));
+            Long snowflake = this.players.get(player);
+            if(snowflake == null) return Optional.empty();
+
+            List<FriendMapping> mappings = this.cache.get(snowflake);
+
+            return Optional.of(mappings);
+        } catch (Exception ignore) {
+            Long snowflake = this.cache.put(new ArrayList<>());
+            List<FriendMapping> mappings = this.cache.get(snowflake);
+
+            this.players.put(player, snowflake);
+
+            return Optional.of(mappings);
+        }
+    }
+
+    public boolean unCachePlayer(Player player) {
+        try {
+            Long snowflake = this.players.get(player);
+            this.players.remove(snowflake);
+            this.cache.get(snowflake).clear();
+            this.cache.remove(snowflake);
         } catch (Exception ignore) {}
-        return Optional.empty();
+        return false;
     }
 
     /**
@@ -38,7 +60,9 @@ public class FriendsDataEnclaveService extends Service {
     public Optional<List<FriendMapping>> findFriends(Player player) {
         try {
             return Optional.of(this.getPlayersCacheEntry(player).orElseThrow());
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         try {
             List<FriendMapping> mappings = this.mySQLService.findFriends(player).orElseThrow();
@@ -46,7 +70,9 @@ public class FriendsDataEnclaveService extends Service {
             this.players.put(player, snowflake);
 
             return Optional.of(mappings);
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return Optional.empty();
     }
@@ -68,24 +94,36 @@ public class FriendsDataEnclaveService extends Service {
             this.players.put(player, snowflake);
 
             return Optional.of(mappings.size());
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return Optional.empty();
     }
 
     public Optional<FriendMapping> addFriend(Player player1, Player player2) throws SQLException {
         try {
-            FriendMapping mapping = this.mySQLService.addFriend(player1, player2);
+            FriendMapping mapping = new FriendMapping(player1, player2);
+            try {
+                 this.mySQLService.addFriend(player1, player2);
+                 // TODO actually handle duplicates properly instead of pretending they don't exist
+            } catch (SQLIntegrityConstraintViolationException ignore) {}
 
             try {
                 this.getPlayersCacheEntry(player1).orElseThrow().add(mapping);
-            } catch (Exception ignore) {}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             try {
                 this.getPlayersCacheEntry(player2).orElseThrow().add(mapping);
-            } catch (Exception ignore) {}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             return Optional.of(mapping);
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return Optional.empty();
     }
@@ -94,13 +132,19 @@ public class FriendsDataEnclaveService extends Service {
         FriendMapping mapping = new FriendMapping(player1, player2);
         try {
             this.mySQLService.removeFriend(player1, player2);
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try {
             this.getPlayersCacheEntry(player1).orElseThrow().remove(mapping);
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try {
             this.getPlayersCacheEntry(player2).orElseThrow().remove(mapping);
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

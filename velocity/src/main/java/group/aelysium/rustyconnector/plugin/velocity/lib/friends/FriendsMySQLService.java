@@ -22,13 +22,9 @@ import java.util.Optional;
 
 public class FriendsMySQLService extends MySQLService {
     private static final String FIND_FRIENDS = "SELECT * FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
-    private static final String FIND_FRIEND = "SELECT * FROM friends WHERE player1_uuid = ? AND player2_uuid = ? OR player1_uuid = ? AND player2_uuid = ?;";
     private static final String GET_FRIEND_COUNT = "SELECT COUNT(*) FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
     private static final String DELETE_FRIEND = "DELETE FROM friends WHERE player1_uuid = ? AND player2_uuid = ?;";
     private static final String ADD_FRIEND = "INSERT INTO friends (player1_uuid, player2_uuid) VALUES(?, ?);";
-
-    private static final String SEND_FRIEND_REQUEST = "INSERT INTO requests (sender_UUID, target_UUID) VALUES(?, ?);";
-    private static final String DELETE_FRIEND_REQUEST = "DELETE FROM requests WHERE sender_UUID = ? AND target_UUID = ?;";
 
     private FriendsMySQLService(DataSource dataSource) {
         super(dataSource);
@@ -104,16 +100,15 @@ public class FriendsMySQLService extends MySQLService {
         return friendCount;
     }
 
-    public FriendMapping addFriend(Player player1, Player player2) throws SQLException {
+    public void addFriend(Player player1, Player player2) throws SQLException {
         this.connect();
         PreparedStatement statement = this.prepare(ADD_FRIEND);
         statement.setString(1, player1.getUniqueId().toString());
         statement.setString(2, player2.getUniqueId().toString());
 
-        ResultSet result = this.executeQuery(statement);
+        this.execute(statement);
 
         this.close();
-        return new FriendMapping(player1, player2);
     }
 
     public void removeFriend(Player player1, Player player2) throws SQLException {
@@ -122,7 +117,7 @@ public class FriendsMySQLService extends MySQLService {
         statement.setString(1, player1.getUniqueId().toString());
         statement.setString(2, player2.getUniqueId().toString());
 
-        this.executeQuery(statement);
+        this.execute(statement);
 
         this.close();
     }
