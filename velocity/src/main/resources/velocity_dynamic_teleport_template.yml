@@ -101,6 +101,8 @@ tpa:
     # | This data value is a Liquid Timestamp. Read more here:                 #
     # https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
     #                                                                          #
+    #   NOTE: The Liquid Timestamp "NEVER" is not allowed here!                #
+    #                                                                          #
     #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
     ############################################################################
     expiration: NEVER

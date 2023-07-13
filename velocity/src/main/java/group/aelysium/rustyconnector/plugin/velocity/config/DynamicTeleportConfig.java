@@ -2,11 +2,17 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class DynamicTeleportConfig extends YAML {
     private static DynamicTeleportConfig config;
@@ -92,10 +98,13 @@ public class DynamicTeleportConfig extends YAML {
 
         try {
             String expiration = this.getNode(this.data, "tpa.expiration", String.class);
-            if(expiration.equals("NEVER")) this.tpa_expiration = null;
+            if(expiration.equals("NEVER")) {
+                this.tpa_expiration = new LiquidTimestamp(5, TimeUnit.MINUTES);
+                VelocityRustyConnector.getAPI().getLogger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes."), NamedTextColor.YELLOW));
+            }
             else this.tpa_expiration = new LiquidTimestamp(expiration);
         } catch (ParseException e) {
-            throw new IllegalStateException("You must provide a valid time value for [tpa.tpa_expiration] in dynamic_teleport.yml!");
+            throw new IllegalStateException("You must provide a valid time value for [tpa.expiration] in dynamic_teleport.yml!");
         }
     }
 }
