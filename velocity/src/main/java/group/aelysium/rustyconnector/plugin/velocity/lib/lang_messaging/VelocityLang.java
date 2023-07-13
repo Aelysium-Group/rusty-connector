@@ -473,7 +473,7 @@ public interface VelocityLang extends Lang {
     );
     Message FRIEND_REQUEST_USAGE = () -> join(
             Lang.newlines(),
-            text("Usage: /friend requests <username> <accept / deny>",RED)
+            text("Usage: /friend requests <username> <accept / ignore>",RED)
     );
     Message UNFRIEND_USAGE = () -> join(
             Lang.newlines(),

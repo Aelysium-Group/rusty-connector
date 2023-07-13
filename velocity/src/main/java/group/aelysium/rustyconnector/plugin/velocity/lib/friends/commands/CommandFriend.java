@@ -169,13 +169,13 @@ public final class CommandFriend {
 
                                                 try {
                                                     invite.ignore();
-                                                    return closeMessage(player, Component.text("Ignored the friend request from "+senderPlayer.getUsername(), NamedTextColor.GREEN));
+                                                    return closeMessage(player, Component.text("Ignored the friend request from "+username, NamedTextColor.GREEN));
                                                 } catch (Exception ignore) {
                                                     friendsService.closeInvite(invite);
                                                 }
                                             } catch (Exception ignore) {}
 
-                                            return closeMessage(player, Component.text("There was an issue ignoring the friend request from "+senderPlayer.getUsername(), NamedTextColor.RED));
+                                            return closeMessage(player, Component.text("There was an issue ignoring the friend request from "+username, NamedTextColor.RED));
                                         })
                                 )
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
@@ -197,7 +197,7 @@ public final class CommandFriend {
 
                                             FriendRequest invite = friendsService.findRequest(player, senderPlayer).orElse(null);
                                             if(invite == null)
-                                                return closeMessage(player, Component.text("The friend request from " + senderPlayer + " has expired!", NamedTextColor.RED));
+                                                return closeMessage(player, Component.text("The friend request from " + senderPlayer.getUsername() + " has expired!", NamedTextColor.RED));
 
                                             try {
                                                 invite.accept();
