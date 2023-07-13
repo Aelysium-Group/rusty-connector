@@ -41,8 +41,12 @@ public class PartyInvite {
 
         if(this.isAcknowledged != null)
             throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
-        if(this.party.get() == null)
-            throw new IllegalStateException("This party no longer exists!");
+        try {
+            if (this.party.get() == null || Objects.requireNonNull(this.party.get()).isEmpty())
+                throw new IllegalStateException("This invite has expired!");
+        } catch (NullPointerException ignore) {
+            throw new IllegalStateException("This invite has expired!");
+        }
         if(this.sender.get() == null)
             throw new IllegalStateException("The sender is no-longer online!");
         if(!Objects.requireNonNull(this.sender.get()).isActive())
@@ -68,8 +72,7 @@ public class PartyInvite {
         if(this.isAcknowledged != null) throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
 
         PartyService partyService = VelocityRustyConnector.getAPI().getService(PARTY_SERVICE).orElse(null);
-        if(partyService == null)
-            throw new IllegalStateException("The party module is disabled!");
+        if(partyService == null) throw new IllegalStateException("The party module is disabled!");
 
         partyService.closeInvite(this);
         this.isAcknowledged = true;

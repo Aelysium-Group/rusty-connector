@@ -130,7 +130,7 @@ public final class CommandParty {
                                             Player senderPlayer = api.getServer().getPlayer(username).orElse(null);
 
                                             if(senderPlayer == null)
-                                                return closeMessage(player, Component.text(username + " doesn't seem to exist on this server! (How did this happen?)", NamedTextColor.RED));
+                                                return closeMessage(player, Component.text(username + " doesn't seem to exist on this server!", NamedTextColor.RED));
 
                                             try {
                                                 PartyInvite invite = partyService.findInvite(player, senderPlayer).orElse(null);
@@ -141,9 +141,10 @@ public final class CommandParty {
                                                 } catch (Exception ignore) {
                                                     partyService.closeInvite(invite);
                                                 }
-                                            } catch (Exception ignore) {}
-
-                                            return closeMessage(player, Component.text("There was an issue accepting that invite!", NamedTextColor.RED));
+                                            } catch (Exception ignore) {
+                                                return closeMessage(player, Component.text("There was an issue denying that invite!", NamedTextColor.RED));
+                                            }
+                                            return Command.SINGLE_SUCCESS;
                                         })
                                 )
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
