@@ -24,7 +24,7 @@ public class FriendsMySQLService extends MySQLService {
     private static final String FIND_FRIENDS = "SELECT * FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
     private static final String GET_FRIEND_COUNT = "SELECT COUNT(*) FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
     private static final String DELETE_FRIEND = "DELETE FROM friends WHERE player1_uuid = ? AND player2_uuid = ?;";
-    private static final String ADD_FRIEND = "INSERT INTO friends (player1_uuid, player2_uuid) VALUES(?, ?);";
+    private static final String ADD_FRIEND = "REPLACE INTO friends (player1_uuid, player2_uuid) VALUES(?, ?);";
 
     private FriendsMySQLService(DataSource dataSource) {
         super(dataSource);

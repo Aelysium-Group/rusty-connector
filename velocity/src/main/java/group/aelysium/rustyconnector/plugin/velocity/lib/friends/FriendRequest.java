@@ -67,8 +67,8 @@ public class FriendRequest {
             this.isAcknowledged = true;
         } catch (Exception e) {
             e.printStackTrace();
+            throw new IllegalStateException("There was a fatal error accepting this friend request!");
         }
-        throw new IllegalStateException("There was a fatal error accepting this friend request!");
     }
 
     /**
