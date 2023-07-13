@@ -136,7 +136,6 @@ public class DefaultConfig extends YAML {
             throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
 
 
-
         this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
         if(this.redis_dataChannel.equals(""))
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");

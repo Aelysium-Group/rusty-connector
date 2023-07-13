@@ -57,7 +57,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public LoadBalancer getLoadBalancer() {
         return this.loadBalancer;
     }
-
+  
     /**
      * Get the whitelist for this family, or `null` if there isn't one.
      * @return The whitelist or `null` if there isn't one.

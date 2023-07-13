@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class StaticFamilyConfig extends YAML {
     private static Map<String, StaticFamilyConfig> configs = new HashMap<>();
+    private String parent_family = "";
     private boolean firstConnection_loadBalancing_weighted = false;
     private String firstConnection_loadBalancing_algorithm = "ROUND_ROBIN";
     private boolean firstConnection_loadBalancing_persistence_enabled = false;
@@ -24,6 +25,8 @@ public class StaticFamilyConfig extends YAML {
     private StaticFamilyConfig(File configPointer, String template) {
         super(configPointer, template);
     }
+
+    public String getParent_family() { return parent_family; }
 
     public boolean isFirstConnection_loadBalancing_weighted() {
         return firstConnection_loadBalancing_weighted;
@@ -75,6 +78,8 @@ public class StaticFamilyConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
+        this.parent_family = this.getNode(this.data, "parent-family", String.class);
+
         this.firstConnection_loadBalancing_weighted = this.getNode(this.data,"first-connection.load-balancing.weighted",Boolean.class);
         this.firstConnection_loadBalancing_algorithm = this.getNode(this.data,"first-connection.load-balancing.algorithm",String.class);
 

@@ -165,7 +165,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
+                    staticFamilyConfig.getParent_family()
             );
             case LEAST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
@@ -175,7 +176,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
+                    staticFamilyConfig.getParent_family()
             );
             case MOST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
@@ -185,7 +187,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
+                    staticFamilyConfig.getParent_family()
             );
         }
 

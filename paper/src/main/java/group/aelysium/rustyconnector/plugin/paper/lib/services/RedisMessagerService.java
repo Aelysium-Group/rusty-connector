@@ -36,7 +36,7 @@ public class RedisMessagerService extends Service {
                     .buildSendable();
             api.getService(REDIS_SERVICE).orElseThrow().publish(message);
         } catch (Exception e) {
-            Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text(e.getMessage()), NamedTextColor.RED);
+            Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text(e.toString()), NamedTextColor.RED);
         }
     }
 

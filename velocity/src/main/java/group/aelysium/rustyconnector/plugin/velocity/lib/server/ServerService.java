@@ -207,6 +207,9 @@ public class ServerService extends ServiceableService {
         private int weight;
         private int softPlayerCap;
         private int hardPlayerCap;
+
+        private String parentFamilyName;
+
         protected int initialTimeout = 15;
 
         public ServerService.ServerBuilder setServerInfo(ServerInfo serverInfo) {
@@ -216,6 +219,11 @@ public class ServerService extends ServiceableService {
 
         public ServerService.ServerBuilder setFamilyName(String familyName) {
             this.familyName = familyName;
+            return this;
+        }
+
+        public ServerService.ServerBuilder setParentFamilyName(String parentFamilyName) {
+            this.parentFamilyName = parentFamilyName;
             return this;
         }
 
