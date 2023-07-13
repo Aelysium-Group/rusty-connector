@@ -13,8 +13,6 @@ public class MessageCacheService extends Service {
     private int max = 25;
 
     public MessageCacheService(Integer max) {
-        super(true);
-
         if(max <= 0) max = 0;
         if(max > 500) max = 500;
 

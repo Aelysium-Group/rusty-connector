@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.message.handling;
+package group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
@@ -6,15 +6,16 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.R
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.ProxyConnectorService;
+import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class PingResponseHandler implements MessageHandler {
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.MAGIC_LINK_SERVICE;
+
+public class MagicLink_PingResponseHandler implements MessageHandler {
     private final RedisMessageServerPingResponse message;
 
-    public PingResponseHandler(GenericRedisMessage message) {
+    public MagicLink_PingResponseHandler(GenericRedisMessage message) {
         this.message = (RedisMessageServerPingResponse) message;
     }
 
@@ -22,10 +23,10 @@ public class PingResponseHandler implements MessageHandler {
     public void execute() throws Exception {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        ProxyConnectorService service = api.getService(ProxyConnectorService.class);
+        MagicLinkService service = api.getService(MAGIC_LINK_SERVICE).orElseThrow();
 
         if(message.getStatus() == RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED) {
-            logger.send(PaperLang.BOXED_MESSAGE_COLORED.build(Component.text(message.getMessage()), message.getColor()));
+            logger.send(Component.text(message.getMessage(), message.getColor()));
 
             if(message.getPingInterval().isPresent()) {
                 service.setUpcomingPingDelay(message.getPingInterval().get());
@@ -35,15 +36,15 @@ public class PingResponseHandler implements MessageHandler {
                 service.setNextcomingPingDelay(10);
             }
 
-            service.setStatus(ProxyConnectorService.Status.CONNECTED);
+            service.setStatus(MagicLinkService.Status.CONNECTED);
         }
 
         if(message.getStatus() == RedisMessageServerPingResponse.PingResponseStatus.DENIED) {
-            logger.send(PaperLang.BOXED_MESSAGE_COLORED.build(Component.text(message.getMessage()), message.getColor()));
+            logger.send(Component.text(message.getMessage(), message.getColor()));
             logger.send(Component.text("Waiting 1 minute before trying again...", NamedTextColor.GRAY));
             service.setUpcomingPingDelay(60);
             service.setNextcomingPingDelay(10);
-            service.setStatus(ProxyConnectorService.Status.SEARCHING);
+            service.setStatus(MagicLinkService.Status.SEARCHING);
         }
     }
 }

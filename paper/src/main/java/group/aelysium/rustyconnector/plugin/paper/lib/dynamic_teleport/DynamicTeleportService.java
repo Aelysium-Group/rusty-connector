@@ -1,32 +1,29 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.tpa;
+package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport;
 
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.DynamicTeleport_TPARequest;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TPAQueueService extends Service {
-    private final List<TPARequest> requests = new ArrayList<>();
+public class DynamicTeleportService extends Service {
+    private final List<DynamicTeleport_TPARequest> requests = new ArrayList<>();
 
-    public TPAQueueService() {
-        super(true);
-    }
-
-    public TPARequest newRequest(String client_username, Player target) {
-        TPARequest tpaRequest = new TPARequest(client_username, target);
+    public DynamicTeleport_TPARequest newRequest(String client_username, Player target) {
+        DynamicTeleport_TPARequest tpaRequest = new DynamicTeleport_TPARequest(client_username, target);
         requests.add(tpaRequest);
 
         return tpaRequest;
     }
 
-    public TPARequest findClient(String client_username) {
+    public DynamicTeleport_TPARequest findClient(String client_username) {
         return this.requests.stream().filter(tpaRequest -> Objects.equals(tpaRequest.getClientUsername(), client_username)).findFirst().orElse(null);
     }
 
-    public TPARequest findTarget(Player target) {
+    public DynamicTeleport_TPARequest findTarget(Player target) {
         return this.requests.stream().filter(tpaRequest -> Objects.equals(tpaRequest.getTarget(), target)).findFirst().orElse(null);
     }
 
@@ -43,7 +40,7 @@ public class TPAQueueService extends Service {
         }
     }
 
-    public void remove(TPARequest tpaRequest) {
+    public void remove(DynamicTeleport_TPARequest tpaRequest) {
         this.requests.remove(tpaRequest);
     }
 

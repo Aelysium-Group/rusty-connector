@@ -56,3 +56,13 @@ scalar: []
 # Static families require that MySQL is set up.
 #
 static: []
+
+#
+# MySQL is required in order for static families to operate.
+#
+mysql:
+    host: ""
+    port: 3306
+    user: "root"
+    password: "password"
+    database: "RustyConnector"

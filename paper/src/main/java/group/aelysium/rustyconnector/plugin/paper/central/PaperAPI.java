@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.ProxyConnectorService;
+import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -19,7 +19,11 @@ import org.slf4j.Logger;
 import java.io.InputStream;
 import java.io.SyncFailedException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 import java.util.function.Function;
+
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.MAGIC_LINK_SERVICE;
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.REDIS_SERVICE;
 
 public class PaperAPI extends PluginAPI<BukkitScheduler> {
     private PaperCommandManager<CommandSender> commandManager;
@@ -67,19 +71,12 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
         return this.plugin.getServer();
     }
 
-    public <S extends Service> S getService(Class<S> type) {
+    public <S extends Service> Optional<S> getService(Class<S> type) {
         return this.processor.getService(type);
     }
 
     public void killServices() {
         this.processor.kill();
-    }
-
-    public void reloadServices() {
-        this.processor.kill();
-        this.processor = null;
-
-        PaperRustyConnector.getLifecycle().loadConfigs();
     }
 
     /**
@@ -99,8 +96,8 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
-        this.processor.getService(RedisService.class).start(RedisSubscriber.class);
-        this.processor.getService(ProxyConnectorService.class).startHeartbeat();
+        this.processor.getService(REDIS_SERVICE).orElseThrow().start(RedisSubscriber.class);
+        this.processor.getService(MAGIC_LINK_SERVICE).orElseThrow().startHeartbeat();
     }
 
     public boolean isFolia() {

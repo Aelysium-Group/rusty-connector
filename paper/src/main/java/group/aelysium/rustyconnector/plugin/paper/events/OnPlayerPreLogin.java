@@ -1,14 +1,9 @@
 package group.aelysium.rustyconnector.plugin.paper.events;
 
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
-import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPARequest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 
 public class OnPlayerPreLogin implements Listener {
 

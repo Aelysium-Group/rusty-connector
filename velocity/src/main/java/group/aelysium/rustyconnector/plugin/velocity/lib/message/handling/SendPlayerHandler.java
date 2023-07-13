@@ -13,6 +13,8 @@ import net.kyori.adventure.text.Component;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
+
 public class SendPlayerHandler implements MessageHandler {
     private final RedisMessageSendPlayer message;
 
@@ -28,7 +30,8 @@ public class SendPlayerHandler implements MessageHandler {
         if(player == null) return;
 
         try {
-            PlayerFocusedServerFamily family = (PlayerFocusedServerFamily) api.getService(FamilyService.class).find(message.getTargetFamilyName());
+            FamilyService familyService = api.getService(FAMILY_SERVICE).orElseThrow();
+            PlayerFocusedServerFamily family = (PlayerFocusedServerFamily) familyService.find(message.getTargetFamilyName());
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+message.getTargetFamilyName()+"` doesn't exist!");
 
             family.connect(player);

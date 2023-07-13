@@ -15,9 +15,6 @@ public class ScalarFamilyConfig extends YAML {
     private int loadBalancing_persistence_attempts = 5;
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
-    private boolean tpa_enabled = false;
-    private boolean tpa_ignorePlayerCap = false;
-    private int tpa_requestLifetime = 5;
 
     private ScalarFamilyConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -47,17 +44,6 @@ public class ScalarFamilyConfig extends YAML {
 
     public String getWhitelist_name() {
         return whitelist_name;
-    }
-
-    public boolean isTPA_enabled() {
-        return tpa_enabled;
-    }
-
-    public boolean shouldTPA_ignorePlayerCap() {
-        return tpa_ignorePlayerCap;
-    }
-    public int getTPA_requestLifetime() {
-        return tpa_requestLifetime;
     }
 
     /**
@@ -102,9 +88,5 @@ public class ScalarFamilyConfig extends YAML {
             throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
-
-        this.tpa_enabled = this.getNode(this.data,"tpa.enabled",Boolean.class);
-        this.tpa_ignorePlayerCap = this.getNode(this.data,"tpa.ignore-player-cap",Boolean.class);
-        this.tpa_requestLifetime = this.getNode(this.data,"tpa.request-lifetime",Integer.class);
     }
 }

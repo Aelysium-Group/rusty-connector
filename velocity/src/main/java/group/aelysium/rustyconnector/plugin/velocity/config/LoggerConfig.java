@@ -25,7 +25,6 @@ public class LoggerConfig extends YAML {
     private String consoleIcons_canceledRequest = "xxxxx";
     private String consoleIcons_familyBalancing = "▲▼▲▼▲";
     private String consoleIcons_ping = "|>>>>";
-    private String consoleIcons_pong = "<<<<|";
 
     private LoggerConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -99,10 +98,6 @@ public class LoggerConfig extends YAML {
         return consoleIcons_ping;
     }
 
-    public String getConsoleIcons_pong() {
-        return consoleIcons_pong;
-    }
-
     /**
      * Get the current config.
      * @return The config.
@@ -142,13 +137,12 @@ public class LoggerConfig extends YAML {
         this.log_playerMove = this.getNode(this.data,"log.player-move",Boolean.class);
         this.log_familyBalancing = this.getNode(this.data,"log.family-balancing",Boolean.class);
 
-        this.consoleIcons_attemptingRegistration = this.getNode(this.data,"console-icons.requesting-registration",String.class);
+        this.consoleIcons_attemptingRegistration = this.getNode(this.data,"console-icons.attempting-registration",String.class);
         this.consoleIcons_registered = this.getNode(this.data,"console-icons.registered",String.class);
-        this.consoleIcons_attemptingUnregistration = this.getNode(this.data,"console-icons.requesting-unregistration",String.class);
+        this.consoleIcons_attemptingUnregistration = this.getNode(this.data,"console-icons.attempting-unregistration",String.class);
         this.consoleIcons_unregistered = this.getNode(this.data,"console-icons.unregistered",String.class);
         this.consoleIcons_canceledRequest = this.getNode(this.data,"console-icons.canceled-request",String.class);
         this.consoleIcons_familyBalancing = this.getNode(this.data,"console-icons.family-balancing",String.class);
         this.consoleIcons_ping = this.getNode(this.data,"console-icons.ping",String.class);
-        this.consoleIcons_pong = this.getNode(this.data,"console-icons.pong",String.class);
     }
 }

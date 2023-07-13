@@ -9,9 +9,6 @@ import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.commands.CommandHub;
-import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.velocity.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
@@ -124,19 +121,9 @@ public class VelocityLifecycle extends PluginLifecycle {
                     );
 
             commandManager.unregister("server");
-
-            commandManager.register(
-                    commandManager.metaBuilder("tpa")
-                            .build(),
-                    CommandTPA.create()
-            );
-
-            commandManager.register(
-                    commandManager.metaBuilder("hub")
-                            .build(),
-                    CommandHub.create()
-            );
-
+          
+            // Commands for specific services can be found in the constructors for those services
+  
             return true;
         } catch (Exception e) {
             VelocityLang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);

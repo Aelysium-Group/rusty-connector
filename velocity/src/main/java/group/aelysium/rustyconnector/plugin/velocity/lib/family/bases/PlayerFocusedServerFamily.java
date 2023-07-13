@@ -8,9 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBala
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPAHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
-import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
 
 /**
  * This class should never be used directly.
@@ -27,11 +28,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     protected LoadBalancer loadBalancer = null;
     protected String whitelist;
     protected boolean weighted;
-    protected TPAHandler tpaHandler;
 
-    protected String parentFamily;
-
-    protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name);
         if(whitelist == null) this.whitelist = null;
         else this.whitelist = whitelist.getName();
@@ -42,10 +40,6 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         } catch (Exception ignore) {}
         this.loadBalancer.setPersistence(persistence, attempts);
         this.loadBalancer.setWeighted(weighted);
-
-        this.tpaHandler = new TPAHandler(tpaSettings);
-
-        this.parentFamily = parentFamily;
     }
 
     /**
@@ -63,13 +57,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public LoadBalancer getLoadBalancer() {
         return this.loadBalancer;
     }
-
-    public TPAHandler getTPAHandler() {
-        return tpaHandler;
-    }
-
-    public String getParentFamily() { return parentFamily; }
-
+  
     /**
      * Get the whitelist for this family, or `null` if there isn't one.
      * @return The whitelist or `null` if there isn't one.
@@ -77,7 +65,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public Whitelist getWhitelist() {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         if(this.name == null) return null;
-        return api.getService(WhitelistService.class).find(this.whitelist);
+        return api.getService(WHITELIST_SERVICE).orElseThrow().find(this.whitelist);
     }
 
     public long serverCount() { return this.loadBalancer.size(); }
@@ -114,7 +102,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
     @Override
     public void unregisterServers() throws Exception {
-        ServerService serverService = VelocityRustyConnector.getAPI().getService(ServerService.class);
+        ServerService serverService = VelocityRustyConnector.getAPI().getService(SERVER_SERVICE).orElseThrow();
 
         for (PlayerServer server : this.loadBalancer.dump()) {
             if(server == null) continue;

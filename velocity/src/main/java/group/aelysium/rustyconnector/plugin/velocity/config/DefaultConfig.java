@@ -21,13 +21,6 @@ public class DefaultConfig extends YAML {
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
 
-    private boolean mysql_enabled = false;
-    private String mysql_host = "";
-    private int mysql_port = 3306;
-    private String mysql_user = "root";
-    private String mysql_password = "password";
-    private String mysql_database = "RustyConnector";
-
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
@@ -96,26 +89,6 @@ public class DefaultConfig extends YAML {
 
     public String getRedis_dataChannel() {
         return this.redis_dataChannel;
-    }
-
-    public boolean isMysql_enabled() {
-        return this.mysql_enabled;
-    }
-
-    public String getMysql_host() {
-        return this.mysql_host;
-    }
-    public int getMysql_port() {
-        return this.mysql_port;
-    }
-    public String getMysql_password() {
-        return this.mysql_password;
-    }
-    public String getMysql_user() {
-        return this.mysql_user;
-    }
-    public String getMysql_database() {
-        return this.mysql_database;
     }
 
     public boolean isWhitelist_enabled() {
@@ -204,23 +177,6 @@ public class DefaultConfig extends YAML {
         this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
         if(this.redis_dataChannel.equals(""))
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
-
-        // MySQL
-        this.mysql_enabled = this.getNode(this.data, "mysql.enabled", Boolean.class);
-
-        this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
-        if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
-
-        this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
-        this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
-        this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
-
-        if (this.redis_password.length() != 0 && this.redis_password.length() < 16)
-            throw new IllegalStateException("Your MySQL password is to short! For security purposes, please use a longer password! " + this.redis_password.length() + " < 16");
-
-        this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
-        if (this.mysql_database.equals(""))
-            throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
 
         // Whitelist
 

@@ -20,6 +20,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.MESSAGE_CACHE_SERVICE;
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.REDIS_MESSAGER_SERVICE;
+
 public final class CommandRusty {
     public static void create(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperRustyConnector.getAPI();
@@ -41,7 +44,7 @@ public final class CommandRusty {
                             try {
                                 final Long snowflake = commandContext.get("snowflake");
 
-                                MessageCacheService messageCacheService = api.getService(MessageCacheService.class);
+                                MessageCacheService messageCacheService = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow();
 
                                 CacheableMessage message = messageCacheService.getMessage(snowflake);
 
@@ -69,7 +72,7 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                api.getService(RedisMessagerService.class).sendToOtherFamily(player,familyName);
+                                api.getService(REDIS_MESSAGER_SERVICE).orElseThrow().sendToOtherFamily(player,familyName);
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {

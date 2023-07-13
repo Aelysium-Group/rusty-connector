@@ -13,17 +13,18 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConn
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.tpa.TPASettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
+
 public class ScalarServerFamily extends PlayerFocusedServerFamily {
 
-    private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, TPASettings tpaSettings, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings, parentFamily);
+    private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, whitelist, clazz, weighted, persistence, attempts);
     }
 
     public PlayerServer connect(Player player) throws RuntimeException {
@@ -41,7 +42,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static ScalarServerFamily init(WhitelistService whitelistService, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static ScalarServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
         logger.log("Registering family: "+familyName);
@@ -60,7 +61,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
         if(scalarFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
-            api.getService(WhitelistService.class).add(whitelist);
+            api.getService(WHITELIST_SERVICE).orElseThrow().add(whitelist);
 
             logger.log(familyName+" whitelist registered!");
         } else {
@@ -75,9 +76,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         RoundRobin.class,
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime()),
-                        scalarFamilyConfig.getParent_family()
+                        scalarFamilyConfig.getLoadBalancing_persistence_attempts()
                 );
             }
             case LEAST_CONNECTION -> {
@@ -87,9 +86,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         LeastConnection.class,
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime()),
-                        scalarFamilyConfig.getParent_family()
+                        scalarFamilyConfig.getLoadBalancing_persistence_attempts()
                 );
             }
             case MOST_CONNECTION -> {
@@ -99,47 +96,11 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         MostConnection.class,
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime()),
-                        scalarFamilyConfig.getParent_family()
+                        scalarFamilyConfig.getLoadBalancing_persistence_attempts()
                 );
             }
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
-    }
-
-    public void reloadWhitelist() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-
-        Whitelist currentWhitelist = this.getWhitelist();
-        if(!(currentWhitelist == null)) {
-            api.getService(WhitelistService.class).remove(currentWhitelist);
-        }
-
-        ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
-                this.name,
-                new File(String.valueOf(api.getDataFolder()), "families/"+this.name+".scalar.yml"),
-                "velocity_scalar_family_template.yml"
-        );
-        if(!scalarFamilyConfig.generate()) {
-            throw new IllegalStateException("Unable to load or create families/"+this.name+".scalar.yml!");
-        }
-        scalarFamilyConfig.register();
-
-        Whitelist newWhitelist;
-        if(scalarFamilyConfig.isWhitelist_enabled()) {
-            newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
-
-            this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getService(WhitelistService.class).add(newWhitelist);
-
-            logger.log("Finished reloading whitelist for "+this.name);
-            return;
-        }
-
-        this.whitelist = null;
-        logger.log("There is no whitelist for "+this.name);
     }
 }
 

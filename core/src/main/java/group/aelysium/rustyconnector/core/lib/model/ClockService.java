@@ -8,9 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class ClockService extends Service {
     protected final ScheduledExecutorService executorService;
 
-    public ClockService(boolean enabled, int threads) {
-        super(enabled);
-
+    public ClockService(int threads) {
         this.executorService = Executors.newScheduledThreadPool(threads);
     }
 
@@ -21,6 +19,15 @@ public class ClockService extends Service {
      */
     public ScheduledFuture<?> scheduleRecurring(Runnable runnable, long period) {
         return this.executorService.scheduleAtFixedRate(runnable, 0, period, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Schedule a new task to run every `heartbeat`
+     * @param runnable The runnable task to run.
+     * @param period The intervals in seconds to wait before executing the runnable again.
+     */
+    public ScheduledFuture<?> scheduleRecurring(Runnable runnable, LiquidTimestamp period) {
+        return this.executorService.scheduleAtFixedRate(runnable, 0, period.getValue(), period.getUnit());
     }
 
     /**

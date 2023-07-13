@@ -16,6 +16,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
+
 public class WebhooksConfig extends YAML {
     private static WebhooksConfig config;
 
@@ -64,7 +66,7 @@ public class WebhooksConfig extends YAML {
                         case FAMILY -> {
                             String familyName = this.getNode(node, "target-family", String.class);
 
-                            BaseServerFamily family = api.getService(FamilyService.class).find(familyName);
+                            BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
                             if (family == null)
                                 logger.warn("webhooks.yml is pointing a webhook at a family with the name: " + familyName + ". No family with this name exists!");
 

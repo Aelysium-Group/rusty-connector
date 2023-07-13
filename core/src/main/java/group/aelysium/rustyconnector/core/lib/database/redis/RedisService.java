@@ -21,7 +21,6 @@ public class RedisService extends Service {
     ExecutorService executorService;
 
     public RedisService(RedisClient.Builder clientBuilder, char[] privateKey) {
-        super(true);
         this.clientBuilder = clientBuilder.setPrivateKey(privateKey);
         this.privateKey = privateKey;
 

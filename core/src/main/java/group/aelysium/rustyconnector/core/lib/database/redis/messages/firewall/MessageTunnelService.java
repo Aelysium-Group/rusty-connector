@@ -16,8 +16,6 @@ public class MessageTunnelService extends Service {
     private final List<InetSocketAddress> whitelist = new ArrayList<>();
 
     public MessageTunnelService(boolean hasBlacklist, boolean hasWhitelist, int maxLength) {
-        super(true);
-
         this.hasBlacklist = hasBlacklist;
         this.hasWhitelist = hasWhitelist;
         this.maxLength = maxLength;

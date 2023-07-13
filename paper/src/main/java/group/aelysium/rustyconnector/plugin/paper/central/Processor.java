@@ -10,10 +10,10 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.ProxyConnectorService;
+import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
-import group.aelysium.rustyconnector.plugin.paper.lib.tpa.TPAQueueService;
+import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;
 
 import java.io.File;
 import java.util.HashMap;
@@ -77,9 +77,9 @@ public class Processor extends IKLifecycle {
 
         builder.addService(new RedisMessagerService());
 
-        builder.addService(new TPAQueueService());
+        builder.addService(new DynamicTeleportService());
 
-        builder.addService(new ProxyConnectorService(3));
+        builder.addService(new MagicLinkService(3));
 
         return builder.build();
     }
@@ -96,5 +96,18 @@ public class Processor extends IKLifecycle {
         public Processor build() {
             return new Processor(this.services);
         }
+    }
+
+    /**
+     * The services that are valid for this service provider.
+     */
+    public static class ValidServices {
+        public static Class<MessageCacheService> MESSAGE_CACHE_SERVICE = MessageCacheService.class;
+        public static Class<DynamicTeleportService> DYNAMIC_TELEPORT_SERVICE = DynamicTeleportService.class;
+        public static Class<MagicLinkService> MAGIC_LINK_SERVICE = MagicLinkService.class;
+        public static Class<RedisService> REDIS_SERVICE = RedisService.class;
+        public static Class<RedisMessagerService> REDIS_MESSAGER_SERVICE = RedisMessagerService.class;
+        public static Class<ServerInfoService> SERVER_INFO_SERVICE = ServerInfoService.class;
+        public static Class<MessageCacheService> MYSQL_SERVICE = MessageCacheService.class;
     }
 }

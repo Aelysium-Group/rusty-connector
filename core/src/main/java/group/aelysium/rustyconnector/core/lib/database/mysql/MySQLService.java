@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.database;
+package group.aelysium.rustyconnector.core.lib.database.mysql;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
@@ -16,11 +16,7 @@ public class MySQLService extends Service {
     private DataSource dataSource;
     private Connection connection;
 
-    private MySQLService() {
-        super(false);
-    }
-    private MySQLService(DataSource dataSource) {
-        super(true);
+    protected MySQLService(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -89,51 +85,42 @@ public class MySQLService extends Service {
         this.dataSource = null;
     }
 
-    public static class MySQLBuilder {
-        private boolean enabled = true;
+    public static class Builder {
+        protected String host;
+        protected int port;
 
-        private String host;
-        private int port;
+        protected String database;
+        protected String user;
+        protected String password;
 
-        private String database;
-        private String user;
-        private String password;
+        public Builder(){}
 
-        public MySQLBuilder(){}
-
-        public MySQLBuilder setHost(String host) {
+        public Builder setHost(String host) {
             this.host = host;
             return this;
         }
 
-        public MySQLBuilder setPort(int port) {
+        public Builder setPort(int port) {
             this.port = port;
             return this;
         }
 
-        public MySQLBuilder setDatabase(String database) {
+        public Builder setDatabase(String database) {
             this.database = database;
             return this;
         }
 
-        public MySQLBuilder setUser(String user) {
+        public Builder setUser(String user) {
             this.user = user;
             return this;
         }
 
-        public MySQLBuilder setPassword(String password) {
+        public Builder setPassword(String password) {
             this.password = password;
             return this;
         }
 
-        public MySQLBuilder setDisabled() {
-            this.enabled = false;
-            return this;
-        }
-
         public MySQLService build(){
-            if(this.enabled == false) return new MySQLService();
-
             MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
             dataSource.setServerName(this.host);
             dataSource.setPortNumber(this.port);

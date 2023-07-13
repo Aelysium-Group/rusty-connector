@@ -12,12 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RedisMessageServerPing extends GenericRedisMessage {
+    private ConnectionIntent intent;
     private String familyName;
     private String serverName;
     private Integer softCap;
     private Integer hardCap;
     private Integer weight;
 
+    public ConnectionIntent getIntent() {
+        return intent;
+    }
     public String getFamilyName() {
         return familyName;
     }
@@ -49,6 +53,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
             JsonPrimitive value = entry.getValue();
 
             switch (key) {
+                case ValidParameters.INTENT -> this.intent = ConnectionIntent.valueOf(value.getAsString());
                 case ValidParameters.FAMILY_NAME -> this.familyName = value.getAsString();
                 case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
                 case ValidParameters.SOFT_CAP -> this.softCap = value.getAsInt();
@@ -68,6 +73,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
             JsonPrimitive value = entry.getValue();
 
             switch (key) {
+                case ValidParameters.INTENT -> this.intent = ConnectionIntent.valueOf(value.getAsString());
                 case ValidParameters.FAMILY_NAME -> this.familyName = value.getAsString();
                 case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
                 case ValidParameters.SOFT_CAP -> this.softCap = value.getAsInt();
@@ -82,6 +88,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
         JsonObject object = super.toJSON();
         JsonObject parameters = new JsonObject();
 
+        parameters.add(ValidParameters.INTENT, new JsonPrimitive(this.intent.toString()));
         parameters.add(ValidParameters.FAMILY_NAME, new JsonPrimitive(this.familyName));
         parameters.add(ValidParameters.SERVER_NAME, new JsonPrimitive(this.serverName));
         parameters.add(ValidParameters.SOFT_CAP, new JsonPrimitive(this.softCap));
@@ -99,6 +106,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
         String SOFT_CAP = "sc";
         String HARD_CAP = "hc";
         String WEIGHT = "w";
+        String INTENT = "i";
 
         static List<String> toList() {
             List<String> list = new ArrayList<>();
@@ -107,8 +115,14 @@ public class RedisMessageServerPing extends GenericRedisMessage {
             list.add(SOFT_CAP);
             list.add(HARD_CAP);
             list.add(WEIGHT);
+            list.add(INTENT);
 
             return list;
         }
+    }
+
+    public enum ConnectionIntent {
+        CONNECT,
+        DISCONNECT
     }
 }

@@ -10,11 +10,14 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.Mess
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.message.handling.*;
+import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers.TPAQueuePlayerHandler;
+import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers.MagicLink_PingResponseHandler;
 
 import javax.naming.AuthenticationException;
 
 import static group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType.*;
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.MESSAGE_CACHE_SERVICE;
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.REDIS_SERVICE;
 
 public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber {
     public RedisSubscriber(RedisClient client) {
@@ -26,7 +29,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
 
-        CacheableMessage cachedMessage = api.getService(MessageCacheService.class).cacheMessage(rawMessage, MessageStatus.UNDEFINED);
+        CacheableMessage cachedMessage = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
 
         try {
             GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
@@ -34,7 +37,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
 
             if(message.getOrigin() == MessageOrigin.SERVER) throw new Exception("Message from a sub-server! Ignoring...");
             try {
-                if (!(api.getService(RedisService.class).validatePrivateKey(message.getPrivateKey())))
+                if (!(api.getService(REDIS_SERVICE).orElseThrow().validatePrivateKey(message.getPrivateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
@@ -58,7 +61,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
 
         try {
-            if(message.getType() == PING_RESPONSE)      new PingResponseHandler(message).execute();
+            if(message.getType() == PING_RESPONSE)      new MagicLink_PingResponseHandler(message).execute();
             if(message.getType() == TPA_QUEUE_PLAYER)   new TPAQueuePlayerHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
