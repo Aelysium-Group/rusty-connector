@@ -35,7 +35,7 @@ public final class CommandParty {
         // If this command class loads, then PartyService MUST be set.
         PartyService partyService = api.getService(PARTY_SERVICE).orElseThrow();
 
-        LiteralCommandNode<CommandSource> tpa = LiteralArgumentBuilder
+        LiteralCommandNode<CommandSource> partyCommand = LiteralArgumentBuilder
                 .<CommandSource>literal("party")
                 .requires(source -> source instanceof Player)
                 .executes(context -> {
@@ -389,7 +389,7 @@ public final class CommandParty {
                 .build();
 
         // BrigadierCommand implements Command
-        return new BrigadierCommand(tpa);
+        return new BrigadierCommand(partyCommand);
     }
 
     public static int closeMessage(Player player, Component message) {

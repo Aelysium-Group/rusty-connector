@@ -84,10 +84,9 @@ public class FriendRequest {
         try {
             friendsService.closeInvite(this);
             this.isAcknowledged = true;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignore) {
+            throw new IllegalStateException("There was a fatal error ignoring this friend request!");
         }
-        throw new IllegalStateException("There was a fatal error ignoring this friend request!");
     }
 
     public synchronized void decompose() {
