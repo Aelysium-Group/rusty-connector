@@ -106,3 +106,93 @@ tpa:
     #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
     ############################################################################
     expiration: NEVER
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                       Family Anchor                      #
+#                                                          #
+#               ----------------------------               #
+#                                                          #
+# | Family anchors are player facing commands that         #
+# | directly connect players to a specific family!         #
+#                                                          #
+#               -----------------------------              #
+#                        Permission:                       #
+#               rustyconnector.command.anchor              #
+#               -----------------------------              #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+family-anchor:
+    enabled: false
+
+    #
+    # List as many anchors as you'd like!
+    #
+    # All anchor commands are executed using `/<anchor name>`
+    #
+    # NOTE: Make sure that, when you define your command, you don't include a slash!
+    #
+    anchors:
+        - command: "lobby"
+          family: "lobby"
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                           Hub                            #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Hub allows your players to teleport to the parent      #
+# | family of the family they are currently connected to!  #
+#                                                          #
+#               ----------------------------               #
+#                        Permission:                       #
+#                rustyconnector.command.hub                #
+#               ----------------------------               #
+#                          Usage:                          #
+#                           /hub                           #
+#               ----------------------------               #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+hub:
+    enabled: false
+
+    ############################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                     Family Hierarchy                     #
+    #                                                          #
+    #               ---------------------------                #
+    #                                                          #
+    # | Family Hierarchy is where you lay out how your         #
+    # | families relate to eachother.                          #
+    #                                                          #
+    # | If a player is in a child family, they can use /hub    #
+    # | to teleport to their parent family.                    #
+    #                                                          #
+    # | If a family is not listed in the hierarchy, it's       #
+    # | parent family will default to being the root family.   #
+    #                                                          #
+    #   NOTE: The format used for family-hierarchy is JSON.    #
+    #         Be sure to use a JSON syntax checker so that you #
+    #         can make sure you've written it properly.        #
+    #                                                          #
+    #               ---------------------------                #
+    #                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################
+    family-hierarchy: '[
+        {
+            "family": "lobby",
+            "children": [
+                {"family": "survival"},
+                {"family": "creative"},
+                {"family": "pvp", "children": [
+                    {"family": "hungergames"},
+                    {"family": "skywars"},
+                    {"family": "spleef"}
+                ]}
+            ]
+        }
+    ]'

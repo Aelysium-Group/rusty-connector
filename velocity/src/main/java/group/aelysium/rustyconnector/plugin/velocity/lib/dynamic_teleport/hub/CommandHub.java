@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.commands;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

@@ -1,17 +1,19 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import ninja.leaping.configurate.ConfigurationNode;
 
 import java.io.File;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class DynamicTeleportConfig extends YAML {
@@ -23,6 +25,13 @@ public class DynamicTeleportConfig extends YAML {
     private List<String> tpa_enabledFamilies = new ArrayList<>();
     private boolean tpa_ignorePlayerCap = false;
     private LiquidTimestamp tpa_expiration;
+
+    private boolean familyAnchor_enabled = false;
+
+    private List<Map.Entry<String, String>> familyAnchor_anchors;
+
+    private boolean hub_enabled = false;
+    private JsonArray hub_familyHierarchy;
 
     private DynamicTeleportConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -76,35 +85,69 @@ public class DynamicTeleportConfig extends YAML {
         return tpa_expiration;
     }
 
+    public boolean isFamilyAnchor_enabled() {
+        return familyAnchor_enabled;
+    }
+
+    public List<Map.Entry<String, String>> getFamilyAnchor_anchors() {
+        return familyAnchor_anchors;
+    }
+
+    public boolean isHub_enabled() {
+        return hub_enabled;
+    }
+
+    public JsonArray getHub_familyHierarchy() {
+        return hub_familyHierarchy;
+    }
+
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
         this.enabled = this.getNode(this.data, "enabled", Boolean.class);
         if(!this.enabled) return;
 
         this.tpa_enabled = this.getNode(this.data, "tpa.enabled", Boolean.class);
-        if(!this.tpa_enabled) return;
+        if(this.tpa_enabled) {
+            this.tpa_friendsOnly = this.getNode(this.data, "tpa.friends-only", Boolean.class);
+
+            try {
+                this.tpa_enabledFamilies = (List<String>) (this.getNode(this.data, "tpa.enabled-families", List.class));
+            } catch (Exception e) {
+                throw new IllegalStateException("The node [tpa.enabled-families] in " + this.getName() + " is invalid! Make sure you are using the correct type of data!");
+            }
+
+            this.tpa_ignorePlayerCap = this.getNode(this.data, "tpa.ignore-player-cap", Boolean.class);
 
 
-        this.tpa_friendsOnly = this.getNode(this.data, "tpa.friends-only", Boolean.class);
-
-        try {
-            this.tpa_enabledFamilies = (List<String>) (this.getNode(this.data,"tpa.enabled-families",List.class));
-        } catch (Exception e) {
-            throw new IllegalStateException("The node [tpa.enabled-families] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
+            try {
+                String expiration = this.getNode(this.data, "tpa.expiration", String.class);
+                if (expiration.equals("NEVER")) {
+                    this.tpa_expiration = new LiquidTimestamp(5, TimeUnit.MINUTES);
+                    VelocityRustyConnector.getAPI().getLogger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes."), NamedTextColor.YELLOW));
+                } else this.tpa_expiration = new LiquidTimestamp(expiration);
+            } catch (ParseException e) {
+                throw new IllegalStateException("You must provide a valid time value for [tpa.expiration] in dynamic_teleport.yml!");
+            }
         }
 
-        this.tpa_ignorePlayerCap = this.getNode(this.data, "tpa.ignore-player-cap", Boolean.class);
+        this.familyAnchor_enabled = this.getNode(this.data, "family-anchor.enabled", Boolean.class);
+        if(this.familyAnchor_enabled) {
+            List<? extends ConfigurationNode> anchors = YAML.get(this.data, "family-anchor.anchors").getChildrenList();
 
+            this.familyAnchor_anchors = new ArrayList<>();
+            if(anchors.size() != 0)
+                for (ConfigurationNode entry: anchors)
+                    this.familyAnchor_anchors.add(Map.entry(
+                            Objects.requireNonNull(entry.getKey()).toString(),
+                            Objects.requireNonNull(entry.getValue()).toString()
+                    ));
+        }
 
-        try {
-            String expiration = this.getNode(this.data, "tpa.expiration", String.class);
-            if(expiration.equals("NEVER")) {
-                this.tpa_expiration = new LiquidTimestamp(5, TimeUnit.MINUTES);
-                VelocityRustyConnector.getAPI().getLogger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes."), NamedTextColor.YELLOW));
-            }
-            else this.tpa_expiration = new LiquidTimestamp(expiration);
-        } catch (ParseException e) {
-            throw new IllegalStateException("You must provide a valid time value for [tpa.expiration] in dynamic_teleport.yml!");
+        this.hub_enabled = this.getNode(this.data, "hub.enabled", Boolean.class);
+        if(this.hub_enabled) {
+            Gson gson = new Gson();
+
+            this.hub_familyHierarchy = gson.fromJson(this.getNode(this.data, "hub.family-hierarchy", String.class), JsonArray.class);
         }
     }
 }
