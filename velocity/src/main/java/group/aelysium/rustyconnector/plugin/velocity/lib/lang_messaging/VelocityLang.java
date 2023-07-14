@@ -262,9 +262,12 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
-        String parentFamilyName = family.getParentFamily();
-        if (Objects.equals(parentFamilyName, ""))
-            parentFamilyName = VelocityRustyConnector.getAPI().getService(FamilyService.class).getRootFamily().getName();
+        ScalarServerFamily rootFamily = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
+        String parentFamilyName = rootFamily.getName();
+        try {
+            parentFamilyName = Objects.requireNonNull(family.getParent().get()).getName();
+        } catch (Exception ignore) {}
+        if(family.equals(rootFamily)) parentFamilyName = "none";
 
         return join(
                 Lang.newlines(),
@@ -324,9 +327,12 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
-        String parentFamilyName = family.getParentFamily();
-        if (Objects.equals(parentFamilyName, ""))
-            parentFamilyName = VelocityRustyConnector.getAPI().getService(FamilyService.class).getRootFamily().getName();
+        ScalarServerFamily rootFamily = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
+        String parentFamilyName = rootFamily.getName();
+        try {
+            parentFamilyName = Objects.requireNonNull(family.getParent().get()).getName();
+        } catch (Exception ignore) {}
+        if(family.equals(rootFamily)) parentFamilyName = "none";
 
         LiquidTimestamp expiration = family.getHomeServerExpiration();
         String homeServerExpiration = "NEVER";

@@ -22,8 +22,8 @@ import java.lang.reflect.InvocationTargetException;
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
 
 public class ScalarServerFamily extends PlayerFocusedServerFamily {
-    private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts);
+    private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
     }
 
     public PlayerServer connect(Player player) throws RuntimeException {
@@ -75,7 +75,8 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         RoundRobin.class,
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts()
+                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
+                        scalarFamilyConfig.getParent_family()
                 );
             }
             case LEAST_CONNECTION -> {
@@ -85,7 +86,8 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         LeastConnection.class,
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts()
+                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
+                        scalarFamilyConfig.getParent_family()
                 );
             }
             case MOST_CONNECTION -> {
@@ -95,7 +97,8 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         MostConnection.class,
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts()
+                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
+                        scalarFamilyConfig.getParent_family()
                 );
             }
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");

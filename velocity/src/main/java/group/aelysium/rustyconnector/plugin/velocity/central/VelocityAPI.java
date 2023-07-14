@@ -14,6 +14,8 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
@@ -28,7 +30,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
-import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService.ValidServices.TPA_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService.ValidServices.*;
 import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService.ValidServices.TPA_CLEANING_SERVICE;
 
 public class VelocityAPI extends PluginAPI<Scheduler> {
@@ -84,12 +86,24 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     }
 
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
+        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
         this.processor.getService(REDIS_SERVICE).orElseThrow().start(RedisSubscriber.class);
         this.processor.getService(SERVER_SERVICE).orElseThrow()
                       .getService(ServerService.ValidServices.MAGIC_LINK_SERVICE).orElseThrow().startHeartbeat();
 
+        try {
+            FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
+
+            familyService.dump().forEach(baseServerFamily -> {
+                try {
+                    ((PlayerFocusedServerFamily) baseServerFamily).resolveParent();
+                } catch (Exception e) {
+                    logger.log("There was an issue resolving the parent for "+baseServerFamily.getName()+". "+e.getMessage());
+                }
+            });
+        } catch (Exception ignore) {}
         try {
             FriendsService friendsService = Processor.Initializer.buildFriendsService().orElseThrow();
 
@@ -109,10 +123,26 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
 
             this.processor.addService(dynamicTeleportService);
 
-            dynamicTeleportService.getService(TPA_SERVICE).orElseThrow()
-                    .getService(TPA_CLEANING_SERVICE).orElseThrow()
-                    .startHeartbeat();
-            dynamicTeleportService.getService(TPA_SERVICE).orElseThrow().initCommand();
+            try {
+                dynamicTeleportService.getService(TPA_SERVICE).orElseThrow()
+                        .getService(TPA_CLEANING_SERVICE).orElseThrow()
+                        .startHeartbeat();
+                dynamicTeleportService.getService(TPA_SERVICE).orElseThrow().initCommand();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            try {
+                dynamicTeleportService.getService(HUB_SERVICE).orElseThrow().initCommand();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            try {
+                dynamicTeleportService.getService(ANCHOR_SERVICE).orElseThrow().initCommands();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

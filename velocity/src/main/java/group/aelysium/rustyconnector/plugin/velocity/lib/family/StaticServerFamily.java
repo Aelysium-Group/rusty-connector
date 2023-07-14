@@ -33,8 +33,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
     LiquidTimestamp homeServerExpiration;
     UnavailableProtocol unavailableProtocol;
 
-    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts);
+    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
         this.unavailableProtocol = unavailableProtocol;
         this.homeServerExpiration = homeServerExpiration;
     }
