@@ -28,6 +28,10 @@
 # | be sent to when they run /hub, or when a fallback      #
 # | occurs. If the parent family is unavailable, the       #
 # | root family is used instead.                           #
+#                                                          #
+#   NOTE: If this value is set for the root family         #
+#         it will be ignored.                              #
+#                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

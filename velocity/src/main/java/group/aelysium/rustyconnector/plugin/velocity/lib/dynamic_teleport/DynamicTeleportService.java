@@ -4,47 +4,66 @@ import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.config.DynamicTeleportConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPASettings;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-// TODO: Currently pretty bare bones, expansions are planned
 public class DynamicTeleportService extends ServiceableService {
-    protected DynamicTeleportService() {
-        super(new HashMap<>());
-    }
-
-    protected DynamicTeleportService(TPAService tpaService) {
-        super(new HashMap<>());
-
-        this.services.put(TPAService.class, tpaService);
+    protected DynamicTeleportService(Map<Class<? extends Service>, Service> services) {
+        super(services);
     }
 
     public static Optional<DynamicTeleportService> init(DynamicTeleportConfig config) {
         try {
             if(!config.isEnabled()) throw new NoOutputException();
 
-            // TODO: Currently works as a guard clause, needs to be changed as new modules are added to Dynamic Teleport
-            if(!config.isTpa_enabled())
-                return Optional.of(new DynamicTeleportService());
+            DynamicTeleportService.Builder builder = new DynamicTeleportService.Builder();
 
-            TPASettings tpaSettings = new TPASettings(
-                    config.isTpa_friendsOnly(),
-                    config.isTpa_ignorePlayerCap(),
-                    config.getTpa_expiration(),
-                    config.getTpa_enabledFamilies()
-            );
+            if(config.isTpa_enabled()) {
 
-            TPAService tpaService = new TPAService(tpaSettings);
+                TPASettings tpaSettings = new TPASettings(
+                        config.isTpa_friendsOnly(),
+                        config.isTpa_ignorePlayerCap(),
+                        config.getTpa_expiration(),
+                        config.getTpa_enabledFamilies()
+                );
 
-            DynamicTeleportService dynamicTeleportService = new DynamicTeleportService(tpaService);
+                TPAService tpaService = new TPAService(tpaSettings);
 
-            return Optional.of(dynamicTeleportService);
+                builder.addService(tpaService);
+            }
+            if(config.isFamilyAnchor_enabled()) {
+                try {
+                    builder.addService(AnchorService.init(config).orElseThrow());
+                } catch (Exception ignore) {}
+            }
+            if(config.isHub_enabled()) {
+                try {
+                    builder.addService(new HubService(config.getHub_enabledFamilies()));
+                } catch (Exception ignore) {}
+            }
+            return Optional.of(builder.build());
         } catch (Exception ignore) {}
 
         return Optional.empty();
+    }
+
+    protected static class Builder {
+        protected final Map<Class<? extends Service>, Service> services = new HashMap<>();
+
+        public DynamicTeleportService.Builder addService(Service service) {
+            this.services.put(service.getClass(), service);
+            return this;
+        }
+
+        public DynamicTeleportService build() {
+            return new DynamicTeleportService(this.services);
+        }
     }
 
     /**
@@ -54,6 +73,8 @@ public class DynamicTeleportService extends ServiceableService {
      */
     public static class ValidServices {
         public static Class<TPAService> TPA_SERVICE = TPAService.class;
+        public static Class<AnchorService> ANCHOR_SERVICE = AnchorService.class;
+        public static Class<HubService> HUB_SERVICE = HubService.class;
 
         public static boolean isOptional(Class<? extends Service> clazz) {
             if(clazz == TPA_SERVICE) return true;

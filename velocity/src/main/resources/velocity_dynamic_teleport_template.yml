@@ -117,8 +117,9 @@ tpa:
 # | directly connect players to a specific family!         #
 #                                                          #
 #               -----------------------------              #
-#                        Permission:                       #
+#                        Permissions:                      #
 #               rustyconnector.command.anchor              #
+#        rustyconnector.command.anchor.<anchor name>       #
 #               -----------------------------              #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -131,10 +132,10 @@ family-anchor:
     #
     # All anchor commands are executed using `/<anchor name>`
     #
-    # NOTE: Make sure that, when you define your command, you don't include a slash!
+    # NOTE: Make sure that, when you define your name, you don't include a slash!
     #
     anchors:
-        - command: "lobby"
+        - name: "lobby"
           family: "lobby"
 
 ############################################################
@@ -145,6 +146,9 @@ family-anchor:
 #                                                          #
 # | Hub allows your players to teleport to the parent      #
 # | family of the family they are currently connected to!  #
+#                                                          #
+# | Set your family parent's in your respective family     #
+# | config files.                                          #
 #                                                          #
 #               ----------------------------               #
 #                        Permission:                       #
@@ -159,40 +163,7 @@ family-anchor:
 hub:
     enabled: false
 
-    ############################################################
-    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-    #                     Family Hierarchy                     #
-    #                                                          #
-    #               ---------------------------                #
-    #                                                          #
-    # | Family Hierarchy is where you lay out how your         #
-    # | families relate to eachother.                          #
-    #                                                          #
-    # | If a player is in a child family, they can use /hub    #
-    # | to teleport to their parent family.                    #
-    #                                                          #
-    # | If a family is not listed in the hierarchy, it's       #
-    # | parent family will default to being the root family.   #
-    #                                                          #
-    #   NOTE: The format used for family-hierarchy is JSON.    #
-    #         Be sure to use a JSON syntax checker so that you #
-    #         can make sure you've written it properly.        #
-    #                                                          #
-    #               ---------------------------                #
-    #                                                          #
-    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-    ############################################################
-    family-hierarchy: '[
-        {
-            "family": "lobby",
-            "children": [
-                {"family": "survival"},
-                {"family": "creative"},
-                {"family": "pvp", "children": [
-                    {"family": "hungergames"},
-                    {"family": "skywars"},
-                    {"family": "spleef"}
-                ]}
-            ]
-        }
-    ]'
+    #
+    # List the families that you'd like players to be able to use /hub in.
+    #
+    enabled-families: []

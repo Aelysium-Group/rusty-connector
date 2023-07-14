@@ -31,7 +31,7 @@ public class DynamicTeleportConfig extends YAML {
     private List<Map.Entry<String, String>> familyAnchor_anchors;
 
     private boolean hub_enabled = false;
-    private JsonArray hub_familyHierarchy;
+    private List<String> hub_enabledFamilies = new ArrayList<>();
 
     private DynamicTeleportConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -97,8 +97,8 @@ public class DynamicTeleportConfig extends YAML {
         return hub_enabled;
     }
 
-    public JsonArray getHub_familyHierarchy() {
-        return hub_familyHierarchy;
+    public List<String> getHub_enabledFamilies() {
+        return hub_enabledFamilies;
     }
 
     @SuppressWarnings("unchecked")
@@ -138,16 +138,18 @@ public class DynamicTeleportConfig extends YAML {
             if(anchors.size() != 0)
                 for (ConfigurationNode entry: anchors)
                     this.familyAnchor_anchors.add(Map.entry(
-                            Objects.requireNonNull(entry.getKey()).toString(),
-                            Objects.requireNonNull(entry.getValue()).toString()
+                            YAML.get(entry, "name").getString(),
+                            YAML.get(entry, "family").getString()
                     ));
         }
 
         this.hub_enabled = this.getNode(this.data, "hub.enabled", Boolean.class);
         if(this.hub_enabled) {
-            Gson gson = new Gson();
-
-            this.hub_familyHierarchy = gson.fromJson(this.getNode(this.data, "hub.family-hierarchy", String.class), JsonArray.class);
+            try {
+                this.hub_enabledFamilies = (List<String>) (this.getNode(this.data, "tpa.enabled-families", List.class));
+            } catch (Exception e) {
+                throw new IllegalStateException("The node [tpa.enabled-families] in " + this.getName() + " is invalid! Make sure you are using the correct type of data!");
+            }
         }
     }
 }

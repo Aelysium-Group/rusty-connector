@@ -11,10 +11,12 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAHandler;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
@@ -25,6 +27,7 @@ import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.Va
  * Player-focused families offer features such as /tpa, whitelists, load-balancing, and direct connection.
  */
 public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerServer> {
+    protected WeakReference<BaseServerFamily> parent;
     protected LoadBalancer loadBalancer = null;
     protected String whitelist;
     protected boolean weighted;
@@ -40,6 +43,13 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         } catch (Exception ignore) {}
         this.loadBalancer.setPersistence(persistence, attempts);
         this.loadBalancer.setWeighted(weighted);
+    }
+
+    public void setParent(BaseServerFamily family) {
+        this.parent = new WeakReference<>(family);
+    }
+    public WeakReference<BaseServerFamily> getParent() {
+        return this.parent;
     }
 
     /**
