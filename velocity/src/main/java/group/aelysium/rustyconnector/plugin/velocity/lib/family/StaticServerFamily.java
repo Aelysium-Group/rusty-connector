@@ -6,7 +6,6 @@ import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -17,7 +16,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConn
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPASettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -28,13 +26,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
+
 public class StaticServerFamily extends PlayerFocusedServerFamily {
     List<HomeServerMapping> mappingsCache = new ArrayList<>();
     LiquidTimestamp homeServerExpiration;
     UnavailableProtocol unavailableProtocol;
 
-    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, DynamicTeleport_TPASettings tpaSettings, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings);
+    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
         this.unavailableProtocol = unavailableProtocol;
         this.homeServerExpiration = homeServerExpiration;
     }
@@ -129,7 +129,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticServerFamily init(WhitelistService whitelistService, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static StaticServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
         logger.log("Registering family: " + familyName);
@@ -148,7 +148,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
         if (staticFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name());
 
-            whitelistService.add(whitelist);
+            api.getService(WHITELIST_SERVICE).orElseThrow().add(whitelist);
 
             logger.log(familyName + " whitelist registered!");
         } else {
@@ -164,9 +164,9 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    new DynamicTeleport_TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
+                    staticFamilyConfig.getParent_family()
             );
             case LEAST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
@@ -175,9 +175,9 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    new DynamicTeleport_TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
+                    staticFamilyConfig.getParent_family()
             );
             case MOST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
@@ -186,9 +186,9 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
                     staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    new DynamicTeleport_TPASettings(staticFamilyConfig.isTPA_enabled(), staticFamilyConfig.shouldTPA_ignorePlayerCap(), staticFamilyConfig.getTPA_requestLifetime()),
                     staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
+                    staticFamilyConfig.getParent_family()
             );
         }
 
@@ -202,40 +202,6 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
         }
 
         return family;
-    }
-
-    public void reloadWhitelist() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-
-        Whitelist currentWhitelist = this.getWhitelist();
-        if (!(currentWhitelist == null)) {
-            api.getService(WhitelistService.class).remove(currentWhitelist);
-        }
-
-        ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
-                this.name,
-                new File(String.valueOf(api.getDataFolder()), "families/" + this.name + ".static.yml"),
-                "velocity_static_family_template.yml"
-        );
-        if (!scalarFamilyConfig.generate()) {
-            throw new IllegalStateException("Unable to load or create families/" + this.name + ".static.yml!");
-        }
-        scalarFamilyConfig.register();
-
-        Whitelist newWhitelist;
-        if (scalarFamilyConfig.isWhitelist_enabled()) {
-            newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
-
-            this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getService(WhitelistService.class).add(newWhitelist);
-
-            logger.log("Finished reloading whitelist for " + this.name);
-            return;
-        }
-
-        this.whitelist = null;
-        logger.log("There is no whitelist for " + this.name);
     }
 }
 

@@ -15,7 +15,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFami
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import net.kyori.adventure.text.Component;
+import java.util.Objects;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
@@ -182,7 +184,7 @@ public interface VelocityLang extends Lang {
     Message RC_FAMILY = () -> {
         VelocityAPI api = VelocityRustyConnector.getAPI();
         Component families = text("");
-        for (BaseServerFamily family : api.getService(FamilyService.class).dump()) {
+        for (BaseServerFamily family : api.getService(FAMILY_SERVICE).orElseThrow().dump()) {
             if(family instanceof ScalarServerFamily)
                 families = families.append(text("[ "+family.getName()+" ] ").color(GOLD));
             if(family instanceof StaticServerFamily)
@@ -260,6 +262,13 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
+        ScalarServerFamily rootFamily = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
+        String parentFamilyName = rootFamily.getName();
+        try {
+            parentFamilyName = Objects.requireNonNull(family.getParent().get()).getName();
+        } catch (Exception ignore) {}
+        if(family.equals(rootFamily)) parentFamilyName = "none";
+
         return join(
                 Lang.newlines(),
                 BORDER,
@@ -270,6 +279,7 @@ public interface VelocityLang extends Lang {
                 SPACING,
                 text("   ---| Online Players: "+family.getPlayerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
+                text("   ---| Parent Family: "+ parentFamilyName),
                 text("   ---| Load Balancing:"),
                 text("      | - Algorithm: "+family.getLoadBalancer()),
                 text("      | - Weighted Sorting: "+family.isWeighted()),
@@ -317,6 +327,13 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
+        ScalarServerFamily rootFamily = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
+        String parentFamilyName = rootFamily.getName();
+        try {
+            parentFamilyName = Objects.requireNonNull(family.getParent().get()).getName();
+        } catch (Exception ignore) {}
+        if(family.equals(rootFamily)) parentFamilyName = "none";
+
         LiquidTimestamp expiration = family.getHomeServerExpiration();
         String homeServerExpiration = "NEVER";
         if(expiration != null) homeServerExpiration = expiration.toString();
@@ -331,6 +348,7 @@ public interface VelocityLang extends Lang {
                 SPACING,
                 text("   ---| Online Players: "+family.getPlayerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
+                text("   ---| Parent Family: "+ parentFamilyName),
                 text("   ---| Home Server Expiration: "+homeServerExpiration),
                 text("   ---| Load Balancing:"),
                 text("      | - Algorithm: "+family.getLoadBalancer()),
@@ -358,7 +376,7 @@ public interface VelocityLang extends Lang {
     Component BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT = text("The server you were meant to be connected to is unavailable! Please try again later!", RED);
 
 
-    Component TPA_NO_PERMISSION = text("You do not have permission to use this command.",RED);
+    Component COMMAND_NO_PERMISSION = text("You do not have permission to use this command.",RED);
 
     Message TPA_USAGE = () -> join(
             Lang.newlines(),
@@ -428,6 +446,60 @@ public interface VelocityLang extends Lang {
     ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> join(
             Lang.newlines(),
             text("Your tpa request to "+username+" has expired!",RED)
+    );
+
+    Message PARTY_USAGE_NO_PARTY = () -> join(
+            Lang.newlines(),
+            text("Usage: /party <create / invites>",RED)
+    );
+
+    Message PARTY_USAGE_PARTY_LEADER = () -> join(
+            Lang.newlines(),
+            text("Usage: /party <disband / invite / kick / promote>",RED)
+    );
+
+    Message PARTY_USAGE_PARTY_MEMBER = () -> join(
+            Lang.newlines(),
+            text("Usage: /party <leave / invites>",RED)
+    );
+
+    Message PARTY_USAGE_INVITES = () -> join(
+            Lang.newlines(),
+            text("Usage: /party invites <username> <accept / ignore>",RED)
+    );
+
+    Message PARTY_USAGE_INVITE = () -> join(
+            Lang.newlines(),
+            text("Usage: /party invite <username>",RED)
+    );
+
+    Message PARTY_USAGE_KICK = () -> join(
+            Lang.newlines(),
+            text("Usage: /party kick <username>",RED)
+    );
+
+    Message PARTY_USAGE_PROMOTE = () -> join(
+            Lang.newlines(),
+            text("Usage: /party promote <username>",RED)
+    );
+
+    Message PARTY_DISBANDED = () -> join(
+            Lang.newlines(),
+            text("Your party has been disbanded.",GRAY)
+    );
+
+
+    Message FRIEND_USAGE = () -> join(
+            Lang.newlines(),
+            text("Usage: /friend <<username> / requests>",RED)
+    );
+    Message FRIEND_REQUEST_USAGE = () -> join(
+            Lang.newlines(),
+            text("Usage: /friend requests <username> <accept / ignore>",RED)
+    );
+    Message UNFRIEND_USAGE = () -> join(
+            Lang.newlines(),
+            text("Usage: /unfriend <username>",RED)
     );
 
     ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(

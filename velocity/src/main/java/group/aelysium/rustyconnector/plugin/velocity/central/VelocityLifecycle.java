@@ -9,8 +9,6 @@ import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
@@ -36,15 +34,6 @@ public class VelocityLifecycle extends PluginLifecycle {
         if(!loadEvents()) return false;
 
         VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(logger);
-
-        DefaultConfig defaultConfig = DefaultConfig.getConfig();
-        if(defaultConfig.isBootCommands_enabled()) {
-            logger.log("Issuing boot commands...");
-            defaultConfig.getBootCommands_commands().forEach(command -> {
-                logger.log(">>> "+command);
-                api.dispatchCommand(command);
-            });
-        }
 
         WhitelistConfig.empty();
         DefaultConfig.empty();
@@ -123,13 +112,9 @@ public class VelocityLifecycle extends PluginLifecycle {
                     );
 
             commandManager.unregister("server");
-
-            commandManager.register(
-                    commandManager.metaBuilder("tpa")
-                            .build(),
-                    CommandTPA.create()
-            );
-
+          
+            // Commands for specific services can be found in the constructors for those services
+  
             return true;
         } catch (Exception e) {
             VelocityLang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);

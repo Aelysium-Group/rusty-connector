@@ -8,15 +8,16 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
-import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
+
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
 
 public class OnPlayerChooseInitialServer {
     /**
@@ -30,16 +31,16 @@ public class OnPlayerChooseInitialServer {
 
         return EventTask.async(() -> {
             try {
-                Whitelist whitelist = api.getService(WhitelistService.class).getProxyWhitelist();
-                if(whitelist != null) {
+                try {
+                    Whitelist whitelist = api.getService(WHITELIST_SERVICE).orElseThrow().getProxyWhitelist().orElseThrow();
                     if (!whitelist.validate(player)) {
                         logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
                         player.disconnect(Component.text(whitelist.getMessage()));
                         return;
                     }
-                }
+                } catch (Exception ignore) {}
 
-                ScalarServerFamily rootFamily = api.getService(FamilyService.class).getRootFamily();
+                ScalarServerFamily rootFamily = api.getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
 
                 PlayerServer server = rootFamily.connect(player);
                 if(server == null) return;

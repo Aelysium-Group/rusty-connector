@@ -1,22 +1,30 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
+import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriend;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Vector;
 
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.PARTY_SERVICE;
+
 public class Party {
-    private boolean empty = false;
     private final Vector<Player> players;
-    private final int size;
-    private Player host;
+    private final int maxSize;
+    private WeakReference<Player> leader;
     private WeakReference<PlayerServer> server;
 
-    public Party(int size, Player host) {
-        this.players = new Vector<>(size);
-        this.size = size;
-        this.setHost(host);
+    public Party(int maxSize, Player host) {
+        this.players = new Vector<>(maxSize);
+        this.maxSize = maxSize;
+        this.setLeader(host);
     }
 
     public void setServer(PlayerServer server) {
@@ -26,26 +34,40 @@ public class Party {
         return this.server.get();
     }
 
-    public Player getHost() {
+    public Player getLeader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
+        if(this.leader.get() == null) {
+            Player newLeader = players.get(0);
+            this.setLeader(newLeader);
+            this.broadcast(Component.text("The old party leader is no-longer available! "+newLeader.getUsername()+" is the new leader!", NamedTextColor.YELLOW));
+        }
 
-        return this.host;
+        return this.leader.get();
     }
 
-    private void setHost(Player player) {
-        this.host = player;
-        this.players.add(player);
+    public void setLeader(Player player) {
+        if(!this.players.contains(player))
+            this.players.add(player);
+        this.leader = new WeakReference<>(player);
     }
 
     public boolean isEmpty() {
-        return this.empty;
+        return this.players().isEmpty();
+    }
+
+    public Vector<Player> players() {
+        return this.players;
     }
 
     public void join(Player player) {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
 
-        if(this.players.size() > this.size) throw new RuntimeException("The party is already full! Try again later!");
+        if(this.players.size() > this.maxSize) throw new RuntimeException("The party is already full! Try again later!");
 
+        this.getServer().connect(player);
+        this.getServer().playerJoined();
+
+        this.players.forEach(partyMember -> player.sendMessage(Component.text(player.getUsername() + " joined the party.", NamedTextColor.YELLOW)));
         this.players.add(player);
     }
 
@@ -54,17 +76,32 @@ public class Party {
 
         this.players.remove(player);
 
-        if(this.players.size() <= 0)
-            this.decompose();
+        this.players.forEach(partyMember -> player.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
+
+        if(this.isEmpty())
+            VelocityRustyConnector.getAPI().getService(PARTY_SERVICE).orElseThrow().disband(this);
+    }
+
+    public void broadcast(Component message) {
+        this.players.forEach(player -> player.sendMessage(message));
     }
 
     public boolean contains(Player player) {
         return this.players.contains(player);
     }
 
-    private void decompose() {
-        this.empty = true;
+    public void decompose() {
         this.players.clear();
-        this.host = null;
+        this.leader.clear();
+        this.leader = null;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return "<Party players=" + this.players.size() + " leader=" + Objects.requireNonNull(this.leader.get()).getUsername() + ">";
+        } catch (Exception ignore) {
+            return "<Party players=" + this.players.size() + " leader=null>";
+        }
     }
 }

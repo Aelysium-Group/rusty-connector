@@ -6,22 +6,20 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
 
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
     private RegisteredServer registeredServer = null;
@@ -98,7 +96,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     public void register(String familyName) throws Exception {
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        this.registeredServer = api.getService(ServerService.class).registerServer(this, familyName);
+        this.registeredServer = api.getService(SERVER_SERVICE).orElseThrow().registerServer(this, familyName);
 
         this.familyName = familyName;
     }
@@ -184,7 +182,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
-        BaseServerFamily family = api.getService(FamilyService.class).find(this.familyName);
+        BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
@@ -220,6 +218,29 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     }
 
     /**
+     * Connects a party to the server.
+     * This also increases the player count on this server by the number of players in the party.
+     * If any members of the party have already connected to this server, they will be ignored.
+     * @param party The party to connect.
+     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
+     */
+    public void connect(Party party) {
+        party.setServer(this);
+
+        party.players().forEach(player -> {
+            try {
+                if(player.getCurrentServer().orElseThrow().getServer().equals(this.registeredServer)) return;
+
+                ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
+                connection.connect().get().isSuccessful();
+            } catch (Exception e) {
+                player.sendMessage(Component.text("There was an issue following your party! You've been kicked. "+e.getMessage(), NamedTextColor.RED));
+                party.leave(player);
+            }
+        });
+    }
+
+    /**
      * Reduces the player count on this server by 1.
      */
     public void playerLeft() {
@@ -239,5 +260,9 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
                "("+this.getServerInfo().getAddress().getHostName()+":"+this.getServerInfo().getAddress().getPort()+") - " +
                "["+this.getPlayerCount()+" ("+this.getSoftPlayerCap()+" <> "+this.getSoftPlayerCap()+") w-"+this.getWeight()+"]" +
                "{"+ this.familyName +"}";
+    }
+
+    public boolean equals(PlayerServer server) {
+        return this.serverInfo.equals(server.getServerInfo());
     }
 }

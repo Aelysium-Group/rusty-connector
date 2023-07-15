@@ -40,7 +40,6 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, P
             e.printStackTrace();
             this.getPluginLoader().disablePlugin(this);
         }
-
     }
 
     @Override

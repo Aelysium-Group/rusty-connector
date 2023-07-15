@@ -1,34 +1,60 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
+import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageTPAQueuePlayer;
-import group.aelysium.rustyconnector.core.lib.model.ClockService;
+import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
-public class DynamicTeleport_TPACleaningService extends ClockService {
-    protected final long heartbeat;
+import java.util.*;
 
-    public DynamicTeleport_TPACleaningService(long heartbeat) {
-        super(true, 3);
-        this.heartbeat = heartbeat;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
+
+public class TPAService extends ServiceableService {
+    private TPASettings settings;
+    private Map<BaseServerFamily, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
+
+    public TPAService(TPASettings settings) {
+        super(new HashMap<>());
+        this.services.put(TPACleaningService.class, new TPACleaningService(settings.expiration()));
+        this.settings = settings;
+    }
+    public void initCommand() {
+        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
+        if(!commandManager.hasCommand("tpa"))
+            try {
+                commandManager.register(
+                        commandManager.metaBuilder("tpa").build(),
+                        CommandTPA.create()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
-    public DynamicTeleport_TPACleaningService() {
-        super(false, 0);
-        this.heartbeat = 0;
+    public TPASettings getSettings() {
+        return this.settings;
+    }
+
+    public Optional<TPAHandler> getTPAHandler(BaseServerFamily family) {
+        try {
+            return Optional.of(Objects.requireNonNull(this.tpaHandlers.get(family)));
+        } catch (Exception ignore) {}
+        return Optional.empty();
+    }
+    public List<TPAHandler> getAllTPAHandlers() {
+        return this.tpaHandlers.values().stream().toList();
     }
 
     /**
@@ -39,13 +65,11 @@ public class DynamicTeleport_TPACleaningService extends ClockService {
      * @throws NullPointerException If the server doesn't exist in the family.
      */
     public void tpaSendPlayer(Player source, Player target, ServerInfo targetServerInfo) {
-        this.throwIfDisabled();
-
         VelocityAPI api = VelocityRustyConnector.getAPI();
 
         ServerInfo senderServerInfo = source.getCurrentServer().orElseThrow().getServerInfo();
 
-        PlayerServer targetServer = api.getService(ServerService.class).findServer(targetServerInfo);
+        PlayerServer targetServer = api.getService(SERVER_SERVICE).orElseThrow().findServer(targetServerInfo);
         if(targetServer == null) throw new NullPointerException();
 
 
@@ -57,7 +81,7 @@ public class DynamicTeleport_TPACleaningService extends ClockService {
                 .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        api.getService(RedisService.class).publish(message);
+        api.getService(REDIS_SERVICE).orElseThrow().publish(message);
 
 
         if(senderServerInfo.equals(targetServerInfo)) return;
@@ -70,17 +94,23 @@ public class DynamicTeleport_TPACleaningService extends ClockService {
         }
     }
 
-    public void startHeartbeat() {
-        this.throwIfDisabled();
+    @Override
+    public void kill() {
+        this.getAllTPAHandlers().forEach(TPAHandler::decompose);
+        this.tpaHandlers.clear();
+        super.kill();
+    }
 
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        this.scheduleRecurring(() -> {
-            for(BaseServerFamily family : api.getService(FamilyService.class).dump()) {
-                if(!(family instanceof PlayerFocusedServerFamily)) continue;
+    /**
+     * The services that are valid for this service provider.
+     * Services marked as @Optional should be handled accordingly.
+     * If a service is not marked @Optional it should be impossible for that service to be unavailable.
+     */
+    public static class ValidServices {
+        public static Class<TPACleaningService> TPA_CLEANING_SERVICE = TPACleaningService.class;
 
-                if(!((PlayerFocusedServerFamily) family).getTPAHandler().getSettings().isEnabled()) continue;
-                ((PlayerFocusedServerFamily) family).getTPAHandler().clearExpired();
-            }
-        }, this.heartbeat);
+        public static boolean isOptional(Class<? extends Service> clazz) {
+            return false;
+        }
     }
 }

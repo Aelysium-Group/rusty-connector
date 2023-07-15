@@ -10,6 +10,8 @@ import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkServic
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.MAGIC_LINK_SERVICE;
+
 public class MagicLink_PingResponseHandler implements MessageHandler {
     private final RedisMessageServerPingResponse message;
 
@@ -21,17 +23,16 @@ public class MagicLink_PingResponseHandler implements MessageHandler {
     public void execute() throws Exception {
         PaperAPI api = PaperRustyConnector.getAPI();
         PluginLogger logger = api.getLogger();
-        MagicLinkService service = api.getService(MagicLinkService.class);
+        MagicLinkService service = api.getService(MAGIC_LINK_SERVICE).orElseThrow();
 
         if(message.getStatus() == RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED) {
             logger.send(Component.text(message.getMessage(), message.getColor()));
 
             if(message.getPingInterval().isPresent()) {
                 service.setUpcomingPingDelay(message.getPingInterval().get());
-                service.setNextcomingPingDelay(message.getPingInterval().get());
             } else {
-                service.setUpcomingPingDelay(10);
-                service.setNextcomingPingDelay(10);
+                logger.send(Component.text("No ping interval was given during registration! Defaulting to 15 seconds!", NamedTextColor.YELLOW));
+                service.setUpcomingPingDelay(15);
             }
 
             service.setStatus(MagicLinkService.Status.CONNECTED);
@@ -41,7 +42,6 @@ public class MagicLink_PingResponseHandler implements MessageHandler {
             logger.send(Component.text(message.getMessage(), message.getColor()));
             logger.send(Component.text("Waiting 1 minute before trying again...", NamedTextColor.GRAY));
             service.setUpcomingPingDelay(60);
-            service.setNextcomingPingDelay(10);
             service.setStatus(MagicLinkService.Status.SEARCHING);
         }
     }
