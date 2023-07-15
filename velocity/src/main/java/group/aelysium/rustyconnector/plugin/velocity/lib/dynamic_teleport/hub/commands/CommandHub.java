@@ -18,10 +18,13 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServer
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
 import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService.ValidServices.HUB_SERVICE;
@@ -33,6 +36,7 @@ public class CommandHub {
 
         FamilyService familyService = api.getService(FAMILY_SERVICE).orElseThrow();
         HubService hubService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow().getService(HUB_SERVICE).orElseThrow();
+        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
 
         LiteralCommandNode<CommandSource> hub = LiteralArgumentBuilder
                 .<CommandSource>literal("hub")
@@ -61,56 +65,35 @@ public class CommandHub {
                             return Command.SINGLE_SUCCESS;
                         } catch (RuntimeException err) {
                             VelocityLang.RC_SEND_NO_SERVER.send(logger, "Failed to connect player to parent family " + rootFamily.getName() + "!");
-                            context.getSource().sendMessage(Component.text("Failed to connect you to any parent servers!"));
+                            context.getSource().sendMessage(Component.text("Failed to connect you to the hub!"));
                         }
 
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    // Compile a list of parent families in-case a connect attempt fails
-                    List<BaseServerFamily> parentFamilies = new ArrayList<>();
-                    {
-                        BaseServerFamily currentFamily = ((PlayerFocusedServerFamily) family).getParent().get();
+                    try {
+                        PlayerFocusedServerFamily parent = (PlayerFocusedServerFamily) ((PlayerFocusedServerFamily) family).getParent().get();
 
-                        int maxDepth = 10;
-                        while (maxDepth > 0) {
-                            BaseServerFamily parentFamily;
-
-                            if (currentFamily == null) break;
-                            else parentFamily = ((PlayerFocusedServerFamily) currentFamily).getParent().get();
-
-                            if (!(parentFamily instanceof PlayerFocusedServerFamily)) break;
-
-                            if (parentFamilies.contains(parentFamily)) break;
-                            else parentFamilies.add(parentFamily);
-
-                            currentFamily = ((PlayerFocusedServerFamily) parentFamily).getParent().get();
-
-                            maxDepth--;
+                        if(parent != null) {
+                            parent.connect(player);
+                            return Command.SINGLE_SUCCESS;
                         }
 
-                        parentFamilies.add(rootFamily);
+                        rootFamily.connect(player);
+                    } catch (RuntimeException err) {
+                        VelocityLang.RC_SEND_NO_SERVER.send(logger, "Failed to connect player to parent family " + rootFamily.getName() + "!");
+                        context.getSource().sendMessage(Component.text("Failed to connect you to the hub!", NamedTextColor.RED));
                     }
-
-                    boolean playerSent = false;
-
-                    for (BaseServerFamily currentFamily : parentFamilies) {
-                        try {
-                            ((PlayerFocusedServerFamily) currentFamily).connect(player);
-                            playerSent = true;
-                            break;
-                        } catch (RuntimeException e) {
-                            VelocityLang.RC_SEND_NO_SERVER.send(logger, "Failed to connect player to parent family " + family.getName() + "!");
-                        }
-                    }
-
-                    if (!playerSent)
-                        player.sendMessage(Component.text("Failed to connect you to any parent servers!"));
 
                     return Command.SINGLE_SUCCESS;
                 })
                 .build();
 
         return new BrigadierCommand(hub);
+    }
+
+    public static int closeMessage(Player player, Component message) {
+        player.sendMessage(message);
+        return Command.SINGLE_SUCCESS;
     }
 }

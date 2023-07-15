@@ -40,6 +40,7 @@ public class CommandAnchor {
 
         DynamicTeleportService dynamicTeleportService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow();
         AnchorService anchorService = dynamicTeleportService.getService(ANCHOR_SERVICE).orElseThrow();
+        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
 
 
         LiteralCommandNode<CommandSource> anchorCommand = LiteralArgumentBuilder
@@ -56,7 +57,17 @@ public class CommandAnchor {
                     }
 
                     try {
-                        ((PlayerFocusedServerFamily) anchorService.getFamily(anchor).orElseThrow()).connect(player);
+                        PlayerFocusedServerFamily family = ((PlayerFocusedServerFamily) anchorService.getFamily(anchor).orElseThrow());
+
+                        // If the attempt to check player's family fails, just ignore it and try to connect.
+                        // If there's actually an issue it'll be caught further down.
+                        try {
+                            PlayerServer server = serverService.findServer(Objects.requireNonNull(player.getCurrentServer().orElse(null)).getServerInfo());
+                            if(family.equals(server.getFamily()))
+                                return closeMessage(player, Component.text("You're already connected to this server.", NamedTextColor.RED));
+                        } catch (Exception ignore) {}
+
+                        family.connect(player);
                     } catch (Exception e) {
                         e.printStackTrace();
                         return closeMessage(player, Component.text("There was a fatal error while trying to complete your request.", NamedTextColor.RED));
