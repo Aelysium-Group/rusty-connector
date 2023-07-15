@@ -31,9 +31,6 @@ public class DefaultConfig extends YAML {
     private boolean messageTunnel_denylist_enabled = false;
     private List<String> messageTunnel_denylist_addresses = new ArrayList<>();
 
-    private boolean bootCommands_enabled = false;
-    private List<String> bootCommands_commands = new ArrayList<>();
-
     private Integer services_serverLifecycle_serverTimeout = 15;
     private Integer services_serverLifecycle_serverPingInterval = 10;
     private Boolean services_loadBalancing_enabled = true;
@@ -122,14 +119,6 @@ public class DefaultConfig extends YAML {
         return this.messageTunnel_denylist_enabled;
     }
 
-    public boolean isBootCommands_enabled() {
-        return bootCommands_enabled;
-    }
-
-    public List<String> getBootCommands_commands() {
-        return bootCommands_commands;
-    }
-
     public Integer getServices_serverLifecycle_serverTimeout() {
         return services_serverLifecycle_serverTimeout;
     }
@@ -212,15 +201,6 @@ public class DefaultConfig extends YAML {
             this.messageTunnel_denylist_addresses = (List<String>) this.getNode(this.data,"message-tunnel.denylist.addresses",List.class);
         } catch (Exception e) {
             throw new IllegalStateException("The node [message-tunnel.denylist] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
-        }
-
-        // Boot commands
-
-        this.bootCommands_enabled = this.getNode(this.data,"boot-commands.enabled",Boolean.class);
-        try {
-            this.bootCommands_commands = (List<String>) this.getNode(this.data,"boot-commands.commands",List.class);
-        } catch (Exception e) {
-            throw new IllegalStateException("The node [boot-commands.commands] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
 
         // Hearts

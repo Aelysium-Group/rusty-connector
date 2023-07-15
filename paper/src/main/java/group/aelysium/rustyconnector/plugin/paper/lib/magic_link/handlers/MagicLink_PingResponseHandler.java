@@ -30,10 +30,9 @@ public class MagicLink_PingResponseHandler implements MessageHandler {
 
             if(message.getPingInterval().isPresent()) {
                 service.setUpcomingPingDelay(message.getPingInterval().get());
-                service.setNextcomingPingDelay(message.getPingInterval().get());
             } else {
-                service.setUpcomingPingDelay(10);
-                service.setNextcomingPingDelay(10);
+                logger.send(Component.text("No ping interval was given during registration! Defaulting to 15 seconds!", NamedTextColor.YELLOW));
+                service.setUpcomingPingDelay(15);
             }
 
             service.setStatus(MagicLinkService.Status.CONNECTED);
@@ -43,7 +42,6 @@ public class MagicLink_PingResponseHandler implements MessageHandler {
             logger.send(Component.text(message.getMessage(), message.getColor()));
             logger.send(Component.text("Waiting 1 minute before trying again...", NamedTextColor.GRAY));
             service.setUpcomingPingDelay(60);
-            service.setNextcomingPingDelay(10);
             service.setStatus(MagicLinkService.Status.SEARCHING);
         }
     }

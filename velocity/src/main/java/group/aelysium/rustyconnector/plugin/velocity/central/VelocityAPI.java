@@ -128,24 +128,16 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
                         .getService(TPA_CLEANING_SERVICE).orElseThrow()
                         .startHeartbeat();
                 dynamicTeleportService.getService(TPA_SERVICE).orElseThrow().initCommand();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception ignore) {}
 
             try {
                 dynamicTeleportService.getService(HUB_SERVICE).orElseThrow().initCommand();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception ignore) {}
 
             try {
                 dynamicTeleportService.getService(ANCHOR_SERVICE).orElseThrow().initCommands();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            } catch (Exception ignore) {}
+        } catch (Exception ignore) {}
     }
 
     /**

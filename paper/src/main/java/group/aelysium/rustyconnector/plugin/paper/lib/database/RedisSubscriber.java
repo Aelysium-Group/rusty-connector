@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageSta
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
@@ -16,8 +17,7 @@ import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers.MagicL
 import javax.naming.AuthenticationException;
 
 import static group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType.*;
-import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.MESSAGE_CACHE_SERVICE;
-import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.REDIS_SERVICE;
+import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.*;
 
 public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber {
     public RedisSubscriber(RedisClient client) {
@@ -36,9 +36,14 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             GenericRedisMessage message = serializer.parseReceived(rawMessage);
 
             if(message.getOrigin() == MessageOrigin.SERVER) throw new Exception("Message from a sub-server! Ignoring...");
+
+
+            if(!AddressUtil.addressToString(message.getAddress()).equals(api.getService(SERVER_INFO_SERVICE).orElseThrow().getAddress()))
+               throw new Exception("Message addressed to another sub-server! Ignoring...");
             try {
                 if (!(api.getService(REDIS_SERVICE).orElseThrow().validatePrivateKey(message.getPrivateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
+
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
 

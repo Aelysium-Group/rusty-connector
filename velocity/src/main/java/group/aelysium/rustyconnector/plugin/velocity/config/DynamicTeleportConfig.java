@@ -132,23 +132,23 @@ public class DynamicTeleportConfig extends YAML {
 
         this.familyAnchor_enabled = this.getNode(this.data, "family-anchor.enabled", Boolean.class);
         if(this.familyAnchor_enabled) {
-            List<? extends ConfigurationNode> anchors = YAML.get(this.data, "family-anchor.anchors").getChildrenList();
+            List<? extends ConfigurationNode> anchors = get(this.data, "family-anchor.anchors").getChildrenList();
 
             this.familyAnchor_anchors = new ArrayList<>();
             if(anchors.size() != 0)
                 for (ConfigurationNode entry: anchors)
                     this.familyAnchor_anchors.add(Map.entry(
-                            YAML.get(entry, "name").getString(),
-                            YAML.get(entry, "family").getString()
+                            this.getNode(entry, "name", String.class),
+                            this.getNode(entry, "family", String.class)
                     ));
         }
 
         this.hub_enabled = this.getNode(this.data, "hub.enabled", Boolean.class);
         if(this.hub_enabled) {
             try {
-                this.hub_enabledFamilies = (List<String>) (this.getNode(this.data, "tpa.enabled-families", List.class));
+                this.hub_enabledFamilies = (List<String>) (this.getNode(this.data, "hub.enabled-families", List.class));
             } catch (Exception e) {
-                throw new IllegalStateException("The node [tpa.enabled-families] in " + this.getName() + " is invalid! Make sure you are using the correct type of data!");
+                throw new IllegalStateException("The node [hub.enabled-families] in " + this.getName() + " is invalid! Make sure you are using the correct type of data!");
             }
         }
     }

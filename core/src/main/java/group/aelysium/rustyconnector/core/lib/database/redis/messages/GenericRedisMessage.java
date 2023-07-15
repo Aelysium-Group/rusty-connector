@@ -91,7 +91,7 @@ public class GenericRedisMessage {
         object.add(MasterValidParameters.PROTOCOL_VERSION, new JsonPrimitive(this.messageVersion));
         object.add(MasterValidParameters.TYPE, new JsonPrimitive(String.valueOf(this.type)));
         object.add(MasterValidParameters.ORIGIN, new JsonPrimitive(String.valueOf(this.origin)));
-        if(this.origin == MessageOrigin.PROXY || this.address == null)
+        if(this.origin == MessageOrigin.PROXY && this.address == null)
             object.add(MasterValidParameters.ADDRESS, new JsonPrimitive("null"));
         else
             object.add(MasterValidParameters.ADDRESS, new JsonPrimitive(this.address.getHostString() + ":" + this.address.getPort()));
@@ -215,7 +215,7 @@ public class GenericRedisMessage {
                 throw new IllegalStateException("You must provide `origin` when building a receivable RedisMessage!");
 
             if (this.type == PING)              return new RedisMessageServerPing(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if (this.type == PING_RESPONSE)              return new RedisMessageServerPingResponse(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == PING_RESPONSE)     return new RedisMessageServerPingResponse(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if (this.type == SEND_PLAYER)       return new RedisMessageSendPlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if (this.type == TPA_QUEUE_PLAYER)  return new RedisMessageTPAQueuePlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
 
@@ -238,7 +238,7 @@ public class GenericRedisMessage {
             if(this.protocolVersion != null) throw new IllegalStateException("You're not allowed to set `protocolVersion` when building a sendable RedisMessage!");
             if(this.type == null) throw new IllegalStateException("You must provide `type` when building a sendable RedisMessage!");
             if(this.origin == null) throw new IllegalStateException("You must provide `origin` when building a sendable RedisMessage!");
-            // Specifically allow address to be set as `null`
+            if(this.address == null) throw new IllegalStateException("You must provide `address` when building a sendable RedisMessage!");
 
             if(this.type == PING)               return new RedisMessageServerPing(this.address, this.origin, this.parameters);
             if(this.type == PING_RESPONSE)      return new RedisMessageServerPingResponse(this.address, this.origin, this.parameters);

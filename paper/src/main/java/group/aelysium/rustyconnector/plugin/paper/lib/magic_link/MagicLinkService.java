@@ -11,8 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.REDIS_MESSAGER_SERVICE;
 
 public class MagicLinkService extends ClockService {
-    private AtomicInteger upcomingPingDelay = new AtomicInteger(0);
-    private AtomicInteger nextcomingPingDelay = new AtomicInteger(5);
+    private AtomicInteger upcomingPingDelay = new AtomicInteger(5);
     private Status status = Status.SEARCHING;
 
     public MagicLinkService(int threads) {
@@ -31,14 +30,6 @@ public class MagicLinkService extends ClockService {
         upcomingPingDelay.set(delay);
     }
 
-    /**
-     * Set the ping delay for all pings after this upcoming one.
-     * @param delay The delay to set.
-     */
-    public void setNextcomingPingDelay(int delay) {
-        nextcomingPingDelay.set(delay);
-    }
-
     private void scheduleNextPing() {
         PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
         RedisMessagerService service = PaperRustyConnector.getAPI().getService(REDIS_MESSAGER_SERVICE).orElseThrow();
@@ -54,8 +45,6 @@ public class MagicLinkService extends ClockService {
 
             MagicLinkService.this.scheduleNextPing();
         }, this.upcomingPingDelay.get());
-
-        if(this.upcomingPingDelay.get() != this.nextcomingPingDelay.get()) this.upcomingPingDelay = this.nextcomingPingDelay;
     }
 
     public void startHeartbeat() {

@@ -35,15 +35,6 @@ public class VelocityLifecycle extends PluginLifecycle {
 
         VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(logger);
 
-        DefaultConfig defaultConfig = DefaultConfig.getConfig();
-        if(defaultConfig.isBootCommands_enabled()) {
-            logger.log("Issuing boot commands...");
-            defaultConfig.getBootCommands_commands().forEach(command -> {
-                logger.log(">>> "+command);
-                api.dispatchCommand(command);
-            });
-        }
-
         WhitelistConfig.empty();
         DefaultConfig.empty();
         ScalarFamilyConfig.empty();
