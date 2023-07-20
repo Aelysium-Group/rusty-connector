@@ -110,10 +110,10 @@ public final class CommandTPA {
                                         BaseServerFamily family = familyService.find(familyName);
                                         if(!(family instanceof PlayerFocusedServerFamily)) return builder.buildFuture();
 
-                                        TPAHandler tpaHandler = tpaService.getTPAHandler(family).orElseThrow();
+                                        TPAHandler tpaHandler = tpaService.getTPAHandler(family);
                                         List<TPARequest> requests = tpaHandler.findRequestsForTarget(player);
 
-                                        if(requests.size() <= 0) {
+                                        if(requests.size() == 0) {
                                             builder.suggest("You have no pending TPA requests!");
                                             return builder.buildFuture();
                                         }
@@ -154,7 +154,7 @@ public final class CommandTPA {
                                             if(family == null) throw new NullPointerException();
                                             if(!(family instanceof PlayerFocusedServerFamily)) throw new NullPointerException();
 
-                                            TPAHandler tpaHandler = tpaService.getTPAHandler(family).orElseThrow();
+                                            TPAHandler tpaHandler = tpaService.getTPAHandler(family);
                                             TPARequest request = tpaHandler.findRequest(senderPlayer, (Player) context.getSource());
                                             if(request == null) {
                                                 context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_REQUEST.build(username));
@@ -208,10 +208,10 @@ public final class CommandTPA {
                                         String familyName = serverService.findServer(sendingServer).getFamilyName();
                                         BaseServerFamily family = familyService.find(familyName);
                                         if(!(family instanceof PlayerFocusedServerFamily)) return builder.buildFuture();
-                                        TPAHandler tpaHandler = tpaService.getTPAHandler(family).orElseThrow();
+                                        TPAHandler tpaHandler = tpaService.getTPAHandler(family);
                                         List<TPARequest> requests = tpaHandler.findRequestsForTarget(player);
 
-                                        if(requests.size() <= 0) {
+                                        if(requests.size() == 0) {
                                             builder.suggest("You have no pending TPA requests!");
                                             return builder.buildFuture();
                                         }
@@ -242,7 +242,7 @@ public final class CommandTPA {
                                             BaseServerFamily family = familyService.find(familyName);
                                             if(family == null) throw new NullPointerException();
 
-                                            TPAHandler tpaHandler = tpaService.getTPAHandler(family).orElseThrow();
+                                            TPAHandler tpaHandler = tpaService.getTPAHandler(family);
                                             TPARequest request = tpaHandler.findRequest(senderPlayer, (Player) context.getSource());
                                             if(request == null) {
                                                 context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_REQUEST.build(username));
@@ -276,7 +276,7 @@ public final class CommandTPA {
                                 String familyName = serverService.findServer(sendingServer).getFamilyName();
                                 BaseServerFamily family = familyService.find(familyName);
 
-                                family.getAllPlayers(100).forEach(player -> builder.suggest(((Player) player).getUsername()));
+                                family.getAllPlayers(50).forEach(player -> builder.suggest(((Player) player).getUsername()));
 
                                 return builder.buildFuture();
                             } catch (Exception ignored) {}
@@ -309,7 +309,7 @@ public final class CommandTPA {
                                     return Command.SINGLE_SUCCESS;
                                 }
 
-                                ServerInfo sendersServerInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
+                                ServerInfo sendersServerInfo = player.getCurrentServer().orElseThrow().getServerInfo();
 
                                 PlayerServer sendersServer = serverService.findServer(sendersServerInfo);
                                 String familyName = sendersServer.getFamilyName();
@@ -317,7 +317,7 @@ public final class CommandTPA {
                                     BaseServerFamily family = familyService.find(familyName);
                                     if(family == null) throw new NullPointerException();
                                     if(!(family instanceof PlayerFocusedServerFamily)) throw new NullPointerException();
-                                    TPAHandler tpaHandler = tpaService.getTPAHandler(family).orElseThrow();
+                                    TPAHandler tpaHandler = tpaService.getTPAHandler(family);
 
                                     if(tpaHandler.findRequestSender((Player) context.getSource()) != null) {
                                         context.getSource().sendMessage(VelocityLang.TPA_REQUEST_DUPLICATE.build(targetPlayer.getUsername()));
@@ -329,7 +329,7 @@ public final class CommandTPA {
 
                                     return Command.SINGLE_SUCCESS;
                                 } catch (NullPointerException e) {
-                                    logger.send(Component.text("Player attempted to use /tpa from a family that doesn't exist! (How?)", NamedTextColor.RED));
+                                    logger.send(Component.text("Player attempted to use /tpa from a family that doesn't exist! (How did this happen?)", NamedTextColor.RED));
                                     context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
                                 }
                             } catch (NoSuchElementException e) {

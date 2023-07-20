@@ -31,13 +31,10 @@ public class MagicLinkService extends ClockService {
     }
 
     private void scheduleNextPing() {
-        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
         RedisMessagerService service = PaperRustyConnector.getAPI().getService(REDIS_MESSAGER_SERVICE).orElseThrow();
 
         this.scheduleDelayed(() -> {
             try {
-                if(this.status == Status.SEARCHING)
-                    logger.log("Searching for proxy...");
                 service.pingProxy(RedisMessageServerPing.ConnectionIntent.CONNECT);
             } catch (Exception e) {
                 e.printStackTrace();
