@@ -64,7 +64,7 @@ public class CommandHub {
                             rootFamily.connect(player);
                             return Command.SINGLE_SUCCESS;
                         } catch (RuntimeException err) {
-                            VelocityLang.RC_SEND_NO_SERVER.send(logger, "Failed to connect player to parent family " + rootFamily.getName() + "!");
+                            logger.send(Component.text("Failed to connect player to parent family " + rootFamily.getName() + "!",NamedTextColor.RED));
                             context.getSource().sendMessage(Component.text("Failed to connect you to the hub!"));
                         }
 
@@ -81,7 +81,7 @@ public class CommandHub {
 
                         rootFamily.connect(player);
                     } catch (RuntimeException err) {
-                        VelocityLang.RC_SEND_NO_SERVER.send(logger, "Failed to connect player to parent family " + rootFamily.getName() + "!");
+                        logger.send(Component.text("Failed to connect player to parent family " + rootFamily.getName() + "!",NamedTextColor.RED));
                         context.getSource().sendMessage(Component.text("Failed to connect you to the hub!", NamedTextColor.RED));
                     }
 
