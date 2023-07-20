@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -49,7 +50,7 @@ public class OnPlayerKicked {
             try {
                 if (!api.getService(FAMILY_SERVICE).orElseThrow().shouldCatchDisconnectingPlayers()) throw new NoOutputException();
 
-                ScalarServerFamily rootFamily = api.getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
+                RootServerFamily rootFamily = api.getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
                 if(rootFamily.getRegisteredServers().isEmpty()) throw new RuntimeException("There are no available servers for you to connect to!");
                 if(isFromRootFamily) throw new NoOutputException();
 

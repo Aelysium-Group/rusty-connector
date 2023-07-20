@@ -13,6 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -51,7 +52,7 @@ public class CommandHub {
 
                     PlayerServer sendersServer = api.getService(SERVER_SERVICE).orElseThrow().findServer(serverInfo);
                     BaseServerFamily family = sendersServer.getFamily();
-                    ScalarServerFamily rootFamily = familyService.getRootFamily();
+                    RootServerFamily rootFamily = familyService.getRootFamily();
 
                     if(!hubService.isEnabled(family.getName())) {
                         context.getSource().sendMessage(Lang.UNKNOWN_COMMAND);

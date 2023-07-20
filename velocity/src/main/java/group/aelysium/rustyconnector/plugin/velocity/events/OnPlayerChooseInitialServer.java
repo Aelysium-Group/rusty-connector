@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
@@ -40,7 +41,7 @@ public class OnPlayerChooseInitialServer {
                     }
                 } catch (Exception ignore) {}
 
-                ScalarServerFamily rootFamily = api.getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
+                RootServerFamily rootFamily = api.getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
 
                 PlayerServer server = rootFamily.connect(player);
                 if(server == null) return;

@@ -17,7 +17,7 @@ import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.Va
 
 public class FamilyService extends Service implements NodeManager<BaseServerFamily> {
     private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
-    private WeakReference<ScalarServerFamily> rootFamily;
+    private WeakReference<RootServerFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
     private final Optional<MySQLService> mySQLService;
 
@@ -34,7 +34,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
         return this.catchDisconnectingPlayers;
     }
 
-    public void setRootFamily(ScalarServerFamily family) {
+    public void setRootFamily(RootServerFamily family) {
         this.registeredFamilies.put(family.getName(), family);
         this.rootFamily = new WeakReference<>(family);
     }
@@ -43,9 +43,9 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * Get the root family of this FamilyService.
      * If root family hasn't been set, or the family it references has been garbage collected,
      * this will return `null`.
-     * @return A {@link BaseServerFamily} or `null`
+     * @return A {@link RootServerFamily} or `null`
      */
-    public ScalarServerFamily getRootFamily() {
+    public RootServerFamily getRootFamily() {
         return this.rootFamily.get();
     }
 
