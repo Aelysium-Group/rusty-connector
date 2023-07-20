@@ -12,6 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -130,7 +131,8 @@ public class Processor extends IKLifecycle {
 
         logger.log("Setting up root family");
 
-        familyService.setRootFamily(ScalarServerFamily.init(familiesConfig.getRootFamilyName()));
+        RootServerFamily rootFamily = RootServerFamily.init(familiesConfig.getRootFamilyName());
+        familyService.setRootFamily(rootFamily);
 
         logger.log("Finished setting up root family");
 

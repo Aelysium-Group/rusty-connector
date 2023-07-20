@@ -4,22 +4,24 @@ import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
+import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
 
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
     private RegisteredServer registeredServer = null;
@@ -195,12 +197,28 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
      */
     public boolean connect(Player player) {
+        VelocityAPI api = VelocityRustyConnector.getAPI();
+
         ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
         try {
-            return connection.connect().get().isSuccessful();
-        } catch (Exception e) {
+            if (!connection.connect().get().isSuccessful()) return false;
+        } catch (Exception ignore) {
             return false;
         }
+
+        try {
+            PartyService partyService = api.getService(PARTY_SERVICE).orElse(null);
+            if (partyService == null) throw new NoOutputException();
+
+            Party party = partyService.find(player).orElse(null);
+            if (party == null) throw new NoOutputException();
+
+            this.connect(party);
+        } catch (NoOutputException ignore) {
+        } catch (Exception e) {
+            api.getLogger().log("Issue trying to pull party with player! " + e.getMessage());
+        }
+        return true;
     }
 
     /**
@@ -229,10 +247,12 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
 
         party.players().forEach(player -> {
             try {
-                if(player.getCurrentServer().orElseThrow().getServer().equals(this.registeredServer)) return;
+                ServerConnection serverConnection = player.getCurrentServer().orElse(null);
+                if(serverConnection != null)
+                    if(!serverConnection.getServer().equals(this.registeredServer)) return;
 
                 ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
-                connection.connect().get().isSuccessful();
+                connection.connect();
             } catch (Exception e) {
                 player.sendMessage(Component.text("There was an issue following your party! You've been kicked. "+e.getMessage(), NamedTextColor.RED));
                 party.leave(player);

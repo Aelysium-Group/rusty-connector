@@ -26,7 +26,7 @@ import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.Va
  */
 public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerServer> {
     @Initializer
-    protected String parentName;
+    protected String parentName = null;
 
     protected WeakReference<BaseServerFamily> parent = null;
     protected LoadBalancer loadBalancer = null;
@@ -51,6 +51,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public void resolveParent() {
         FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
         BaseServerFamily family = familyService.find(parentName);
+
+        this.parentName = null;
         if(family == null) {
             this.parent = new WeakReference<>(familyService.getRootFamily());
             return;
@@ -58,6 +60,14 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
         this.parent = new WeakReference<>(family);
     }
+
+    public boolean hasParent() {
+        return
+                this.parentName != null ||
+                !this.parentName.equals("") ||
+                this.parent != null;
+    }
+
     public WeakReference<BaseServerFamily> getParent() {
         FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
         if(familyService.getRootFamily().equals(this)) return null;

@@ -63,8 +63,6 @@ public class OnPlayerChangeServer {
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_SERVER, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_SERVER.build(player, oldServer, newServer));
 
                     if(!isTheSameFamily) handleHomeServerCache(oldServer.getFamily(), player);
-
-                    partyFollow(player, newServer);
                 } catch (Exception e) {
                     logger.log(e.getMessage());
                 }
@@ -80,17 +78,5 @@ public class OnPlayerChangeServer {
         } catch (Exception e) {
             logger.log(e.getMessage());
         }
-    }
-
-    public void partyFollow(Player player, PlayerServer server) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-
-        PartyService partyService = api.getService(PARTY_SERVICE).orElse(null);
-        if(partyService == null) return;
-
-        Party party = partyService.find(player).orElse(null);
-        if(party == null) return;
-
-        server.connect(party);
     }
 }

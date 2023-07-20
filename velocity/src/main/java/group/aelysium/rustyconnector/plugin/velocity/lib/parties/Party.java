@@ -21,10 +21,11 @@ public class Party {
     private WeakReference<Player> leader;
     private WeakReference<PlayerServer> server;
 
-    public Party(int maxSize, Player host) {
+    public Party(int maxSize, Player host, PlayerServer server) {
         this.players = new Vector<>(maxSize);
         this.maxSize = maxSize;
         this.setLeader(host);
+        this.setServer(server);
     }
 
     public void setServer(PlayerServer server) {

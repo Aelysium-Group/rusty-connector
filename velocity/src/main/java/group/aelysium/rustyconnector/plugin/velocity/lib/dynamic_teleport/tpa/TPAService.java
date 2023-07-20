@@ -49,7 +49,14 @@ public class TPAService extends ServiceableService {
 
     public Optional<TPAHandler> getTPAHandler(BaseServerFamily family) {
         try {
-            return Optional.of(Objects.requireNonNull(this.tpaHandlers.get(family)));
+            TPAHandler tpaHandler = this.tpaHandlers.get(family);
+            if(tpaHandler == null) {
+                TPAHandler newTPAHandler = new TPAHandler();
+                this.tpaHandlers.put(family, newTPAHandler);
+                tpaHandler = newTPAHandler;
+            }
+
+            return Optional.of(tpaHandler);
         } catch (Exception ignore) {}
         return Optional.empty();
     }

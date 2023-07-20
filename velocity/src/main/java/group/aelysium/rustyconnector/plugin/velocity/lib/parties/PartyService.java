@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -46,8 +47,8 @@ public class PartyService extends Service {
         return this.settings;
     }
 
-    public Party create(Player host) {
-        Party party = new Party(this.settings.maxMembers, host);
+    public Party create(Player host, PlayerServer server) {
+        Party party = new Party(this.settings.maxMembers, host, server);
         this.parties.add(party);
         return party;
     }
@@ -100,8 +101,8 @@ public class PartyService extends Service {
         sender.sendMessage(Component.text("You invited " + target.getUsername() + " to your party!", NamedTextColor.GREEN));
 
         target.sendMessage(Component.text("Hey! "+ sender.getUsername() +" wants you to join their party!", NamedTextColor.GRAY));
-        target.sendMessage(Component.text("Accept with: ", NamedTextColor.GRAY).append(Component.text("/party invite "+sender.getUsername()+" accept", NamedTextColor.GREEN)));
-        target.sendMessage(Component.text("Deny with: ", NamedTextColor.GRAY).append(Component.text("/party invite "+sender.getUsername()+" deny", NamedTextColor.RED)));
+        target.sendMessage(Component.text("Accept with: ", NamedTextColor.GRAY).append(Component.text("/party invites "+sender.getUsername()+" accept", NamedTextColor.GREEN)));
+        target.sendMessage(Component.text("Deny with: ", NamedTextColor.GRAY).append(Component.text("/party invites "+sender.getUsername()+" deny", NamedTextColor.RED)));
         return invite;
     }
 

@@ -19,13 +19,12 @@ public class DynamicTeleportService extends ServiceableService {
     }
 
     public static Optional<DynamicTeleportService> init(DynamicTeleportConfig config) {
-        try {
-            if(!config.isEnabled()) throw new NoOutputException();
+        if(!config.isEnabled()) return Optional.empty();
 
+        try {
             DynamicTeleportService.Builder builder = new DynamicTeleportService.Builder();
 
             if(config.isTpa_enabled()) {
-
                 TPASettings tpaSettings = new TPASettings(
                         config.isTpa_friendsOnly(),
                         config.isTpa_ignorePlayerCap(),
@@ -37,16 +36,19 @@ public class DynamicTeleportService extends ServiceableService {
 
                 builder.addService(tpaService);
             }
+
             if(config.isFamilyAnchor_enabled()) {
                 try {
                     builder.addService(AnchorService.init(config).orElseThrow());
                 } catch (Exception ignore) {}
             }
+
             if(config.isHub_enabled()) {
                 try {
                     builder.addService(new HubService(config.getHub_enabledFamilies()));
                 } catch (Exception ignore) {}
             }
+
             return Optional.of(builder.build());
         } catch (Exception ignore) {}
 
