@@ -28,8 +28,9 @@ public class TPACleaningService extends ClockService {
     }
 
     public void startHeartbeat() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        TPAService tpaService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow().getService(DynamicTeleportService.ValidServices.TPA_SERVICE).orElseThrow();
+        VelocityAPI api = VelocityAPI.get();
+        TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
+                                   .services().tpaService().orElseThrow();
         this.scheduleRecurring(() -> {
             for(TPAHandler handler : tpaService.getAllTPAHandlers()) {
                 try {

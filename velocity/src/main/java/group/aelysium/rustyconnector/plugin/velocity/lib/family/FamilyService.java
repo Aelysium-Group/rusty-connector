@@ -5,15 +5,13 @@ import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
 
 public class FamilyService extends Service implements NodeManager<BaseServerFamily> {
     private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
@@ -96,7 +94,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * @param player The player to uncache mappings for.
      */
     public void uncacheHomeServerMappings(Player player) {
-        FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
+        FamilyService familyService = VelocityAPI.get().services().familyService();
         List<BaseServerFamily> familyList = familyService.dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
         if(familyList.size() == 0) return;
 

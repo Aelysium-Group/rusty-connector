@@ -19,7 +19,7 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
     @Override
     public boolean generate() {
         PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PluginLogger logger = api.logger();
 
         logger.log("---| Registering "+this.configPointer.getName()+"...");
         logger.log("-----| Looking for "+this.configPointer.getName()+"...");

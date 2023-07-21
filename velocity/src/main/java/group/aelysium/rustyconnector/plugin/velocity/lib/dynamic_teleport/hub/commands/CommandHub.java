@@ -9,35 +9,26 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
-import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService.ValidServices.HUB_SERVICE;
-
 public class CommandHub {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
-        FamilyService familyService = api.getService(FAMILY_SERVICE).orElseThrow();
-        HubService hubService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow().getService(HUB_SERVICE).orElseThrow();
-        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
+        FamilyService familyService = api.services().familyService();
+        HubService hubService = api.services().dynamicTeleportService().orElseThrow()
+                                   .services().hubService().orElseThrow();
+        ServerService serverService = api.services().serverService();
 
         LiteralCommandNode<CommandSource> hub = LiteralArgumentBuilder
                 .<CommandSource>literal("hub")
@@ -50,7 +41,7 @@ public class CommandHub {
 
                     ServerInfo serverInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                    PlayerServer sendersServer = api.getService(SERVER_SERVICE).orElseThrow().findServer(serverInfo);
+                    PlayerServer sendersServer = serverService.findServer(serverInfo);
                     BaseServerFamily family = sendersServer.getFamily();
                     RootServerFamily rootFamily = familyService.getRootFamily();
 

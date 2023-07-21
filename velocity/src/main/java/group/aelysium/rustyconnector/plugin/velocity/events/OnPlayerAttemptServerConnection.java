@@ -21,7 +21,7 @@ public class OnPlayerAttemptServerConnection {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerAttemptServerConnection(ServerPreConnectEvent event) {
             return EventTask.async(() -> {
-                VelocityAPI api = VelocityRustyConnector.getAPI();
+                VelocityAPI api = VelocityAPI.get();
                 Player player = event.getPlayer();
 
                 try {

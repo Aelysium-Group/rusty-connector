@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 
 import java.io.*;
@@ -24,8 +23,8 @@ public class PrivateKeyConfig extends YAML {
 
     @Override
     public boolean generate() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         logger.log("---| Registering "+this.configPointer.getName()+"...");
         logger.log("-----| Looking for "+this.configPointer.getName()+"...");

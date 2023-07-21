@@ -8,8 +8,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
 import java.util.Objects;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
-
 public class MagicLinkService extends ClockService {
     protected final long interval;
 
@@ -19,8 +17,8 @@ public class MagicLinkService extends ClockService {
     }
 
     public void startHeartbeat() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
+        VelocityAPI api = VelocityAPI.get();
+        ServerService serverService = api.services().serverService();
 
         this.scheduleRecurring(() -> {
             try {

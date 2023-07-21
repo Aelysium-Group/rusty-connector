@@ -1,12 +1,10 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.database;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
@@ -27,7 +25,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
     @Override
     public void onMessage(String rawMessage) {
         PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PluginLogger logger = api.logger();
 
         CacheableMessage cachedMessage = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
 
@@ -63,7 +61,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
     }
 
     private static void processParameters(GenericRedisMessage message, CacheableMessage cachedMessage) {
-        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
+        PluginLogger logger = PaperRustyConnector.getAPI().logger();
 
         try {
             if(message.getType() == PING_RESPONSE)      new MagicLink_PingResponseHandler(message).execute();

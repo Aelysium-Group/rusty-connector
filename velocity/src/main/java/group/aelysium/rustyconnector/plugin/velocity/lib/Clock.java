@@ -22,7 +22,7 @@ public class Clock {
     }
 
     public void start() {
-        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+        PluginLogger logger = VelocityAPI.get().getLogger();
         this.timer.schedule( new TimerTask() {
             public void run() {
                 try {

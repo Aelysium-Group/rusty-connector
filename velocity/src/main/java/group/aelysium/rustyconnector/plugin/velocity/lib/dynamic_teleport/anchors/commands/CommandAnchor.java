@@ -6,19 +6,11 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -26,21 +18,16 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
-import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService.ValidServices.ANCHOR_SERVICE;
 
 public class CommandAnchor {
     public static BrigadierCommand create(String anchor) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
-        DynamicTeleportService dynamicTeleportService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow();
-        AnchorService anchorService = dynamicTeleportService.getService(ANCHOR_SERVICE).orElseThrow();
-        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
+        DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleportService().orElseThrow();
+        AnchorService anchorService = dynamicTeleportService.services().anchorService().orElseThrow();
+        ServerService serverService = api.services().serverService();
 
 
         LiteralCommandNode<CommandSource> anchorCommand = LiteralArgumentBuilder

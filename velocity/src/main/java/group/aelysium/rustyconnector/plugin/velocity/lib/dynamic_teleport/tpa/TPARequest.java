@@ -3,7 +3,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
@@ -11,9 +10,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServer
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
 
 public class TPARequest {
     private final Player sender;
@@ -62,11 +58,11 @@ public class TPARequest {
     }
 
     public void accept() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
-        DynamicTeleportService dynamicTeleportService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElse(null);
+        DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleportService().orElse(null);
         if(dynamicTeleportService == null) throw new NullPointerException("Dynamic Teleport must be enabled to use tpa functions!");
-        TPAService tpaService = dynamicTeleportService.getService(DynamicTeleportService.ValidServices.TPA_SERVICE).orElse(null);
+        TPAService tpaService = dynamicTeleportService.services().tpaService().orElse(null);
         if(tpaService == null) throw new NullPointerException("TPA in Dynamic Teleport must be enabled to use tpa functions!");
 
         this.getSender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.getTarget().getUsername()));
@@ -76,7 +72,7 @@ public class TPARequest {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.getTarget().getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer server = api.getService(SERVER_SERVICE).orElseThrow().findServer(serverInfo);
+            PlayerServer server = api.services().serverService().findServer(serverInfo);
             BaseServerFamily family = server.getFamily();
             if(family == null) throw new NullPointerException();
 

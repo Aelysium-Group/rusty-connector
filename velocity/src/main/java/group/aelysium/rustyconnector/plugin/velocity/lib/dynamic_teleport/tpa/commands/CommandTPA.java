@@ -11,7 +11,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAHandler;
@@ -30,8 +29,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
-
 public final class CommandTPA {
 
     /**
@@ -40,12 +37,13 @@ public final class CommandTPA {
      * @return `true` is /tpa is allowed. `false` otherwise.
      */
     public static boolean tpaEnabled(Player sender) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
         try {
-            TPAService tpaService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow().getService(DynamicTeleportService.ValidServices.TPA_SERVICE).orElseThrow();
+            TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
+                                       .services().tpaService().orElseThrow();
 
             ServerInfo serverInfo = sender.getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer targetServer = api.getService(SERVER_SERVICE).orElseThrow().findServer(serverInfo);
+            PlayerServer targetServer = api.services().serverService().findServer(serverInfo);
             String familyName = targetServer.getFamilyName();
 
             return tpaService.getSettings().enabledFamilies().contains(familyName);
@@ -54,12 +52,13 @@ public final class CommandTPA {
     }
 
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
-        FamilyService familyService = api.getService(FAMILY_SERVICE).orElseThrow();
-        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
-        TPAService tpaService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow().getService(DynamicTeleportService.ValidServices.TPA_SERVICE).orElseThrow();
+        FamilyService familyService = api.services().familyService();
+        ServerService serverService = api.services().serverService();
+        TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
+                                   .services().tpaService().orElseThrow();
 
         LiteralCommandNode<CommandSource> tpa = LiteralArgumentBuilder
                 .<CommandSource>literal("tpa")

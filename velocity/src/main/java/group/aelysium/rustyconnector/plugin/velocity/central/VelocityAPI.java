@@ -1,14 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.scheduler.Scheduler;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
@@ -17,9 +14,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.Dynami
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
@@ -27,13 +22,13 @@ import java.io.SyncFailedException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Optional;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
-import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService.ValidServices.*;
-import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService.ValidServices.TPA_CLEANING_SERVICE;
 
 public class VelocityAPI extends PluginAPI<Scheduler> {
+    private static VelocityAPI instance;
+    public static VelocityAPI get() {
+        return instance;
+    }
+    
     private final VelocityRustyConnector plugin;
     private final ProxyServer server;
     private Processor processor = null;
@@ -41,6 +36,8 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     private final PluginLogger pluginLogger;
 
     public VelocityAPI(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
+        instance = this;
+        
         this.plugin = plugin;
         this.server = server;
         this.pluginLogger = new PluginLogger(logger);
@@ -53,25 +50,18 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     }
 
     @Override
-    public Scheduler getScheduler() {
+    public Scheduler scheduler() {
         return getServer().getScheduler();
     }
 
     @Override
-    public PluginLogger getLogger() {
+    public PluginLogger logger() {
         return this.pluginLogger;
     }
 
     @Override
-    public String getDataFolder() {
+    public String dataFolder() {
         return String.valueOf(this.dataFolder);
-    }
-
-    public <S extends Service> Optional<S> getService(Class<S> type) {
-        return this.processor.getService(type);
-    }
-    public <S extends Service> boolean isEnabled(Class<S> type) {
-        return this.processor.isEnabled(type);
     }
 
     public void killServices() {
@@ -86,15 +76,14 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     }
 
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
-        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+        PluginLogger logger = VelocityAPI.get().logger();
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
-        this.processor.getService(REDIS_SERVICE).orElseThrow().start(RedisSubscriber.class);
-        this.processor.getService(SERVER_SERVICE).orElseThrow()
-                      .getService(ServerService.ValidServices.MAGIC_LINK_SERVICE).orElseThrow().startHeartbeat();
+        this.processor.services().redisService().start(RedisSubscriber.class);
+        this.processor.services().magicLinkService().startHeartbeat();
 
         try {
-            FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
+            FamilyService familyService = this.processor.services().familyService();
 
             familyService.dump().forEach(baseServerFamily -> {
                 try {
@@ -107,37 +96,40 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         try {
             FriendsService friendsService = Processor.Initializer.buildFriendsService().orElseThrow();
 
-            this.processor.addService(friendsService);
+            this.processor.services().add(friendsService);
 
             friendsService.initCommand();
         } catch (Exception ignore) {}
         try {
             PartyService partyService = Processor.Initializer.buildPartyService().orElseThrow();
 
-            this.processor.addService(partyService);
+            this.processor.services().add(partyService);
 
             partyService.initCommand();
         } catch (Exception ignore) {}
         try {
             DynamicTeleportService dynamicTeleportService = Processor.Initializer.buildDynamicTeleportService().orElseThrow();
 
-            this.processor.addService(dynamicTeleportService);
+            this.processor.services().add(dynamicTeleportService);
 
             try {
-                dynamicTeleportService.getService(TPA_SERVICE).orElseThrow()
-                        .getService(TPA_CLEANING_SERVICE).orElseThrow()
-                        .startHeartbeat();
-                dynamicTeleportService.getService(TPA_SERVICE).orElseThrow().initCommand();
+                dynamicTeleportService.services().tpaService().orElseThrow()
+                                      .services().tpaCleaningService().startHeartbeat();
+                dynamicTeleportService.services().tpaService().orElseThrow().initCommand();
             } catch (Exception ignore) {}
 
             try {
-                dynamicTeleportService.getService(HUB_SERVICE).orElseThrow().initCommand();
+                dynamicTeleportService.services().hubService().orElseThrow().initCommand();
             } catch (Exception ignore) {}
 
             try {
-                dynamicTeleportService.getService(ANCHOR_SERVICE).orElseThrow().initCommands();
+                dynamicTeleportService.services().anchorService().orElseThrow().initCommands();
             } catch (Exception ignore) {}
         } catch (Exception ignore) {}
+    }
+
+    public ProcessorServiceHandler services() {
+        return this.processor.services();
     }
 
     /**
@@ -174,15 +166,5 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     public VelocityRustyConnector accessPlugin() throws SyncFailedException {
         if(VelocityRustyConnector.getLifecycle().isRunning()) throw new SyncFailedException("You can't get the plugin instance while the plugin is running!");
         return this.plugin;
-    }
-
-    /**
-     * Attempt to dispatch a command as the Proxy
-     * @param command The command to dispatch.
-     */
-    public void dispatchCommand(String command) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        api.getServer().getCommandManager()
-                .executeAsync((ConsoleCommandSource) permission -> null, command);
     }
 }

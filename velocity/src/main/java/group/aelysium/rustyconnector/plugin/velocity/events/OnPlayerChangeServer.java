@@ -7,15 +7,10 @@ import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -30,8 +25,8 @@ public class OnPlayerChangeServer {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerChangeServer(ServerConnectedEvent event) {
             return EventTask.async(() -> {
-                VelocityAPI api = VelocityRustyConnector.getAPI();
-                PluginLogger logger = api.getLogger();
+                VelocityAPI api = VelocityAPI.get();
+                PluginLogger logger = api.logger();
 
                 try {
                     Player player = event.getPlayer();
@@ -70,7 +65,7 @@ public class OnPlayerChangeServer {
     }
 
     public void handleHomeServerCache(BaseServerFamily family, Player player) {
-        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+        PluginLogger logger = VelocityAPI.get().logger();
 
         try {
             if (!(family instanceof StaticServerFamily)) return;

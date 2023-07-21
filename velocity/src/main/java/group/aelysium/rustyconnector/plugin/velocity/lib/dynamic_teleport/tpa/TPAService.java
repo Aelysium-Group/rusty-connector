@@ -1,16 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageTPAQueuePlayer;
-import group.aelysium.rustyconnector.core.lib.model.Service;
-import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
@@ -19,19 +15,17 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.util.*;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
-
-public class TPAService extends ServiceableService {
+public class TPAService extends ServiceableService<TPAServiceHandler> {
     private TPASettings settings;
     private Map<BaseServerFamily, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
 
     public TPAService(TPASettings settings) {
-        super(new HashMap<>());
-        this.services.put(TPACleaningService.class, new TPACleaningService(settings.expiration()));
+        super(new TPAServiceHandler());
+        this.services.add(new TPACleaningService(settings.expiration()));
         this.settings = settings;
     }
     public void initCommand() {
-        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
+        CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
         if(!commandManager.hasCommand("tpa"))
             try {
                 commandManager.register(
@@ -69,7 +63,7 @@ public class TPAService extends ServiceableService {
      * @throws NullPointerException If the server doesn't exist in the family.
      */
     public void tpaSendPlayer(Player source, Player target, PlayerServer targetServer) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
         if(targetServer == null) throw new NullPointerException();
 
@@ -82,10 +76,10 @@ public class TPAService extends ServiceableService {
                 .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        api.getService(REDIS_SERVICE).orElseThrow().publish(message);
+        api.services().redisService().publish(message);
 
         try {
-            PlayerServer senderServer = api.getService(SERVER_SERVICE).orElseThrow().findServer(source.getCurrentServer().orElseThrow().getServerInfo());
+            PlayerServer senderServer = api.services().serverService().findServer(source.getCurrentServer().orElseThrow().getServerInfo());
 
             if (senderServer.equals(targetServer)) return;
         } catch (Exception ignore) {}
@@ -106,14 +100,12 @@ public class TPAService extends ServiceableService {
 
     /**
      * The services that are valid for this service provider.
-     * Services marked as @Optional should be handled accordingly.
-     * If a service is not marked @Optional it should be impossible for that service to be unavailable.
      */
-    public static class ValidServices {
-        public static Class<TPACleaningService> TPA_CLEANING_SERVICE = TPACleaningService.class;
-
-        public static boolean isOptional(Class<? extends Service> clazz) {
-            return false;
-        }
+    public enum ValidServices {
+        /**
+         * Represents {@link TPACleaningService}
+         * This service is required and must always be set.
+         */
+        TPA_CLEANING_SERVICE,
     }
 }

@@ -4,7 +4,6 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
@@ -16,7 +15,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConn
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -25,8 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
 
 public class StaticServerFamily extends PlayerFocusedServerFamily {
     List<HomeServerMapping> mappingsCache = new ArrayList<>();
@@ -130,13 +126,13 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @return A list of all server families.
      */
     public static StaticServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
         logger.log("Registering family: " + familyName);
 
         StaticFamilyConfig staticFamilyConfig = StaticFamilyConfig.newConfig(
                 familyName,
-                new File(String.valueOf(api.getDataFolder()), "families/" + familyName + ".static.yml"),
+                new File(String.valueOf(api.dataFolder()), "families/" + familyName + ".static.yml"),
                 "velocity_static_family_template.yml"
         );
         if (!staticFamilyConfig.generate()) {
@@ -148,7 +144,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
         if (staticFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name());
 
-            api.getService(WHITELIST_SERVICE).orElseThrow().add(whitelist);
+            api.services().whitelistService().add(whitelist);
 
             logger.log(familyName + " whitelist registered!");
         } else {
@@ -273,7 +269,7 @@ class StaticFamilyConnector {
         try {
             this.family.registerHomeServer(this.player, server);
         } catch (Exception e) {
-            VelocityRustyConnector.getAPI().getLogger().send(Component.text("Unable to save "+ this.player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
+            VelocityAPI.get().logger().send(Component.text("Unable to save "+ this.player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
             e.printStackTrace();
         }
 

@@ -10,7 +10,6 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
@@ -25,15 +24,13 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
-
 public final class CommandParty {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         // If this command class loads, then PartyService MUST be set.
-        PartyService partyService = api.getService(PARTY_SERVICE).orElseThrow();
+        PartyService partyService = api.services().partyService().orElseThrow();
 
         LiteralCommandNode<CommandSource> partyCommand = LiteralArgumentBuilder
                 .<CommandSource>literal("party")
@@ -202,7 +199,7 @@ public final class CommandParty {
                             if(player.getCurrentServer().orElse(null) == null)
                                 return closeMessage(player, Component.text("You have to be connected to a server in order to create a party!", NamedTextColor.RED));
 
-                            PlayerServer server = api.getService(SERVER_SERVICE).orElseThrow().findServer(player.getCurrentServer().orElse(null).getServerInfo());
+                            PlayerServer server = api.services().serverService().findServer(player.getCurrentServer().orElse(null).getServerInfo());
                             partyService.create(player, server);
                             player.sendMessage(Component.text("You created a new party!",NamedTextColor.GREEN));
 
@@ -273,7 +270,7 @@ public final class CommandParty {
                                     try {
                                         if(!partyService.getSettings().friendsOnly()) return builder.buildFuture();
 
-                                        FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
+                                        FriendsService friendsService = api.services().friendsService().orElseThrow();
                                         List<FriendMapping> friends = friendsService.findFriends(player).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");

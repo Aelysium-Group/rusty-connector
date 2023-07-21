@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessa
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageSendPlayer;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import net.kyori.adventure.text.Component;
@@ -36,7 +36,7 @@ public class RedisMessagerService extends Service {
                     .buildSendable();
             api.getService(REDIS_SERVICE).orElseThrow().publish(message);
         } catch (Exception e) {
-            Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text(e.toString()), NamedTextColor.RED);
+            Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().logger(), Component.text(e.toString()), NamedTextColor.RED);
         }
     }
 

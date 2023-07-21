@@ -3,14 +3,10 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
 
 public class LoadBalancingService extends ClockService {
     protected final long heartbeat;
@@ -20,13 +16,13 @@ public class LoadBalancingService extends ClockService {
     }
 
     public void init() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        for (BaseServerFamily family : api.getService(FAMILY_SERVICE).orElseThrow().dump()) {
+        VelocityAPI api = VelocityAPI.get();
+        for (BaseServerFamily family : api.services().familyService().dump()) {
             if (!(family instanceof PlayerFocusedServerFamily)) continue;
 
             this.scheduleRecurring(() -> {
                 try {
-                    PluginLogger logger = api.getLogger();
+                    PluginLogger logger = api.logger();
 
                     ((PlayerFocusedServerFamily) family).getLoadBalancer().completeSort();
                     if (logger.getGate().check(GateKey.FAMILY_BALANCING))

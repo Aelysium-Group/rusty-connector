@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper.lib.services;
 
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
@@ -38,7 +38,7 @@ public class ServerInfoService extends Service implements PlayerServer {
      */
     private void setPlayerCap(int softPlayerCap, int hardPlayerCap) {
         PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PluginLogger logger = api.logger();
 
         api.getServer().setMaxPlayers(hardPlayerCap);
 

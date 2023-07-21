@@ -2,32 +2,28 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.model.Service;
-import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
+import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.config.FriendsConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.*;
 
-public class FriendsService extends ServiceableService {
+public class FriendsService extends ServiceableService<FriendsServiceHandler> {
     private final Vector<FriendRequest> friendRequests = new Vector<>();
     private final FriendsSettings settings;
 
     public FriendsService(FriendsSettings settings, FriendsMySQLService friendsMySQLService) {
-        super(new HashMap<>());
-        this.services.put(FriendsDataEnclaveService.class, new FriendsDataEnclaveService(friendsMySQLService));
+        super(new FriendsServiceHandler());
+        this.services().add(new FriendsDataEnclaveService(friendsMySQLService));
         this.settings = settings;
     }
 
     public void initCommand() {
-        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
+        CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
         if(!commandManager.hasCommand("friend"))
             try {
                 commandManager.register(
@@ -60,7 +56,7 @@ public class FriendsService extends ServiceableService {
     }
 
     public Optional<List<FriendMapping>> findFriends(Player player) {
-        return this.getService(ValidServices.DATA_ENCLAVE).orElseThrow().findFriends(player);
+        return this.services.dataEnclave().findFriends(player);
     }
 
     public FriendMapping sendRequest(Player sender, Player target) {
@@ -80,7 +76,7 @@ public class FriendsService extends ServiceableService {
 
     public boolean removeFriend(Player sender, Player target) {
         try {
-            this.getService(ValidServices.DATA_ENCLAVE).orElseThrow().removeFriend(sender, target);
+            this.services().dataEnclave().removeFriend(sender, target);
             return true;
         } catch (IllegalStateException e) {
             throw e;
@@ -94,7 +90,7 @@ public class FriendsService extends ServiceableService {
     }
 
     public Optional<Integer> getFriendCount(Player player) {
-        return this.getService(ValidServices.DATA_ENCLAVE).orElseThrow().getFriendCount(player);
+        return this.services().dataEnclave().getFriendCount(player);
     }
 
     @Override
@@ -106,8 +102,12 @@ public class FriendsService extends ServiceableService {
     /**
      * The services that are valid for this service provider.
      */
-    public static class ValidServices {
-        public static Class<FriendsDataEnclaveService> DATA_ENCLAVE = FriendsDataEnclaveService.class;
+    public enum ValidServices {
+        /**
+         * Represents {@link FriendsDataEnclaveService}
+         * This service is required and must always be set.
+         */
+        DATA_ENCLAVE,
     }
 
     public record FriendsSettings(

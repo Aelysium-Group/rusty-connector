@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;

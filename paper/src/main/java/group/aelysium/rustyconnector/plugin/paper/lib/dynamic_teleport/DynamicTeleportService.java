@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport;
 
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.DynamicTeleport_TPARequest;
 import org.bukkit.entity.Player;

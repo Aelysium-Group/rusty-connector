@@ -26,7 +26,7 @@ public class OnPlayerDisconnect {
      */
     @Subscribe(order = PostOrder.LAST)
     public EventTask onPlayerDisconnect(DisconnectEvent event) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
         return EventTask.async(() -> {
             Player player = event.getPlayer();

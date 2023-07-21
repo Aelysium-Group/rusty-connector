@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import com.google.gson.stream.JsonReader;
 import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperLifecycle;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
@@ -32,9 +31,9 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, P
 
             try {
                 new Metrics(this, 17973);
-                getAPI().getLogger().log("Registered to bstats!");
+                getAPI().logger().log("Registered to bstats!");
             } catch (Exception e) {
-                getAPI().getLogger().log("Failed to register to bstats!");
+                getAPI().logger().log("Failed to register to bstats!");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,7 +46,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener, P
         try {
             lifecycle.stop();
         } catch (Exception e) {
-            getAPI().getLogger().log("RustyConnector: " + e.getMessage());
+            getAPI().logger().log("RustyConnector: " + e.getMessage());
         }
     }
 }

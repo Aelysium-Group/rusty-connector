@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.core.lib.database.mysql;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

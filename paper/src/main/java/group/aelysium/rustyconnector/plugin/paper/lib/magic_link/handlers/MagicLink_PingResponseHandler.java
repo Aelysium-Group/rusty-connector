@@ -22,7 +22,7 @@ public class MagicLink_PingResponseHandler implements MessageHandler {
     @Override
     public void execute() throws Exception {
         PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PluginLogger logger = api.logger();
         MagicLinkService service = api.getService(MAGIC_LINK_SERVICE).orElseThrow();
 
         if(message.getStatus() == RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED) {

@@ -8,9 +8,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -20,8 +18,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
 
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
     private RegisteredServer registeredServer = null;
@@ -96,9 +92,9 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @throws InvalidAlgorithmParameterException If the family doesn't exist.
      */
     public void register(String familyName) throws Exception {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
-        this.registeredServer = api.getService(SERVER_SERVICE).orElseThrow().registerServer(this, familyName);
+        this.registeredServer = api.services().serverService().registerServer(this, familyName);
 
         this.familyName = familyName;
     }
@@ -182,9 +178,9 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      */
     public BaseServerFamily getFamily() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
-        BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(this.familyName);
+        BaseServerFamily family = api.services().familyService().find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
@@ -197,7 +193,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
      */
     public boolean connect(Player player) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
         ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
         try {
@@ -207,7 +203,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         }
 
         try {
-            PartyService partyService = api.getService(PARTY_SERVICE).orElse(null);
+            PartyService partyService = api.services().partyService().orElse(null);
             if (partyService == null) throw new NoOutputException();
 
             Party party = partyService.find(player).orElse(null);
@@ -216,7 +212,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
             this.connect(party);
         } catch (NoOutputException ignore) {
         } catch (Exception e) {
-            api.getLogger().log("Issue trying to pull party with player! " + e.getMessage());
+            api.logger().log("Issue trying to pull party with player! " + e.getMessage());
         }
         return true;
     }

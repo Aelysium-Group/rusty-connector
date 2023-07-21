@@ -8,14 +8,12 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.Mess
 import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.IKLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsMySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
@@ -25,7 +23,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkSer
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -37,32 +35,24 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
-
-public class Processor extends IKLifecycle {
+public class Processor extends IKLifecycle<ProcessorServiceHandler> {
     protected Processor(Map<Class<? extends Service>, Service> services) {
-        super(services);
+        super(new ProcessorServiceHandler(services));
     }
 
     @Override
     public void kill() {
-        this.services.values().forEach(Service::kill);
-        this.services.clear();
-    }
-
-    public void addService(Service service) {
-        this.services.put(service.getClass(), service);
+        this.services.killAll();
     }
 
     public static Processor init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
         Processor.Builder builder = new Processor.Builder();
 
         // Setup private key
-        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "private.key"));
+        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.dataFolder()), "private.key"));
         if(!privateKeyConfig.generate())
             throw new IllegalStateException("Unable to load or create private.key!");
         char[] privateKey = null;
@@ -89,7 +79,7 @@ public class Processor extends IKLifecycle {
         // Setup families
         logger.log("Setting up Families");
 
-        FamiliesConfig familiesConfig = FamiliesConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "families.yml"), "velocity_families_template.yml");
+        FamiliesConfig familiesConfig = FamiliesConfig.newConfig(new File(String.valueOf(api.dataFolder()), "families.yml"), "velocity_families_template.yml");
         if(!familiesConfig.generate())
             throw new IllegalStateException("Unable to load or create families.yml!");
         familiesConfig.register();
@@ -182,11 +172,11 @@ public class Processor extends IKLifecycle {
 
 
         MagicLinkService magicLinkService = new MagicLinkService(3, config.getServices_serverLifecycle_serverPingInterval());
+        builder.addService(magicLinkService);
 
         ServerService.Builder serverServiceBuilder = new ServerService.Builder()
                 .setServerTimeout(config.getServices_serverLifecycle_serverTimeout())
-                .setServerInterval(config.getServices_serverLifecycle_serverPingInterval())
-                .addService(magicLinkService);
+                .setServerInterval(config.getServices_serverLifecycle_serverPingInterval());
 
         builder.addService(serverServiceBuilder.build());
 
@@ -195,10 +185,10 @@ public class Processor extends IKLifecycle {
 
     public static class Initializer {
         public static Optional<PartyService> buildPartyService() {
-            VelocityAPI api = VelocityRustyConnector.getAPI();
-            PluginLogger logger = api.getLogger();
+            VelocityAPI api = VelocityAPI.get();
+            PluginLogger logger = api.logger();
             try {
-                PartyConfig config = PartyConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "party.yml"), "velocity_party_template.yml");
+                PartyConfig config = PartyConfig.newConfig(new File(String.valueOf(api.dataFolder()), "party.yml"), "velocity_party_template.yml");
                 if (!config.generate())
                     throw new IllegalStateException("Unable to load or create party.yml!");
                 config.register();
@@ -223,10 +213,10 @@ public class Processor extends IKLifecycle {
         }
 
         public static Optional<FriendsService> buildFriendsService() {
-            VelocityAPI api = VelocityRustyConnector.getAPI();
-            PluginLogger logger = api.getLogger();
+            VelocityAPI api = VelocityAPI.get();
+            PluginLogger logger = api.logger();
             try {
-                FriendsConfig config = FriendsConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "friends.yml"), "velocity_friends_template.yml");
+                FriendsConfig config = FriendsConfig.newConfig(new File(String.valueOf(api.dataFolder()), "friends.yml"), "velocity_friends_template.yml");
                 if (!config.generate())
                     throw new IllegalStateException("Unable to load or create friends.yml!");
                 config.register();
@@ -255,10 +245,10 @@ public class Processor extends IKLifecycle {
         }
 
         public static Optional<DynamicTeleportService> buildDynamicTeleportService() {
-            VelocityAPI api = VelocityRustyConnector.getAPI();
-            PluginLogger logger = api.getLogger();
+            VelocityAPI api = VelocityAPI.get();
+            PluginLogger logger = api.logger();
             try {
-                DynamicTeleportConfig config = DynamicTeleportConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "dynamic_teleport.yml"), "velocity_dynamic_teleport_template.yml");
+                DynamicTeleportConfig config = DynamicTeleportConfig.newConfig(new File(String.valueOf(api.dataFolder()), "dynamic_teleport.yml"), "velocity_dynamic_teleport_template.yml");
                 if (!config.generate())
                     throw new IllegalStateException("Unable to load or create dynamic_teleport.yml!");
                 config.register();
@@ -286,41 +276,4 @@ public class Processor extends IKLifecycle {
         }
     }
 
-    /**
-     * The services that are valid for this service provider.
-     * Services marked as @Optional should be handled accordingly.
-     * If a service is not marked @Optional it should be impossible for that service to be unavailable.
-     */
-    public static class ValidServices {
-        public static Class<FamilyService> FAMILY_SERVICE = FamilyService.class;
-        public static Class<ServerService> SERVER_SERVICE = ServerService.class;
-        public static Class<RedisService> REDIS_SERVICE = RedisService.class;
-        public static Class<MessageTunnelService> MESSAGE_TUNNEL_SERVICE = MessageTunnelService.class;
-        public static Class<MessageCacheService> MESSAGE_CACHE_SERVICE = MessageCacheService.class;
-        public static Class<WhitelistService> WHITELIST_SERVICE = WhitelistService.class;
-        public static Class<LoadBalancingService> LOAD_BALANCING_SERVICE = LoadBalancingService.class;
-
-        /**
-         * Optional
-         */
-        public static Class<PartyService> PARTY_SERVICE = PartyService.class;
-
-        /**
-         * Optional
-         */
-        public static Class<FriendsService> FRIENDS_SERVICE = FriendsService.class;
-
-        /**
-         * Optional
-         */
-        public static Class<DynamicTeleportService> DYNAMIC_TELEPORT_SERVICE = DynamicTeleportService.class;
-
-        public static boolean isOptional(Class<? extends Service> clazz) {
-            if(clazz == PARTY_SERVICE) return true;
-            if(clazz == FRIENDS_SERVICE) return true;
-            if(clazz == DYNAMIC_TELEPORT_SERVICE) return true;
-
-            return false;
-        }
-    }
 }

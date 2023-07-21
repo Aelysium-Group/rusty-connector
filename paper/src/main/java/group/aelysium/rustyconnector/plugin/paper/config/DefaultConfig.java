@@ -98,7 +98,7 @@ public class DefaultConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
-        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
+        PluginLogger logger = PaperRustyConnector.getAPI().logger();
 
         try {
             this.processVersion(YAML.currentVersion);

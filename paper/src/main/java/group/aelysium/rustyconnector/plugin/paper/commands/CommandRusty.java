@@ -8,14 +8,10 @@ import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -33,7 +29,7 @@ public final class CommandRusty {
 
     private static Command.Builder<CommandSender> message(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("message")
@@ -59,7 +55,7 @@ public final class CommandRusty {
 
     private static Command.Builder<CommandSender> send(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("send")

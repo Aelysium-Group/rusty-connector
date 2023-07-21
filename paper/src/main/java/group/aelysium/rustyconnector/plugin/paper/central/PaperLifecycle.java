@@ -12,7 +12,6 @@ import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -49,9 +48,9 @@ public class PaperLifecycle extends PluginLifecycle {
 
     protected boolean loadConfigs() {
         PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PluginLogger logger = api.logger();
         try {
-            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.getDataFolder(), "config.yml"), "paper_config_template.yml");
+            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.dataFolder(), "config.yml"), "paper_config_template.yml");
             if(!defaultConfig.generate()) {
                 throw new IllegalStateException("Unable to load or create config.yml!");
             }
@@ -72,7 +71,7 @@ public class PaperLifecycle extends PluginLifecycle {
     }
     protected boolean loadCommands() {
         PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PluginLogger logger = api.logger();
         try {
 
             CommandRusty.create(api.getCommandManager());
@@ -86,7 +85,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
     protected boolean loadEvents() {
         PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PluginLogger logger = api.logger();
 
         try {
             api.getServer().getPluginManager().registerEvents(new OnPlayerJoin(), api.accessPlugin());

@@ -49,7 +49,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     public void resolveParent() {
-        FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
+        FamilyService familyService = VelocityAPI.get().services().familyService();
         BaseServerFamily family = familyService.find(parentName);
 
         this.parentName = null;
@@ -69,7 +69,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     public WeakReference<BaseServerFamily> getParent() {
-        FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
+        FamilyService familyService = VelocityAPI.get().services().familyService();
         if(familyService.getRootFamily().equals(this)) return null;
         return this.parent;
     }
@@ -95,9 +95,9 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
      * @return The whitelist or `null` if there isn't one.
      */
     public Whitelist getWhitelist() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
         if(this.name == null) return null;
-        return api.getService(WHITELIST_SERVICE).orElseThrow().find(this.whitelist);
+        return api.services().whitelistService().find(this.whitelist);
     }
 
     public long serverCount() { return this.loadBalancer.size(); }
@@ -134,7 +134,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
     @Override
     public void unregisterServers() throws Exception {
-        ServerService serverService = VelocityRustyConnector.getAPI().getService(SERVER_SERVICE).orElseThrow();
+        ServerService serverService = VelocityAPI.get().services().serverService();
 
         for (PlayerServer server : this.loadBalancer.dump()) {
             if(server == null) continue;

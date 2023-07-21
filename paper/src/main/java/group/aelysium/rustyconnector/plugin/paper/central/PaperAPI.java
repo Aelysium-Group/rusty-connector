@@ -3,13 +3,11 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -50,17 +48,17 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     }
 
     @Override
-    public BukkitScheduler getScheduler() {
+    public BukkitScheduler scheduler() {
         return Bukkit.getScheduler();
     }
 
     @Override
-    public PluginLogger getLogger() {
+    public PluginLogger logger() {
         return this.pluginLogger;
     }
 
     @Override
-    public String getDataFolder() {
+    public String dataFolder() {
         return plugin.getDataFolder().getPath();
     }
 
