@@ -1,0 +1,2 @@
+rootProject.name = 'rusty-connector'
+include 'core', 'paper', ':velocity'
