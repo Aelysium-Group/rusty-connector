@@ -1,4 +1,5 @@
 dependencies {
+    // Include in jar
     implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
     implementation "commons-codec:commons-codec:${project.commons_version}"
     implementation "com.jcabi:jcabi-log:${project.jcabi_version}"

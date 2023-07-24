@@ -1,4 +1,5 @@
 dependencies {
+    // Include in jar
     implementation "com.google.inject:guice:${project.guice_version}"
     implementation "club.minnced:discord-webhooks:${project.discord_version}"
 
