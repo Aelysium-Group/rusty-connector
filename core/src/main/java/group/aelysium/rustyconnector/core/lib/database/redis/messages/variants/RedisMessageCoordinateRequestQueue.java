@@ -11,7 +11,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageTPAQueuePlayer extends GenericRedisMessage {
+public class RedisMessageCoordinateRequestQueue extends GenericRedisMessage {
     private String targetUsername;
     private String targetServer;
     private String sourceUsername;
@@ -28,10 +28,10 @@ public class RedisMessageTPAQueuePlayer extends GenericRedisMessage {
         return targetServer;
     }
 
-    public RedisMessageTPAQueuePlayer(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(RedisMessageType.TPA_QUEUE_PLAYER, address, origin);
+    public RedisMessageCoordinateRequestQueue(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(RedisMessageType.COORDINATE_REQUEST_QUEUE, address, origin);
 
-        if(!RedisMessageTPAQueuePlayer.validateParameters(ValidParameters.toList(), parameters))
+        if(!RedisMessageCoordinateRequestQueue.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -45,10 +45,10 @@ public class RedisMessageTPAQueuePlayer extends GenericRedisMessage {
             }
         });
     }
-    public RedisMessageTPAQueuePlayer(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.TPA_QUEUE_PLAYER, address, origin);
+    public RedisMessageCoordinateRequestQueue(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.COORDINATE_REQUEST_QUEUE, address, origin);
 
-        if(!RedisMessageTPAQueuePlayer.validateParameters(ValidParameters.toList(), parameters))
+        if(!RedisMessageCoordinateRequestQueue.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {

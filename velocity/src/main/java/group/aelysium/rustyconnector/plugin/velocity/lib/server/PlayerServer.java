@@ -186,19 +186,15 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         return family;
     }
 
-    /**
-     * Connects a player to the server.
-     * This also increases the player count on this server by 1.
-     * @param player The player to connect.
-     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
-     */
     public boolean connect(Player player) {
         VelocityAPI api = VelocityAPI.get();
 
         ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
         try {
-            if (!connection.connect().get().isSuccessful()) return false;
-        } catch (Exception ignore) {
+            ConnectionRequestBuilder.Result result = connection.connect().join();
+
+            if (!result.isSuccessful()) return false;
+        } catch (Exception e) {
             return false;
         }
 
@@ -236,7 +232,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * This also increases the player count on this server by the number of players in the party.
      * If any members of the party have already connected to this server, they will be ignored.
      * @param party The party to connect.
-     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
      */
     public void connect(Party party) {
         party.setServer(this);

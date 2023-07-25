@@ -4,12 +4,12 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import org.bukkit.entity.Player;
 
-public class DynamicTeleport_TPARequest {
+public class CoordinateRequest {
     private String clientUsername;
     private Player client = null;
     private Player target;
 
-    public DynamicTeleport_TPARequest(String clientUsername, Player target) {
+    public CoordinateRequest(String clientUsername, Player target) {
         this.clientUsername = clientUsername;
         this.target = target;
     }
@@ -50,6 +50,12 @@ public class DynamicTeleport_TPARequest {
 
         if(!this.target.isOnline()) throw new NullPointerException("Attempted to resolve a tpa request while the target isn't online!");
 
-        this.client.teleportAsync(this.target.getLocation()).completeExceptionally(new RuntimeException("Failed to teleport "+this.client.getName()+" to "+this.target.getName()));
+        if(PaperAPI.get().isFolia()) {
+            PaperAPI.get().scheduler().scheduleSyncDelayedTask(PaperRustyConnector.getPlugin(PaperRustyConnector.class), () -> {
+                this.client.teleport(this.target.getLocation());
+            }, 0);
+        } else {
+            this.client.teleportAsync(this.target.getLocation());
+        }
     }
 }

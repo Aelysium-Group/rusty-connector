@@ -65,9 +65,6 @@ public class TPARequest {
         TPAService tpaService = dynamicTeleportService.services().tpaService().orElse(null);
         if(tpaService == null) throw new NullPointerException("TPA in Dynamic Teleport must be enabled to use tpa functions!");
 
-        this.getSender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.getTarget().getUsername()));
-        this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.getSender().getUsername()));
-
         try {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
@@ -77,6 +74,9 @@ public class TPARequest {
             if(family == null) throw new NullPointerException();
 
             tpaService.tpaSendPlayer(this.getSender(), this.getTarget(), server);
+
+            this.getSender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.getTarget().getUsername()));
+            this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.getSender().getUsername()));
         } catch (Exception e) {
             e.printStackTrace();
             this.getSender().sendMessage(VelocityLang.TPA_FAILURE.build(this.getTarget().getUsername()));

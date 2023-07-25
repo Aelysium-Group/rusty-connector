@@ -5,6 +5,7 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
@@ -25,12 +26,13 @@ public class OnPlayerAttemptServerConnection {
                     PartyService partyService = api.services().partyService().orElseThrow();
 
                     Party party = partyService.find(player).orElse(null);
-                    if(party == null) return;
+                    if(party == null) throw new NoOutputException();
 
                     if(partyService.getSettings().onlyLeaderCanSwitchServers())
                         if(!party.getLeader().equals(player) && !party.getServer().getRegisteredServer().equals(event.getOriginalServer())) {
                             player.sendMessage(Component.text("Only the party leader can connect to other servers!", NamedTextColor.RED));
                             event.setResult(ServerPreConnectEvent.ServerResult.denied());
+                            return;
                         }
                 } catch (Exception ignore) {}
             });
