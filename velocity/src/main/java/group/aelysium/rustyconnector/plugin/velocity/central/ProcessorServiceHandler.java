@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnelService;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
@@ -34,8 +34,8 @@ public class ProcessorServiceHandler extends group.aelysium.rustyconnector.core.
     public RedisService redisService() {
         return this.find(RedisService.class).orElseThrow();
     }
-    public MessageTunnelService messageTunnelService() {
-        return this.find(MessageTunnelService.class).orElseThrow();
+    public DataTransitService dataTransitService() {
+        return this.find(DataTransitService.class).orElseThrow();
     }
     public MessageCacheService messageCacheService() {
         return this.find(MessageCacheService.class).orElseThrow();

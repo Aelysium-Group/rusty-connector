@@ -40,6 +40,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
             GenericRedisMessage message = serializer.parseReceived(rawMessage);
 
+            if(messageCacheService.isIgnoredType(message)) messageCacheService.removeMessage(cachedMessage.getSnowflake());
             if(message.getOrigin() == MessageOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
             try {
                 redisService.validatePrivateKey(message.getPrivateKey());

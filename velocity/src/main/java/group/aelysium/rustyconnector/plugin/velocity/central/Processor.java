@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.MessageTunnelService;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.IKLifecycle;
@@ -139,33 +139,38 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
             whitelistService.setProxyWhitelist(Whitelist.init(config.getWhitelist_name()));
         logger.log("Finished setting up network whitelist");
 
-        // Setup message tunnel
-        builder.addService(new MessageCacheService(config.getMessageTunnel_messageCacheSize()));
-        logger.log("Set message cache size to be: "+config.getMessageTunnel_messageCacheSize());
+        // Setup Data Transit
+        DataTransitConfig dataTransitConfig = DataTransitConfig.newConfig(new File(String.valueOf(api.dataFolder()), "data-transit.yml"), "velocity_data_transit_template.yml");
+        if(!dataTransitConfig.generate())
+            throw new IllegalStateException("Unable to load or create data-transit.yml!");
+        dataTransitConfig.register();
 
-        MessageTunnelService messageTunnelService = new MessageTunnelService(
-                config.isMessageTunnel_denylist_enabled(),
-                config.isMessageTunnel_whitelist_enabled(),
-                config.getMessageTunnel_messageMaxLength()
+        builder.addService(new MessageCacheService(dataTransitConfig.getCache_size(), dataTransitConfig.getCache_ignoredStatuses(), dataTransitConfig.getCache_ignoredTypes()));
+        logger.log("Set message cache size to be: "+dataTransitConfig.getCache_size());
+
+        DataTransitService dataTransitService = new DataTransitService(
+                dataTransitConfig.isDenylist_enabled(),
+                dataTransitConfig.isWhitelist_enabled(),
+                dataTransitConfig.getMaxPacketLength()
         );
-        builder.addService(messageTunnelService);
+        builder.addService(dataTransitService);
 
-        if(config.isMessageTunnel_whitelist_enabled())
-            config.getMessageTunnel_whitelist_addresses().forEach(entry -> {
+        if(dataTransitConfig.isWhitelist_enabled())
+            dataTransitConfig.getWhitelist_addresses().forEach(entry -> {
                 String[] addressSplit = entry.split(":");
 
                 InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
 
-                messageTunnelService.whitelistAddress(address);
+                dataTransitService.whitelistAddress(address);
             });
 
-        if(config.isMessageTunnel_denylist_enabled())
-            config.getMessageTunnel_denylist_addresses().forEach(entry -> {
+        if(dataTransitConfig.isDenylist_enabled())
+            dataTransitConfig.getDenylist_addresses().forEach(entry -> {
                 String[] addressSplit = entry.split(":");
 
                 InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
 
-                messageTunnelService.blacklistAddress(address);
+                dataTransitService.blacklistAddress(address);
             });
 
         logger.log("Finished setting up message tunnel");

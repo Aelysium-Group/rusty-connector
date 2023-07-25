@@ -1,15 +1,20 @@
 package group.aelysium.rustyconnector.core.lib.database.redis.messages.cache;
 
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MessageCacheService extends Service {
     private final Snowflake snowflakeGenerator = new Snowflake();
+    private final List<MessageStatus> ignoredStatuses;
+    private final List<RedisMessageType.Mapping> ignoredTypes;
     private int max = 25;
 
     public MessageCacheService(Integer max) {
@@ -17,6 +22,16 @@ public class MessageCacheService extends Service {
         if(max > 500) max = 500;
 
         this.max = max;
+        this.ignoredStatuses = new ArrayList<>(0);
+        this.ignoredTypes = new ArrayList<>(0);
+    }
+    public MessageCacheService(Integer max, List<MessageStatus> ignoredStatuses, List<RedisMessageType.Mapping> ignoredTypes) {
+        if(max <= 0) max = 0;
+        if(max > 500) max = 500;
+
+        this.max = max;
+        this.ignoredStatuses = ignoredStatuses;
+        this.ignoredTypes = ignoredTypes;
     }
 
     protected final LinkedHashMap<Long, CacheableMessage> messages = new LinkedHashMap<>(this.max){
@@ -36,8 +51,15 @@ public class MessageCacheService extends Service {
 
         CacheableMessage cacheableMessage = new CacheableMessage(snowflake, message, status);
 
+        if(this.ignoredStatuses.contains(status)) return cacheableMessage;
+
         this.messages.put(snowflake,cacheableMessage);
+
         return cacheableMessage;
+    }
+
+    public boolean isIgnoredType(GenericRedisMessage message) {
+        return this.ignoredTypes.contains(message.getType());
     }
 
     /**

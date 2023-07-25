@@ -27,6 +27,16 @@
 ###########################################################################################################
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ###########################################################################################################
+
+#
+# The max length that packets are allowed to be.
+# If a packet is over this value it will be thrown away.
+# The size below should work for just about everything that is sent by RustyConnector.
+# If you are defining larger addresses or names on your paper servers, you might want to increase this.
+#
+max-packet-length: 512
+
+
 #
 # The cache allows you to view messages after they've been received.
 # This is helpful for debugging issues and seeing what's happening under the hood.
@@ -51,15 +61,6 @@ cache:
 # If a packet matches a status listed below, it will not be cached.
 #
     ignored-statuses: []
-
-
-#
-# The max length that packets are allowed to be.
-# If a packet is over this value it will get thrown away!
-# The size below should work for just about everything that is sent by RustyConnector.
-# If you are defining larger addresses or names on your paper servers, you might want to increase this.
-#
-max-packet-length: 512
 
 
 #
