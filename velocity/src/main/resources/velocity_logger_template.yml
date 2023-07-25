@@ -63,14 +63,9 @@ console-icons:
 #                      Console Icons                       #
 #                                                          #
 #               ---------------------------                #
-# | Any system developer will tell you that watching       #
-# | logs can sometimes feel messy and overwhelming.        #
-# | Sometimes, this is because there are just to many      #
-# | things you have to read in such short amounts of time  #
 #                                                          #
-# | To address this issue. We've implemented something     #
-# | we're calling Console Icons. These are short           #
-# | combinations of characters meant to convey a meaning.  #
+# | Console Icons are short combinations of characters     #
+# | meant to convey a meaning.                             #
 # | It's a known fact that the human eye recognizes shapes #
 # | faster than it can process words. So we wanted to      #
 # | take advantage of that ability.                        #
@@ -79,6 +74,7 @@ console-icons:
 # | to replace the icons below with your own worded        #
 # | versions! Or you can adjust them in a way that helps   #
 # | you interpret them faster and better!                  #
+#                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -116,7 +112,7 @@ console-icons:
 
     #
     #   Symbol used when a family is balancing its servers
-    #   Example: family-name /---\
+    #   Example: family-name ▲▼▲▼▲
     #
     family-balancing: "▲▼▲▼▲"
 
