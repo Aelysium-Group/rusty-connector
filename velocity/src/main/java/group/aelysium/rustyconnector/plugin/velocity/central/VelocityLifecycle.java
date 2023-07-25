@@ -105,7 +105,7 @@ public class VelocityLifecycle extends PluginLifecycle {
         try {
             commandManager.register(
                     commandManager.metaBuilder("rc")
-                            .aliases("/rc") // Add slash variants so that they can be used in console as well
+                            .aliases("/rc", "//") // Add slash variants so that they can be used in console as well
                             .build(),
                     CommandRusty.create()
                     );
