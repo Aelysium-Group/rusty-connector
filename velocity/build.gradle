@@ -1,3 +1,7 @@
+compileJava {
+    options.encoding = "UTF-8"
+}
+
 dependencies {
     // Include in jar
     implementation "com.google.inject:guice:${project.guice_version}"

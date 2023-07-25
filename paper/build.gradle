@@ -1,5 +1,9 @@
 def plugin_version = project.plugin_version
 
+compileJava {
+    options.encoding = "UTF-8"
+}
+
 dependencies {
     // Dev only
     shadow project(path: ':core', configuration: 'shadow')

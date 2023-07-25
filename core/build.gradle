@@ -1,3 +1,7 @@
+compileJava {
+    options.encoding = "UTF-8"
+}
+
 dependencies {
     // Include in jar
     implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
