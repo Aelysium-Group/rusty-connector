@@ -3,7 +3,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.annotations.Initializer;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
@@ -11,14 +10,11 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
 
 /**
  * This class should never be used directly.
@@ -59,13 +55,6 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         }
 
         this.parent = new WeakReference<>(family);
-    }
-
-    public boolean hasParent() {
-        return
-                this.parentName != null ||
-                !this.parentName.equals("") ||
-                this.parent != null;
     }
 
     public WeakReference<BaseServerFamily> getParent() {

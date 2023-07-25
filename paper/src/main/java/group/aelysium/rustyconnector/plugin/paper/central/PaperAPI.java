@@ -3,7 +3,6 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
@@ -16,14 +15,14 @@ import org.slf4j.Logger;
 
 import java.io.InputStream;
 import java.io.SyncFailedException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Optional;
 import java.util.function.Function;
 
-import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.MAGIC_LINK_SERVICE;
-import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.REDIS_SERVICE;
-
 public class PaperAPI extends PluginAPI<BukkitScheduler> {
+    private static PaperAPI instance;
+    public static PaperAPI get() {
+        return instance;
+    }
+
     private PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
     private Processor processor = null;
@@ -31,6 +30,7 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
 
 
     public PaperAPI(PaperRustyConnector plugin, Logger logger) throws Exception {
+        instance = this;
         this.plugin = plugin;
         this.pluginLogger = new PluginLogger(logger);
 
@@ -69,8 +69,8 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
         return this.plugin.getServer();
     }
 
-    public <S extends Service> Optional<S> getService(Class<S> type) {
-        return this.processor.getService(type);
+    public ProcessorServiceHandler services() {
+        return this.processor.services();
     }
 
     public void killServices() {
@@ -91,11 +91,11 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
         return commandManager;
     }
 
-    public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
+    public void configureProcessor(DefaultConfig config) throws IllegalAccessException {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
-        this.processor.getService(REDIS_SERVICE).orElseThrow().start(RedisSubscriber.class);
-        this.processor.getService(MAGIC_LINK_SERVICE).orElseThrow().startHeartbeat();
+        this.processor.services().redisService().start(RedisSubscriber.class);
+        this.processor.services().magicLinkService().startHeartbeat();
     }
 
     public boolean isFolia() {

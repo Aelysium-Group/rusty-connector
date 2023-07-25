@@ -3,14 +3,11 @@ package group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPingResponse;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-
-import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.MAGIC_LINK_SERVICE;
 
 public class MagicLink_PingResponseHandler implements MessageHandler {
     private final RedisMessageServerPingResponse message;
@@ -21,9 +18,9 @@ public class MagicLink_PingResponseHandler implements MessageHandler {
 
     @Override
     public void execute() throws Exception {
-        PaperAPI api = PaperRustyConnector.getAPI();
+        PaperAPI api = PaperAPI.get();
         PluginLogger logger = api.logger();
-        MagicLinkService service = api.getService(MAGIC_LINK_SERVICE).orElseThrow();
+        MagicLinkService service = api.services().magicLinkService();
 
         if(message.getStatus() == RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED) {
             logger.send(Component.text(message.getMessage(), message.getColor()));

@@ -15,9 +15,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventMan
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import net.kyori.adventure.text.Component;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.WHITELIST_SERVICE;
-
 public class OnPlayerChooseInitialServer {
     /**
      * Runs when a player first joins the proxy
@@ -31,7 +28,7 @@ public class OnPlayerChooseInitialServer {
         return EventTask.async(() -> {
             try {
                 try {
-                    Whitelist whitelist = api.getService(WHITELIST_SERVICE).orElseThrow().getProxyWhitelist().orElseThrow();
+                    Whitelist whitelist = api.services().whitelistService().getProxyWhitelist().orElseThrow();
                     if (!whitelist.validate(player)) {
                         logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
                         player.disconnect(Component.text(whitelist.getMessage()));
@@ -39,7 +36,7 @@ public class OnPlayerChooseInitialServer {
                     }
                 } catch (Exception ignore) {}
 
-                RootServerFamily rootFamily = api.getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
+                RootServerFamily rootFamily = api.services().familyService().getRootFamily();
 
                 PlayerServer server = rootFamily.connect(player);
                 if(server == null) return;

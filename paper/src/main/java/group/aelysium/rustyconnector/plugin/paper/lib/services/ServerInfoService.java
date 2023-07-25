@@ -37,7 +37,7 @@ public class ServerInfoService extends Service implements PlayerServer {
      * @param hardPlayerCap The hard player cap
      */
     private void setPlayerCap(int softPlayerCap, int hardPlayerCap) {
-        PaperAPI api = PaperRustyConnector.getAPI();
+        PaperAPI api = PaperAPI.get();
         PluginLogger logger = api.logger();
 
         api.getServer().setMaxPlayers(hardPlayerCap);
@@ -64,7 +64,7 @@ public class ServerInfoService extends Service implements PlayerServer {
 
     @Override
     public int getPlayerCount() {
-        return PaperRustyConnector.getAPI().getServer().getOnlinePlayers().size();
+        return PaperAPI.get().getServer().getOnlinePlayers().size();
     }
 
     @Override

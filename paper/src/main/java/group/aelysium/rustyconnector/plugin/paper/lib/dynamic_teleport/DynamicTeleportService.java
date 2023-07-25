@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport;
 
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.DynamicTeleport_TPARequest;
 import org.bukkit.entity.Player;
 
@@ -32,7 +33,7 @@ public class DynamicTeleportService extends Service {
      * @param player The player to search for.
      */
     public void removeAllPlayersRequests(Player player) {
-        if(PaperRustyConnector.getAPI().isFolia()) {
+        if(PaperAPI.get().isFolia()) {
             this.requests.removeIf(tpaRequest ->
                     Objects.equals(tpaRequest.getTarget(),         player)
                  || Objects.equals(tpaRequest.getClientUsername(), player.getPlayerProfile().getName())
