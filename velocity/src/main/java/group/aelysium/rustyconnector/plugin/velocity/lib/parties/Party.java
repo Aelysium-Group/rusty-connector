@@ -1,10 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
-import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriend;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,18 +10,17 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Vector;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.PARTY_SERVICE;
-
 public class Party {
     private final Vector<Player> players;
     private final int maxSize;
     private WeakReference<Player> leader;
     private WeakReference<PlayerServer> server;
 
-    public Party(int maxSize, Player host) {
+    public Party(int maxSize, Player host, PlayerServer server) {
         this.players = new Vector<>(maxSize);
         this.maxSize = maxSize;
         this.setLeader(host);
+        this.setServer(server);
     }
 
     public void setServer(PlayerServer server) {
@@ -79,7 +75,7 @@ public class Party {
         this.players.forEach(partyMember -> player.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
 
         if(this.isEmpty())
-            VelocityRustyConnector.getAPI().getService(PARTY_SERVICE).orElseThrow().disband(this);
+            VelocityAPI.get().services().partyService().orElseThrow().disband(this);
     }
 
     public void broadcast(Component message) {

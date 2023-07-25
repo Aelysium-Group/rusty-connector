@@ -3,22 +3,19 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.model.Service;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FRIENDS_SERVICE;
 
 public class PartyService extends Service {
     private final Vector<Party> parties = new Vector<>();
@@ -30,7 +27,7 @@ public class PartyService extends Service {
     }
 
     public void initCommand() {
-        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
+        CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
         if(!commandManager.hasCommand("party"))
             try {
                 commandManager.register(
@@ -46,8 +43,8 @@ public class PartyService extends Service {
         return this.settings;
     }
 
-    public Party create(Player host) {
-        Party party = new Party(this.settings.maxMembers, host);
+    public Party create(Player host, PlayerServer server) {
+        Party party = new Party(this.settings.maxMembers, host, server);
         this.parties.add(party);
         return party;
     }
@@ -73,16 +70,16 @@ public class PartyService extends Service {
     }
 
     public PartyInvite invitePlayer(Party party, Player sender, Player target) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
         if(party.getLeader() != sender && this.settings.onlyLeaderCanInvite)
             throw new IllegalStateException("Hey! Only the party leader can invite other players!");
 
         if(this.settings.friendsOnly())
             try {
-                FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElse(null);
+                FriendsService friendsService = api.services().friendsService().orElse(null);
                 if(friendsService == null) {
-                    api.getLogger().send(Component.text("You have parties set to only allow players to invite their friends! But the Friends module is disabled! Ignoring...", NamedTextColor.YELLOW));
+                    api.logger().send(Component.text("You have parties set to only allow players to invite their friends! But the Friends module is disabled! Ignoring...", NamedTextColor.YELLOW));
                     throw new NoOutputException();
                 }
 
@@ -100,8 +97,8 @@ public class PartyService extends Service {
         sender.sendMessage(Component.text("You invited " + target.getUsername() + " to your party!", NamedTextColor.GREEN));
 
         target.sendMessage(Component.text("Hey! "+ sender.getUsername() +" wants you to join their party!", NamedTextColor.GRAY));
-        target.sendMessage(Component.text("Accept with: ", NamedTextColor.GRAY).append(Component.text("/party invite "+sender.getUsername()+" accept", NamedTextColor.GREEN)));
-        target.sendMessage(Component.text("Deny with: ", NamedTextColor.GRAY).append(Component.text("/party invite "+sender.getUsername()+" deny", NamedTextColor.RED)));
+        target.sendMessage(Component.text("Accept with: ", NamedTextColor.GRAY).append(Component.text("/party invites "+sender.getUsername()+" accept", NamedTextColor.GREEN)));
+        target.sendMessage(Component.text("Deny with: ", NamedTextColor.GRAY).append(Component.text("/party invites "+sender.getUsername()+" deny", NamedTextColor.RED)));
         return invite;
     }
 

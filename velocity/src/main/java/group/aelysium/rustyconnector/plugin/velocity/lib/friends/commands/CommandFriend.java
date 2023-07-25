@@ -8,32 +8,25 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FRIENDS_SERVICE;
-
 public final class CommandFriend {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
-        FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElse(null);
+        FriendsService friendsService = api.services().friendsService().orElse(null);
         if (friendsService == null) {
             logger.send(Component.text("The Friends service must be enabled to load the /friend command.", NamedTextColor.YELLOW));
             return null;

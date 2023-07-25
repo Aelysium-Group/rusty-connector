@@ -4,7 +4,6 @@ import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
@@ -34,7 +33,7 @@ public class FriendsMySQLService extends MySQLService {
      * Initialize the table for home server mappings.
      */
     public void init() throws SQLException, IOException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
         InputStream stream = api.getResourceAsStream("friends.sql");
         String file = new String(stream.readAllBytes());
 
@@ -50,7 +49,7 @@ public class FriendsMySQLService extends MySQLService {
      * @throws SQLException If there was an issue.
      */
     public Optional<List<FriendMapping>> findFriends(Player player) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
         try {
             this.connect();
@@ -74,7 +73,7 @@ public class FriendsMySQLService extends MySQLService {
             this.close();
             return Optional.of(friends);
         } catch (Exception e) {
-            api.getLogger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
         }
 
         return Optional.empty();

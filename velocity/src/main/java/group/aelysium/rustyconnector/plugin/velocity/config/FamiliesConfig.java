@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -84,7 +84,7 @@ public class FamiliesConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
-        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+        PluginLogger logger = VelocityAPI.get().logger();
 
         // Families
         try {

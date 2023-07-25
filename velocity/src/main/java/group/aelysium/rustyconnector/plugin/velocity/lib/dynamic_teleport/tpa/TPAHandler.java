@@ -1,15 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.DYNAMIC_TELEPORT_SERVICE;
-import static group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService.ValidServices.TPA_SERVICE;
 
 public class TPAHandler {
     private final List<TPARequest> requests = new ArrayList<>();
@@ -35,8 +31,9 @@ public class TPAHandler {
     }
 
     public TPARequest newRequest(Player sender, Player target) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        TPAService tpaService = api.getService(DYNAMIC_TELEPORT_SERVICE).orElseThrow().getService(TPA_SERVICE).orElseThrow();
+        VelocityAPI api = VelocityAPI.get();
+        TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
+                                   .services().tpaService().orElseThrow();
 
         TPARequest tpaRequest = new TPARequest(sender, target, tpaService.getSettings().expiration());
         requests.add(tpaRequest);

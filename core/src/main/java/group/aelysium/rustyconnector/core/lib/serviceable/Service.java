@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.model;
+package group.aelysium.rustyconnector.core.lib.serviceable;
 
 public abstract class Service {
     public abstract void kill();

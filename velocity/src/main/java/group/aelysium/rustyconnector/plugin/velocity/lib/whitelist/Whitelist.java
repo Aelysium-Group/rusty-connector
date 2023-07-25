@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.config.WhitelistConfig;
@@ -115,12 +114,12 @@ public class Whitelist {
      * @return A whitelist.
      */
     public static Whitelist init(String whitelistName) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         WhitelistConfig whitelistConfig = WhitelistConfig.newConfig(
                 whitelistName,
-                new File(String.valueOf(api.getDataFolder()), "whitelists/"+whitelistName+".yml"),
+                new File(String.valueOf(api.dataFolder()), "whitelists/"+whitelistName+".yml"),
                 "velocity_whitelist_template.yml"
         );
         if(!whitelistConfig.generate()) {

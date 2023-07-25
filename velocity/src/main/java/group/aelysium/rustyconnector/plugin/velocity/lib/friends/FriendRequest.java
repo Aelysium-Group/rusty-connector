@@ -1,14 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FRIENDS_SERVICE;
 
 public class FriendRequest {
     private final WeakReference<Player> sender;
@@ -33,10 +30,10 @@ public class FriendRequest {
      * This will subsequently connect the player to the party's server and then decompose the invite and remove it from the PartyService that it belongs to.
      */
     public synchronized void accept() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        if(!api.isEnabled(FRIENDS_SERVICE))
+        VelocityAPI api = VelocityAPI.get();
+        if(api.services().friendsService().orElse(null) == null)
             throw new IllegalStateException("The friends module is disabled!");
-        FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
+        FriendsService friendsService = api.services().friendsService().orElseThrow();
 
         try {
             if (friendsService.getFriendCount(this.target).orElseThrow() > friendsService.getSettings().maxFriends())
@@ -54,7 +51,7 @@ public class FriendRequest {
             throw new IllegalStateException("The sender of this friend request doesn't exist! (How did this happen?)");
 
         try {
-            friendsService.getService(FriendsService.ValidServices.DATA_ENCLAVE).orElseThrow().addFriend(this.sender.get(), this.target);
+            friendsService.services().dataEnclave().addFriend(this.sender.get(), this.target);
 
             try {
                 this.getTarget().sendMessage(Component.text("You and " + this.getSender().getUsername() + " are now friends!", NamedTextColor.GREEN));
@@ -76,10 +73,10 @@ public class FriendRequest {
      * This will subsequently decompose the invite and remove it from the PartyService that it belongs to.
      */
     public synchronized void ignore() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        if(!api.isEnabled(FRIENDS_SERVICE))
+        VelocityAPI api = VelocityAPI.get();
+        if(api.services().friendsService().orElse(null) == null)
             throw new IllegalStateException("The friends module is disabled!");
-        FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
+        FriendsService friendsService = api.services().friendsService().orElseThrow();
 
         try {
             friendsService.closeInvite(this);

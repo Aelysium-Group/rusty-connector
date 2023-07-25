@@ -6,23 +6,19 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessa
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageSendPlayer;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
-import group.aelysium.rustyconnector.core.lib.model.Service;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
-import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.REDIS_SERVICE;
-import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.SERVER_INFO_SERVICE;
-
 public class RedisMessagerService extends Service {
 
     public void pingProxy(RedisMessageServerPing.ConnectionIntent intent) {
-        PaperAPI api = PaperRustyConnector.getAPI();
+        PaperAPI api = PaperAPI.get();
 
         try {
-            ServerInfoService serverInfoService = api.getService(SERVER_INFO_SERVICE).orElseThrow();
+            ServerInfoService serverInfoService = api.services().serverInfoService();
             RedisMessageServerPing message = (RedisMessageServerPing) new GenericRedisMessage.Builder()
                     .setType(RedisMessageType.PING)
                     .setOrigin(MessageOrigin.SERVER)
@@ -34,9 +30,9 @@ public class RedisMessagerService extends Service {
                     .setParameter(RedisMessageServerPing.ValidParameters.HARD_CAP, String.valueOf(serverInfoService.getHardPlayerCap()))
                     .setParameter(RedisMessageServerPing.ValidParameters.WEIGHT, String.valueOf(serverInfoService.getWeight()))
                     .buildSendable();
-            api.getService(REDIS_SERVICE).orElseThrow().publish(message);
+            api.services().redisService().publish(message);
         } catch (Exception e) {
-            Lang.BOXED_MESSAGE_COLORED.send(PaperRustyConnector.getAPI().getLogger(), Component.text(e.toString()), NamedTextColor.RED);
+            Lang.BOXED_MESSAGE_COLORED.send(PaperAPI.get().logger(), Component.text(e.toString()), NamedTextColor.RED);
         }
     }
 
@@ -46,8 +42,8 @@ public class RedisMessagerService extends Service {
      * @param familyName The name of the family to send to.
      */
     public void sendToOtherFamily(Player player, String familyName) {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        ServerInfoService serverInfoService = api.getService(SERVER_INFO_SERVICE).orElseThrow();
+        PaperAPI api = PaperAPI.get();
+        ServerInfoService serverInfoService = api.services().serverInfoService();
 
         RedisMessageSendPlayer message = (RedisMessageSendPlayer) new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.SEND_PLAYER)
@@ -57,7 +53,7 @@ public class RedisMessagerService extends Service {
                 .setParameter(RedisMessageSendPlayer.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
                 .buildSendable();
 
-        api.getService(REDIS_SERVICE).orElseThrow().publish(message);
+        api.services().redisService().publish(message);
     }
 
     @Override

@@ -3,7 +3,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.annotations.Initializer;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
@@ -11,14 +10,11 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
 
 /**
  * This class should never be used directly.
@@ -26,7 +22,7 @@ import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.Va
  */
 public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerServer> {
     @Initializer
-    protected String parentName;
+    protected String parentName = null;
 
     protected WeakReference<BaseServerFamily> parent = null;
     protected LoadBalancer loadBalancer = null;
@@ -49,8 +45,10 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     public void resolveParent() {
-        FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
+        FamilyService familyService = VelocityAPI.get().services().familyService();
         BaseServerFamily family = familyService.find(parentName);
+
+        this.parentName = null;
         if(family == null) {
             this.parent = new WeakReference<>(familyService.getRootFamily());
             return;
@@ -58,8 +56,9 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
         this.parent = new WeakReference<>(family);
     }
+
     public WeakReference<BaseServerFamily> getParent() {
-        FamilyService familyService = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow();
+        FamilyService familyService = VelocityAPI.get().services().familyService();
         if(familyService.getRootFamily().equals(this)) return null;
         return this.parent;
     }
@@ -85,9 +84,9 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
      * @return The whitelist or `null` if there isn't one.
      */
     public Whitelist getWhitelist() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
         if(this.name == null) return null;
-        return api.getService(WHITELIST_SERVICE).orElseThrow().find(this.whitelist);
+        return api.services().whitelistService().find(this.whitelist);
     }
 
     public long serverCount() { return this.loadBalancer.size(); }
@@ -124,7 +123,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
     @Override
     public void unregisterServers() throws Exception {
-        ServerService serverService = VelocityRustyConnector.getAPI().getService(SERVER_SERVICE).orElseThrow();
+        ServerService serverService = VelocityAPI.get().services().serverService();
 
         for (PlayerServer server : this.loadBalancer.dump()) {
             if(server == null) continue;

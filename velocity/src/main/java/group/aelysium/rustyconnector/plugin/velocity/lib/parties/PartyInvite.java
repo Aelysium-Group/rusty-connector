@@ -1,13 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.PARTY_SERVICE;
 
 public class PartyInvite {
     private final WeakReference<Party> party;
@@ -34,8 +31,8 @@ public class PartyInvite {
      * This will subsequently connect the player to the party's server and then decompose the invite and remove it from the PartyService that it belongs to.
      */
     public synchronized void accept() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PartyService partyService = api.getService(PARTY_SERVICE).orElse(null);
+        VelocityAPI api = VelocityAPI.get();
+        PartyService partyService = api.services().partyService().orElse(null);
         if(partyService == null)
             throw new IllegalStateException("The party module is disabled!");
 
@@ -71,7 +68,7 @@ public class PartyInvite {
     public synchronized void ignore() {
         if(this.isAcknowledged != null) throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
 
-        PartyService partyService = VelocityRustyConnector.getAPI().getService(PARTY_SERVICE).orElse(null);
+        PartyService partyService = VelocityAPI.get().services().partyService().orElse(null);
         if(partyService == null) throw new IllegalStateException("The party module is disabled!");
 
         partyService.closeInvite(this);

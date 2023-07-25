@@ -4,6 +4,7 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.TimeoutOptions;
+import io.lettuce.core.protocol.ProtocolVersion;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.NettyCustomizer;
 import io.netty.bootstrap.Bootstrap;
@@ -96,6 +97,7 @@ public class RedisClient extends io.lettuce.core.RedisClient {
                     .autoReconnect(true)
                     .socketOptions(socket)
                     .timeoutOptions(timeout)
+                    .protocolVersion(ProtocolVersion.RESP2)
                     .build();
 
             RedisURI uri;

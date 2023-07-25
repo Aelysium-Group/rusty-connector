@@ -21,36 +21,32 @@ import java.nio.file.Path;
 public class VelocityRustyConnector implements PluginRuntime {
     private final Metrics.Factory metricsFactory;
     private static VelocityLifecycle lifecycle;
-    private static VelocityAPI api;
-    public static VelocityAPI getAPI() {
-        return api;
-    }
     public static VelocityLifecycle getLifecycle() {
         return lifecycle;
     }
 
     @Inject
     public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder, Metrics.Factory metricsFactory) {
-        api = new VelocityAPI(this, server, logger, dataFolder);
+        new VelocityAPI(this, server, logger, dataFolder);
         lifecycle = new VelocityLifecycle();
         this.metricsFactory = metricsFactory;
     }
 
     @Subscribe
     public void onLoad(ProxyInitializeEvent event) throws DuplicateLifecycleException {
-        if(!api.getServer().getConfiguration().isOnlineMode())
-            VelocityRustyConnector.getAPI().getLogger().log("Offline mode detected");
+        if(!VelocityAPI.get().getServer().getConfiguration().isOnlineMode())
+            VelocityAPI.get().logger().log("Offline mode detected");
 
         if(!lifecycle.start()) lifecycle.stop();
         try {
             metricsFactory.make(this, 17972);
-            VelocityRustyConnector.getAPI().getLogger().log("Registered to bstats!");
+            VelocityAPI.get().logger().log("Registered to bstats!");
         } catch (Exception e) {
-            VelocityRustyConnector.getAPI().getLogger().log("Failed to register to bstats!");
+            VelocityAPI.get().logger().log("Failed to register to bstats!");
         }
 
-        if(!api.getServer().getConfiguration().isOnlineMode())
-            VelocityRustyConnector.getAPI().getLogger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!"), NamedTextColor.RED));
+        if(!VelocityAPI.get().getServer().getConfiguration().isOnlineMode())
+            VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!"), NamedTextColor.RED));
     }
 
     @Subscribe
@@ -58,7 +54,7 @@ public class VelocityRustyConnector implements PluginRuntime {
         try {
             lifecycle.stop();
         } catch (Exception e) {
-            VelocityRustyConnector.getAPI().getLogger().log("RustyConnector: " + e.getMessage());
+            VelocityAPI.get().logger().log("RustyConnector: " + e.getMessage());
         }
     }
 }

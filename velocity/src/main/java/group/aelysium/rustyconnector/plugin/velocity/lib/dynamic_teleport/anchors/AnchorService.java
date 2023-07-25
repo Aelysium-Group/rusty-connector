@@ -1,26 +1,18 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors;
 
 import com.velocitypowered.api.command.CommandManager;
-import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.DynamicTeleportConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.commands.CommandAnchor;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPASettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
 
 public class AnchorService extends Service {
     private Map<String, WeakReference<BaseServerFamily>> anchors;
@@ -30,9 +22,9 @@ public class AnchorService extends Service {
     }
 
     public void initCommands() {
-        CommandManager commandManager = VelocityRustyConnector.getAPI().getServer().getCommandManager();
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         this.anchors.forEach((name, family) -> {
             if(commandManager.hasCommand(name)) {
@@ -63,9 +55,9 @@ public class AnchorService extends Service {
     }
 
     public static Optional<AnchorService> init(DynamicTeleportConfig config) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-        FamilyService familyService = api.getService(FAMILY_SERVICE).orElseThrow();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
+        FamilyService familyService = api.services().familyService();
 
         try {
             if(!config.isFamilyAnchor_enabled()) return Optional.empty();

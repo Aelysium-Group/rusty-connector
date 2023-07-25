@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;

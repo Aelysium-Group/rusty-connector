@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 
 import java.io.File;
@@ -17,8 +16,8 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
 
     @Override
     public boolean generate() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
         if (!this.configPointer.exists()) {
             File parent = this.configPointer.getParentFile();
             if (!parent.exists())

@@ -1,14 +1,11 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.database;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers.TPAQueuePlayerHandler;
@@ -17,7 +14,6 @@ import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers.MagicL
 import javax.naming.AuthenticationException;
 
 import static group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType.*;
-import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.*;
 
 public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber {
     public RedisSubscriber(RedisClient client) {
@@ -26,10 +22,10 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
 
     @Override
     public void onMessage(String rawMessage) {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
 
-        CacheableMessage cachedMessage = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
+        CacheableMessage cachedMessage = api.services().messageCacheService().cacheMessage(rawMessage, MessageStatus.UNDEFINED);
 
         try {
             GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
@@ -38,10 +34,10 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(message.getOrigin() == MessageOrigin.SERVER) throw new Exception("Message from a sub-server! Ignoring...");
 
 
-            if(!AddressUtil.addressToString(message.getAddress()).equals(api.getService(SERVER_INFO_SERVICE).orElseThrow().getAddress()))
+            if(!AddressUtil.addressToString(message.getAddress()).equals(api.services().serverInfoService().getAddress()))
                throw new Exception("Message addressed to another sub-server! Ignoring...");
             try {
-                if (!(api.getService(REDIS_SERVICE).orElseThrow().validatePrivateKey(message.getPrivateKey())))
+                if (!(api.services().redisService().validatePrivateKey(message.getPrivateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
 
@@ -63,7 +59,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
     }
 
     private static void processParameters(GenericRedisMessage message, CacheableMessage cachedMessage) {
-        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
+        PluginLogger logger = PaperAPI.get().logger();
 
         try {
             if(message.getType() == PING_RESPONSE)      new MagicLink_PingResponseHandler(message).execute();

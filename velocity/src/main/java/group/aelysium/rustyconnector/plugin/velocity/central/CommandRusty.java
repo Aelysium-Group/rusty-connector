@@ -12,14 +12,9 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -27,20 +22,18 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.Velocity
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
-import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.List;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.*;
-
 public final class CommandRusty {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
+
+        MessageCacheService messageCacheService = api.services().messageCacheService();
 
         LiteralCommandNode<CommandSource> rusty = LiteralArgumentBuilder
             .<CommandSource>literal("rc")
@@ -58,7 +51,6 @@ public final class CommandRusty {
                             .executes(context -> {
                                 new Thread(() -> {
                                     try {
-                                        MessageCacheService messageCacheService = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow();
                                         if(messageCacheService.getSize() > 10) {
                                             int numberOfPages = Math.floorDiv(messageCacheService.getSize(),10) + 1;
 
@@ -86,7 +78,6 @@ public final class CommandRusty {
                                             try {
                                                 int pageNumber = context.getArgument("page-number", Integer.class);
 
-                                                MessageCacheService messageCacheService = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow();
                                                 List<CacheableMessage> messages = messageCacheService.getMessagesPage(pageNumber);
 
                                                 int numberOfPages = Math.floorDiv(messageCacheService.getSize(),10) + 1;
@@ -111,7 +102,6 @@ public final class CommandRusty {
                                     .executes(context -> {
                                         try {
                                             Long snowflake = context.getArgument("snowflake", Long.class);
-                                            MessageCacheService messageCacheService = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow();
 
                                             CacheableMessage message = messageCacheService.getMessage(snowflake);
 
@@ -139,7 +129,7 @@ public final class CommandRusty {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
+                                BaseServerFamily family = api.services().familyService().find(familyName);
                                 if(family == null) throw new NullPointerException();
 
                                 if(family instanceof ScalarServerFamily)
@@ -157,7 +147,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
+                                        BaseServerFamily family = api.services().familyService().find(familyName);
                                         if(family == null) throw new NullPointerException();
                                         if(!(family instanceof PlayerFocusedServerFamily)) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on scalar and static families!");
@@ -182,7 +172,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
+                                        BaseServerFamily family = api.services().familyService().find(familyName);
                                         if(family == null) throw new NullPointerException();
                                         if(!(family instanceof PlayerFocusedServerFamily)) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only use sort on scalar and static families!");
@@ -208,7 +198,7 @@ public final class CommandRusty {
             .then(LiteralArgumentBuilder.<CommandSource>literal("parties")
                     .executes(context -> {
                         try {
-                            api.getService(PARTY_SERVICE).orElseThrow().dump().forEach(party -> {
+                            api.services().partyService().orElseThrow().dump().forEach(party -> {
                                 logger.log(party.toString());
                             });
                         } catch (Exception e) {
@@ -222,7 +212,7 @@ public final class CommandRusty {
                     .executes(context -> {
                         logger.log("Reloading the proxy...");
                         try {
-                            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.getDataFolder(), "config.yml"), "velocity_config_template.yml");
+                            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.dataFolder(), "config.yml"), "velocity_config_template.yml");
                             if(!defaultConfig.generate()) {
                                 throw new IllegalStateException("Unable to load or create config.yml!");
                             }
@@ -261,7 +251,7 @@ public final class CommandRusty {
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
+                                            BaseServerFamily family = api.services().familyService().find(familyName);
                                             if(family == null) {
                                                 logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                                                 return Command.SINGLE_SUCCESS;
@@ -307,7 +297,7 @@ public final class CommandRusty {
                                                         return Command.SINGLE_SUCCESS;
                                                     }
 
-                                                    PlayerServer server = api.getService(SERVER_SERVICE).orElseThrow().findServer(registeredServer.getServerInfo());
+                                                    PlayerServer server = api.services().serverService().findServer(registeredServer.getServerInfo());
                                                     if (server == null) {
                                                         logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
                                                         return Command.SINGLE_SUCCESS;

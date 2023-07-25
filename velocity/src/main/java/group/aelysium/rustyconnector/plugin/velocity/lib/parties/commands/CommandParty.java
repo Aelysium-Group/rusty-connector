@@ -10,7 +10,6 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
@@ -19,21 +18,19 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.Velocity
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FRIENDS_SERVICE;
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.PARTY_SERVICE;
-
 public final class CommandParty {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         // If this command class loads, then PartyService MUST be set.
-        PartyService partyService = api.getService(PARTY_SERVICE).orElseThrow();
+        PartyService partyService = api.services().partyService().orElseThrow();
 
         LiteralCommandNode<CommandSource> partyCommand = LiteralArgumentBuilder
                 .<CommandSource>literal("party")
@@ -165,11 +162,11 @@ public final class CommandParty {
                                             String username = context.getArgument("username", String.class);
                                             Player senderPlayer = api.getServer().getPlayer(username).orElse(null);
                                             if(senderPlayer == null || !senderPlayer.isActive())
-                                                return closeMessage(player, Component.text(senderPlayer + " isn't online for you to join their party!", NamedTextColor.RED));
+                                                return closeMessage(player, Component.text(username + " isn't online for you to join their party!", NamedTextColor.RED));
 
                                             PartyInvite invite = partyService.findInvite(player, senderPlayer).orElse(null);
                                             if(invite == null)
-                                                return closeMessage(player, Component.text("The invite from " + senderPlayer + " has expired!", NamedTextColor.RED));
+                                                return closeMessage(player, Component.text("The invite from " + username + " has expired!", NamedTextColor.RED));
 
                                             try {
                                                 invite.accept();
@@ -199,7 +196,11 @@ public final class CommandParty {
                             if(partyService.find(player).orElse(null) != null)
                                 return closeMessage(player, Component.text("You can't start a party if you're already in one!", NamedTextColor.RED));
 
-                            partyService.create(player);
+                            if(player.getCurrentServer().orElse(null) == null)
+                                return closeMessage(player, Component.text("You have to be connected to a server in order to create a party!", NamedTextColor.RED));
+
+                            PlayerServer server = api.services().serverService().findServer(player.getCurrentServer().orElse(null).getServerInfo());
+                            partyService.create(player, server);
                             player.sendMessage(Component.text("You created a new party!",NamedTextColor.GREEN));
 
                             return Command.SINGLE_SUCCESS;
@@ -269,7 +270,7 @@ public final class CommandParty {
                                     try {
                                         if(!partyService.getSettings().friendsOnly()) return builder.buildFuture();
 
-                                        FriendsService friendsService = api.getService(FRIENDS_SERVICE).orElseThrow();
+                                        FriendsService friendsService = api.services().friendsService().orElseThrow();
                                         List<FriendMapping> friends = friendsService.findFriends(player).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
@@ -458,7 +459,7 @@ public final class CommandParty {
                                     try {
                                         party.setLeader(targetPlayer);
                                         targetPlayer.sendMessage(Component.text("You were promoted to party leader.",NamedTextColor.YELLOW));
-                                        targetPlayer.sendMessage(Component.text("You are no longer party leader.",NamedTextColor.YELLOW));
+                                        player.sendMessage(Component.text("You are no longer party leader.",NamedTextColor.YELLOW));
                                     } catch (Exception e) {
                                         return closeMessage(player, Component.text(username + "There was an issue doing that!", NamedTextColor.RED));
                                     }

@@ -6,18 +6,15 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import net.kyori.adventure.text.Component;
 import java.util.Objects;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
@@ -182,9 +179,9 @@ public interface VelocityLang extends Lang {
     );
 
     Message RC_FAMILY = () -> {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
         Component families = text("");
-        for (BaseServerFamily family : api.getService(FAMILY_SERVICE).orElseThrow().dump()) {
+        for (BaseServerFamily family : api.services().familyService().dump()) {
             if(family instanceof ScalarServerFamily)
                 families = families.append(text("[ "+family.getName()+" ] ").color(GOLD));
             if(family instanceof StaticServerFamily)
@@ -262,7 +259,7 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
-        ScalarServerFamily rootFamily = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
+        RootServerFamily rootFamily = VelocityAPI.get().services().familyService().getRootFamily();
         String parentFamilyName = rootFamily.getName();
         try {
             parentFamilyName = Objects.requireNonNull(family.getParent().get()).getName();
@@ -327,7 +324,7 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
-        ScalarServerFamily rootFamily = VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().getRootFamily();
+        RootServerFamily rootFamily = VelocityAPI.get().services().familyService().getRootFamily();
         String parentFamilyName = rootFamily.getName();
         try {
             parentFamilyName = Objects.requireNonNull(family.getParent().get()).getName();

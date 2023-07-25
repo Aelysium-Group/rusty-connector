@@ -2,13 +2,10 @@ package group.aelysium.rustyconnector.plugin.paper.lib.magic_link;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static group.aelysium.rustyconnector.plugin.paper.central.Processor.ValidServices.REDIS_MESSAGER_SERVICE;
 
 public class MagicLinkService extends ClockService {
     private AtomicInteger upcomingPingDelay = new AtomicInteger(5);
@@ -31,13 +28,10 @@ public class MagicLinkService extends ClockService {
     }
 
     private void scheduleNextPing() {
-        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
-        RedisMessagerService service = PaperRustyConnector.getAPI().getService(REDIS_MESSAGER_SERVICE).orElseThrow();
+        RedisMessagerService service = PaperAPI.get().services().redisMessagerService();
 
         this.scheduleDelayed(() -> {
             try {
-                if(this.status == Status.SEARCHING)
-                    logger.log("Searching for proxy...");
                 service.pingProxy(RedisMessageServerPing.ConnectionIntent.CONNECT);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -58,7 +52,7 @@ public class MagicLinkService extends ClockService {
     }
 
     public void disconnect() {
-        RedisMessagerService service = PaperRustyConnector.getAPI().getService(REDIS_MESSAGER_SERVICE).orElseThrow();
+        RedisMessagerService service = PaperAPI.get().services().redisMessagerService();
         service.pingProxy(RedisMessageServerPing.ConnectionIntent.DISCONNECT);
     }
 

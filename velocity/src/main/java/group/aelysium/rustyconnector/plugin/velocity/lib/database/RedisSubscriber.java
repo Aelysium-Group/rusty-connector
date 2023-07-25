@@ -10,7 +10,6 @@ import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers.MagicLinkPingHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.*;
@@ -19,8 +18,6 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRed
 import javax.naming.AuthenticationException;
 
 import static group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType.*;
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.MESSAGE_CACHE_SERVICE;
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.REDIS_SERVICE;
 
 public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.database.redis.RedisSubscriber {
     public RedisSubscriber(RedisClient client) {
@@ -29,9 +26,10 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
 
     @Override
     public void onMessage(String rawMessage) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-        MessageCacheService messageCacheService = api.getService(MESSAGE_CACHE_SERVICE).orElseThrow();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
+        MessageCacheService messageCacheService = api.services().messageCacheService();
+        RedisService redisService = api.services().redisService();
 
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
         // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
@@ -44,9 +42,9 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
 
             if(message.getOrigin() == MessageOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
             try {
-                api.getService(REDIS_SERVICE).orElseThrow().validatePrivateKey(message.getPrivateKey());
+                redisService.validatePrivateKey(message.getPrivateKey());
 
-                if (!(api.getService(REDIS_SERVICE).orElseThrow().validatePrivateKey(message.getPrivateKey())))
+                if (!(redisService.validatePrivateKey(message.getPrivateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
@@ -70,7 +68,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(logger.getGate().check(GateKey.SAVE_TRASH_MESSAGES))
                 cachedMessage.sentenceMessage(MessageStatus.TRASHED, e.getMessage());
             else
-                api.getService(MESSAGE_CACHE_SERVICE).orElseThrow().removeMessage(cachedMessage.getSnowflake());
+                messageCacheService.removeMessage(cachedMessage.getSnowflake());
 
             if(!logger.getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 
@@ -80,7 +78,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
     }
 
     private static void processParameters(GenericRedisMessage message, CacheableMessage cachedMessage) {
-        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+        PluginLogger logger = VelocityAPI.get().logger();
 
         try {
             if(message.getType() == PING)           new MagicLinkPingHandler(message).execute();

@@ -9,7 +9,6 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessa
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPingResponse;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -17,9 +16,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.net.InetSocketAddress;
-
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.REDIS_SERVICE;
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
 
 public class MagicLinkPingHandler implements MessageHandler {
     private final RedisMessageServerPing message;
@@ -31,15 +27,15 @@ public class MagicLinkPingHandler implements MessageHandler {
     @Override
     public void execute() throws Exception {
         InetSocketAddress address = message.getAddress();
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
         ServerInfo serverInfo = new ServerInfo(
                 message.getServerName(),
                 address
         );
 
-        if(api.getLogger().getGate().check(GateKey.PING))
-            api.getLogger().send(VelocityLang.PING.build(serverInfo));
+        if(api.logger().getGate().check(GateKey.PING))
+            api.logger().send(VelocityLang.PING.build(serverInfo));
 
         if(message.getIntent() == RedisMessageServerPing.ConnectionIntent.CONNECT)
             this.reviveOrConnectServer(serverInfo);
@@ -48,9 +44,9 @@ public class MagicLinkPingHandler implements MessageHandler {
     }
 
     private boolean connectServer(ServerInfo serverInfo) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
-        RedisService redisService = api.getService(REDIS_SERVICE).orElseThrow();
+        VelocityAPI api = VelocityAPI.get();
+        ServerService serverService = api.services().serverService();
+        RedisService redisService = api.services().redisService();
 
         try {
             PlayerServer server = new ServerService.ServerBuilder()
@@ -90,15 +86,15 @@ public class MagicLinkPingHandler implements MessageHandler {
     }
 
     private boolean disconnectServer(ServerInfo serverInfo) throws Exception {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        api.getService(SERVER_SERVICE).orElseThrow().unregisterServer(serverInfo, message.getFamilyName(), true);
+        VelocityAPI api = VelocityAPI.get();
+        api.services().serverService().unregisterServer(serverInfo, message.getFamilyName(), true);
 
         return true;
     }
 
     private boolean reviveOrConnectServer(ServerInfo serverInfo) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        ServerService serverService = api.getService(SERVER_SERVICE).orElseThrow();
+        VelocityAPI api = VelocityAPI.get();
+        ServerService serverService = api.services().serverService();
 
         PlayerServer server = serverService.findServer(serverInfo);
         if (server == null) {

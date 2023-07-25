@@ -36,7 +36,7 @@ public class DynamicTeleport_TPARequest {
      * @throws NullPointerException If the player with `clientUsername` is not online.
      */
     public void resolveClient() {
-        PaperAPI api = PaperRustyConnector.getAPI();
+        PaperAPI api = PaperAPI.get();
         Player client = api.getServer().getPlayer(this.clientUsername);
         if(client == null) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");
         if(!client.isOnline()) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");

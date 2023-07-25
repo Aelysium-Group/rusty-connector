@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
 import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.util.LinkedHashMap;
 import java.util.List;

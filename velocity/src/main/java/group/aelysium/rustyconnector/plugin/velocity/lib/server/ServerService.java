@@ -4,15 +4,12 @@ import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
-import group.aelysium.rustyconnector.core.lib.model.Service;
-import group.aelysium.rustyconnector.core.lib.model.ServiceableService;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -20,21 +17,15 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventMan
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Vector;
 
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.FAMILY_SERVICE;
-import static group.aelysium.rustyconnector.plugin.velocity.central.Processor.ValidServices.SERVER_SERVICE;
-
-public class ServerService extends ServiceableService {
+public class ServerService extends Service {
     private final Vector<WeakReference<PlayerServer>> servers =  new Vector<>();
 
     private final int serverTimeout;
     private final int serverInterval;
 
-    protected ServerService(Map<Class<? extends Service>, Service> services, int serverTimeout, int serverInterval) {
-        super(services);
+    protected ServerService(int serverTimeout, int serverInterval) {
         this.serverTimeout = serverTimeout;
         this.serverInterval = serverInterval;
     }
@@ -48,7 +39,7 @@ public class ServerService extends ServiceableService {
     }
 
     public PlayerServer findServer(ServerInfo serverInfo) {
-        for(BaseServerFamily family : VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().dump()) {
+        for(BaseServerFamily family : VelocityAPI.get().services().familyService().dump()) {
             PlayerServer server = family.getServer(serverInfo);
             if(server == null) continue;
 
@@ -62,7 +53,7 @@ public class ServerService extends ServiceableService {
     }
 
     public boolean contains(ServerInfo serverInfo) {
-        for(BaseServerFamily family : VelocityRustyConnector.getAPI().getService(FAMILY_SERVICE).orElseThrow().dump()) {
+        for(BaseServerFamily family : VelocityAPI.get().services().familyService().dump()) {
             if(family.containsServer(serverInfo)) return true;
         }
         return false;
@@ -72,10 +63,10 @@ public class ServerService extends ServiceableService {
      * Registers fake servers into the proxy to help with testing systems.
      */
     public void registerFakeServers() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
-        for (BaseServerFamily family : api.getService(FAMILY_SERVICE).orElseThrow().dump()) {
+        for (BaseServerFamily family : api.services().familyService().dump()) {
             logger.log("---| Starting on: " + family.getName());
             // Register 1000 servers into each family
             for (int i = 0; i < 1000; i++) {
@@ -105,8 +96,8 @@ public class ServerService extends ServiceableService {
      * @return A RegisteredServer node.
      */
     public RegisteredServer registerServer(PlayerServer server, String familyName) throws Exception {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         try {
             if(logger.getGate().check(GateKey.REGISTRATION_ATTEMPT))
@@ -114,7 +105,7 @@ public class ServerService extends ServiceableService {
 
             if(this.contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
 
-            BaseServerFamily family = api.getService(FAMILY_SERVICE).orElseThrow().find(familyName);
+            BaseServerFamily family = api.services().familyService().find(familyName);
             if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
             RegisteredServer registeredServer = api.registerServer(server.getServerInfo());
@@ -144,8 +135,8 @@ public class ServerService extends ServiceableService {
      * @param removeFromFamily Should the server be removed from it's associated family?
      */
     public void unregisterServer(ServerInfo serverInfo, String familyName, Boolean removeFromFamily) throws Exception {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
         try {
             PlayerServer server = this.findServer(serverInfo);
             if(server == null) throw new NullPointerException("Server ["+serverInfo.getName()+"]("+serverInfo.getAddress()+":"+serverInfo.getAddress().getPort()+") doesn't exist! It can't be unregistered!");
@@ -175,8 +166,12 @@ public class ServerService extends ServiceableService {
         }
     }
 
+    @Override
+    public void kill() {
+
+    }
+
     public static class Builder {
-        protected final Map<Class<? extends Service>, Service> services = new HashMap<>();
         protected int timeout = 15;
         protected int interval = 10;
 
@@ -190,13 +185,8 @@ public class ServerService extends ServiceableService {
             return this;
         }
 
-        public ServerService.Builder addService(Service service) {
-            this.services.put(service.getClass(), service);
-            return this;
-        }
-
         public ServerService build() {
-            return new ServerService(this.services, timeout, interval);
+            return new ServerService(timeout, interval);
         }
     }
 
@@ -248,16 +238,9 @@ public class ServerService extends ServiceableService {
         }
 
         public PlayerServer build() {
-            this.initialTimeout = VelocityRustyConnector.getAPI().getService(SERVER_SERVICE).orElseThrow().getServerTimeout();
+            this.initialTimeout = VelocityAPI.get().services().serverService().getServerTimeout();
 
             return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
         }
-    }
-
-    /**
-     * The services that are valid for this service provider.
-     */
-    public static class ValidServices {
-        public static Class<MagicLinkService> MAGIC_LINK_SERVICE = MagicLinkService.class;
     }
 }
