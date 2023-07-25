@@ -1,0 +1,61 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'com.github.johnrengelman:shadow:8.1.1'
+    }
+}
+
+apply plugin: 'java'
+
+group = project.maven_group
+version = project.plugin_version
+
+allprojects {
+    repositories {
+        mavenCentral();
+        maven { url = "https://repo.maven.apache.org/maven2/" }
+        maven { url = "https://repo.papermc.io/repository/maven-public/" }
+        maven { url = "https://hub.spigotmc.org/nexus/content/groups/public/" }
+        maven { url = "https://oss.sonatype.org/content/groups/public/" }
+        maven { url = "https://papermc.io/repo/repository/maven-public/" }
+    }
+}
+
+subprojects {
+    apply plugin: "java"
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    dependencies {
+        compileOnly "io.lettuce:lettuce-core:${project.lettuce_version}"
+        compileOnly "commons-codec:commons-codec:${project.commons_version}"
+        compileOnly "com.jcabi:jcabi-log:${project.jcabi_version}"
+        compileOnly "org.spongepowered:configurate-yaml:${project.configurate_version}"
+        compileOnly "mysql:mysql-connector-java:${project.mysql_version}"
+        compileOnly "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
+    }
+}
+
+configurations {
+    modules
+    compile.extendsFrom(modules)
+}
+
+dependencies{
+    modules project(':core')
+    modules project(':paper')
+    modules project(':velocity')
+}
+
+def projects = [":core", ":paper", ":velocity"]
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn(projects.collect {it + ":shadowJar"} )
+
+    from configurations.modules.collect {
+        it.isDirectory() ? it : zipTree(it)
+    }
+
+    from(files("LICENSE_rusty-connector"))
+}
