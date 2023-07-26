@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class FriendsMySQLService extends MySQLService {
     private static final String FIND_FRIENDS = "SELECT * FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
@@ -29,9 +30,6 @@ public class FriendsMySQLService extends MySQLService {
         super(dataSource);
     }
 
-    /**
-     * Initialize the table for home server mappings.
-     */
     public void init() throws SQLException, IOException {
         VelocityAPI api = VelocityAPI.get();
         InputStream stream = api.getResourceAsStream("friends.sql");
@@ -61,14 +59,51 @@ public class FriendsMySQLService extends MySQLService {
 
             List<FriendMapping> friends = new ArrayList<>();
             while (result.next()) {
-                Player player1 = api.getServer().getPlayer(result.getString("player1_uuid")).orElse(null);
-                Player player2 = api.getServer().getPlayer(result.getString("player2_uuid")).orElse(null);
+                Player player1 = api.getServer().getPlayer(UUID.fromString(result.getString("player1_uuid"))).orElse(null);
+                Player player2 = api.getServer().getPlayer(UUID.fromString(result.getString("player2_uuid"))).orElse(null);
+
+                api.getServer().getAllPlayers()
+
+                System.out.println(player1);
+                System.out.println(player2);
 
                 if (player1 == null) continue;
                 if (player2 == null) continue;
 
                 friends.add(new FriendMapping(player1, player2));
             }
+
+            this.close();
+            return Optional.of(friends);
+        } catch (Exception e) {
+            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<FriendMapping> findFriendMapping(Player player1, Player player2) {
+        VelocityAPI api = VelocityAPI.get();
+
+        try {
+            this.connect();
+            PreparedStatement statement = this.prepare(FIND_FRIENDS);
+            statement.setString(1, player1.getUniqueId().toString());
+            statement.setString(2, player2.getUniqueId().toString());
+
+            ResultSet result = this.executeQuery(statement);
+            if(!result.next()) return Optional.empty();
+
+            Player resultPlayer1 = api.getServer().getPlayer(UUID.fromString(result.getString("player1_uuid"))).orElse(null);
+            Player resultPlayer2 = api.getServer().getPlayer(UUID.fromString(result.getString("player2_uuid"))).orElse(null);
+
+            System.out.println(player1);
+            System.out.println(player2);
+
+            if (resultPlayer1 == null) return Optional.empty();
+            if (resultPlayer2 == null) return Optional.empty();
+
+            FriendMapping friends = new FriendMapping(resultPlayer1, resultPlayer2);
 
             this.close();
             return Optional.of(friends);

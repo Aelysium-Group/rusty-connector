@@ -224,7 +224,10 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                 if(!config.isEnabled()) return Optional.empty();
 
                 FriendsService.FriendsSettings settings = new FriendsService.FriendsSettings(
-                        config.getMaxFriends()
+                        config.getMaxFriends(),
+                        config.isSendNotifications(),
+                        config.isShowFamilies(),
+                        config.isAllowMessaging()
                 );
 
                 FriendsMySQLService mySQLService = new FriendsMySQLService.Builder()

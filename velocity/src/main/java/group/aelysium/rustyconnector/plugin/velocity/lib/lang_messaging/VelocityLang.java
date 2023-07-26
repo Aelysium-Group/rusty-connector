@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging;
 
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.ASCIIAlphabet;
@@ -9,9 +11,11 @@ import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
@@ -22,6 +26,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
+import java.util.List;
 import java.util.Objects;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -124,38 +129,6 @@ public interface VelocityLang extends Lang {
             BORDER
     );
 
-    Message RC_RELOAD_USAGE = () -> join(
-            Lang.newlines(),
-            BORDER,
-            SPACING,
-            WORDMARK_USAGE.build().color(AQUA),
-            SPACING,
-            text("Blue commands will return information or data to you! They will not cause changes to be made.",GRAY),
-            text("Orange commands will make the plugin do something. Make sure you know what these commands do before using them!",GRAY),
-            SPACING,
-            text("Using reload to create or delete families is not currently supported. You must restart your proxy to add or remove families.",RED),
-            SPACING,
-            BORDER,
-            SPACING,
-            text("/rc reload proxy", GOLD),
-            text("Reloads config.yml", DARK_GRAY),
-            text("Does NOT reload families.", RED),
-            text("Does NOT reload redis.", RED),
-            SPACING,
-            text("/rc reload family <family name>", GOLD),
-            text("Reload a specific family's configuration.", DARK_GRAY),
-            text("All servers will have to re-register into this family.", RED),
-            SPACING,
-            text("/rc reload logger", GOLD),
-            text("Reloads logger.yml", DARK_GRAY),
-            SPACING,
-            text("/rc reload whitelists", GOLD),
-            text("Reloads all active whitelists. Will also register if the proxy or a family's whitelist settings change.", DARK_GRAY),
-            text("Players already connected to servers will NOT be kicked out if a whitelist is activated.", RED),
-            SPACING,
-            BORDER
-    );
-
     ParameterizedMessage1<CacheableMessage> RC_MESSAGE_GET_MESSAGE = (message) -> join(
             Lang.newlines(),
             BORDER,
@@ -221,19 +194,6 @@ public interface VelocityLang extends Lang {
             BORDER,
             SPACING,
             WORDMARK_REGISTERED_FAMILIES.build().color(RED),
-            SPACING,
-            BORDER,
-            SPACING,
-            text(error,GRAY),
-            SPACING,
-            BORDER
-    );
-
-    ParameterizedMessage1<String> RC_REGISTER_ERROR = error -> join(
-            Lang.newlines(),
-            BORDER,
-            SPACING,
-            ASCIIAlphabet.generate("REGISTER", RED),
             SPACING,
             BORDER,
             SPACING,
@@ -383,10 +343,7 @@ public interface VelocityLang extends Lang {
 
     Component COMMAND_NO_PERMISSION = text("You do not have permission to use this command.",RED);
 
-    Message TPA_USAGE = () -> join(
-            Lang.newlines(),
-            text("Usage: /tpa <<username>, deny, accept>",RED)
-    );
+    Message TPA_USAGE = () -> text("Usage: /tpa <<username>, deny, accept>",RED);
     Message TPA_IGNORE_USAGE = () -> join(
             Lang.newlines(),
             text("Usage: /tpa ignore <username>",RED),
@@ -398,27 +355,12 @@ public interface VelocityLang extends Lang {
             text("Accept a tpa request from a user.",GRAY)
     );
 
-    ParameterizedMessage1<String> TPA_FAILURE = username -> join(
-            Lang.newlines(),
-            text("Unable to tpa to "+username+"!",RED)
-    );
-    ParameterizedMessage1<String> TPA_FAILURE_TARGET = username -> join(
-            Lang.newlines(),
-            text("Unable to tpa "+username+" to you!",RED)
-    );
+    ParameterizedMessage1<String> TPA_FAILURE = username -> text("Unable to tpa to "+username+"!",RED);
+    ParameterizedMessage1<String> TPA_FAILURE_TARGET = username -> text("Unable to tpa "+username+" to you!",RED);
     Component TPA_FAILURE_SELF_TP = text("You can't teleport to yourself!",RED);
-    ParameterizedMessage1<String> TPA_FAILURE_NO_USERNAME = username -> join(
-            Lang.newlines(),
-            text(username+" isn't online!",RED)
-    );
-    ParameterizedMessage1<String> TPA_FAILURE_NO_REQUEST = username -> join(
-            Lang.newlines(),
-            text(username+" hasn't sent you any recent tpa requests!",RED)
-    );
-    ParameterizedMessage1<String> TPA_REQUEST_DUPLICATE = username -> join(
-            Lang.newlines(),
-            text("You already have a pending tpa request to "+ username +"!",RED)
-    );
+    ParameterizedMessage1<String> TPA_FAILURE_NO_USERNAME = username -> text(username+" isn't online!",RED);
+    ParameterizedMessage1<String> TPA_FAILURE_NO_REQUEST = username -> text(username+" hasn't sent you any recent tpa requests!",RED);
+    ParameterizedMessage1<String> TPA_REQUEST_DUPLICATE = username -> text("You already have a pending tpa request to "+ username +"!",RED);
 
     ParameterizedMessage1<Player> TPA_REQUEST_QUERY = (sender) -> join(
             Lang.newlines(),
@@ -429,10 +371,7 @@ public interface VelocityLang extends Lang {
                     text("[Ignore]", RED).hoverEvent(HoverEvent.showText(text("Ignore "+sender.getUsername()+"'s request"))).clickEvent(ClickEvent.runCommand("/party ignore "+sender.getUsername()))
             )
     );
-    ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> join(
-            Lang.newlines(),
-            text("You requested to teleport to "+ username +"!",GREEN)
-    );
+    ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> text("You requested to teleport to "+ username +"!",GREEN);
     ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_SENDER = username -> join(
             Lang.newlines(),
             text(username +" accepted your request!",GREEN),
@@ -443,19 +382,13 @@ public interface VelocityLang extends Lang {
             text(username +"'s tpa request has been accepted!",GREEN),
             text("Attempting to teleport...",GRAY)
     );
-    ParameterizedMessage1<String> TPA_REQUEST_DENIED_SENDER = username -> join(
-            Lang.newlines(),
-            text(username +" denied your request!",RED)
-    );
+    ParameterizedMessage1<String> TPA_REQUEST_DENIED_SENDER = username -> text(username +" denied your request!",RED);
     ParameterizedMessage1<String> TPA_REQUEST_DENIED_TARGET = username -> join(
             Lang.newlines(),
             text(username +"'s tpa request has been denied!",RED),
             text("They've been notified...",GRAY)
     );
-    ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> join(
-            Lang.newlines(),
-            text("Your tpa request to "+username+" has expired!",RED)
-    );
+    ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> text("Your tpa request to "+username+" has expired!",RED);
 
     ParameterizedMessage2<Party, Player> PARTY_BOARD = (party, member) -> {
         boolean hasParty = party != null;
@@ -480,32 +413,31 @@ public interface VelocityLang extends Lang {
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
-                                        text("[Leader]", BLUE),
+                                        text("[x]", RED).hoverEvent(HoverEvent.showText(text("Leave Party"))).clickEvent(ClickEvent.runCommand("/party leave")),
+                                        text("[^]", GRAY),
                                         text(partyMember.getUsername(), WHITE),
-                                        text("[x]", RED).hoverEvent(HoverEvent.showText(text("Leave Party"))).clickEvent(ClickEvent.runCommand("/party leave"))
+                                        text("[Leader]", BLUE)
                                 )
                         );
                     else
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
-                                        text(partyMember.getUsername(), WHITE),
                                         text("[x]", RED).hoverEvent(HoverEvent.showText(text("Kick Player"))).clickEvent(ClickEvent.runCommand("/party kick " + partyMember.getUsername())),
-                                        text("[^]", GREEN).hoverEvent(HoverEvent.showText(text("Promote to Leader"))).clickEvent(ClickEvent.runCommand("/party promote " + partyMember.getUsername()))
+                                        text("[^]", GREEN).hoverEvent(HoverEvent.showText(text("Promote to Leader"))).clickEvent(ClickEvent.runCommand("/party promote " + partyMember.getUsername())),
+                                        text(partyMember.getUsername(), WHITE)
                                 )
                         );
                 });
             else
                 party.players().forEach(partyMember -> {
-                    if(party.getLeader().equals(partyMember)) return;
-
                     playersList[0] = playersList[0].appendNewline();
                     if(party.getLeader().equals(partyMember))
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
-                                        text("[Leader]", BLUE),
-                                        text(partyMember.getUsername(), WHITE)
+                                        text(partyMember.getUsername(), WHITE),
+                                        text("[Leader]", BLUE)
                                 )
                         );
                     else
@@ -522,41 +454,38 @@ public interface VelocityLang extends Lang {
                 header = text("-------------------", GRAY)
                  .append(text(" Party ", WHITE))
                  .append(text("[+]", GREEN)).hoverEvent(HoverEvent.showText(text("Invite Player"))).clickEvent(ClickEvent.suggestCommand("/party invite <username>"))
-                 .append(text(" --------------------", GRAY));
+                 .append(text(" ------------------", GRAY));
             else
-                header = text("---------------------", GRAY)
+                header = text("------------------", GRAY)
                         .append(text(" Party ", WHITE))
-                        .append(text(" ---------------------", GRAY));
+                        .append(text(" ------------------", GRAY));
 
             if(isLeader)
                 return join(
                         Lang.newlines(),
                         header,
                         playersList[0],
-                        newline(),
-                        text("-----------------", GRAY)
+                        space(),
+                        text("----------------", GRAY)
                                 .appendSpace()
                                 .append(text("Disband", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party disband")))
                                 .appendSpace()
                                 .appendSpace()
                                 .append(text("Leave", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party leave")))
                                 .appendSpace()
-                                .append(text("-----------------", GRAY))
+                                .append(text("----------------", GRAY))
                 );
             else
                 return join(
                         Lang.newlines(),
                         header,
                         playersList[0],
-                        newline(),
-                        text("------------------- ", GRAY).append(text("Leave", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party leave"))).append(text(" -------------------", GRAY))
+                        space(),
+                        text("------------------ ", GRAY).append(text("Leave", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party leave"))).append(text(" ------------------", GRAY))
                         );
         }
 
-        return join(
-                Lang.newlines(),
-                text("Click here to create a party.", YELLOW, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party create"))
-        );
+        return text("Click here to create a party.", YELLOW, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party create"));
     };
 
     ParameterizedMessage1<Player> PARTY_INVITE_RECEIVED = (sender) -> join(
@@ -569,44 +498,111 @@ public interface VelocityLang extends Lang {
             )
     );
 
-    Message PARTY_USAGE_INVITES = () -> join(
-            Lang.newlines(),
-            text("Usage: /party invites <username> <accept / ignore>",RED)
-    );
+    Message PARTY_USAGE_INVITES = () -> text("Usage: /party invites <username> <accept / ignore>",RED);
 
-    Message PARTY_USAGE_INVITE = () -> join(
-            Lang.newlines(),
-            text("Usage: /party invite <username>",RED)
-    );
+    Message PARTY_USAGE_INVITE = () -> text("Usage: /party invite <username>",RED);
 
-    Message PARTY_USAGE_KICK = () -> join(
-            Lang.newlines(),
-            text("Usage: /party kick <username>",RED)
-    );
+    Message PARTY_USAGE_KICK = () -> text("Usage: /party kick <username>",RED);
 
-    Message PARTY_USAGE_PROMOTE = () -> join(
-            Lang.newlines(),
-            text("Usage: /party promote <username>",RED)
-    );
+    Message PARTY_USAGE_PROMOTE = () -> text("Usage: /party promote <username>",RED);
 
-    Message PARTY_DISBANDED = () -> join(
-            Lang.newlines(),
-            text("Your party has been disbanded.",GRAY)
-    );
+    Message PARTY_DISBANDED = () -> text("Your party has been disbanded.",GRAY);
+
+    ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
+        VelocityAPI api = VelocityAPI.get();
+        FriendsService friendsService = api.services().friendsService().orElseThrow();
+        int maxFriends = friendsService.getSettings().maxFriends();
+        player.sendMessage(text("Getting friends...", GRAY));
+
+        boolean isPartyEnabled = false;
+        try {
+            api.services().partyService().orElseThrow();
+            isPartyEnabled = true;
+        } catch (Exception ignore) {}
+        boolean finalIsPartyEnabled = isPartyEnabled;
+
+        boolean isFriendMessagingEnabled = friendsService.getSettings().allowMessaging();
+        boolean canSeeFriendFamilies = friendsService.getSettings().showFamilies();
+
+        List<Player> friends = friendsService.findFriends(player, true).orElse(null);
+
+        if(friends != null && friends.size() != 0) {
+            final Component[] playersList = {text("")};
+
+            friends.forEach(friend -> {
+                playersList[0] = playersList[0].appendNewline();
+
+                playersList[0] = playersList[0].append(text("[x]", RED).hoverEvent(HoverEvent.showText(text("Unfriend "+friend.getUsername()))).clickEvent(ClickEvent.runCommand("/unfriend " + friend.getUsername())));
+                playersList[0] = playersList[0].append(space());
 
 
-    Message FRIEND_USAGE = () -> join(
+                if(isFriendMessagingEnabled)
+                    playersList[0] = playersList[0].append(text("[!]", YELLOW).hoverEvent(HoverEvent.showText(text("Message "+friend.getUsername()))).clickEvent(ClickEvent.suggestCommand("/fm "+friend.getUsername()+" ")));
+                playersList[0] = playersList[0].append(space());
+
+
+                if(finalIsPartyEnabled)
+                    playersList[0] = playersList[0].append(text("[p]", BLUE).hoverEvent(HoverEvent.showText(text("Invite "+friend.getUsername()+" to your party"))).clickEvent(ClickEvent.runCommand("/party invite "+friend.getUsername()+" ")));
+                playersList[0] = playersList[0].append(space());
+
+
+                ServerConnection serverConnection = player.getCurrentServer().orElse(null);
+                if(serverConnection == null) {
+                    playersList[0] = playersList[0].append(text(friend.getUsername(), GRAY).hoverEvent(HoverEvent.showText(text("Offline", GRAY))));
+                    return;
+                }
+
+                PlayerServer playerServer = api.services().serverService().findServer(serverConnection.getServerInfo());
+                if(canSeeFriendFamilies)
+                    playersList[0] = playersList[0].append(text(friend.getUsername(), WHITE)).hoverEvent(HoverEvent.showText(text("Currently Playing: ", GRAY).append(text(playerServer.getFamily().getName(), AQUA))));
+                else
+                    playersList[0] = playersList[0].append(text(friend.getUsername(), WHITE).hoverEvent(HoverEvent.showText(text("Online", WHITE))));
+            });
+
+            return join(
+                    Lang.newlines(),
+                    text("--------------", GRAY)
+                            .append(text(" Friends ("+friends.size()+"/"+maxFriends+") ", WHITE))
+                            .append(text("[+]", GREEN).hoverEvent(HoverEvent.showText(text("Add Friend"))).clickEvent(ClickEvent.suggestCommand("/friends add <username>")))
+                            .append(text(" --------------", GRAY)),
+                    playersList[0],
+                    space(),
+                    text("---------------------------------------------", GRAY)
+            );
+        }
+
+        return join(
+                Lang.newlines(),
+                text("Click here to send a friend request.", YELLOW, TextDecoration.UNDERLINED).clickEvent(ClickEvent.suggestCommand("/friends add <username>"))
+        );
+    };
+
+    ParameterizedMessage1<Player> FRIEND_REQUEST = (sender) -> join(
             Lang.newlines(),
-            text("Usage: /friend <<username> / requests>",RED)
+            text("Hey! "+ sender.getUsername() +" wants to be your friend!", NamedTextColor.GRAY),
+            join(
+                    JoinConfiguration.separator(space()),
+                    text("[Accept]", GREEN).hoverEvent(HoverEvent.showText(text("Accept friend request"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.getUsername()+" accept")),
+                    text("[Ignore]", RED).hoverEvent(HoverEvent.showText(text("Ignore friend request"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.getUsername()+" ignore"))
+            )
     );
-    Message FRIEND_REQUEST_USAGE = () -> join(
-            Lang.newlines(),
-            text("Usage: /friend requests <username> <accept / ignore>",RED)
-    );
-    Message UNFRIEND_USAGE = () -> join(
-            Lang.newlines(),
-            text("Usage: /unfriend <username>",RED)
-    );
+    ParameterizedMessage1<Player> FRIEND_JOIN = (player) -> {
+        FriendsService friendsService = VelocityAPI.get().services().friendsService().orElseThrow();
+
+        if(friendsService.getSettings().allowMessaging())
+            return join(
+                    JoinConfiguration.separator(space()),
+                    text("Your friend", NamedTextColor.GRAY),
+                    text(player.getUsername(), AQUA, TextDecoration.UNDERLINED).hoverEvent(HoverEvent.showText(text("Send a message to "+player.getUsername()))).clickEvent(ClickEvent.suggestCommand("/fm "+player.getUsername()+" ")),
+                    text("just logged in.", NamedTextColor.GRAY)
+            );
+        else
+            return text("Your friend "+ player.getUsername() +" just logged in!", NamedTextColor.GRAY);
+    };
+    ParameterizedMessage1<Player> FRIEND_LEAVE = (player) -> text("Your friend "+ player.getUsername() +" just logged out!", NamedTextColor.GRAY);;
+    Message FRIEND_REQUEST_USAGE = () -> text("Usage: /friend requests <username> <accept / ignore>",RED);
+    Message UNFRIEND_USAGE = () -> text("Usage: /unfriend <username>",RED);
+    Message FM_USAGE = () -> text("Usage: /fm <username> <message>",RED);
 
     ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(
              LoggerConfig.getConfig().getConsoleIcons_ping() + " " +

@@ -5,6 +5,19 @@ import com.velocitypowered.api.proxy.Player;
 import java.util.Objects;
 
 public record FriendMapping(Player player1, Player player2) {
+    public FriendMapping(Player player1, Player player2) {
+        // Ensure that players are always in order of the lowest uuid to the highest uuid.
+        if(player1.getUniqueId().compareTo(player2.getUniqueId()) > 0) {
+            this.player1 = player2;
+            this.player2 = player1;
+
+            return;
+        }
+
+        this.player1 = player1;
+        this.player2 = player2;
+    }
+
     /**
      * Return the friend of one of the players in this mapping.
      * @param player The player to get the friend of.

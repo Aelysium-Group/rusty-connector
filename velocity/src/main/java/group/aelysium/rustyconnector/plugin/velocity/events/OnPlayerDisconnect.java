@@ -5,14 +5,21 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class OnPlayerDisconnect {
     /**
@@ -56,10 +63,22 @@ public class OnPlayerDisconnect {
                 } catch (Exception e) {}
             } catch (Exception ignore) {}
 
-            // Handle friends when player leaves
+            // Handle uncaching friends when player leaves
             try {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
                 friendsService.services().dataEnclave().unCachePlayer(player);
+            } catch (Exception ignore) {}
+
+            // Handle sending out friend messages when player leaves
+            try {
+                FriendsService friendsService = api.services().friendsService().orElseThrow();
+                if(!friendsService.getSettings().allowMessaging()) throw new NoOutputException();
+
+                List<Player> friends = friendsService.findFriends(player, true).orElseThrow();
+
+                if(friends.size() == 0) throw new NoOutputException();
+
+                friends.forEach(friend -> friend.sendMessage(VelocityLang.FRIEND_LEAVE.build(player)));
             } catch (Exception ignore) {}
 
             WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));

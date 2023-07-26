@@ -51,6 +51,9 @@ public class TPARequest {
     }
 
     public void ignore() {
+        this.getSender().sendMessage(VelocityLang.TPA_REQUEST_DENIED_SENDER.build(this.getTarget().getUsername()));
+        this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_DENIED_TARGET.build(this.getSender().getUsername()));
+
         this.updateStatus(TPARequestStatus.DENIED);
     }
 

@@ -191,8 +191,9 @@ public final class CommandParty {
                                 return closeMessage(player, Component.text("You have to be connected to a server in order to create a party!", NamedTextColor.RED));
 
                             PlayerServer server = api.services().serverService().findServer(player.getCurrentServer().orElse(null).getServerInfo());
-                            partyService.create(player, server);
-                            player.sendMessage(Component.text("You created a new party!",NamedTextColor.GREEN));
+                            Party party = partyService.create(player, server);
+
+                            context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
 
                             return Command.SINGLE_SUCCESS;
                         })
@@ -272,7 +273,7 @@ public final class CommandParty {
                                         }
 
                                         FriendsService friendsService = api.services().friendsService().orElseThrow();
-                                        List<Player> friends = friendsService.findFriends(player).orElseThrow();
+                                        List<Player> friends = friendsService.findFriends(player, false).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
                                             return builder.buildFuture();
@@ -319,9 +320,12 @@ public final class CommandParty {
 
                                     String username = context.getArgument("username", String.class);
                                     Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
-                                    if(targetPlayer == null || !targetPlayer.isActive()) return closeMessage(player, Component.text(username + " isn't available to send an invite to!", NamedTextColor.RED));
+                                    if(targetPlayer == null || !targetPlayer.isActive())
+                                        return closeMessage(player, Component.text(username + " isn't available to send an invite to!", NamedTextColor.RED));
                                     if(targetPlayer.equals(player))
                                         return closeMessage(player, Component.text("You can't invite yourself to your own party!", NamedTextColor.RED));
+                                    if(party.contains(targetPlayer))
+                                        return closeMessage(player, Component.text(targetPlayer.getUsername()+" is already in your party!", NamedTextColor.RED));
 
                                     try {
                                         partyService.invitePlayer(party, player, targetPlayer);
@@ -397,6 +401,8 @@ public final class CommandParty {
                                         return closeMessage(player, Component.text(username + " isn't in your party!", NamedTextColor.RED));
 
                                     party.leave(targetPlayer);
+
+                                    context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
                                     targetPlayer.sendMessage(Component.text("You were kicked from your party.",NamedTextColor.YELLOW));
                                     return Command.SINGLE_SUCCESS;
                                 })
@@ -470,6 +476,14 @@ public final class CommandParty {
                                         party.setLeader(targetPlayer);
                                         targetPlayer.sendMessage(Component.text("You were promoted to party leader.",NamedTextColor.YELLOW));
                                         player.sendMessage(Component.text("You are no longer party leader.",NamedTextColor.YELLOW));
+                                        party.players().forEach(partyMember -> {
+                                            if(partyMember.equals(player)) return;
+                                            if(partyMember.equals(targetPlayer)) return;
+
+                                            partyMember.sendMessage(Component.text(targetPlayer.getUsername()+" was promoted to party leader.", NamedTextColor.YELLOW));
+                                        });
+
+                                        context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
                                     } catch (Exception e) {
                                         return closeMessage(player, Component.text(username + "There was an issue doing that!", NamedTextColor.RED));
                                     }

@@ -92,7 +92,7 @@ public class PartyService extends Service {
                     throw new NoOutputException();
                 }
 
-                if(friendsService.findFriends(sender).orElseThrow().contains(target))
+                if(friendsService.findFriends(sender, false).orElseThrow().contains(target))
                     throw new IllegalStateException("You are only allowed to invite friends to join your party!");
             } catch (IllegalStateException e) {
                 throw e;

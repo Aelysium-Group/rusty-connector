@@ -36,7 +36,7 @@ public class Party {
     public synchronized Player getLeader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
         if(this.leader.get() == null) {
-            Player newLeader = players.get(0);
+            Player newLeader = players.lastElement();
             this.setLeader(newLeader);
             this.broadcast(Component.text("The old party leader is no-longer available! "+newLeader.getUsername()+" is the new leader!", NamedTextColor.YELLOW));
         }
@@ -44,7 +44,17 @@ public class Party {
         return this.leader.get();
     }
 
+    /**
+     * Assign a new leader to the party.
+     * If `null` is passed, this will find a random player and make them leader.
+     * @param player The player to make leader. Or `null` to assign a random member.
+     */
     public void setLeader(Player player) {
+        if(player == null) {
+            this.leader.clear();
+            getLeader();
+        }
+
         if(!this.players.contains(player))
             this.players.add(player);
         this.leader = new WeakReference<>(player);
@@ -69,10 +79,11 @@ public class Party {
 
     public synchronized void leave(Player player) {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
-
         this.players.remove(player);
 
         this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
+
+        if(player.equals(getLeader())) setLeader(null);
 
         if(this.isEmpty())
             VelocityAPI.get().services().partyService().orElseThrow().disband(this);

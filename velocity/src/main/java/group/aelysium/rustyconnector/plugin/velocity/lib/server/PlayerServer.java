@@ -64,6 +64,12 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         return this.getServerInfo().getAddress().getHostName() + ":" + this.getServerInfo().getAddress().getPort();
     }
 
+    /**
+     * Get the name of the family this server belongs to.
+     * @return The family name.
+     * @deprecated Use `.getFamily().getName()` instead.
+     */
+    @Deprecated(forRemoval = true, since = "0.6.0")
     public String getFamilyName() {
         return this.familyName;
     }

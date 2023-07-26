@@ -8,10 +8,12 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
@@ -19,32 +21,32 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 
-public final class CommandUnFriend {
+public final class CommandFM {
     public static BrigadierCommand create() {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
 
         FriendsService friendsService = api.services().friendsService().orElse(null);
         if (friendsService == null) {
-            logger.send(Component.text("The Friends service must be enabled to load the /friend command.", NamedTextColor.YELLOW));
+            logger.send(Component.text("The Friends service must be enabled to load the /friends command.", NamedTextColor.YELLOW));
             return null;
         }
 
-        LiteralCommandNode<CommandSource> unfriend = LiteralArgumentBuilder
-                .<CommandSource>literal("unfriend")
+        LiteralCommandNode<CommandSource> fm = LiteralArgumentBuilder
+                .<CommandSource>literal("fm")
                 .requires(source -> source instanceof Player)
                 .executes(context -> {
                     if(!(context.getSource() instanceof Player player)) {
-                        logger.log("/unfriend must be sent as a player!");
+                        logger.log("/fm must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    if(!Permission.validate(player, "rustyconnector.command.unfriend")) {
+                    if(!Permission.validate(player, "rustyconnector.command.fm")) {
                         player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(player, VelocityLang.UNFRIEND_USAGE.build());
+                    return closeMessage(player, VelocityLang.FM_USAGE.build());
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
@@ -67,35 +69,49 @@ public final class CommandUnFriend {
                         })
                         .executes(context -> {
                             if(!(context.getSource() instanceof Player player)) {
-                                logger.log("/unfriend must be sent as a player!");
+                                logger.log("/fm must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            if(!Permission.validate(player, "rustyconnector.command.unfriend")) {
+                            if(!Permission.validate(player, "rustyconnector.command.fm")) {
                                 player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            String username = context.getArgument("username", String.class);
-                            Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
+                            return closeMessage(player, VelocityLang.FM_USAGE.build());
+                        }).then(RequiredArgumentBuilder.<CommandSource, String>argument("message", StringArgumentType.greedyString())
+                            .executes(context -> {
+                                if(!(context.getSource() instanceof Player player)) {
+                                    logger.log("/fm must be sent as a player!");
+                                    return Command.SINGLE_SUCCESS;
+                                }
 
-                            if(targetPlayer == null)
-                                return closeMessage(player, Component.text(username + " doesn't seem to exist!", NamedTextColor.RED));
+                                if(!Permission.validate(player, "rustyconnector.command.fm")) {
+                                    player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                    return Command.SINGLE_SUCCESS;
+                                }
 
-                            try {
-                                if(friendsService.removeFriend(player, targetPlayer))
-                                    return closeMessage(player, Component.text("You are no longer friends with "+username, NamedTextColor.GREEN));
-                            } catch (IllegalStateException e) {
-                                return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
-                            } catch (Exception ignore) {}
+                                String username = context.getArgument("username", String.class);
+                                Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
 
-                            return closeMessage(player, Component.text("There was an issue unfriending "+username, NamedTextColor.RED));
-                        })
+                                if(targetPlayer == null)
+                                    return closeMessage(player, Component.text(username + " doesn't seem to exist!", NamedTextColor.RED));
+                                if(!friendsService.areFriends(player, targetPlayer))
+                                    return closeMessage(player, Component.text("You can only send messages to your friends!", NamedTextColor.RED));
+
+                                String message = context.getArgument("message", String.class);
+
+                                player.sendMessage(Component.text("[you -> "+targetPlayer.getUsername()+"]: "+message, NamedTextColor.GRAY));
+                                targetPlayer.sendMessage(Component.text("["+player.getUsername()+" -> you]: "+message, NamedTextColor.GRAY));
+
+                                return Command.SINGLE_SUCCESS;
+                            })
+                        )
                 )
                 .build();
 
         // BrigadierCommand implements Command
-        return new BrigadierCommand(unfriend);
+        return new BrigadierCommand(fm);
     }
 
     public static int closeMessage(Player player, Component message) {

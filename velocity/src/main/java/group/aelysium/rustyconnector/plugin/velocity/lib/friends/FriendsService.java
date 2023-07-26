@@ -3,10 +3,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriend;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -24,11 +25,11 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
 
     public void initCommand() {
         CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
-        if(!commandManager.hasCommand("friend"))
+        if(!commandManager.hasCommand("friends"))
             try {
                 commandManager.register(
-                        commandManager.metaBuilder("friend").aliases("/friend").build(),
-                        CommandFriend.create()
+                        commandManager.metaBuilder("friends").aliases("/friends").build(),
+                        CommandFriends.create()
                 );
             } catch (Exception e) {
                 e.printStackTrace();
@@ -38,6 +39,15 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
                 commandManager.register(
                         commandManager.metaBuilder("unfriend").aliases("/unfriend").build(),
                         CommandUnFriend.create()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        if(!commandManager.hasCommand("fm"))
+            try {
+                commandManager.register(
+                        commandManager.metaBuilder("fm").aliases("/fm").build(),
+                        CommandFM.create()
                 );
             } catch (Exception e) {
                 e.printStackTrace();
@@ -55,9 +65,9 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         return this.friendRequests.stream().filter(invite -> invite.getTarget().equals(target) && invite.getSender().equals(sender)).findFirst();
     }
 
-    public Optional<List<Player>> findFriends(Player player) {
+    public Optional<List<Player>> findFriends(Player player, boolean forcePull) {
         List<Player> friends = new ArrayList<>();
-        List<FriendMapping> friendMappings = this.services.dataEnclave().findFriends(player).orElse(null);
+        List<FriendMapping> friendMappings = this.services.dataEnclave().findFriends(player, forcePull).orElse(null);
         if(friendMappings == null) return Optional.empty();
 
         friendMappings.forEach(mapping -> {
@@ -69,6 +79,10 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         return Optional.of(friends);
     }
 
+    public boolean areFriends(Player player1, Player player2) {
+        return this.services.dataEnclave().areFriends(player1, player2);
+    }
+
     public FriendMapping sendRequest(Player sender, Player target) {
         if(this.getFriendCount(sender).orElseThrow() > this.getSettings().maxFriends())
             sender.sendMessage(Component.text("You have reached the max number of friends!", NamedTextColor.RED));
@@ -78,9 +92,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
 
         sender.sendMessage(Component.text("Friend request sent to " + target.getUsername(), NamedTextColor.GREEN));
 
-        target.sendMessage(Component.text("Hey! "+ sender.getUsername() +" wants to be your friend!", NamedTextColor.GRAY));
-        target.sendMessage(Component.text("Accept their friend request: ", NamedTextColor.GRAY).append(Component.text("/friend requests "+sender.getUsername()+" accept", NamedTextColor.GREEN)));
-        target.sendMessage(Component.text("Deny their friend request: ", NamedTextColor.GRAY).append(Component.text("/friend requests "+sender.getUsername()+" deny", NamedTextColor.RED)));
+        target.sendMessage(VelocityLang.FRIEND_REQUEST.build(sender));
         return new FriendMapping(sender, target);
     }
 
@@ -109,18 +121,10 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         super.kill();
     }
 
-    /**
-     * The services that are valid for this service provider.
-     */
-    public enum ValidServices {
-        /**
-         * Represents {@link FriendsDataEnclaveService}
-         * This service is required and must always be set.
-         */
-        DATA_ENCLAVE,
-    }
-
     public record FriendsSettings(
-            int maxFriends
+            int maxFriends,
+            boolean sendNotifications,
+            boolean showFamilies,
+            boolean allowMessaging
     ) {}
 }

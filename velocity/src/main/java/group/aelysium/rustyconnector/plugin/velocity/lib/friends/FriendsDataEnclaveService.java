@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.Cache;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
@@ -23,22 +24,44 @@ public class FriendsDataEnclaveService extends Service {
         this.mySQLService = mySQLService;
     }
 
-    private Optional<List<FriendMapping>> getPlayersCacheEntry(Player player) {
+    /**
+     * Get the mappings associated with a player.
+     * If there are no cache entries for a player, create one and return it.
+     * @param player The player.
+     * @return A cache entry list.
+     */
+    private List<FriendMapping> getPlayersCacheEntry(Player player) {
         try {
             Long snowflake = this.players.get(player);
-            if(snowflake == null) return Optional.empty();
+            if(snowflake == null) throw new NoOutputException();
 
             List<FriendMapping> mappings = this.cache.get(snowflake);
+            if(mappings == null) throw new NoOutputException();
 
-            return Optional.of(mappings);
-        } catch (Exception ignore) {
-            Long snowflake = this.cache.put(new ArrayList<>());
-            List<FriendMapping> mappings = this.cache.get(snowflake);
+            return mappings;
+        } catch (Exception ignore) {}
+        List<FriendMapping> mappings = new ArrayList<>();
+        Long snowflake = this.cache.put(mappings);
 
-            this.players.put(player, snowflake);
+        this.players.put(player, snowflake);
 
-            return Optional.of(mappings);
-        }
+        return mappings;
+    }
+
+    private void putMapping(FriendMapping mapping) {
+        getPlayersCacheEntry(mapping.player1()).remove(mapping);
+        getPlayersCacheEntry(mapping.player2()).remove(mapping);
+    }
+
+    private void removeMapping(FriendMapping mapping) {
+        List<FriendMapping> player1Mappings = getPlayersCacheEntry(mapping.player1());
+        List<FriendMapping> player2Mappings = getPlayersCacheEntry(mapping.player2());
+
+        player1Mappings.remove(mapping);
+        player2Mappings.remove(mapping);
+
+        if(player1Mappings.size() == 0) unCachePlayer(mapping.player1());
+        if(player2Mappings.size() == 0) unCachePlayer(mapping.player2());
     }
 
     public boolean unCachePlayer(Player player) {
@@ -54,23 +77,44 @@ public class FriendsDataEnclaveService extends Service {
     /**
      * Find all friends of a player.
      * @param player The player to find friends of.
+     * @param forcePull Should we pull directly from MySQL?
      * @return A list of friends.
      * @throws SQLException If there was an issue.
      */
-    public Optional<List<FriendMapping>> findFriends(Player player) {
-        try {
-            return Optional.of(this.getPlayersCacheEntry(player).orElseThrow());
-        } catch (Exception ignore) {}
+    public Optional<List<FriendMapping>> findFriends(Player player, boolean forcePull) {
+        if(!forcePull)
+            try {
+                return Optional.of(this.getPlayersCacheEntry(player));
+            } catch (Exception ignore) {}
 
         try {
             List<FriendMapping> mappings = this.mySQLService.findFriends(player).orElseThrow();
-            Long snowflake = this.cache.put(mappings);
-            this.players.put(player, snowflake);
+            mappings.forEach(this::putMapping);
 
             return Optional.of(mappings);
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return Optional.empty();
+    }
+
+    /**
+     * Check if two players are friends.
+     * If the players are found as friends in the cache, returns `true`.
+     * If not, search MySQL and return whether or not they are friends.
+     * @param player1 The first player.
+     * @param player2 The second player.
+     * @return `true` If the two players are friends in the cache, or on MySQL.
+     */
+    public boolean areFriends(Player player1, Player player2) throws RuntimeException {
+        if (
+                this.getPlayersCacheEntry(player1).stream().anyMatch(friendMapping -> friendMapping.getFriendOf(player1).equals(player2)) ||
+                        this.getPlayersCacheEntry(player2).stream().anyMatch(friendMapping -> friendMapping.getFriendOf(player2).equals(player1))
+        )
+            return true;
+
+        return this.mySQLService.findFriendMapping(player1, player2).orElse(null) != null;
     }
 
     /**
@@ -81,7 +125,7 @@ public class FriendsDataEnclaveService extends Service {
      */
     public Optional<Integer> getFriendCount(Player player) {
         try {
-            return Optional.of(this.getPlayersCacheEntry(player).orElseThrow().size());
+            return Optional.of(this.getPlayersCacheEntry(player).size());
         } catch (Exception ignore) {}
 
         try {
@@ -102,16 +146,15 @@ public class FriendsDataEnclaveService extends Service {
             FriendMapping mapping = new FriendMapping(player1, player2);
             try {
                  this.mySQLService.addFriend(player1, player2);
-                 // TODO actually handle duplicates properly instead of pretending they don't exist
             } catch (SQLIntegrityConstraintViolationException ignore) {}
 
             try {
-                this.getPlayersCacheEntry(player1).orElseThrow().add(mapping);
+                this.getPlayersCacheEntry(player1).add(mapping);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
-                this.getPlayersCacheEntry(player2).orElseThrow().add(mapping);
+                this.getPlayersCacheEntry(player2).add(mapping);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -131,16 +174,8 @@ public class FriendsDataEnclaveService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        try {
-            this.getPlayersCacheEntry(player1).orElseThrow().remove(mapping);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            this.getPlayersCacheEntry(player2).orElseThrow().remove(mapping);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        removeMapping(mapping);
     }
 
     @Override
