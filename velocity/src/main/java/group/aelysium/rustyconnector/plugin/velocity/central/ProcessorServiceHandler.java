@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 
@@ -54,6 +55,9 @@ public class ProcessorServiceHandler extends group.aelysium.rustyconnector.core.
     }
     public Optional<FriendsService> friendsService() {
         return this.find(FriendsService.class);
+    }
+    public Optional<PlayerService> playerService() {
+        return this.find(PlayerService.class);
     }
     public Optional<DynamicTeleportService> dynamicTeleportService() {
         return this.find(DynamicTeleportService.class);

@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.Comman
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -65,8 +66,8 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         return this.friendRequests.stream().filter(invite -> invite.getTarget().equals(target) && invite.getSender().equals(sender)).findFirst();
     }
 
-    public Optional<List<Player>> findFriends(Player player, boolean forcePull) {
-        List<Player> friends = new ArrayList<>();
+    public Optional<List<FakePlayer>> findFriends(Player player, boolean forcePull) {
+        List<FakePlayer> friends = new ArrayList<>();
         List<FriendMapping> friendMappings = this.services.dataEnclave().findFriends(player, forcePull).orElse(null);
         if(friendMappings == null) return Optional.empty();
 
@@ -80,7 +81,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
     }
 
     public boolean areFriends(Player player1, Player player2) {
-        return this.services.dataEnclave().areFriends(player1, player2);
+        return this.services.dataEnclave().areFriends(FakePlayer.from(player1), FakePlayer.from(player2));
     }
 
     public FriendMapping sendRequest(Player sender, Player target) {

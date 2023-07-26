@@ -16,6 +16,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -53,11 +54,11 @@ public final class CommandFM {
                             if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                             try {
-                                List<Player> friends = friendsService.findFriends(player, false).orElseThrow();
+                                List<FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
-                                        builder.suggest(friend.getUsername());
+                                        builder.suggest(friend.username());
                                     } catch (Exception ignore) {}
                                 });
 

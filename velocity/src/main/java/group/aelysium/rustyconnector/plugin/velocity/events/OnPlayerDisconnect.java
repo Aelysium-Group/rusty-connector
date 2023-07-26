@@ -11,15 +11,15 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class OnPlayerDisconnect {
     /**
@@ -41,7 +41,7 @@ public class OnPlayerDisconnect {
                     server.playerLeft();
                     api.services().familyService().uncacheHomeServerMappings(player);
 
-                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
+                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.getFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, server));
                 }
             } catch (Exception e) {
@@ -66,7 +66,7 @@ public class OnPlayerDisconnect {
             // Handle uncaching friends when player leaves
             try {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
-                friendsService.services().dataEnclave().unCachePlayer(player);
+                friendsService.services().dataEnclave().uncachePlayer(FakePlayer.from(player));
             } catch (Exception ignore) {}
 
             // Handle sending out friend messages when player leaves
@@ -74,11 +74,22 @@ public class OnPlayerDisconnect {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
                 if(!friendsService.getSettings().allowMessaging()) throw new NoOutputException();
 
-                List<Player> friends = friendsService.findFriends(player, true).orElseThrow();
+                List<FakePlayer> friends = friendsService.findFriends(player, true).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 
-                friends.forEach(friend -> friend.sendMessage(VelocityLang.FRIEND_LEAVE.build(player)));
+                friends.forEach(friend -> {
+                    Optional<Player> resolvedPlayer = friend.resolve();
+                    if(!resolvedPlayer.isPresent()) return;
+
+                    resolvedPlayer.get().sendMessage(VelocityLang.FRIEND_LEAVE.build(player));
+                });
+            } catch (Exception ignore) {}
+
+            // Handle caching player when they leave
+            try {
+                PlayerService playerService = api.services().playerService().orElseThrow();
+                playerService.cachePlayer(player);
             } catch (Exception ignore) {}
 
             WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));

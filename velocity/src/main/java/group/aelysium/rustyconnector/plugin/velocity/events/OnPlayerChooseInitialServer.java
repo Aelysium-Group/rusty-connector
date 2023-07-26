@@ -11,6 +11,8 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -21,6 +23,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class OnPlayerChooseInitialServer {
     /**
@@ -58,14 +61,20 @@ public class OnPlayerChooseInitialServer {
             }
 
             try {
+                PlayerService playerService = api.services().playerService().orElseThrow();
+                playerService.savePlayer(player);
+            } catch (Exception ignore) {}
+
+            try {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
-                List<Player> friends = friendsService.findFriends(player, true).orElseThrow();
+                List<FakePlayer> friends = friendsService.findFriends(player, true).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 
                 List<Player> onlineFriends = new ArrayList<>();
                 friends.forEach(friend -> {
-                    if(friend.isActive()) onlineFriends.add(player);
+                    Optional<Player> resolvedPlayer = friend.resolve();
+                    if(resolvedPlayer.isPresent()) onlineFriends.add(player);
                 });
 
                 if(friends.size() != 0 && onlineFriends.size() == 0) {
@@ -77,7 +86,7 @@ public class OnPlayerChooseInitialServer {
                 final Component[] friendsList = {Component.text("", NamedTextColor.YELLOW)};
                 onlineFriends.forEach(friend -> friendsList[0] = friendsList[0].append(Component.text(friend.getUsername() + " ")));
 
-                friends.forEach(friend -> friend.sendMessage(VelocityLang.FRIEND_JOIN.build(player)));
+                onlineFriends.forEach(friend -> friend.sendMessage(VelocityLang.FRIEND_JOIN.build(player)));
             } catch (Exception ignore) {}
         });
     }

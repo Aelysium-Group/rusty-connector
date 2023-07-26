@@ -18,6 +18,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.Velocity
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -273,7 +274,7 @@ public final class CommandParty {
                                         }
 
                                         FriendsService friendsService = api.services().friendsService().orElseThrow();
-                                        List<Player> friends = friendsService.findFriends(player, false).orElseThrow();
+                                        List<FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
                                             return builder.buildFuture();
@@ -281,7 +282,7 @@ public final class CommandParty {
 
                                         friends.forEach(friend -> {
                                             try {
-                                                builder.suggest(friend.getUsername());
+                                                builder.suggest(friend.username());
                                             } catch (Exception ignore) {}
                                         });
 

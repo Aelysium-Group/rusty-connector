@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.Cache;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -16,7 +17,7 @@ import java.util.*;
  * If not, it will query the database.
  */
 public class FriendsDataEnclaveService extends Service {
-    private final Map<Player, Long> players = new HashMap<>();
+    private final Map<FakePlayer, Long> players = new HashMap<>();
     private final Cache<List<FriendMapping>> cache = new Cache<>(100); // Max number of players that can be stored at once
     private final FriendsMySQLService mySQLService;
 
@@ -30,7 +31,7 @@ public class FriendsDataEnclaveService extends Service {
      * @param player The player.
      * @return A cache entry list.
      */
-    private List<FriendMapping> getPlayersCacheEntry(Player player) {
+    private List<FriendMapping> getPlayersCacheEntry(FakePlayer player) {
         try {
             Long snowflake = this.players.get(player);
             if(snowflake == null) throw new NoOutputException();
@@ -60,14 +61,14 @@ public class FriendsDataEnclaveService extends Service {
         player1Mappings.remove(mapping);
         player2Mappings.remove(mapping);
 
-        if(player1Mappings.size() == 0) unCachePlayer(mapping.player1());
-        if(player2Mappings.size() == 0) unCachePlayer(mapping.player2());
+        if(player1Mappings.size() == 0) uncachePlayer(mapping.player1());
+        if(player2Mappings.size() == 0) uncachePlayer(mapping.player2());
     }
 
-    public boolean unCachePlayer(Player player) {
+    public boolean uncachePlayer(FakePlayer player) {
         try {
             Long snowflake = this.players.get(player);
-            this.players.remove(snowflake);
+            this.players.remove(player);
             this.cache.get(snowflake).clear();
             this.cache.remove(snowflake);
         } catch (Exception ignore) {}
@@ -84,7 +85,7 @@ public class FriendsDataEnclaveService extends Service {
     public Optional<List<FriendMapping>> findFriends(Player player, boolean forcePull) {
         if(!forcePull)
             try {
-                return Optional.of(this.getPlayersCacheEntry(player));
+                return Optional.of(this.getPlayersCacheEntry(FakePlayer.from(player)));
             } catch (Exception ignore) {}
 
         try {
@@ -107,10 +108,10 @@ public class FriendsDataEnclaveService extends Service {
      * @param player2 The second player.
      * @return `true` If the two players are friends in the cache, or on MySQL.
      */
-    public boolean areFriends(Player player1, Player player2) throws RuntimeException {
+    public boolean areFriends(FakePlayer player1, FakePlayer player2) throws RuntimeException {
         if (
                 this.getPlayersCacheEntry(player1).stream().anyMatch(friendMapping -> friendMapping.getFriendOf(player1).equals(player2)) ||
-                        this.getPlayersCacheEntry(player2).stream().anyMatch(friendMapping -> friendMapping.getFriendOf(player2).equals(player1))
+                this.getPlayersCacheEntry(player2).stream().anyMatch(friendMapping -> friendMapping.getFriendOf(player2).equals(player1))
         )
             return true;
 
@@ -125,13 +126,13 @@ public class FriendsDataEnclaveService extends Service {
      */
     public Optional<Integer> getFriendCount(Player player) {
         try {
-            return Optional.of(this.getPlayersCacheEntry(player).size());
+            return Optional.of(this.getPlayersCacheEntry(FakePlayer.from(player)).size());
         } catch (Exception ignore) {}
 
         try {
             List<FriendMapping> mappings = this.mySQLService.findFriends(player).orElseThrow();
             Long snowflake = this.cache.put(mappings);
-            this.players.put(player, snowflake);
+            this.players.put(FakePlayer.from(player), snowflake);
 
             return Optional.of(mappings.size());
         } catch (Exception e) {
@@ -148,16 +149,7 @@ public class FriendsDataEnclaveService extends Service {
                  this.mySQLService.addFriend(player1, player2);
             } catch (SQLIntegrityConstraintViolationException ignore) {}
 
-            try {
-                this.getPlayersCacheEntry(player1).add(mapping);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                this.getPlayersCacheEntry(player2).add(mapping);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            putMapping(mapping);
 
             return Optional.of(mapping);
         } catch (Exception e) {

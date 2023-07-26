@@ -6,6 +6,8 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -48,6 +50,7 @@ public class FriendsMySQLService extends MySQLService {
      */
     public Optional<List<FriendMapping>> findFriends(Player player) {
         VelocityAPI api = VelocityAPI.get();
+        PlayerService playerService = api.services().playerService().orElseThrow();
 
         try {
             this.connect();
@@ -59,13 +62,8 @@ public class FriendsMySQLService extends MySQLService {
 
             List<FriendMapping> friends = new ArrayList<>();
             while (result.next()) {
-                Player player1 = api.getServer().getPlayer(UUID.fromString(result.getString("player1_uuid"))).orElse(null);
-                Player player2 = api.getServer().getPlayer(UUID.fromString(result.getString("player2_uuid"))).orElse(null);
-
-                api.getServer().getAllPlayers()
-
-                System.out.println(player1);
-                System.out.println(player2);
+                FakePlayer player1 = playerService.findPlayer(UUID.fromString(result.getString("player1_uuid")));
+                FakePlayer player2 = playerService.findPlayer(UUID.fromString(result.getString("player2_uuid")));
 
                 if (player1 == null) continue;
                 if (player2 == null) continue;
@@ -82,23 +80,21 @@ public class FriendsMySQLService extends MySQLService {
         return Optional.empty();
     }
 
-    public Optional<FriendMapping> findFriendMapping(Player player1, Player player2) {
+    public Optional<FriendMapping> findFriendMapping(FakePlayer player1, FakePlayer player2) {
         VelocityAPI api = VelocityAPI.get();
+        PlayerService playerService = api.services().playerService().orElseThrow();
 
         try {
             this.connect();
             PreparedStatement statement = this.prepare(FIND_FRIENDS);
-            statement.setString(1, player1.getUniqueId().toString());
-            statement.setString(2, player2.getUniqueId().toString());
+            statement.setString(1, player1.uuid().toString());
+            statement.setString(2, player2.uuid().toString());
 
             ResultSet result = this.executeQuery(statement);
             if(!result.next()) return Optional.empty();
 
-            Player resultPlayer1 = api.getServer().getPlayer(UUID.fromString(result.getString("player1_uuid"))).orElse(null);
-            Player resultPlayer2 = api.getServer().getPlayer(UUID.fromString(result.getString("player2_uuid"))).orElse(null);
-
-            System.out.println(player1);
-            System.out.println(player2);
+            FakePlayer resultPlayer1 = playerService.findPlayer(UUID.fromString(result.getString("player1_uuid")));
+            FakePlayer resultPlayer2 = playerService.findPlayer(UUID.fromString(result.getString("player2_uuid")));
 
             if (resultPlayer1 == null) return Optional.empty();
             if (resultPlayer2 == null) return Optional.empty();

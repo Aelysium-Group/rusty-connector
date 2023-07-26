@@ -17,6 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFami
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import net.kyori.adventure.text.Component;
@@ -524,7 +525,7 @@ public interface VelocityLang extends Lang {
         boolean isFriendMessagingEnabled = friendsService.getSettings().allowMessaging();
         boolean canSeeFriendFamilies = friendsService.getSettings().showFamilies();
 
-        List<Player> friends = friendsService.findFriends(player, true).orElse(null);
+        List<FakePlayer> friends = friendsService.findFriends(player, true).orElse(null);
 
         if(friends != null && friends.size() != 0) {
             final Component[] playersList = {text("")};
@@ -532,31 +533,31 @@ public interface VelocityLang extends Lang {
             friends.forEach(friend -> {
                 playersList[0] = playersList[0].appendNewline();
 
-                playersList[0] = playersList[0].append(text("[x]", RED).hoverEvent(HoverEvent.showText(text("Unfriend "+friend.getUsername()))).clickEvent(ClickEvent.runCommand("/unfriend " + friend.getUsername())));
+                playersList[0] = playersList[0].append(text("[x]", RED).hoverEvent(HoverEvent.showText(text("Unfriend "+friend.username()))).clickEvent(ClickEvent.runCommand("/unfriend " + friend.username())));
                 playersList[0] = playersList[0].append(space());
 
 
                 if(isFriendMessagingEnabled)
-                    playersList[0] = playersList[0].append(text("[!]", YELLOW).hoverEvent(HoverEvent.showText(text("Message "+friend.getUsername()))).clickEvent(ClickEvent.suggestCommand("/fm "+friend.getUsername()+" ")));
+                    playersList[0] = playersList[0].append(text("[!]", YELLOW).hoverEvent(HoverEvent.showText(text("Message "+friend.username()))).clickEvent(ClickEvent.suggestCommand("/fm "+friend.username()+" ")));
                 playersList[0] = playersList[0].append(space());
 
 
                 if(finalIsPartyEnabled)
-                    playersList[0] = playersList[0].append(text("[p]", BLUE).hoverEvent(HoverEvent.showText(text("Invite "+friend.getUsername()+" to your party"))).clickEvent(ClickEvent.runCommand("/party invite "+friend.getUsername()+" ")));
+                    playersList[0] = playersList[0].append(text("[p]", BLUE).hoverEvent(HoverEvent.showText(text("Invite "+friend.username()+" to your party"))).clickEvent(ClickEvent.runCommand("/party invite "+friend.username()+" ")));
                 playersList[0] = playersList[0].append(space());
 
 
                 ServerConnection serverConnection = player.getCurrentServer().orElse(null);
                 if(serverConnection == null) {
-                    playersList[0] = playersList[0].append(text(friend.getUsername(), GRAY).hoverEvent(HoverEvent.showText(text("Offline", GRAY))));
+                    playersList[0] = playersList[0].append(text(friend.username(), GRAY).hoverEvent(HoverEvent.showText(text("Offline", GRAY))));
                     return;
                 }
 
                 PlayerServer playerServer = api.services().serverService().findServer(serverConnection.getServerInfo());
                 if(canSeeFriendFamilies)
-                    playersList[0] = playersList[0].append(text(friend.getUsername(), WHITE)).hoverEvent(HoverEvent.showText(text("Currently Playing: ", GRAY).append(text(playerServer.getFamily().getName(), AQUA))));
+                    playersList[0] = playersList[0].append(text(friend.username(), WHITE)).hoverEvent(HoverEvent.showText(text("Currently Playing: ", GRAY).append(text(playerServer.getFamily().getName(), AQUA))));
                 else
-                    playersList[0] = playersList[0].append(text(friend.getUsername(), WHITE).hoverEvent(HoverEvent.showText(text("Online", WHITE))));
+                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(text("Online", WHITE))));
             });
 
             return join(

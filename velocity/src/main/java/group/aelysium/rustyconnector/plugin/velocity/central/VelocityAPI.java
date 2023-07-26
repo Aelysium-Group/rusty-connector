@@ -15,6 +15,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
@@ -99,6 +100,11 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
             this.processor.services().add(friendsService);
 
             friendsService.initCommand();
+        } catch (Exception ignore) {}
+        try {
+            PlayerService playerService = Processor.Initializer.buildPlayerService().orElseThrow();
+
+            this.processor.services().add(playerService);
         } catch (Exception ignore) {}
         try {
             PartyService partyService = Processor.Initializer.buildPartyService().orElseThrow();
