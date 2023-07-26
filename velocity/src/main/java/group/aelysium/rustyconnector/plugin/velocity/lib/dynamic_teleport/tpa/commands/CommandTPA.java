@@ -81,7 +81,7 @@ public final class CommandTPA {
                     context.getSource().sendMessage(VelocityLang.TPA_USAGE.build());
                     return Command.SINGLE_SUCCESS;
                 })
-                .then(LiteralArgumentBuilder.<CommandSource>literal("deny")
+                .then(LiteralArgumentBuilder.<CommandSource>literal("ignore")
                         .executes(context -> {
                             if(!(context.getSource() instanceof Player)) {
                                 logger.log("/tpa must be sent as a player!");
@@ -94,7 +94,7 @@ public final class CommandTPA {
                             }
 
 
-                            context.getSource().sendMessage(VelocityLang.TPA_DENY_USAGE.build());
+                            context.getSource().sendMessage(VelocityLang.TPA_IGNORE_USAGE.build());
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
@@ -159,7 +159,7 @@ public final class CommandTPA {
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            request.deny();
+                                            request.ignore();
                                             tpaHandler.remove(request);
                                             return Command.SINGLE_SUCCESS;
                                         } catch (NullPointerException e) {

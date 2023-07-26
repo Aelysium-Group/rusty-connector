@@ -46,14 +46,11 @@ public class TPARequest {
 
     public void submit() {
         this.getSender().sendMessage(VelocityLang.TPA_REQUEST_SUBMISSION.build(this.getTarget().getUsername()));
-        this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_QUERY.build(this.getSender().getUsername()));
+        this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_QUERY.build(this.getSender()));
         this.updateStatus(TPARequestStatus.REQUESTED);
     }
 
-    public void deny() {
-        this.getSender().sendMessage(VelocityLang.TPA_REQUEST_DENIED_SENDER.build(this.getTarget().getUsername()));
-        this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_DENIED_TARGET.build(this.getSender().getUsername()));
-
+    public void ignore() {
         this.updateStatus(TPARequestStatus.DENIED);
     }
 

@@ -47,18 +47,9 @@ public final class CommandParty {
                     }
 
                     Party party = partyService.find(player).orElse(null);
-                    if(party == null) {
-                        context.getSource().sendMessage(VelocityLang.PARTY_USAGE_NO_PARTY.build());
-                        return Command.SINGLE_SUCCESS;
-                    }
 
-                    if(party.getLeader() == player) {
-                        context.getSource().sendMessage(VelocityLang.PARTY_USAGE_PARTY_LEADER.build());
-                        return Command.SINGLE_SUCCESS;
-                    } else {
-                        context.getSource().sendMessage(VelocityLang.PARTY_USAGE_PARTY_MEMBER.build());
-                        return Command.SINGLE_SUCCESS;
-                    }
+                    context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
+                    return Command.SINGLE_SUCCESS;
                 })
                 .then(LiteralArgumentBuilder.<CommandSource>literal("invites")
                         .executes(context -> {
@@ -268,18 +259,28 @@ public final class CommandParty {
                                     if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                                     try {
-                                        if(!partyService.getSettings().friendsOnly()) return builder.buildFuture();
+                                        if(!partyService.getSettings().friendsOnly()) {
+                                            PlayerServer server = api.services().serverService().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
+
+                                            server.getRegisteredServer().getPlayersConnected().forEach(nearbyPlayer -> {
+                                                if(nearbyPlayer.equals(player)) return;
+
+                                                builder.suggest(nearbyPlayer.getUsername());
+                                            });
+
+                                            return builder.buildFuture();
+                                        }
 
                                         FriendsService friendsService = api.services().friendsService().orElseThrow();
-                                        List<FriendMapping> friends = friendsService.findFriends(player).orElseThrow();
+                                        List<Player> friends = friendsService.findFriends(player).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
                                             return builder.buildFuture();
                                         }
 
-                                        friends.forEach(friendMapping -> {
+                                        friends.forEach(friend -> {
                                             try {
-                                                builder.suggest(friendMapping.getFriendOf(player).getUsername());
+                                                builder.suggest(friend.getUsername());
                                             } catch (Exception ignore) {}
                                         });
 
@@ -301,7 +302,16 @@ public final class CommandParty {
                                     }
 
                                     Party party = partyService.find(player).orElse(null);
-                                    if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
+                                    if(party == null) {
+                                        if(player.getCurrentServer().orElse(null) == null)
+                                            return closeMessage(player, Component.text("You have to be connected to a server in order to create a party!", NamedTextColor.RED));
+
+                                        PlayerServer server = api.services().serverService().findServer(player.getCurrentServer().orElse(null).getServerInfo());
+                                        Party newParty = partyService.create(player, server);
+                                        player.sendMessage(Component.text("You created a new party!",NamedTextColor.GREEN));
+
+                                        party = newParty;
+                                    }
 
                                     if(partyService.getSettings().onlyLeaderCanInvite())
                                         if(!party.getLeader().equals(player))

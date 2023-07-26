@@ -51,11 +51,11 @@ public final class CommandUnFriend {
                             if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                             try {
-                                List<FriendMapping> friends = friendsService.findFriends(player).orElseThrow();
+                                List<Player> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
-                                        builder.suggest(friend.getFriendOf(player).getUsername());
+                                        builder.suggest(friend.getUsername());
                                     } catch (Exception ignore) {}
                                 });
 

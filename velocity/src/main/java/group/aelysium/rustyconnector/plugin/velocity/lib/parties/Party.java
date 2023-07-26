@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
+import java.rmi.ConnectException;
 import java.util.Objects;
 import java.util.Vector;
 
@@ -20,17 +21,19 @@ public class Party {
         this.players = new Vector<>(maxSize);
         this.maxSize = maxSize;
         this.setLeader(host);
-        this.setServer(server);
+        this.server = new WeakReference<>(server);
     }
 
     public void setServer(PlayerServer server) {
+        if(server.equals(getServer())) return;
+
         this.server = new WeakReference<>(server);
     }
     public PlayerServer getServer() {
         return this.server.get();
     }
 
-    public Player getLeader() {
+    public synchronized Player getLeader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
         if(this.leader.get() == null) {
             Player newLeader = players.get(0);
@@ -55,24 +58,21 @@ public class Party {
         return this.players;
     }
 
-    public void join(Player player) {
+    public synchronized void join(Player player) {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
 
         if(this.players.size() > this.maxSize) throw new RuntimeException("The party is already full! Try again later!");
 
-        this.getServer().connect(player);
-        this.getServer().playerJoined();
-
-        this.players.forEach(partyMember -> player.sendMessage(Component.text(player.getUsername() + " joined the party.", NamedTextColor.YELLOW)));
+        this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " joined the party.", NamedTextColor.YELLOW)));
         this.players.add(player);
     }
 
-    public void leave(Player player) {
+    public synchronized void leave(Player player) {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
 
         this.players.remove(player);
 
-        this.players.forEach(partyMember -> player.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
+        this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
 
         if(this.isEmpty())
             VelocityAPI.get().services().partyService().orElseThrow().disband(this);
@@ -90,6 +90,26 @@ public class Party {
         this.players.clear();
         this.leader.clear();
         this.leader = null;
+    }
+
+    public synchronized void connect(PlayerServer server, Player caller) {
+        this.setServer(server);
+        Vector<Player> kickedPlayers = new Vector<>();
+
+        VelocityAPI.get().services().partyService().orElseThrow().queueConnector(() -> {
+            this.players.forEach(player -> {
+                try {
+                    server.directConnect(player);
+                } catch (ConnectException e) {
+                    kickedPlayers.add(player);
+                }
+            });
+
+            kickedPlayers.forEach(player -> {
+                player.sendMessage(Component.text("There was an issue following your party! You've been kicked.", NamedTextColor.RED));
+                this.leave(player);
+            });
+        });
     }
 
     @Override

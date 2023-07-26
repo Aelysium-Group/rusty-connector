@@ -60,9 +60,7 @@ public class FriendsDataEnclaveService extends Service {
     public Optional<List<FriendMapping>> findFriends(Player player) {
         try {
             return Optional.of(this.getPlayersCacheEntry(player).orElseThrow());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignore) {}
 
         try {
             List<FriendMapping> mappings = this.mySQLService.findFriends(player).orElseThrow();
@@ -70,9 +68,7 @@ public class FriendsDataEnclaveService extends Service {
             this.players.put(player, snowflake);
 
             return Optional.of(mappings);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignore) {}
 
         return Optional.empty();
     }

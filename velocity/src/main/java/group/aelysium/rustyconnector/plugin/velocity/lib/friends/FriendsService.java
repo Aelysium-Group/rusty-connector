@@ -55,8 +55,18 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         return this.friendRequests.stream().filter(invite -> invite.getTarget().equals(target) && invite.getSender().equals(sender)).findFirst();
     }
 
-    public Optional<List<FriendMapping>> findFriends(Player player) {
-        return this.services.dataEnclave().findFriends(player);
+    public Optional<List<Player>> findFriends(Player player) {
+        List<Player> friends = new ArrayList<>();
+        List<FriendMapping> friendMappings = this.services.dataEnclave().findFriends(player).orElse(null);
+        if(friendMappings == null) return Optional.empty();
+
+        friendMappings.forEach(mapping -> {
+            try {
+                friends.add(mapping.getFriendOf(player));
+            } catch (NullPointerException ignore) {}
+        });
+
+        return Optional.of(friends);
     }
 
     public FriendMapping sendRequest(Player sender, Player target) {

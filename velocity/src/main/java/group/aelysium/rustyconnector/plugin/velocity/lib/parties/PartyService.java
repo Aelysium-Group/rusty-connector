@@ -16,14 +16,19 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PartyService extends Service {
     private final Vector<Party> parties = new Vector<>();
     private final Vector<PartyInvite> invites = new Vector<>();
     private final PartySettings settings;
+    private final ExecutorService connector;
 
     public PartyService(PartySettings settings) {
         this.settings = settings;
+
+        this.connector = Executors.newFixedThreadPool(10);
     }
 
     public void initCommand() {
@@ -37,6 +42,10 @@ public class PartyService extends Service {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+    }
+
+    public void queueConnector(Runnable runnable) {
+        this.connector.submit(runnable);
     }
 
     public PartySettings getSettings() {
@@ -83,10 +92,8 @@ public class PartyService extends Service {
                     throw new NoOutputException();
                 }
 
-                for (FriendMapping friendMapping : friendsService.findFriends(sender).orElseThrow())
-                    if(friendMapping.getFriendOf(sender).equals(target)) throw new NoOutputException();
-
-                throw new IllegalStateException("You are only allowed to invite friends to join your party!");
+                if(friendsService.findFriends(sender).orElseThrow().contains(target))
+                    throw new IllegalStateException("You are only allowed to invite friends to join your party!");
             } catch (IllegalStateException e) {
                 throw e;
             } catch (Exception ignore) {}
@@ -96,9 +103,7 @@ public class PartyService extends Service {
 
         sender.sendMessage(Component.text("You invited " + target.getUsername() + " to your party!", NamedTextColor.GREEN));
 
-        target.sendMessage(Component.text("Hey! "+ sender.getUsername() +" wants you to join their party!", NamedTextColor.GRAY));
-        target.sendMessage(Component.text("Accept with: ", NamedTextColor.GRAY).append(Component.text("/party invites "+sender.getUsername()+" accept", NamedTextColor.GREEN)));
-        target.sendMessage(Component.text("Deny with: ", NamedTextColor.GRAY).append(Component.text("/party invites "+sender.getUsername()+" deny", NamedTextColor.RED)));
+        target.sendMessage(VelocityLang.PARTY_INVITE_RECEIVED.build(sender));
         return invite;
     }
 
@@ -122,6 +127,7 @@ public class PartyService extends Service {
     public void kill() {
         this.parties.clear();
         this.invites.clear();
+        this.connector.shutdown();
     }
 
     public record PartySettings(

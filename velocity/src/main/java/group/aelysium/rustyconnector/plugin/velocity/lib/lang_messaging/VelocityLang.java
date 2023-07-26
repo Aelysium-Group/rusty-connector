@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging;
 
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.ASCIIAlphabet;
@@ -11,9 +12,16 @@ import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+
 import java.util.Objects;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -379,9 +387,9 @@ public interface VelocityLang extends Lang {
             Lang.newlines(),
             text("Usage: /tpa <<username>, deny, accept>",RED)
     );
-    Message TPA_DENY_USAGE = () -> join(
+    Message TPA_IGNORE_USAGE = () -> join(
             Lang.newlines(),
-            text("Usage: /tpa deny <username>",RED),
+            text("Usage: /tpa ignore <username>",RED),
             text("Deny a tpa request from a user.",GRAY)
     );
     Message TPA_ACCEPT_USAGE = () -> join(
@@ -411,11 +419,15 @@ public interface VelocityLang extends Lang {
             Lang.newlines(),
             text("You already have a pending tpa request to "+ username +"!",RED)
     );
-    ParameterizedMessage1<String> TPA_REQUEST_QUERY = username -> join(
+
+    ParameterizedMessage1<Player> TPA_REQUEST_QUERY = (sender) -> join(
             Lang.newlines(),
-            text(username + " has requested to teleport to you!",GOLD),
-            text("Use `",GRAY).append(Component.text("/tpa accept "+username,AQUA)).append(Component.text("` to accept!", GRAY)),
-            text("Use `",GRAY).append(Component.text("/tpa deny "+username,AQUA)).append(Component.text("` to deny!", GRAY))
+            text("Hey! " + sender.getUsername() + " has requested to teleport to you!",GOLD),
+            join(
+                    JoinConfiguration.separator(space()),
+                    text("[Accept]", GREEN).hoverEvent(HoverEvent.showText(text("Let "+sender.getUsername()+" teleport to you"))).clickEvent(ClickEvent.runCommand("/tpa accept "+sender.getUsername())),
+                    text("[Ignore]", RED).hoverEvent(HoverEvent.showText(text("Ignore "+sender.getUsername()+"'s request"))).clickEvent(ClickEvent.runCommand("/party ignore "+sender.getUsername()))
+            )
     );
     ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> join(
             Lang.newlines(),
@@ -445,19 +457,116 @@ public interface VelocityLang extends Lang {
             text("Your tpa request to "+username+" has expired!",RED)
     );
 
-    Message PARTY_USAGE_NO_PARTY = () -> join(
-            Lang.newlines(),
-            text("Usage: /party <create / invites>",RED)
-    );
+    ParameterizedMessage2<Party, Player> PARTY_BOARD = (party, member) -> {
+        boolean hasParty = party != null;
 
-    Message PARTY_USAGE_PARTY_LEADER = () -> join(
-            Lang.newlines(),
-            text("Usage: /party <disband / invite / kick / promote>",RED)
-    );
+        if(hasParty) {
+            boolean isLeader = party.getLeader().equals(member);
+            boolean canInvite;
+            try {
+                boolean onlyLeaderCanInvite = VelocityAPI.get().services().partyService().orElseThrow().getSettings().onlyLeaderCanInvite();
+                canInvite = !onlyLeaderCanInvite || isLeader;
+            } catch (Exception ignore) {
+                canInvite = isLeader;
+            }
 
-    Message PARTY_USAGE_PARTY_MEMBER = () -> join(
+            final Component[] playersList = {text("")};
+            if(isLeader)
+                party.players().forEach(partyMember -> {
+
+                    playersList[0] = playersList[0].appendNewline();
+
+                    if(party.getLeader().equals(partyMember))
+                        playersList[0] = playersList[0].append(
+                                join(
+                                        JoinConfiguration.separator(text(" ")),
+                                        text("[Leader]", BLUE),
+                                        text(partyMember.getUsername(), WHITE),
+                                        text("[x]", RED).hoverEvent(HoverEvent.showText(text("Leave Party"))).clickEvent(ClickEvent.runCommand("/party leave"))
+                                )
+                        );
+                    else
+                        playersList[0] = playersList[0].append(
+                                join(
+                                        JoinConfiguration.separator(text(" ")),
+                                        text(partyMember.getUsername(), WHITE),
+                                        text("[x]", RED).hoverEvent(HoverEvent.showText(text("Kick Player"))).clickEvent(ClickEvent.runCommand("/party kick " + partyMember.getUsername())),
+                                        text("[^]", GREEN).hoverEvent(HoverEvent.showText(text("Promote to Leader"))).clickEvent(ClickEvent.runCommand("/party promote " + partyMember.getUsername()))
+                                )
+                        );
+                });
+            else
+                party.players().forEach(partyMember -> {
+                    if(party.getLeader().equals(partyMember)) return;
+
+                    playersList[0] = playersList[0].appendNewline();
+                    if(party.getLeader().equals(partyMember))
+                        playersList[0] = playersList[0].append(
+                                join(
+                                        JoinConfiguration.separator(text(" ")),
+                                        text("[Leader]", BLUE),
+                                        text(partyMember.getUsername(), WHITE)
+                                )
+                        );
+                    else
+                        playersList[0] = playersList[0].append(
+                                join(
+                                        JoinConfiguration.separator(text(" ")),
+                                        text(partyMember.getUsername(), WHITE)
+                                )
+                        );
+                });
+
+            Component header;
+            if(canInvite)
+                header = text("-------------------", GRAY)
+                 .append(text(" Party ", WHITE))
+                 .append(text("[+]", GREEN)).hoverEvent(HoverEvent.showText(text("Invite Player"))).clickEvent(ClickEvent.suggestCommand("/party invite <username>"))
+                 .append(text(" --------------------", GRAY));
+            else
+                header = text("---------------------", GRAY)
+                        .append(text(" Party ", WHITE))
+                        .append(text(" ---------------------", GRAY));
+
+            if(isLeader)
+                return join(
+                        Lang.newlines(),
+                        header,
+                        playersList[0],
+                        newline(),
+                        text("-----------------", GRAY)
+                                .appendSpace()
+                                .append(text("Disband", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party disband")))
+                                .appendSpace()
+                                .appendSpace()
+                                .append(text("Leave", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party leave")))
+                                .appendSpace()
+                                .append(text("-----------------", GRAY))
+                );
+            else
+                return join(
+                        Lang.newlines(),
+                        header,
+                        playersList[0],
+                        newline(),
+                        text("------------------- ", GRAY).append(text("Leave", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party leave"))).append(text(" -------------------", GRAY))
+                        );
+        }
+
+        return join(
+                Lang.newlines(),
+                text("Click here to create a party.", YELLOW, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party create"))
+        );
+    };
+
+    ParameterizedMessage1<Player> PARTY_INVITE_RECEIVED = (sender) -> join(
             Lang.newlines(),
-            text("Usage: /party <leave / invites>",RED)
+            text("Hey! "+ sender.getUsername() +" wants you to join their party!", NamedTextColor.GRAY),
+            join(
+                    JoinConfiguration.separator(space()),
+                    text("[Accept]", GREEN).hoverEvent(HoverEvent.showText(text("Accept party invite"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" accept")),
+                    text("[Ignore]", RED).hoverEvent(HoverEvent.showText(text("Ignore party invite"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" ignore"))
+            )
     );
 
     Message PARTY_USAGE_INVITES = () -> join(
