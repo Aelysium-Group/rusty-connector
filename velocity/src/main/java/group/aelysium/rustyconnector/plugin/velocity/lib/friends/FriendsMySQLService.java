@@ -80,61 +80,35 @@ public class FriendsMySQLService extends MySQLService {
         return Optional.empty();
     }
 
-    public Optional<FriendMapping> findFriendMapping(FakePlayer player1, FakePlayer player2) {
+    public boolean areFriends(FakePlayer player1, FakePlayer player2) {
         VelocityAPI api = VelocityAPI.get();
-        PlayerService playerService = api.services().playerService().orElseThrow();
+        FriendMapping orderedMapping = new FriendMapping(player1, player2);
 
         try {
             this.connect();
             PreparedStatement statement = this.prepare(FIND_FRIENDS);
-            statement.setString(1, player1.uuid().toString());
-            statement.setString(2, player2.uuid().toString());
+            statement.setString(1, orderedMapping.player1().uuid().toString());
+            statement.setString(2, orderedMapping.player2().uuid().toString());
 
             ResultSet result = this.executeQuery(statement);
-            if(!result.next()) return Optional.empty();
-
-            FakePlayer resultPlayer1 = playerService.findPlayer(UUID.fromString(result.getString("player1_uuid")));
-            FakePlayer resultPlayer2 = playerService.findPlayer(UUID.fromString(result.getString("player2_uuid")));
-
-            if (resultPlayer1 == null) return Optional.empty();
-            if (resultPlayer2 == null) return Optional.empty();
-
-            FriendMapping friends = new FriendMapping(resultPlayer1, resultPlayer2);
+            if(!result.next()) return false;
 
             this.close();
-            return Optional.of(friends);
+            return true;
         } catch (Exception e) {
             api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
         }
 
-        return Optional.empty();
-    }
-
-    /**
-     * Get number of friends of a player.
-     * @param player The player to get the friend count of.
-     * @return The number of friends a player has.
-     * @throws SQLException If there was an issue.
-     */
-    public int getFriendCount(Player player) throws SQLException {
-        this.connect();
-        PreparedStatement statement = this.prepare(GET_FRIEND_COUNT);
-        statement.setString(1, player.getUniqueId().toString());
-        statement.setString(2, player.getUniqueId().toString());
-
-        ResultSet result = this.executeQuery(statement);
-
-        int friendCount = result.getInt(0);
-
-        this.close();
-        return friendCount;
+        return false;
     }
 
     public void addFriend(Player player1, Player player2) throws SQLException {
+        FriendMapping orderedMapping = new FriendMapping(player1, player2);
+
         this.connect();
         PreparedStatement statement = this.prepare(ADD_FRIEND);
-        statement.setString(1, player1.getUniqueId().toString());
-        statement.setString(2, player2.getUniqueId().toString());
+        statement.setString(1, orderedMapping.player1().uuid().toString());
+        statement.setString(2, orderedMapping.player2().uuid().toString());
 
         this.execute(statement);
 
@@ -142,10 +116,12 @@ public class FriendsMySQLService extends MySQLService {
     }
 
     public void removeFriend(Player player1, Player player2) throws SQLException {
+        FriendMapping orderedMapping = new FriendMapping(player1, player2);
+
         this.connect();
         PreparedStatement statement = this.prepare(DELETE_FRIEND);
-        statement.setString(1, player1.getUniqueId().toString());
-        statement.setString(2, player2.getUniqueId().toString());
+        statement.setString(1, orderedMapping.player1().uuid().toString());
+        statement.setString(2, orderedMapping.player2().uuid().toString());
 
         this.execute(statement);
 

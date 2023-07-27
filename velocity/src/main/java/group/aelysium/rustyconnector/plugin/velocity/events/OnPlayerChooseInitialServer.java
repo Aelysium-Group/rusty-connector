@@ -19,6 +19,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFla
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.ArrayList;
@@ -48,9 +49,7 @@ public class OnPlayerChooseInitialServer {
 
                 RootServerFamily rootFamily = api.services().familyService().getRootFamily();
 
-                PlayerServer server = rootFamily.connect(player);
-                if(server == null) return;
-                event.setInitialServer(server.getRegisteredServer());
+                PlayerServer server = rootFamily.connect(event);
 
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, DiscordWebhookMessage.PROXY__PLAYER_JOIN.build(player, server));
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, server));
@@ -73,18 +72,22 @@ public class OnPlayerChooseInitialServer {
 
                 List<Player> onlineFriends = new ArrayList<>();
                 friends.forEach(friend -> {
-                    Optional<Player> resolvedPlayer = friend.resolve();
-                    if(resolvedPlayer.isPresent()) onlineFriends.add(player);
+                    try {
+                        Player onlineFriend = friend.resolve().orElseThrow();
+
+                        if (onlineFriend.isActive()) onlineFriends.add(onlineFriend);
+                    } catch (Exception ignore) {}
                 });
 
-                if(friends.size() != 0 && onlineFriends.size() == 0) {
+                if(friends.size() == 0 || onlineFriends.size() == 0) {
                     player.sendMessage(Component.text("None of your friends are online right now.", NamedTextColor.GRAY));
                     throw new NoOutputException();
                 }
 
                 player.sendMessage(Component.text("You have friends online!", NamedTextColor.GRAY));
-                final Component[] friendsList = {Component.text("", NamedTextColor.YELLOW)};
-                onlineFriends.forEach(friend -> friendsList[0] = friendsList[0].append(Component.text(friend.getUsername() + " ")));
+                final Component[] friendsList = {Component.text("", NamedTextColor.WHITE)};
+                onlineFriends.forEach(friend -> friendsList[0] = friendsList[0].append(Component.text(friend.getUsername())));
+                player.sendMessage(Component.join(JoinConfiguration.commas(true), friendsList));
 
                 onlineFriends.forEach(friend -> friend.sendMessage(VelocityLang.FRIEND_JOIN.build(player)));
             } catch (Exception ignore) {}

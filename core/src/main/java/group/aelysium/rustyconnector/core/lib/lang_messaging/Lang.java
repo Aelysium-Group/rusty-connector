@@ -14,9 +14,11 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 /**
  * Thank you to https://github.com/LuckPerms/LuckPerms for inspiring this implementation.
  *
- * Text generated using: https://patorjk.com/software/taag/
+ * Some text generated using: https://patorjk.com/software/taag/
  */
 public interface Lang {
+    String attachedWordmark = "RustyConnector:";
+
     /*
      * AQUA - For when data is successfully returned or when we send usage info
      * RED - For when an error has occurred.
@@ -169,7 +171,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build()
                     )
             );
@@ -182,7 +184,7 @@ public interface Lang {
             sender.send(
                     join(
                             JoinConfiguration.separator(newline()),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build(arg1)
                     )
             );
@@ -195,7 +197,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build(arg1, arg2)
                     )
             );
@@ -208,7 +210,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build(arg1, arg2, arg3)
                     )
             );
@@ -221,7 +223,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build(arg1, arg2, arg3, arg4)
                     )
             );

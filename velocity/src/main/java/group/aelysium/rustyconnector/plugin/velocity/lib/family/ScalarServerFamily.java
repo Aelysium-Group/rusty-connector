@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
@@ -28,6 +29,10 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
 
     public PlayerServer connect(Player player) throws RuntimeException {
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
+        return connector.connect();
+    }
+    public PlayerServer connect(PlayerChooseInitialServerEvent event) throws RuntimeException {
+        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, event);
         return connector.connect();
     }
 
@@ -109,10 +114,17 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
 class ScalarFamilyConnector {
     private final ScalarServerFamily family;
     private final Player player;
+    private final PlayerChooseInitialServerEvent event;
 
     public ScalarFamilyConnector(ScalarServerFamily family, Player player) {
         this.family = family;
         this.player = player;
+        this.event = null;
+    }
+    public ScalarFamilyConnector(ScalarServerFamily family, PlayerChooseInitialServerEvent event) {
+        this.family = family;
+        this.player = event.getPlayer();
+        this.event = event;
     }
 
     public PlayerServer connect() throws RuntimeException {
@@ -124,19 +136,6 @@ class ScalarFamilyConnector {
         PlayerServer server = this.establishAnyConnection();
 
         server.playerJoined();
-/*
-        try {
-            PartyService partyService = VelocityAPI.get().services().partyService().orElse(null);
-            if (partyService == null) throw new NoOutputException();
-
-            Party party = partyService.find(player).orElse(null);
-            if (party == null) throw new NoOutputException();
-
-            party.connect(server);
-        } catch (NoOutputException ignore) {
-        } catch (Exception e) {
-            VelocityAPI.get().logger().log("Issue trying to pull party with player! " + e.getMessage());
-        }*/
 
         return server;
     }
@@ -175,8 +174,13 @@ class ScalarFamilyConnector {
             if(!server.validatePlayer(player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
 
-            if (!server.connect(player))
-                throw new RuntimeException("There was an issue connecting you to the server!");
+            if(this.event == null) {
+                if (!server.connect(player))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+            } else {
+                if (!server.connect(this.event))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+            }
 
             this.family.getLoadBalancer().iterate();
 
@@ -197,11 +201,19 @@ class ScalarFamilyConnector {
                 if(!server.validatePlayer(player))
                     throw new RuntimeException("The server you're trying to connect to is full!");
 
-                if(server.connect(player)) {
-                    this.family.getLoadBalancer().forceIterate();
-                    return server;
+                if(this.event == null) {
+                    if (server.connect(player)) {
+                        this.family.getLoadBalancer().forceIterate();
+                        return server;
+                    }
+                } else {
+                    if (server.connect(this.event)) {
+                        this.family.getLoadBalancer().forceIterate();
+                        return server;
+                    }
                 }
-                else throw new RuntimeException("Unable to connect you to the server in time!");
+
+                throw new RuntimeException("Unable to connect you to the server in time!");
             } catch (Exception e) {
                 if(isFinal)
                     player.disconnect(Component.text(e.getMessage()));

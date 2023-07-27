@@ -37,6 +37,13 @@ max-members: 5
 #
 friends-only: false
 
+#
+# Should players only be allowed to invite players in their current server?
+# If you have friends enabled, it's suggested to have this disabled so that
+# friends can join each-other no matter where they are on the network.
+#
+local-only: true
+
 party-leader:
     #
     # Should the leader be the only one allowed to invite new members to the party?

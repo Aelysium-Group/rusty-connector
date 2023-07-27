@@ -537,25 +537,31 @@ public interface VelocityLang extends Lang {
                 playersList[0] = playersList[0].append(space());
 
 
-                if(isFriendMessagingEnabled)
-                    playersList[0] = playersList[0].append(text("[!]", YELLOW).hoverEvent(HoverEvent.showText(text("Message "+friend.username()))).clickEvent(ClickEvent.suggestCommand("/fm "+friend.username()+" ")));
-                playersList[0] = playersList[0].append(space());
+                if(isFriendMessagingEnabled) {
+                    playersList[0] = playersList[0].append(text("[!]", YELLOW).hoverEvent(HoverEvent.showText(text("Message " + friend.username()))).clickEvent(ClickEvent.suggestCommand("/fm " + friend.username() + " ")));
+                    playersList[0] = playersList[0].append(space());
+                }
 
 
-                if(finalIsPartyEnabled)
-                    playersList[0] = playersList[0].append(text("[p]", BLUE).hoverEvent(HoverEvent.showText(text("Invite "+friend.username()+" to your party"))).clickEvent(ClickEvent.runCommand("/party invite "+friend.username()+" ")));
-                playersList[0] = playersList[0].append(space());
+                if(finalIsPartyEnabled) {
+                    playersList[0] = playersList[0].append(text("[p]", BLUE).hoverEvent(HoverEvent.showText(text("Invite " + friend.username() + " to your party"))).clickEvent(ClickEvent.runCommand("/party invite " + friend.username() + " ")));
+                    playersList[0] = playersList[0].append(space());
+                }
 
 
-                ServerConnection serverConnection = player.getCurrentServer().orElse(null);
-                if(serverConnection == null) {
+                Player resolvedFriend = friend.resolve().orElse(null);
+                if(resolvedFriend == null) {
+                    playersList[0] = playersList[0].append(text(friend.username(), GRAY).hoverEvent(HoverEvent.showText(text("Offline", GRAY))));
+                    return;
+                }
+                if(resolvedFriend.getCurrentServer().orElse(null) == null) {
                     playersList[0] = playersList[0].append(text(friend.username(), GRAY).hoverEvent(HoverEvent.showText(text("Offline", GRAY))));
                     return;
                 }
 
-                PlayerServer playerServer = api.services().serverService().findServer(serverConnection.getServerInfo());
+                PlayerServer playerServer = api.services().serverService().findServer(resolvedFriend.getCurrentServer().get().getServerInfo());
                 if(canSeeFriendFamilies)
-                    playersList[0] = playersList[0].append(text(friend.username(), WHITE)).hoverEvent(HoverEvent.showText(text("Currently Playing: ", GRAY).append(text(playerServer.getFamily().getName(), AQUA))));
+                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(text("Currently Playing: ", GRAY).append(text(playerServer.getFamily().getName(), AQUA)))));
                 else
                     playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(text("Online", WHITE))));
             });

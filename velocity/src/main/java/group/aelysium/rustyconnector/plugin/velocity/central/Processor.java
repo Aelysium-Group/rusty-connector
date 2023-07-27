@@ -200,6 +200,7 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                 PartyService.PartySettings settings = new PartyService.PartySettings(
                         config.getMaxMembers(),
                         config.isFriendsOnly(),
+                        config.isLocalOnly(),
                         config.isPartyLeader_onlyLeaderCanInvite(),
                         config.isPartyLeader_onlyLeaderCanKick(),
                         config.isPartyLeader_onlyLeaderCanSwitchServers(),

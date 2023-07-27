@@ -23,6 +23,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public final class CommandParty {
@@ -323,6 +325,17 @@ public final class CommandParty {
                                     Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null || !targetPlayer.isActive())
                                         return closeMessage(player, Component.text(username + " isn't available to send an invite to!", NamedTextColor.RED));
+                                    try {
+                                        Collection<Player> connectedPlayers = targetPlayer.getCurrentServer().orElseThrow().getServer().getPlayersConnected();
+                                        if (partyService.getSettings().localOnly())
+                                            if (!connectedPlayers.contains(targetPlayer))
+                                                return closeMessage(player, Component.text("You can only send invites to players that are in the server with you!", NamedTextColor.RED));
+                                    } catch (Exception ignore) {}
+                                    try {
+                                        if (partyService.getSettings().friendsOnly())
+                                            if (!api.services().friendsService().orElseThrow().areFriends(player, targetPlayer))
+                                                return closeMessage(player, Component.text("You can only send invites to your friends!", NamedTextColor.RED));
+                                    } catch (Exception ignore) {}
                                     if(targetPlayer.equals(player))
                                         return closeMessage(player, Component.text("You can't invite yourself to your own party!", NamedTextColor.RED));
                                     if(party.contains(targetPlayer))

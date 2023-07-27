@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerMySQLService extends MySQLService {
-    private static final String FIND_PLAYER = "SELECT * FROM friends WHERE uuid = ?;";
+    private static final String FIND_PLAYER = "SELECT * FROM players WHERE uuid = ?;";
     private static final String ADD_PLAYER = "REPLACE INTO players (uuid, username) VALUES(?, ?);";
 
     private PlayerMySQLService(DataSource dataSource) {

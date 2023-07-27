@@ -133,6 +133,7 @@ public class PartyService extends Service {
     public record PartySettings(
                                 int maxMembers,
                                 boolean friendsOnly,
+                                boolean localOnly,
                                 boolean onlyLeaderCanInvite,
                                 boolean onlyLeaderCanKick,
                                 boolean onlyLeaderCanSwitchServers,

@@ -44,15 +44,16 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        if(!commandManager.hasCommand("fm"))
-            try {
-                commandManager.register(
-                        commandManager.metaBuilder("fm").aliases("/fm").build(),
-                        CommandFM.create()
-                );
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if(this.settings.allowMessaging())
+            if(!commandManager.hasCommand("fm"))
+                try {
+                    commandManager.register(
+                            commandManager.metaBuilder("fm").aliases("/fm").build(),
+                            CommandFM.create()
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
     }
 
     public FriendsSettings getSettings() {

@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -73,6 +74,7 @@ public class Party {
 
         if(this.players.size() > this.maxSize) throw new RuntimeException("The party is already full! Try again later!");
 
+        player.sendMessage(Component.text("You joined the party!", NamedTextColor.GREEN));
         this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " joined the party.", NamedTextColor.YELLOW)));
         this.players.add(player);
     }

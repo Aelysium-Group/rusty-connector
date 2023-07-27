@@ -18,6 +18,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
@@ -97,13 +99,15 @@ public final class CommandFM {
 
                                 if(targetPlayer == null)
                                     return closeMessage(player, Component.text(username + " doesn't seem to exist!", NamedTextColor.RED));
+                                if(player.equals(targetPlayer))
+                                    return closeMessage(player, Component.text("You can't message yourself!", NamedTextColor.RED));
                                 if(!friendsService.areFriends(player, targetPlayer))
                                     return closeMessage(player, Component.text("You can only send messages to your friends!", NamedTextColor.RED));
 
                                 String message = context.getArgument("message", String.class);
 
                                 player.sendMessage(Component.text("[you -> "+targetPlayer.getUsername()+"]: "+message, NamedTextColor.GRAY));
-                                targetPlayer.sendMessage(Component.text("["+player.getUsername()+" -> you]: "+message, NamedTextColor.GRAY));
+                                targetPlayer.sendMessage(Component.text("["+player.getUsername()+" -> you]: "+message, NamedTextColor.GRAY).hoverEvent(HoverEvent.showText(Component.text("Click to reply"))).clickEvent(ClickEvent.suggestCommand("/fm "+player.getUsername()+" ")));
 
                                 return Command.SINGLE_SUCCESS;
                             })

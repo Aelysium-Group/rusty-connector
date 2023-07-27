@@ -103,7 +103,7 @@ public class FriendsDataEnclaveService extends Service {
     /**
      * Check if two players are friends.
      * If the players are found as friends in the cache, returns `true`.
-     * If not, search MySQL and return whether or not they are friends.
+     * If not, search MySQL and return whether they are friends.
      * @param player1 The first player.
      * @param player2 The second player.
      * @return `true` If the two players are friends in the cache, or on MySQL.
@@ -115,7 +115,7 @@ public class FriendsDataEnclaveService extends Service {
         )
             return true;
 
-        return this.mySQLService.findFriendMapping(player1, player2).orElse(null) != null;
+        return this.mySQLService.areFriends(player1, player2);
     }
 
     /**
