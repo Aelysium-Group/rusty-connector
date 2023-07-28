@@ -65,7 +65,7 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Was unregistered from: " + server.getFamilyName(), null)
+                            new WebhookEmbed.EmbedTitle("Was unregistered from: " + server.getFamily().getName(), null)
                     )
                     .setColor(COLOR_RED)
                     .build();
@@ -81,7 +81,7 @@ public interface DiscordWebhookMessage {
                     .setTitle(
                             new WebhookEmbed.EmbedTitle(player.getUsername(), null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.getFamilyName()))
+                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.getFamily().getName()))
                     .addField(new WebhookEmbed.EmbedField(true, "Server", server.getServerInfo().getName()))
                     .setColor(COLOR_GREEN)
                     .build();
@@ -109,7 +109,7 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Joined the family: " + server.getFamilyName(),null)
+                            new WebhookEmbed.EmbedTitle("Joined the family: " + server.getFamily().getName(),null)
                     )
                     .addField(new WebhookEmbed.EmbedField(false, "Server", server.getServerInfo().getName()))
                     .setColor(COLOR_GREEN)
@@ -124,13 +124,13 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Left the family: " + server.getFamilyName(), null)
+                            new WebhookEmbed.EmbedTitle("Left the family: " + server.getFamily().getName(), null)
                     )
                     .setColor(COLOR_RED)
                     .build();
 
     ParameterizedEmbed3<Player, PlayerServer, PlayerServer> PROXY__PLAYER_SWITCH_SERVER = (player, oldServer, newServer) -> {
-        if(oldServer.getFamilyName().equals(newServer.getFamilyName()))
+        if(oldServer.getFamily().equals(newServer.getFamily()))
             return new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -170,7 +170,7 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Switched families from " + oldServer.getFamilyName() + " to " + newServer.getFamilyName(), null)
+                            new WebhookEmbed.EmbedTitle("Switched families from " + oldServer.getFamily().getName() + " to " + newServer.getFamily().getName(), null)
                     )
                     .setColor(COLOR_BLUE)
                     .build();
@@ -184,7 +184,7 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Was caught by " + newServer.getFamilyName() + " after being disconnected from another server", null)
+                            new WebhookEmbed.EmbedTitle("Was caught by " + newServer.getFamily().getName() + " after being disconnected from another server", null)
                     )
                     .setColor(COLOR_BLUE)
                     .build();
@@ -228,7 +228,7 @@ public interface DiscordWebhookMessage {
                     .setTitle(
                             new WebhookEmbed.EmbedTitle(server.getServerInfo().getName(), null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(false, "Family", server.getFamilyName()))
+                    .addField(new WebhookEmbed.EmbedField(false, "Family", server.getFamily().getName()))
                     .setColor(COLOR_RED)
                     .build();
 
@@ -243,7 +243,7 @@ public interface DiscordWebhookMessage {
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Joined the family: ", null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.getFamilyName()))
+                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.getFamily().getName()))
                     .addField(new WebhookEmbed.EmbedField(true, "Server", server.getServerInfo().getName()))
                     .setColor(COLOR_GREEN)
                     .build();
@@ -259,7 +259,7 @@ public interface DiscordWebhookMessage {
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Left the family: ", null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.getFamilyName()))
+                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.getFamily().getName()))
                     .addField(new WebhookEmbed.EmbedField(true, "Server", server.getServerInfo().getName()))
                     .setColor(COLOR_RED)
                     .build();
@@ -275,7 +275,7 @@ public interface DiscordWebhookMessage {
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Switched servers from " + oldServer.getServerInfo().getName() + " to " + newServer.getServerInfo().getName(), null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(false, "Family", newServer.getFamilyName()))
+                    .addField(new WebhookEmbed.EmbedField(false, "Family", newServer.getFamily().getName()))
                     .setColor(COLOR_PINK)
                     .build();
 

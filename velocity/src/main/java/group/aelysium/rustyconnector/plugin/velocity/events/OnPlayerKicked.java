@@ -34,8 +34,8 @@ public class OnPlayerKicked {
 
                 oldServer.playerLeft();
 
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.getFamilyName(), DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, oldServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.getFamily().getName(), DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, oldServer.getFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
 
                 isFromRootFamily = oldServer.getFamily() == api.services().familyService().getRootFamily();
             } catch (Exception ignore) {}

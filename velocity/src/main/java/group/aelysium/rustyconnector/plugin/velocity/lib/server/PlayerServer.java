@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
-    private String familyName;
+    private BaseServerFamily family;
     private int playerCount = 0;
     private int weight;
     private int softPlayerCap;
@@ -64,16 +64,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         return this.getServerInfo().getAddress().getHostName() + ":" + this.getServerInfo().getAddress().getPort();
     }
 
-    /**
-     * Get the name of the family this server belongs to.
-     * @return The family name.
-     * @deprecated Use `.getFamily().getName()` instead.
-     */
-    @Deprecated(forRemoval = true, since = "0.6.0")
-    public String getFamilyName() {
-        return this.familyName;
-    }
-
     public RegisteredServer getRegisteredServer() {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         return this.registeredServer;
@@ -100,9 +90,12 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     public void register(String familyName) throws Exception {
         VelocityAPI api = VelocityAPI.get();
 
-        this.registeredServer = api.services().serverService().registerServer(this, familyName);
+        BaseServerFamily family = api.services().familyService().find(familyName);
+        if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
-        this.familyName = familyName;
+        this.registeredServer = api.services().serverService().registerServer(this, family);
+
+        this.family = family;
     }
 
     /**
@@ -132,7 +125,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(Permission.validate(
                 player,
                 "rustyconnector.hardCapBypass",
-                Permission.constructNode("rustyconnector.<family name>.hardCapBypass",this.familyName)
+                Permission.constructNode("rustyconnector.<family name>.hardCapBypass",this.family.getName())
         )) return true; // If the player has permission to bypass hard-player-cap, let them in.
 
         if(this.isMaxed()) return false; // If the player count is at hard-player-cap. Boot the player.
@@ -140,7 +133,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(Permission.validate(
                 player,
                 "rustyconnector.softCapBypass",
-                Permission.constructNode("rustyconnector.<family name>.softCapBypass",this.familyName)
+                Permission.constructNode("rustyconnector.<family name>.softCapBypass",this.family.getName())
         )) return true; // If the player has permission to bypass soft-player-cap, let them in.
 
         return !this.isFull();
@@ -186,7 +179,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         VelocityAPI api = VelocityAPI.get();
 
-        BaseServerFamily family = api.services().familyService().find(this.familyName);
+        BaseServerFamily family = api.services().familyService().find(this.family.getName());
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
@@ -257,7 +250,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         return "["+this.getServerInfo().getName()+"]" +
                "("+this.getServerInfo().getAddress().getHostName()+":"+this.getServerInfo().getAddress().getPort()+") - " +
                "["+this.getPlayerCount()+" ("+this.getSoftPlayerCap()+" <> "+this.getSoftPlayerCap()+") w-"+this.getWeight()+"]" +
-               "{"+ this.familyName +"}";
+               "{"+ this.family.getName() +"}";
     }
 
     public boolean equals(PlayerServer server) {

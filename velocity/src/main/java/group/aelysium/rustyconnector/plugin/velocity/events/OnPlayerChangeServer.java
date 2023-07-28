@@ -36,20 +36,20 @@ public class OnPlayerChangeServer {
                     if(oldRawServer == null) return; // Player just connected to proxy. This isn't a server switch.
                     PlayerServer oldServer = api.services().serverService().findServer(oldRawServer.getServerInfo());
 
-                    boolean isTheSameFamily = newServer.getFamilyName().equals(oldServer.getFamilyName());
+                    boolean isTheSameFamily = newServer.getFamily().equals(oldServer.getFamily());
 
                     oldServer.playerLeft();
 
                     // These are all family alerts, if the player doesn't move between families at all, these don't need to fire.
                     if(!isTheSameFamily) {
                         WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
-                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
+                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.getFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
 
                         WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, newServer));
-                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, newServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
+                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, newServer.getFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
 
                         WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_FAMILY.build(player, oldServer, newServer));
-                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH, newServer.getFamilyName(), DiscordWebhookMessage.FAMILY__PLAYER_SWITCH.build(player, oldServer, newServer));
+                        WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH, newServer.getFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_SWITCH.build(player, oldServer, newServer));
                     }
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_SERVER, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_SERVER.build(player, oldServer, newServer));

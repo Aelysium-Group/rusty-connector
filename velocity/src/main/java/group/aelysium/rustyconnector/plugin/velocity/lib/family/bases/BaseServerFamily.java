@@ -40,11 +40,6 @@ public abstract class BaseServerFamily<S extends PlayerServer> {
     abstract public void removeServer(S server);
 
     /**
-     * Unregisters all servers from this family.
-     */
-    abstract public void unregisterServers() throws Exception;
-
-    /**
      * Get all players in the family up to approximately `max`.
      * @param max The approximate max number of players to return.
      * @return A list of players.

@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link;
 
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
@@ -30,7 +29,7 @@ public class MagicLinkService extends ClockService {
 
                     try {
                         if (server.isStale()) {
-                            serverService.unregisterServer(server.getServerInfo(), server.getFamilyName(), true);
+                            serverService.unregisterServer(server.getServerInfo(), server.getFamily().getName(), true);
                             serverService.getServers().remove(serverReference);
                         }
                     } catch (NullPointerException ignore) {}

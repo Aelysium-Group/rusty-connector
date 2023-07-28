@@ -16,7 +16,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventMan
 
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
-import java.security.InvalidAlgorithmParameterException;
 import java.util.Vector;
 
 public class ServerService extends Service {
@@ -92,21 +91,18 @@ public class ServerService extends Service {
     /**
      * Register a server to the proxy.
      * @param server The server to be registered.
-     * @param familyName The family to register the server into.
+     * @param family The family to register the server into.
      * @return A RegisteredServer node.
      */
-    public RegisteredServer registerServer(PlayerServer server, String familyName) throws Exception {
+    public RegisteredServer registerServer(PlayerServer server, BaseServerFamily family) throws Exception {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
 
         try {
             if(logger.getGate().check(GateKey.REGISTRATION_ATTEMPT))
-                VelocityLang.REGISTRATION_REQUEST.send(logger, server.getServerInfo(), familyName);
+                VelocityLang.REGISTRATION_REQUEST.send(logger, server.getServerInfo(), family.getName());
 
             if(this.contains(server.getServerInfo())) throw new DuplicateRequestException("Server ["+server.getServerInfo().getName()+"]("+server.getServerInfo().getAddress()+":"+server.getServerInfo().getAddress().getPort()+") can't be registered twice!");
-
-            BaseServerFamily family = api.services().familyService().find(familyName);
-            if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
             RegisteredServer registeredServer = api.registerServer(server.getServerInfo());
             if(registeredServer == null) throw new NullPointerException("Unable to register the server to the proxy.");
@@ -116,14 +112,14 @@ public class ServerService extends Service {
             this.servers.add(new WeakReference<>(server));
 
             if(logger.getGate().check(GateKey.REGISTRATION_ATTEMPT))
-                VelocityLang.REGISTERED.send(logger, server.getServerInfo(), familyName);
+                VelocityLang.REGISTERED.send(logger, server.getServerInfo(), family.getName());
 
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, DiscordWebhookMessage.PROXY__SERVER_REGISTER.build(server, familyName));
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, familyName, DiscordWebhookMessage.FAMILY__SERVER_REGISTER.build(server, familyName));
+            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, DiscordWebhookMessage.PROXY__SERVER_REGISTER.build(server, family.getName()));
+            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, family.getName(), DiscordWebhookMessage.FAMILY__SERVER_REGISTER.build(server, family.getName()));
             return registeredServer;
         } catch (Exception error) {
             if(logger.getGate().check(GateKey.REGISTRATION_ATTEMPT))
-                VelocityLang.REGISTRATION_CANCELED.send(logger, server.getServerInfo(), familyName);
+                VelocityLang.REGISTRATION_CANCELED.send(logger, server.getServerInfo(), family.getName());
             throw new Exception(error.getMessage());
         }
     }

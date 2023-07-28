@@ -122,16 +122,6 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     @Override
-    public void unregisterServers() throws Exception {
-        ServerService serverService = VelocityAPI.get().services().serverService();
-
-        for (PlayerServer server : this.loadBalancer.dump()) {
-            if(server == null) continue;
-            serverService.unregisterServer(server.getServerInfo(),this.name, false);
-        }
-    }
-
-    @Override
     public List<Player> getAllPlayers(int max) {
         List<Player> players = new ArrayList<>();
 
