@@ -38,7 +38,7 @@ public class PartyService extends Service {
         if(!commandManager.hasCommand("party"))
             try {
                 commandManager.register(
-                        commandManager.metaBuilder("party").aliases("/party").build(),
+                        commandManager.metaBuilder("party").build(),
                         CommandParty.create()
                 );
 

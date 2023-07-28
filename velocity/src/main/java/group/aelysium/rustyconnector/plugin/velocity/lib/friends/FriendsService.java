@@ -31,7 +31,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         if(!commandManager.hasCommand("friends"))
             try {
                 commandManager.register(
-                        commandManager.metaBuilder("friends").aliases("/friends").build(),
+                        commandManager.metaBuilder("friends").build(),
                         CommandFriends.create()
                 );
 
@@ -42,7 +42,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         if(!commandManager.hasCommand("unfriend"))
             try {
                 commandManager.register(
-                        commandManager.metaBuilder("unfriend").aliases("/unfriend").build(),
+                        commandManager.metaBuilder("unfriend").build(),
                         CommandUnFriend.create()
                 );
 
@@ -54,7 +54,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
             if(!commandManager.hasCommand("fm"))
                 try {
                     commandManager.register(
-                            commandManager.metaBuilder("fm").aliases("/fm").build(),
+                            commandManager.metaBuilder("fm").build(),
                             CommandFM.create()
                     );
 
