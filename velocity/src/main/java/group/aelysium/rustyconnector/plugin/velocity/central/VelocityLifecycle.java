@@ -8,14 +8,8 @@ import group.aelysium.rustyconnector.core.lib.exception.DuplicateLifecycleExcept
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerDisconnect;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerKicked;
+import group.aelysium.rustyconnector.plugin.velocity.events.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,8 +18,8 @@ import java.io.File;
 
 public class VelocityLifecycle extends PluginLifecycle {
     public boolean start() throws DuplicateLifecycleException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         if(this.isRunning()) throw new DuplicateLifecycleException("RustyConnector-Velocity is already running! You can't start it a second time!");
 
@@ -35,16 +29,7 @@ public class VelocityLifecycle extends PluginLifecycle {
         if(!loadCommands()) return false;
         if(!loadEvents()) return false;
 
-        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(logger);
-
-        DefaultConfig defaultConfig = DefaultConfig.getConfig();
-        if(defaultConfig.isBootCommands_enabled()) {
-            logger.log("Issuing boot commands...");
-            defaultConfig.getBootCommands_commands().forEach(command -> {
-                logger.log(">>> "+command);
-                api.dispatchCommand(command);
-            });
-        }
+        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(logger, api.version());
 
         WhitelistConfig.empty();
         DefaultConfig.empty();
@@ -55,7 +40,7 @@ public class VelocityLifecycle extends PluginLifecycle {
     }
     public void stop() {
         try {
-            VelocityAPI api = VelocityRustyConnector.getAPI();
+            VelocityAPI api = VelocityAPI.get();
 
             WhitelistConfig.empty();
             DefaultConfig.empty();
@@ -79,15 +64,15 @@ public class VelocityLifecycle extends PluginLifecycle {
     }
 
     protected boolean loadConfigs() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
         try {
-            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "config.yml"), "velocity_config_template.yml");
+            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(String.valueOf(api.dataFolder()), "config.yml"), "velocity_config_template.yml");
             if(!defaultConfig.generate())
                 throw new IllegalStateException("Unable to load or create config.yml!");
             defaultConfig.register();
 
-            LoggerConfig loggerConfig = LoggerConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "logger.yml"), "velocity_logger_template.yml");
+            LoggerConfig loggerConfig = LoggerConfig.newConfig(new File(String.valueOf(api.dataFolder()), "logger.yml"), "velocity_logger_template.yml");
             if(!loggerConfig.generate())
                 throw new IllegalStateException("Unable to load or create logger.yml!");
             loggerConfig.register();
@@ -95,7 +80,7 @@ public class VelocityLifecycle extends PluginLifecycle {
 
             api.configureProcessor(defaultConfig);
 
-            WebhooksConfig webhooksConfig = WebhooksConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "webhooks.yml"), "velocity_webhooks_template.yml");
+            WebhooksConfig webhooksConfig = WebhooksConfig.newConfig(new File(String.valueOf(api.dataFolder()), "webhooks.yml"), "velocity_webhooks_template.yml");
             if(!webhooksConfig.generate())
                 throw new IllegalStateException("Unable to load or create webhooks.yml!");
             webhooksConfig.register();
@@ -110,26 +95,22 @@ public class VelocityLifecycle extends PluginLifecycle {
         }
     }
     protected boolean loadCommands() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         CommandManager commandManager = api.getServer().getCommandManager();
         try {
             commandManager.register(
                     commandManager.metaBuilder("rc")
-                            .aliases("/rc") // Add slash variants so that they can be used in console as well
+                            .aliases("/rc", "//") // Add slash variants so that they can be used in console as well
                             .build(),
                     CommandRusty.create()
                     );
 
             commandManager.unregister("server");
-
-            commandManager.register(
-                    commandManager.metaBuilder("tpa")
-                            .build(),
-                    CommandTPA.create()
-            );
-
+          
+            // Commands for specific services can be found in the constructors for those services
+  
             return true;
         } catch (Exception e) {
             VelocityLang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);
@@ -138,8 +119,8 @@ public class VelocityLifecycle extends PluginLifecycle {
     }
 
     protected boolean loadEvents() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         EventManager manager = api.getServer().getEventManager();
         try {

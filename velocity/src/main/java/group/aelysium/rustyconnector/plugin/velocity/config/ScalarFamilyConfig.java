@@ -8,19 +8,19 @@ import java.util.Map;
 
 public class ScalarFamilyConfig extends YAML {
     private static Map<String, ScalarFamilyConfig> configs = new HashMap<>();
+    private String parent_family = "";
     private boolean loadBalancing_weighted = false;
     private String loadBalancing_algorithm = "ROUND_ROBIN";
     private boolean loadBalancing_persistence_enabled = false;
     private int loadBalancing_persistence_attempts = 5;
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
-    private boolean tpa_enabled = false;
-    private boolean tpa_ignorePlayerCap = false;
-    private int tpa_requestLifetime = 5;
 
     private ScalarFamilyConfig(File configPointer, String template) {
         super(configPointer, template);
     }
+
+    public String getParent_family() { return parent_family; }
 
     public boolean isLoadBalancing_weighted() {
         return loadBalancing_weighted;
@@ -46,17 +46,6 @@ public class ScalarFamilyConfig extends YAML {
         return whitelist_name;
     }
 
-    public boolean isTPA_enabled() {
-        return tpa_enabled;
-    }
-
-    public boolean shouldTPA_ignorePlayerCap() {
-        return tpa_ignorePlayerCap;
-    }
-    public int getTPA_requestLifetime() {
-        return tpa_requestLifetime;
-    }
-
     /**
      * Add a whitelist config to the proxy.
      * @param name The name of the whitelist family to save.
@@ -77,6 +66,8 @@ public class ScalarFamilyConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
+        this.parent_family = this.getNode(this.data, "parent-family", String.class);
+
         this.loadBalancing_weighted = this.getNode(this.data,"load-balancing.weighted",Boolean.class);
         this.loadBalancing_algorithm = this.getNode(this.data,"load-balancing.algorithm",String.class);
 
@@ -97,9 +88,5 @@ public class ScalarFamilyConfig extends YAML {
             throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
-
-        this.tpa_enabled = this.getNode(this.data,"tpa.enabled",Boolean.class);
-        this.tpa_ignorePlayerCap = this.getNode(this.data,"tpa.ignore-player-cap",Boolean.class);
-        this.tpa_requestLifetime = this.getNode(this.data,"tpa.request-lifetime",Integer.class);
     }
 }

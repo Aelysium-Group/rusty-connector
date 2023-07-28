@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -8,9 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class ClockService extends Service {
     protected final ScheduledExecutorService executorService;
 
-    public ClockService(boolean enabled, int threads) {
-        super(enabled);
-
+    public ClockService(int threads) {
         this.executorService = Executors.newScheduledThreadPool(threads);
     }
 
@@ -25,6 +25,15 @@ public class ClockService extends Service {
 
     /**
      * Schedule a new task to run every `heartbeat`
+     * @param runnable The runnable task to run.
+     * @param period The intervals in seconds to wait before executing the runnable again.
+     */
+    public ScheduledFuture<?> scheduleRecurring(Runnable runnable, LiquidTimestamp period) {
+        return this.executorService.scheduleAtFixedRate(runnable, 0, period.getValue(), period.getUnit());
+    }
+
+    /**
+     * Schedule a new task to run after `delay` amount of seconds.
      * @param runnable The runnable task to run.
      * @param delay The amount of time in seconds to wait before executing the runnable.
      */

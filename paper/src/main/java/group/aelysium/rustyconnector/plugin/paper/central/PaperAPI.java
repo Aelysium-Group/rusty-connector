@@ -3,13 +3,10 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.model.Service;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -18,10 +15,14 @@ import org.slf4j.Logger;
 
 import java.io.InputStream;
 import java.io.SyncFailedException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 public class PaperAPI extends PluginAPI<BukkitScheduler> {
+    private static PaperAPI instance;
+    public static PaperAPI get() {
+        return instance;
+    }
+
     private PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
     private Processor processor = null;
@@ -29,6 +30,7 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
 
 
     public PaperAPI(PaperRustyConnector plugin, Logger logger) throws Exception {
+        instance = this;
         this.plugin = plugin;
         this.pluginLogger = new PluginLogger(logger);
 
@@ -46,17 +48,22 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     }
 
     @Override
-    public BukkitScheduler getScheduler() {
+    public BukkitScheduler scheduler() {
         return Bukkit.getScheduler();
     }
 
     @Override
-    public PluginLogger getLogger() {
+    public String version() {
+        return null;
+    }
+
+    @Override
+    public PluginLogger logger() {
         return this.pluginLogger;
     }
 
     @Override
-    public String getDataFolder() {
+    public String dataFolder() {
         return plugin.getDataFolder().getPath();
     }
 
@@ -67,19 +74,12 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
         return this.plugin.getServer();
     }
 
-    public <S extends Service> S getService(Class<S> type) {
-        return this.processor.getService(type);
+    public ProcessorServiceHandler services() {
+        return this.processor.services();
     }
 
     public void killServices() {
         this.processor.kill();
-    }
-
-    public void reloadServices() {
-        this.processor.kill();
-        this.processor = null;
-
-        PaperRustyConnector.getLifecycle().loadConfigs();
     }
 
     /**
@@ -96,11 +96,11 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
         return commandManager;
     }
 
-    public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
+    public void configureProcessor(DefaultConfig config) throws IllegalAccessException {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
-        this.processor.getService(RedisService.class).start(RedisSubscriber.class);
-        this.processor.getService(MagicLinkService.class).startHeartbeat();
+        this.processor.services().redisService().start(RedisSubscriber.class);
+        this.processor.services().magicLinkService().startHeartbeat();
     }
 
     public boolean isFolia() {

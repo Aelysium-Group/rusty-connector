@@ -2,7 +2,8 @@ package group.aelysium.rustyconnector.plugin.paper.lib.services;
 
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
@@ -18,8 +19,6 @@ public class ServerInfoService extends Service implements PlayerServer {
     private Integer weight;
 
     public ServerInfoService(String name, InetSocketAddress address, String family, int softPlayerCap, int hardPlayerCap, int weight) {
-        super(true);
-
         if(name.equals(""))
             name = family + "-" + MD5.generateMD5(); // Generate a custom string to be the server's name
         this.name = name;
@@ -38,8 +37,8 @@ public class ServerInfoService extends Service implements PlayerServer {
      * @param hardPlayerCap The hard player cap
      */
     private void setPlayerCap(int softPlayerCap, int hardPlayerCap) {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
 
         api.getServer().setMaxPlayers(hardPlayerCap);
 
@@ -54,7 +53,7 @@ public class ServerInfoService extends Service implements PlayerServer {
     }
 
     public String getAddress() {
-        return this.address.getHostName() + ":" + this.address.getPort();
+        return AddressUtil.addressToString(this.address);
     }
 
     public String getName() {
@@ -65,7 +64,7 @@ public class ServerInfoService extends Service implements PlayerServer {
 
     @Override
     public int getPlayerCount() {
-        return PaperRustyConnector.getAPI().getServer().getOnlinePlayers().size();
+        return PaperAPI.get().getServer().getOnlinePlayers().size();
     }
 
     @Override

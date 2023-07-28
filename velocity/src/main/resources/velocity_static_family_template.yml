@@ -20,6 +20,20 @@
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Parent Family                       #
+#                                                          #
+#               ---------------------------                #
+# | The parent family is the family that players will      #
+# | be sent to when they run /hub, or when a fallback      #
+# | occurs. If the parent family is unavailable, the       #
+# | root family is used instead.                           #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+parent-family: ""
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                     First Connection                     #
 #                                                          #
 #               ---------------------------                #
@@ -232,53 +246,3 @@ whitelist:
 # You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
 #
     name: "whitelist-template"
-
-tpa:
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                           TPA                            #
-#                                                          #
-#               ---------------------------                #
-# | Should players inside this family be able to tpa       #
-# | to each other across servers?                          #
-# | If player1 is in one server and player2 is in another  #
-# | server; player1 will connect to the new server and     #
-# | then teleport to player2's coordinates.                #
-#                                                          #
-# | If both players are in the same server, player1 will   #
-# | just automatically teleport to player1.                #
-#                                                          #
-#   NOTE: This command is player facing!                   #
-#                                                          #
-#               ----------------------------               #
-#                        Permission:                       #
-#                rustyconnector.command.tpa                #
-#               ----------------------------               #
-#                          Usage:                          #
-#              /tpa <target players username>              #
-#               ----------------------------               #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-    enabled: false
-
-#
-# Should the tpa consider player caps before attempting to teleport?
-# If false, the player must match the player caps of the server they
-# are attempting to connect to.
-#
-    ignore-player-cap: false
-
-#
-# How many minutes a pending tpa request can exist for before it expires.
-# Players are not allowed to issue new tpa requests if they already have one pending.
-#
-# If a player's tpa request is accepted or denied before it expires, they will
-# be able to issue a new tpa request immediately.
-# Otherwise, they must wait for their current request to expire before issuing a new one.
-#
-# Players will receive a notification in-chat once their request expires.
-#
-# `request-lifetime` is in minutes.
-#
-    request-lifetime: 5

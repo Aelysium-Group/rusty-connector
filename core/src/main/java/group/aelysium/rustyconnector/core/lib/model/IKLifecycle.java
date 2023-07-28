@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.core.lib.serviceable.Serviceable;
 
-public abstract class IKLifecycle extends Serviceable {
-    protected IKLifecycle(Map<Class<? extends Service>, Service> services) {
+public abstract class IKLifecycle<H extends ServiceHandler> extends Serviceable<H> {
+    protected IKLifecycle(H services) {
         super(services);
     }
 

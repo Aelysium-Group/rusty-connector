@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.core.lib.database.redis.messages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RedisMessageType {
     /**
@@ -29,20 +30,20 @@ public class RedisMessageType {
     /**
      * `Proxy > Server` | Add a player's teleportation to the TPA queue on a specific server.
      */
-    public static Mapping TPA_QUEUE_PLAYER = new Mapping(300, "TPA_QUEUE_PLAYER");
+    public static Mapping COORDINATE_REQUEST_QUEUE = new Mapping(300, "TPA_QUEUE_PLAYER");
 
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();
         list.add(PING);
         list.add(PING_RESPONSE);
         list.add(SEND_PLAYER);
-        list.add(TPA_QUEUE_PLAYER);
+        list.add(COORDINATE_REQUEST_QUEUE);
 
         return list;
     }
 
     public static Mapping getMapping(String name) {
-        return toList().stream().filter(entry -> entry.name() == name).findFirst().orElseThrow(NullPointerException::new);
+        return toList().stream().filter(entry -> Objects.equals(entry.name(), name)).findFirst().orElseThrow(NullPointerException::new);
     }
     public static Mapping getMapping(int id) {
         return toList().stream().filter(entry -> entry.id() == id).findFirst().orElseThrow(NullPointerException::new);

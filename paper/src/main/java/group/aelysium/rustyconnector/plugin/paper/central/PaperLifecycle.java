@@ -4,7 +4,6 @@ import group.aelysium.rustyconnector.core.central.PluginLifecycle;
 import group.aelysium.rustyconnector.core.lib.config.MigrationDirections;
 import group.aelysium.rustyconnector.core.lib.exception.DuplicateLifecycleException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
@@ -12,7 +11,6 @@ import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -20,7 +18,7 @@ import java.io.File;
 
 public class PaperLifecycle extends PluginLifecycle {
     public boolean start() throws DuplicateLifecycleException {
-        PaperAPI api = PaperRustyConnector.getAPI();
+        PaperAPI api = PaperAPI.get();
         if(this.isRunning()) throw new DuplicateLifecycleException(
                 PaperLang.RCNAME_PAPER_FOLIA.build(api.isFolia()).toString() +
                 " is already running! You can't start it a second time!");
@@ -34,11 +32,11 @@ public class PaperLifecycle extends PluginLifecycle {
         return true;
     }
     public void stop() {
-        PaperAPI api = PaperRustyConnector.getAPI();
+        PaperAPI api = PaperAPI.get();
 
         DefaultConfig.empty();
 
-        api.getService(MagicLinkService.class).disconnect();
+        api.services().magicLinkService().disconnect();
 
         api.killServices();
 
@@ -46,10 +44,10 @@ public class PaperLifecycle extends PluginLifecycle {
     }
 
     protected boolean loadConfigs() {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
         try {
-            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.getDataFolder(), "config.yml"), "paper_config_template.yml");
+            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.dataFolder(), "config.yml"), "paper_config_template.yml");
             if(!defaultConfig.generate()) {
                 throw new IllegalStateException("Unable to load or create config.yml!");
             }
@@ -57,7 +55,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
             api.configureProcessor(defaultConfig);
 
-            Lang.WORDMARK_RUSTY_CONNECTOR.send(logger);
+            Lang.WORDMARK_RUSTY_CONNECTOR.send(logger, api.version());
 
             DefaultConfig.empty();
 
@@ -69,8 +67,8 @@ public class PaperLifecycle extends PluginLifecycle {
         }
     }
     protected boolean loadCommands() {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
         try {
 
             CommandRusty.create(api.getCommandManager());
@@ -83,8 +81,8 @@ public class PaperLifecycle extends PluginLifecycle {
     }
 
     protected boolean loadEvents() {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
 
         try {
             api.getServer().getPluginManager().registerEvents(new OnPlayerJoin(), api.accessPlugin());

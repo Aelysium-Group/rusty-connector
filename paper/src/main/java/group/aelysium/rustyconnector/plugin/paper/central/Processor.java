@@ -2,11 +2,10 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.model.IKLifecycle;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.config.PrivateKeyConfig;
@@ -19,24 +18,23 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Processor extends IKLifecycle {
+public class Processor extends IKLifecycle<ProcessorServiceHandler> {
     protected Processor(Map<Class<? extends Service>, Service> services) {
-        super(services);
+        super(new ProcessorServiceHandler(services));
     }
 
     @Override
     public void kill() {
-        this.services.values().forEach(Service::kill);
-        this.services.clear();
+        this.services().killAll();
     }
 
     public static Processor init(DefaultConfig config) throws IllegalAccessException {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
         Processor.Builder builder = new Processor.Builder();
 
         // Setup private key
-        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.getDataFolder()), "private.key"));
+        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.dataFolder()), "private.key"));
         if(!privateKeyConfig.generate())
             throw new IllegalStateException("Unable to load or create private.key!");
         char[] privateKey = null;

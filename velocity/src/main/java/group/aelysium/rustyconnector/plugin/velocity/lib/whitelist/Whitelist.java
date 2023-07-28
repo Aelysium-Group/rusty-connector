@@ -4,11 +4,12 @@ import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.config.WhitelistConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.*;
@@ -115,12 +116,13 @@ public class Whitelist {
      * @return A whitelist.
      */
     public static Whitelist init(String whitelistName) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
+        logger.send(Component.text(" | Registering whitelist "+whitelistName+"...", NamedTextColor.DARK_GRAY));
 
         WhitelistConfig whitelistConfig = WhitelistConfig.newConfig(
                 whitelistName,
-                new File(String.valueOf(api.getDataFolder()), "whitelists/"+whitelistName+".yml"),
+                new File(String.valueOf(api.dataFolder()), "whitelists/"+whitelistName+".yml"),
                 "velocity_whitelist_template.yml"
         );
         if(!whitelistConfig.generate()) {
@@ -147,7 +149,7 @@ public class Whitelist {
             });
         }
 
-        logger.log("Loaded whitelist: "+whitelistName);
+        logger.send(Component.text(" | Registered whitelist: "+whitelistName, NamedTextColor.YELLOW));
         return whitelist;
     }
 }

@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper.config;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -98,7 +99,7 @@ public class DefaultConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
-        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
+        PluginLogger logger = PaperAPI.get().logger();
 
         try {
             this.processVersion(YAML.currentVersion);
@@ -134,7 +135,6 @@ public class DefaultConfig extends YAML {
 
         if(this.redis_password.length() != 0 && this.redis_password.length() < 16)
             throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
-
 
 
         this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);

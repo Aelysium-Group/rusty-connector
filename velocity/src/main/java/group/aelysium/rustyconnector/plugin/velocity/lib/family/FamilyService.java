@@ -1,31 +1,38 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.core.lib.model.Service;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class FamilyService extends Service implements NodeManager<BaseServerFamily> {
     private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
-    private WeakReference<ScalarServerFamily> rootFamily;
+    private WeakReference<RootServerFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
+    private final Optional<MySQLService> mySQLService;
 
-    public FamilyService(boolean catchDisconnectingPlayers) {
-        super(true);
+    public FamilyService(boolean catchDisconnectingPlayers, Optional<MySQLService> mySQLService) {
         this.catchDisconnectingPlayers = catchDisconnectingPlayers;
+        this.mySQLService = mySQLService;
+    }
+
+    public Optional<MySQLService> getMySQLService() {
+        return this.mySQLService;
     }
 
     public boolean shouldCatchDisconnectingPlayers() {
         return this.catchDisconnectingPlayers;
     }
 
-    public void setRootFamily(ScalarServerFamily family) {
+    public void setRootFamily(RootServerFamily family) {
         this.registeredFamilies.put(family.getName(), family);
         this.rootFamily = new WeakReference<>(family);
     }
@@ -34,9 +41,9 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * Get the root family of this FamilyService.
      * If root family hasn't been set, or the family it references has been garbage collected,
      * this will return `null`.
-     * @return A {@link BaseServerFamily} or `null`
+     * @return A {@link RootServerFamily} or `null`
      */
-    public ScalarServerFamily getRootFamily() {
+    public RootServerFamily getRootFamily() {
         return this.rootFamily.get();
     }
 
@@ -87,7 +94,8 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * @param player The player to uncache mappings for.
      */
     public void uncacheHomeServerMappings(Player player) {
-        List<BaseServerFamily> familyList = VelocityRustyConnector.getAPI().getService(FamilyService.class).dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
+        FamilyService familyService = VelocityAPI.get().services().familyService();
+        List<BaseServerFamily> familyList = familyService.dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
         if(familyList.size() == 0) return;
 
         for (BaseServerFamily family : familyList) {

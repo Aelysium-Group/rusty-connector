@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib;
 
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -22,7 +22,7 @@ public class Clock {
     }
 
     public void start() {
-        PluginLogger logger = VelocityRustyConnector.getAPI().getLogger();
+        PluginLogger logger = VelocityAPI.get().logger();
         this.timer.schedule( new TimerTask() {
             public void run() {
                 try {

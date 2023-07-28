@@ -2,16 +2,15 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.database;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.core.lib.database.MySQLService;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 
 public class HomeServerMappingsDatabase {
@@ -22,22 +21,17 @@ public class HomeServerMappingsDatabase {
     private static final String PURGE_FAMILY_EXPIRED_MAPPINGS = "DELETE FROM home_server_mappings WHERE family_name = ? AND expiration < NOW();";
     private static final String UPDATE_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = ? WHERE family_name = ? AND expiration IS NULL;";
     private static final String UPDATE_NOT_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = NULL WHERE family_name = ? AND expiration IS NOT NULL;";
-    private static final String INIT_TABLE = "" +
-            "CREATE TABLE IF NOT EXISTS home_server_mappings (" +
-            "    player_uuid VARCHAR(36) NOT NULL," +
-            "    family_name VARCHAR(32) NOT NULL," +
-            "    server_address VARCHAR(128) NOT NULL," +
-            "    server_name VARCHAR(128) NOT NULL," +
-            "    expiration TIMESTAMP NULL DEFAULT NULL," +
-            "    CONSTRAINT uc_Mappings UNIQUE (player_uuid, family_name)" +
-            ");";
 
     /**
      * Initialize the table for home server mappings.
      */
-    public static void init(MySQLService service) throws SQLException {
+    public static void init(MySQLService service) throws SQLException, IOException {
+        VelocityAPI api = VelocityAPI.get();
+        InputStream stream = api.getResourceAsStream("home_server_mappings.sql");
+        String file = new String(stream.readAllBytes());
+
         service.connect();
-        PreparedStatement statement = service.prepare(INIT_TABLE);
+        PreparedStatement statement = service.prepare(file);
         service.execute(statement);
         service.close();
     }
@@ -50,8 +44,8 @@ public class HomeServerMappingsDatabase {
      * @throws SQLException If there was an issue with the query.
      */
     public static HomeServerMapping find(Player player, StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQLService mySQLService = api.getService(MySQLService.class);
+        VelocityAPI api = VelocityAPI.get();
+        MySQLService mySQLService = api.services().familyService().getMySQLService().orElseThrow();
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(FIND_HOME_SERVER_IN_FAMILY);
@@ -63,7 +57,7 @@ public class HomeServerMappingsDatabase {
 
         RegisteredServer registeredServer = api.getServer().getServer(result.getString("server_name")).orElse(null);
         if(registeredServer == null) return null;
-        PlayerServer server = api.getService(ServerService.class).findServer(registeredServer.getServerInfo());
+        PlayerServer server = api.services().serverService().findServer(registeredServer.getServerInfo());
 
         mySQLService.close();
         return new HomeServerMapping(player, server, family);
@@ -77,8 +71,8 @@ public class HomeServerMappingsDatabase {
      * @throws SQLException If there was an issue with the query.
      */
     public static boolean doesPlayerHaveHome(Player player, StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQLService mySQLService = api.getService(MySQLService.class);
+        VelocityAPI api = VelocityAPI.get();
+        MySQLService mySQLService = api.services().familyService().getMySQLService().orElseThrow();
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(CHECK_IF_PLAYER_HAS_HOME);
@@ -97,8 +91,8 @@ public class HomeServerMappingsDatabase {
      * @throws SQLException If there was an issue with the query.
      */
     public static void delete(Player player, StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQLService mySQLService = api.getService(MySQLService.class);
+        VelocityAPI api = VelocityAPI.get();
+        MySQLService mySQLService = api.services().familyService().getMySQLService().orElseThrow();
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(DELETE_PLAYERS_HOME_SERVER);
@@ -115,8 +109,8 @@ public class HomeServerMappingsDatabase {
      * @throws SQLException If there was an issue with the query.
      */
     public static void save(HomeServerMapping mapping) throws SQLException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQLService mySQLService = api.getService(MySQLService.class);
+        VelocityAPI api = VelocityAPI.get();
+        MySQLService mySQLService = api.services().familyService().getMySQLService().orElseThrow();
 
         LiquidTimestamp expiration = mapping.family().getHomeServerExpiration();
 
@@ -141,8 +135,8 @@ public class HomeServerMappingsDatabase {
      * @throws SQLException If there was an issue with the query.
      */
     public static void purgeExpired(StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQLService mySQLService = api.getService(MySQLService.class);
+        VelocityAPI api = VelocityAPI.get();
+        MySQLService mySQLService = api.services().familyService().getMySQLService().orElseThrow();
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(PURGE_FAMILY_EXPIRED_MAPPINGS);
@@ -161,8 +155,8 @@ public class HomeServerMappingsDatabase {
         LiquidTimestamp liquidExpiration = family.getHomeServerExpiration();
         if(liquidExpiration == null) return;
 
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQLService mySQLService = api.getService(MySQLService.class);
+        VelocityAPI api = VelocityAPI.get();
+        MySQLService mySQLService = api.services().familyService().getMySQLService().orElseThrow();
 
         Timestamp expiration = new Timestamp(liquidExpiration.getEpochFromNow());
 
@@ -181,8 +175,8 @@ public class HomeServerMappingsDatabase {
      * @throws SQLException If there was an issue with the query.
      */
     public static void updateValidExpirations(StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        MySQLService mySQLService = api.getService(MySQLService.class);
+        VelocityAPI api = VelocityAPI.get();
+        MySQLService mySQLService = api.services().familyService().getMySQLService().orElseThrow();
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(UPDATE_NOT_NULL_EXPIRATIONS);

@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport;
 
-import group.aelysium.rustyconnector.core.lib.model.Service;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.DynamicTeleport_TPARequest;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
+import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.CoordinateRequest;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -10,25 +10,21 @@ import java.util.List;
 import java.util.Objects;
 
 public class DynamicTeleportService extends Service {
-    private final List<DynamicTeleport_TPARequest> requests = new ArrayList<>();
+    private final List<CoordinateRequest> requests = new ArrayList<>();
 
-    public DynamicTeleportService() {
-        super(true);
+    public CoordinateRequest newRequest(String client_username, Player target) {
+        CoordinateRequest request = new CoordinateRequest(client_username, target);
+        requests.add(request);
+
+        return request;
     }
 
-    public DynamicTeleport_TPARequest newRequest(String client_username, Player target) {
-        DynamicTeleport_TPARequest tpaRequest = new DynamicTeleport_TPARequest(client_username, target);
-        requests.add(tpaRequest);
-
-        return tpaRequest;
+    public CoordinateRequest findClient(String clientUsername) {
+        return this.requests.stream().filter(request -> Objects.equals(request.getClientUsername(), clientUsername)).findFirst().orElse(null);
     }
 
-    public DynamicTeleport_TPARequest findClient(String client_username) {
-        return this.requests.stream().filter(tpaRequest -> Objects.equals(tpaRequest.getClientUsername(), client_username)).findFirst().orElse(null);
-    }
-
-    public DynamicTeleport_TPARequest findTarget(Player target) {
-        return this.requests.stream().filter(tpaRequest -> Objects.equals(tpaRequest.getTarget(), target)).findFirst().orElse(null);
+    public CoordinateRequest findTarget(Player target) {
+        return this.requests.stream().filter(request -> Objects.equals(request.getTarget(), target)).findFirst().orElse(null);
     }
 
     /**
@@ -36,16 +32,16 @@ public class DynamicTeleportService extends Service {
      * @param player The player to search for.
      */
     public void removeAllPlayersRequests(Player player) {
-        if(PaperRustyConnector.getAPI().isFolia()) {
-            this.requests.removeIf(tpaRequest ->
-                    Objects.equals(tpaRequest.getTarget(),         player)
-                 || Objects.equals(tpaRequest.getClientUsername(), player.getPlayerProfile().getName())
+        if(PaperAPI.get().isFolia()) {
+            this.requests.removeIf(request ->
+                    Objects.equals(request.getTarget(),         player)
+                 || Objects.equals(request.getClientUsername(), player.getPlayerProfile().getName())
             );
         }
     }
 
-    public void remove(DynamicTeleport_TPARequest tpaRequest) {
-        this.requests.remove(tpaRequest);
+    public void remove(CoordinateRequest request) {
+        this.requests.remove(request);
     }
 
     @Override

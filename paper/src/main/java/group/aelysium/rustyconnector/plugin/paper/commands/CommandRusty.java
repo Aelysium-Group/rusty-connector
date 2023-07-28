@@ -6,31 +6,24 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 public final class CommandRusty {
     public static void create(PaperCommandManager<CommandSender> manager) {
-        PaperAPI api = PaperRustyConnector.getAPI();
-
         manager.command(message(manager));
         manager.command(send(manager));
     }
 
     private static Command.Builder<CommandSender> message(PaperCommandManager<CommandSender> manager) {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("message")
@@ -41,7 +34,7 @@ public final class CommandRusty {
                             try {
                                 final Long snowflake = commandContext.get("snowflake");
 
-                                MessageCacheService messageCacheService = api.getService(MessageCacheService.class);
+                                MessageCacheService messageCacheService = api.services().messageCacheService();
 
                                 CacheableMessage message = messageCacheService.getMessage(snowflake);
 
@@ -55,8 +48,8 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> send(PaperCommandManager<CommandSender> manager) {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("send")
@@ -69,7 +62,7 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                api.getService(RedisMessagerService.class).sendToOtherFamily(player,familyName);
+                                api.services().redisMessagerService().sendToOtherFamily(player,familyName);
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {

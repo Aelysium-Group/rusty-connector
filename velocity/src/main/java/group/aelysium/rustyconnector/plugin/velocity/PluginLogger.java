@@ -59,12 +59,12 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
     }
 
     public void send(Component message) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
         api.getServer().getConsoleCommandSource().sendMessage(message);
     }
 
     public static void init(LoggerConfig config) {
-        PluginLogger pluginLogger = VelocityRustyConnector.getAPI().getLogger();
+        PluginLogger pluginLogger = VelocityAPI.get().logger();
 
         LoggerGate gate = pluginLogger.getGate();
 

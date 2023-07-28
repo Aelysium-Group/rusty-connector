@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class BaseServerFamily<S extends PlayerServer> {
     protected final String name;
@@ -61,4 +62,12 @@ public abstract class BaseServerFamily<S extends PlayerServer> {
      * @return A player count
      */
     abstract public long getPlayerCount();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseServerFamily<?> that = (BaseServerFamily<?>) o;
+        return Objects.equals(name, that.name);
+    }
 }

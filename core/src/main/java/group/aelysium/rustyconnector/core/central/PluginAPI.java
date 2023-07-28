@@ -10,9 +10,11 @@ public abstract class PluginAPI<S> {
      */
     abstract public InputStream getResourceAsStream(String filename);
 
-    abstract public S getScheduler();
+    abstract public S scheduler();
 
-    abstract public PluginLogger getLogger();
+    abstract public PluginLogger logger();
 
-    abstract public String getDataFolder();
+    abstract public String dataFolder();
+
+    abstract public String version();
 }

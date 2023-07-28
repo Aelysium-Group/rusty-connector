@@ -6,21 +6,17 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisPublisher;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
@@ -68,6 +64,12 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         return this.getServerInfo().getAddress().getHostName() + ":" + this.getServerInfo().getAddress().getPort();
     }
 
+    /**
+     * Get the name of the family this server belongs to.
+     * @return The family name.
+     * @deprecated Use `.getFamily().getName()` instead.
+     */
+    @Deprecated(forRemoval = true, since = "0.6.0")
     public String getFamilyName() {
         return this.familyName;
     }
@@ -96,9 +98,9 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @throws InvalidAlgorithmParameterException If the family doesn't exist.
      */
     public void register(String familyName) throws Exception {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
-        this.registeredServer = api.getService(ServerService.class).registerServer(this, familyName);
+        this.registeredServer = api.services().serverService().registerServer(this, familyName);
 
         this.familyName = familyName;
     }
@@ -182,26 +184,43 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      */
     public BaseServerFamily getFamily() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
-        VelocityAPI api = VelocityRustyConnector.getAPI();
+        VelocityAPI api = VelocityAPI.get();
 
-        BaseServerFamily family = api.getService(FamilyService.class).find(this.familyName);
+        BaseServerFamily family = api.services().familyService().find(this.familyName);
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
     }
 
-    /**
-     * Connects a player to the server.
-     * This also increases the player count on this server by 1.
-     * @param player The player to connect.
-     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
-     */
-    public boolean connect(Player player) {
+    public boolean connect(Player player) throws ConnectException {
+        try {
+            PartyService partyService = VelocityAPI.get().services().partyService().orElseThrow();
+            Party party = partyService.find(player).orElseThrow();
+
+            try {
+                if(partyService.getSettings().onlyLeaderCanSwitchServers())
+                    if(!party.getLeader().equals(player)) {
+                        player.sendMessage(Component.text("Only the party leader can switch servers!", NamedTextColor.RED));
+                        return false;
+                    }
+
+                party.connect(this, player);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception ignore) {}
+
+        return directConnect(player);
+    }
+
+    public boolean directConnect(Player player) throws ConnectException {
         ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
         try {
-            return connection.connect().get().isSuccessful();
+            ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
+
+            return result.isSuccessful();
         } catch (Exception e) {
-            return false;
+            throw new ConnectException("Unable to connect to that server!", e);
         }
     }
 
@@ -239,5 +258,9 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
                "("+this.getServerInfo().getAddress().getHostName()+":"+this.getServerInfo().getAddress().getPort()+") - " +
                "["+this.getPlayerCount()+" ("+this.getSoftPlayerCap()+" <> "+this.getSoftPlayerCap()+") w-"+this.getWeight()+"]" +
                "{"+ this.familyName +"}";
+    }
+
+    public boolean equals(PlayerServer server) {
+        return this.serverInfo.equals(server.getServerInfo());
     }
 }

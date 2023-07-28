@@ -1,9 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -11,23 +12,28 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastCon
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.DynamicTeleport_TPASettings;
-import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.ConnectException;
 
 public class ScalarServerFamily extends PlayerFocusedServerFamily {
-
-    private ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, DynamicTeleport_TPASettings tpaSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts, tpaSettings);
+    protected ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
     }
 
     public PlayerServer connect(Player player) throws RuntimeException {
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
+        return connector.connect();
+    }
+    public PlayerServer connect(PlayerChooseInitialServerEvent event) throws RuntimeException {
+        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, event);
         return connector.connect();
     }
 
@@ -41,14 +47,13 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static ScalarServerFamily init(WhitelistService whitelistService, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-        logger.log("Registering family: "+familyName);
+    public static ScalarServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
                 familyName,
-                new File(String.valueOf(api.getDataFolder()), "families/"+familyName+".scalar.yml"),
+                new File(String.valueOf(api.dataFolder()), "families/"+familyName+".scalar.yml"),
                 "velocity_scalar_family_template.yml"
         );
         if(!scalarFamilyConfig.generate()) {
@@ -60,11 +65,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
         if(scalarFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
-            api.getService(WhitelistService.class).add(whitelist);
-
-            logger.log(familyName+" whitelist registered!");
-        } else {
-            logger.log(familyName + " doesn't have a whitelist.");
+            api.services().whitelistService().add(whitelist);
         }
 
         switch (Enum.valueOf(AlgorithmType.class, scalarFamilyConfig.getLoadBalancing_algorithm())) {
@@ -76,7 +77,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new DynamicTeleport_TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                        scalarFamilyConfig.getParent_family()
                 );
             }
             case LEAST_CONNECTION -> {
@@ -87,7 +88,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new DynamicTeleport_TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                        scalarFamilyConfig.getParent_family()
                 );
             }
             case MOST_CONNECTION -> {
@@ -98,55 +99,28 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                         scalarFamilyConfig.isLoadBalancing_weighted(),
                         scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
                         scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        new DynamicTeleport_TPASettings(scalarFamilyConfig.isTPA_enabled(), scalarFamilyConfig.shouldTPA_ignorePlayerCap(), scalarFamilyConfig.getTPA_requestLifetime())
+                        scalarFamilyConfig.getParent_family()
                 );
             }
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
-    }
-
-    public void reloadWhitelist() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-
-        Whitelist currentWhitelist = this.getWhitelist();
-        if(!(currentWhitelist == null)) {
-            api.getService(WhitelistService.class).remove(currentWhitelist);
-        }
-
-        ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
-                this.name,
-                new File(String.valueOf(api.getDataFolder()), "families/"+this.name+".scalar.yml"),
-                "velocity_scalar_family_template.yml"
-        );
-        if(!scalarFamilyConfig.generate()) {
-            throw new IllegalStateException("Unable to load or create families/"+this.name+".scalar.yml!");
-        }
-        scalarFamilyConfig.register();
-
-        Whitelist newWhitelist;
-        if(scalarFamilyConfig.isWhitelist_enabled()) {
-            newWhitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
-
-            this.whitelist = scalarFamilyConfig.getWhitelist_name();
-            api.getService(WhitelistService.class).add(newWhitelist);
-
-            logger.log("Finished reloading whitelist for "+this.name);
-            return;
-        }
-
-        this.whitelist = null;
-        logger.log("There is no whitelist for "+this.name);
     }
 }
 
 class ScalarFamilyConnector {
     private final ScalarServerFamily family;
     private final Player player;
+    private final PlayerChooseInitialServerEvent event;
 
     public ScalarFamilyConnector(ScalarServerFamily family, Player player) {
         this.family = family;
         this.player = player;
+        this.event = null;
+    }
+    public ScalarFamilyConnector(ScalarServerFamily family, PlayerChooseInitialServerEvent event) {
+        this.family = family;
+        this.player = event.getPlayer();
+        this.event = event;
     }
 
     public PlayerServer connect() throws RuntimeException {
@@ -196,13 +170,18 @@ class ScalarFamilyConnector {
             if(!server.validatePlayer(player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
 
-            if (!server.connect(player))
-                throw new RuntimeException("There was an issue connecting you to the server!");
+            if(this.event == null) {
+                if (!server.connect(player))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+            } else {
+                if (!server.connect(this.event))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+            }
 
             this.family.getLoadBalancer().iterate();
 
             return server;
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | ConnectException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -218,11 +197,19 @@ class ScalarFamilyConnector {
                 if(!server.validatePlayer(player))
                     throw new RuntimeException("The server you're trying to connect to is full!");
 
-                if(server.connect(player)) {
-                    this.family.getLoadBalancer().forceIterate();
-                    return server;
+                if(this.event == null) {
+                    if (server.connect(player)) {
+                        this.family.getLoadBalancer().forceIterate();
+                        return server;
+                    }
+                } else {
+                    if (server.connect(this.event)) {
+                        this.family.getLoadBalancer().forceIterate();
+                        return server;
+                    }
                 }
-                else throw new RuntimeException("Unable to connect you to the server in time!");
+
+                throw new RuntimeException("Unable to connect you to the server in time!");
             } catch (Exception e) {
                 if(isFinal)
                     player.disconnect(Component.text(e.getMessage()));

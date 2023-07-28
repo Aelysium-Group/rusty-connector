@@ -2,19 +2,17 @@ package group.aelysium.rustyconnector.plugin.paper.lib.magic_link;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MagicLinkService extends ClockService {
-    private AtomicInteger upcomingPingDelay = new AtomicInteger(0);
-    private AtomicInteger nextcomingPingDelay = new AtomicInteger(5);
+    private AtomicInteger upcomingPingDelay = new AtomicInteger(5);
     private Status status = Status.SEARCHING;
 
     public MagicLinkService(int threads) {
-        super(true, threads);
+        super(threads);
     }
 
     public void setStatus(Status status) {
@@ -29,22 +27,11 @@ public class MagicLinkService extends ClockService {
         upcomingPingDelay.set(delay);
     }
 
-    /**
-     * Set the ping delay for all pings after this upcoming one.
-     * @param delay The delay to set.
-     */
-    public void setNextcomingPingDelay(int delay) {
-        nextcomingPingDelay.set(delay);
-    }
-
     private void scheduleNextPing() {
-        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
-        RedisMessagerService service = PaperRustyConnector.getAPI().getService(RedisMessagerService.class);
+        RedisMessagerService service = PaperAPI.get().services().redisMessagerService();
 
         this.scheduleDelayed(() -> {
             try {
-                if(this.status == Status.SEARCHING)
-                    logger.log("Searching for proxy...");
                 service.pingProxy(RedisMessageServerPing.ConnectionIntent.CONNECT);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -52,13 +39,9 @@ public class MagicLinkService extends ClockService {
 
             MagicLinkService.this.scheduleNextPing();
         }, this.upcomingPingDelay.get());
-
-        if(this.upcomingPingDelay.get() != this.nextcomingPingDelay.get()) this.upcomingPingDelay = this.nextcomingPingDelay;
     }
 
     public void startHeartbeat() {
-        this.throwIfDisabled();
-
         this.scheduleNextPing();
     }
 
@@ -69,7 +52,7 @@ public class MagicLinkService extends ClockService {
     }
 
     public void disconnect() {
-        RedisMessagerService service = PaperRustyConnector.getAPI().getService(RedisMessagerService.class);
+        RedisMessagerService service = PaperAPI.get().services().redisMessagerService();
         service.pingProxy(RedisMessageServerPing.ConnectionIntent.DISCONNECT);
     }
 

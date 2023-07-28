@@ -12,15 +12,13 @@ public class MagicLinkService extends ClockService {
     protected final long interval;
 
     public MagicLinkService(int threads, long interval) {
-        super(true, threads);
+        super(threads);
         this.interval = interval;
     }
 
     public void startHeartbeat() {
-        this.throwIfDisabled();
-
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        ServerService serverService = api.getService(ServerService.class);
+        VelocityAPI api = VelocityAPI.get();
+        ServerService serverService = api.services().serverService();
 
         this.scheduleRecurring(() -> {
             try {

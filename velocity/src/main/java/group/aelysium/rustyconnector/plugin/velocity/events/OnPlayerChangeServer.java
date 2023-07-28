@@ -7,13 +7,10 @@ import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.central.Processor;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -25,8 +22,8 @@ public class OnPlayerChangeServer {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerChangeServer(ServerConnectedEvent event) {
             return EventTask.async(() -> {
-                VelocityAPI api = VelocityRustyConnector.getAPI();
-                PluginLogger logger = api.getLogger();
+                VelocityAPI api = VelocityAPI.get();
+                PluginLogger logger = api.logger();
 
                 try {
                     Player player = event.getPlayer();
@@ -34,10 +31,10 @@ public class OnPlayerChangeServer {
                     RegisteredServer newRawServer = event.getServer();
                     RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
 
-                    PlayerServer newServer = api.getService(ServerService.class).findServer(newRawServer.getServerInfo());
+                    PlayerServer newServer = api.services().serverService().findServer(newRawServer.getServerInfo());
 
                     if(oldRawServer == null) return; // Player just connected to proxy. This isn't a server switch.
-                    PlayerServer oldServer = api.getService(ServerService.class).findServer(oldRawServer.getServerInfo());
+                    PlayerServer oldServer = api.services().serverService().findServer(oldRawServer.getServerInfo());
 
                     boolean isTheSameFamily = newServer.getFamilyName().equals(oldServer.getFamilyName());
 
@@ -57,15 +54,21 @@ public class OnPlayerChangeServer {
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_SERVER, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_SERVER.build(player, oldServer, newServer));
 
-                    // Uncache any old servers in the old family.
-                    if(!isTheSameFamily) {
-                        BaseServerFamily family = oldServer.getFamily();
-                        if (!(family instanceof StaticServerFamily)) return;
-                        ((StaticServerFamily) family).uncacheHomeServer(player);
-                    }
+                    if(!isTheSameFamily) handleHomeServerCache(oldServer.getFamily(), player);
                 } catch (Exception e) {
                     logger.log(e.getMessage());
                 }
             });
+    }
+
+    public void handleHomeServerCache(BaseServerFamily family, Player player) {
+        PluginLogger logger = VelocityAPI.get().logger();
+
+        try {
+            if (!(family instanceof StaticServerFamily)) return;
+            ((StaticServerFamily) family).uncacheHomeServer(player);
+        } catch (Exception e) {
+            logger.log(e.getMessage());
+        }
     }
 }
