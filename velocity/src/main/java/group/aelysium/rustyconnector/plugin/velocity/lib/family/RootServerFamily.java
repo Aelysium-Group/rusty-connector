@@ -24,7 +24,6 @@ public class RootServerFamily extends ScalarServerFamily {
     public static RootServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
-        logger.log("Registering family: "+familyName);
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
                 familyName,
@@ -41,10 +40,6 @@ public class RootServerFamily extends ScalarServerFamily {
             whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
             api.services().whitelistService().add(whitelist);
-
-            logger.log(familyName+" whitelist registered!");
-        } else {
-            logger.log(familyName + " doesn't have a whitelist.");
         }
 
         if(!scalarFamilyConfig.getParent_family().equals(""))

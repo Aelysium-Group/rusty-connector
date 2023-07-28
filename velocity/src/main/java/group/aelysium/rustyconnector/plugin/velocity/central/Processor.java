@@ -3,8 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.DataTransitService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.core.lib.model.IKLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -55,137 +55,185 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
 
         // Setup private key
         PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.dataFolder()), "private.key"));
-        if(!privateKeyConfig.generate())
+        if (!privateKeyConfig.generate())
             throw new IllegalStateException("Unable to load or create private.key!");
         char[] privateKey = null;
         try {
             privateKey = privateKeyConfig.get();
-        } catch (Exception ignore) {}
-        if(privateKey == null) throw new IllegalAccessException("There was a fatal error while reading private.key!");
+        } catch (Exception ignore) {
+        }
+        if (privateKey == null) throw new IllegalAccessException("There was a fatal error while reading private.key!");
 
-        // Setup Redis
-        RedisClient.Builder redisClientBuilder = new RedisClient.Builder()
-                .setHost(config.getRedis_host())
-                .setPort(config.getRedis_port())
-                .setUser(config.getRedis_user())
-                .setPrivateKey(privateKey)
-                .setDataChannel(config.getRedis_dataChannel());
+        {
+            // Setup Redis
+            logger.send(Component.text("Building Redis...", NamedTextColor.DARK_GRAY));
 
-        if(!config.getRedis_password().equals(""))
-            redisClientBuilder.setPassword(config.getRedis_password());
+            RedisClient.Builder redisClientBuilder = new RedisClient.Builder()
+                    .setHost(config.getRedis_host())
+                    .setPort(config.getRedis_port())
+                    .setUser(config.getRedis_user())
+                    .setPrivateKey(privateKey)
+                    .setDataChannel(config.getRedis_dataChannel());
 
-        builder.addService(new RedisService(redisClientBuilder, privateKey));
+            if (!config.getRedis_password().equals(""))
+                redisClientBuilder.setPassword(config.getRedis_password());
 
-        logger.log("Finished setting up redis");
+            builder.addService(new RedisService(redisClientBuilder, privateKey));
 
-        // Setup families
-        logger.log("Setting up Families");
+            logger.send(Component.text("Finished building Redis.", NamedTextColor.GREEN));
+        }
 
-        FamiliesConfig familiesConfig = FamiliesConfig.newConfig(new File(String.valueOf(api.dataFolder()), "families.yml"), "velocity_families_template.yml");
-        if(!familiesConfig.generate())
-            throw new IllegalStateException("Unable to load or create families.yml!");
-        familiesConfig.register();
+        {
+            // Setup families
+            logger.send(Component.text("Building families service...", NamedTextColor.DARK_GRAY));
 
-        // Setup MySQL
-        java.util.Optional<MySQLService> mySQLService = java.util.Optional.empty();
-        try {
-            if (!familiesConfig.getStaticFamilies().isEmpty()) {
-                MySQLService builtMySQLService = new MySQLService.Builder()
-                        .setHost(familiesConfig.getMysql_host())
-                        .setPort(familiesConfig.getMysql_port())
-                        .setDatabase(familiesConfig.getMysql_database())
-                        .setUser(familiesConfig.getMysql_user())
-                        .setPassword(familiesConfig.getMysql_password())
-                        .build();
+            FamiliesConfig familiesConfig = FamiliesConfig.newConfig(new File(String.valueOf(api.dataFolder()), "families.yml"), "velocity_families_template.yml");
+            if (!familiesConfig.generate())
+                throw new IllegalStateException("Unable to load or create families.yml!");
+            familiesConfig.register();
 
-                HomeServerMappingsDatabase.init(builtMySQLService);
+            // Setup Static families MySQL
+            java.util.Optional<MySQLService> mySQLService = java.util.Optional.empty();
+            {
+                logger.send(Component.text(" | Static families detected. Building static family MySQL...", NamedTextColor.DARK_GRAY));
+                try {
+                    if (!familiesConfig.getStaticFamilies().isEmpty()) {
+                        MySQLService builtMySQLService = new MySQLService.Builder()
+                                .setHost(familiesConfig.getMysql_host())
+                                .setPort(familiesConfig.getMysql_port())
+                                .setDatabase(familiesConfig.getMysql_database())
+                                .setUser(familiesConfig.getMysql_user())
+                                .setPassword(familiesConfig.getMysql_password())
+                                .build();
 
-                mySQLService = java.util.Optional.of(builtMySQLService);
-                logger.log("Finished setting up MySQL");
+                        HomeServerMappingsDatabase.init(builtMySQLService);
+
+                        mySQLService = java.util.Optional.of(builtMySQLService);
+                    }
+                } catch (CommunicationsException e) {
+                    throw new IllegalAccessException("Unable to connect to MySQL! Is the server available?");
+                } catch (Exception e) {
+                    throw new IllegalAccessException("Unable to connect to initialize MySQL for Static Families!");
+                }
+
+                logger.send(Component.text(" | Finished building static family MySQL.", NamedTextColor.GREEN));
             }
 
-        } catch (CommunicationsException e) {
-            throw new IllegalAccessException("Unable to connect to MySQL! Is the server available?");
-        } catch (Exception e) {
-            throw new IllegalAccessException("Unable to connect to initialize MySQL for Static Families!");
+            logger.send(Component.text(" | Registering family service to the API...", NamedTextColor.DARK_GRAY));
+            FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers(), mySQLService);
+            builder.addService(familyService);
+            logger.send(Component.text(" | Finished registering family service to API.", NamedTextColor.GREEN));
+
+            {
+                logger.send(Component.text(" | Building families...", NamedTextColor.DARK_GRAY));
+                for (String familyName : familiesConfig.getScalarFamilies()) {
+                    familyService.add(ScalarServerFamily.init(familyName));
+                    logger.send(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
+                }
+                for (String familyName : familiesConfig.getStaticFamilies()) {
+                    familyService.add(StaticServerFamily.init(familyName));
+                    logger.send(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
+                }
+                logger.send(Component.text(" | Finished building families.", NamedTextColor.GREEN));
+            }
+
+            {
+                logger.send(Component.text(" | Building root family...", NamedTextColor.DARK_GRAY));
+
+                RootServerFamily rootFamily = RootServerFamily.init(familiesConfig.getRootFamilyName());
+                familyService.setRootFamily(rootFamily);
+                logger.send(Component.text(" | Registered root family: "+rootFamily.getName(), NamedTextColor.YELLOW));
+
+                logger.send(Component.text(" | Finished building root family.", NamedTextColor.GREEN));
+            }
+
+            logger.send(Component.text(" | Registering load balancing service to the API...", NamedTextColor.DARK_GRAY));
+            if (config.getServices_loadBalancing_enabled()) {
+                builder.addService(new LoadBalancingService(familyService.size(), config.getServices_loadBalancing_interval()));
+            }
+            logger.send(Component.text(" | Finished registering load balancing service to the API.", NamedTextColor.GREEN));
+
+            logger.send(Component.text("Finished building families service.", NamedTextColor.GREEN));
         }
-
-        FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers(), mySQLService);
-        builder.addService(familyService);
-
-        WhitelistService whitelistService = new WhitelistService();
-        builder.addService(whitelistService);
-
-        for (String familyName: familiesConfig.getScalarFamilies())
-            familyService.add(ScalarServerFamily.init(familyName));
-        for (String familyName: familiesConfig.getStaticFamilies())
-            familyService.add(StaticServerFamily.init(familyName));
-
-        logger.log("Setting up root family");
-
-        RootServerFamily rootFamily = RootServerFamily.init(familiesConfig.getRootFamilyName());
-        familyService.setRootFamily(rootFamily);
-
-        logger.log("Finished setting up root family");
-
-        logger.log("Finished setting up families");
-
-        if(config.getServices_loadBalancing_enabled()) {
-            builder.addService(new LoadBalancingService(familyService.size(), config.getServices_loadBalancing_interval()));
-        }
-
-        logger.log("Finished loading services...");
 
         // Setup network whitelist
-        if(config.isWhitelist_enabled())
-            whitelistService.setProxyWhitelist(Whitelist.init(config.getWhitelist_name()));
-        logger.log("Finished setting up network whitelist");
+        {
+            logger.send(Component.text("Registering whitelist service to the API...", NamedTextColor.DARK_GRAY));
+            WhitelistService whitelistService = new WhitelistService();
+            builder.addService(whitelistService);
+            logger.send(Component.text("Finished registering whitelist service to the API.", NamedTextColor.GREEN));
 
-        // Setup Data Transit
-        DataTransitConfig dataTransitConfig = DataTransitConfig.newConfig(new File(String.valueOf(api.dataFolder()), "data-transit.yml"), "velocity_data_transit_template.yml");
-        if(!dataTransitConfig.generate())
-            throw new IllegalStateException("Unable to load or create data-transit.yml!");
-        dataTransitConfig.register();
+            logger.send(Component.text("Building proxy whitelist...", NamedTextColor.DARK_GRAY));
+            if (config.isWhitelist_enabled()) {
+                whitelistService.setProxyWhitelist(Whitelist.init(config.getWhitelist_name()));
+                logger.send(Component.text("Finished building proxy whitelist.", NamedTextColor.GREEN));
+            } else
+                logger.send(Component.text("Finished building proxy whitelist. No whitelist is enabled for the proxy.", NamedTextColor.GREEN));
+        }
 
-        builder.addService(new MessageCacheService(dataTransitConfig.getCache_size(), dataTransitConfig.getCache_ignoredStatuses(), dataTransitConfig.getCache_ignoredTypes()));
-        logger.log("Set message cache size to be: "+dataTransitConfig.getCache_size());
+        {
+            logger.send(Component.text("Building data transit service...", NamedTextColor.DARK_GRAY));
+            // Setup Data Transit
+            DataTransitConfig dataTransitConfig = DataTransitConfig.newConfig(new File(String.valueOf(api.dataFolder()), "data_transit.yml"), "velocity_data_transit_template.yml");
+            if (!dataTransitConfig.generate())
+                throw new IllegalStateException("Unable to load or create data-transit.yml!");
+            dataTransitConfig.register();
 
-        DataTransitService dataTransitService = new DataTransitService(
-                dataTransitConfig.isDenylist_enabled(),
-                dataTransitConfig.isWhitelist_enabled(),
-                dataTransitConfig.getMaxPacketLength()
-        );
-        builder.addService(dataTransitService);
+            {
+                logger.send(Component.text(" | Building message cache service...", NamedTextColor.DARK_GRAY));
+                builder.addService(new MessageCacheService(dataTransitConfig.getCache_size(), dataTransitConfig.getCache_ignoredStatuses(), dataTransitConfig.getCache_ignoredTypes()));
+                logger.send(Component.text(" | Message cache size set to: "+dataTransitConfig.getCache_size(), NamedTextColor.YELLOW));
+                logger.send(Component.text(" | Finished building message cache service.", NamedTextColor.GREEN));
+            }
 
-        if(dataTransitConfig.isWhitelist_enabled())
-            dataTransitConfig.getWhitelist_addresses().forEach(entry -> {
-                String[] addressSplit = entry.split(":");
+            DataTransitService dataTransitService = new DataTransitService(
+                    dataTransitConfig.isDenylist_enabled(),
+                    dataTransitConfig.isWhitelist_enabled(),
+                    dataTransitConfig.getMaxPacketLength()
+            );
+            builder.addService(dataTransitService);
 
-                InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
+            if (dataTransitConfig.isWhitelist_enabled())
+                dataTransitConfig.getWhitelist_addresses().forEach(entry -> {
+                    String[] addressSplit = entry.split(":");
 
-                dataTransitService.whitelistAddress(address);
-            });
+                    InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
 
-        if(dataTransitConfig.isDenylist_enabled())
-            dataTransitConfig.getDenylist_addresses().forEach(entry -> {
-                String[] addressSplit = entry.split(":");
+                    dataTransitService.whitelistAddress(address);
+                });
 
-                InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
+            if (dataTransitConfig.isDenylist_enabled())
+                dataTransitConfig.getDenylist_addresses().forEach(entry -> {
+                    String[] addressSplit = entry.split(":");
 
-                dataTransitService.blacklistAddress(address);
-            });
+                    InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
 
-        logger.log("Finished setting up message tunnel");
+                    dataTransitService.blacklistAddress(address);
+                });
 
+            logger.send(Component.text("Finished building data transit service.", NamedTextColor.GREEN));
+        }
 
-        MagicLinkService magicLinkService = new MagicLinkService(3, config.getServices_serverLifecycle_serverPingInterval());
-        builder.addService(magicLinkService);
+        {
+            logger.send(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-        ServerService.Builder serverServiceBuilder = new ServerService.Builder()
-                .setServerTimeout(config.getServices_serverLifecycle_serverTimeout())
-                .setServerInterval(config.getServices_serverLifecycle_serverPingInterval());
+            MagicLinkService magicLinkService = new MagicLinkService(3, config.getServices_serverLifecycle_serverPingInterval());
+            builder.addService(magicLinkService);
 
-        builder.addService(serverServiceBuilder.build());
+            logger.send(Component.text("Finished building magic link service.", NamedTextColor.GREEN));
+        }
+
+        {
+            logger.send(Component.text("Building server service...", NamedTextColor.DARK_GRAY));
+
+            ServerService.Builder serverServiceBuilder = new ServerService.Builder()
+                    .setServerTimeout(config.getServices_serverLifecycle_serverTimeout())
+                    .setServerInterval(config.getServices_serverLifecycle_serverPingInterval());
+
+            builder.addService(serverServiceBuilder.build());
+
+            logger.send(Component.text("Finished building server service.", NamedTextColor.GREEN));
+        }
 
         return builder.build();
     }

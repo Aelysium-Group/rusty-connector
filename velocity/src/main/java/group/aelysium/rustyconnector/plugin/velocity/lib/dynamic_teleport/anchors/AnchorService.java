@@ -26,9 +26,10 @@ public class AnchorService extends Service {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
 
+        VelocityAPI.get().logger().send(Component.text("Building anchor service commands...", NamedTextColor.DARK_GRAY));
         this.anchors.forEach((name, family) -> {
             if(commandManager.hasCommand(name)) {
-                logger.send(Component.text("Issue initializing Family Anchors! A command called "+name+" already exists! Please find another name for this anchor!", NamedTextColor.RED));
+                logger.send(Component.text("Issue initializing Family Anchors! A command called /"+name+" already exists! Please find another name for this anchor!", NamedTextColor.RED));
                 return;
             }
 
@@ -37,10 +38,14 @@ public class AnchorService extends Service {
                         commandManager.metaBuilder(name).build(),
                         CommandAnchor.create(name)
                 );
+
+                VelocityAPI.get().logger().send(Component.text(" | Registered: /"+name, NamedTextColor.YELLOW));
             } catch (Exception e) {
                 logger.send(Component.text("Issue initializing Family Anchors! "+ e.getMessage(), NamedTextColor.RED));
             }
         });
+
+        VelocityAPI.get().logger().send(Component.text("Finished building anchor service commands.", NamedTextColor.GREEN));
     }
 
     public Optional<BaseServerFamily> getFamily(String anchor) {

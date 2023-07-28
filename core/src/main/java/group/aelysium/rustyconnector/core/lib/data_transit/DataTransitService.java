@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall;
+package group.aelysium.rustyconnector.core.lib.data_transit;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
@@ -32,11 +32,6 @@ public class DataTransitService extends Service {
 
     /**
      * Validate a message.
-     * This system first checks to see if the address is blacklisted. If so it returns `false`.
-     * If the address is not blacklisted, it checks if the address is whitelisted. If not we return `false`.
-     *
-     * Succeeds if the address is both whitelisted and not blacklisted.
-     * Succeeds if no whitelist or blacklist is defined.
      * @param message The message to check.
      * @throws BlockedMessageException If the message should be blocked.
      */

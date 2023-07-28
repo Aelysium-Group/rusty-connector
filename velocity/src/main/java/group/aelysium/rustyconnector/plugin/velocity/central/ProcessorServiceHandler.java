@@ -2,8 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.firewall.DataTransitService;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;

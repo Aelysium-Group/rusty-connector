@@ -33,15 +33,21 @@ public class PartyService extends Service {
 
     public void initCommand() {
         CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
+        VelocityAPI.get().logger().send(Component.text("Building party service commands...", NamedTextColor.DARK_GRAY));
+
         if(!commandManager.hasCommand("party"))
             try {
                 commandManager.register(
                         commandManager.metaBuilder("party").aliases("/party").build(),
                         CommandParty.create()
                 );
+
+                VelocityAPI.get().logger().send(Component.text(" | Registered: /party", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+        VelocityAPI.get().logger().send(Component.text("Finished building party service commands.", NamedTextColor.GREEN));
     }
 
     public void queueConnector(Runnable runnable) {

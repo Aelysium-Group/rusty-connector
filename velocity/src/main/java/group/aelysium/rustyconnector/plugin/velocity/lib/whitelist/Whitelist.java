@@ -8,6 +8,8 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.config.WhitelistConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.*;
@@ -116,6 +118,7 @@ public class Whitelist {
     public static Whitelist init(String whitelistName) {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
+        logger.send(Component.text(" | Registering whitelist "+whitelistName+"...", NamedTextColor.DARK_GRAY));
 
         WhitelistConfig whitelistConfig = WhitelistConfig.newConfig(
                 whitelistName,
@@ -146,7 +149,7 @@ public class Whitelist {
             });
         }
 
-        logger.log("Loaded whitelist: "+whitelistName);
+        logger.send(Component.text(" | Registered whitelist: "+whitelistName, NamedTextColor.YELLOW));
         return whitelist;
     }
 }

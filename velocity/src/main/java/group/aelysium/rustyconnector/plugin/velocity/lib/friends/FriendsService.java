@@ -26,12 +26,16 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
 
     public void initCommand() {
         CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
+        VelocityAPI.get().logger().send(Component.text("Building friends service commands...", NamedTextColor.DARK_GRAY));
+
         if(!commandManager.hasCommand("friends"))
             try {
                 commandManager.register(
                         commandManager.metaBuilder("friends").aliases("/friends").build(),
                         CommandFriends.create()
                 );
+
+                VelocityAPI.get().logger().send(Component.text(" | Registered: /friends", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -41,6 +45,8 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
                         commandManager.metaBuilder("unfriend").aliases("/unfriend").build(),
                         CommandUnFriend.create()
                 );
+
+                VelocityAPI.get().logger().send(Component.text(" | Registered: /unfriend", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -51,9 +57,13 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
                             commandManager.metaBuilder("fm").aliases("/fm").build(),
                             CommandFM.create()
                     );
+
+                    VelocityAPI.get().logger().send(Component.text(" | Registered: /fm", NamedTextColor.YELLOW));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+        VelocityAPI.get().logger().send(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
     }
 
     public FriendsSettings getSettings() {

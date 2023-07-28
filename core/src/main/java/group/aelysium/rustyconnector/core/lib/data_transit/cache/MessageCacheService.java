@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.database.redis.messages.cache;
+package group.aelysium.rustyconnector.core.lib.data_transit.cache;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;

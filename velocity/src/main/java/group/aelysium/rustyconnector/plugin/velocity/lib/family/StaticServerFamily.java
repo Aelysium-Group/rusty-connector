@@ -132,7 +132,6 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
     public static StaticServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
-        logger.log("Registering family: " + familyName);
 
         StaticFamilyConfig staticFamilyConfig = StaticFamilyConfig.newConfig(
                 familyName,
@@ -149,10 +148,6 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
             whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name());
 
             api.services().whitelistService().add(whitelist);
-
-            logger.log(familyName + " whitelist registered!");
-        } else {
-            logger.log(familyName + " doesn't have a whitelist.");
         }
 
         StaticServerFamily family = null;

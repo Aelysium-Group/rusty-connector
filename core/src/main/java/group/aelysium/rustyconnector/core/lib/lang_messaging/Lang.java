@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.lang_messaging;
 
 import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;

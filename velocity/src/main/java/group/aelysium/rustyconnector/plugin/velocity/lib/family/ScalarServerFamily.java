@@ -17,6 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -49,7 +50,6 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
     public static ScalarServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
-        logger.log("Registering family: "+familyName);
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
                 familyName,
@@ -66,10 +66,6 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
             whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
 
             api.services().whitelistService().add(whitelist);
-
-            logger.log(familyName+" whitelist registered!");
-        } else {
-            logger.log(familyName + " doesn't have a whitelist.");
         }
 
         switch (Enum.valueOf(AlgorithmType.class, scalarFamilyConfig.getLoadBalancing_algorithm())) {

@@ -12,7 +12,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
@@ -21,7 +21,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocu
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 

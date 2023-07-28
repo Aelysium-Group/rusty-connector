@@ -12,6 +12,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.co
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 
@@ -26,15 +28,21 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
     }
     public void initCommand() {
         CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
+        VelocityAPI.get().logger().send(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
+
         if(!commandManager.hasCommand("tpa"))
             try {
                 commandManager.register(
                         commandManager.metaBuilder("tpa").build(),
                         CommandTPA.create()
                 );
+
+                VelocityAPI.get().logger().send(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+        VelocityAPI.get().logger().send(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
     }
 
     public TPASettings getSettings() {

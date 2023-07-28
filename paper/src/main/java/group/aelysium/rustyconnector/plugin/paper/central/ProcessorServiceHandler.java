@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 
 
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;

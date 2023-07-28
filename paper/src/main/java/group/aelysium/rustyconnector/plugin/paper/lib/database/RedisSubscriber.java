@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;

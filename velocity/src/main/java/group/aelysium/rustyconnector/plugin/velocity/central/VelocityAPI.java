@@ -19,6 +19,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocu
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;
@@ -104,10 +106,18 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         PluginLogger logger = VelocityAPI.get().logger();
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
+
+        logger.send(Component.text("Booting Redis service...", NamedTextColor.DARK_GRAY));
         this.processor.services().redisService().start(RedisSubscriber.class);
+        logger.send(Component.text("Finished booting Redis service.", NamedTextColor.GREEN));
+
+        logger.send(Component.text("Booting magic link service...", NamedTextColor.DARK_GRAY));
         this.processor.services().magicLinkService().startHeartbeat();
+        logger.send(Component.text("Finished booting magic link service.", NamedTextColor.GREEN));
 
         try {
+            logger.send(Component.text("Booting family service...", NamedTextColor.DARK_GRAY));
+
             FamilyService familyService = this.processor.services().familyService();
 
             familyService.dump().forEach(baseServerFamily -> {
@@ -117,27 +127,40 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
                     logger.log("There was an issue resolving the parent for "+baseServerFamily.getName()+". "+e.getMessage());
                 }
             });
+
+            logger.send(Component.text("Finished booting family service.", NamedTextColor.GREEN));
         } catch (Exception ignore) {}
+
         try {
+            VelocityAPI.get().logger().send(Component.text("Building friends service...", NamedTextColor.DARK_GRAY));
             FriendsService friendsService = Processor.Initializer.buildFriendsService().orElseThrow();
 
             this.processor.services().add(friendsService);
 
             friendsService.initCommand();
-        } catch (Exception ignore) {}
+            VelocityAPI.get().logger().send(Component.text("Finished building friends service.", NamedTextColor.GREEN));
+        } catch (Exception ignore) {
+            VelocityAPI.get().logger().send(Component.text("The friends service wasn't enabled.", NamedTextColor.GRAY));
+        }
+
         try {
             PlayerService playerService = Processor.Initializer.buildPlayerService().orElseThrow();
 
             this.processor.services().add(playerService);
         } catch (Exception ignore) {}
         try {
+            VelocityAPI.get().logger().send(Component.text("Building party service...", NamedTextColor.DARK_GRAY));
             PartyService partyService = Processor.Initializer.buildPartyService().orElseThrow();
 
             this.processor.services().add(partyService);
 
             partyService.initCommand();
-        } catch (Exception ignore) {}
+            VelocityAPI.get().logger().send(Component.text("Finished building party service.", NamedTextColor.GREEN));
+        } catch (Exception ignore) {
+            VelocityAPI.get().logger().send(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
+        }
         try {
+            VelocityAPI.get().logger().send(Component.text("Building dynamic teleport service...", NamedTextColor.DARK_GRAY));
             DynamicTeleportService dynamicTeleportService = Processor.Initializer.buildDynamicTeleportService().orElseThrow();
 
             this.processor.services().add(dynamicTeleportService);
@@ -155,7 +178,11 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
             try {
                 dynamicTeleportService.services().anchorService().orElseThrow().initCommands();
             } catch (Exception ignore) {}
-        } catch (Exception ignore) {}
+
+            VelocityAPI.get().logger().send(Component.text("Finished building dynamic teleport service.", NamedTextColor.GREEN));
+        } catch (Exception ignore) {
+            VelocityAPI.get().logger().send(Component.text("The dynamic teleport service wasn't enabled.", NamedTextColor.GRAY));
+        }
     }
 
     public ProcessorServiceHandler services() {
