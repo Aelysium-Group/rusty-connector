@@ -53,6 +53,11 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     }
 
     @Override
+    public String version() {
+        return null;
+    }
+
+    @Override
     public PluginLogger logger() {
         return this.pluginLogger;
     }

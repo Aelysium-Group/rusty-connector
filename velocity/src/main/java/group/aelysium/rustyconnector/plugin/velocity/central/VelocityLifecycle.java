@@ -29,7 +29,7 @@ public class VelocityLifecycle extends PluginLifecycle {
         if(!loadCommands()) return false;
         if(!loadEvents()) return false;
 
-        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(logger);
+        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(logger, api.version());
 
         WhitelistConfig.empty();
         DefaultConfig.empty();

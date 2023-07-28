@@ -35,42 +35,38 @@ public interface Lang {
 
     Component UNKNOWN_COMMAND = text("Unknown command. Type \"/help\" for help.",WHITE);
 
-    Message WORDMARK_INFO = () -> ASCIIAlphabet.generate("info");
-
     Message WORDMARK_USAGE = () -> ASCIIAlphabet.generate("usage");
-
-    Message WORDMARK_CACHED_MESSAGES = () -> join(
-            newlines(),
-            ASCIIAlphabet.generate("cached"),
-            SPACING,
-            ASCIIAlphabet.generate("messages")
-    );
 
     Message WORDMARK_MESSAGE = () -> ASCIIAlphabet.generate("message");
 
-    Message WORDMARK_RUSTY_CONNECTOR = () -> // font: ANSI Shadow
-            join(
+    ParameterizedMessage1<String> WORDMARK_RUSTY_CONNECTOR = (version) -> {// font: ANSI Shadow
+        Component versionComponent = empty();
+
+        if(version != null && !version.equals(""))
+            versionComponent = versionComponent.append(text("Version "+version, GREEN));
+
+        return join(
                 newlines(),
                 BORDER,
                 SPACING,
-                text(" /███████                        /██"                                                           , AQUA),
-                text("| ██__  ██                      | ██"                                                           , AQUA),
-                text("| ██  \\ ██ /██   /██  /███████ /██████   /██   /██"                                            , AQUA),
-                text("| ███████/| ██  | ██ /██_____/|_  ██_/  | ██  | ██"                                             , AQUA),
-                text("| ██__  ██| ██  | ██|  ██████   | ██    | ██  | ██"                                             , AQUA),
-                text("| ██  \\ ██| ██  | ██ \\____  ██  | ██ /██| ██  | ██"                                           , AQUA),
-                text("| ██  | ██|  ██████/ /███████/  |  ████/|  ███████"                                             , AQUA),
-                text("|__/  |__/ \\______/ |_______/    \\___/   \\____  ██"                                          , AQUA),
-                text("                                         /██  | ██"                                             , AQUA),
-                text("                                        |  ██████/"                                             , AQUA),
-                text("  /██████                                \\______/             /██"                             , AQUA),
-                text(" /██__  ██                                                    | ██"                             , AQUA),
-                text("| ██  \\__/  /██████  /███████  /███████   /██████   /███████ /██████    /██████   /██████"     , AQUA),
-                text("| ██       /██__  ██| ██__  ██| ██__  ██ /██__  ██ /██_____/|_  ██_/   /██__  ██ /██__  ██"     , AQUA),
+                text(" /███████                        /██", AQUA),
+                text("| ██__  ██                      | ██", AQUA),
+                text("| ██  \\ ██ /██   /██  /███████ /██████   /██   /██", AQUA),
+                text("| ███████/| ██  | ██ /██_____/|_  ██_/  | ██  | ██", AQUA),
+                text("| ██__  ██| ██  | ██|  ██████   | ██    | ██  | ██", AQUA),
+                text("| ██  \\ ██| ██  | ██ \\____  ██  | ██ /██| ██  | ██", AQUA),
+                text("| ██  | ██|  ██████/ /███████/  |  ████/|  ███████", AQUA),
+                text("|__/  |__/ \\______/ |_______/    \\___/   \\____  ██", AQUA),
+                text("                                         /██  | ██  ", AQUA).append(versionComponent),
+                text("                                        |  ██████/", AQUA),
+                text("  /██████                                \\______/             /██", AQUA),
+                text(" /██__  ██                                                    | ██", AQUA),
+                text("| ██  \\__/  /██████  /███████  /███████   /██████   /███████ /██████    /██████   /██████", AQUA),
+                text("| ██       /██__  ██| ██__  ██| ██__  ██ /██__  ██ /██_____/|_  ██_/   /██__  ██ /██__  ██", AQUA),
                 text("| ██      | ██  \\ ██| ██  \\ ██| ██  \\ ██| ████████| ██        | ██    | ██  \\ ██| ██  \\__/", AQUA),
-                text("| ██    ██| ██  | ██| ██  | ██| ██  | ██| ██_____/| ██        | ██ /██| ██  | ██| ██"           , AQUA),
-                text("|  ██████/|  ██████/| ██  | ██| ██  | ██|  ███████|  ███████  |  ████/|  ██████/| ██"           , AQUA),
-                text("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/"      , AQUA),
+                text("| ██    ██| ██  | ██| ██  | ██| ██  | ██| ██_____/| ██        | ██ /██| ██  | ██| ██", AQUA),
+                text("|  ██████/|  ██████/| ██  | ██| ██  | ██|  ███████|  ███████  |  ████/|  ██████/| ██", AQUA),
+                text("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/", AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
@@ -78,7 +74,8 @@ public interface Lang {
                 text("Use: `/rc` to get started", YELLOW),
                 SPACING,
                 BORDER
-            );
+        );
+    };
 
     ParameterizedMessage1<Component> BOXED_MESSAGE = (message) -> join(
             newlines(),

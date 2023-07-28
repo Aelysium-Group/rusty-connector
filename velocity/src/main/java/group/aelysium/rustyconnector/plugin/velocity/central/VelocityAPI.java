@@ -1,5 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
+import com.google.common.io.Resources;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -18,7 +21,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import org.slf4j.Logger;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.SyncFailedException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
@@ -29,7 +34,8 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     public static VelocityAPI get() {
         return instance;
     }
-    
+
+    private String version;
     private final VelocityRustyConnector plugin;
     private final ProxyServer server;
     private Processor processor = null;
@@ -38,7 +44,20 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
 
     public VelocityAPI(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
         instance = this;
-        
+
+        try {
+            InputStream stream = getResourceAsStream("velocity-plugin.json");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            JsonObject json = new Gson().fromJson(reader, JsonObject.class);
+
+            stream.close();
+            reader.close();
+            this.version = json.get("version").getAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.version = null;
+        }
+
         this.plugin = plugin;
         this.server = server;
         this.pluginLogger = new PluginLogger(logger);
@@ -48,6 +67,11 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     @Override
     public InputStream getResourceAsStream(String filename)  {
         return getClass().getClassLoader().getResourceAsStream(filename);
+    }
+
+    @Override
+    public String version() {
+        return this.version;
     }
 
     @Override
