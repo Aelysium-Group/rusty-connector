@@ -55,7 +55,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
             api.configureProcessor(defaultConfig);
 
-            Lang.WORDMARK_RUSTY_CONNECTOR.send(logger);
+            Lang.WORDMARK_RUSTY_CONNECTOR.send(logger, api.version());
 
             DefaultConfig.empty();
 

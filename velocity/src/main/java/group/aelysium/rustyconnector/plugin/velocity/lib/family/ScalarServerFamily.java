@@ -1,7 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
@@ -10,12 +12,15 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastCon
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.ConnectException;
 
 public class ScalarServerFamily extends PlayerFocusedServerFamily {
     protected ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -24,6 +29,10 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
 
     public PlayerServer connect(Player player) throws RuntimeException {
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
+        return connector.connect();
+    }
+    public PlayerServer connect(PlayerChooseInitialServerEvent event) throws RuntimeException {
+        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, event);
         return connector.connect();
     }
 
@@ -105,10 +114,17 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
 class ScalarFamilyConnector {
     private final ScalarServerFamily family;
     private final Player player;
+    private final PlayerChooseInitialServerEvent event;
 
     public ScalarFamilyConnector(ScalarServerFamily family, Player player) {
         this.family = family;
         this.player = player;
+        this.event = null;
+    }
+    public ScalarFamilyConnector(ScalarServerFamily family, PlayerChooseInitialServerEvent event) {
+        this.family = family;
+        this.player = event.getPlayer();
+        this.event = event;
     }
 
     public PlayerServer connect() throws RuntimeException {
@@ -158,13 +174,18 @@ class ScalarFamilyConnector {
             if(!server.validatePlayer(player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
 
-            if (!server.connect(player))
-                throw new RuntimeException("There was an issue connecting you to the server!");
+            if(this.event == null) {
+                if (!server.connect(player))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+            } else {
+                if (!server.connect(this.event))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+            }
 
             this.family.getLoadBalancer().iterate();
 
             return server;
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | ConnectException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -180,11 +201,19 @@ class ScalarFamilyConnector {
                 if(!server.validatePlayer(player))
                     throw new RuntimeException("The server you're trying to connect to is full!");
 
-                if(server.connect(player)) {
-                    this.family.getLoadBalancer().forceIterate();
-                    return server;
+                if(this.event == null) {
+                    if (server.connect(player)) {
+                        this.family.getLoadBalancer().forceIterate();
+                        return server;
+                    }
+                } else {
+                    if (server.connect(this.event)) {
+                        this.family.getLoadBalancer().forceIterate();
+                        return server;
+                    }
                 }
-                else throw new RuntimeException("Unable to connect you to the server in time!");
+
+                throw new RuntimeException("Unable to connect you to the server in time!");
             } catch (Exception e) {
                 if(isFinal)
                     player.disconnect(Component.text(e.getMessage()));

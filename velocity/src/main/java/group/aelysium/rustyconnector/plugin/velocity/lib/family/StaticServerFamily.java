@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
@@ -13,6 +14,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastCon
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
@@ -20,6 +23,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.ConnectException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -241,11 +245,28 @@ class StaticFamilyConnector {
      * @return The player server that this player was connected to.
      */
     public PlayerServer establishAnyConnection() {
+        PlayerServer server;
         try {
-            return this.connectHomeServer();
-        } catch (Exception ignore) {}
+            server = this.connectHomeServer();
+        } catch (Exception ignore) {
+            server = establishNewConnection(true);
+        }
 
-        return establishNewConnection(true);
+        /*
+        try {
+            PartyService partyService = VelocityAPI.get().services().partyService().orElse(null);
+            if (partyService == null) throw new NoOutputException();
+
+            Party party = partyService.find(player).orElse(null);
+            if (party == null) throw new NoOutputException();
+
+            party.connect(server);
+        } catch (NoOutputException ignore) {
+        } catch (Exception e) {
+            VelocityAPI.get().logger().log("Issue trying to pull party with player! " + e.getMessage());
+        }*/
+
+        return server;
     }
 
     /**
@@ -323,7 +344,7 @@ class StaticFamilyConnector {
             this.family.getLoadBalancer().iterate();
 
             return server;
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | ConnectException e) {
             throw new RuntimeException(e.getMessage());
         }
     }

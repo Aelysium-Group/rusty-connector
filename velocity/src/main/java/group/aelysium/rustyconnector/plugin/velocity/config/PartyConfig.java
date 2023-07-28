@@ -1,7 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.SwitchPower;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 
@@ -12,6 +16,7 @@ public class PartyConfig extends YAML {
     private int maxMembers = 5;
 
     private boolean friendsOnly = false;
+    private boolean localOnly = false;
 
     private boolean partyLeader_onlyLeaderCanInvite = true;
     private boolean partyLeader_onlyLeaderCanKick = true;
@@ -59,6 +64,9 @@ public class PartyConfig extends YAML {
     public boolean isFriendsOnly() {
         return friendsOnly;
     }
+    public boolean isLocalOnly() {
+        return localOnly;
+    }
 
     public boolean isPartyLeader_onlyLeaderCanInvite() {
         return partyLeader_onlyLeaderCanInvite;
@@ -87,7 +95,15 @@ public class PartyConfig extends YAML {
 
         this.maxMembers = this.getNode(this.data, "max-members", Integer.class);
 
-        this.friendsOnly = this.getNode(this.data, "friends-only", Boolean.class);
+        try {
+            this.friendsOnly = this.getNode(this.data, "friends-only", Boolean.class);
+            if(this.friendsOnly)
+                VelocityAPI.get().services().friendsService().orElseThrow();
+        } catch (Exception ignore) {
+            VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("[friends-only] in `party.yml` is set to true. But the friends module isn't enabled! Ignoring..."), NamedTextColor.YELLOW));
+            this.friendsOnly = false;
+        }
+        this.localOnly = this.getNode(this.data, "local-only", Boolean.class);
 
         this.partyLeader_onlyLeaderCanInvite = this.getNode(this.data, "party-leader.only-leader-can-invite", Boolean.class);
         this.partyLeader_onlyLeaderCanKick = this.getNode(this.data, "party-leader.only-leader-can-kick", Boolean.class);

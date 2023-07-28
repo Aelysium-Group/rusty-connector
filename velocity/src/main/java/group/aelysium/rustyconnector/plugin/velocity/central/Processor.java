@@ -21,6 +21,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBala
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerMySQLService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
@@ -203,6 +205,7 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                 PartyService.PartySettings settings = new PartyService.PartySettings(
                         config.getMaxMembers(),
                         config.isFriendsOnly(),
+                        config.isLocalOnly(),
                         config.isPartyLeader_onlyLeaderCanInvite(),
                         config.isPartyLeader_onlyLeaderCanKick(),
                         config.isPartyLeader_onlyLeaderCanSwitchServers(),
@@ -229,10 +232,13 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                 if(!config.isEnabled()) return Optional.empty();
 
                 FriendsService.FriendsSettings settings = new FriendsService.FriendsSettings(
-                        config.getMaxFriends()
+                        config.getMaxFriends(),
+                        config.isSendNotifications(),
+                        config.isShowFamilies(),
+                        config.isAllowMessaging()
                 );
 
-                FriendsMySQLService mySQLService = new FriendsMySQLService.Builder()
+                FriendsMySQLService friendsMySQLService = new FriendsMySQLService.Builder()
                         .setHost(config.getMysql_host())
                         .setPort(config.getMysql_port())
                         .setDatabase(config.getMysql_database())
@@ -240,9 +246,37 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                         .setPassword(config.getMysql_password())
                         .build();
 
-                mySQLService.init();
+                friendsMySQLService.init();
 
-                return Optional.of(new FriendsService(settings, mySQLService));
+                return Optional.of(new FriendsService(settings, friendsMySQLService));
+            } catch (Exception e) {
+                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+            }
+            return Optional.empty();
+        }
+
+        public static Optional<PlayerService> buildPlayerService() {
+            VelocityAPI api = VelocityAPI.get();
+            PluginLogger logger = api.logger();
+            try {
+                FriendsConfig config = FriendsConfig.newConfig(new File(String.valueOf(api.dataFolder()), "friends.yml"), "velocity_friends_template.yml");
+                if (!config.generate())
+                    throw new IllegalStateException("Unable to load or create friends.yml!");
+                config.register();
+
+                if(!config.isEnabled()) return Optional.empty();
+
+                PlayerMySQLService playerMySQLService = new PlayerMySQLService.Builder()
+                        .setHost(config.getMysql_host())
+                        .setPort(config.getMysql_port())
+                        .setDatabase(config.getMysql_database())
+                        .setUser(config.getMysql_user())
+                        .setPassword(config.getMysql_password())
+                        .build();
+
+                playerMySQLService.init();
+
+                return Optional.of(new PlayerService(playerMySQLService));
             } catch (Exception e) {
                 logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
             }

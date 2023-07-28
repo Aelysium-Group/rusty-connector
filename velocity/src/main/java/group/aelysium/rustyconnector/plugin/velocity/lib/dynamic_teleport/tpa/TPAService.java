@@ -5,7 +5,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageTPAQueuePlayer;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageCoordinateRequestQueue;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
@@ -65,15 +65,13 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
     public void tpaSendPlayer(Player source, Player target, PlayerServer targetServer) {
         VelocityAPI api = VelocityAPI.get();
 
-        if(targetServer == null) throw new NullPointerException();
-
-        RedisMessageTPAQueuePlayer message = (RedisMessageTPAQueuePlayer) new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.TPA_QUEUE_PLAYER)
+        RedisMessageCoordinateRequestQueue message = (RedisMessageCoordinateRequestQueue) new GenericRedisMessage.Builder()
+                .setType(RedisMessageType.COORDINATE_REQUEST_QUEUE)
                 .setOrigin(MessageOrigin.PROXY)
                 .setAddress(targetServer.getAddress())
-                .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.TARGET_SERVER, targetServer.getAddress())
-                .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.TARGET_USERNAME, target.getUsername())
-                .setParameter(RedisMessageTPAQueuePlayer.ValidParameters.SOURCE_USERNAME, source.getUsername())
+                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.TARGET_SERVER, targetServer.getAddress())
+                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.TARGET_USERNAME, target.getUsername())
+                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
         api.services().redisService().publish(message);
@@ -85,7 +83,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         } catch (Exception ignore) {}
 
         try {
-            targetServer.connect(target);
+            targetServer.connect(source);
         } catch (Exception e) {
             source.sendMessage(VelocityLang.TPA_FAILURE.build(target.getUsername()));
         }

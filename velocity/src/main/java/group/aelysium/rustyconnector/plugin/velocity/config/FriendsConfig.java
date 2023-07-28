@@ -3,6 +3,9 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 
@@ -10,15 +13,17 @@ public class FriendsConfig extends YAML {
     private static FriendsConfig config;
 
     private boolean enabled = false;
-    private int maxFriends = 25;
+    private int maxFriends;
+    private boolean sendNotifications;
+    private boolean showFamilies;
+
+    private boolean allowMessaging;
 
     private String mysql_host = "";
     private int mysql_port = 3306;
     private String mysql_user = "root";
     private String mysql_password = "password";
     private String mysql_database = "RustyConnector";
-
-    private boolean onlyTPAToFriends = false;
 
     private FriendsConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -56,6 +61,18 @@ public class FriendsConfig extends YAML {
         return maxFriends;
     }
 
+    public boolean isSendNotifications() {
+        return sendNotifications;
+    }
+
+    public boolean isShowFamilies() {
+        return showFamilies;
+    }
+
+    public boolean isAllowMessaging() {
+        return allowMessaging;
+    }
+
     public String getMysql_host() {
         return this.mysql_host;
     }
@@ -80,6 +97,14 @@ public class FriendsConfig extends YAML {
         if(!this.enabled) return;
 
         this.maxFriends = this.getNode(this.data, "max-friends", Integer.class);
+        if(maxFriends > 100) {
+            this.maxFriends = 100;
+            logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("[max-friends] in friends.yml is to high! Setting to 100."), NamedTextColor.YELLOW));
+        }
+
+        this.sendNotifications = this.getNode(this.data, "send-notifications", Boolean.class);
+        this.showFamilies = this.getNode(this.data, "show-families", Boolean.class);
+        this.allowMessaging = this.getNode(this.data, "allow-messaging", Boolean.class);
 
         // MySQL
 

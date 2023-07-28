@@ -18,6 +18,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
     private Integer softCap;
     private Integer hardCap;
     private Integer weight;
+    private Integer playerCount;
 
     public ConnectionIntent getIntent() {
         return intent;
@@ -42,6 +43,10 @@ public class RedisMessageServerPing extends GenericRedisMessage {
         return weight;
     }
 
+    public Integer getPlayerCount() {
+        return playerCount;
+    }
+
     public RedisMessageServerPing(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(RedisMessageType.PING, address, origin);
 
@@ -59,6 +64,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
                 case ValidParameters.SOFT_CAP -> this.softCap = value.getAsInt();
                 case ValidParameters.HARD_CAP -> this.hardCap = value.getAsInt();
                 case ValidParameters.WEIGHT -> this.weight = value.getAsInt();
+                case ValidParameters.PLAYER_COUNT -> this.playerCount = value.getAsInt();
             }
         });
     }
@@ -79,6 +85,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
                 case ValidParameters.SOFT_CAP -> this.softCap = value.getAsInt();
                 case ValidParameters.HARD_CAP -> this.hardCap = value.getAsInt();
                 case ValidParameters.WEIGHT -> this.weight = value.getAsInt();
+                case ValidParameters.PLAYER_COUNT -> this.playerCount = value.getAsInt();
             }
         });
     }
@@ -94,6 +101,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
         parameters.add(ValidParameters.SOFT_CAP, new JsonPrimitive(this.softCap));
         parameters.add(ValidParameters.HARD_CAP, new JsonPrimitive(this.hardCap));
         parameters.add(ValidParameters.WEIGHT, new JsonPrimitive(this.weight));
+        parameters.add(ValidParameters.PLAYER_COUNT, new JsonPrimitive(this.playerCount));
 
         object.add(MasterValidParameters.PARAMETERS, parameters);
 
@@ -107,6 +115,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
         String HARD_CAP = "hc";
         String WEIGHT = "w";
         String INTENT = "i";
+        String PLAYER_COUNT = "pc";
 
         static List<String> toList() {
             List<String> list = new ArrayList<>();
@@ -116,6 +125,7 @@ public class RedisMessageServerPing extends GenericRedisMessage {
             list.add(HARD_CAP);
             list.add(WEIGHT);
             list.add(INTENT);
+            list.add(PLAYER_COUNT);
 
             return list;
         }

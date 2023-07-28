@@ -4,10 +4,8 @@ import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
@@ -16,7 +14,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
@@ -64,6 +64,12 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         return this.getServerInfo().getAddress().getHostName() + ":" + this.getServerInfo().getAddress().getPort();
     }
 
+    /**
+     * Get the name of the family this server belongs to.
+     * @return The family name.
+     * @deprecated Use `.getFamily().getName()` instead.
+     */
+    @Deprecated(forRemoval = true, since = "0.6.0")
     public String getFamilyName() {
         return this.familyName;
     }
@@ -186,35 +192,36 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         return family;
     }
 
-    /**
-     * Connects a player to the server.
-     * This also increases the player count on this server by 1.
-     * @param player The player to connect.
-     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
-     */
-    public boolean connect(Player player) {
-        VelocityAPI api = VelocityAPI.get();
+    public boolean connect(Player player) throws ConnectException {
+        try {
+            PartyService partyService = VelocityAPI.get().services().partyService().orElseThrow();
+            Party party = partyService.find(player).orElseThrow();
 
+            try {
+                if(partyService.getSettings().onlyLeaderCanSwitchServers())
+                    if(!party.getLeader().equals(player)) {
+                        player.sendMessage(Component.text("Only the party leader can switch servers!", NamedTextColor.RED));
+                        return false;
+                    }
+
+                party.connect(this, player);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception ignore) {}
+
+        return directConnect(player);
+    }
+
+    public boolean directConnect(Player player) throws ConnectException {
         ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
         try {
-            if (!connection.connect().get().isSuccessful()) return false;
-        } catch (Exception ignore) {
-            return false;
-        }
+            ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
 
-        try {
-            PartyService partyService = api.services().partyService().orElse(null);
-            if (partyService == null) throw new NoOutputException();
-
-            Party party = partyService.find(player).orElse(null);
-            if (party == null) throw new NoOutputException();
-
-            this.connect(party);
-        } catch (NoOutputException ignore) {
+            return result.isSuccessful();
         } catch (Exception e) {
-            api.logger().log("Issue trying to pull party with player! " + e.getMessage());
+            throw new ConnectException("Unable to connect to that server!", e);
         }
-        return true;
     }
 
     /**
@@ -229,31 +236,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         } catch(Exception ignore) {
             return false;
         }
-    }
-
-    /**
-     * Connects a party to the server.
-     * This also increases the player count on this server by the number of players in the party.
-     * If any members of the party have already connected to this server, they will be ignored.
-     * @param party The party to connect.
-     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
-     */
-    public void connect(Party party) {
-        party.setServer(this);
-
-        party.players().forEach(player -> {
-            try {
-                ServerConnection serverConnection = player.getCurrentServer().orElse(null);
-                if(serverConnection != null)
-                    if(!serverConnection.getServer().equals(this.registeredServer)) return;
-
-                ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
-                connection.connect();
-            } catch (Exception e) {
-                player.sendMessage(Component.text("There was an issue following your party! You've been kicked. "+e.getMessage(), NamedTextColor.RED));
-                party.leave(player);
-            }
-        });
     }
 
     /**

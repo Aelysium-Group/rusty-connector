@@ -35,6 +35,42 @@ enabled: false
 max-friends: 25
 
 #
+# Let your players be notified when their friends log in or log off the network.
+# This feature works regardless of what servers your players are on.
+#
+send-notifications: true
+
+#
+# Let your players see what families their friends are playing in.
+# Players can see this information by using `/friends` and hovering over the username of their friend.
+# The family name which is shown is the same as the name of the family defined in `families.yml`!
+# Make sure your family names look pretty ;)
+#
+show-families: true
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                     Friend Messaging                     #
+#                                                          #
+#               ---------------------------                #
+# | Let your players message their friends from anywhere   #
+# | on your network!                                       #
+#                                                          #
+#   NOTE: This command is player only!                     #
+#                                                          #
+#               ----------------------------               #
+#                        Permission:                       #
+#                rustyconnector.command.fm                 #
+#               ----------------------------               #
+#                          Usage:                          #
+#                 /fm <username> <message>                 #
+#               ----------------------------               #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+allow-messaging: true
+
+#
 # Set the MySQL database to use for storing friends in.
 #
 mysql:
@@ -43,3 +79,29 @@ mysql:
     user: "root"
     password: "password"
     database: "RustyConnector"
+
+
+#
+# Additional Commands.
+# These commands are also enabled when you enable this module.
+#
+#######################################################################################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                         Friends                          #                        Unfriend                          #
+#                                                          #                                                          #
+#               ---------------------------                #               ---------------------------                #
+# | The main friends command. Lets players manage their    # | Let your players unfriend other players.               #
+# | friends.                                               #                                                          #
+#                                                          #   NOTE: This command is player only!                     #
+#   NOTE: This command is player only!                     #                                                          #
+#                                                          #                                                          #
+#               ----------------------------               #               ----------------------------               #
+#                        Permission:                       #                        Permission:                       #
+#              rustyconnector.command.friends              #              rustyconnector.command.unfriend             #
+#               ----------------------------               #               ----------------------------               #
+#                          Usage:                          #                          Usage:                          #
+#                        /friends                          #                   /unfriend <username>                   #
+#               ----------------------------               #               ----------------------------               #
+#                                                          #                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#######################################################################################################################

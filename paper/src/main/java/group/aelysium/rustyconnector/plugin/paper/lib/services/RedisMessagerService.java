@@ -29,6 +29,7 @@ public class RedisMessagerService extends Service {
                     .setParameter(RedisMessageServerPing.ValidParameters.SOFT_CAP, String.valueOf(serverInfoService.getSoftPlayerCap()))
                     .setParameter(RedisMessageServerPing.ValidParameters.HARD_CAP, String.valueOf(serverInfoService.getHardPlayerCap()))
                     .setParameter(RedisMessageServerPing.ValidParameters.WEIGHT, String.valueOf(serverInfoService.getWeight()))
+                    .setParameter(RedisMessageServerPing.ValidParameters.PLAYER_COUNT, String.valueOf(serverInfoService.getPlayerCount()))
                     .buildSendable();
             api.services().redisService().publish(message);
         } catch (Exception e) {

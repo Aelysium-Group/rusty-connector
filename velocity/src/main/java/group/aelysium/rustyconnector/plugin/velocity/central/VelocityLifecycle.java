@@ -9,10 +9,7 @@ import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerDisconnect;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerKicked;
+import group.aelysium.rustyconnector.plugin.velocity.events.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -32,7 +29,7 @@ public class VelocityLifecycle extends PluginLifecycle {
         if(!loadCommands()) return false;
         if(!loadEvents()) return false;
 
-        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(logger);
+        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(logger, api.version());
 
         WhitelistConfig.empty();
         DefaultConfig.empty();

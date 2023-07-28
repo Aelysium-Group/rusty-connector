@@ -6,6 +6,8 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -18,6 +20,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class FriendsMySQLService extends MySQLService {
     private static final String FIND_FRIENDS = "SELECT * FROM friends WHERE player1_uuid = ? OR player2_uuid = ?;";
@@ -29,9 +32,6 @@ public class FriendsMySQLService extends MySQLService {
         super(dataSource);
     }
 
-    /**
-     * Initialize the table for home server mappings.
-     */
     public void init() throws SQLException, IOException {
         VelocityAPI api = VelocityAPI.get();
         InputStream stream = api.getResourceAsStream("friends.sql");
@@ -50,6 +50,7 @@ public class FriendsMySQLService extends MySQLService {
      */
     public Optional<List<FriendMapping>> findFriends(Player player) {
         VelocityAPI api = VelocityAPI.get();
+        PlayerService playerService = api.services().playerService().orElseThrow();
 
         try {
             this.connect();
@@ -61,8 +62,8 @@ public class FriendsMySQLService extends MySQLService {
 
             List<FriendMapping> friends = new ArrayList<>();
             while (result.next()) {
-                Player player1 = api.getServer().getPlayer(result.getString("player1_uuid")).orElse(null);
-                Player player2 = api.getServer().getPlayer(result.getString("player2_uuid")).orElse(null);
+                FakePlayer player1 = playerService.findPlayer(UUID.fromString(result.getString("player1_uuid")));
+                FakePlayer player2 = playerService.findPlayer(UUID.fromString(result.getString("player2_uuid")));
 
                 if (player1 == null) continue;
                 if (player2 == null) continue;
@@ -79,31 +80,35 @@ public class FriendsMySQLService extends MySQLService {
         return Optional.empty();
     }
 
-    /**
-     * Get number of friends of a player.
-     * @param player The player to get the friend count of.
-     * @return The number of friends a player has.
-     * @throws SQLException If there was an issue.
-     */
-    public int getFriendCount(Player player) throws SQLException {
-        this.connect();
-        PreparedStatement statement = this.prepare(GET_FRIEND_COUNT);
-        statement.setString(1, player.getUniqueId().toString());
-        statement.setString(2, player.getUniqueId().toString());
+    public boolean areFriends(FakePlayer player1, FakePlayer player2) {
+        VelocityAPI api = VelocityAPI.get();
+        FriendMapping orderedMapping = new FriendMapping(player1, player2);
 
-        ResultSet result = this.executeQuery(statement);
+        try {
+            this.connect();
+            PreparedStatement statement = this.prepare(FIND_FRIENDS);
+            statement.setString(1, orderedMapping.player1().uuid().toString());
+            statement.setString(2, orderedMapping.player2().uuid().toString());
 
-        int friendCount = result.getInt(0);
+            ResultSet result = this.executeQuery(statement);
+            if(!result.next()) return false;
 
-        this.close();
-        return friendCount;
+            this.close();
+            return true;
+        } catch (Exception e) {
+            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+        }
+
+        return false;
     }
 
     public void addFriend(Player player1, Player player2) throws SQLException {
+        FriendMapping orderedMapping = new FriendMapping(player1, player2);
+
         this.connect();
         PreparedStatement statement = this.prepare(ADD_FRIEND);
-        statement.setString(1, player1.getUniqueId().toString());
-        statement.setString(2, player2.getUniqueId().toString());
+        statement.setString(1, orderedMapping.player1().uuid().toString());
+        statement.setString(2, orderedMapping.player2().uuid().toString());
 
         this.execute(statement);
 
@@ -111,10 +116,12 @@ public class FriendsMySQLService extends MySQLService {
     }
 
     public void removeFriend(Player player1, Player player2) throws SQLException {
+        FriendMapping orderedMapping = new FriendMapping(player1, player2);
+
         this.connect();
         PreparedStatement statement = this.prepare(DELETE_FRIEND);
-        statement.setString(1, player1.getUniqueId().toString());
-        statement.setString(2, player2.getUniqueId().toString());
+        statement.setString(1, orderedMapping.player1().uuid().toString());
+        statement.setString(2, orderedMapping.player2().uuid().toString());
 
         this.execute(statement);
 

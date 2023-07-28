@@ -102,6 +102,7 @@ public class MagicLinkPingHandler implements MessageHandler {
         }
 
         server.setTimeout(serverService.getServerTimeout());
+        server.setPlayerCount(this.message.getPlayerCount());
         return true;
     }
 }

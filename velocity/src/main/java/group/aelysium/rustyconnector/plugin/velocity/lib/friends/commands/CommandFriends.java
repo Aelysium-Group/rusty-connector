@@ -21,81 +21,86 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 
-public final class CommandFriend {
+public final class CommandFriends {
     public static BrigadierCommand create() {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
 
         FriendsService friendsService = api.services().friendsService().orElse(null);
         if (friendsService == null) {
-            logger.send(Component.text("The Friends service must be enabled to load the /friend command.", NamedTextColor.YELLOW));
+            logger.send(Component.text("The Friends service must be enabled to load the /friends command.", NamedTextColor.YELLOW));
             return null;
         }
 
-        LiteralCommandNode<CommandSource> friend = LiteralArgumentBuilder
-                .<CommandSource>literal("friend")
+        LiteralCommandNode<CommandSource> friends = LiteralArgumentBuilder
+                .<CommandSource>literal("friends")
                 .requires(source -> source instanceof Player)
                 .executes(context -> {
                     if(!(context.getSource() instanceof Player player)) {
-                        logger.log("/friend must be sent as a player!");
+                        logger.log("/friends must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    if(!Permission.validate(player, "rustyconnector.command.friend")) {
+                    if(!Permission.validate(player, "rustyconnector.command.friends")) {
                         player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(player, VelocityLang.FRIEND_USAGE.build());
+                    return closeMessage(player, VelocityLang.FRIENDS_BOARD.build(player));
                 })
-                .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
-                        .suggests((context, builder) -> {
-                            if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                .then(LiteralArgumentBuilder.<CommandSource>literal("add")
+                    .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
+                            .suggests((context, builder) -> {
+                                if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
-                            try {
-                                RegisteredServer server = player.getCurrentServer().orElseThrow().getServer();
+                                try {
+                                    RegisteredServer server = player.getCurrentServer().orElseThrow().getServer();
 
-                                server.getPlayersConnected().forEach(localPlayer -> {
-                                    if(localPlayer.equals(player)) return;
+                                    server.getPlayersConnected().forEach(localPlayer -> {
+                                        if(localPlayer.equals(player)) return;
 
-                                    builder.suggest(localPlayer.getUsername());
-                                });
+                                        builder.suggest(localPlayer.getUsername());
+                                    });
+
+                                    return builder.buildFuture();
+                                } catch (Exception ignored) {}
 
                                 return builder.buildFuture();
-                            } catch (Exception ignored) {}
+                            })
+                            .executes(context -> {
+                                if(!(context.getSource() instanceof Player player)) {
+                                    logger.log("/friends must be sent as a player!");
+                                    return Command.SINGLE_SUCCESS;
+                                }
 
-                            return builder.buildFuture();
-                        })
-                        .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
-                                logger.log("/friend must be sent as a player!");
+                                if(!Permission.validate(player, "rustyconnector.command.friends")) {
+                                    player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                    return Command.SINGLE_SUCCESS;
+                                }
+
+                                String username = context.getArgument("username", String.class);
+                                Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
+
+                                if(friendsService.areFriends(player, targetPlayer))
+                                    return closeMessage(player, Component.text(username + " is already your friend!", NamedTextColor.RED));
+
+                                if(targetPlayer == null)
+                                    return closeMessage(player, Component.text(username + " isn't available to send requests to!", NamedTextColor.RED));
+
+                                friendsService.sendRequest(player, targetPlayer);
+
                                 return Command.SINGLE_SUCCESS;
-                            }
-
-                            if(!Permission.validate(player, "rustyconnector.command.friend")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            String username = context.getArgument("username", String.class);
-                            Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
-
-                            if(targetPlayer == null)
-                                return closeMessage(player, Component.text(username + " isn't available to send requests to!", NamedTextColor.RED));
-
-                            friendsService.sendRequest(player, targetPlayer);
-
-                            return Command.SINGLE_SUCCESS;
-                        })
+                            })
+                    )
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("requests")
                         .executes(context -> {
                             if(!(context.getSource() instanceof Player player)) {
-                                logger.log("/friend must be sent as a player!");
+                                logger.log("/friends must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            if(!Permission.validate(player, "rustyconnector.command.friend")) {
+                            if(!Permission.validate(player, "rustyconnector.command.friends")) {
                                 player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -127,11 +132,11 @@ public final class CommandFriend {
                                 })
                                 .executes(context -> {
                                     if(!(context.getSource() instanceof Player player)) {
-                                        logger.log("/friend must be sent as a player!");
+                                        logger.log("/friends must be sent as a player!");
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    if(!Permission.validate(player, "rustyconnector.command.friend")) {
+                                    if(!Permission.validate(player, "rustyconnector.command.friends")) {
                                         player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
@@ -142,11 +147,11 @@ public final class CommandFriend {
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("ignore")
                                         .executes(context -> {
                                             if(!(context.getSource() instanceof Player player)) {
-                                                logger.log("/friend must be sent as a player!");
+                                                logger.log("/friends must be sent as a player!");
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            if(!Permission.validate(player, "rustyconnector.command.friend")) {
+                                            if(!Permission.validate(player, "rustyconnector.command.friends")) {
                                                 player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
@@ -175,11 +180,11 @@ public final class CommandFriend {
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
                                         .executes(context -> {
                                             if(!(context.getSource() instanceof Player player)) {
-                                                logger.log("/friend must be sent as a player!");
+                                                logger.log("/friends must be sent as a player!");
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            if(!Permission.validate(player, "rustyconnector.command.friend")) {
+                                            if(!Permission.validate(player, "rustyconnector.command.friends")) {
                                                 player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
@@ -209,7 +214,7 @@ public final class CommandFriend {
                 .build();
 
         // BrigadierCommand implements Command
-        return new BrigadierCommand(friend);
+        return new BrigadierCommand(friends);
     }
 
     public static int closeMessage(Player player, Component message) {
