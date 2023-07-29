@@ -162,9 +162,9 @@ public interface VelocityLang extends Lang {
         Component families = text("");
         for (BaseServerFamily family : api.services().familyService().dump()) {
             if(family instanceof ScalarServerFamily)
-                families = families.append(text("[ "+family.getName()+" ] ").color(GOLD));
+                families = families.append(text("[ "+family.name()+" ] ").color(GOLD));
             if(family instanceof StaticServerFamily)
-                families = families.append(text("[ "+family.getName()+" ] ").color(DARK_GREEN));
+                families = families.append(text("[ "+family.name()+" ] ").color(DARK_GREEN));
         }
 
         return join(
@@ -204,20 +204,20 @@ public interface VelocityLang extends Lang {
         Component servers = text("");
         int i = 0;
 
-        if(family.getRegisteredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
-        else if(family.getRegisteredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
-        else for (PlayerServer server : family.getRegisteredServers()) {
-                if(family.getLoadBalancer().getIndex() == i)
+        if(family.registeredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
+        else if(family.registeredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
+        else for (PlayerServer server : family.registeredServers()) {
+                if(family.loadBalancer().index() == i)
                     servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getHardPlayerCap()+") w-"+server.getWeight()+"] <<<<<"
+                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] <<<<<"
                                     , GREEN));
                 else
                     servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getHardPlayerCap()+") w-"+server.getWeight()+"]"
+                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
                                     , GRAY));
 
                 servers = servers.append(newline());
@@ -225,10 +225,10 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = VelocityAPI.get().services().familyService().getRootFamily();
-        String parentFamilyName = rootFamily.getName();
+        RootServerFamily rootFamily = VelocityAPI.get().services().familyService().rootFamily();
+        String parentFamilyName = rootFamily.name();
         try {
-            parentFamilyName = Objects.requireNonNull(family.getParent().get()).getName();
+            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
         } catch (Exception ignore) {}
         if(family.equals(rootFamily)) parentFamilyName = "none";
 
@@ -236,18 +236,18 @@ public interface VelocityLang extends Lang {
                 Lang.newlines(),
                 BORDER,
                 SPACING,
-                ASCIIAlphabet.generate(family.getName(), AQUA),
+                ASCIIAlphabet.generate(family.name(), AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
-                text("   ---| Online Players: "+family.getPlayerCount()),
+                text("   ---| Online Players: "+family.playerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
                 text("   ---| Parent Family: "+ parentFamilyName),
                 text("   ---| Load Balancing:"),
-                text("      | - Algorithm: "+family.getLoadBalancer()),
+                text("      | - Algorithm: "+family.loadBalancer()),
                 text("      | - Weighted Sorting: "+family.isWeighted()),
-                text("      | - Persistence: "+family.getLoadBalancer().isPersistent()),
-                text("      | - Max Attempts: "+family.getLoadBalancer().getAttempts()),
+                text("      | - Persistence: "+family.loadBalancer().persistent()),
+                text("      | - Max Attempts: "+family.loadBalancer().attempts()),
                 SPACING,
                 BORDER,
                 SPACING,
@@ -269,20 +269,20 @@ public interface VelocityLang extends Lang {
         Component servers = text("");
         int i = 0;
 
-        if(family.getRegisteredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
-        else if(family.getRegisteredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
-        else for (PlayerServer server : family.getRegisteredServers()) {
-                if(family.getLoadBalancer().getIndex() == i)
+        if(family.registeredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
+        else if(family.registeredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
+        else for (PlayerServer server : family.registeredServers()) {
+                if(family.loadBalancer().index() == i)
                     servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getHardPlayerCap()+") w-"+server.getWeight()+"] <<<<<"
+                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] <<<<<"
                                     , GREEN));
                 else
                     servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.getRegisteredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.getRegisteredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.getPlayerCount()+" ("+server.getSoftPlayerCap()+" <> "+server.getHardPlayerCap()+") w-"+server.getWeight()+"]"
+                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
                                     , GRAY));
 
                 servers = servers.append(newline());
@@ -290,14 +290,14 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = VelocityAPI.get().services().familyService().getRootFamily();
-        String parentFamilyName = rootFamily.getName();
+        RootServerFamily rootFamily = VelocityAPI.get().services().familyService().rootFamily();
+        String parentFamilyName = rootFamily.name();
         try {
-            parentFamilyName = Objects.requireNonNull(family.getParent().get()).getName();
+            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
         } catch (Exception ignore) {}
         if(family.equals(rootFamily)) parentFamilyName = "none";
 
-        LiquidTimestamp expiration = family.getHomeServerExpiration();
+        LiquidTimestamp expiration = family.homeServerExpiration();
         String homeServerExpiration = "NEVER";
         if(expiration != null) homeServerExpiration = expiration.toString();
 
@@ -305,19 +305,19 @@ public interface VelocityLang extends Lang {
                 Lang.newlines(),
                 BORDER,
                 SPACING,
-                ASCIIAlphabet.generate(family.getName(), AQUA),
+                ASCIIAlphabet.generate(family.name(), AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
-                text("   ---| Online Players: "+family.getPlayerCount()),
+                text("   ---| Online Players: "+family.playerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
                 text("   ---| Parent Family: "+ parentFamilyName),
                 text("   ---| Home Server Expiration: "+homeServerExpiration),
                 text("   ---| Load Balancing:"),
-                text("      | - Algorithm: "+family.getLoadBalancer()),
+                text("      | - Algorithm: "+family.loadBalancer()),
                 text("      | - Weighted Sorting: "+family.isWeighted()),
-                text("      | - Persistence: "+family.getLoadBalancer().isPersistent()),
-                text("      | - Max Attempts: "+family.getLoadBalancer().getAttempts()),
+                text("      | - Persistence: "+family.loadBalancer().persistent()),
+                text("      | - Max Attempts: "+family.loadBalancer().attempts()),
                 SPACING,
                 BORDER,
                 SPACING,
@@ -392,10 +392,10 @@ public interface VelocityLang extends Lang {
         boolean hasParty = party != null;
 
         if(hasParty) {
-            boolean isLeader = party.getLeader().equals(member);
+            boolean isLeader = party.leader().equals(member);
             boolean canInvite;
             try {
-                boolean onlyLeaderCanInvite = VelocityAPI.get().services().partyService().orElseThrow().getSettings().onlyLeaderCanInvite();
+                boolean onlyLeaderCanInvite = VelocityAPI.get().services().partyService().orElseThrow().settings().onlyLeaderCanInvite();
                 canInvite = !onlyLeaderCanInvite || isLeader;
             } catch (Exception ignore) {
                 canInvite = isLeader;
@@ -407,7 +407,7 @@ public interface VelocityLang extends Lang {
 
                     playersList[0] = playersList[0].appendNewline();
 
-                    if(party.getLeader().equals(partyMember))
+                    if(party.leader().equals(partyMember))
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
@@ -430,7 +430,7 @@ public interface VelocityLang extends Lang {
             else
                 party.players().forEach(partyMember -> {
                     playersList[0] = playersList[0].appendNewline();
-                    if(party.getLeader().equals(partyMember))
+                    if(party.leader().equals(partyMember))
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
@@ -509,7 +509,7 @@ public interface VelocityLang extends Lang {
     ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
         VelocityAPI api = VelocityAPI.get();
         FriendsService friendsService = api.services().friendsService().orElseThrow();
-        int maxFriends = friendsService.getSettings().maxFriends();
+        int maxFriends = friendsService.settings().maxFriends();
         player.sendMessage(text("Getting friends...", GRAY));
 
         boolean isPartyEnabled = false;
@@ -519,8 +519,8 @@ public interface VelocityLang extends Lang {
         } catch (Exception ignore) {}
         boolean finalIsPartyEnabled = isPartyEnabled;
 
-        boolean isFriendMessagingEnabled = friendsService.getSettings().allowMessaging();
-        boolean canSeeFriendFamilies = friendsService.getSettings().showFamilies();
+        boolean isFriendMessagingEnabled = friendsService.settings().allowMessaging();
+        boolean canSeeFriendFamilies = friendsService.settings().showFamilies();
 
         List<FakePlayer> friends = friendsService.findFriends(player, true).orElse(null);
 
@@ -556,9 +556,9 @@ public interface VelocityLang extends Lang {
                     return;
                 }
 
-                PlayerServer playerServer = api.services().serverService().findServer(resolvedFriend.getCurrentServer().get().getServerInfo());
+                PlayerServer playerServer = api.services().serverService().search(resolvedFriend.getCurrentServer().get().getServerInfo());
                 if(canSeeFriendFamilies)
-                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(text("Currently Playing: ", GRAY).append(text(playerServer.getFamily().getName(), AQUA)))));
+                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(text("Currently Playing: ", GRAY).append(text(playerServer.family().name(), AQUA)))));
                 else
                     playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(text("Online", WHITE))));
             });
@@ -593,7 +593,7 @@ public interface VelocityLang extends Lang {
     ParameterizedMessage1<Player> FRIEND_JOIN = (player) -> {
         FriendsService friendsService = VelocityAPI.get().services().friendsService().orElseThrow();
 
-        if(friendsService.getSettings().allowMessaging())
+        if(friendsService.settings().allowMessaging())
             return join(
                     JoinConfiguration.separator(space()),
                     text("Your friend", NamedTextColor.GRAY),
@@ -651,6 +651,6 @@ public interface VelocityLang extends Lang {
     );
 
     ParameterizedMessage1<BaseServerFamily> FAMILY_BALANCING = family -> text(
-            family.getName() + " " + LoggerConfig.getConfig().getConsoleIcons_familyBalancing()
+            family.name() + " " + LoggerConfig.getConfig().getConsoleIcons_familyBalancing()
     );
 }

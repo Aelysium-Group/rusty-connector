@@ -26,7 +26,7 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
             if (!parent.exists())
                 parent.mkdirs();
 
-            InputStream templateStream = api.getResourceAsStream(this.template);
+            InputStream templateStream = api.resourceAsStream(this.template);
             if (templateStream == null) {
                 logger.error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
                 return false;

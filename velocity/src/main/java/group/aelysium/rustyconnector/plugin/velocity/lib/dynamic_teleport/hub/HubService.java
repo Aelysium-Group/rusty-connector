@@ -21,7 +21,7 @@ public class HubService extends Service {
     }
 
     public void initCommand() {
-        CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
 
         VelocityAPI.get().logger().send(Component.text("Building hub service commands...", NamedTextColor.DARK_GRAY));
         if(!commandManager.hasCommand("hub"))

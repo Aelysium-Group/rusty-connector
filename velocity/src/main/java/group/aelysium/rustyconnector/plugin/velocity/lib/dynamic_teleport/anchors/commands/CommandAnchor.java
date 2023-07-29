@@ -44,13 +44,13 @@ public class CommandAnchor {
                     }
 
                     try {
-                        PlayerFocusedServerFamily family = ((PlayerFocusedServerFamily) anchorService.getFamily(anchor).orElseThrow());
+                        PlayerFocusedServerFamily family = ((PlayerFocusedServerFamily) anchorService.family(anchor).orElseThrow());
 
                         // If the attempt to check player's family fails, just ignore it and try to connect.
                         // If there's actually an issue it'll be caught further down.
                         try {
-                            PlayerServer server = serverService.findServer(Objects.requireNonNull(player.getCurrentServer().orElse(null)).getServerInfo());
-                            if(family.equals(server.getFamily()))
+                            PlayerServer server = serverService.search(Objects.requireNonNull(player.getCurrentServer().orElse(null)).getServerInfo());
+                            if(family.equals(server.family()))
                                 return closeMessage(player, Component.text("You're already connected to this server.", NamedTextColor.RED));
                         } catch (Exception ignore) {}
 

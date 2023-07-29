@@ -79,7 +79,7 @@ public final class CommandFriends {
                                 }
 
                                 String username = context.getArgument("username", String.class);
-                                Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
+                                Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
 
                                 if(friendsService.areFriends(player, targetPlayer))
                                     return closeMessage(player, Component.text(username + " is already your friend!", NamedTextColor.RED));
@@ -121,7 +121,7 @@ public final class CommandFriends {
                                         }
 
                                         requests.forEach(invite -> {
-                                            builder.suggest(invite.getSender().getUsername());
+                                            builder.suggest(invite.sender().getUsername());
                                         });
 
                                         return builder.buildFuture();
@@ -157,7 +157,7 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = api.getServer().getPlayer(username).orElse(null);
+                                            Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                             if(senderPlayer == null)
                                                 return closeMessage(player, Component.text(username + " doesn't seem to exist on this server! (How did this happen?)", NamedTextColor.RED));
 
@@ -190,7 +190,7 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = api.getServer().getPlayer(username).orElse(null);
+                                            Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                             if(senderPlayer == null)
                                                 return closeMessage(player, Component.text(username + " doesn't seem to exist on this server! (How did this happen?)", NamedTextColor.RED));
 

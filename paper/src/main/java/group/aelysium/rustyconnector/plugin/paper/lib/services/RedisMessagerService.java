@@ -26,10 +26,10 @@ public class RedisMessagerService extends Service {
                     .setParameter(RedisMessageServerPing.ValidParameters.INTENT, intent.toString())
                     .setParameter(RedisMessageServerPing.ValidParameters.FAMILY_NAME, serverInfoService.getFamily())
                     .setParameter(RedisMessageServerPing.ValidParameters.SERVER_NAME, serverInfoService.getName())
-                    .setParameter(RedisMessageServerPing.ValidParameters.SOFT_CAP, String.valueOf(serverInfoService.getSoftPlayerCap()))
-                    .setParameter(RedisMessageServerPing.ValidParameters.HARD_CAP, String.valueOf(serverInfoService.getHardPlayerCap()))
-                    .setParameter(RedisMessageServerPing.ValidParameters.WEIGHT, String.valueOf(serverInfoService.getWeight()))
-                    .setParameter(RedisMessageServerPing.ValidParameters.PLAYER_COUNT, String.valueOf(serverInfoService.getPlayerCount()))
+                    .setParameter(RedisMessageServerPing.ValidParameters.SOFT_CAP, String.valueOf(serverInfoService.softPlayerCap()))
+                    .setParameter(RedisMessageServerPing.ValidParameters.HARD_CAP, String.valueOf(serverInfoService.hardPlayerCap()))
+                    .setParameter(RedisMessageServerPing.ValidParameters.WEIGHT, String.valueOf(serverInfoService.weight()))
+                    .setParameter(RedisMessageServerPing.ValidParameters.PLAYER_COUNT, String.valueOf(serverInfoService.playerCount()))
                     .buildSendable();
             api.services().redisService().publish(message);
         } catch (Exception e) {

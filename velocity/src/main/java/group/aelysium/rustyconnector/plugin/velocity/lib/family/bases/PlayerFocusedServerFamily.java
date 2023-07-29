@@ -7,7 +7,6 @@ import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +31,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentName) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name);
         if(whitelist == null) this.whitelist = null;
-        else this.whitelist = whitelist.getName();
+        else this.whitelist = whitelist.name();
         this.weighted = weighted;
 
         try {
@@ -50,16 +49,16 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
         this.parentName = null;
         if(family == null) {
-            this.parent = new WeakReference<>(familyService.getRootFamily());
+            this.parent = new WeakReference<>(familyService.rootFamily());
             return;
         }
 
         this.parent = new WeakReference<>(family);
     }
 
-    public WeakReference<BaseServerFamily> getParent() {
+    public WeakReference<BaseServerFamily> parent() {
         FamilyService familyService = VelocityAPI.get().services().familyService();
-        if(familyService.getRootFamily().equals(this)) return null;
+        if(familyService.rootFamily().equals(this)) return null;
         return this.parent;
     }
 
@@ -75,7 +74,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         return weighted;
     }
 
-    public LoadBalancer getLoadBalancer() {
+    public LoadBalancer loadBalancer() {
         return this.loadBalancer;
     }
   
@@ -83,7 +82,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
      * Get the whitelist for this family, or `null` if there isn't one.
      * @return The whitelist or `null` if there isn't one.
      */
-    public Whitelist getWhitelist() {
+    public Whitelist whitelist() {
         VelocityAPI api = VelocityAPI.get();
         if(this.name == null) return null;
         return api.services().whitelistService().find(this.whitelist);
@@ -92,15 +91,15 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public long serverCount() { return this.loadBalancer.size(); }
 
     @Override
-    public long getPlayerCount() {
+    public long playerCount() {
         AtomicLong newPlayerCount = new AtomicLong();
-        this.loadBalancer.dump().forEach(server -> newPlayerCount.addAndGet(server.getPlayerCount()));
+        this.loadBalancer.dump().forEach(server -> newPlayerCount.addAndGet(server.playerCount()));
 
         return newPlayerCount.get();
     }
 
     @Override
-    public List<PlayerServer> getRegisteredServers() {
+    public List<PlayerServer> registeredServers() {
         return this.loadBalancer.dump();
     }
 
@@ -115,20 +114,20 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     @Override
-    public PlayerServer getServer(@NotNull ServerInfo serverInfo) {
-        return this.getRegisteredServers().stream()
-                .filter(server -> Objects.equals(server.getServerInfo(), serverInfo)
+    public PlayerServer findServer(@NotNull ServerInfo serverInfo) {
+        return this.registeredServers().stream()
+                .filter(server -> Objects.equals(server.serverInfo(), serverInfo)
                 ).findFirst().orElse(null);
     }
 
     @Override
-    public List<Player> getAllPlayers(int max) {
+    public List<Player> allPlayers(int max) {
         List<Player> players = new ArrayList<>();
 
-        for (PlayerServer server : this.getRegisteredServers()) {
+        for (PlayerServer server : this.registeredServers()) {
             if(players.size() > max) break;
 
-            players.addAll(server.getRegisteredServer().getPlayersConnected());
+            players.addAll(server.registeredServer().getPlayersConnected());
         }
 
         return players;

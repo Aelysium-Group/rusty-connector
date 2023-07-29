@@ -8,8 +8,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DefaultConfig extends YAML {
     private static DefaultConfig config;
@@ -37,7 +35,7 @@ public class DefaultConfig extends YAML {
      * Get the current config.
      * @return The config.
      */
-    public static DefaultConfig getConfig() {
+    public static DefaultConfig config() {
         return config;
     }
 
@@ -47,7 +45,7 @@ public class DefaultConfig extends YAML {
      */
     public static DefaultConfig newConfig(File configPointer, String template) {
         config = new DefaultConfig(configPointer, template);
-        return DefaultConfig.getConfig();
+        return DefaultConfig.config();
     }
 
     /**
@@ -61,47 +59,47 @@ public class DefaultConfig extends YAML {
         return this.debug;
     }
 
-    public String getRedis_host() {
+    public String redis_host() {
         return this.redis_host;
     }
 
-    public int getRedis_port() {
+    public int redis_port() {
         return this.redis_port;
     }
 
-    public String getRedis_password() {
+    public String redis_password() {
         return this.redis_password;
     }
 
-    public String getRedis_user() {
+    public String redis_user() {
         return this.redis_user;
     }
 
-    public String getRedis_dataChannel() {
+    public String redis_dataChannel() {
         return this.redis_dataChannel;
     }
 
-    public boolean isWhitelist_enabled() {
+    public boolean whitelist_enabled() {
         return this.whitelist_enabled;
     }
 
-    public String getWhitelist_name() {
+    public String whitelist_name() {
         return this.whitelist_name;
     }
 
-    public Integer getServices_serverLifecycle_serverTimeout() {
+    public Integer services_serverLifecycle_serverTimeout() {
         return services_serverLifecycle_serverTimeout;
     }
 
-    public Integer getServices_serverLifecycle_serverPingInterval() {
+    public Integer services_serverLifecycle_serverPingInterval() {
         return services_serverLifecycle_serverPingInterval;
     }
 
-    public Integer getServices_loadBalancing_interval() {
+    public Integer services_loadBalancing_interval() {
         return services_loadBalancing_interval;
     }
 
-    public Boolean getServices_loadBalancing_enabled() {
+    public Boolean services_loadBalancing_enabled() {
         return services_loadBalancing_enabled;
     }
 

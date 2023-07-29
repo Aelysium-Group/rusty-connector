@@ -18,14 +18,14 @@ public class WeightedQuickSort {
         List<SortableInteger> indexes = new ArrayList<>();
         Map<Integer, List<I>> weighted = new HashMap<>();
         for (I entry : array) {
-            if(!(indexes.contains(new SortableInteger(entry.getWeight()))))
-                indexes.add(new SortableInteger(entry.getWeight()));
+            if(!(indexes.contains(new SortableInteger(entry.weight()))))
+                indexes.add(new SortableInteger(entry.weight()));
 
-            if(weighted.containsKey(entry.getWeight()))
-                weighted.get(entry.getWeight()).add(entry);
+            if(weighted.containsKey(entry.weight()))
+                weighted.get(entry.weight()).add(entry);
             else {
-                weighted.put(entry.getWeight(), new ArrayList<>());
-                weighted.get(entry.getWeight()).add(entry);
+                weighted.put(entry.weight(), new ArrayList<>());
+                weighted.get(entry.weight()).add(entry);
             }
         }
 

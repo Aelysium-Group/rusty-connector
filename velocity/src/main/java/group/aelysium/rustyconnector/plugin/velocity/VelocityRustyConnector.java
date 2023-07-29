@@ -7,7 +7,6 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.core.lib.exception.DuplicateLifecycleException;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
@@ -23,7 +22,7 @@ import java.nio.file.Path;
 public class VelocityRustyConnector implements PluginRuntime {
     private final Metrics.Factory metricsFactory;
     private static VelocityLifecycle lifecycle;
-    public static VelocityLifecycle getLifecycle() {
+    public static VelocityLifecycle lifecycle() {
         return lifecycle;
     }
 
@@ -36,7 +35,7 @@ public class VelocityRustyConnector implements PluginRuntime {
 
     @Subscribe
     public void onLoad(ProxyInitializeEvent event) throws DuplicateLifecycleException {
-        if(!VelocityAPI.get().getServer().getConfiguration().isOnlineMode())
+        if(!VelocityAPI.get().velocityServer().getConfiguration().isOnlineMode())
             VelocityAPI.get().logger().log("Offline mode detected");
 
         if(!lifecycle.start()) lifecycle.stop();
@@ -47,11 +46,11 @@ public class VelocityRustyConnector implements PluginRuntime {
             VelocityAPI.get().logger().log("Failed to register to bstats!");
         }
 
-        if(!VelocityAPI.get().getServer().getConfiguration().isOnlineMode())
+        if(!VelocityAPI.get().velocityServer().getConfiguration().isOnlineMode())
             VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!"), NamedTextColor.RED));
 
         // Velocity requires that at least one server is always defined in velocity.toml
-        if(VelocityAPI.get().getServer().getConfiguration().getServers().size() > 1)
+        if(VelocityAPI.get().velocityServer().getConfiguration().getServers().size() > 1)
             VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(
                     Component.join(
                             JoinConfiguration.newlines(),

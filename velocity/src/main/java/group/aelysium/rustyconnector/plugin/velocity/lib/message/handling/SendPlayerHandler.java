@@ -23,7 +23,7 @@ public class SendPlayerHandler implements MessageHandler {
     public void execute() throws Exception {
         VelocityAPI api = VelocityAPI.get();
 
-        Player player = api.getServer().getPlayer(UUID.fromString(message.getUUID())).stream().findFirst().orElse(null);
+        Player player = api.velocityServer().getPlayer(UUID.fromString(message.getUUID())).stream().findFirst().orElse(null);
         if(player == null) return;
 
         try {

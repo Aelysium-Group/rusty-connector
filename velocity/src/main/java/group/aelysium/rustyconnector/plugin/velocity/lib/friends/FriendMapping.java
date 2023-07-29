@@ -27,7 +27,7 @@ public record FriendMapping(FakePlayer player1, FakePlayer player2) {
      * @param player The player to get the friend of.
      * @return The friend of `player`.
      */
-    public FakePlayer getFriendOf(FakePlayer player) {
+    public FakePlayer friendOf(FakePlayer player) {
         if(this.player1.equals(player)) return this.player2;
         if(this.player2.equals(player)) return this.player1;
 
@@ -39,7 +39,7 @@ public record FriendMapping(FakePlayer player1, FakePlayer player2) {
      * @param player The player to get the friend of.
      * @return The friend of `player`.
      */
-    public FakePlayer getFriendOf(Player player) {
+    public FakePlayer friendOf(Player player) {
         FakePlayer fakePlayer = FakePlayer.from(player);
 
         if(this.player1.equals(fakePlayer)) return this.player2;

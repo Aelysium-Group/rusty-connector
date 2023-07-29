@@ -43,7 +43,7 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     }
 
     @Override
-    public InputStream getResourceAsStream(String filename)  {
+    public InputStream resourceAsStream(String filename)  {
         return getClass().getClassLoader().getResourceAsStream(filename);
     }
 

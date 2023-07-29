@@ -12,21 +12,21 @@ public class TPAHandler {
 
     public TPARequest findRequest(Player sender, Player target) {
         return this.requests.stream()
-                .filter(request -> request.getSender().equals(sender) && request.getTarget().equals(target))
+                .filter(request -> request.sender().equals(sender) && request.target().equals(target))
                 .findFirst()
                 .orElse(null);
     }
 
     public TPARequest findRequestSender(Player sender) {
         return this.requests.stream()
-                .filter(request -> request.getSender().equals(sender))
+                .filter(request -> request.sender().equals(sender))
                 .findFirst()
                 .orElse(null);
     }
 
     public List<TPARequest> findRequestsForTarget(Player target) {
         return this.requests.stream()
-                .filter(request -> request.getTarget().equals(target))
+                .filter(request -> request.target().equals(target))
                 .toList();
     }
 
@@ -35,7 +35,7 @@ public class TPAHandler {
         TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
                                    .services().tpaService().orElseThrow();
 
-        TPARequest tpaRequest = new TPARequest(sender, target, tpaService.getSettings().expiration());
+        TPARequest tpaRequest = new TPARequest(sender, target, tpaService.settings().expiration());
         requests.add(tpaRequest);
 
         return tpaRequest;
@@ -47,7 +47,7 @@ public class TPAHandler {
 
     public void clearExpired() {
         this.requests.stream().filter(TPARequest::expired).forEach(request -> {
-            request.getSender().sendMessage(VelocityLang.TPA_REQUEST_EXPIRED.build(request.getTarget().getUsername()));
+            request.sender().sendMessage(VelocityLang.TPA_REQUEST_EXPIRED.build(request.target().getUsername()));
             this.requests.remove(request);
         });
     }

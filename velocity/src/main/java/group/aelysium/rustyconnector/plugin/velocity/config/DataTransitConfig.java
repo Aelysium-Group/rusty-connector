@@ -28,35 +28,35 @@ public class DataTransitConfig extends YAML {
     private boolean denylist_enabled = false;
     private List<String> denylist_addresses = new ArrayList<>();
 
-    public int getMaxPacketLength() {
+    public int maxPacketLength() {
         return maxPacketLength;
     }
 
-    public int getCache_size() {
+    public int cache_size() {
         return cache_size;
     }
 
-    public List<RedisMessageType.Mapping> getCache_ignoredTypes() {
+    public List<RedisMessageType.Mapping> cache_ignoredTypes() {
         return cache_ignoredTypes;
     }
 
-    public List<MessageStatus> getCache_ignoredStatuses() {
+    public List<MessageStatus> cache_ignoredStatuses() {
         return cache_ignoredStatuses;
     }
 
-    public boolean isWhitelist_enabled() {
+    public boolean whitelist_enabled() {
         return whitelist_enabled;
     }
 
-    public List<String> getWhitelist_addresses() {
+    public List<String> whitelist_addresses() {
         return whitelist_addresses;
     }
 
-    public boolean isDenylist_enabled() {
+    public boolean denylist_enabled() {
         return denylist_enabled;
     }
 
-    public List<String> getDenylist_addresses() {
+    public List<String> denylist_addresses() {
         return denylist_addresses;
     }
 
@@ -68,7 +68,7 @@ public class DataTransitConfig extends YAML {
      * Get the current config.
      * @return The config.
      */
-    public static DataTransitConfig getConfig() {
+    public static DataTransitConfig config() {
         return config;
     }
 
@@ -78,7 +78,7 @@ public class DataTransitConfig extends YAML {
      */
     public static DataTransitConfig newConfig(File configPointer, String template) {
         config = new DataTransitConfig(configPointer, template);
-        return DataTransitConfig.getConfig();
+        return DataTransitConfig.config();
     }
 
     /**

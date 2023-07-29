@@ -10,12 +10,12 @@ public class SortableInteger implements Sortable {
     }
 
     @Override
-    public int getSortIndex() {
+    public int sortIndex() {
         return this.value;
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return 0;
     }
 

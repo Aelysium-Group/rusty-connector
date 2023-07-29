@@ -18,10 +18,10 @@ public class PartyInvite {
         this.target = target;
     }
 
-    public Player getSender() {
+    public Player sender() {
         return this.sender.get();
     }
-    public Player getTarget() {
+    public Player target() {
         return this.target;
     }
 
@@ -49,8 +49,8 @@ public class PartyInvite {
         if(!Objects.requireNonNull(this.sender.get()).isActive())
             throw new IllegalStateException("The sender is no-longer online!");
 
-        if(partyService.getSettings().onlyLeaderCanInvite())
-            if(!Objects.requireNonNull(party.get()).getLeader().equals(getSender()))
+        if(partyService.settings().onlyLeaderCanInvite())
+            if(!Objects.requireNonNull(party.get()).leader().equals(sender()))
                 throw new IllegalStateException("The leader that invited you to their party is either no longer in it or isn't the leader anymore!");
         else
             if(!Objects.requireNonNull(party.get()).players().contains(sender.get()))

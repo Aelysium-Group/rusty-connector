@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,15 +25,15 @@ public class Party {
     }
 
     public void setServer(PlayerServer server) {
-        if(server.equals(getServer())) return;
+        if(server.equals(server())) return;
 
         this.server = new WeakReference<>(server);
     }
-    public PlayerServer getServer() {
+    public PlayerServer server() {
         return this.server.get();
     }
 
-    public synchronized Player getLeader() {
+    public synchronized Player leader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
         if(this.leader.get() == null) {
             Player newLeader = players.lastElement();
@@ -53,7 +52,7 @@ public class Party {
     public void setLeader(Player player) {
         if(player == null) {
             this.leader.clear();
-            getLeader();
+            leader();
         }
 
         if(!this.players.contains(player))
@@ -85,7 +84,7 @@ public class Party {
 
         this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
 
-        if(player.equals(getLeader())) setLeader(null);
+        if(player.equals(leader())) setLeader(null);
 
         if(this.isEmpty())
             VelocityAPI.get().services().partyService().orElseThrow().disband(this);

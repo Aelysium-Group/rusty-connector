@@ -24,7 +24,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class OnPlayerChooseInitialServer {
     /**
@@ -39,21 +38,21 @@ public class OnPlayerChooseInitialServer {
         return EventTask.async(() -> {
             try {
                 try {
-                    Whitelist whitelist = api.services().whitelistService().getProxyWhitelist().orElseThrow();
+                    Whitelist whitelist = api.services().whitelistService().proxyWhitelist().orElseThrow();
                     if (!whitelist.validate(player)) {
                         logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
-                        player.disconnect(Component.text(whitelist.getMessage()));
+                        player.disconnect(Component.text(whitelist.message()));
                         return;
                     }
                 } catch (Exception ignore) {}
 
-                RootServerFamily rootFamily = api.services().familyService().getRootFamily();
+                RootServerFamily rootFamily = api.services().familyService().rootFamily();
 
                 PlayerServer server = rootFamily.connect(event);
 
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, DiscordWebhookMessage.PROXY__PLAYER_JOIN.build(player, server));
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, server));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, server.getFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, server));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, server.family().name(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, server));
             } catch (Exception e) {
                 player.disconnect(Component.text("Disconnected. "+e.getMessage()));
                 e.printStackTrace();

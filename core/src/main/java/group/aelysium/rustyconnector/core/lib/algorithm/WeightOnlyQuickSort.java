@@ -14,7 +14,7 @@ public class WeightOnlyQuickSort {
 
     static int partition(List<? extends Sortable> array, int low, int high) {
         // pivot
-        int pivot = array.get(high).getWeight();
+        int pivot = array.get(high).weight();
   
         // Index of smaller element and
         // indicates the right position
@@ -25,7 +25,7 @@ public class WeightOnlyQuickSort {
   
             // If current element is smaller
             // than the pivot
-            if (array.get(j).getWeight() < pivot) {
+            if (array.get(j).weight() < pivot) {
   
                 // Increment index of
                 // smaller element

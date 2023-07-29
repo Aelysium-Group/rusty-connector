@@ -14,7 +14,7 @@ public class SingleSort {
         array.remove(item);
 
         for (I entry : array) {
-            if(item.getSortIndex() < entry.getSortIndex()) continue;
+            if(item.sortIndex() < entry.sortIndex()) continue;
             array.add(array.indexOf(entry), item);
             return;
         }

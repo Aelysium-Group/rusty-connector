@@ -24,8 +24,8 @@ public class LoadBalancingService extends ClockService {
                 try {
                     PluginLogger logger = api.logger();
 
-                    ((PlayerFocusedServerFamily) family).getLoadBalancer().completeSort();
-                    if (logger.getGate().check(GateKey.FAMILY_BALANCING))
+                    ((PlayerFocusedServerFamily) family).loadBalancer().completeSort();
+                    if (logger.loggerGate().check(GateKey.FAMILY_BALANCING))
                         VelocityLang.FAMILY_BALANCING.send(logger, family);
                 } catch (Exception e) {
                     e.printStackTrace();

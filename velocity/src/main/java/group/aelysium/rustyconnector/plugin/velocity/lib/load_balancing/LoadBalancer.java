@@ -13,23 +13,23 @@ public class LoadBalancer implements group.aelysium.rustyconnector.core.lib.Load
     protected List<PlayerServer> items = new ArrayList<>();
 
     @Override
-    public boolean isPersistent() {
+    public boolean persistent() {
         return this.persistence;
     }
 
     @Override
-    public int getAttempts() {
-        if(!this.isPersistent()) return 0;
+    public int attempts() {
+        if(!this.persistent()) return 0;
         return this.attempts;
     }
 
     @Override
-    public boolean isWeighted() {
+    public boolean weighted() {
         return this.weighted;
     }
 
     @Override
-    public PlayerServer getCurrent() {
+    public PlayerServer current() {
         PlayerServer item;
         if(this.index >= this.size()) {
             item = this.items.get(this.index);
@@ -42,7 +42,7 @@ public class LoadBalancer implements group.aelysium.rustyconnector.core.lib.Load
     }
 
     @Override
-    public int getIndex() {
+    public int index() {
         return this.index;
     }
 

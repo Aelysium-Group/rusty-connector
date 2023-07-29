@@ -34,7 +34,7 @@ public class FriendsMySQLService extends MySQLService {
 
     public void init() throws SQLException, IOException {
         VelocityAPI api = VelocityAPI.get();
-        InputStream stream = api.getResourceAsStream("friends.sql");
+        InputStream stream = api.resourceAsStream("friends.sql");
         String file = new String(stream.readAllBytes());
 
         this.connect();

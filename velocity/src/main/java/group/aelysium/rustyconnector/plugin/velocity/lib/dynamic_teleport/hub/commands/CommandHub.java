@@ -41,11 +41,11 @@ public class CommandHub {
 
                     ServerInfo serverInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                    PlayerServer sendersServer = serverService.findServer(serverInfo);
-                    BaseServerFamily family = sendersServer.getFamily();
-                    RootServerFamily rootFamily = familyService.getRootFamily();
+                    PlayerServer sendersServer = serverService.search(serverInfo);
+                    BaseServerFamily family = sendersServer.family();
+                    RootServerFamily rootFamily = familyService.rootFamily();
 
-                    if(!hubService.isEnabled(family.getName())) {
+                    if(!hubService.isEnabled(family.name())) {
                         context.getSource().sendMessage(Lang.UNKNOWN_COMMAND);
                         return Command.SINGLE_SUCCESS;
                     }
@@ -56,7 +56,7 @@ public class CommandHub {
                             rootFamily.connect(player);
                             return Command.SINGLE_SUCCESS;
                         } catch (RuntimeException err) {
-                            logger.send(Component.text("Failed to connect player to parent family " + rootFamily.getName() + "!",NamedTextColor.RED));
+                            logger.send(Component.text("Failed to connect player to parent family " + rootFamily.name() + "!",NamedTextColor.RED));
                             context.getSource().sendMessage(Component.text("Failed to connect you to the hub!"));
                         }
 
@@ -64,7 +64,7 @@ public class CommandHub {
                     }
 
                     try {
-                        PlayerFocusedServerFamily parent = (PlayerFocusedServerFamily) ((PlayerFocusedServerFamily) family).getParent().get();
+                        PlayerFocusedServerFamily parent = (PlayerFocusedServerFamily) ((PlayerFocusedServerFamily) family).parent().get();
 
                         if(parent != null) {
                             parent.connect(player);
@@ -73,7 +73,7 @@ public class CommandHub {
 
                         rootFamily.connect(player);
                     } catch (RuntimeException err) {
-                        logger.send(Component.text("Failed to connect player to parent family " + rootFamily.getName() + "!",NamedTextColor.RED));
+                        logger.send(Component.text("Failed to connect player to parent family " + rootFamily.name() + "!",NamedTextColor.RED));
                         context.getSource().sendMessage(Component.text("Failed to connect you to the hub!", NamedTextColor.RED));
                     }
 

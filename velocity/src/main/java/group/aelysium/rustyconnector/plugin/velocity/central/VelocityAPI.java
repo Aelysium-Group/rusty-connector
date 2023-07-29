@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
@@ -48,7 +47,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         instance = this;
 
         try {
-            InputStream stream = getResourceAsStream("velocity-plugin.json");
+            InputStream stream = resourceAsStream("velocity-plugin.json");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             JsonObject json = new Gson().fromJson(reader, JsonObject.class);
 
@@ -67,7 +66,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     }
 
     @Override
-    public InputStream getResourceAsStream(String filename)  {
+    public InputStream resourceAsStream(String filename)  {
         return getClass().getClassLoader().getResourceAsStream(filename);
     }
 
@@ -78,7 +77,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
 
     @Override
     public Scheduler scheduler() {
-        return getServer().getScheduler();
+        return velocityServer().getScheduler();
     }
 
     @Override
@@ -99,7 +98,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         this.processor.kill();
         this.processor = null;
 
-        VelocityRustyConnector.getLifecycle().loadConfigs();
+        VelocityRustyConnector.lifecycle().loadConfigs();
     }
 
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
@@ -124,7 +123,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
                 try {
                     ((PlayerFocusedServerFamily) baseServerFamily).resolveParent();
                 } catch (Exception e) {
-                    logger.log("There was an issue resolving the parent for "+baseServerFamily.getName()+". "+e.getMessage());
+                    logger.log("There was an issue resolving the parent for "+baseServerFamily.name()+". "+e.getMessage());
                 }
             });
 
@@ -192,7 +191,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     /**
      * Get the velocity server
      */
-    public ProxyServer getServer() {
+    public ProxyServer velocityServer() {
         return this.server;
     }
 
@@ -203,7 +202,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
      * @return the newly registered server
      */
     public RegisteredServer registerServer(ServerInfo serverInfo) {
-        return getServer().registerServer(serverInfo);
+        return velocityServer().registerServer(serverInfo);
     }
 
     /**
@@ -212,7 +211,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
      * @param serverInfo the server to unregister
      */
     public void unregisterServer(ServerInfo serverInfo) {
-        getServer().unregisterServer(serverInfo);
+        velocityServer().unregisterServer(serverInfo);
     }
 
     /**
@@ -221,7 +220,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
      * @throws SyncFailedException If the plugin is currently running.
      */
     public VelocityRustyConnector accessPlugin() throws SyncFailedException {
-        if(VelocityRustyConnector.getLifecycle().isRunning()) throw new SyncFailedException("You can't get the plugin instance while the plugin is running!");
+        if(VelocityRustyConnector.lifecycle().isRunning()) throw new SyncFailedException("You can't get the plugin instance while the plugin is running!");
         return this.plugin;
     }
 }

@@ -63,27 +63,27 @@ public class ServerInfoService extends Service implements PlayerServer {
     public String getFamily() { return this.family; }
 
     @Override
-    public int getPlayerCount() {
+    public int playerCount() {
         return PaperAPI.get().getServer().getOnlinePlayers().size();
     }
 
     @Override
-    public int getSortIndex() {
+    public int sortIndex() {
         return 0;
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return this.weight;
     }
 
     @Override
-    public int getSoftPlayerCap() {
+    public int softPlayerCap() {
         return this.softPlayerCap;
     }
 
     @Override
-    public int getHardPlayerCap() {
+    public int hardPlayerCap() {
         return this.hardPlayerCap;
     }
 

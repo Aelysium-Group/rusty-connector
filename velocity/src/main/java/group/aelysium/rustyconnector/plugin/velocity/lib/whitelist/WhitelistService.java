@@ -13,7 +13,7 @@ public class WhitelistService extends Service implements NodeManager<Whitelist> 
     private final Map<String, Whitelist> registeredWhitelists = new HashMap<>();
     private WeakReference<Whitelist> proxyWhitelist;
 
-    public Optional<Whitelist> getProxyWhitelist() {
+    public Optional<Whitelist> proxyWhitelist() {
         try {
             Whitelist whitelist = this.proxyWhitelist.get();
             if(whitelist != null) return Optional.of(whitelist);
@@ -43,7 +43,7 @@ public class WhitelistService extends Service implements NodeManager<Whitelist> 
      */
     @Override
     public void add(Whitelist whitelist) {
-        this.registeredWhitelists.put(whitelist.getName(),whitelist);
+        this.registeredWhitelists.put(whitelist.name(),whitelist);
     }
 
     /**
@@ -52,7 +52,7 @@ public class WhitelistService extends Service implements NodeManager<Whitelist> 
      */
     @Override
     public void remove(Whitelist whitelist) {
-        this.registeredWhitelists.remove(whitelist.getName());
+        this.registeredWhitelists.remove(whitelist.name());
     }
 
     @Override

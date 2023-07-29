@@ -12,7 +12,6 @@ import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -24,7 +23,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public final class CommandParty {
@@ -82,7 +80,7 @@ public final class CommandParty {
                                         }
 
                                         invites.forEach(invite -> {
-                                            builder.suggest(invite.getSender().getUsername());
+                                            builder.suggest(invite.sender().getUsername());
                                         });
 
                                         return builder.buildFuture();
@@ -118,7 +116,7 @@ public final class CommandParty {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = api.getServer().getPlayer(username).orElse(null);
+                                            Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
 
                                             if(senderPlayer == null)
                                                 return closeMessage(player, Component.text(username + " doesn't seem to exist on this server!", NamedTextColor.RED));
@@ -154,7 +152,7 @@ public final class CommandParty {
                                                 return closeMessage(player, Component.text("You must leave your current party before joining another party.", NamedTextColor.RED));
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = api.getServer().getPlayer(username).orElse(null);
+                                            Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                             if(senderPlayer == null || !senderPlayer.isActive())
                                                 return closeMessage(player, Component.text(username + " isn't online for you to join their party!", NamedTextColor.RED));
 
@@ -193,7 +191,7 @@ public final class CommandParty {
                             if(player.getCurrentServer().orElse(null) == null)
                                 return closeMessage(player, Component.text("You have to be connected to a server in order to create a party!", NamedTextColor.RED));
 
-                            PlayerServer server = api.services().serverService().findServer(player.getCurrentServer().orElse(null).getServerInfo());
+                            PlayerServer server = api.services().serverService().search(player.getCurrentServer().orElse(null).getServerInfo());
                             Party party = partyService.create(player, server);
 
                             context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
@@ -216,7 +214,7 @@ public final class CommandParty {
                             Party party = partyService.find(player).orElse(null);
                             if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
 
-                            if(!party.getLeader().equals(player))
+                            if(!party.leader().equals(player))
                                 return closeMessage(player, Component.text("Only the party leader can disband the party!", NamedTextColor.RED));
 
                             partyService.disband(party);
@@ -263,10 +261,10 @@ public final class CommandParty {
                                     if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                                     try {
-                                        if(!partyService.getSettings().friendsOnly()) {
-                                            PlayerServer server = api.services().serverService().findServer(player.getCurrentServer().orElseThrow().getServerInfo());
+                                        if(!partyService.settings().friendsOnly()) {
+                                            PlayerServer server = api.services().serverService().search(player.getCurrentServer().orElseThrow().getServerInfo());
 
-                                            server.getRegisteredServer().getPlayersConnected().forEach(nearbyPlayer -> {
+                                            server.registeredServer().getPlayersConnected().forEach(nearbyPlayer -> {
                                                 if(nearbyPlayer.equals(player)) return;
 
                                                 builder.suggest(nearbyPlayer.getUsername());
@@ -310,29 +308,29 @@ public final class CommandParty {
                                         if(player.getCurrentServer().orElse(null) == null)
                                             return closeMessage(player, Component.text("You have to be connected to a server in order to create a party!", NamedTextColor.RED));
 
-                                        PlayerServer server = api.services().serverService().findServer(player.getCurrentServer().orElse(null).getServerInfo());
+                                        PlayerServer server = api.services().serverService().search(player.getCurrentServer().orElse(null).getServerInfo());
                                         Party newParty = partyService.create(player, server);
                                         player.sendMessage(Component.text("You created a new party!",NamedTextColor.GREEN));
 
                                         party = newParty;
                                     }
 
-                                    if(partyService.getSettings().onlyLeaderCanInvite())
-                                        if(!party.getLeader().equals(player))
+                                    if(partyService.settings().onlyLeaderCanInvite())
+                                        if(!party.leader().equals(player))
                                             return closeMessage(player, Component.text("Only the party leader can invite people!", NamedTextColor.RED));
 
                                     String username = context.getArgument("username", String.class);
-                                    Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
+                                    Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null || !targetPlayer.isActive())
                                         return closeMessage(player, Component.text(username + " isn't available to send an invite to!", NamedTextColor.RED));
                                     try {
                                         Collection<Player> connectedPlayers = targetPlayer.getCurrentServer().orElseThrow().getServer().getPlayersConnected();
-                                        if (partyService.getSettings().localOnly())
+                                        if (partyService.settings().localOnly())
                                             if (!connectedPlayers.contains(targetPlayer))
                                                 return closeMessage(player, Component.text("You can only send invites to players that are in the server with you!", NamedTextColor.RED));
                                     } catch (Exception ignore) {}
                                     try {
-                                        if (partyService.getSettings().friendsOnly())
+                                        if (partyService.settings().friendsOnly())
                                             if (!api.services().friendsService().orElseThrow().areFriends(player, targetPlayer))
                                                 return closeMessage(player, Component.text("You can only send invites to your friends!", NamedTextColor.RED));
                                     } catch (Exception ignore) {}
@@ -401,12 +399,12 @@ public final class CommandParty {
                                     Party party = partyService.find(player).orElse(null);
                                     if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
 
-                                    if(partyService.getSettings().onlyLeaderCanKick())
-                                        if(!party.getLeader().equals(player))
+                                    if(partyService.settings().onlyLeaderCanKick())
+                                        if(!party.leader().equals(player))
                                             return closeMessage(player, Component.text("Only the party leader can kick people!", NamedTextColor.RED));
 
                                     String username = context.getArgument("username", String.class);
-                                    Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
+                                    Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null)
                                         return closeMessage(player, Component.text(username + " hasn't played on the server!", NamedTextColor.RED));
                                     if(targetPlayer.equals(player))
@@ -473,12 +471,12 @@ public final class CommandParty {
                                     Party party = partyService.find(player).orElse(null);
                                     if(party == null) return closeMessage(player, Component.text("You aren't in a party!", NamedTextColor.RED));
 
-                                    if(partyService.getSettings().onlyLeaderCanKick())
-                                        if(!party.getLeader().equals(player))
+                                    if(partyService.settings().onlyLeaderCanKick())
+                                        if(!party.leader().equals(player))
                                             return closeMessage(player, Component.text("Only the party leader can promote people!", NamedTextColor.RED));
 
                                     String username = context.getArgument("username", String.class);
-                                    Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
+                                    Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null)
                                         return closeMessage(player, Component.text(username + " hasn't played on the server!", NamedTextColor.RED));
                                     if(targetPlayer.equals(player))

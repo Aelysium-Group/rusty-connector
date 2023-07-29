@@ -5,7 +5,6 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
@@ -32,7 +31,7 @@ public class PartyService extends Service {
     }
 
     public void initCommand() {
-        CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
         VelocityAPI.get().logger().send(Component.text("Building party service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("party"))
@@ -54,7 +53,7 @@ public class PartyService extends Service {
         this.connector.submit(runnable);
     }
 
-    public PartySettings getSettings() {
+    public PartySettings settings() {
         return this.settings;
     }
 
@@ -87,7 +86,7 @@ public class PartyService extends Service {
     public PartyInvite invitePlayer(Party party, Player sender, Player target) {
         VelocityAPI api = VelocityAPI.get();
 
-        if(party.getLeader() != sender && this.settings.onlyLeaderCanInvite)
+        if(party.leader() != sender && this.settings.onlyLeaderCanInvite)
             throw new IllegalStateException("Hey! Only the party leader can invite other players!");
 
         if(this.settings.friendsOnly())
@@ -114,10 +113,10 @@ public class PartyService extends Service {
     }
 
     public List<PartyInvite> findInvitesToTarget(Player target) {
-        return this.invites.stream().filter(invite -> invite.getTarget() == target).findAny().stream().toList();
+        return this.invites.stream().filter(invite -> invite.target() == target).findAny().stream().toList();
     }
     public Optional<PartyInvite> findInvite(Player target, Player sender) {
-        return this.invites.stream().filter(invite -> invite.getTarget().equals(target) && invite.getSender().equals(sender)).findFirst();
+        return this.invites.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();
     }
 
     public void closeInvite(PartyInvite invite) {

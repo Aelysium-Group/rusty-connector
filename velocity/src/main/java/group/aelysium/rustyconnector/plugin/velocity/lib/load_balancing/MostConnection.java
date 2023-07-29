@@ -13,7 +13,7 @@ public class MostConnection extends LeastConnection { // Extends LeastConnection
         try {
             PlayerServer currentItem = this.items.get(this.index);
 
-            if(currentItem.getPlayerCount() + 1 >= currentItem.getHardPlayerCap()) this.index++;
+            if(currentItem.playerCount() + 1 >= currentItem.hardPlayerCap()) this.index++;
             if(this.index >= this.items.size()) this.index = 0;
         } catch (IndexOutOfBoundsException ignore) {}
     }
@@ -22,7 +22,7 @@ public class MostConnection extends LeastConnection { // Extends LeastConnection
     @Override
     public void completeSort() {
         this.index = 0;
-        if(this.isWeighted()) WeightedQuickSort.sort(this.items);
+        if(this.weighted()) WeightedQuickSort.sort(this.items);
         else {
             QuickSort.sort(this.items);
             Collections.reverse(this.items);

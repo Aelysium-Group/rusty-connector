@@ -13,7 +13,7 @@ public class QuickSort {
 
     static int partition(List<? extends Sortable> array, int low, int high) {
         // pivot
-        int pivot = array.get(high).getSortIndex();
+        int pivot = array.get(high).sortIndex();
   
         // Index of smaller element and
         // indicates the right position
@@ -24,7 +24,7 @@ public class QuickSort {
   
             // If current element is smaller
             // than the pivot
-            if (array.get(j).getSortIndex() < pivot) {
+            if (array.get(j).sortIndex() < pivot) {
   
                 // Increment index of
                 // smaller element

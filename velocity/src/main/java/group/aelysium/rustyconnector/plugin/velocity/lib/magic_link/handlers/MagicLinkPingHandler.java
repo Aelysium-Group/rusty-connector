@@ -34,7 +34,7 @@ public class MagicLinkPingHandler implements MessageHandler {
                 address
         );
 
-        if(api.logger().getGate().check(GateKey.PING))
+        if(api.logger().loggerGate().check(GateKey.PING))
             api.logger().send(VelocityLang.PING.build(serverInfo));
 
         if(message.getIntent() == RedisMessageServerPing.ConnectionIntent.CONNECT)
@@ -66,7 +66,7 @@ public class MagicLinkPingHandler implements MessageHandler {
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.STATUS, String.valueOf(RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED))
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.MESSAGE, "Connected to the proxy!")
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.GREEN.toString())
-                    .setParameter(RedisMessageServerPingResponse.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.getServerInterval()))
+                    .setParameter(RedisMessageServerPingResponse.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.serverInterval()))
                     .buildSendable();
             redisService.publish(message);
 
@@ -96,12 +96,12 @@ public class MagicLinkPingHandler implements MessageHandler {
         VelocityAPI api = VelocityAPI.get();
         ServerService serverService = api.services().serverService();
 
-        PlayerServer server = serverService.findServer(serverInfo);
+        PlayerServer server = serverService.search(serverInfo);
         if (server == null) {
             return this.connectServer(serverInfo);
         }
 
-        server.setTimeout(serverService.getServerTimeout());
+        server.setTimeout(serverService.serverTimeout());
         server.setPlayerCount(this.message.getPlayerCount());
         return true;
     }

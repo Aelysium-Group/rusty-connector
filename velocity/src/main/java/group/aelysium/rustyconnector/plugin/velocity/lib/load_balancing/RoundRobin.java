@@ -10,7 +10,7 @@ public class RoundRobin extends LoadBalancer {
 
     @Override
     public void completeSort() {
-        if(this.isWeighted()) WeightOnlyQuickSort.sort(this.items);
+        if(this.weighted()) WeightOnlyQuickSort.sort(this.items);
     }
 
     @Override

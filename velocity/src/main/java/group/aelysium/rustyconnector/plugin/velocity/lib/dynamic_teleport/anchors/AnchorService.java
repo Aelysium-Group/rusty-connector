@@ -22,7 +22,7 @@ public class AnchorService extends Service {
     }
 
     public void initCommands() {
-        CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
 
@@ -48,7 +48,7 @@ public class AnchorService extends Service {
         VelocityAPI.get().logger().send(Component.text("Finished building anchor service commands.", NamedTextColor.GREEN));
     }
 
-    public Optional<BaseServerFamily> getFamily(String anchor) {
+    public Optional<BaseServerFamily> family(String anchor) {
         try {
             BaseServerFamily family = this.anchors.get(anchor).get();
             if(family == null) return Optional.empty();

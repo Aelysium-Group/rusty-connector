@@ -69,14 +69,14 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
             logger.send(Component.text("Building Redis...", NamedTextColor.DARK_GRAY));
 
             RedisClient.Builder redisClientBuilder = new RedisClient.Builder()
-                    .setHost(config.getRedis_host())
-                    .setPort(config.getRedis_port())
-                    .setUser(config.getRedis_user())
+                    .setHost(config.redis_host())
+                    .setPort(config.redis_port())
+                    .setUser(config.redis_user())
                     .setPrivateKey(privateKey)
-                    .setDataChannel(config.getRedis_dataChannel());
+                    .setDataChannel(config.redis_dataChannel());
 
-            if (!config.getRedis_password().equals(""))
-                redisClientBuilder.setPassword(config.getRedis_password());
+            if (!config.redis_password().equals(""))
+                redisClientBuilder.setPassword(config.redis_password());
 
             builder.addService(new RedisService(redisClientBuilder, privateKey));
 
@@ -142,14 +142,14 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
 
                 RootServerFamily rootFamily = RootServerFamily.init(familiesConfig.getRootFamilyName());
                 familyService.setRootFamily(rootFamily);
-                logger.send(Component.text(" | Registered root family: "+rootFamily.getName(), NamedTextColor.YELLOW));
+                logger.send(Component.text(" | Registered root family: "+rootFamily.name(), NamedTextColor.YELLOW));
 
                 logger.send(Component.text(" | Finished building root family.", NamedTextColor.GREEN));
             }
 
             logger.send(Component.text(" | Registering load balancing service to the API...", NamedTextColor.DARK_GRAY));
-            if (config.getServices_loadBalancing_enabled()) {
-                builder.addService(new LoadBalancingService(familyService.size(), config.getServices_loadBalancing_interval()));
+            if (config.services_loadBalancing_enabled()) {
+                builder.addService(new LoadBalancingService(familyService.size(), config.services_loadBalancing_interval()));
             }
             logger.send(Component.text(" | Finished registering load balancing service to the API.", NamedTextColor.GREEN));
 
@@ -164,8 +164,8 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
             logger.send(Component.text("Finished registering whitelist service to the API.", NamedTextColor.GREEN));
 
             logger.send(Component.text("Building proxy whitelist...", NamedTextColor.DARK_GRAY));
-            if (config.isWhitelist_enabled()) {
-                whitelistService.setProxyWhitelist(Whitelist.init(config.getWhitelist_name()));
+            if (config.whitelist_enabled()) {
+                whitelistService.setProxyWhitelist(Whitelist.init(config.whitelist_name()));
                 logger.send(Component.text("Finished building proxy whitelist.", NamedTextColor.GREEN));
             } else
                 logger.send(Component.text("Finished building proxy whitelist. No whitelist is enabled for the proxy.", NamedTextColor.GREEN));
@@ -181,20 +181,20 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
 
             {
                 logger.send(Component.text(" | Building message cache service...", NamedTextColor.DARK_GRAY));
-                builder.addService(new MessageCacheService(dataTransitConfig.getCache_size(), dataTransitConfig.getCache_ignoredStatuses(), dataTransitConfig.getCache_ignoredTypes()));
-                logger.send(Component.text(" | Message cache size set to: "+dataTransitConfig.getCache_size(), NamedTextColor.YELLOW));
+                builder.addService(new MessageCacheService(dataTransitConfig.cache_size(), dataTransitConfig.cache_ignoredStatuses(), dataTransitConfig.cache_ignoredTypes()));
+                logger.send(Component.text(" | Message cache size set to: "+dataTransitConfig.cache_size(), NamedTextColor.YELLOW));
                 logger.send(Component.text(" | Finished building message cache service.", NamedTextColor.GREEN));
             }
 
             DataTransitService dataTransitService = new DataTransitService(
-                    dataTransitConfig.isDenylist_enabled(),
-                    dataTransitConfig.isWhitelist_enabled(),
-                    dataTransitConfig.getMaxPacketLength()
+                    dataTransitConfig.denylist_enabled(),
+                    dataTransitConfig.whitelist_enabled(),
+                    dataTransitConfig.maxPacketLength()
             );
             builder.addService(dataTransitService);
 
-            if (dataTransitConfig.isWhitelist_enabled())
-                dataTransitConfig.getWhitelist_addresses().forEach(entry -> {
+            if (dataTransitConfig.whitelist_enabled())
+                dataTransitConfig.whitelist_addresses().forEach(entry -> {
                     String[] addressSplit = entry.split(":");
 
                     InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
@@ -202,8 +202,8 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                     dataTransitService.whitelistAddress(address);
                 });
 
-            if (dataTransitConfig.isDenylist_enabled())
-                dataTransitConfig.getDenylist_addresses().forEach(entry -> {
+            if (dataTransitConfig.denylist_enabled())
+                dataTransitConfig.denylist_addresses().forEach(entry -> {
                     String[] addressSplit = entry.split(":");
 
                     InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
@@ -217,7 +217,7 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
         {
             logger.send(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-            MagicLinkService magicLinkService = new MagicLinkService(3, config.getServices_serverLifecycle_serverPingInterval());
+            MagicLinkService magicLinkService = new MagicLinkService(3, config.services_serverLifecycle_serverPingInterval());
             builder.addService(magicLinkService);
 
             logger.send(Component.text("Finished building magic link service.", NamedTextColor.GREEN));
@@ -227,8 +227,8 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
             logger.send(Component.text("Building server service...", NamedTextColor.DARK_GRAY));
 
             ServerService.Builder serverServiceBuilder = new ServerService.Builder()
-                    .setServerTimeout(config.getServices_serverLifecycle_serverTimeout())
-                    .setServerInterval(config.getServices_serverLifecycle_serverPingInterval());
+                    .setServerTimeout(config.services_serverLifecycle_serverTimeout())
+                    .setServerInterval(config.services_serverLifecycle_serverPingInterval());
 
             builder.addService(serverServiceBuilder.build());
 

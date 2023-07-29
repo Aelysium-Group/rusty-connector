@@ -10,15 +10,15 @@ public class WhitelistPlayer {
     private String username = null;
     private String ip = null;
 
-    public UUID getUUID() {
+    public UUID uuid() {
         return this.uuid;
     }
 
-    public String getUsername() {
+    public String username() {
         return this.username;
     }
 
-    public String getIP() {
+    public String ip() {
         return this.ip;
     }
 
@@ -29,15 +29,15 @@ public class WhitelistPlayer {
     }
 
     public static boolean validate(Whitelist whitelist, Player playerToValidate) {
-        WhitelistPlayer player = whitelist.getPlayerManager().find(playerToValidate.getUsername());
+        WhitelistPlayer player = whitelist.playerManager().find(playerToValidate.getUsername());
         if(player == null) return false;
 
-        if(player.getUUID() != null)
-            if(!Objects.equals(player.getUUID().toString(), playerToValidate.getUniqueId().toString()))
+        if(player.uuid() != null)
+            if(!Objects.equals(player.uuid().toString(), playerToValidate.getUniqueId().toString()))
                 return false;
 
-        if(player.getIP() != null)
-            return Objects.equals(player.getIP(), playerToValidate.getRemoteAddress().getHostString());
+        if(player.ip() != null)
+            return Objects.equals(player.ip(), playerToValidate.getRemoteAddress().getHostString());
 
         return true;
     }

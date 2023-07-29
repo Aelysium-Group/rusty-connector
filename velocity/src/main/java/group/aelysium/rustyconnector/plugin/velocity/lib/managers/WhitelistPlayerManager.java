@@ -24,7 +24,7 @@ public class WhitelistPlayerManager implements NodeManager<WhitelistPlayer> {
      */
     @Override
     public void add(WhitelistPlayer player) {
-        this.registeredPlayers.put(player.getUsername(),player);
+        this.registeredPlayers.put(player.username(),player);
     }
 
     /**
@@ -33,7 +33,7 @@ public class WhitelistPlayerManager implements NodeManager<WhitelistPlayer> {
      */
     @Override
     public void remove(WhitelistPlayer player) {
-        this.remove(player.getUsername());
+        this.remove(player.username());
     }
 
     @Override

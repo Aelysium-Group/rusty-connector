@@ -71,7 +71,7 @@ public class WebhooksConfig extends YAML {
                     }
                 }
 
-                logger.log("Successfully registered the webhook: " + webhook.getName() + "!");
+                logger.log("Successfully registered the webhook: " + webhook.name() + "!");
             } catch (MalformedURLException e) {
                 throw new IllegalStateException("`url` in webhooks.yml must be a valid url!");
             }

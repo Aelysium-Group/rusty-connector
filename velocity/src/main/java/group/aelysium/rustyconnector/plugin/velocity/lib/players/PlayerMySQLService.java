@@ -5,7 +5,6 @@ import com.mysql.cj.jdbc.MysqlDataSource;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -16,8 +15,6 @@ import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,7 +28,7 @@ public class PlayerMySQLService extends MySQLService {
 
     public void init() throws SQLException, IOException {
         VelocityAPI api = VelocityAPI.get();
-        InputStream stream = api.getResourceAsStream("players.sql");
+        InputStream stream = api.resourceAsStream("players.sql");
         String file = new String(stream.readAllBytes());
 
         this.connect();

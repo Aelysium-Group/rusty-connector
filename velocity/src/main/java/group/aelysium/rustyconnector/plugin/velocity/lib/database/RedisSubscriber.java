@@ -58,7 +58,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             } catch (BlockedMessageException e) {
                 cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
 
-                if(!logger.getGate().check(GateKey.MESSAGE_TUNNEL_FAILED_MESSAGE)) return;
+                if(!logger.loggerGate().check(GateKey.MESSAGE_TUNNEL_FAILED_MESSAGE)) return;
 
                 logger.error("An incoming message from: "+message.getAddress().toString()+" was blocked by the message tunnel!");
                 logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
@@ -66,12 +66,12 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
                 cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
             }
         } catch (Exception e) {
-            if(logger.getGate().check(GateKey.SAVE_TRASH_MESSAGES))
+            if(logger.loggerGate().check(GateKey.SAVE_TRASH_MESSAGES))
                 cachedMessage.sentenceMessage(MessageStatus.TRASHED, e.getMessage());
             else
                 messageCacheService.removeMessage(cachedMessage.getSnowflake());
 
-            if(!logger.getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
+            if(!logger.loggerGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 
             logger.error("An incoming message was thrown away!");
             logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
@@ -89,14 +89,14 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         } catch (NullPointerException e) {
             cachedMessage.sentenceMessage(MessageStatus.PARSING_ERROR);
 
-            if(!logger.getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
+            if(!logger.loggerGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 
             logger.error("There was an issue handling the message. Throwing away...", e);
             logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
         } catch (Exception e) {
             cachedMessage.sentenceMessage(MessageStatus.EXECUTING_ERROR, e.getMessage());
 
-            if(!logger.getGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
+            if(!logger.loggerGate().check(GateKey.MESSAGE_PARSER_TRASH)) return;
 
             logger.error("There was an issue handling the message. Throwing away...", e);
             logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());

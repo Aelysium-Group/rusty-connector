@@ -24,7 +24,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
         this.mySQLService = mySQLService;
     }
 
-    public Optional<MySQLService> getMySQLService() {
+    public Optional<MySQLService> mySQLService() {
         return this.mySQLService;
     }
 
@@ -33,7 +33,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
     }
 
     public void setRootFamily(RootServerFamily family) {
-        this.registeredFamilies.put(family.getName(), family);
+        this.registeredFamilies.put(family.name(), family);
         this.rootFamily = new WeakReference<>(family);
     }
 
@@ -43,7 +43,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * this will return `null`.
      * @return A {@link RootServerFamily} or `null`
      */
-    public RootServerFamily getRootFamily() {
+    public RootServerFamily rootFamily() {
         return this.rootFamily.get();
     }
 
@@ -63,7 +63,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      */
     @Override
     public void add(BaseServerFamily family) {
-        this.registeredFamilies.put(family.getName(),family);
+        this.registeredFamilies.put(family.name(),family);
     }
 
     /**
@@ -72,7 +72,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      */
     @Override
     public void remove(BaseServerFamily family) {
-        this.registeredFamilies.remove(family.getName());
+        this.registeredFamilies.remove(family.name());
     }
 
     @Override

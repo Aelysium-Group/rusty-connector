@@ -17,7 +17,7 @@ public class TPACleaningService extends ClockService {
         TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
                                    .services().tpaService().orElseThrow();
         this.scheduleRecurring(() -> {
-            for(TPAHandler handler : tpaService.getAllTPAHandlers()) {
+            for(TPAHandler handler : tpaService.allTPAHandlers()) {
                 try {
                     handler.clearExpired();
                 } catch (Exception ignore) {}

@@ -15,7 +15,7 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
     }
 
     @Override
-    public LoggerGate getGate() {
+    public LoggerGate loggerGate() {
         return this.gate;
     }
 
@@ -60,13 +60,13 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
 
     public void send(Component message) {
         VelocityAPI api = VelocityAPI.get();
-        api.getServer().getConsoleCommandSource().sendMessage(message);
+        api.velocityServer().getConsoleCommandSource().sendMessage(message);
     }
 
     public static void init(LoggerConfig config) {
         PluginLogger pluginLogger = VelocityAPI.get().logger();
 
-        LoggerGate gate = pluginLogger.getGate();
+        LoggerGate gate = pluginLogger.loggerGate();
 
         gate.registerNode(
                 GateKey.SAVE_TRASH_MESSAGES,

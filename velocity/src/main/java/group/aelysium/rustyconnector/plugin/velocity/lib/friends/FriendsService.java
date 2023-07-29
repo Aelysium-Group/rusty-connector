@@ -25,7 +25,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
     }
 
     public void initCommand() {
-        CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
         VelocityAPI.get().logger().send(Component.text("Building friends service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("friends"))
@@ -66,15 +66,15 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         VelocityAPI.get().logger().send(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
     }
 
-    public FriendsSettings getSettings() {
+    public FriendsSettings settings() {
         return this.settings;
     }
 
     public List<FriendRequest> findRequestsToTarget(Player target) {
-        return this.friendRequests.stream().filter(request -> request.getTarget() == target).findAny().stream().toList();
+        return this.friendRequests.stream().filter(request -> request.target() == target).findAny().stream().toList();
     }
     public Optional<FriendRequest> findRequest(Player target, Player sender) {
-        return this.friendRequests.stream().filter(invite -> invite.getTarget().equals(target) && invite.getSender().equals(sender)).findFirst();
+        return this.friendRequests.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();
     }
 
     public Optional<List<FakePlayer>> findFriends(Player player, boolean forcePull) {
@@ -84,7 +84,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
 
         friendMappings.forEach(mapping -> {
             try {
-                friends.add(mapping.getFriendOf(player));
+                friends.add(mapping.friendOf(player));
             } catch (NullPointerException ignore) {}
         });
 
@@ -96,7 +96,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
     }
 
     public FriendMapping sendRequest(Player sender, Player target) {
-        if(this.getFriendCount(sender).orElseThrow() > this.getSettings().maxFriends())
+        if(this.friendCount(sender).orElseThrow() > this.settings().maxFriends())
             sender.sendMessage(Component.text("You have reached the max number of friends!", NamedTextColor.RED));
 
         FriendRequest friendRequest = new FriendRequest(sender, target);
@@ -123,7 +123,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         request.decompose();
     }
 
-    public Optional<Integer> getFriendCount(Player player) {
+    public Optional<Integer> friendCount(Player player) {
         return this.services().dataEnclave().getFriendCount(player);
     }
 

@@ -27,7 +27,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         this.settings = settings;
     }
     public void initCommand() {
-        CommandManager commandManager = VelocityAPI.get().getServer().getCommandManager();
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
         VelocityAPI.get().logger().send(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("tpa"))
@@ -45,11 +45,11 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         VelocityAPI.get().logger().send(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
     }
 
-    public TPASettings getSettings() {
+    public TPASettings settings() {
         return this.settings;
     }
 
-    public TPAHandler getTPAHandler(BaseServerFamily family) {
+    public TPAHandler tpaHandler(BaseServerFamily family) {
         TPAHandler tpaHandler = this.tpaHandlers.get(family);
         if(tpaHandler == null) {
             TPAHandler newTPAHandler = new TPAHandler();
@@ -59,7 +59,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
 
         return tpaHandler;
     }
-    public List<TPAHandler> getAllTPAHandlers() {
+    public List<TPAHandler> allTPAHandlers() {
         return this.tpaHandlers.values().stream().toList();
     }
 
@@ -76,8 +76,8 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         RedisMessageCoordinateRequestQueue message = (RedisMessageCoordinateRequestQueue) new GenericRedisMessage.Builder()
                 .setType(RedisMessageType.COORDINATE_REQUEST_QUEUE)
                 .setOrigin(MessageOrigin.PROXY)
-                .setAddress(targetServer.getAddress())
-                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.TARGET_SERVER, targetServer.getAddress())
+                .setAddress(targetServer.address())
+                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.TARGET_SERVER, targetServer.address())
                 .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.TARGET_USERNAME, target.getUsername())
                 .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
@@ -85,7 +85,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         api.services().redisService().publish(message);
 
         try {
-            PlayerServer senderServer = api.services().serverService().findServer(source.getCurrentServer().orElseThrow().getServerInfo());
+            PlayerServer senderServer = api.services().serverService().search(source.getCurrentServer().orElseThrow().getServerInfo());
 
             if (senderServer.equals(targetServer)) return;
         } catch (Exception ignore) {}
@@ -99,19 +99,8 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
 
     @Override
     public void kill() {
-        this.getAllTPAHandlers().forEach(TPAHandler::decompose);
+        this.allTPAHandlers().forEach(TPAHandler::decompose);
         this.tpaHandlers.clear();
         super.kill();
-    }
-
-    /**
-     * The services that are valid for this service provider.
-     */
-    public enum ValidServices {
-        /**
-         * Represents {@link TPACleaningService}
-         * This service is required and must always be set.
-         */
-        TPA_CLEANING_SERVICE,
     }
 }

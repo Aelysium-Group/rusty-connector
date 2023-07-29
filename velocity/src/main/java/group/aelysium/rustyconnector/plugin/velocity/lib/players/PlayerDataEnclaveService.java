@@ -1,16 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.model.Cache;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsMySQLService;
 
 import java.io.SyncFailedException;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.*;
 
 /**
@@ -54,7 +48,7 @@ public class PlayerDataEnclaveService extends Service {
     public FakePlayer findPlayer(UUID uuid) throws SyncFailedException {
         // Check velocity for online players first
         try {
-            FakePlayer fakePlayer = FakePlayer.from(VelocityAPI.get().getServer().getPlayer(uuid).orElseThrow());
+            FakePlayer fakePlayer = FakePlayer.from(VelocityAPI.get().velocityServer().getPlayer(uuid).orElseThrow());
             cachePlayer(fakePlayer);
 
             return fakePlayer;

@@ -8,12 +8,9 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
@@ -95,7 +92,7 @@ public final class CommandFM {
                                 }
 
                                 String username = context.getArgument("username", String.class);
-                                Player targetPlayer = api.getServer().getPlayer(username).orElse(null);
+                                Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
 
                                 if(targetPlayer == null)
                                     return closeMessage(player, Component.text(username + " doesn't seem to exist!", NamedTextColor.RED));

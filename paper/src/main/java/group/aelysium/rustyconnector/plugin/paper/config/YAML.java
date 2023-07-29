@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.paper.config;
 
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import net.kyori.adventure.text.Component;
@@ -30,7 +29,7 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
                 parent.mkdirs();
             }
 
-            InputStream templateStream = api.getResourceAsStream(this.template);
+            InputStream templateStream = api.resourceAsStream(this.template);
             if (templateStream == null) {
                 logger.error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
                 return false;

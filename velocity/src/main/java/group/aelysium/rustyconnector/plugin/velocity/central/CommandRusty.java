@@ -154,7 +154,7 @@ public final class CommandRusty {
                                             return Command.SINGLE_SUCCESS;
                                         }
 
-                                        ((PlayerFocusedServerFamily) family).getLoadBalancer().resetIndex();
+                                        ((PlayerFocusedServerFamily) family).loadBalancer().resetIndex();
 
                                         if(family instanceof ScalarServerFamily)
                                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
@@ -179,7 +179,7 @@ public final class CommandRusty {
                                             return Command.SINGLE_SUCCESS;
                                         }
 
-                                        ((PlayerFocusedServerFamily) family).getLoadBalancer().completeSort();
+                                        ((PlayerFocusedServerFamily) family).loadBalancer().completeSort();
 
                                         if(family instanceof ScalarServerFamily)
                                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
@@ -245,7 +245,7 @@ public final class CommandRusty {
                                             String familyName = context.getArgument("familyName", String.class);
                                             String username = context.getArgument("username", String.class);
 
-                                            Player player = api.getServer().getPlayer(username).orElse(null);
+                                            Player player = api.velocityServer().getPlayer(username).orElse(null);
                                             if(player == null) {
                                                 logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
                                                 return Command.SINGLE_SUCCESS;
@@ -285,19 +285,19 @@ public final class CommandRusty {
                                                     String serverName = context.getArgument("serverName", String.class);
                                                     String username = context.getArgument("username", String.class);
 
-                                                    Player player = api.getServer().getPlayer(username).orElse(null);
+                                                    Player player = api.velocityServer().getPlayer(username).orElse(null);
                                                     if (player == null) {
                                                         logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
                                                         return Command.SINGLE_SUCCESS;
                                                     }
 
-                                                    RegisteredServer registeredServer = api.getServer().getServer(serverName).orElse(null);
+                                                    RegisteredServer registeredServer = api.velocityServer().getServer(serverName).orElse(null);
                                                     if (registeredServer == null) {
                                                         logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
                                                         return Command.SINGLE_SUCCESS;
                                                     }
 
-                                                    PlayerServer server = api.services().serverService().findServer(registeredServer.getServerInfo());
+                                                    PlayerServer server = api.services().serverService().search(registeredServer.getServerInfo());
                                                     if (server == null) {
                                                         logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
                                                         return Command.SINGLE_SUCCESS;

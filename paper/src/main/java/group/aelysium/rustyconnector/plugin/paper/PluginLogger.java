@@ -14,7 +14,7 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
     }
 
     @Override
-    public LoggerGate getGate() {
+    public LoggerGate loggerGate() {
         return this.gate;
     }
     @Override

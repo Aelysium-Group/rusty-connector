@@ -110,8 +110,8 @@ public class FriendsDataEnclaveService extends Service {
      */
     public boolean areFriends(FakePlayer player1, FakePlayer player2) throws RuntimeException {
         if (
-                this.getPlayersCacheEntry(player1).stream().anyMatch(friendMapping -> friendMapping.getFriendOf(player1).equals(player2)) ||
-                this.getPlayersCacheEntry(player2).stream().anyMatch(friendMapping -> friendMapping.getFriendOf(player2).equals(player1))
+                this.getPlayersCacheEntry(player1).stream().anyMatch(friendMapping -> friendMapping.friendOf(player1).equals(player2)) ||
+                this.getPlayersCacheEntry(player2).stream().anyMatch(friendMapping -> friendMapping.friendOf(player2).equals(player1))
         )
             return true;
 

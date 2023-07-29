@@ -37,11 +37,11 @@ public class OnPlayerDisconnect {
             // Handle servers when player leaves
             try {
                 if(player.getCurrentServer().isPresent()) {
-                    PlayerServer server = api.services().serverService().findServer(player.getCurrentServer().get().getServerInfo());
+                    PlayerServer server = api.services().serverService().search(player.getCurrentServer().get().getServerInfo());
                     server.playerLeft();
                     api.services().familyService().uncacheHomeServerMappings(player);
 
-                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.getFamily().getName(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
+                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.family().name(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, server));
                 }
             } catch (Exception e) {
@@ -53,10 +53,10 @@ public class OnPlayerDisconnect {
                 PartyService partyService = api.services().partyService().orElseThrow();
                 Party party = partyService.find(player).orElseThrow();
                 try {
-                    boolean wasPartyLeader = party.getLeader().equals(player);
+                    boolean wasPartyLeader = party.leader().equals(player);
 
                     if(wasPartyLeader)
-                        if(partyService.getSettings().disbandOnLeaderQuit())
+                        if(partyService.settings().disbandOnLeaderQuit())
                             partyService.disband(party);
 
                     party.leave(player);
@@ -72,7 +72,7 @@ public class OnPlayerDisconnect {
             // Handle sending out friend messages when player leaves
             try {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
-                if(!friendsService.getSettings().allowMessaging()) throw new NoOutputException();
+                if(!friendsService.settings().allowMessaging()) throw new NoOutputException();
 
                 List<FakePlayer> friends = friendsService.findFriends(player, true).orElseThrow();
 

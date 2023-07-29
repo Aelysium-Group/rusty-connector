@@ -17,10 +17,10 @@ public class FriendRequest {
         this.target = target;
     }
 
-    public Player getSender() {
+    public Player sender() {
         return this.sender.get();
     }
-    public Player getTarget() {
+    public Player target() {
         return this.target;
     }
 
@@ -36,7 +36,7 @@ public class FriendRequest {
         FriendsService friendsService = api.services().friendsService().orElseThrow();
 
         try {
-            if (friendsService.getFriendCount(this.target).orElseThrow() > friendsService.getSettings().maxFriends())
+            if (friendsService.friendCount(this.target).orElseThrow() > friendsService.settings().maxFriends())
                 throw new IllegalStateException("You've already maxed out the number of friends you can have.");
         } catch (IllegalStateException e) {
             throw e;
@@ -54,8 +54,8 @@ public class FriendRequest {
             friendsService.services().dataEnclave().addFriend(this.sender.get(), this.target);
 
             try {
-                this.getTarget().sendMessage(Component.text("You and " + this.getSender().getUsername() + " are now friends!", NamedTextColor.GREEN));
-                this.getSender().sendMessage(Component.text("You and " + this.getTarget().getUsername() + " are now friends!", NamedTextColor.GREEN));
+                this.target().sendMessage(Component.text("You and " + this.sender().getUsername() + " are now friends!", NamedTextColor.GREEN));
+                this.sender().sendMessage(Component.text("You and " + this.target().getUsername() + " are now friends!", NamedTextColor.GREEN));
             } catch (Exception ignore) {
                 this.target.sendMessage(Component.text("You accepted the friend request!", NamedTextColor.GREEN));
             }

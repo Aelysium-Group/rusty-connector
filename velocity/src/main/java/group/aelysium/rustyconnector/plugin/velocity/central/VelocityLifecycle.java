@@ -51,15 +51,15 @@ public class VelocityLifecycle extends PluginLifecycle {
                 api.killServices();
             } catch (Exception ignore) {}
 
-            api.getServer().getCommandManager().unregister("rc");
-            api.getServer().getCommandManager().unregister("tpa");
+            api.velocityServer().getCommandManager().unregister("rc");
+            api.velocityServer().getCommandManager().unregister("tpa");
 
             this.isRunning = false;
 
-            api.getServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerChooseInitialServer());
-            api.getServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerChangeServer());
-            api.getServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerKicked());
-            api.getServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerDisconnect());
+            api.velocityServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerChooseInitialServer());
+            api.velocityServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerChangeServer());
+            api.velocityServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerKicked());
+            api.velocityServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerDisconnect());
         } catch (Exception ignore) {}
     }
 
@@ -98,7 +98,7 @@ public class VelocityLifecycle extends PluginLifecycle {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
 
-        CommandManager commandManager = api.getServer().getCommandManager();
+        CommandManager commandManager = api.velocityServer().getCommandManager();
         try {
             commandManager.register(
                     commandManager.metaBuilder("rc")
@@ -122,7 +122,7 @@ public class VelocityLifecycle extends PluginLifecycle {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
 
-        EventManager manager = api.getServer().getEventManager();
+        EventManager manager = api.velocityServer().getEventManager();
         try {
             manager.register(api.accessPlugin(), new OnPlayerChooseInitialServer());
             manager.register(api.accessPlugin(), new OnPlayerChangeServer());

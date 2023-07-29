@@ -27,11 +27,11 @@ public class TPARequest {
         this.status = status;
     }
 
-    public Player getSender() {
+    public Player sender() {
         return sender;
     }
 
-    public Player getTarget() {
+    public Player target() {
         return target;
     }
 
@@ -45,14 +45,14 @@ public class TPARequest {
     }
 
     public void submit() {
-        this.getSender().sendMessage(VelocityLang.TPA_REQUEST_SUBMISSION.build(this.getTarget().getUsername()));
-        this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_QUERY.build(this.getSender()));
+        this.sender().sendMessage(VelocityLang.TPA_REQUEST_SUBMISSION.build(this.target().getUsername()));
+        this.target().sendMessage(VelocityLang.TPA_REQUEST_QUERY.build(this.sender()));
         this.updateStatus(TPARequestStatus.REQUESTED);
     }
 
     public void ignore() {
-        this.getSender().sendMessage(VelocityLang.TPA_REQUEST_DENIED_SENDER.build(this.getTarget().getUsername()));
-        this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_DENIED_TARGET.build(this.getSender().getUsername()));
+        this.sender().sendMessage(VelocityLang.TPA_REQUEST_DENIED_SENDER.build(this.target().getUsername()));
+        this.target().sendMessage(VelocityLang.TPA_REQUEST_DENIED_TARGET.build(this.sender().getUsername()));
 
         this.updateStatus(TPARequestStatus.DENIED);
     }
@@ -68,19 +68,19 @@ public class TPARequest {
         try {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
-            ServerInfo serverInfo = this.getTarget().getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer server = api.services().serverService().findServer(serverInfo);
-            BaseServerFamily family = server.getFamily();
+            ServerInfo serverInfo = this.target().getCurrentServer().orElseThrow().getServerInfo();
+            PlayerServer server = api.services().serverService().search(serverInfo);
+            BaseServerFamily family = server.family();
             if(family == null) throw new NullPointerException();
 
-            tpaService.tpaSendPlayer(this.getSender(), this.getTarget(), server);
+            tpaService.tpaSendPlayer(this.sender(), this.target(), server);
 
-            this.getSender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.getTarget().getUsername()));
-            this.getTarget().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.getSender().getUsername()));
+            this.sender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.target().getUsername()));
+            this.target().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.sender().getUsername()));
         } catch (Exception e) {
             e.printStackTrace();
-            this.getSender().sendMessage(VelocityLang.TPA_FAILURE.build(this.getTarget().getUsername()));
-            this.getTarget().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.getSender().getUsername()));
+            this.sender().sendMessage(VelocityLang.TPA_FAILURE.build(this.target().getUsername()));
+            this.target().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.sender().getUsername()));
 
             this.updateStatus(TPARequestStatus.STALE);
         }
@@ -88,8 +88,8 @@ public class TPARequest {
 
     @Override
     public String toString() {
-        return "<TPARequest Sender=" + this.getSender().getUsername() +" "+
-               "Target="+ this.getTarget().getUsername() +" "+
+        return "<TPARequest Sender=" + this.sender().getUsername() +" "+
+               "Target="+ this.target().getUsername() +" "+
                "Status="+ this.status +" "+
                "Expiration="+ this.expiration.toString() +" "+
                ">";

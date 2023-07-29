@@ -8,7 +8,7 @@ public abstract class PluginAPI<S> {
      * @param filename The name of the resource to get.
      * @return The resource as a stream.
      */
-    abstract public InputStream getResourceAsStream(String filename);
+    abstract public InputStream resourceAsStream(String filename);
 
     abstract public S scheduler();
 

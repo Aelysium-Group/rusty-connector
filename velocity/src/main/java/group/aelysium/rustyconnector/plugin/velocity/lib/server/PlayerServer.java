@@ -44,7 +44,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         this.timeout = new AtomicInteger(timeout);
     }
 
-    public boolean isStale() {
+    public boolean stale() {
         return this.timeout.get() <= 0;
     }
 
@@ -60,16 +60,16 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         return this.timeout.get();
     }
 
-    public String getAddress() {
-        return this.getServerInfo().getAddress().getHostName() + ":" + this.getServerInfo().getAddress().getPort();
+    public String address() {
+        return this.serverInfo().getAddress().getHostName() + ":" + this.serverInfo().getAddress().getPort();
     }
 
-    public RegisteredServer getRegisteredServer() {
+    public RegisteredServer registeredServer() {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         return this.registeredServer;
     }
 
-    public ServerInfo getServerInfo() { return this.serverInfo; }
+    public ServerInfo serverInfo() { return this.serverInfo; }
 
     /**
      * Set the registered server associated with this PlayerServer.
@@ -102,7 +102,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * Is the server full? Will return `true` if and only if `soft-player-cap` has been reached or surpassed.
      * @return `true` if the server is full
      */
-    public boolean isFull() {
+    public boolean full() {
         return this.playerCount >= softPlayerCap;
     }
 
@@ -110,7 +110,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * Is the server maxed out? Will return `true` if and only if `hard-player-cap` has been reached or surpassed.
      * @return `true` if the server is maxed out
      */
-    public boolean isMaxed() {
+    public boolean maxed() {
         return this.playerCount >= hardPlayerCap;
     }
 
@@ -125,22 +125,22 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(Permission.validate(
                 player,
                 "rustyconnector.hardCapBypass",
-                Permission.constructNode("rustyconnector.<family name>.hardCapBypass",this.family.getName())
+                Permission.constructNode("rustyconnector.<family name>.hardCapBypass",this.family.name())
         )) return true; // If the player has permission to bypass hard-player-cap, let them in.
 
-        if(this.isMaxed()) return false; // If the player count is at hard-player-cap. Boot the player.
+        if(this.maxed()) return false; // If the player count is at hard-player-cap. Boot the player.
 
         if(Permission.validate(
                 player,
                 "rustyconnector.softCapBypass",
-                Permission.constructNode("rustyconnector.<family name>.softCapBypass",this.family.getName())
+                Permission.constructNode("rustyconnector.<family name>.softCapBypass",this.family.name())
         )) return true; // If the player has permission to bypass soft-player-cap, let them in.
 
-        return !this.isFull();
+        return !this.full();
     }
 
     @Override
-    public int getPlayerCount() {
+    public int playerCount() {
         //return 0;
         return this.playerCount;
     }
@@ -150,22 +150,22 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     }
 
     @Override
-    public int getSortIndex() {
+    public int sortIndex() {
         return this.playerCount;
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return this.weight;
     }
 
     @Override
-    public int getSoftPlayerCap() {
+    public int softPlayerCap() {
         return this.softPlayerCap;
     }
 
     @Override
-    public int getHardPlayerCap() {
+    public int hardPlayerCap() {
         return this.hardPlayerCap;
     }
 
@@ -175,11 +175,11 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @throws IllegalStateException If the server hasn't been registered yet.
      * @throws NullPointerException If the family associated with this server doesn't exist.
      */
-    public BaseServerFamily getFamily() throws IllegalStateException, NullPointerException {
+    public BaseServerFamily family() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         VelocityAPI api = VelocityAPI.get();
 
-        BaseServerFamily family = api.services().familyService().find(this.family.getName());
+        BaseServerFamily family = api.services().familyService().find(this.family.name());
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
@@ -191,8 +191,8 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
             Party party = partyService.find(player).orElseThrow();
 
             try {
-                if(partyService.getSettings().onlyLeaderCanSwitchServers())
-                    if(!party.getLeader().equals(player)) {
+                if(partyService.settings().onlyLeaderCanSwitchServers())
+                    if(!party.leader().equals(player)) {
                         player.sendMessage(Component.text("Only the party leader can switch servers!", NamedTextColor.RED));
                         return false;
                     }
@@ -207,7 +207,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     }
 
     public boolean directConnect(Player player) throws ConnectException {
-        ConnectionRequestBuilder connection = player.createConnectionRequest(this.getRegisteredServer());
+        ConnectionRequestBuilder connection = player.createConnectionRequest(this.registeredServer());
         try {
             ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
 
@@ -224,7 +224,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      */
     public boolean connect(PlayerChooseInitialServerEvent event) {
         try {
-            event.setInitialServer(this.getRegisteredServer());
+            event.setInitialServer(this.registeredServer());
             return true;
         } catch(Exception ignore) {
             return false;
@@ -247,13 +247,13 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
 
     @Override
     public String toString() {
-        return "["+this.getServerInfo().getName()+"]" +
-               "("+this.getServerInfo().getAddress().getHostName()+":"+this.getServerInfo().getAddress().getPort()+") - " +
-               "["+this.getPlayerCount()+" ("+this.getSoftPlayerCap()+" <> "+this.getSoftPlayerCap()+") w-"+this.getWeight()+"]" +
-               "{"+ this.family.getName() +"}";
+        return "["+this.serverInfo().getName()+"]" +
+               "("+this.serverInfo().getAddress().getHostName()+":"+this.serverInfo().getAddress().getPort()+") - " +
+               "["+this.playerCount()+" ("+this.softPlayerCap()+" <> "+this.softPlayerCap()+") w-"+this.weight()+"]" +
+               "{"+ this.family.name() +"}";
     }
 
     public boolean equals(PlayerServer server) {
-        return this.serverInfo.equals(server.getServerInfo());
+        return this.serverInfo.equals(server.serverInfo());
     }
 }

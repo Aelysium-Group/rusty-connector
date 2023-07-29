@@ -16,7 +16,7 @@ public record FakePlayer(UUID uuid, String username) {
     }
 
     public Optional<Player> resolve() {
-        return VelocityAPI.get().getServer().getPlayer(this.uuid);
+        return VelocityAPI.get().velocityServer().getPlayer(this.uuid);
     }
 
     @Override

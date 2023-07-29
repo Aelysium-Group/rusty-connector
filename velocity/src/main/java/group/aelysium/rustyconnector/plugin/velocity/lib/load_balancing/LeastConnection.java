@@ -13,14 +13,14 @@ public class LeastConnection extends LoadBalancer {
             PlayerServer thisItem = this.items.get(this.index);
             PlayerServer theNextItem = this.items.get(this.index + 1);
 
-            if(thisItem.getPlayerCount() >= theNextItem.getPlayerCount()) this.index++;
+            if(thisItem.playerCount() >= theNextItem.playerCount()) this.index++;
         } catch (IndexOutOfBoundsException ignore) {}
     }
 
     @Override
     public void completeSort() {
         this.index = 0;
-        if(this.isWeighted()) WeightedQuickSort.sort(this.items);
+        if(this.weighted()) WeightedQuickSort.sort(this.items);
         else QuickSort.sort(this.items);
     }
 

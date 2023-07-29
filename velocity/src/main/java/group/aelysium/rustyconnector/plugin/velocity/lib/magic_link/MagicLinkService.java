@@ -21,16 +21,16 @@ public class MagicLinkService extends ClockService {
 
         this.scheduleRecurring(() -> {
             try {
-                serverService.getServers().forEach(serverReference -> {
+                serverService.servers().forEach(serverReference -> {
                     PlayerServer server = serverReference.get();
                     if (server == null) return;
 
                     server.decreaseTimeout();
 
                     try {
-                        if (server.isStale()) {
-                            serverService.unregisterServer(server.getServerInfo(), server.getFamily().getName(), true);
-                            serverService.getServers().remove(serverReference);
+                        if (server.stale()) {
+                            serverService.unregisterServer(server.serverInfo(), server.family().name(), true);
+                            serverService.servers().remove(serverReference);
                         }
                     } catch (NullPointerException ignore) {}
                     catch (Exception e) {
@@ -38,10 +38,10 @@ public class MagicLinkService extends ClockService {
                     }
                 });
 
-                serverService.getServers().removeIf(server -> {
+                serverService.servers().removeIf(server -> {
                     if(server.get() == null) return true;
                     try {
-                        if (Objects.requireNonNull(server.get()).isStale()) return true;
+                        if (Objects.requireNonNull(server.get()).stale()) return true;
                     } catch (Exception ignore) {}
 
                     return false;

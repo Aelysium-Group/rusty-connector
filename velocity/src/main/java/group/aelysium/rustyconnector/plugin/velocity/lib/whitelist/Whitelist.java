@@ -43,17 +43,17 @@ public class Whitelist {
     public boolean usesPermission() {
         return usePermission;
     }
-    public String getName() {
+    public String name() {
         return name;
     }
-    public String getMessage() {
+    public String message() {
         return message;
     }
-    public boolean isInverted() {
+    public boolean inverted() {
         return this.inverted;
     }
 
-    public WhitelistPlayerManager getPlayerManager() {
+    public WhitelistPlayerManager playerManager() {
         return this.whitelistPlayerManager;
     }
 
@@ -145,7 +145,7 @@ public class Whitelist {
                 String json = gson.toJson(entry);
                 WhitelistPlayer player = gson.fromJson(json, WhitelistPlayer.class);
 
-                whitelist.getPlayerManager().add(player);
+                whitelist.playerManager().add(player);
             });
         }
 

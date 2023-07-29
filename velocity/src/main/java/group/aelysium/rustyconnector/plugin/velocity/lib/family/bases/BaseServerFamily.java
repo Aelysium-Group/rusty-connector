@@ -16,7 +16,7 @@ public abstract class BaseServerFamily<S extends PlayerServer> {
         this.name = name;
     }
 
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
@@ -25,7 +25,7 @@ public abstract class BaseServerFamily<S extends PlayerServer> {
      * @param serverInfo The info matching the server to get.
      * @return A found server or `null` if there's no match.
      */
-    abstract public S getServer(@NotNull ServerInfo serverInfo);
+    abstract public S findServer(@NotNull ServerInfo serverInfo);
 
     /**
      * Add a server to the family.
@@ -44,19 +44,19 @@ public abstract class BaseServerFamily<S extends PlayerServer> {
      * @param max The approximate max number of players to return.
      * @return A list of players.
      */
-    abstract public List<Player> getAllPlayers(int max);
+    abstract public List<Player> allPlayers(int max);
 
-    abstract public List<S> getRegisteredServers();
+    abstract public List<S> registeredServers();
 
     public boolean containsServer(ServerInfo serverInfo) {
-        return !(this.getServer(serverInfo) == null);
+        return !(this.findServer(serverInfo) == null);
     }
 
     /**
      * Gets the aggregate player count across all servers in this family
      * @return A player count
      */
-    abstract public long getPlayerCount();
+    abstract public long playerCount();
 
     @Override
     public boolean equals(Object o) {
