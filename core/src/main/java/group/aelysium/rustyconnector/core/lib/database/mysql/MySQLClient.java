@@ -20,16 +20,12 @@ public class MySQLClient extends io.lettuce.core.RedisClient {
         this.privateKey = privateKey;
     }
 
-    public String getDataChannel() {
-        return dataChannel;
-    }
-
     /*
      * RedisClient is specifically never used in a way that it can be accessed through the public plugin API.
      * And it should remain that way.
      * That's why this field is allowed to be public.
      */
-    public char[] getPrivateKey() {
+    public char[] privateKey() {
         return privateKey;
     }
 

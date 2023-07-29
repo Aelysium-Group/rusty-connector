@@ -313,7 +313,7 @@ public interface ASCIIAlphabet {
      * @return
      */
     static Component generate(String string) {
-        Map<Character, Lang.Message> map = getMap();
+        Map<Character, Lang.Message> map = map();
         List<Component> generatedString = new ArrayList<>();
 
         for (int i = 0; i < font_size; i++) {
@@ -350,7 +350,7 @@ public interface ASCIIAlphabet {
      * @return
      */
     static Component generate(String string, NamedTextColor color) {
-        Map<Character, Lang.Message> map = getMap();
+        Map<Character, Lang.Message> map = map();
         List<Component> generatedString = new ArrayList<>();
 
         for (int i = 0; i < font_size; i++) {
@@ -380,7 +380,7 @@ public interface ASCIIAlphabet {
         );
     }
 
-    static Map<Character, Lang.Message> getMap() {
+    static Map<Character, Lang.Message> map() {
         Map<Character, Lang.Message> output = new HashMap<>();
         output.put('A',ASCIIAlphabet.A);
         output.put('B',ASCIIAlphabet.B);

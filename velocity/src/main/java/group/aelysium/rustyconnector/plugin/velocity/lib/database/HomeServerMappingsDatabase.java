@@ -123,7 +123,7 @@ public class HomeServerMappingsDatabase {
         if(expiration == null)
             statement.setNull(5, Types.NULL);
         else
-            statement.setLong(5, expiration.getEpochFromNow());
+            statement.setLong(5, expiration.epochFromNow());
 
         mySQLService.execute(statement);
         mySQLService.close();
@@ -158,7 +158,7 @@ public class HomeServerMappingsDatabase {
         VelocityAPI api = VelocityAPI.get();
         MySQLService mySQLService = api.services().familyService().mySQLService().orElseThrow();
 
-        Timestamp expiration = new Timestamp(liquidExpiration.getEpochFromNow());
+        Timestamp expiration = new Timestamp(liquidExpiration.epochFromNow());
 
         mySQLService.connect();
         PreparedStatement statement = mySQLService.prepare(UPDATE_NULL_EXPIRATIONS);

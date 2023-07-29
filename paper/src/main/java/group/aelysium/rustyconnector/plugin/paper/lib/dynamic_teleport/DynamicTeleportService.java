@@ -20,11 +20,11 @@ public class DynamicTeleportService extends Service {
     }
 
     public CoordinateRequest findClient(String clientUsername) {
-        return this.requests.stream().filter(request -> Objects.equals(request.getClientUsername(), clientUsername)).findFirst().orElse(null);
+        return this.requests.stream().filter(request -> Objects.equals(request.clientUsername(), clientUsername)).findFirst().orElse(null);
     }
 
     public CoordinateRequest findTarget(Player target) {
-        return this.requests.stream().filter(request -> Objects.equals(request.getTarget(), target)).findFirst().orElse(null);
+        return this.requests.stream().filter(request -> Objects.equals(request.target(), target)).findFirst().orElse(null);
     }
 
     /**
@@ -34,8 +34,8 @@ public class DynamicTeleportService extends Service {
     public void removeAllPlayersRequests(Player player) {
         if(PaperAPI.get().isFolia()) {
             this.requests.removeIf(request ->
-                    Objects.equals(request.getTarget(),         player)
-                 || Objects.equals(request.getClientUsername(), player.getPlayerProfile().getName())
+                    Objects.equals(request.target(),         player)
+                 || Objects.equals(request.clientUsername(), player.getPlayerProfile().getName())
             );
         }
     }

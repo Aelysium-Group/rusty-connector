@@ -14,7 +14,7 @@ import static group.aelysium.rustyconnector.core.lib.database.redis.messages.Red
 public class GenericRedisMessage {
     private static final int protocolVersion = 2;
 
-    public static int getProtocolVersion() {
+    public static int protocolVersion() {
         return protocolVersion;
     }
 
@@ -27,14 +27,14 @@ public class GenericRedisMessage {
     private final InetSocketAddress address;
     private final MessageOrigin origin;
 
-    public int getMessageVersion() { return this.messageVersion; }
+    public int messageVersion() { return this.messageVersion; }
 
-    public boolean isSendable() { return this.sendable; }
-    public String getRawMessage() { return this.rawMessage; }
-    public char[] getPrivateKey() { return this.privateKey; }
-    public InetSocketAddress getAddress() { return this.address; }
-    public RedisMessageType.Mapping getType() { return this.type; }
-    public MessageOrigin getOrigin() { return origin; }
+    public boolean sendable() { return this.sendable; }
+    public String rawMessage() { return this.rawMessage; }
+    public char[] privateKey() { return this.privateKey; }
+    public InetSocketAddress address() { return this.address; }
+    public RedisMessageType.Mapping type() { return this.type; }
+    public MessageOrigin origin() { return origin; }
 
     /*
      * Constructs a sendable RedisMessage.
@@ -68,7 +68,7 @@ public class GenericRedisMessage {
      * @throws IllegalStateException If you attempt to sign a received message. Or if the message is already signed.
      */
     public void signMessage(char[] privateKey) {
-        if(!this.isSendable()) throw new IllegalStateException("Attempted to sign a received message! You can only sign sendable messages!");
+        if(!this.sendable()) throw new IllegalStateException("Attempted to sign a received message! You can only sign sendable messages!");
         if(this.privateKey != null) throw new IllegalStateException("Attempted to sign a message that was already signed!");
         this.privateKey = privateKey;
     }
@@ -270,7 +270,7 @@ public class GenericRedisMessage {
                     case MasterValidParameters.PROTOCOL_VERSION -> redisMessageBuilder.setProtocolVersion(value.getAsInt());
                     case MasterValidParameters.PRIVATE_KEY -> redisMessageBuilder.setPrivateKey(value.getAsString().toCharArray());
                     case MasterValidParameters.ADDRESS -> redisMessageBuilder.setAddress(value.getAsString());
-                    case MasterValidParameters.TYPE -> redisMessageBuilder.setType(RedisMessageType.getMapping(value.getAsInt()));
+                    case MasterValidParameters.TYPE -> redisMessageBuilder.setType(RedisMessageType.mapping(value.getAsInt()));
                     case MasterValidParameters.ORIGIN -> redisMessageBuilder.setOrigin(MessageOrigin.valueOf(value.getAsString()));
                     case MasterValidParameters.PARAMETERS -> parseParams(value.getAsJsonObject(), redisMessageBuilder);
                 }

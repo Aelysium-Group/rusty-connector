@@ -21,10 +21,10 @@ public class OnPlayerJoin implements Listener {
             try {
                 tpaRequest.teleport();
             } catch (NullPointerException e) {
-                event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.getTarget().getPlayerProfile().getName()));
+                event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.target().getPlayerProfile().getName()));
             }
         } catch (Exception e) {
-            event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.getTarget().getPlayerProfile().getName()));
+            event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.target().getPlayerProfile().getName()));
         }
 
         api.services().dynamicTeleportService().removeAllPlayersRequests(event.getPlayer());

@@ -20,30 +20,30 @@ public class RedisMessageServerPing extends GenericRedisMessage {
     private Integer weight;
     private Integer playerCount;
 
-    public ConnectionIntent getIntent() {
+    public ConnectionIntent intent() {
         return intent;
     }
-    public String getFamilyName() {
+    public String familyName() {
         return familyName;
     }
 
-    public String getServerName() {
+    public String serverName() {
         return serverName;
     }
 
-    public Integer getSoftCap() {
+    public Integer softCap() {
         return softCap;
     }
 
-    public Integer getHardCap() {
+    public Integer hardCap() {
         return hardCap;
     }
 
-    public Integer getWeight() {
+    public Integer weight() {
         return weight;
     }
 
-    public Integer getPlayerCount() {
+    public Integer playerCount() {
         return playerCount;
     }
 

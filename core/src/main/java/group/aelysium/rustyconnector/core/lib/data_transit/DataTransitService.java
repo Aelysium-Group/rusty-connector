@@ -36,20 +36,20 @@ public class DataTransitService extends Service {
      * @throws BlockedMessageException If the message should be blocked.
      */
     public void validate(GenericRedisMessage message) throws BlockedMessageException, NoOutputException {
-        if(message.getMessageVersion() > GenericRedisMessage.getProtocolVersion())
-            throw new BlockedMessageException("The incoming message contained a protocol version greater than expected! " + message.getMessageVersion() + " > " + GenericRedisMessage.getProtocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
-        if(message.getMessageVersion() < GenericRedisMessage.getProtocolVersion())
-            throw new BlockedMessageException("The incoming message contained a protocol version that was less than expected! " + message.getMessageVersion() + " < " + GenericRedisMessage.getProtocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
+        if(message.messageVersion() > GenericRedisMessage.protocolVersion())
+            throw new BlockedMessageException("The incoming message contained a protocol version greater than expected! " + message.messageVersion() + " > " + GenericRedisMessage.protocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
+        if(message.messageVersion() < GenericRedisMessage.protocolVersion())
+            throw new BlockedMessageException("The incoming message contained a protocol version that was less than expected! " + message.messageVersion() + " < " + GenericRedisMessage.protocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
 
         if(message.toString().length() > this.maxLength)
             throw new BlockedMessageException("The message is to long!");
 
         if(hasBlacklist)
-            if(this.blacklist.contains(message.getAddress()))
+            if(this.blacklist.contains(message.address()))
                 throw new BlockedMessageException("The message was sent from a blacklisted IP Address!");
 
         if(hasWhitelist)
-            if(!this.whitelist.contains(message.getAddress()))
+            if(!this.whitelist.contains(message.address()))
                 throw new BlockedMessageException("The message was sent from an IP Address that isn't whitelisted!");
     }
 

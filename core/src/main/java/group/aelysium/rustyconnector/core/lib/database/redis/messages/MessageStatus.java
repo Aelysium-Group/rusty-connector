@@ -11,7 +11,7 @@ public enum MessageStatus {
     EXECUTING_ERROR, // If the message failed to be parsed
     EXECUTED; // The message has successfully processed and handled.
 
-    public NamedTextColor getColor() {
+    public NamedTextColor color() {
         if(this == AUTH_DENIAL) return NamedTextColor.RED;
         if(this == TRASHED) return NamedTextColor.DARK_GRAY;
         if(this == PARSING_ERROR) return NamedTextColor.DARK_RED;

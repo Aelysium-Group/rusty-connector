@@ -29,7 +29,7 @@ public class ClockService extends Service {
      * @param period The intervals in seconds to wait before executing the runnable again.
      */
     public ScheduledFuture<?> scheduleRecurring(Runnable runnable, LiquidTimestamp period) {
-        return this.executorService.scheduleAtFixedRate(runnable, 0, period.getValue(), period.getUnit());
+        return this.executorService.scheduleAtFixedRate(runnable, 0, period.value(), period.unit());
     }
 
     /**

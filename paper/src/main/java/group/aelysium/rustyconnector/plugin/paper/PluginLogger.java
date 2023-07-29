@@ -58,6 +58,6 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
 
     @Override
     public void send(Component message) {
-        PaperAPI.get().getServer().getConsoleSender().sendMessage(message);
+        PaperAPI.get().paperServer().getConsoleSender().sendMessage(message);
     }
 }

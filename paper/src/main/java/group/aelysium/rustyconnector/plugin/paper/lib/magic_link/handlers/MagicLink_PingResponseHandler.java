@@ -22,11 +22,11 @@ public class MagicLink_PingResponseHandler implements MessageHandler {
         PluginLogger logger = api.logger();
         MagicLinkService service = api.services().magicLinkService();
 
-        if(message.getStatus() == RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED) {
-            logger.send(Component.text(message.getMessage(), message.getColor()));
+        if(message.status() == RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED) {
+            logger.send(Component.text(message.message(), message.color()));
 
-            if(message.getPingInterval().isPresent()) {
-                service.setUpcomingPingDelay(message.getPingInterval().get());
+            if(message.pingInterval().isPresent()) {
+                service.setUpcomingPingDelay(message.pingInterval().get());
             } else {
                 logger.send(Component.text("No ping interval was given during registration! Defaulting to 15 seconds!", NamedTextColor.YELLOW));
                 service.setUpcomingPingDelay(15);
@@ -35,8 +35,8 @@ public class MagicLink_PingResponseHandler implements MessageHandler {
             service.setStatus(MagicLinkService.Status.CONNECTED);
         }
 
-        if(message.getStatus() == RedisMessageServerPingResponse.PingResponseStatus.DENIED) {
-            logger.send(Component.text(message.getMessage(), message.getColor()));
+        if(message.status() == RedisMessageServerPingResponse.PingResponseStatus.DENIED) {
+            logger.send(Component.text(message.message(), message.color()));
             logger.send(Component.text("Waiting 1 minute before trying again...", NamedTextColor.GRAY));
             service.setUpcomingPingDelay(60);
             service.setStatus(MagicLinkService.Status.SEARCHING);

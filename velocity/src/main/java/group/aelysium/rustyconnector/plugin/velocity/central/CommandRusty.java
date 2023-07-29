@@ -51,17 +51,17 @@ public final class CommandRusty {
                             .executes(context -> {
                                 new Thread(() -> {
                                     try {
-                                        if(messageCacheService.getSize() > 10) {
-                                            int numberOfPages = Math.floorDiv(messageCacheService.getSize(),10) + 1;
+                                        if(messageCacheService.size() > 10) {
+                                            int numberOfPages = Math.floorDiv(messageCacheService.size(),10) + 1;
 
-                                            List<CacheableMessage> messagesPage = messageCacheService.getMessagesPage(1);
+                                            List<CacheableMessage> messagesPage = messageCacheService.fetchMessagesPage(1);
 
                                             VelocityLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
                                             return;
                                         }
 
-                                        List<CacheableMessage> messages = messageCacheService.getMessages();
+                                        List<CacheableMessage> messages = messageCacheService.messages();
 
                                         VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
@@ -78,9 +78,9 @@ public final class CommandRusty {
                                             try {
                                                 int pageNumber = context.getArgument("page-number", Integer.class);
 
-                                                List<CacheableMessage> messages = messageCacheService.getMessagesPage(pageNumber);
+                                                List<CacheableMessage> messages = messageCacheService.fetchMessagesPage(pageNumber);
 
-                                                int numberOfPages = Math.floorDiv(messageCacheService.getSize(),10) + 1;
+                                                int numberOfPages = Math.floorDiv(messageCacheService.size(),10) + 1;
 
                                                 VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,pageNumber,numberOfPages);
                                             } catch (Exception e) {
@@ -103,7 +103,7 @@ public final class CommandRusty {
                                         try {
                                             Long snowflake = context.getArgument("snowflake", Long.class);
 
-                                            CacheableMessage message = messageCacheService.getMessage(snowflake);
+                                            CacheableMessage message = messageCacheService.findMessage(snowflake);
 
                                             VelocityLang.RC_MESSAGE_GET_MESSAGE.send(logger, message);
                                         } catch (Exception e) {

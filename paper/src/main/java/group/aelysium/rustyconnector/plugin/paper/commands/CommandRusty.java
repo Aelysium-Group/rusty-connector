@@ -24,7 +24,7 @@ public final class CommandRusty {
     private static Command.Builder<CommandSender> message(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperAPI.get();
         PluginLogger logger = api.logger();
-        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
+        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("message")
                 .senderType(ConsoleCommandSender.class)
@@ -36,7 +36,7 @@ public final class CommandRusty {
 
                                 MessageCacheService messageCacheService = api.services().messageCacheService();
 
-                                CacheableMessage message = messageCacheService.getMessage(snowflake);
+                                CacheableMessage message = messageCacheService.findMessage(snowflake);
 
                                 PaperLang.RC_MESSAGE_GET_MESSAGE.send(logger, message.getSnowflake(), message.getDate(), message.getContents());
                             } catch (NullPointerException e) {
@@ -50,7 +50,7 @@ public final class CommandRusty {
     private static Command.Builder<CommandSender> send(PaperCommandManager<CommandSender> manager) {
         PaperAPI api = PaperAPI.get();
         PluginLogger logger = api.logger();
-        final Command.Builder<CommandSender> builder = api.getCommandManager().commandBuilder("rc", "/rc");
+        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("send")
                 .senderType(ConsoleCommandSender.class)

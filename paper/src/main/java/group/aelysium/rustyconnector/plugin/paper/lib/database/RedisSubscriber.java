@@ -31,13 +31,13 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
             GenericRedisMessage message = serializer.parseReceived(rawMessage);
 
-            if(message.getOrigin() == MessageOrigin.SERVER) throw new Exception("Message from a sub-server! Ignoring...");
+            if(message.origin() == MessageOrigin.SERVER) throw new Exception("Message from a sub-server! Ignoring...");
 
 
-            if(!AddressUtil.addressToString(message.getAddress()).equals(api.services().serverInfoService().getAddress()))
+            if(!AddressUtil.addressToString(message.address()).equals(api.services().serverInfoService().address()))
                throw new Exception("Message addressed to another sub-server! Ignoring...");
             try {
-                if (!(api.services().redisService().validatePrivateKey(message.getPrivateKey())))
+                if (!(api.services().redisService().validatePrivateKey(message.privateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
 
@@ -45,7 +45,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
 
                 RedisSubscriber.processParameters(message, cachedMessage);
             } catch (AuthenticationException e) {
-                logger.error("Incoming message from: " + message.getAddress().toString() + " contains an invalid private key! Throwing away...");
+                logger.error("Incoming message from: " + message.address().toString() + " contains an invalid private key! Throwing away...");
                 logger.log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
             }
         } catch (Exception e) {
@@ -62,14 +62,14 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = PaperAPI.get().logger();
 
         try {
-            if(message.getType() == PING_RESPONSE)      new MagicLink_PingResponseHandler(message).execute();
-            if(message.getType() == COORDINATE_REQUEST_QUEUE)   new CoordinateRequestHandler(message).execute();
+            if(message.type() == PING_RESPONSE)      new MagicLink_PingResponseHandler(message).execute();
+            if(message.type() == COORDINATE_REQUEST_QUEUE)   new CoordinateRequestHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (Exception e) {
             cachedMessage.sentenceMessage(MessageStatus.PARSING_ERROR);
 
-            logger.error("Incoming message " + message.getType().name() + " from " + message.getAddress() + " is not formatted properly. Throwing away...", e);
+            logger.error("Incoming message " + message.type().name() + " from " + message.address() + " is not formatted properly. Throwing away...", e);
             logger.log("To view the thrown away message use: /rc message get " + cachedMessage.getSnowflake());
         }
     }

@@ -16,15 +16,15 @@ public class RedisMessageCoordinateRequestQueue extends GenericRedisMessage {
     private String targetServer;
     private String sourceUsername;
 
-    public String getTargetUsername() {
+    public String targetUsername() {
         return targetUsername;
     }
 
-    public String getSourceUsername() {
+    public String sourceUsername() {
         return sourceUsername;
     }
 
-    public String getTargetServer() {
+    public String targetServer() {
         return targetServer;
     }
 

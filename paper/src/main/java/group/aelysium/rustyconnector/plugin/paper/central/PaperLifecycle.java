@@ -40,7 +40,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
         api.killServices();
 
-        api.getCommandManager().deleteRootCommand("rc");
+        api.commandManager().deleteRootCommand("rc");
     }
 
     protected boolean loadConfigs() {
@@ -71,7 +71,7 @@ public class PaperLifecycle extends PluginLifecycle {
         PluginLogger logger = api.logger();
         try {
 
-            CommandRusty.create(api.getCommandManager());
+            CommandRusty.create(api.commandManager());
 
             return true;
         } catch (Exception e) {
@@ -85,9 +85,9 @@ public class PaperLifecycle extends PluginLifecycle {
         PluginLogger logger = api.logger();
 
         try {
-            api.getServer().getPluginManager().registerEvents(new OnPlayerJoin(), api.accessPlugin());
-            api.getServer().getPluginManager().registerEvents(new OnPlayerLeave(), api.accessPlugin());
-            api.getServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), api.accessPlugin());
+            api.paperServer().getPluginManager().registerEvents(new OnPlayerJoin(), api.accessPlugin());
+            api.paperServer().getPluginManager().registerEvents(new OnPlayerLeave(), api.accessPlugin());
+            api.paperServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), api.accessPlugin());
 
             return true;
         } catch (Exception e) {

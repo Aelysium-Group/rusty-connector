@@ -2,8 +2,6 @@ package group.aelysium.rustyconnector.core.lib.model;
 
 import java.text.ParseException;
 import java.time.Instant;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAdjuster;
 import java.util.concurrent.TimeUnit;
 
 public class LiquidTimestamp {
@@ -51,10 +49,10 @@ public class LiquidTimestamp {
         this.unit = unit;
     }
 
-    public TimeUnit getUnit() {
+    public TimeUnit unit() {
         return this.unit;
     }
-    public int getValue() {
+    public int value() {
         return this.value;
     }
 
@@ -62,7 +60,7 @@ public class LiquidTimestamp {
      * Returns a unix timestamp set `value` number of `units` away from now.
      * @return The Unix timestamp in milliseconds.
      */
-    public long getEpochFromNow() {
+    public long epochFromNow() {
         long time = Instant.now().getEpochSecond();
         switch (this.unit) {
             case DAYS -> time += ((long) this.value * 24 * 60 * 60);

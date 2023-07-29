@@ -40,12 +40,12 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             GenericRedisMessage.Serializer serializer = new GenericRedisMessage.Serializer();
             GenericRedisMessage message = serializer.parseReceived(rawMessage);
 
-            if(messageCacheService.isIgnoredType(message)) messageCacheService.removeMessage(cachedMessage.getSnowflake());
-            if(message.getOrigin() == MessageOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
+            if(messageCacheService.ignoredType(message)) messageCacheService.removeMessage(cachedMessage.getSnowflake());
+            if(message.origin() == MessageOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
             try {
-                redisService.validatePrivateKey(message.getPrivateKey());
+                redisService.validatePrivateKey(message.privateKey());
 
-                if (!(redisService.validatePrivateKey(message.getPrivateKey())))
+                if (!(redisService.validatePrivateKey(message.privateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);
@@ -53,14 +53,14 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             } catch (AuthenticationException e) {
                 cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
 
-                logger.error("An incoming message from: "+message.getAddress().toString()+" had an invalid private-key!");
+                logger.error("An incoming message from: "+message.address().toString()+" had an invalid private-key!");
                 logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
             } catch (BlockedMessageException e) {
                 cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
 
                 if(!logger.loggerGate().check(GateKey.MESSAGE_TUNNEL_FAILED_MESSAGE)) return;
 
-                logger.error("An incoming message from: "+message.getAddress().toString()+" was blocked by the message tunnel!");
+                logger.error("An incoming message from: "+message.address().toString()+" was blocked by the message tunnel!");
                 logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
             } catch (NoOutputException e) {
                 cachedMessage.sentenceMessage(MessageStatus.AUTH_DENIAL, e.getMessage());
@@ -82,8 +82,8 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         PluginLogger logger = VelocityAPI.get().logger();
 
         try {
-            if(message.getType() == PING)           new MagicLinkPingHandler(message).execute();
-            if(message.getType() == SEND_PLAYER)    new SendPlayerHandler(message).execute();
+            if(message.type() == PING)           new MagicLinkPingHandler(message).execute();
+            if(message.type() == SEND_PLAYER)    new SendPlayerHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (NullPointerException e) {

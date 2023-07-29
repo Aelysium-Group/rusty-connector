@@ -70,7 +70,7 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     /**
      * Get the paper server
      */
-    public Server getServer() {
+    public Server paperServer() {
         return this.plugin.getServer();
     }
 
@@ -88,11 +88,11 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
      * @throws SyncFailedException If the plugin is currently running.
      */
     public PaperRustyConnector accessPlugin() throws SyncFailedException {
-        if(PaperRustyConnector.getLifecycle().isRunning()) throw new SyncFailedException("You can't get the plugin instance while the plugin is running!");
+        if(PaperRustyConnector.lifecycle().isRunning()) throw new SyncFailedException("You can't get the plugin instance while the plugin is running!");
         return this.plugin;
     }
 
-    public PaperCommandManager<CommandSender> getCommandManager() {
+    public PaperCommandManager<CommandSender> commandManager() {
         return commandManager;
     }
 

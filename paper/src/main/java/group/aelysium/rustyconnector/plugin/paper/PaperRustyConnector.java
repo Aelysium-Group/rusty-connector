@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import group.aelysium.rustyconnector.core.central.PluginRuntime;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperLifecycle;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.bstats.Metrics;
@@ -8,9 +7,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class PaperRustyConnector extends JavaPlugin implements Listener, PluginRuntime {
+public final class PaperRustyConnector extends JavaPlugin implements Listener {
     private static PaperLifecycle lifecycle;
-    public static PaperLifecycle getLifecycle() {
+    public static PaperLifecycle lifecycle() {
         return lifecycle;
     }
 

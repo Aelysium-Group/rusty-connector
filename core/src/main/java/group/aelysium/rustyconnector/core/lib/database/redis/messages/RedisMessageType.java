@@ -42,10 +42,10 @@ public class RedisMessageType {
         return list;
     }
 
-    public static Mapping getMapping(String name) {
+    public static Mapping mapping(String name) {
         return toList().stream().filter(entry -> Objects.equals(entry.name(), name)).findFirst().orElseThrow(NullPointerException::new);
     }
-    public static Mapping getMapping(int id) {
+    public static Mapping mapping(int id) {
         return toList().stream().filter(entry -> entry.id() == id).findFirst().orElseThrow(NullPointerException::new);
     }
 

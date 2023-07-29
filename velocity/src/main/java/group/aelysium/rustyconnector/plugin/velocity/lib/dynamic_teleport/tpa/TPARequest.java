@@ -20,7 +20,7 @@ public class TPARequest {
     public TPARequest(Player sender, Player target, LiquidTimestamp lifetime) {
         this.sender = sender;
         this.target = target;
-        this.expiration = new Date(lifetime.getEpochFromNow());
+        this.expiration = new Date(lifetime.epochFromNow());
     }
 
     private void updateStatus(TPARequestStatus status) {

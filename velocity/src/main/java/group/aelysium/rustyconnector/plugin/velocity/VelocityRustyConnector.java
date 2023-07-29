@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 
 import java.nio.file.Path;
 
-public class VelocityRustyConnector implements PluginRuntime {
+public class VelocityRustyConnector {
     private final Metrics.Factory metricsFactory;
     private static VelocityLifecycle lifecycle;
     public static VelocityLifecycle lifecycle() {

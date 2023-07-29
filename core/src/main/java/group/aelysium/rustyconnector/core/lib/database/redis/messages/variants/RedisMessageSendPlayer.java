@@ -15,11 +15,11 @@ public class RedisMessageSendPlayer extends GenericRedisMessage {
     private String targetFamilyName;
     private String uuid;
 
-    public String getTargetFamilyName() {
+    public String targetFamilyName() {
         return targetFamilyName;
     }
 
-    public String getUUID() {
+    public String uuid() {
         return uuid;
     }
 

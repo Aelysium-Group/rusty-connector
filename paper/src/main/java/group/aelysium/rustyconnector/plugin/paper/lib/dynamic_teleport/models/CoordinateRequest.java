@@ -15,15 +15,15 @@ public class CoordinateRequest {
     }
 
 
-    public String getClientUsername() {
+    public String clientUsername() {
         return clientUsername;
     }
 
-    public Player getClient() {
+    public Player client() {
         return client;
     }
 
-    public Player getTarget() {
+    public Player target() {
         return target;
     }
 
@@ -37,7 +37,7 @@ public class CoordinateRequest {
      */
     public void resolveClient() {
         PaperAPI api = PaperAPI.get();
-        Player client = api.getServer().getPlayer(this.clientUsername);
+        Player client = api.paperServer().getPlayer(this.clientUsername);
         if(client == null) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");
         if(!client.isOnline()) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");
 

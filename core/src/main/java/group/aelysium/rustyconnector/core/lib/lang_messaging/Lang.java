@@ -101,10 +101,10 @@ public interface Lang {
     ParameterizedMessage1<CacheableMessage> CACHED_MESSAGE = (message) -> join(
                     newlines(),
                     BORDER,
-                    text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
-                    text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
-                    text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
-                    text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                    text("Status: " + message.getSentence().name(), message.getSentence().color()),
+                    text("ID: ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+                    text("Timestamp: ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+                    text("Contents: ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
                     BORDER
             );
 
@@ -116,12 +116,12 @@ public interface Lang {
                         newlines(),
                         BORDER,
                         SPACING,
-                        text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
-                        text("Reason: " + message.getSentenceReason(), message.getSentence().getColor()),
+                        text("Status: " + message.getSentence().name(), message.getSentence().color()),
+                        text("Reason: " + message.getSentenceReason(), message.getSentence().color()),
                         SPACING,
-                        text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
-                        text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
-                        text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                        text("ID: ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+                        text("Timestamp: ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+                        text("Contents: ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
                         SPACING
                 ));
             else
@@ -129,11 +129,11 @@ public interface Lang {
                         newlines(),
                         BORDER,
                         SPACING,
-                        text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
+                        text("Status: " + message.getSentence().name(), message.getSentence().color()),
                         SPACING,
-                        text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
-                        text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
-                        text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                        text("ID: ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+                        text("Timestamp: ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+                        text("Contents: ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
                         SPACING
                 ));
         }

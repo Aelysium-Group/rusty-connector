@@ -107,7 +107,7 @@ public class DataTransitConfig extends YAML {
             List<String> stringTypes = (List<String>) this.getNode(this.data,"cache.ignored-types",List.class);
             stringTypes.forEach(item -> {
                 try {
-                    this.cache_ignoredTypes.add(RedisMessageType.getMapping(item));
+                    this.cache_ignoredTypes.add(RedisMessageType.mapping(item));
                 } catch (Exception ignore) {
                     logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There is no packet type of "+item+"! Ignoring..."), NamedTextColor.YELLOW));
                 }

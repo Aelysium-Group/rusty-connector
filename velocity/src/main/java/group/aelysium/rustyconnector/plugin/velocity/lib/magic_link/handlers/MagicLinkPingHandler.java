@@ -26,20 +26,20 @@ public class MagicLinkPingHandler implements MessageHandler {
 
     @Override
     public void execute() throws Exception {
-        InetSocketAddress address = message.getAddress();
+        InetSocketAddress address = message.address();
         VelocityAPI api = VelocityAPI.get();
 
         ServerInfo serverInfo = new ServerInfo(
-                message.getServerName(),
+                message.serverName(),
                 address
         );
 
         if(api.logger().loggerGate().check(GateKey.PING))
             api.logger().send(VelocityLang.PING.build(serverInfo));
 
-        if(message.getIntent() == RedisMessageServerPing.ConnectionIntent.CONNECT)
+        if(message.intent() == RedisMessageServerPing.ConnectionIntent.CONNECT)
             this.reviveOrConnectServer(serverInfo);
-        if(message.getIntent() == RedisMessageServerPing.ConnectionIntent.DISCONNECT)
+        if(message.intent() == RedisMessageServerPing.ConnectionIntent.DISCONNECT)
             this.disconnectServer(serverInfo);
     }
 
@@ -51,13 +51,13 @@ public class MagicLinkPingHandler implements MessageHandler {
         try {
             PlayerServer server = new ServerService.ServerBuilder()
                     .setServerInfo(serverInfo)
-                    .setFamilyName(message.getFamilyName())
-                    .setSoftPlayerCap(message.getSoftCap())
-                    .setHardPlayerCap(message.getHardCap())
-                    .setWeight(message.getWeight())
+                    .setFamilyName(message.familyName())
+                    .setSoftPlayerCap(message.softCap())
+                    .setHardPlayerCap(message.hardCap())
+                    .setWeight(message.weight())
                     .build();
 
-            server.register(message.getFamilyName());
+            server.register(message.familyName());
 
             RedisMessageServerPingResponse message = (RedisMessageServerPingResponse) new GenericRedisMessage.Builder()
                     .setType(RedisMessageType.PING_RESPONSE)
@@ -87,7 +87,7 @@ public class MagicLinkPingHandler implements MessageHandler {
 
     private boolean disconnectServer(ServerInfo serverInfo) throws Exception {
         VelocityAPI api = VelocityAPI.get();
-        api.services().serverService().unregisterServer(serverInfo, message.getFamilyName(), true);
+        api.services().serverService().unregisterServer(serverInfo, message.familyName(), true);
 
         return true;
     }
@@ -102,7 +102,7 @@ public class MagicLinkPingHandler implements MessageHandler {
         }
 
         server.setTimeout(serverService.serverTimeout());
-        server.setPlayerCount(this.message.getPlayerCount());
+        server.setPlayerCount(this.message.playerCount());
         return true;
     }
 }

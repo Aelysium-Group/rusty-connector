@@ -20,16 +20,16 @@ public class RedisMessageServerPingResponse extends GenericRedisMessage {
     private NamedTextColor color;
     private Optional<Integer> pingInterval = Optional.empty();
 
-    public PingResponseStatus getStatus() {
+    public PingResponseStatus status() {
         return status;
     }
-    public String getMessage() {
+    public String message() {
         return message;
     }
-    public NamedTextColor getColor() {
+    public NamedTextColor color() {
         return color;
     }
-    public Optional<Integer> getPingInterval() {
+    public Optional<Integer> pingInterval() {
         return pingInterval;
     }
 

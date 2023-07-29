@@ -58,8 +58,8 @@ public class MessageCacheService extends Service {
         return cacheableMessage;
     }
 
-    public boolean isIgnoredType(GenericRedisMessage message) {
-        return this.ignoredTypes.contains(message.getType());
+    public boolean ignoredType(GenericRedisMessage message) {
+        return this.ignoredTypes.contains(message.type());
     }
 
     /**
@@ -68,7 +68,7 @@ public class MessageCacheService extends Service {
      * @return The cached message.
      * @throws NullPointerException If the message can't be found or has been pushed out of the cache.
      */
-    public CacheableMessage getMessage(Long messageSnowflake) throws NullPointerException {
+    public CacheableMessage findMessage(Long messageSnowflake) throws NullPointerException {
         return this.messages.get(messageSnowflake);
     }
 
@@ -84,7 +84,7 @@ public class MessageCacheService extends Service {
      * Get all currently cached messages.
      * @return All currently cached messages.
      */
-    public List<CacheableMessage> getMessages() {
+    public List<CacheableMessage> messages() {
         return this.messages.values().stream().toList();
     }
 
@@ -93,7 +93,7 @@ public class MessageCacheService extends Service {
      * @param pageNumber The page number to look at. Pages are split by 10. Page numbers start at 1 and go up.
      * @return A list of all cached messages inside of a page.
      */
-    public List<CacheableMessage> getMessagesPage(int pageNumber) {
+    public List<CacheableMessage> fetchMessagesPage(int pageNumber) {
         if(pageNumber < 1) pageNumber = 1;
 
         pageNumber--;
@@ -101,16 +101,16 @@ public class MessageCacheService extends Service {
         int lowerIndex = (10 * pageNumber);
         int upperIndex = lowerIndex + 10;
 
-        if(upperIndex > this.getSize()) upperIndex = this.getSize();
+        if(upperIndex > this.size()) upperIndex = this.size();
 
-        List<CacheableMessage> messages = this.getMessages();
+        List<CacheableMessage> messages = this.messages();
 
         return messages.subList(lowerIndex,upperIndex);
     }
 
     public Long newSnowflake() { return this.snowflakeGenerator.nextId(); }
 
-    public int getSize() { return this.messages.size(); }
+    public int size() { return this.messages.size(); }
 
     public void empty() { this.messages.clear(); }
 
