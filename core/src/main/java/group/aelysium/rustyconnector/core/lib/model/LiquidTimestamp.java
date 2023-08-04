@@ -41,7 +41,8 @@ public class LiquidTimestamp {
             if(stamp.contains("days")) unit = TimeUnit.DAYS;
         } catch (Exception ignore) {}
 
-        if(stamp.contains("month")) throw new ParseException("Found `months` being used as a LiquidTimestamp. This is no longer allowed!", 0);
+        if(stamp.contains("month")) throw new ParseException("Found `month` being used as a LiquidTimestamp. This is no longer allowed!", 0);
+        if(stamp.contains("months")) throw new ParseException("Found `months` being used as a LiquidTimestamp. This is no longer allowed!", 0);
 
         if(unit == null) throw new ParseException("Unable to parse string. No valid unit to extract!", 0);
 
