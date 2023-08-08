@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.lang_messaging;
 
 import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,9 +14,11 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 /**
  * Thank you to https://github.com/LuckPerms/LuckPerms for inspiring this implementation.
  *
- * Text generated using: https://patorjk.com/software/taag/
+ * Some text generated using: https://patorjk.com/software/taag/
  */
 public interface Lang {
+    String attachedWordmark = "RustyConnector:";
+
     /*
      * AQUA - For when data is successfully returned or when we send usage info
      * RED - For when an error has occurred.
@@ -33,42 +35,38 @@ public interface Lang {
 
     Component UNKNOWN_COMMAND = text("Unknown command. Type \"/help\" for help.",WHITE);
 
-    Message WORDMARK_INFO = () -> ASCIIAlphabet.generate("info");
-
     Message WORDMARK_USAGE = () -> ASCIIAlphabet.generate("usage");
-
-    Message WORDMARK_CACHED_MESSAGES = () -> join(
-            newlines(),
-            ASCIIAlphabet.generate("cached"),
-            SPACING,
-            ASCIIAlphabet.generate("messages")
-    );
 
     Message WORDMARK_MESSAGE = () -> ASCIIAlphabet.generate("message");
 
-    Message WORDMARK_RUSTY_CONNECTOR = () -> // font: ANSI Shadow
-            join(
+    ParameterizedMessage1<String> WORDMARK_RUSTY_CONNECTOR = (version) -> {// font: ANSI Shadow
+        Component versionComponent = empty();
+
+        if(version != null && !version.equals(""))
+            versionComponent = versionComponent.append(text("Version "+version, GREEN));
+
+        return join(
                 newlines(),
                 BORDER,
                 SPACING,
-                text(" /███████                        /██"                                                           , AQUA),
-                text("| ██__  ██                      | ██"                                                           , AQUA),
-                text("| ██  \\ ██ /██   /██  /███████ /██████   /██   /██"                                            , AQUA),
-                text("| ███████/| ██  | ██ /██_____/|_  ██_/  | ██  | ██"                                             , AQUA),
-                text("| ██__  ██| ██  | ██|  ██████   | ██    | ██  | ██"                                             , AQUA),
-                text("| ██  \\ ██| ██  | ██ \\____  ██  | ██ /██| ██  | ██"                                           , AQUA),
-                text("| ██  | ██|  ██████/ /███████/  |  ████/|  ███████"                                             , AQUA),
-                text("|__/  |__/ \\______/ |_______/    \\___/   \\____  ██"                                          , AQUA),
-                text("                                         /██  | ██"                                             , AQUA),
-                text("                                        |  ██████/"                                             , AQUA),
-                text("  /██████                                \\______/             /██"                             , AQUA),
-                text(" /██__  ██                                                    | ██"                             , AQUA),
-                text("| ██  \\__/  /██████  /███████  /███████   /██████   /███████ /██████    /██████   /██████"     , AQUA),
-                text("| ██       /██__  ██| ██__  ██| ██__  ██ /██__  ██ /██_____/|_  ██_/   /██__  ██ /██__  ██"     , AQUA),
+                text(" /███████                        /██", AQUA),
+                text("| ██__  ██                      | ██", AQUA),
+                text("| ██  \\ ██ /██   /██  /███████ /██████   /██   /██", AQUA),
+                text("| ███████/| ██  | ██ /██_____/|_  ██_/  | ██  | ██", AQUA),
+                text("| ██__  ██| ██  | ██|  ██████   | ██    | ██  | ██", AQUA),
+                text("| ██  \\ ██| ██  | ██ \\____  ██  | ██ /██| ██  | ██", AQUA),
+                text("| ██  | ██|  ██████/ /███████/  |  ████/|  ███████", AQUA),
+                text("|__/  |__/ \\______/ |_______/    \\___/   \\____  ██", AQUA),
+                text("                                         /██  | ██  ", AQUA).append(versionComponent),
+                text("                                        |  ██████/", AQUA),
+                text("  /██████                                \\______/             /██", AQUA),
+                text(" /██__  ██                                                    | ██", AQUA),
+                text("| ██  \\__/  /██████  /███████  /███████   /██████   /███████ /██████    /██████   /██████", AQUA),
+                text("| ██       /██__  ██| ██__  ██| ██__  ██ /██__  ██ /██_____/|_  ██_/   /██__  ██ /██__  ██", AQUA),
                 text("| ██      | ██  \\ ██| ██  \\ ██| ██  \\ ██| ████████| ██        | ██    | ██  \\ ██| ██  \\__/", AQUA),
-                text("| ██    ██| ██  | ██| ██  | ██| ██  | ██| ██_____/| ██        | ██ /██| ██  | ██| ██"           , AQUA),
-                text("|  ██████/|  ██████/| ██  | ██| ██  | ██|  ███████|  ███████  |  ████/|  ██████/| ██"           , AQUA),
-                text("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/"      , AQUA),
+                text("| ██    ██| ██  | ██| ██  | ██| ██  | ██| ██_____/| ██        | ██ /██| ██  | ██| ██", AQUA),
+                text("|  ██████/|  ██████/| ██  | ██| ██  | ██|  ███████|  ███████  |  ████/|  ██████/| ██", AQUA),
+                text("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/", AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
@@ -76,7 +74,8 @@ public interface Lang {
                 text("Use: `/rc` to get started", YELLOW),
                 SPACING,
                 BORDER
-            );
+        );
+    };
 
     ParameterizedMessage1<Component> BOXED_MESSAGE = (message) -> join(
             newlines(),
@@ -102,10 +101,10 @@ public interface Lang {
     ParameterizedMessage1<CacheableMessage> CACHED_MESSAGE = (message) -> join(
                     newlines(),
                     BORDER,
-                    text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
-                    text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
-                    text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
-                    text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                    text("Status: " + message.getSentence().name(), message.getSentence().color()),
+                    text("ID: ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+                    text("Timestamp: ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+                    text("Contents: ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
                     BORDER
             );
 
@@ -117,12 +116,12 @@ public interface Lang {
                         newlines(),
                         BORDER,
                         SPACING,
-                        text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
-                        text("Reason: " + message.getSentenceReason(), message.getSentence().getColor()),
+                        text("Status: " + message.getSentence().name(), message.getSentence().color()),
+                        text("Reason: " + message.getSentenceReason(), message.getSentence().color()),
                         SPACING,
-                        text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
-                        text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
-                        text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                        text("ID: ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+                        text("Timestamp: ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+                        text("Contents: ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
                         SPACING
                 ));
             else
@@ -130,11 +129,11 @@ public interface Lang {
                         newlines(),
                         BORDER,
                         SPACING,
-                        text("Status: " + message.getSentence().name(), message.getSentence().getColor()),
+                        text("Status: " + message.getSentence().name(), message.getSentence().color()),
                         SPACING,
-                        text("ID: ", message.getSentence().getColor()).append(text(message.getSnowflake(), GRAY)),
-                        text("Timestamp: ", message.getSentence().getColor()).append(text(message.getDate().toString(), GRAY)),
-                        text("Contents: ", message.getSentence().getColor()).append(text(message.getContents(), GRAY)),
+                        text("ID: ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+                        text("Timestamp: ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+                        text("Contents: ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
                         SPACING
                 ));
         }
@@ -169,7 +168,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build()
                     )
             );
@@ -182,7 +181,7 @@ public interface Lang {
             sender.send(
                     join(
                             JoinConfiguration.separator(newline()),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build(arg1)
                     )
             );
@@ -195,7 +194,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build(arg1, arg2)
                     )
             );
@@ -208,7 +207,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build(arg1, arg2, arg3)
                     )
             );
@@ -221,7 +220,7 @@ public interface Lang {
             sender.send(
                     join(
                             newlines(),
-                            text("RustyConnector:"),
+                            text(attachedWordmark),
                             build(arg1, arg2, arg3, arg4)
                     )
             );

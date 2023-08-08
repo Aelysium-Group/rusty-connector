@@ -12,19 +12,19 @@ public interface LoadBalancer<I> {
      * Is the load balancer persistent?
      * @return `true` if the load balancer is persistent. `false` otherwise.
      */
-    boolean isPersistent();
+    boolean persistent();
 
     /**
      * Is the load balancer weighted?
      * @return `true` if the load balancer is weighted. `false` otherwise.
      */
-    boolean isWeighted();
+    boolean weighted();
 
     /**
      * Get the number of attempts that persistence will make.
      * @return The number of attempts.
      */
-    int getAttempts();
+    int attempts();
 
     /**
      * Get the item that the iterator is currently pointing to.
@@ -32,13 +32,13 @@ public interface LoadBalancer<I> {
      *
      * @return The item.
      */
-    I getCurrent();
+    I current();
 
     /**
      * Get the index number of the currently selected item.
      * @return The current index.
      */
-    int getIndex();
+    int index();
 
     /**
      * Iterate to the next item.

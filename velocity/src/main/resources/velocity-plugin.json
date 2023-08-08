@@ -1,0 +1,9 @@
+{
+  "id":"rustyconnector-velocity",
+  "name":"RustyConnector",
+  "version":"${version}",
+  "description":"A player and server connection manager for Velocity based Minecraft Networks!",
+  "authors":["sivin"],
+  "main":"group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector",
+  "url": "https://aelysium.group/"
+}

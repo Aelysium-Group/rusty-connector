@@ -3,12 +3,9 @@ package group.aelysium.rustyconnector.core.lib.database.redis;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
-import io.lettuce.core.RedisConnectionStateListener;
-import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 
-import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 public class RedisPublisher {
@@ -35,10 +32,10 @@ public class RedisPublisher {
      * @throws IllegalStateException If you attempt to send a received RedisMessage.
      */
     public void publish(GenericRedisMessage message) {
-        if(!message.isSendable()) throw new IllegalStateException("Attempted to send a RedisMessage that isn't sendable!");
+        if(!message.sendable()) throw new IllegalStateException("Attempted to send a RedisMessage that isn't sendable!");
 
         try {
-            message.signMessage(client.getPrivateKey());
+            message.signMessage(client.privateKey());
         } catch (IllegalStateException ignore) {} // If there's an issue it's because the message is already signed. Thus ready to send.
 
         if(this.connection == null) this.connection = this.client.connectPubSub();
@@ -46,7 +43,7 @@ public class RedisPublisher {
 
         RedisPubSubAsyncCommands<String, String> async = connection.async();
 
-        async.publish(this.client.getDataChannel(), message.toString());
+        async.publish(this.client.dataChannel(), message.toString());
     }
 
     /**
@@ -58,7 +55,7 @@ public class RedisPublisher {
         try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
             RedisPubSubAsyncCommands<String, String> async = connection.async();
 
-            async.publish(this.client.getDataChannel(), "DIE");
+            async.publish(this.client.dataChannel(), "DIE");
         } catch (Exception e) {
             e.printStackTrace();
         }

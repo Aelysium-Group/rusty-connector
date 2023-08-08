@@ -2,8 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -24,42 +25,36 @@ public class PrivateKeyConfig extends YAML {
 
     @Override
     public boolean generate() {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
-
-        logger.log("---| Registering "+this.configPointer.getName()+"...");
-        logger.log("-----| Looking for "+this.configPointer.getName()+"...");
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
+        logger.send(Component.text("Building private.key...", NamedTextColor.DARK_GRAY));
 
         if (!this.configPointer.exists()) {
-            logger.log("-------| "+this.configPointer.getName()+" doesn't exist! Setting it up now...");
-            logger.log("-------| Preparing directory...");
             File parent = this.configPointer.getParentFile();
             if (!parent.exists()) {
                 parent.mkdirs();
             }
 
             if (this.templateStream == null) {
-                logger.error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
+                logger.error("!!!!! Unable to setup " + this.configPointer.getName() + ". This config has no template !!!!!");
                 return false;
             }
 
             try {
-                logger.log("-------| Cloning template file to new configuration...");
                 Files.copy(this.templateStream, this.configPointer.toPath());
-                logger.log("-------| Finished setting up "+this.configPointer.getName());
 
             } catch (IOException e) {
-                logger.error("!!!!! Unable to setup "+this.configPointer.getName()+" !!!!!",e);
+                logger.error("!!!!! Unable to setup " + this.configPointer.getName() + " !!!!!", e);
                 return false;
             }
-        } else {
-            logger.log("-----| Found it!");
         }
 
         try {
             this.data = new FileInputStream(this.configPointer);
+            logger.send(Component.text("Finished building private.key", NamedTextColor.GREEN));
             return true;
         } catch (Exception e) {
+            logger.send(Component.text("Failed to build private.key", NamedTextColor.RED));
             return false;
         }
     }

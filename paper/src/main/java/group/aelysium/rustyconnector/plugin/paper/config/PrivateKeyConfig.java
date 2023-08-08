@@ -24,8 +24,8 @@ public class PrivateKeyConfig extends YAML {
 
     @Override
     public boolean generate() {
-        PaperAPI api = PaperRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
 
         logger.log("---| Registering "+this.configPointer.getName()+"...");
         logger.log("-----| Looking for "+this.configPointer.getName()+"...");

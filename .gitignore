@@ -1,5 +1,6 @@
 # User-specific stuff
 .idea/
+.gradle/
 
 *.iml
 *.ipr
@@ -7,6 +8,8 @@
 
 # IntelliJ
 out/
+.gradle
+build
 
 # Compiled class file
 *.class
@@ -96,6 +99,7 @@ $RECYCLE.BIN/
 *.lnk
 
 target/
+build
 
 pom.xml.tag
 pom.xml.releaseBackup
@@ -108,6 +112,7 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 .flattened-pom.xml
+.gradle
 
 # Common working directory
 run/

@@ -15,7 +15,7 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
     }
 
     @Override
-    public LoggerGate getGate() {
+    public LoggerGate loggerGate() {
         return this.gate;
     }
 
@@ -59,14 +59,14 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
     }
 
     public void send(Component message) {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        api.getServer().getConsoleCommandSource().sendMessage(message);
+        VelocityAPI api = VelocityAPI.get();
+        api.velocityServer().getConsoleCommandSource().sendMessage(message);
     }
 
     public static void init(LoggerConfig config) {
-        PluginLogger pluginLogger = VelocityRustyConnector.getAPI().getLogger();
+        PluginLogger pluginLogger = VelocityAPI.get().logger();
 
-        LoggerGate gate = pluginLogger.getGate();
+        LoggerGate gate = pluginLogger.loggerGate();
 
         gate.registerNode(
                 GateKey.SAVE_TRASH_MESSAGES,
@@ -74,24 +74,16 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
         );
 
         gate.registerNode(
-                GateKey.REGISTRATION_REQUEST,
-                config.isMessaging_registrationRequest()
+                GateKey.REGISTRATION_ATTEMPT,
+                config.isMessaging_registration()
         );
         gate.registerNode(
-                GateKey.UNREGISTRATION_REQUEST,
-                config.isMessaging_unregistrationRequest()
-        );
-        gate.registerNode(
-                GateKey.CALL_FOR_REGISTRATION,
-                config.isMessaging_callForRegistration()
+                GateKey.UNREGISTRATION_ATTEMPT,
+                config.isMessaging_unregistration()
         );
         gate.registerNode(
                 GateKey.PING,
                 config.isMessaging_ping()
-        );
-        gate.registerNode(
-                GateKey.PONG,
-                config.isMessaging_pong()
         );
         gate.registerNode(
                 GateKey.MESSAGE_PARSER_TRASH,

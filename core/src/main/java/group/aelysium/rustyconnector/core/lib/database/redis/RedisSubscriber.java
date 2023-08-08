@@ -6,7 +6,6 @@ import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 
-import java.net.SocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +31,7 @@ public class RedisSubscriber {
 
             connection.addListener(new RedisMessageListener());
 
-            sync.subscribe(this.client.getDataChannel());
+            sync.subscribe(this.client.dataChannel());
 
             this.lock.await();
         } catch (Exception e) {

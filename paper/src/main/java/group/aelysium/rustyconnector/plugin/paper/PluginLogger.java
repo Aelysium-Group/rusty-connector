@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.LoggerGate;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
@@ -13,7 +14,7 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
     }
 
     @Override
-    public LoggerGate getGate() {
+    public LoggerGate loggerGate() {
         return this.gate;
     }
     @Override
@@ -57,6 +58,6 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
 
     @Override
     public void send(Component message) {
-        PaperRustyConnector.getAPI().getServer().getConsoleSender().sendMessage(message);
+        PaperAPI.get().paperServer().getConsoleSender().sendMessage(message);
     }
 }

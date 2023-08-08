@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.LoggerGate;
 import net.kyori.adventure.text.Component;
 
 public interface PluginLogger {
-    LoggerGate getGate();
+    LoggerGate loggerGate();
 
     void log(String message);
     void log(String message, Throwable e);

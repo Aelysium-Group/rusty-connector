@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class StaticFamilyConfig extends YAML {
     private static Map<String, StaticFamilyConfig> configs = new HashMap<>();
+    private String parent_family = "";
     private boolean firstConnection_loadBalancing_weighted = false;
     private String firstConnection_loadBalancing_algorithm = "ROUND_ROBIN";
     private boolean firstConnection_loadBalancing_persistence_enabled = false;
@@ -20,13 +21,12 @@ public class StaticFamilyConfig extends YAML {
     private LiquidTimestamp consecutiveConnections_homeServer_expiration = null;
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
-    private boolean tpa_enabled = false;
-    private boolean tpa_ignorePlayerCap = false;
-    private int tpa_requestLifetime = 5;
 
     private StaticFamilyConfig(File configPointer, String template) {
         super(configPointer, template);
     }
+
+    public String getParent_family() { return parent_family; }
 
     public boolean isFirstConnection_loadBalancing_weighted() {
         return firstConnection_loadBalancing_weighted;
@@ -57,16 +57,6 @@ public class StaticFamilyConfig extends YAML {
     public LiquidTimestamp getConsecutiveConnections_homeServer_expiration() {
         return consecutiveConnections_homeServer_expiration;
     }
-    public boolean isTPA_enabled() {
-        return tpa_enabled;
-    }
-
-    public boolean shouldTPA_ignorePlayerCap() {
-        return tpa_ignorePlayerCap;
-    }
-    public int getTPA_requestLifetime() {
-        return tpa_requestLifetime;
-    }
 
     /**
      * Add a whitelist config to the proxy.
@@ -88,6 +78,8 @@ public class StaticFamilyConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
+        this.parent_family = this.getNode(this.data, "parent-family", String.class);
+
         this.firstConnection_loadBalancing_weighted = this.getNode(this.data,"first-connection.load-balancing.weighted",Boolean.class);
         this.firstConnection_loadBalancing_algorithm = this.getNode(this.data,"first-connection.load-balancing.algorithm",String.class);
 
@@ -121,9 +113,5 @@ public class StaticFamilyConfig extends YAML {
             throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
-
-        this.tpa_enabled = this.getNode(this.data,"tpa.enabled",Boolean.class);
-        this.tpa_ignorePlayerCap = this.getNode(this.data,"tpa.ignore-player-cap",Boolean.class);
-        this.tpa_requestLifetime = this.getNode(this.data,"tpa.request-lifetime",Integer.class);
     }
 }

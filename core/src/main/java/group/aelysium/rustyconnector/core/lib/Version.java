@@ -16,28 +16,28 @@ public class Version {
         this.minor = Integer.parseInt(stringSplit[1]);
         this.fix   = Integer.parseInt(stringSplit[2]);
     }
-    public int getMajor() {
+    public int major() {
         return major;
     }
 
-    public int getMinor() {
+    public int minor() {
         return minor;
     }
 
-    public int getFix() {
+    public int fix() {
         return fix;
     }
 
     public boolean isGreaterThan(Version anotherVersion) {
-        if(!(this.getMajor() == this.getMinor())) return this.getMajor() > this.getMinor();
-        if(!(this.getMinor() == this.getMinor())) return this.getMinor() > this.getMinor();
-        return this.getFix() > this.getFix();
+        if(!(this.major() == this.minor())) return this.major() > this.minor();
+        if(!(this.minor() == this.minor())) return this.minor() > this.minor();
+        return this.fix() > this.fix();
     }
 
     public boolean equals(Version anotherVersion) {
-        return (this.getMajor() == anotherVersion.getMajor()) &&
-               (this.getMinor() == anotherVersion.getMinor()) &&
-               (this.getFix() == anotherVersion.getFix());
+        return (this.major() == anotherVersion.major()) &&
+               (this.minor() == anotherVersion.minor()) &&
+               (this.fix() == anotherVersion.fix());
     }
 
     public String toString() {

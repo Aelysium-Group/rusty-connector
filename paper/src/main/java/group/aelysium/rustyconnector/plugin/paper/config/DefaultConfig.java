@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper.config;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -24,8 +25,6 @@ public class DefaultConfig extends YAML {
     private String redis_user = "default";
     private String redis_password = "password";
     private String redis_dataChannel = "rustyConnector-sync";
-
-    private boolean registerOnBoot = true;
 
     private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -75,10 +74,6 @@ public class DefaultConfig extends YAML {
         return redis_dataChannel;
     }
 
-    public boolean isRegisterOnBoot() {
-        return registerOnBoot;
-    }
-
     /**
      * Get the current config.
      * @return The config.
@@ -104,7 +99,7 @@ public class DefaultConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
-        PluginLogger logger = PaperRustyConnector.getAPI().getLogger();
+        PluginLogger logger = PaperAPI.get().logger();
 
         try {
             this.processVersion(YAML.currentVersion);
@@ -142,7 +137,6 @@ public class DefaultConfig extends YAML {
             throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
 
 
-
         this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
         if(this.redis_dataChannel.equals(""))
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
@@ -150,7 +144,5 @@ public class DefaultConfig extends YAML {
         this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
         if(this.redis_dataChannel.equals(""))
             throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
-
-        this.registerOnBoot = this.getNode(this.data,"register-on-boot",Boolean.class);
     }
 }

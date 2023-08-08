@@ -15,16 +15,16 @@ public class RedisMessageSendPlayer extends GenericRedisMessage {
     private String targetFamilyName;
     private String uuid;
 
-    public String getTargetFamilyName() {
+    public String targetFamilyName() {
         return targetFamilyName;
     }
 
-    public String getUUID() {
+    public String uuid() {
         return uuid;
     }
 
     public RedisMessageSendPlayer(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(RedisMessageType.SEND, address, origin);
+        super(RedisMessageType.SEND_PLAYER, address, origin);
 
         if(!RedisMessageSendPlayer.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
@@ -40,7 +40,7 @@ public class RedisMessageSendPlayer extends GenericRedisMessage {
         });
     }
     public RedisMessageSendPlayer(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.SEND, address, origin);
+        super(messageVersion, rawMessage, privateKey, RedisMessageType.SEND_PLAYER, address, origin);
 
         if(!RedisMessageSendPlayer.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
