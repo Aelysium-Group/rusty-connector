@@ -20,8 +20,8 @@ public class DataTransitConfig extends YAML {
     private int maxPacketLength = 512;
 
     private int cache_size = 100;
-    private List<RedisMessageType.Mapping> cache_ignoredTypes = new ArrayList<>();
-    private List<MessageStatus> cache_ignoredStatuses = new ArrayList<>();
+    private final List<RedisMessageType.Mapping> cache_ignoredTypes = new ArrayList<>();
+    private final List<MessageStatus> cache_ignoredStatuses = new ArrayList<>();
 
     private boolean whitelist_enabled = false;
     private List<String> whitelist_addresses = new ArrayList<>();

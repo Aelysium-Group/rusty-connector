@@ -104,18 +104,34 @@ public class Party {
         this.leader = null;
     }
 
-    public synchronized void connect(PlayerServer server, Player caller) {
+    public synchronized void connect(PlayerServer server) {
+        SwitchPower switchPower = VelocityAPI.get().services().partyService().orElseThrow().settings().switchPower();
         this.setServer(server);
         Vector<Player> kickedPlayers = new Vector<>();
 
         VelocityAPI.get().services().partyService().orElseThrow().queueConnector(() -> {
-            this.players.forEach(player -> {
+            for (Player player : this.players)
                 try {
-                    server.directConnect(player);
+                    switch (switchPower) {
+                        case MINIMAL -> {
+                            if(server.full()) {
+                                kickedPlayers.add(player);
+                                return;
+                            }
+                            server.directConnect(player);
+                        }
+                        case MODERATE -> {
+                            if(server.maxed()) {
+                                kickedPlayers.add(player);
+                                return;
+                            }
+                            server.directConnect(player);
+                        }
+                        case AGGRESSIVE -> server.directConnect(player);
+                    }
                 } catch (ConnectException e) {
                     kickedPlayers.add(player);
                 }
-            });
 
             kickedPlayers.forEach(player -> {
                 player.sendMessage(Component.text("There was an issue following your party! You've been kicked.", NamedTextColor.RED));

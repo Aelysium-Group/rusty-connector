@@ -197,7 +197,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
                         return false;
                     }
 
-                party.connect(this, player);
+                party.connect(this);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -211,10 +211,15 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         try {
             ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
 
-            return result.isSuccessful();
+            if(result.isSuccessful()) {
+                this.playerJoined();
+                return true;
+            }
         } catch (Exception e) {
             throw new ConnectException("Unable to connect to that server!", e);
         }
+
+        return false;
     }
 
     /**
