@@ -109,10 +109,10 @@ switching-servers:
 #                                                          #
 #               ----------------------------               #
 #                        Permission:                       #
-#              rustyconnector.command.friends              #
+#               rustyconnector.command.party               #
 #               ----------------------------               #
 #                          Usage:                          #
-#                        /friends                          #
+#                          /party                          #
 #               ----------------------------               #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
