@@ -1,0 +1,35 @@
+compileJava {
+    options.encoding = "UTF-8"
+}
+
+dependencies {
+    // Include in jar
+    implementation "com.google.inject:guice:${project.guice_version}"
+    implementation "club.minnced:discord-webhooks:${project.discord_version}"
+
+    // Dev Only
+    shadow project(path: ':core', configuration: 'shadow')
+    shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
+}
+
+// If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
+shadowJar {
+    archiveBaseName.set('velocity')
+    archiveClassifier.set('')
+    archiveVersion.set('')
+
+    mergeServiceFiles()
+    minimize()
+}
+
+jar.finalizedBy('shadowJar')
+
+def plugin_version = project.plugin_version
+processResources {
+    inputs.property "version", plugin_version
+    filteringCharset "UTF-8"
+
+    filesMatching("velocity-plugin.json") {
+        expand "version": plugin_version
+    }
+}

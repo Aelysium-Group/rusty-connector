@@ -1,0 +1,12 @@
+name: rustyconnector-paper
+version: '${version}'
+main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
+api-version: 1.16
+website: https://github.com/Aelysium-Group/rusty-connector
+authors: [ Sivin ]
+commands:
+    rc:
+        description: The main RC command.
+
+
+folia-supported: true

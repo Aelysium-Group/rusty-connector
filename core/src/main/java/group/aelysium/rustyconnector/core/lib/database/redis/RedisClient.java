@@ -4,14 +4,11 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.TimeoutOptions;
+import io.lettuce.core.protocol.ProtocolVersion;
 import io.lettuce.core.resource.ClientResources;
-import io.lettuce.core.resource.NettyCustomizer;
-import io.netty.bootstrap.Bootstrap;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
-
-import static jdk.net.ExtendedSocketOptions.TCP_KEEPIDLE;
 
 public class RedisClient extends io.lettuce.core.RedisClient {
     private final char[] privateKey;
@@ -24,7 +21,7 @@ public class RedisClient extends io.lettuce.core.RedisClient {
         this.privateKey = privateKey;
     }
 
-    public String getDataChannel() {
+    public String dataChannel() {
         return dataChannel;
     }
 
@@ -33,7 +30,7 @@ public class RedisClient extends io.lettuce.core.RedisClient {
      * And it should remain that way.
      * That's why this field is allowed to be public.
      */
-    public char[] getPrivateKey() {
+    public char[] privateKey() {
         return privateKey;
     }
 
@@ -96,6 +93,7 @@ public class RedisClient extends io.lettuce.core.RedisClient {
                     .autoReconnect(true)
                     .socketOptions(socket)
                     .timeoutOptions(timeout)
+                    .protocolVersion(ProtocolVersion.RESP2)
                     .build();
 
             RedisURI uri;

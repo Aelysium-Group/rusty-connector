@@ -49,7 +49,7 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 3
+version: 4
 
 server:
 #
@@ -175,23 +175,3 @@ redis:
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                    Register on Boot                      #
-#                                                          #
-#               ---------------------------                #
-# | Change this setting to decide if this server should    #
-# | issue a registration request once it's                 #
-# | finished booting up.                                   #
-#                                                          #
-# | If this is set to `false`, the only way this server    #
-# | can get registered is if the proxy issues a            #
-# | register all request.                                  #
-# | Or if this server sends a registration request to      #
-# | the proxy via the `rc register` command.               #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-register-on-boot: true

@@ -9,6 +9,7 @@ public class MigrationDirections {
     public static void init() {
         directions.put(1 + 2, "https://github.com/Aelysium-Group/rusty-connector/wiki/Update-from-Config-v1-to-v2");
         directions.put(2 + 3, "https://github.com/Aelysium-Group/rusty-connector/wiki/Update-from-Config-v2-to-v3");
+        directions.put(3 + 4, "https://github.com/Aelysium-Group/rusty-connector/wiki/Update-from-Config-v3-to-v4");
     }
 
     public static String findUpgradeDirections(int from, int to)  {

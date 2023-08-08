@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
-import group.aelysium.rustyconnector.core.lib.util.WeightOnlyQuickSort;
+import group.aelysium.rustyconnector.core.lib.algorithm.WeightOnlyQuickSort;
 
 public class RoundRobin extends LoadBalancer {
     @Override
@@ -10,7 +10,7 @@ public class RoundRobin extends LoadBalancer {
 
     @Override
     public void completeSort() {
-        if(this.isWeighted()) WeightOnlyQuickSort.sort(this.items);
+        if(this.weighted()) WeightOnlyQuickSort.sort(this.items);
     }
 
     @Override

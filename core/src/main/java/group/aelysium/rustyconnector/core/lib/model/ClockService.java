@@ -1,24 +1,44 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class ClockService {
+public class ClockService extends Service {
     protected final ScheduledExecutorService executorService;
-    protected final long heartbeat;
 
-    public ClockService(int threads, long heartbeat) {
+    public ClockService(int threads) {
         this.executorService = Executors.newScheduledThreadPool(threads);
-        this.heartbeat = heartbeat;
     }
 
     /**
      * Schedule a new task to run every `heartbeat`
      * @param runnable The runnable task to run.
+     * @param period The intervals in seconds to wait before executing the runnable again.
      */
-    public void schedule(Runnable runnable) {
-        this.executorService.scheduleAtFixedRate(runnable, 0, this.heartbeat, TimeUnit.SECONDS);
+    public ScheduledFuture<?> scheduleRecurring(Runnable runnable, long period) {
+        return this.executorService.scheduleAtFixedRate(runnable, 0, period, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Schedule a new task to run every `heartbeat`
+     * @param runnable The runnable task to run.
+     * @param period The intervals in seconds to wait before executing the runnable again.
+     */
+    public ScheduledFuture<?> scheduleRecurring(Runnable runnable, LiquidTimestamp period) {
+        return this.executorService.scheduleAtFixedRate(runnable, 0, period.value(), period.unit());
+    }
+
+    /**
+     * Schedule a new task to run after `delay` amount of seconds.
+     * @param runnable The runnable task to run.
+     * @param delay The amount of time in seconds to wait before executing the runnable.
+     */
+    public void scheduleDelayed(Runnable runnable, long delay) {
+        this.executorService.schedule(runnable, delay, TimeUnit.SECONDS);
     }
 
     public void kill() {

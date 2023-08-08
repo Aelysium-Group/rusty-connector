@@ -1,10 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhook;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -34,8 +32,8 @@ public class WebhooksConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
-        VelocityAPI api = VelocityRustyConnector.getAPI();
-        PluginLogger logger = api.getLogger();
+        VelocityAPI api = VelocityAPI.get();
+        PluginLogger logger = api.logger();
 
         Boolean enabled = this.getNode(this.data, "enabled", Boolean.class);
         if(!enabled) return;
@@ -64,7 +62,7 @@ public class WebhooksConfig extends YAML {
                         case FAMILY -> {
                             String familyName = this.getNode(node, "target-family", String.class);
 
-                            BaseServerFamily family = api.getVirtualProcessor().getFamilyManager().find(familyName);
+                            BaseServerFamily family = api.services().familyService().find(familyName);
                             if (family == null)
                                 logger.warn("webhooks.yml is pointing a webhook at a family with the name: " + familyName + ". No family with this name exists!");
 
@@ -73,7 +71,7 @@ public class WebhooksConfig extends YAML {
                     }
                 }
 
-                logger.log("Successfully registered the webhook: " + webhook.getName() + "!");
+                logger.log("Successfully registered the webhook: " + webhook.name() + "!");
             } catch (MalformedURLException e) {
                 throw new IllegalStateException("`url` in webhooks.yml must be a valid url!");
             }

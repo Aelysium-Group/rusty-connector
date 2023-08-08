@@ -23,22 +23,19 @@
 save-trashed-messages: true
 
 messaging:
-# Should we log when a server requests to be registered?
+# Should we log when a server attempts to be registered?
 # NOTE: This option can spam your proxy console if your proxy sends out a call-for-registration
 #       which requires all listening servers to submit a registration request
-    registration-request: false
+    registration: false
 
-# Should we log when a server requests to be unregistered?
-    unregistration-request: false
+# Should we log when a server attempts to be unregistered?
+    unregistration: false
 
 # Should we log when the proxy calls for all servers to register themselves?
     call-for-registration: false
 
-# Should we log when the proxy makes a ping request to servers?
+# Should we log when a server pings the proxy?
     ping: false
-
-# Should we log when the proxy receives a ping response from a server? (Also called a `pong`)
-    pong: false
 
 # Should we log anytime the message parser throws away a message? (Can generate lots of console spam on busy servers!)
     message-parser-trash: false
@@ -66,14 +63,9 @@ console-icons:
 #                      Console Icons                       #
 #                                                          #
 #               ---------------------------                #
-# | Any system developer will tell you that watching       #
-# | logs can sometimes feel messy and overwhelming.        #
-# | Sometimes, this is because there are just to many      #
-# | things you have to read in such short amounts of time  #
 #                                                          #
-# | To address this issue. We've implemented something     #
-# | we're calling Console Icons. These are short           #
-# | combinations of characters meant to convey a meaning.  #
+# | Console Icons are short combinations of characters     #
+# | meant to convey a meaning.                             #
 # | It's a known fact that the human eye recognizes shapes #
 # | faster than it can process words. So we wanted to      #
 # | take advantage of that ability.                        #
@@ -82,6 +74,7 @@ console-icons:
 # | to replace the icons below with your own worded        #
 # | versions! Or you can adjust them in a way that helps   #
 # | you interpret them faster and better!                  #
+#                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -91,7 +84,7 @@ console-icons:
 #   Symbol used when a server is requesting the proxy to register it into a family.
 #   Example: [server name](127.0.0.1:25565) ?>>>? family-name
 #
-    requesting-registration: "?>>>?"
+    attempting-registration: "?>>>?"
 
 #
 #   Symbol used when a server gets registered into a family
@@ -100,16 +93,10 @@ console-icons:
     registered: ">>>>>"
 
 #
-#   Symbol used when the proxy asks all servers to register themselves
-#   Example: (Velocity)[127.0.0.1] |>~=- ALL SERVERS
-#
-    call-for-registration: "|>~=-"
-
-#
 #   Symbol used when a server requests to be unregistered from a family
 #   Example: [server name](127.0.0.1:25565) ?///? family-name
 #
-    requesting-unregistration: "?///?"
+    attempting-unregistration: "?///?"
 
 #
 #   Symbol used when a server gets unregistered from a family
@@ -125,18 +112,12 @@ console-icons:
 
     #
     #   Symbol used when a family is balancing its servers
-    #   Example: family-name /---\
+    #   Example: family-name ▲▼▲▼▲
     #
     family-balancing: "▲▼▲▼▲"
 
     #
     #   Symbol used when the proxy pings a server
-    #   Example: Proxy |>>>> [family name] [server name](127.0.0.1:25565)
+    #   Example: <<<<| [family name] [server name](127.0.0.1:25565)
     #
-    ping: "|>>>>"
-
-    #
-    #   Symbol used when a server responds to a ping
-    #   Example: Proxy <<<<| [family name] [server name](127.0.0.1:25565)
-    #
-    pong: "<<<<|"
+    ping: "<<<<|"

@@ -5,11 +5,11 @@ public interface Sortable {
      * Get the sort index.
      * @return The index by which sorting must occur.
      */
-    int getSortIndex();
+    int sortIndex();
 
     /**
      * Get the weight value.
      * @return The weight of this item.
      */
-    int getWeight();
+    int weight();
 }

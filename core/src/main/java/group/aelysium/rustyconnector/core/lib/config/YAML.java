@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.core.lib.config;
 
-import group.aelysium.rustyconnector.core.lib.Version;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 

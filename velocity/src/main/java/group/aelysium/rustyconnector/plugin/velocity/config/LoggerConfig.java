@@ -6,11 +6,9 @@ public class LoggerConfig extends YAML {
     private static LoggerConfig config;
 
     private boolean saveTrashedMessages = true;
-    private boolean messaging_registrationRequest = false;
-    private boolean messaging_unregistrationRequest = false;
-    private boolean messaging_callForRegistration = false;
+    private boolean messaging_registration = false;
+    private boolean messaging_unregistration = false;
     private boolean messaging_ping = false;
-    private boolean messaging_pong = false;
     private boolean messaging_messageParserTrash = false;
 
     private boolean security_messageTunnelFailedMessage = true;
@@ -20,15 +18,13 @@ public class LoggerConfig extends YAML {
     private boolean log_playerMove = false;
     private boolean log_familyBalancing = false;
 
-    private String consoleIcons_requestingRegistration = "?>>>?";
+    private String consoleIcons_attemptingRegistration = "?>>>?";
     private String consoleIcons_registered = ">>>>>";
-    private String consoleIcons_callForRegistration = "|>~=-";
-    private String consoleIcons_requestingUnregistration = "?///?";
+    private String consoleIcons_attemptingUnregistration = "?///?";
     private String consoleIcons_unregistered = "/////";
     private String consoleIcons_canceledRequest = "xxxxx";
     private String consoleIcons_familyBalancing = "▲▼▲▼▲";
     private String consoleIcons_ping = "|>>>>";
-    private String consoleIcons_pong = "<<<<|";
 
     private LoggerConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -38,24 +34,16 @@ public class LoggerConfig extends YAML {
         return saveTrashedMessages;
     }
 
-    public boolean isMessaging_registrationRequest() {
-        return messaging_registrationRequest;
+    public boolean isMessaging_registration() {
+        return messaging_registration;
     }
 
-    public boolean isMessaging_unregistrationRequest() {
-        return messaging_unregistrationRequest;
-    }
-
-    public boolean isMessaging_callForRegistration() {
-        return messaging_callForRegistration;
+    public boolean isMessaging_unregistration() {
+        return messaging_unregistration;
     }
 
     public boolean isMessaging_ping() {
         return messaging_ping;
-    }
-
-    public boolean isMessaging_pong() {
-        return messaging_pong;
     }
 
     public boolean isMessaging_messageParserTrash() {
@@ -82,20 +70,16 @@ public class LoggerConfig extends YAML {
         return log_familyBalancing;
     }
 
-    public String getConsoleIcons_requestingRegistration() {
-        return consoleIcons_requestingRegistration;
+    public String getConsoleIcons_attemptingRegistration() {
+        return consoleIcons_attemptingRegistration;
     }
 
     public String getConsoleIcons_registered() {
         return consoleIcons_registered;
     }
 
-    public String getConsoleIcons_callForRegistration() {
-        return consoleIcons_callForRegistration;
-    }
-
-    public String getConsoleIcons_requestingUnregistration() {
-        return consoleIcons_requestingUnregistration;
+    public String getConsoleIcons_attemptingUnregistration() {
+        return consoleIcons_attemptingUnregistration;
     }
 
     public String getConsoleIcons_unregistered() {
@@ -112,10 +96,6 @@ public class LoggerConfig extends YAML {
 
     public String getConsoleIcons_ping() {
         return consoleIcons_ping;
-    }
-
-    public String getConsoleIcons_pong() {
-        return consoleIcons_pong;
     }
 
     /**
@@ -145,11 +125,9 @@ public class LoggerConfig extends YAML {
     public void register() throws IllegalStateException {
         this.saveTrashedMessages = this.getNode(this.data,"save-trashed-messages",Boolean.class);
 
-        this.messaging_registrationRequest = this.getNode(this.data,"messaging.registration-request",Boolean.class);
-        this.messaging_unregistrationRequest = this.getNode(this.data,"messaging.unregistration-request",Boolean.class);
-        this.messaging_callForRegistration = this.getNode(this.data,"messaging.call-for-registration",Boolean.class);
+        this.messaging_registration = this.getNode(this.data,"messaging.registration",Boolean.class);
+        this.messaging_unregistration = this.getNode(this.data,"messaging.unregistration",Boolean.class);
         this.messaging_ping = this.getNode(this.data,"messaging.ping",Boolean.class);
-        this.messaging_pong = this.getNode(this.data,"messaging.pong",Boolean.class);
         this.messaging_messageParserTrash = this.getNode(this.data,"messaging.message-parser-trash",Boolean.class);
 
         this.security_messageTunnelFailedMessage = this.getNode(this.data,"security.message-tunnel-failed-message",Boolean.class);
@@ -159,14 +137,12 @@ public class LoggerConfig extends YAML {
         this.log_playerMove = this.getNode(this.data,"log.player-move",Boolean.class);
         this.log_familyBalancing = this.getNode(this.data,"log.family-balancing",Boolean.class);
 
-        this.consoleIcons_requestingRegistration = this.getNode(this.data,"console-icons.requesting-registration",String.class);
+        this.consoleIcons_attemptingRegistration = this.getNode(this.data,"console-icons.attempting-registration",String.class);
         this.consoleIcons_registered = this.getNode(this.data,"console-icons.registered",String.class);
-        this.consoleIcons_callForRegistration = this.getNode(this.data,"console-icons.call-for-registration",String.class);
-        this.consoleIcons_requestingUnregistration = this.getNode(this.data,"console-icons.requesting-unregistration",String.class);
+        this.consoleIcons_attemptingUnregistration = this.getNode(this.data,"console-icons.attempting-unregistration",String.class);
         this.consoleIcons_unregistered = this.getNode(this.data,"console-icons.unregistered",String.class);
         this.consoleIcons_canceledRequest = this.getNode(this.data,"console-icons.canceled-request",String.class);
         this.consoleIcons_familyBalancing = this.getNode(this.data,"console-icons.family-balancing",String.class);
         this.consoleIcons_ping = this.getNode(this.data,"console-icons.ping",String.class);
-        this.consoleIcons_pong = this.getNode(this.data,"console-icons.pong",String.class);
     }
 }

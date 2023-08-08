@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.managers;
 
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.module.WhitelistPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistPlayer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +24,7 @@ public class WhitelistPlayerManager implements NodeManager<WhitelistPlayer> {
      */
     @Override
     public void add(WhitelistPlayer player) {
-        this.registeredPlayers.put(player.getUsername(),player);
+        this.registeredPlayers.put(player.username(),player);
     }
 
     /**
@@ -33,7 +33,7 @@ public class WhitelistPlayerManager implements NodeManager<WhitelistPlayer> {
      */
     @Override
     public void remove(WhitelistPlayer player) {
-        this.remove(player.getUsername());
+        this.remove(player.username());
     }
 
     @Override

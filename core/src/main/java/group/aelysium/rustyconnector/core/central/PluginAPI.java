@@ -1,7 +1,5 @@
 package group.aelysium.rustyconnector.core.central;
 
-import group.aelysium.rustyconnector.core.lib.model.VirtualProcessor;
-
 import java.io.InputStream;
 
 public abstract class PluginAPI<S> {
@@ -10,13 +8,13 @@ public abstract class PluginAPI<S> {
      * @param filename The name of the resource to get.
      * @return The resource as a stream.
      */
-    abstract public InputStream getResourceAsStream(String filename);
+    abstract public InputStream resourceAsStream(String filename);
 
-    abstract public S getScheduler();
+    abstract public S scheduler();
 
-    abstract public PluginLogger getLogger();
+    abstract public PluginLogger logger();
 
-    abstract public VirtualProcessor getVirtualProcessor();
+    abstract public String dataFolder();
 
-    abstract public String getDataFolder();
+    abstract public String version();
 }

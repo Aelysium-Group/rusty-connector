@@ -50,74 +50,7 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 3
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                        Families                          #
-#                                                          #
-#               ---------------------------                #
-# | Families are a collection of servers. To register      #
-# | new servers into a family, you need to configure       #
-# | your sub-servers appropriately.                        #
-#                                                          #
-# | If your sub-servers use family names that don't match  #
-# | what you define here, they will not be registered.     #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-families:
-
-#
-# The root family. Once a player connects and is validated.
-# This is the family that they will automatically be routed to.
-#
-# The root family will ALWAYS be defined as a `scalar` family.
-# Having a root family defined as `static` is not currently possible
-#
-    root-family:
-        name: "lobby"
-
-#
-# If a player is kicked or disconnected from a family in this proxy.
-# Should the root family catch them? If not, they will disconnect from the whole network.
-# This setting is great if you want a player to join back into the lobby if they get kicked from
-# a gamemode or sub-family.
-#
-# Currently, this method will only work for certain if all servers in the root-family are guaranteed to
-# allow players to join. (i.e. they can't have a whitelist set).
-# If some servers in your root family have whitelists set, a player may not be able to connect to the family!
-#
-        catch-disconnecting-players: false
-
-#########################
-#    Scalar Families    #
-#########################
-#
-# Families defined here are optimized for stateless minecraft gamemodes.
-# They support various load balancing algorithms and auto-scaling.
-#
-    scalar:
-        - "skywars"
-        - "kitpvp"
-
-#########################
-#    Static Families    #
-#########################
-#
-# Families defined here are optimized for stateful minecraft gamemodes.
-# When players join a static family, their initial server will be memorized, and they'll be connected
-# back into that server on future family connections as well.
-#
-# To define a new static family change static from `static: []` to:
-#
-# static:
-#       - "family name"
-#       - "family name"
-#
-    static: []
-
+version: 4
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -143,19 +76,6 @@ redis:
 # You probably won't break anything, but you generally just shouldn't touch things you don't understand.
 #
     data-channel: "rustyConnector-sync"
-
-#########################
-#         MySQL         #
-#########################
-#
-# MySQL is required in order for static families to operate properly
-#
-mysql:
-    host: ""
-    port: 3306
-    user: "root"
-    password: "password"
-    database: "RustyConnector"
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -193,112 +113,6 @@ whitelist:
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                     Message Tunnel                       #
-#                                                          #
-#               ---------------------------                #
-# | The message tunnel allows you to have more control     #
-# | over what messages you will allow the proxy to accept  #
-# | or decline.                                            #
-# | This does NOT affect what messages are being sent over #
-# | your Redis channels. All it does is control what your  #
-# | proxy will and will not accept.                        #
-#                                                          #
-#  NOTE: This section has NOTHING to do with players!      #
-#        Instead, it is used to provide better control     #
-#        over where servers are allowed to auto-register   #
-#        from.                                             #
-#                                                          #
-#  NOTE: This section can more or less completely destroy  #
-#        the scalability that RustyConnector provides.     #
-#        While it does prevent the registration of IPs     #
-#        we don't recognize, it also prevents the          #
-#        registration of new IPs without manually adding   #
-#        them below.                                       #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-message-tunnel:
-#
-# The number of messages that will be saved into memory.
-# The message cache allows you to view messages that have recently been received by the proxy.
-# As new messages are generated, old messages will get pushed out of the cache.
-#
-# You can view cached messages using the `/rc message` command.
-#
-    message-cache-size: 50
-
-#
-# The max length that messages received over Redis are allowed to be.
-# If a message is over this value it will get thrown away!
-# The size below should work for just about everything that is sent by RustyConnector.
-# If you are defining larger addresses or names on your paper servers, you might want to increase this.
-#
-    message-max-length: 512
-
-#
-# The tunnel whitelist.
-#
-# By listing IP addresses here. The plugin will NEVER accept messages if they don't contain one of these IP Addresses!
-# If you know exactly which IP Addresses you want to allow messages from. You can whitelist them here!
-#
-# VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
-#                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
-  #                 This feature only exists to give you a bit more flexibility in how strict your plugin can be.
-#
-    whitelist:
-        enabled: false
-        addresses:
-          - "127.0.0.1"
-
-#
-# The tunnel denylist.
-#
-# By listing IP addresses here. The plugin will NEVER accept messages containing one of these IP Addresses!
-#
-# NOTE: The denylist has precedence over the whitelist. If an IP is defined in both the whitelist AND the denylist
-#       it will not be accepted.
-#
-# VERY IMPORTANT: If you are getting messages over your redis network that you don't recognize:
-#                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
-#                 This feature only exists to give you a bit more flexibility in how strict your plugin can be.
-#
-    denylist:
-        enabled: false
-        addresses:
-          - "127.0.0.1"
-
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                      Boot Commands                       #
-#                                                          #
-#               ---------------------------                #
-# | You can run proxy commands when RustyConnector         #
-# | finishes booting up!                                   #
-#                                                          #
-# | This is a great way to automatically send a            #
-# | register all command through the data channel          #
-# | after a server restart!                                #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-boot-commands:
-    enabled: false
-
-#
-# The proxy commands to send on-boot.
-# These commands will be sent, in order, from top to bottom.
-# Remember that these are proxy commands. You won't be able to run commands on your sub-servers from here.
-# This section doesn't care about whether other plugins on the proxy have started yet!
-# If you run commands from other plugins, they might not work because those plugins may not have been booted up yet!
-#
-    commands:
-      - "rc register all"
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Services                          #
 #                                                          #
 #               ---------------------------                #
@@ -315,26 +129,23 @@ services:
 # Also manages the lifecycle of a player's home server if you are using Static Families.
 #
     server-lifecycle:
-        enabled: true
 #
-# Time, in seconds, between sending out a ping and expecting a pong.
-# Servers will also send their current player count with their pong response. This way, if the proxy
-# somehow unsyncs it's player count from the actual count, it can be corrected.
+# Amount of time, in seconds, that a server can go without pinging the proxy.
+# If a server doesn't ping the proxy in this time, it will be declared stale
+# and be unregistered from the proxy.
 #
-        interval: 30
+        server-timeout: 15
+
 #
-# If a server doesn't respond to the most recent ping before the heart's next interval.
-# Should the server get unregistered?
+# Amount of time, in seconds, that a server should wait to ping the proxy.
+# This setting cannot be higher than "server-timeout".
 #
-# This is an additional life-cycle option in-case servers become unresponsive and unable to unregister themselves.
-# If a server can't unregister itself (bad shutdown, server freezing, bad connection between server and proxy, etc) this will be able to see that it's unresponsive and unregister it.
-#
-        unregister-on-ignore: false
+        server-ping-interval: 10
 
 #
 # Manages the load balancing of the proxy's families.
 #
-    family-server-sorting:
+    load-balancing:
         enabled: true
 #
 # Time, in seconds, between when the families sort their servers. This interval will cause your proxy to sort ALL of the servers registered to it!
