@@ -1,0 +1,33 @@
+compileJava {
+    options.encoding = "UTF-8"
+}
+
+dependencies {
+    // Include in jar
+    implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
+    implementation "commons-codec:commons-codec:${project.commons_version}"
+    implementation "com.jcabi:jcabi-log:${project.jcabi_version}"
+    implementation "org.spongepowered:configurate-yaml:${project.configurate_version}"
+    implementation "mysql:mysql-connector-java:${project.mysql_version}"
+    implementation "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
+
+    // Dev only
+    shadow "net.kyori:adventure-api:${project.adventure_version}"
+    shadow "com.google.code.gson:gson:${project.gson_version}"
+    shadow "org.yaml:snakeyaml:${project.snakeyaml_version}"
+}
+
+// If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
+shadowJar {
+    archiveClassifier.set('')
+    archiveVersion.set('')
+
+    minimize {
+        exclude(dependency('cloud.commandframework:cloud-paper:.*'))
+    }
+
+    mergeServiceFiles()
+    minimize()
+}
+
+jar.finalizedBy('shadowJar')
