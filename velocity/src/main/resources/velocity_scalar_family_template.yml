@@ -61,7 +61,7 @@ load-balancing:
 # until they have been filled. It will then step to the next, lower, weight level and continue.
 #
     weighted: false
-    | [Config v3 (Latest)](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-v3)                  | `v0.5.0 (beta)`     | [![Wiki](https://badgen.net/badge/From/Config%20v2/blue?icon=codeclimate)](https://github.com/Aelysium-Group/rusty-connector/wiki/config_migration/Update-from-Config-v1-to-v2) |
+
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Algorithm                         #
