@@ -1,0 +1,68 @@
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Families                          #
+#                                                          #
+#               ---------------------------                #
+# | Families are a collection of servers. To register      #
+# | new servers into a family, you need to configure       #
+# | your sub-servers appropriately.                        #
+#                                                          #
+# | If your sub-servers use family names that don't match  #
+# | what you define here, they will not be registered.     #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+#
+# The root family. Once a player connects and is validated.
+# This is the family that they will automatically be routed to.
+#
+# The root family will ALWAYS be defined as a `scalar` family.
+#
+root-family:
+    name: "lobby"
+
+    #
+    # If a player is kicked or disconnected from a family in this proxy.
+    # Should the root family catch them? If not, they will disconnect from the whole network.
+    # This setting is great if you want a player to join back into the lobby if they get kicked from
+    # a gamemode or sub-family.
+    #
+    catch-disconnecting-players: false
+
+#########################
+#    Scalar Families    #
+#########################
+#
+# Families defined here are optimized for stateless minecraft gamemodes.
+# They support various load balancing algorithms and auto-scaling.
+#
+scalar: []
+
+#########################
+#    Static Families    #
+#########################
+#
+# Families defined here are optimized for stateful minecraft gamemodes.
+# When players join a static family, their initial server will be memorized, and they'll be connected
+# back into that server on future family connections as well.
+#
+# To define a new static family change static from `static: []` to:
+#
+# static:
+#       - "family name"
+#       - "family name"
+#
+# Static families require that MySQL is set up.
+#
+static: []
+
+#
+# MySQL is required in order for static families to operate.
+#
+mysql:
+    host: ""
+    port: 3306
+    user: "root"
+    password: "password"
+    database: "RustyConnector"

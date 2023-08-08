@@ -1,0 +1,169 @@
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#                                                                                                         #
+#                      _____    __  __   __   __   ______   __    __   __   ______                        #
+#                     /\  __-. /\ \_\ \ /\ "-.\ \ /\  __ \ /\ "-./  \ /\ \ /\  ___\                       #
+#                     \ \ \/\ \\ \____ \\ \ \-.  \\ \  __ \\ \ \-./\ \\ \ \\ \ \____                      #
+#                      \ \____- \/\_____\\ \_\\"\_\\ \_\ \_\\ \_\ \ \_\\ \_\\ \_____\                     #
+#                       \/____/  \/_____/ \/_/ \/_/ \/_/\/_/ \/_/  \/_/ \/_/ \/_____/                     #
+#                    ______  ______   __       ______   ______  ______   ______  ______                   #
+#                   /\__  _\/\  ___\ /\ \     /\  ___\ /\  == \/\  __ \ /\  == \/\__  _\                  #
+#                   \/_/\ \/\ \  __\ \ \ \____\ \  __\ \ \  _-/\ \ \/\ \\ \  __<\/_/\ \/                  #
+#                      \ \_\ \ \_____\\ \_____\\ \_____\\ \_\   \ \_____\\ \_\ \_\ \ \_\                  #
+#                       \/_/  \/_____/ \/_____/ \/_____/ \/_/    \/_____/ \/_/ /_/  \/_/                  #
+#                                                                                                         #
+#                                                                                                         #
+#                                                                                                         #
+#                                      Welcome to Dynamic Teleport!                                       #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+#                             | Enables cross-server teleportation commands                               #
+#                             | powered by RustyConnector's Dynamic Teleport                              #
+#                             | engine.                                                                   #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#
+# Master toggle for Dynamic Teleport module
+#
+enabled: false
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                           TPA                            #
+#                                                          #
+#               ---------------------------                #
+# | Let players teleport to eachother between servers      #
+# | inside a family!                                       #
+# | If player1 is in one server and player2 is in another  #
+# | server; player1 will connect to the new server and     #
+# | then teleport to player2's coordinates.                #
+#                                                          #
+# | If both players are in the same server, player1 will   #
+# | just automatically teleport to player1.                #
+#                                                          #
+#   NOTE: This command is player only!                     #
+#                                                          #
+#               ----------------------------               #
+#                        Permission:                       #
+#                rustyconnector.command.tpa                #
+#               ----------------------------               #
+#                          Usage:                          #
+#              /tpa <target players username>              #
+#               ----------------------------               #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+tpa:
+    enabled: false
+
+    #
+    # Should players only be allowed to tpa to their friends?
+    # Requires the friends module be enabled.
+    #
+    friends-only: false
+
+    #
+    # List the families that you'd like players to be able to tpa in.
+    # Players are not able to tpa between families, instead they can
+    # only tpa between servers inside a family.
+    #
+    enabled-families: []
+
+    #
+    # Should the tpa consider player caps before attempting to teleport?
+    # If false, the player must match the player caps of the server they
+    # are attempting to connect to.
+    #
+    ignore-player-cap: false
+
+    ############################################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                                Expiration                                #
+    #                                                                          #
+    #                       ---------------------------                        #
+    # | How many minutes a pending tpa request can exist for before            #
+    # | it expires. Players are not allowed to issue new tpa requests if       #
+    # | they already have one pending.                                         #
+    #                                                                          #
+    # | If a player's tpa request is accepted or denied before it expires,     #
+    # | they will be able to issue a new tpa request immediately.              #
+    # | Otherwise, they must wait for their current request to expire          #
+    # | before issuing a new one.                                              #
+    #                                                                          #
+    # | Players will receive a notification in-chat if their request expires.  #
+    #                                                                          #
+    # | This data value is a Liquid Timestamp. Read more here:                 #
+    # https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
+    #                                                                          #
+    #   NOTE: The Liquid Timestamp "NEVER" is not allowed here!                #
+    #                                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################################
+    expiration: 5 Minutes
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                       Family Anchor                      #
+#                                                          #
+#               ----------------------------               #
+#                                                          #
+# | Family anchors are player facing commands that         #
+# | directly connect players to a specific family!         #
+#                                                          #
+#               -----------------------------              #
+#                        Permissions:                      #
+#               rustyconnector.command.anchor              #
+#        rustyconnector.command.anchor.<anchor name>       #
+#               -----------------------------              #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+family-anchor:
+    enabled: false
+
+    #
+    # List as many anchors as you'd like!
+    #
+    # All anchor commands are executed using `/<anchor name>`
+    #
+    # NOTE: Make sure that, when you define your name, you don't include a slash!
+    #
+    anchors:
+        - name: "lobby"
+          family: "lobby"
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                           Hub                            #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Hub allows your players to teleport to the parent      #
+# | family of the family they are currently connected to!  #
+#                                                          #
+# | Set your family parent's in your respective family     #
+# | config files.                                          #
+#                                                          #
+#               ----------------------------               #
+#                        Permission:                       #
+#                rustyconnector.command.hub                #
+#               ----------------------------               #
+#                          Usage:                          #
+#                           /hub                           #
+#               ----------------------------               #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+hub:
+    enabled: false
+
+    #
+    # List the families that you'd like players to be able to use /hub in.
+    #
+    enabled-families: []
