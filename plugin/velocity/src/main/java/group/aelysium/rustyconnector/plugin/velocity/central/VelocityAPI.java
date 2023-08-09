@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.core.central.PluginAPI;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.config.MemberKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
@@ -18,14 +19,12 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocu
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.SyncFailedException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -42,6 +41,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     private Processor processor = null;
     private final Path dataFolder;
     private final PluginLogger pluginLogger;
+    private final char[] memberKey;
 
     public VelocityAPI(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
         instance = this;
@@ -58,6 +58,23 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
             e.printStackTrace();
             this.version = null;
         }
+
+        // Initialize member key
+        char[] memberKey = null;
+        try {
+            MemberKeyConfig memberKeyConfig = MemberKeyConfig.newConfig(new File(String.valueOf(dataFolder), "member.key"));
+            if (!memberKeyConfig.generate())
+                throw new IllegalStateException("Unable to load or create member.key!");
+            try {
+                memberKey = memberKeyConfig.get();
+            } catch (Exception ignore) {
+                throw new IllegalAccessException("There was a fatal error while reading member.key!");
+            }
+            if(memberKey.length == 0) memberKey = null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        this.memberKey = memberKey;
 
         this.plugin = plugin;
         this.server = server;
@@ -166,7 +183,7 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
 
             try {
                 dynamicTeleportService.services().tpaService().orElseThrow()
-                                      .services().tpaCleaningService().startHeartbeat();
+                        .services().tpaCleaningService().startHeartbeat();
                 dynamicTeleportService.services().tpaService().orElseThrow().initCommand();
             } catch (Exception ignore) {}
 
@@ -181,6 +198,16 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
             VelocityAPI.get().logger().send(Component.text("Finished building dynamic teleport service.", NamedTextColor.GREEN));
         } catch (Exception ignore) {
             VelocityAPI.get().logger().send(Component.text("The dynamic teleport service wasn't enabled.", NamedTextColor.GRAY));
+        }
+        try {
+            VelocityAPI.get().logger().send(Component.text("Building viewport service...", NamedTextColor.DARK_GRAY));
+            ViewportService viewportService = Processor.Initializer.buildViewportService().orElseThrow();
+
+            this.processor.services().add(viewportService);
+
+            VelocityAPI.get().logger().send(Component.text("Finished building viewport service.", NamedTextColor.GREEN));
+        } catch (Exception ignore) {
+            VelocityAPI.get().logger().send(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
         }
     }
 

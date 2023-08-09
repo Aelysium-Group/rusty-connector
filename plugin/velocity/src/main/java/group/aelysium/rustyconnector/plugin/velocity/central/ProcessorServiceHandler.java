@@ -13,6 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkSer
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 
 import java.util.Map;
@@ -61,5 +62,8 @@ public class ProcessorServiceHandler extends group.aelysium.rustyconnector.core.
     }
     public Optional<DynamicTeleportService> dynamicTeleportService() {
         return this.find(DynamicTeleportService.class);
+    }
+    public Optional<ViewportService> viewportService() {
+        return this.find(ViewportService.class);
     }
 }

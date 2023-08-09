@@ -24,6 +24,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerMySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.ViewportMySQLService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.GatewayService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
@@ -57,12 +60,12 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
         PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.dataFolder()), "private.key"));
         if (!privateKeyConfig.generate())
             throw new IllegalStateException("Unable to load or create private.key!");
-        char[] privateKey = null;
+        char[] privateKey;
         try {
             privateKey = privateKeyConfig.get();
         } catch (Exception ignore) {
+            throw new IllegalAccessException("There was a fatal error while reading private.key!");
         }
-        if (privateKey == null) throw new IllegalAccessException("There was a fatal error while reading private.key!");
 
         {
             // Setup Redis
@@ -262,6 +265,40 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                 );
 
                 return Optional.of(new PartyService(settings));
+            } catch (Exception e) {
+                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+            }
+            return Optional.empty();
+        }
+        public static Optional<ViewportService> buildViewportService() {
+            VelocityAPI api = VelocityAPI.get();
+            PluginLogger logger = api.logger();
+            try {
+                logger.send(Component.text("Building viewport service...", NamedTextColor.DARK_GRAY));
+
+                ViewportConfig viewportConfig = ViewportConfig.newConfig(new File(String.valueOf(api.dataFolder()), "viewport.yml"), "velocity_viewport_template.yml");
+                if (!viewportConfig.generate())
+                    throw new IllegalStateException("Unable to load or create viewport.yml!");
+                viewportConfig.register();
+
+                if(!viewportConfig.isEnabled()) return Optional.empty();
+
+                ViewportMySQLService builtMySQLService = new ViewportMySQLService.Builder()
+                        .setHost(viewportConfig.getMysql_host())
+                        .setPort(viewportConfig.getMysql_port())
+                        .setDatabase(viewportConfig.getMysql_database())
+                        .setUser(viewportConfig.getMysql_user())
+                        .setPassword(viewportConfig.getMysql_password())
+                        .build();
+
+                GatewayService gatewayService = new GatewayService(viewportConfig.getWebsocket_address(), viewportConfig.getRest_address());
+
+                ViewportService service = new ViewportService.Builder()
+                        .setMySQLService(builtMySQLService)
+                        .setGatewayService(gatewayService)
+                        .build();
+
+                return Optional.of(service);
             } catch (Exception e) {
                 logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
             }
