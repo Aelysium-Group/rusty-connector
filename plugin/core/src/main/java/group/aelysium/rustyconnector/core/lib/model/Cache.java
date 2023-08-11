@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
@@ -9,20 +11,17 @@ import java.util.Map;
 
 public class Cache<D> extends Service {
     private final Snowflake snowflakeGenerator = new Snowflake();
-    private int maxCapacity = 25;
-
-    protected final LinkedHashMap<Long, D> items = new LinkedHashMap<>(this.maxCapacity){
-        @Override
-        protected boolean removeEldestEntry(final Map.Entry eldest) {
-            return size() > maxCapacity;
-        }
-    };
+    private final int maxCapacity;
+    protected final com.google.common.cache.Cache<Long, D> items;
 
     public Cache(Integer maxCapacity) {
         if(maxCapacity <= 0) maxCapacity = 0;
         if(maxCapacity > 500) maxCapacity = 500;
 
         this.maxCapacity = maxCapacity;
+        this.items = CacheBuilder.newBuilder()
+                .maximumSize(this.maxCapacity)
+                .build();
     }
 
 
@@ -39,7 +38,7 @@ public class Cache<D> extends Service {
      * @throws NullPointerException If the item can't be found or has been pushed out of the cache.
      */
     public synchronized D get(Long messageSnowflake) throws NullPointerException {
-        return this.items.get(messageSnowflake);
+        return this.items.getIfPresent(messageSnowflake);
     }
 
     /**
@@ -47,7 +46,7 @@ public class Cache<D> extends Service {
      * @param messageSnowflake The snowflake of the cached item.
      */
     public synchronized void remove(Long messageSnowflake) {
-        this.items.remove(messageSnowflake);
+        this.items.invalidate(messageSnowflake);
     }
 
     /**
@@ -55,17 +54,17 @@ public class Cache<D> extends Service {
      * @return All currently cached items.
      */
     public List<D> getAll() {
-        return this.items.values().stream().toList();
+        return this.items.asMap().values().stream().toList();
     }
 
     public Long newSnowflake() { return this.snowflakeGenerator.nextId(); }
 
-    public int getSize() { return this.items.size(); }
+    public long getSize() { return this.items.size(); }
 
-    public void empty() { this.items.clear(); }
+    public void empty() { this.items.invalidateAll(); }
 
     @Override
     public void kill() {
-        this.items.clear();
+        this.empty();
     }
 }
