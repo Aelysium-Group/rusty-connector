@@ -19,6 +19,8 @@ public final class CommandRusty {
     public static void create(PaperCommandManager<CommandSender> manager) {
         manager.command(message(manager));
         manager.command(send(manager));
+        manager.command(lock(manager));
+        manager.command(unlock(manager));
     }
 
     private static Command.Builder<CommandSender> message(PaperCommandManager<CommandSender> manager) {
@@ -63,6 +65,46 @@ public final class CommandRusty {
                                 final String familyName = commandContext.get("family-name");
 
                                 api.services().redisMessagerService().sendToOtherFamily(player,familyName);
+                            } catch (NullPointerException e) {
+                                PaperLang.RC_SEND_USAGE.send(logger);
+                            } catch (Exception e) {
+                                logger.log("An error stopped us from processing the request!", e);
+                            }
+                        }).execute());
+    }
+
+    private static Command.Builder<CommandSender> lock(PaperCommandManager<CommandSender> manager) {
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
+        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
+
+        return builder.literal("lock")
+                .senderType(ConsoleCommandSender.class)
+                .handler(context -> manager.taskRecipe().begin(context)
+                        .asynchronous(commandContext -> {
+                            try {
+                                api.services().redisMessagerService()
+                                        .setLockState(api.services().serverInfoService().name(), true);
+                            } catch (NullPointerException e) {
+                                PaperLang.RC_SEND_USAGE.send(logger);
+                            } catch (Exception e) {
+                                logger.log("An error stopped us from processing the request!", e);
+                            }
+                        }).execute());
+    }
+
+    private static Command.Builder<CommandSender> unlock(PaperCommandManager<CommandSender> manager) {
+        PaperAPI api = PaperAPI.get();
+        PluginLogger logger = api.logger();
+        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
+
+        return builder.literal("unlock")
+                .senderType(ConsoleCommandSender.class)
+                .handler(context -> manager.taskRecipe().begin(context)
+                        .asynchronous(commandContext -> {
+                            try {
+                                api.services().redisMessagerService()
+                                        .setLockState(api.services().serverInfoService().name(), false);
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {

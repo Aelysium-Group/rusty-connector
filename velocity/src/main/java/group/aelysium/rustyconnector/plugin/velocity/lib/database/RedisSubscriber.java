@@ -84,6 +84,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         try {
             if(message.type() == PING)           new MagicLinkPingHandler(message).execute();
             if(message.type() == SEND_PLAYER)    new SendPlayerHandler(message).execute();
+            if(message.type() == SEND_LOCK_STATE)    new SetServerLockStateHandler(message).execute();
 
             cachedMessage.sentenceMessage(MessageStatus.EXECUTED);
         } catch (NullPointerException e) {

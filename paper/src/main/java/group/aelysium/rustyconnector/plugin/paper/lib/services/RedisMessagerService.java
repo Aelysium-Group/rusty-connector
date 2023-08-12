@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRed
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageSendPlayer;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerLockState;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
@@ -52,6 +53,24 @@ public class RedisMessagerService extends Service {
                 .setAddress(serverInfoService.address())
                 .setParameter(RedisMessageSendPlayer.ValidParameters.TARGET_FAMILY_NAME, familyName)
                 .setParameter(RedisMessageSendPlayer.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
+                .buildSendable();
+
+        api.services().redisService().publish(message);
+    }
+
+    /**
+     * @param lockState Sets whether the server should be locked or not.
+     */
+    public void setLockState(String serverName, boolean lockState) {
+        PaperAPI api = PaperAPI.get();
+        ServerInfoService serverInfoService = api.services().serverInfoService();
+
+        RedisMessageServerLockState message = (RedisMessageServerLockState) new GenericRedisMessage.Builder()
+                .setType(RedisMessageType.SEND_LOCK_STATE)
+                .setOrigin(MessageOrigin.SERVER)
+                .setAddress(serverInfoService.address())
+                .setParameter(RedisMessageServerLockState.ValidParameters.SERVER_NAME, serverName)
+                .setParameter(RedisMessageServerLockState.ValidParameters.LOCK_STATE, String.valueOf(lockState))
                 .buildSendable();
 
         api.services().redisService().publish(message);

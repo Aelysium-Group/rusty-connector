@@ -208,17 +208,33 @@ public interface VelocityLang extends Lang {
         else if(family.registeredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
         else for (PlayerServer server : family.registeredServers()) {
                 if(family.loadBalancer().index() == i)
-                    servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] <<<<<"
-                                    , GREEN));
+                    if (server.locked()) {
+                        servers = servers.append(
+                                text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                                "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                                "["+server.playerCount()+" (XXX <> XXX) w-"+server.weight()+"] <<<<<"
+                                        , GREEN));
+                    } else {
+                        servers = servers.append(
+                                text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                                "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                                "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] <<<<<"
+                                        , GREEN));
+                    }
                 else
-                    servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
-                                    , GRAY));
+                    if (server.locked()) {
+                        servers = servers.append(
+                                text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                                "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                                "["+server.playerCount()+" (XXX <> XXX) w-"+server.weight()+"]"
+                                        , GRAY));
+                    } else {
+                        servers = servers.append(
+                                text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                                "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                                "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
+                                        , GRAY));
+                    }
 
                 servers = servers.append(newline());
 

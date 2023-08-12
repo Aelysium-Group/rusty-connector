@@ -73,6 +73,8 @@ public class RedisMessageSendPlayer extends GenericRedisMessage {
         String TARGET_FAMILY_NAME = "f";
         String PLAYER_UUID = "p";
 
+        String LOCK_STATE = "l";
+
         static List<String> toList() {
             List<String> list = new ArrayList<>();
             list.add(TARGET_FAMILY_NAME);

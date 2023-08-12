@@ -217,6 +217,7 @@ public class GenericRedisMessage {
             if (this.type == PING)              return new RedisMessageServerPing(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if (this.type == PING_RESPONSE)     return new RedisMessageServerPingResponse(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if (this.type == SEND_PLAYER)       return new RedisMessageSendPlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == SEND_LOCK_STATE)       return new RedisMessageServerLockState(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
             if (this.type == COORDINATE_REQUEST_QUEUE)  return new RedisMessageCoordinateRequestQueue(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
@@ -243,6 +244,7 @@ public class GenericRedisMessage {
             if(this.type == PING)               return new RedisMessageServerPing(this.address, this.origin, this.parameters);
             if(this.type == PING_RESPONSE)      return new RedisMessageServerPingResponse(this.address, this.origin, this.parameters);
             if(this.type == SEND_PLAYER)        return new RedisMessageSendPlayer(this.address, this.origin, this.parameters);
+            if(this.type == SEND_LOCK_STATE)        return new RedisMessageServerLockState(this.address, this.origin, this.parameters);
             if(this.type == COORDINATE_REQUEST_QUEUE)   return new RedisMessageCoordinateRequestQueue(this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");

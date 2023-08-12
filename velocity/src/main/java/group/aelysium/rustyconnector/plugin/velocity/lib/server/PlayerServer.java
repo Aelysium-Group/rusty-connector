@@ -27,6 +27,8 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     private int weight;
     private int softPlayerCap;
     private int hardPlayerCap;
+    
+    private boolean isLocked = false;
 
     private AtomicInteger timeout;
 
@@ -116,12 +118,28 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
 
 
     /**
+     * Checks if the server is locked, meaning players cannot be
+     * put into the server when sent to the family.
+     *
+     * @return `false` if players are able to join the server, otherwise `true`.
+     */
+    public boolean locked() { return this.isLocked; }
+
+    /**
+     * @param lockState Sets whether the server is locked or unlocked.
+     */
+
+    public void setLocked(boolean lockState) {this.isLocked = lockState; }
+
+    /**
      * Validates the player against the server's current player count.
      * If the server is full or the player doesn't have permissions to bypass soft and hard player caps. They will be kicked
      * @param player The player to validate
      * @return `true` if the player is able to join. `false` otherwise.
      */
     public boolean validatePlayer(Player player) {
+        if (this.locked()) return false;
+
         if(Permission.validate(
                 player,
                 "rustyconnector.hardCapBypass",
