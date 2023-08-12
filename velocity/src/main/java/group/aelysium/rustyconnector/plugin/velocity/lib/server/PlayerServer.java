@@ -138,8 +138,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @return `true` if the player is able to join. `false` otherwise.
      */
     public boolean validatePlayer(Player player) {
-        if (this.locked()) return false;
-
         if(Permission.validate(
                 player,
                 "rustyconnector.hardCapBypass",
@@ -154,7 +152,15 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
                 Permission.constructNode("rustyconnector.<family name>.softCapBypass",this.family.name())
         )) return true; // If the player has permission to bypass soft-player-cap, let them in.
 
-        return !this.full();
+        if(this.full()) return false; // If the player count is at soft-player-cap. Boot the player.
+
+        if(Permission.validate(
+                player,
+                "rustyconnector.lockBypass",
+                Permission.constructNode("rustyconnector.<family name>.lockBypass",this.family.name())
+        )) return true; // If the player has permission to bypass the server lock, let them in.
+
+        return !this.locked(); // If the server is locked, boot the player, otherwise let them in.
     }
 
     @Override
