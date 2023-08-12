@@ -327,8 +327,10 @@ class StaticFamilyConnector {
     private PlayerServer connectSingleton() {
         PlayerServer server = this.family.loadBalancer().current();
         try {
-            if(!server.validatePlayer(this.player))
-                throw new RuntimeException("The server you're trying to connect to is full!");
+            if(!server.validatePlayer(this.player)) {
+                if (!server.locked()) throw new RuntimeException("The server you're trying to connect to is full!");
+                else throw new RuntimeException("The server you're trying to connect to is locked!");
+            }
 
             if (!server.connect(this.player))
                 throw new RuntimeException("There was an issue connecting you to the server!");
@@ -349,8 +351,10 @@ class StaticFamilyConnector {
             PlayerServer server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
 
             try {
-                if (!server.validatePlayer(this.player))
-                    throw new RuntimeException("The server you're trying to connect to is full!");
+                if (!server.validatePlayer(this.player)) {
+                    if (!server.locked()) throw new RuntimeException("The server you're trying to connect to is full!");
+                    else throw new RuntimeException("The server you're trying to connect to is locked!");
+                }
 
                 if (server.connect(this.player)) {
                     this.family.loadBalancer().forceIterate();

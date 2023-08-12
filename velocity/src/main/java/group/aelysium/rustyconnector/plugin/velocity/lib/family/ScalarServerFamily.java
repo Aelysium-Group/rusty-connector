@@ -163,8 +163,10 @@ class ScalarFamilyConnector {
     private PlayerServer connectSingleton() {
         PlayerServer server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
         try {
-            if(!server.validatePlayer(player))
-                throw new RuntimeException("The server you're trying to connect to is full!");
+            if(!server.validatePlayer(player)) {
+                if (!server.locked()) throw new RuntimeException("The server you're trying to connect to is full!");
+                else throw new RuntimeException("The server you're trying to connect to is locked!");
+            }
 
             if(this.event == null) {
                 if (!server.connect(player))
@@ -190,8 +192,10 @@ class ScalarFamilyConnector {
             PlayerServer server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
 
             try {
-                if(!server.validatePlayer(player))
-                    throw new RuntimeException("The server you're trying to connect to is full!");
+                if(!server.validatePlayer(player)) {
+                    if (!server.locked()) throw new RuntimeException("The server you're trying to connect to is full!");
+                    else throw new RuntimeException("The server you're trying to connect to is locked!");
+                }
 
                 if(this.event == null) {
                     if (server.connect(player)) {
