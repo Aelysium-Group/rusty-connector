@@ -1,30 +1,38 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket;
 
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.ViewportSession;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
+import javax.naming.AuthenticationException;
+
 @WebSocket
 public class WebSocketHandler {
-    private final WebSocketService.WebsocketChannel.Mapping channel;
 
-    public WebSocketHandler(WebSocketService.WebsocketChannel.Mapping channel) {
-        this.channel = channel;
-    }
+    public WebSocketHandler() {}
 
     @OnWebSocketConnect
     public void onConnect(Session session) throws Exception {
-        VelocityAPI.get()
-                .services().viewportService().orElseThrow()
-                .services().gatewayService().websocket().sessions(this.channel).add(session);
+        ViewportService viewportService = VelocityAPI.get().services().viewportService().orElseThrow();
+        ViewportSession viewportSession = ViewportSession.with(session.getUpgradeRequest().getHeader("Authentication").toCharArray());
+
+        if(viewportSession == null) {
+            session.close(500, "Unable to authenticate.");
+            return;
+        }
+        viewportService.services().gatewayService().websocket().join(viewportSession, null);
     }
 
     @OnWebSocketClose
-    public void onClose(Session session, int statusCode, String reason) {
-        VelocityAPI.get()
-                .services().viewportService().orElseThrow()
-                .services().gatewayService().websocket().sessions(this.channel).remove(session);
+    public void onClose(Session session, int statusCode, String reason) throws AuthenticationException {
+        ViewportSession viewportSession = ViewportSession.with(session.getUpgradeRequest().getHeader("Authentication").toCharArray());
+
+        if(viewportSession == null) return;
+
+        viewportSession.logout();
     }
 }

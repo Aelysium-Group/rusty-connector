@@ -1,13 +1,20 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
+import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.Role;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.User;
+import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.SyncedRole;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.SyncedUser;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ViewportConfig extends YAML {
     private static ViewportConfig config;
@@ -20,12 +27,12 @@ public class ViewportConfig extends YAML {
     private String mysql_password = "password";
     private String mysql_database = "RustyConnector";
 
-    private InetSocketAddress websocket_address;
+    private InetSocketAddress api_address;
+    private InetSocketAddress public_address;
+    private LiquidTimestamp public_afkExpiration;
 
-    private InetSocketAddress rest_address;
-
-    private List<Role> roles = new ArrayList<>();
-    private List<User> users = new ArrayList<>();
+    private List<SyncedRole> roles = new ArrayList<>();
+    private List<SyncedUser> users = new ArrayList<>();
 
     public boolean isEnabled() {
         return enabled;
@@ -45,16 +52,19 @@ public class ViewportConfig extends YAML {
     public String getMysql_database() {
         return mysql_database;
     }
-    public InetSocketAddress getWebsocket_address() {
-        return websocket_address;
+    public InetSocketAddress getApi_address() {
+        return api_address;
     }
-    public InetSocketAddress getRest_address() {
-        return rest_address;
+    public InetSocketAddress getPublic_address() {
+        return public_address;
     }
-    public List<Role> getRoles() {
+    public LiquidTimestamp getPublic_afkExpiration() {
+        return public_afkExpiration;
+    }
+    public List<SyncedRole> getRoles() {
         return roles;
     }
-    public List<User> getUsers() {
+    public List<SyncedUser> getUsers() {
         return users;
     }
 
@@ -79,7 +89,7 @@ public class ViewportConfig extends YAML {
      * Get the current config.
      * @return The config.
      */
-    public static DefaultConfig getConfig() {
+    public static ViewportConfig getConfig() {
         return config;
     }
 
@@ -94,15 +104,24 @@ public class ViewportConfig extends YAML {
     public void register() throws IllegalStateException {
         this.enabled = this.getNode(this.data, "enabled", Boolean.class);
 
-        this.websocket_address = AddressUtil.parseAddress(
-                this.getNode(this.data, "websocket.hostname", String.class) + ":" +
-                        this.getNode(this.data, "websocket.port", Integer.class)
+        this.api_address = AddressUtil.parseAddress(
+                this.getNode(this.data, "api.hostname", String.class) + ":" +
+                        this.getNode(this.data, "api.port", Integer.class)
         );
 
-        this.rest_address = AddressUtil.parseAddress(
-                this.getNode(this.data, "rest.hostname", String.class) + ":" +
-                        this.getNode(this.data, "rest.port", Integer.class)
+        this.public_address = AddressUtil.parseAddress(
+                this.getNode(this.data, "public.hostname", String.class) + ":" +
+                        this.getNode(this.data, "public.port", Integer.class)
         );
+        try {
+            LiquidTimestamp expiration = LiquidTimestamp.from(this.getNode(this.data, "public.afk-expiration", String.class));
+            if (expiration.compareTo(new LiquidTimestamp(30, TimeUnit.MINUTES)) < 0) {
+                this.public_afkExpiration = new LiquidTimestamp(30, TimeUnit.MINUTES);
+                VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("[public.afk-expiration] must be at least 30 Minutes."), NamedTextColor.YELLOW));
+            } else this.public_afkExpiration = expiration;
+        } catch (ParseException e) {
+            throw new IllegalStateException("You must provide a valid time value for [public.afk-expiration] in viewport.yml!");
+        }
 
         this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
         if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");

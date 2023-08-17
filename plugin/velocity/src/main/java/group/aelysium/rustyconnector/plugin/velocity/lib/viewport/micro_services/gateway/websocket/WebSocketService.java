@@ -1,29 +1,24 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket.event_factory.ViewportEvent;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket.event_factory.events.ServerChatEvent;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.ViewportSession;
 import org.eclipse.jetty.websocket.api.Session;
 
-import java.net.InetSocketAddress;
 import java.util.*;
 
-import static spark.Service.ignite;
-
 public class WebSocketService extends Service {
-    private Map<WebsocketChannel.Mapping, Vector<Session>> sessions = new HashMap<>();
+    private Map<ViewportSession, Class<? extends ViewportEvent>> sessions = Collections.synchronizedMap(new WeakHashMap<>());
     private spark.Service spark;
 
-    public WebSocketService(InetSocketAddress address) {
-        this.spark = ignite().ipAddress(address.getHostName()).port(address.getPort());
+    public WebSocketService(spark.Service spark) {
+        this.spark = spark;
 
-        this.sessions.put(WebsocketChannel.FAMILY_OVERVIEW, new Vector<>());
-        this.spark.webSocket(WebsocketChannel.FAMILY_OVERVIEW.toString(), new WebSocketHandler(WebsocketChannel.FAMILY_OVERVIEW));
-
-        this.sessions.put(WebsocketChannel.FAMILY_SPECIFIC, new Vector<>());
-        this.spark.webSocket(WebsocketChannel.FAMILY_SPECIFIC.toString(), new WebSocketHandler(WebsocketChannel.FAMILY_SPECIFIC));
-
-        this.sessions.put(WebsocketChannel.CHAT, new Vector<>());
-        this.spark.webSocket(WebsocketChannel.CHAT.toString(), new WebSocketHandler(WebsocketChannel.CHAT));
-        this.spark.init();
+        this.spark.webSocket("", new WebSocketHandler());
     }
 
     private static void enableCORS(spark.Service service) {
@@ -51,47 +46,82 @@ public class WebSocketService extends Service {
         });
     }
 
-    public Vector<Session> sessions(WebsocketChannel.Mapping channel) {
-        return this.sessions.get(channel);
+    public Set<ViewportSession> sessions() {
+        return this.sessions.keySet();
     }
 
-    public void publish(WebsocketChannel.Mapping channel, String message) {
-        if(this.sessions.get(channel).size() == 0) return;
+    public void join(ViewportSession session, Class<ViewportEvent> eventClass) {
+        this.sessions.put(session, eventClass);
+    }
 
-        this.sessions.get(channel).forEach(session -> {
+    public void leave(ViewportSession session) {
+        this.sessions.remove(session);
+    }
+
+    public void updateListening(ViewportSession session, Class<? extends ViewportEvent> eventClass) {
+        this.sessions.put(session, eventClass);
+    }
+
+    public List<ViewportSession> findListening(Class<? extends ViewportEvent> eventClass) {
+        List<Map.Entry<ViewportSession, Class<? extends ViewportEvent>>> matchingSessionMappings = this.sessions.entrySet().stream().filter(entry -> entry.getValue() == eventClass).toList();
+
+        List<ViewportSession> listeningSessions = new ArrayList<>();
+        for (Map.Entry<ViewportSession, Class<? extends ViewportEvent>> sessionMapping : matchingSessionMappings) {
+            listeningSessions.add(sessionMapping.getKey());
+        }
+
+        return listeningSessions;
+    }
+
+    /**
+     * Fire an event to all listening sessions.
+     * @param event The event to send.
+     */
+    public void fire(ViewportEvent event) {
+        List<Map.Entry<ViewportSession, Class<? extends ViewportEvent>>> matchingSessionMappings = this.sessions.entrySet().stream().filter(entry -> entry.getValue() == event.getClass()).toList();
+
+        for (Map.Entry<ViewportSession, Class<? extends ViewportEvent>> sessionMapping : matchingSessionMappings) {
+            Session session = sessionMapping.getKey().websocketClient().orElse(null);
+            if(session == null) {
+                this.sessions.remove(sessionMapping.getKey());
+                continue;
+            }
+
             try {
-                session.getRemote().sendString(message);
-            } catch (Exception ignore) {}
-        });
+                session.getRemote().sendString(event.toJsonPacket());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void kill() {
-        this.spark.stop();
+        this.sessions.forEach((key, value) -> {
+            try {
+                key.websocketClient().orElseThrow().close();
+            } catch (Exception ignore) {}
+        });
+        this.sessions.clear();
+        try {
+            this.spark.stop();
+        } catch (Exception ignore) {}
     }
 
-    public class WebsocketChannel {
-        public static Mapping FAMILY_OVERVIEW = new Mapping("/family", "FAMILY_OVERVIEW");
-
-        /**
-         * This mapping option must immediately be followed by the concatenated name of a family.
-         */
-        public static Mapping FAMILY_SPECIFIC = new Mapping("/family/", "FAMILY_SPECIFIC");
-        public static Mapping CHAT = new Mapping("/chat", "CHAT");
+    public class Events {
+        public static Mapping SERVER_CHAT_EVENT = new Mapping(ServerChatEvent.class, "SERVER_CHAT");
 
         public static List<Mapping> toList() {
             List<Mapping> list = new ArrayList<>();
-            list.add(FAMILY_OVERVIEW);
-            list.add(FAMILY_SPECIFIC);
-            list.add(CHAT);
+            list.add(SERVER_CHAT_EVENT);
 
             return list;
         }
 
-        public record Mapping (String id, String name) {
+        public record Mapping (Class<? extends ViewportEvent> clazz, String name) {
             @Override
             public String toString() {
-                return id;
+                return name;
             }
         }
     }

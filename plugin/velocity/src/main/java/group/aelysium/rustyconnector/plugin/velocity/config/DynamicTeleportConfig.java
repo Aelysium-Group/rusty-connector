@@ -121,7 +121,7 @@ public class DynamicTeleportConfig extends YAML {
                 if (expiration.equals("NEVER")) {
                     this.tpa_expiration = new LiquidTimestamp(5, TimeUnit.MINUTES);
                     VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes."), NamedTextColor.YELLOW));
-                } else this.tpa_expiration = new LiquidTimestamp(expiration);
+                } else this.tpa_expiration = LiquidTimestamp.from(expiration);
             } catch (ParseException e) {
                 throw new IllegalStateException("You must provide a valid time value for [tpa.expiration] in dynamic_teleport.yml!");
             }

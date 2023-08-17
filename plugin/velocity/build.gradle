@@ -7,6 +7,7 @@ dependencies {
     implementation "com.google.inject:guice:${project.guice_version}"
     implementation "club.minnced:discord-webhooks:${project.discord_version}"
     implementation "com.sparkjava:spark-core:${project.spark_version}"
+    implementation "at.favre.lib:bcrypt:${project.bcrypt_version}"
 
     // Dev Only
     shadow project(path: ':core', configuration: 'shadow')

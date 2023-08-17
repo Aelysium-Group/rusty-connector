@@ -2,27 +2,31 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_service
 
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.rest.endpoints.LoginEndpoint;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.Session;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.rest.endpoints.LogoutEndpoint;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.rest.endpoints.SwitchChannelEndpoint;
+import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket.WebSocketService;
 
 import java.net.InetSocketAddress;
 import java.util.*;
 
 import static spark.Service.ignite;
 
-public class RESTAPIService extends Service {
-    private Vector<Session> sessions = new Vector<>();
-    private spark.Service spark;
+public class APIService extends Service {
+    private final WebSocketService websocket;
+    private final spark.Service spark;
 
-    public RESTAPIService(InetSocketAddress address) {
+    public APIService(InetSocketAddress address) {
         this.spark = ignite();
-        this.spark.staticFiles.location("/viewport");
+        this.spark.ipAddress(address.getHostName()).port(address.getPort());
+
+        this.websocket = new WebSocketService(this.spark);
 
         {
-            this.spark.post("/login", new LoginEndpoint());
-        }
+            this.spark.post(Endpoints.LOGIN, new LoginEndpoint());
 
-        this.spark.ipAddress(address.getHostName()).port(address.getPort());
-        this.spark.init();
+            this.spark.get(Endpoints.LOGOUT, new LogoutEndpoint());
+            this.spark.get(Endpoints.SWITCH_WEBSOCKET_CHANNEL, new SwitchChannelEndpoint());
+        }
     }
 
     private static void enableCORS(spark.Service service) {
@@ -50,12 +54,30 @@ public class RESTAPIService extends Service {
         });
     }
 
-    public Vector<Session> sessions() {
-        return this.sessions;
+    public WebSocketService websocket() {
+        return this.websocket;
     }
 
     @Override
     public void kill() {
-        this.spark.stop();
+        this.websocket.kill();
+        try {
+            this.spark.stop();
+        } catch (Exception ignore) {}
+    }
+
+    public interface Endpoints {
+        String LOGIN = "/login";
+        String LOGOUT = "/logout";
+        String SWITCH_WEBSOCKET_CHANNEL = "/socket/:channel_id";
+
+        static List<String> toList() {
+            List<String> list = new ArrayList<>();
+            list.add(LOGIN);
+            list.add(LOGOUT);
+            list.add(SWITCH_WEBSOCKET_CHANNEL);
+
+            return list;
+        }
     }
 }

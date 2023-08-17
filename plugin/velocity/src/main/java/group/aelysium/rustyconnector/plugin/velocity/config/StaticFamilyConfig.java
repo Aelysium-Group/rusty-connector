@@ -102,7 +102,7 @@ public class StaticFamilyConfig extends YAML {
         try {
             String expiration = this.getNode(this.data, "consecutive-connections.home-server.expiration", String.class);
             if(expiration.equals("NEVER")) this.consecutiveConnections_homeServer_expiration = null;
-            else this.consecutiveConnections_homeServer_expiration = new LiquidTimestamp(expiration);
+            else this.consecutiveConnections_homeServer_expiration = LiquidTimestamp.from(expiration);
         } catch (ParseException e) {
             throw new IllegalStateException("You must provide a valid time value for [consecutive-connections.home-server.expiration] in your static family configs!");
         }

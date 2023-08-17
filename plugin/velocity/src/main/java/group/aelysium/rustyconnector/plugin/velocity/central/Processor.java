@@ -291,7 +291,11 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                         .setPassword(viewportConfig.getMysql_password())
                         .build();
 
-                GatewayService gatewayService = new GatewayService(viewportConfig.getWebsocket_address(), viewportConfig.getRest_address());
+                GatewayService.GatewaySettings settings = new GatewayService.GatewaySettings(
+                        viewportConfig.getPublic_afkExpiration()
+                );
+
+                GatewayService gatewayService = new GatewayService(viewportConfig.getPublic_address(), viewportConfig.getApi_address(), settings);
 
                 ViewportService service = new ViewportService.Builder()
                         .setMySQLService(builtMySQLService)
