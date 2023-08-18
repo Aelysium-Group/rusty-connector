@@ -1,4 +1,4 @@
-import { ViewportEvent } from "../../ViewportEvent";
+import { ViewportEvent } from "../../../lib/services/event_factory/ViewportEvent";
 
 export type CursorType = "default" | "text" | "deny";
 export class CursorChangeEvent extends ViewportEvent {

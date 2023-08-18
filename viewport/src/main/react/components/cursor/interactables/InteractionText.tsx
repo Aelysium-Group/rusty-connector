@@ -2,7 +2,7 @@ import useMeasure from "react-use-measure";
 import { ViewportServices } from "../../../lib/services/ViewportServices";
 import { useState } from "react";
 import { QueryMode, useScreen, useView } from "react-ui-breakpoints";
-import { CursorHoverEvent } from "../../../lib/services/event_factory/events/cursor/CursorHoverEvent";
+import { CursorHoverEvent } from "../events/CursorHoverEvent";
 
 type InteractionText = {
     children?: JSX.Element | JSX.Element[] | string;

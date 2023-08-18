@@ -59,4 +59,6 @@ jar {
     }
 
     from(files("LICENSE_rusty-connector"))
+
+    exclude("META-INF/*.RSA", "META-INF/*.DSA", "META-INF/*.SF")
 }

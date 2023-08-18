@@ -1,4 +1,4 @@
-import { ViewportEvent } from "../../ViewportEvent";
+import { ViewportEvent } from "../../../lib/services/event_factory/ViewportEvent";
 
 export class ContextEvent extends ViewportEvent {
     private static _empty = new ContextEvent(false, []);

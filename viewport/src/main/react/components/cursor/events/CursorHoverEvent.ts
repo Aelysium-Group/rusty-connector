@@ -1,5 +1,5 @@
 import { RectReadOnly } from "react-use-measure";
-import { ViewportEvent } from "../../ViewportEvent";
+import { ViewportEvent } from "../../../lib/services/event_factory/ViewportEvent";
 
 export type Radius = `${number}px` | `${number}rem` | `${number}%`;
 export class CursorHoverEvent extends ViewportEvent {

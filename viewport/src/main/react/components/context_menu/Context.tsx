@@ -1,7 +1,7 @@
-import { ViewportServices } from "../../../lib/services/ViewportServices";
-import { Icon, IconName } from "../../icons/Icon";
-import { TriggerEvent } from "../../../lib/services/event_factory/events/context_menu/triggers/TriggerEvent";
-import { ContextEvent } from "../../../lib/services/event_factory/events/context_menu/ContextEvent";
+import { ViewportServices } from "../../lib/services/ViewportServices";
+import { Icon, IconName } from "../icons/Icon";
+import { TriggerEvent } from "./events/triggers/TriggerEvent";
+import { ContextEvent } from "./events/ContextEvent";
 
 const eventFactory = ViewportServices.get().eventFactory();
 

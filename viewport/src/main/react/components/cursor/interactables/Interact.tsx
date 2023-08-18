@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 import { ViewportServices } from "../../../lib/services/ViewportServices";
-import { CursorChangeEvent } from "../../../lib/services/event_factory/events/cursor/CursorChangeEvent";
+import { CursorChangeEvent } from "../events/CursorChangeEvent";
 
 type TextChildren = JSX.Element | JSX.Element[] | string | number;
 const eventFactory = ViewportServices.get().eventFactory();

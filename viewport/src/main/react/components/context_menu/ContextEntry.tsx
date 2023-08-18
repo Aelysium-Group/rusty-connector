@@ -1,6 +1,6 @@
-import { ViewportServices } from "../../../lib/services/ViewportServices";
-import { TriggerEvent } from "../../../lib/services/event_factory/events/context_menu/triggers/TriggerEvent";
-import { Icon, IconName } from "../../icons/Icon";
+import { ViewportServices } from "../../lib/services/ViewportServices";
+import { TriggerEvent } from "./events/triggers/TriggerEvent";
+import { Icon, IconName } from "../icons/Icon";
 
 type ContextMenuOption = {
     icon: IconName;

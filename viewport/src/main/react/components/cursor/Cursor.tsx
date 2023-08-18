@@ -3,16 +3,17 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { QueryMode, useScreen, useView } from "react-ui-breakpoints";
 import { Coordinate } from "../../lib/modals/Coordinate";
 import { ViewportServices } from "../../lib/services/ViewportServices";
-import { RectReadOnly } from "react-use-measure";
-import { CursorChangeEvent, CursorType } from "../../lib/services/event_factory/events/cursor/CursorChangeEvent";
-import { CursorHoverEvent } from "../../lib/services/event_factory/events/cursor/CursorHoverEvent";
-import { ContextEvent } from "../../lib/services/event_factory/events/context_menu/ContextEvent";
+import useMeasure, { RectReadOnly } from "react-use-measure";
+import { CursorChangeEvent, CursorType } from "./events/CursorChangeEvent";
+import { ContextEvent } from "../context_menu/events/ContextEvent";
 import { ViewportEvent } from "../../lib/services/event_factory/ViewportEvent";
 import { EventListener } from "../../lib/services/event_factory/EventListener";
+import { CursorHoverEvent } from "./events/CursorHoverEvent";
 
 const eventFactory = ViewportServices.get().eventFactory();
 
 export const Cursor = () => {
+    const [ ref, bounds ] = useMeasure();
     const [ mouseCoordinate, setMouseCoordinate ] = useState(new Coordinate(0, 0));
     const [ type, setType ]: [ CursorType, Dispatch<SetStateAction<CursorType>> ] = useState("default" as CursorType);
 
@@ -22,13 +23,12 @@ export const Cursor = () => {
     const [ hovered, setHovered ] = useState(false);
 
 
+    const [ contextCoordinate, setContextCoordinate ] = useState(new Coordinate(0, 0));
     const [ contextContent, setContextContent ] = useState([] as JSX.Element[]);
     const [ context, setContext ] = useState(false);
 
     
     const mouseMove = (event: MouseEvent) => {
-        if(context) return;
-        
         setMouseCoordinate(
             new Coordinate(
                 event.clientX - 10,
@@ -38,7 +38,7 @@ export const Cursor = () => {
     }
 
     const contextMenu = (event: ContextEvent) => {
-        console.log(event.open);
+        if(event.open) setContextCoordinate(mouseCoordinate);
         setContext(event.open);
         setContextContent(event.children);
     }
@@ -72,7 +72,7 @@ export const Cursor = () => {
             window.removeEventListener("contextmenu", event => event.preventDefault());
             listeners.forEach(listener => eventFactory.off(listener));
         }
-    }, [mouseCoordinate, context]);
+    }, [mouseCoordinate, context, bounds]);
 
     const render = () => {
         const variants = {
@@ -82,12 +82,12 @@ export const Cursor = () => {
                 borderRadius: "1rem",
                 transition: {
                     type: "spring",
-                    damping: 50,
+                    damping: 45,
                     stiffness: 500
                 }
             },
             context: {
-                x: mouseCoordinate.x - 150, y: mouseCoordinate.y - 50,
+                x: contextCoordinate.x - 150, y: contextCoordinate.y - 25,
                 width: "300px", height: "auto",
                 borderRadius: "20px",
                 transition: {
@@ -132,7 +132,7 @@ export const Cursor = () => {
                     {context ?
                         <motion.div
                             key={0}
-                            className="fixed bg-neutral-600/70 cursor-glass z-40"
+                            className="fixed bg-neutral-600/70 frosted-glass-light z-40"
                             initial={{
                                 x: 0,
                                 y: 0,
@@ -160,12 +160,23 @@ export const Cursor = () => {
                         />
                     : <></>}
                     <motion.div
-                    key={1}
-                        className={`overflow-hidden fixed top-0 left-0 z-40 bg-neutral-900/30 cursor-glass w-20px h-20px ${ context ? "" : "pointer-events-none"}`}
+                        key={1}
+                        ref={ref}
+                        className={`overflow-hidden fixed top-0 left-0 z-40 cursor-glass w-20px h-20px ${ context ? "bg-neutral-800/30" : "pointer-events-none"}`}
                         variants={variants}
                         animate={ getVariant() }
                         onMouseLeave={() => eventFactory.fire(new ContextEvent(false, []))}
                     >
+                        {
+                            context || hovered ?
+                        <div className="relative">
+                            <div
+                                className="absolute white-radial-gradient aspect-square w-400px opacity-20"
+                                style={{ left: `${(mouseCoordinate.x - bounds.x) - 200}px`, top: `${(mouseCoordinate.y - bounds.y) - 200}px` }}
+                            />
+                        </div>
+                        : <></>
+                        }
                         {context ?
                         <>
                             <div className="p-10px">
