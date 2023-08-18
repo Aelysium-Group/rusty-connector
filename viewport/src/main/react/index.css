@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.frosted-glass {
+    backdrop-filter: blur(12px);
+}
+.cursor-glass {
+    backdrop-filter: blur(5px);
+}
