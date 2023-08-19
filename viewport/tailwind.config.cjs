@@ -8,7 +8,8 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                sneakers: ['sneakers-pro', 'Arial', 'Helvetica', 'sans-serif'],
+                forma: ["forma-djr-display", 'Arial', 'Helvetica', 'sans-serif'],
+                darkmode: ["darkmode-off", 'Arial', 'Helvetica', 'sans-serif'],
             },
             fontSize: {
               '2xs': '0.625rem',

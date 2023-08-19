@@ -120,7 +120,7 @@ export const Dynav = () => {
                     {opened ?
                         <motion.div
                             key={0}
-                            className="fixed bg-neutral-600/70 frosted-glass-light z-40"
+                            className="fixed inset-0 bg-neutral-600/70 frosted-glass-light z-40"
                             initial={{
                                 x: 0,
                                 y: 0,
@@ -154,7 +154,7 @@ export const Dynav = () => {
                         variants={variants}
                         animate={ getVariant() }
                         initial={"default"}
-                        onClick={ e => {
+                        onTap={ e => {
                             if(opened) return;
                             setOpened(true);
                             cursorHover(false);

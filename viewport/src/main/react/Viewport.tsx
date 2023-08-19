@@ -15,8 +15,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
         <SkeletonTheme baseColor='#262626' highlightColor='#737373'>
             <Dynav />
-            <Cursor />
             <PageRouter />
+            <Cursor />
         </SkeletonTheme>
     </BrowserRouter>
   </React.StrictMode>,

@@ -10,3 +10,11 @@ export const InterfaceColor = {
     WHITE: "#D4D4D4",   // "bg-neutral-300"
 } as const;
 export type InterfaceColor = typeof InterfaceColor[keyof typeof InterfaceColor];
+
+export type Color = `#${string}`;
+
+export type RGBColor = {
+    r: number;
+    g: number;
+    b: number;
+}

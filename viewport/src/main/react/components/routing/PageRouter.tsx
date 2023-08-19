@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, useLocation } from "react-router-dom";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { NetworkOverview } from '../pages/NetworkOverview';
+import { FamilySpecific } from '../pages/family_specific/FamilySpecific';
 
 interface PageRouter {
 }
@@ -38,6 +39,7 @@ export const PageRouter = (props: PageRouter) => {
                     timeout={1000}>
                     <Routes location={location}>
                         <Route path='*'        element={<NetworkOverview />}/>
+                        <Route path='family/:family_id'    element={<FamilySpecific />}/>
                         {/*
                         <Route path='*'        element={<Page404 />}/>
                         <Route path='login'    element={<LoginPage />}/>
