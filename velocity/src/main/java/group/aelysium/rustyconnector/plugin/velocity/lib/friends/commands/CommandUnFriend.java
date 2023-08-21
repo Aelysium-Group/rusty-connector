@@ -17,6 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.io.SyncFailedException;
 import java.util.List;
 
 public final class CommandUnFriend {
@@ -77,19 +78,27 @@ public final class CommandUnFriend {
                             }
 
                             String username = context.getArgument("username", String.class);
-                            Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
-
-                            if(targetPlayer == null)
-                                return closeMessage(player, Component.text(username + " doesn't seem to exist!", NamedTextColor.RED));
-
                             try {
-                                if(friendsService.removeFriend(player, targetPlayer))
-                                    return closeMessage(player, Component.text("You are no longer friends with "+username, NamedTextColor.GREEN));
-                            } catch (IllegalStateException e) {
-                                return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
-                            } catch (Exception ignore) {}
+                                FakePlayer targetPlayer = api.services().playerService().orElseThrow().findPlayer(username);
 
-                            return closeMessage(player, Component.text("There was an issue unfriending "+username, NamedTextColor.RED));
+                                if(friendsService.areFriends(FakePlayer.from(player), targetPlayer))
+                                    return closeMessage(player, Component.text(username + " isn't your friend!", NamedTextColor.RED));
+
+                                if(targetPlayer == null)
+                                    return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
+
+                                try {
+                                    if (friendsService.removeFriend(FakePlayer.from(player), targetPlayer))
+                                        return closeMessage(player, Component.text("You are no longer friends with " + username, NamedTextColor.GREEN));
+                                } catch (IllegalStateException e) {
+                                    return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
+                                } catch (Exception ignore) {}
+                            } catch (SyncFailedException e) {
+                                e.printStackTrace();
+                                return closeMessage(player, Component.text("There was an internal error while trying to find that player!", NamedTextColor.RED));
+                            }
+
+                            return closeMessage(player, Component.text("There was an issue unfriending " + username, NamedTextColor.RED));
                         })
                 )
                 .build();

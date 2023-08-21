@@ -159,10 +159,10 @@ public class FriendsDataEnclaveService extends Service {
         return Optional.empty();
     }
 
-    public void removeFriend(Player player1, Player player2) throws SQLException {
+    public void removeFriend(FakePlayer player1, FakePlayer player2) throws SQLException {
         FriendMapping mapping = new FriendMapping(player1, player2);
         try {
-            this.mySQLService.removeFriend(player1, player2);
+            this.mySQLService.removeFriend(mapping);
         } catch (Exception e) {
             e.printStackTrace();
         }

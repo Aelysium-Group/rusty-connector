@@ -113,13 +113,11 @@ public class FriendsMySQLService extends MySQLService {
         this.close();
     }
 
-    public void removeFriend(Player player1, Player player2) throws SQLException {
-        FriendMapping orderedMapping = new FriendMapping(player1, player2);
-
+    public void removeFriend(FriendMapping mapping) throws SQLException {
         this.connect();
         PreparedStatement statement = this.prepare(DELETE_FRIEND);
-        statement.setString(1, orderedMapping.player1().uuid().toString());
-        statement.setString(2, orderedMapping.player2().uuid().toString());
+        statement.setString(1, mapping.player1().uuid().toString());
+        statement.setString(2, mapping.player2().uuid().toString());
 
         this.execute(statement);
 

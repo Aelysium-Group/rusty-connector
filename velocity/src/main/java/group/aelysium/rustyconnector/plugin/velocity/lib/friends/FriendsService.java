@@ -135,7 +135,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         return new FriendMapping(fakeSender, target);
     }
 
-    public boolean removeFriend(Player sender, Player target) {
+    public boolean removeFriend(FakePlayer sender, FakePlayer target) {
         try {
             this.services().dataEnclave().removeFriend(sender, target);
             return true;
