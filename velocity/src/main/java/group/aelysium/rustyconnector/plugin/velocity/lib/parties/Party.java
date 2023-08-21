@@ -21,6 +21,7 @@ public class Party {
         this.players = new Vector<>(maxSize);
         this.maxSize = maxSize;
         this.leader = host;
+        this.players.add(host);
         this.server = new WeakReference<>(server);
     }
 
