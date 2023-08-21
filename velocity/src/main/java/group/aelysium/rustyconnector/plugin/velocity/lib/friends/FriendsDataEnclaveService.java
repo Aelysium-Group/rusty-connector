@@ -102,19 +102,11 @@ public class FriendsDataEnclaveService extends Service {
 
     /**
      * Check if two players are friends.
-     * If the players are found as friends in the cache, returns `true`.
-     * If not, search MySQL and return whether they are friends.
      * @param player1 The first player.
      * @param player2 The second player.
-     * @return `true` If the two players are friends in the cache, or on MySQL.
+     * @return `true` If the two players are friends.
      */
     public boolean areFriends(FakePlayer player1, FakePlayer player2) throws RuntimeException {
-        if (
-                this.getPlayersCacheEntry(player1).stream().anyMatch(friendMapping -> friendMapping.friendOf(player1).equals(player2)) ||
-                this.getPlayersCacheEntry(player2).stream().anyMatch(friendMapping -> friendMapping.friendOf(player2).equals(player1))
-        )
-            return true;
-
         return this.mySQLService.areFriends(player1, player2);
     }
 
