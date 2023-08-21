@@ -2,16 +2,15 @@ import { useCallback, useState } from "react";
 import Particles from "react-particles";
 import { loadSlim } from "tsparticles-slim";
 import { Engine } from "tsparticles-engine";
-import { Gradient4Point } from "../../gradient/Gradient4Point";
-import { RGBColor } from "../../../lib/InterfaceColor";
 import { motion } from "framer-motion";
 import Chart from "react-google-charts";
 import { clickable } from "../../cursor/interactables/Clickable";
 import { Icon, IconName } from "../../icons/Icon";
 import useMeasure from "react-use-measure";
+import { HealthIndicator } from "./HealthIndicator";
 
 type ParticleHolder = {
-    colors: RGBColor[];
+    familyHealth: number[];
     className: string;
     balancerLevel: number;
     servers: ServerPartial[];
@@ -139,6 +138,9 @@ export const ServersHolder = (props: ParticleHolder) => {
                                         fullScreen: false,
                                         fps_limit: 60,
                                         pauseOnBlur: true,
+                                        background: {
+                                            color: "#828282"
+                                        },
                                         interactivity: {
                                             events: {
                                                 onHover: {
@@ -220,13 +222,12 @@ export const ServersHolder = (props: ParticleHolder) => {
                                         },
                                     }}
                                     />
-                                <div className="absolute inset-0">
-                                    <div className="w-full h-full mix-blend-lighten">
-                                        <Gradient4Point />
-                                    </div>
-                                    <div className="w-full h-full opacity-25">
-                                        <Gradient4Point />
-                                    </div>
+                                <div className="absolute inset-0 w-full h-full mix-blend-darken">
+                                    <HealthIndicator
+                                             serverHealth={props.familyHealth[0]}
+                                             playerHealth={props.familyHealth[1]}
+                                             stressHealth={props.familyHealth[2]}
+                                        loadBalanceHealth={props.familyHealth[3]}  />
                                 </div>
                                 <div className={`absolute inset-0 bg-neutral-100/50 frosted-glass w-full h-full duration-500 ${viewColors ? "opacity-100" : "opacity-0"}`}>
                                     <div className="relative w-400px aspect-square m-50px p-30px">
@@ -234,16 +235,13 @@ export const ServersHolder = (props: ParticleHolder) => {
                                             <div className="col-span-1 bg-amber-400/80 shadow-inset-md w-50px aspect-square rounded" />
                                             <span className="col-span-4 text-sm">Family is over-saturated with empty servers</span>
                                             
-                                            <div className="col-span-1 bg-cyan-300/80 shadow-inset-md w-50px aspect-square rounded" />
-                                            <span className="col-span-4 text-sm">Family has a balanced player-to-server ratio</span>
-                                            
                                             <div className="col-span-1 bg-rose-500/80 shadow-inset-md w-50px aspect-square rounded" />
                                             <span className="col-span-4 text-sm">Family is over-saturated with players</span>
                                             
                                             <div className="col-span-1 bg-green-400/80 shadow-inset-md w-50px aspect-square rounded" />
                                             <span className="col-span-4 text-sm">Family has multiple servers with unhealthy levels of compute stress</span>
                                             
-                                            <div className="col-span-1 bg-purple-400/80 shadow-inset-md w-50px aspect-square rounded" />
+                                            <div className="col-span-1 bg-cyan-300/80 shadow-inset-md w-50px aspect-square rounded" />
                                             <span className="col-span-4 text-sm">Family is load balancing more than what's appropriate for the number of servers</span>
                                         </div>
                                     </div>

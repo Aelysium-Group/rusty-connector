@@ -11,7 +11,7 @@ export const InterfaceColor = {
 } as const;
 export type InterfaceColor = typeof InterfaceColor[keyof typeof InterfaceColor];
 
-export type Color = `#${string}`;
+export type HEXColor = `#${string}`;
 
 export type RGBColor = {
     r: number;
