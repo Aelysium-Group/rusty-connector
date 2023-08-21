@@ -77,6 +77,11 @@ public class Party {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
         this.players.remove(player);
 
+        if(this.isEmpty()) { // This was the last member of the party
+            VelocityAPI.get().services().partyService().orElseThrow().disband(this);
+            return;
+        }
+
         this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
 
         if(player.equals(this.leader)) {
@@ -84,8 +89,6 @@ public class Party {
             this.broadcast(Component.text(this.leader.getUsername()+" is the new party leader!", NamedTextColor.YELLOW));
         }
 
-        if(this.isEmpty())
-            VelocityAPI.get().services().partyService().orElseThrow().disband(this);
     }
 
     public void broadcast(Component message) {
