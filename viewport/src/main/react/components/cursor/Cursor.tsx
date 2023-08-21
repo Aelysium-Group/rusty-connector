@@ -162,7 +162,7 @@ export const Cursor = () => {
                     <motion.div
                         key={1}
                         ref={ref}
-                        className={`overflow-hidden fixed top-0 left-0 z-40 cursor-glass w-20px h-20px ${ context ? "bg-neutral-800/30" : "pointer-events-none"}`}
+                        className={`overflow-hidden fixed top-0 left-0 z-40 cursor-glass w-20px h-20px ${ context ? "bg-neutral-800/30 cursor-auto" : "pointer-events-none"}`}
                         variants={variants}
                         animate={ getVariant() }
                         onMouseLeave={() => eventFactory.fire(new ContextEvent(false, []))}

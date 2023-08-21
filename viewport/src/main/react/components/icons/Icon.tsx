@@ -16,13 +16,18 @@ export const IconName = {
     CLOSE: "close",
     
     TRANSFER: "transfer",
+    
+    SERVER: "server",
 } as const;
 export type IconName = typeof IconName[keyof typeof IconName];
 
-type Icon = {
-    className?: string;
+type Icon = JSX.IntrinsicElements["div"] & {
     iconName: IconName;
+    inverted?: boolean
 }
-export const Icon = (props: Icon) => (
-   <div className={`${props.className} bg-no-repeat bg-center bg-cover`} style={{backgroundImage: `url(./icons/${props.iconName}.svg)`}}></div>
+export const Icon = ({iconName, inverted, children, ...rest }: Icon) => (
+   <div
+   {...rest}
+    className={`${rest.className} bg-no-repeat bg-center bg-cover ${ inverted ? "invert" : ""}`}
+    style={{backgroundImage: `url(../../src/main/resources/icons/${iconName}.svg)`}} />
 )

@@ -81,7 +81,7 @@ export const Dynav = () => {
 
         const variants = {
             default: {
-                x: `calc(50vw - ${100 * 0.5}px)`, bottom: "50px",
+                x: `calc(50vw - ${140 * 0.5}px)`, bottom: "50px",
                 width: "120px", height: "40px",
                 margin: "10px",
                 transition: {
