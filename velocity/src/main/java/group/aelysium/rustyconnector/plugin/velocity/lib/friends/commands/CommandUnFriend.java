@@ -81,7 +81,7 @@ public final class CommandUnFriend {
                             try {
                                 FakePlayer targetPlayer = api.services().playerService().orElseThrow().findPlayer(username);
 
-                                if(friendsService.areFriends(FakePlayer.from(player), targetPlayer))
+                                if(!friendsService.areFriends(FakePlayer.from(player), targetPlayer))
                                     return closeMessage(player, Component.text(username + " isn't your friend!", NamedTextColor.RED));
 
                                 if(targetPlayer == null)
