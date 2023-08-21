@@ -118,3 +118,4 @@ buildNumber.properties
 run/
 
 node_modules/
+bin/
