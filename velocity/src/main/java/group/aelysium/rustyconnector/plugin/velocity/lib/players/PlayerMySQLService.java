@@ -19,7 +19,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerMySQLService extends MySQLService {
-    private static final String FIND_PLAYER = "SELECT * FROM players WHERE uuid = ?;";
+    private static final String FIND_PLAYER_UUID = "SELECT * FROM players WHERE uuid = ?;";
+    private static final String FIND_PLAYER_USERNAME = "SELECT * FROM players WHERE username = ? LIMIT 1;";
     private static final String ADD_PLAYER = "REPLACE INTO players (uuid, username) VALUES(?, ?);";
 
     private PlayerMySQLService(DataSource dataSource) {
@@ -42,13 +43,35 @@ public class PlayerMySQLService extends MySQLService {
 
         try {
             this.connect();
-            PreparedStatement statement = this.prepare(FIND_PLAYER);
+            PreparedStatement statement = this.prepare(FIND_PLAYER_UUID);
             statement.setString(1, uuid.toString());
 
             ResultSet result = this.executeQuery(statement);
             if(!result.next()) return Optional.empty();
 
             String username = result.getString("username");
+
+            this.close();
+            return Optional.of(new FakePlayer(uuid, username));
+        } catch (Exception e) {
+            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<FakePlayer> resolveUsername(String username) {
+        VelocityAPI api = VelocityAPI.get();
+
+        try {
+            this.connect();
+            PreparedStatement statement = this.prepare(FIND_PLAYER_USERNAME);
+            statement.setString(1, username);
+
+            ResultSet result = this.executeQuery(statement);
+            if(!result.next()) return Optional.empty();
+
+            UUID uuid = UUID.fromString(result.getString("uuid"));
 
             this.close();
             return Optional.of(new FakePlayer(uuid, username));

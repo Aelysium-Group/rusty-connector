@@ -82,10 +82,10 @@ public class FriendsDataEnclaveService extends Service {
      * @return A list of friends.
      * @throws SQLException If there was an issue.
      */
-    public Optional<List<FriendMapping>> findFriends(Player player, boolean forcePull) {
+    public Optional<List<FriendMapping>> findFriends(FakePlayer player, boolean forcePull) {
         if(!forcePull)
             try {
-                return Optional.of(this.getPlayersCacheEntry(FakePlayer.from(player)));
+                return Optional.of(this.getPlayersCacheEntry(player));
             } catch (Exception ignore) {}
 
         try {
@@ -124,15 +124,15 @@ public class FriendsDataEnclaveService extends Service {
      * @return The number of friends a player has.
      * @throws SQLException If there was an issue.
      */
-    public Optional<Integer> getFriendCount(Player player) {
+    public Optional<Integer> getFriendCount(FakePlayer player) {
         try {
-            return Optional.of(this.getPlayersCacheEntry(FakePlayer.from(player)).size());
+            return Optional.of(this.getPlayersCacheEntry(player).size());
         } catch (Exception ignore) {}
 
         try {
             List<FriendMapping> mappings = this.mySQLService.findFriends(player).orElseThrow();
             Long snowflake = this.cache.put(mappings);
-            this.players.put(FakePlayer.from(player), snowflake);
+            this.players.put(player, snowflake);
 
             return Optional.of(mappings.size());
         } catch (Exception e) {
@@ -142,11 +142,11 @@ public class FriendsDataEnclaveService extends Service {
         return Optional.empty();
     }
 
-    public Optional<FriendMapping> addFriend(Player player1, Player player2) throws SQLException {
+    public Optional<FriendMapping> addFriend(FakePlayer player1, FakePlayer player2) throws SQLException {
         try {
             FriendMapping mapping = new FriendMapping(player1, player2);
             try {
-                 this.mySQLService.addFriend(player1, player2);
+                 this.mySQLService.addFriends(mapping);
             } catch (SQLIntegrityConstraintViolationException ignore) {}
 
             putMapping(mapping);

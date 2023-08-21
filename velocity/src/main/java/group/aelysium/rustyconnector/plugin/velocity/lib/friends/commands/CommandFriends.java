@@ -16,9 +16,11 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.io.SyncFailedException;
 import java.util.List;
 
 public final class CommandFriends {
@@ -79,15 +81,20 @@ public final class CommandFriends {
                                 }
 
                                 String username = context.getArgument("username", String.class);
-                                Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
+                                try {
+                                    FakePlayer targetPlayer = api.services().playerService().orElseThrow().findPlayer(username);
 
-                                if(friendsService.areFriends(player, targetPlayer))
-                                    return closeMessage(player, Component.text(username + " is already your friend!", NamedTextColor.RED));
+                                    if(friendsService.areFriends(FakePlayer.from(player), targetPlayer))
+                                        return closeMessage(player, Component.text(username + " is already your friend!", NamedTextColor.RED));
 
-                                if(targetPlayer == null)
-                                    return closeMessage(player, Component.text(username + " isn't available to send requests to!", NamedTextColor.RED));
+                                    if(targetPlayer == null)
+                                        return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
 
-                                friendsService.sendRequest(player, targetPlayer);
+                                    friendsService.sendRequest(player, targetPlayer);
+                                } catch (SyncFailedException e) {
+                                    e.printStackTrace();
+                                    return closeMessage(player, Component.text("There was an internal error while trying to find that player!", NamedTextColor.RED));
+                                }
 
                                 return Command.SINGLE_SUCCESS;
                             })
@@ -113,7 +120,7 @@ public final class CommandFriends {
                                     if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                                     try {
-                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(player);
+                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(FakePlayer.from(player));
 
                                         if(requests.size() == 0) {
                                             builder.suggest("You have no pending friend requests!");
@@ -121,7 +128,7 @@ public final class CommandFriends {
                                         }
 
                                         requests.forEach(invite -> {
-                                            builder.suggest(invite.sender().getUsername());
+                                            builder.suggest(invite.sender().username());
                                         });
 
                                         return builder.buildFuture();

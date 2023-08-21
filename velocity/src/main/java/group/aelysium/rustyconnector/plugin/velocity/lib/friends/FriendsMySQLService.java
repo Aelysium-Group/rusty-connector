@@ -48,15 +48,15 @@ public class FriendsMySQLService extends MySQLService {
      * @return A list of friends.
      * @throws SQLException If there was an issue.
      */
-    public Optional<List<FriendMapping>> findFriends(Player player) {
+    public Optional<List<FriendMapping>> findFriends(FakePlayer player) {
         VelocityAPI api = VelocityAPI.get();
         PlayerService playerService = api.services().playerService().orElseThrow();
 
         try {
             this.connect();
             PreparedStatement statement = this.prepare(FIND_FRIENDS);
-            statement.setString(1, player.getUniqueId().toString());
-            statement.setString(2, player.getUniqueId().toString());
+            statement.setString(1, player.uuid().toString());
+            statement.setString(2, player.uuid().toString());
 
             ResultSet result = this.executeQuery(statement);
 
@@ -102,13 +102,11 @@ public class FriendsMySQLService extends MySQLService {
         return false;
     }
 
-    public void addFriend(Player player1, Player player2) throws SQLException {
-        FriendMapping orderedMapping = new FriendMapping(player1, player2);
-
+    public void addFriends(FriendMapping mapping) throws SQLException {
         this.connect();
         PreparedStatement statement = this.prepare(ADD_FRIEND);
-        statement.setString(1, orderedMapping.player1().uuid().toString());
-        statement.setString(2, orderedMapping.player2().uuid().toString());
+        statement.setString(1, mapping.player1().uuid().toString());
+        statement.setString(2, mapping.player2().uuid().toString());
 
         this.execute(statement);
 
