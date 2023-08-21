@@ -89,7 +89,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
 
         return requests;
     }
-    public Optional<FriendRequest> findRequest(Player target, Player sender) {
+    public Optional<FriendRequest> findRequest(FakePlayer target, FakePlayer sender) {
         Optional<Map.Entry<Long, FriendRequest>> entry = this.friendRequests.asMap().entrySet().stream().filter(invite -> invite.getValue().target().equals(target) && invite.getValue().sender().equals(sender)).findFirst();
         return entry.map(Map.Entry::getValue);
     }

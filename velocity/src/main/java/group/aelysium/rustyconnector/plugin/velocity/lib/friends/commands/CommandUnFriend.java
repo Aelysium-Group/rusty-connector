@@ -95,7 +95,7 @@ public final class CommandUnFriend {
                                 } catch (Exception ignore) {}
                             } catch (SyncFailedException e) {
                                 e.printStackTrace();
-                                return closeMessage(player, Component.text("There was an internal error while trying to find that player!", NamedTextColor.RED));
+                                return closeMessage(player, Component.text("There was an internal error while trying to find "+username+"!", NamedTextColor.RED));
                             }
 
                             return closeMessage(player, Component.text("There was an issue unfriending " + username, NamedTextColor.RED));

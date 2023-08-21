@@ -93,7 +93,7 @@ public final class CommandFriends {
                                     friendsService.sendRequest(player, targetPlayer);
                                 } catch (SyncFailedException e) {
                                     e.printStackTrace();
-                                    return closeMessage(player, Component.text("There was an internal error while trying to find that player!", NamedTextColor.RED));
+                                    return closeMessage(player, Component.text("There was an internal error while trying to find "+username+"!", NamedTextColor.RED));
                                 }
 
                                 return Command.SINGLE_SUCCESS;
@@ -164,22 +164,29 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
-                                            if(senderPlayer == null)
-                                                return closeMessage(player, Component.text(username + " doesn't seem to exist on this server! (How did this happen?)", NamedTextColor.RED));
-
                                             try {
-                                                FriendRequest invite = friendsService.findRequest(player, senderPlayer).orElse(null);
-                                                if(invite == null) throw new NoOutputException();
+                                                FakePlayer senderPlayer = api.services().playerService().orElseThrow().findPlayer(username);
+
+                                                if(senderPlayer == null)
+                                                    return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
 
                                                 try {
-                                                    invite.ignore();
-                                                } catch (Exception ignore) {
-                                                    friendsService.closeInvite(invite);
-                                                }
+                                                    FriendRequest invite = friendsService.findRequest(FakePlayer.from(player), senderPlayer).orElse(null);
+                                                    if (invite == null) throw new NoOutputException();
 
-                                                return closeMessage(player, Component.text("Ignored the friend request from "+username, NamedTextColor.GREEN));
-                                            } catch (Exception ignore) {}
+                                                    try {
+                                                        invite.ignore();
+                                                    } catch (Exception ignore) {
+                                                        friendsService.closeInvite(invite);
+                                                    }
+
+                                                    return closeMessage(player, Component.text("Ignored the friend request from " + username, NamedTextColor.GREEN));
+                                                } catch (Exception ignore) {
+                                                }
+                                            } catch (SyncFailedException e) {
+                                                e.printStackTrace();
+                                                return closeMessage(player, Component.text("There was an internal error while trying to find "+username+"!", NamedTextColor.RED));
+                                            }
 
                                             return closeMessage(player, Component.text("There was an issue ignoring the friend request from "+username, NamedTextColor.RED));
                                         })
@@ -197,20 +204,26 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
-                                            if(senderPlayer == null)
-                                                return closeMessage(player, Component.text(username + " doesn't seem to exist on this server! (How did this happen?)", NamedTextColor.RED));
-
-                                            FriendRequest invite = friendsService.findRequest(player, senderPlayer).orElse(null);
-                                            if(invite == null)
-                                                return closeMessage(player, Component.text("The friend request from " + senderPlayer.getUsername() + " has expired!", NamedTextColor.RED));
-
                                             try {
-                                                invite.accept();
-                                            } catch (IllegalStateException e) {
-                                                return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
-                                            } catch (Exception ignore) {
-                                                return closeMessage(player, Component.text("There was an issue accepting that friend request!", NamedTextColor.RED));
+                                                FakePlayer senderPlayer = api.services().playerService().orElseThrow().findPlayer(username);
+
+                                                if (senderPlayer == null)
+                                                    return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
+
+                                                FriendRequest invite = friendsService.findRequest(FakePlayer.from(player), senderPlayer).orElse(null);
+                                                if (invite == null)
+                                                    return closeMessage(player, Component.text("The friend request from " + senderPlayer.username() + " has expired!", NamedTextColor.RED));
+
+                                                try {
+                                                    invite.accept();
+                                                } catch (IllegalStateException e) {
+                                                    return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
+                                                } catch (Exception ignore) {
+                                                    return closeMessage(player, Component.text("There was an issue accepting that friend request!", NamedTextColor.RED));
+                                                }
+                                            } catch (SyncFailedException e) {
+                                                e.printStackTrace();
+                                                return closeMessage(player, Component.text("There was an internal error while trying to find "+username+"!", NamedTextColor.RED));
                                             }
 
                                             return Command.SINGLE_SUCCESS;
