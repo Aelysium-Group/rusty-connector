@@ -496,6 +496,8 @@ public final class CommandParty {
                                         });
 
                                         context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
+                                    } catch (IllegalStateException e) {
+                                        return closeMessage(player, Component.text(targetPlayer.getUsername() + " isn't in this party, they can't be made leader!", NamedTextColor.RED));
                                     } catch (Exception e) {
                                         return closeMessage(player, Component.text(username + "There was an issue doing that!", NamedTextColor.RED));
                                     }
