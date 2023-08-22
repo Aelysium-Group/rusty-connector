@@ -1,7 +1,12 @@
+import { QueryMode, useScreen, useView } from "react-ui-breakpoints";
 import { Player } from "../../../lib/entities/Player";
-import { OverviewHolder } from "./OverviewHolder";
-import { PlayersHolder } from "./PlayersHolder";
-import { ServersHolder } from "./ServersHolder";
+import { Players } from "./sub/Players";
+import { Servers } from "./sub/Servers";
+import { Icon, IconName } from "../../icons/Icon";
+import { clickable } from "../../cursor/interactables/Clickable";
+import { useState } from 'react';
+import { LoadBalancerSettings, Overview } from "./sub/Overview";
+import { Header } from "./sub/Header";
 
 const servers = [
     {name: "server1", id: "gdssfgd"},
@@ -35,27 +40,113 @@ const players = [
     new Player("1e18d5ff643d45c8b50943b8461d8614", "deadmau5"),
 ];
 
-const familyHealth = [ 0, 0, 0, 0];
+const familyHealth = [ 0, 0, 0, 0 ];
 
 export const FamilySpecific = () => {
-    return (
-        <>
-            <div className="absolute block top-25px w-full text-center font-bold text-7xl text-neutral-700">
-                <span className="block z-10">Minigames</span>
-                <div className="-z-10 relative -top-10px overflow-hidden h-200px opacity-50">
-                    <div
-                        className="absolute -top-[380px] inset-0 w-500px aspect-square bg-contain"
-                        style={{
-                            background: `radial-gradient(circle, #09DBAA 0%, #14EBE000 70%)`,
-                            left: "calc(50vw - 250px)"
-                            }} />
+    const [ view, setView ] = useState("servers");
+
+    const desktop = () => (
+        <div className="w-screen h-screen overflow-y-auto pb-200px">
+            <Header
+                type="scalar"
+                name="Minigames"
+                whitelist={true} />
+            <div className="relative left-50px mx-auto">
+                    <Servers className={`absolute left-0 top-100px w-500px aspect-square mx-auto duration-500 ${view == "servers" ? "opacity-100" : "opacity-0 -z-10"}`} familyHealth={familyHealth} balancerLevel={40} servers={servers} />
+                    <Players className={`absolute left-0 top-100px w-500px aspect-square mx-auto duration-500 ${view == "players" ? "opacity-100" : "opacity-0 -z-10"}`} players={players} />
+                    <Overview
+                        className={`absolute left-0 top-100px w-500px aspect-square mx-auto duration-500 ${view == "overview" ? "opacity-100" : "opacity-0 -z-10"}`}
+                        loadBalancer={{
+                            type: "LeastConnection",
+                            weighted: true,
+                            persistence: 10,
+                        }}
+                        parentFamily="lobby"
+                        whitelist={false}
+                        tpa={{
+                            enabled: true,
+                            ignorePlayerCap: false,
+                            friendsOnly: true
+                        }}
+                        anchors={["minigames", "minigame"]}
+                        />
+                <div className="absolute right-0 top-250px gap-y-10px grid grid-rows-3 grid-cols-1 p-5px bg-neutral-200 rounded-lg">
+                    <clickable.div
+                        className={`row-start-1 w-40px aspect-square duration-500 rounded ${view == "servers" ? "bg-neutral-300 invert pointer-events-none" : ""}`}
+                        hoverClassNames="z-50 invert"
+                        onClick={() => setView("servers")}>
+                        <Icon iconName={IconName.TARGET} className="row-start-1 w-40px aspect-square" />
+                    </clickable.div>
+                    <clickable.div
+                        className={`row-start-2 w-40px aspect-square duration-500 rounded ${view == "players" ? "bg-neutral-300 invert pointer-events-none" : ""}`}
+                        hoverClassNames="z-50 invert"
+                        onClick={() => setView("players")}>
+                        <Icon iconName={IconName.USER} className="row-start-1 w-40px aspect-square" />
+                    </clickable.div>
+                    <clickable.div
+                        className={`row-start-3 w-40px aspect-square duration-500 rounded ${view == "overview" ? "bg-neutral-300 invert pointer-events-none" : ""}`}
+                        hoverClassNames="z-50 invert"
+                        onClick={() => setView("overview")}>
+                        <Icon iconName={IconName.LIST} className="row-start-1 w-40px aspect-square bg-[length:80%]" />
+                    </clickable.div>
                 </div>
             </div>
-            <div className="absolute inset-0 grid grid-rows-1 grid-cols-3 w-screen h-screen justify-items-center items-center">
-                <OverviewHolder className="col-start-1" />
-                <ServersHolder className="col-start-2 w-500px h-600px" familyHealth={familyHealth} balancerLevel={40} servers={servers} />
-                <PlayersHolder className="col-start-3" players={players} />
+        </div>
+    );
+    const mobile = () => (
+        <div className="w-screen h-screen overflow-y-auto overflow-x-hidden pb-200px">
+            <div className="scale-50">
+                <Header
+                    type="scalar"
+                    name="Minigames"
+                    whitelist={true} />
             </div>
-        </>
+            <div className="mt-100px mx-auto w-fit gap-x-50px grid grid-cols-3 grid-rows-1 p-5px bg-neutral-200 rounded-lg">
+                <clickable.div
+                    className={`col-start-1 w-50px aspect-square duration-500 rounded ${view == "servers" ? "bg-neutral-300 invert pointer-events-none" : ""}`}
+                    hoverClassNames="z-50 invert"
+                    onClick={() => setView("servers")}>
+                    <Icon iconName={IconName.TARGET} className="row-start-1 w-50px aspect-square" />
+                </clickable.div>
+                <clickable.div
+                    className={`col-start-2 w-50px aspect-square duration-500 rounded ${view == "players" ? "bg-neutral-300 invert pointer-events-none" : ""}`}
+                    hoverClassNames="z-50 invert"
+                    onClick={() => setView("players")}>
+                    <Icon iconName={IconName.USER} className="row-start-1 w-50px aspect-square" />
+                </clickable.div>
+                <clickable.div
+                    className={`col-start-3 w-50px aspect-square duration-500 rounded ${view == "overview" ? "bg-neutral-300 invert pointer-events-none" : ""}`}
+                    hoverClassNames="z-50 invert"
+                    onClick={() => setView("overview")}>
+                    <Icon iconName={IconName.LIST} className="row-start-1 w-50px aspect-square bg-[length:80%]" />
+                </clickable.div>
+            </div>
+            <div className="relative mt-50px w-screen px-100px">
+                    <Servers className={`absolute left-0 w-full aspect-square mx-auto duration-500 ${view == "servers" ? "opacity-100" : "opacity-0 -z-10"}`} familyHealth={familyHealth} balancerLevel={40} servers={servers} />
+                    <Players className={`absolute left-0 w-full aspect-square mx-auto duration-500 ${view == "players" ? "opacity-100" : "opacity-0 -z-10"}`} players={players} />
+                    <Overview
+                        className={`absolute left-0 w-full aspect-square mx-auto duration-500 ${view == "overview" ? "opacity-100" : "opacity-0 -z-10"}`}
+                        loadBalancer={{
+                            type: "LeastConnection",
+                            weighted: true,
+                            persistence: 10,
+                        }}
+                        parentFamily="lobby"
+                        whitelist={false}
+                        tpa={{
+                            enabled: true,
+                            ignorePlayerCap: false,
+                            friendsOnly: true
+                        }}
+                        anchors={["minigames", "minigame"]}
+                        />
+            </div>
+        </div>
+    );
+
+    return useScreen(
+        QueryMode.MOBILE_FIRST,
+        useView("1000px", desktop()),
+        useView("default", mobile()),
     );
 }

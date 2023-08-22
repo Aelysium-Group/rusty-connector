@@ -74,7 +74,7 @@ export const Cursor = () => {
         }
     }, [mouseCoordinate, context, bounds]);
 
-    const render = () => {
+    const fullCursor = () => {
         const variants = {
             default: {
                 x: mouseCoordinate.x,
@@ -82,8 +82,8 @@ export const Cursor = () => {
                 borderRadius: "1rem",
                 transition: {
                     type: "spring",
-                    damping: 45,
-                    stiffness: 500
+                    damping: 50,
+                    stiffness: 1000
                 }
             },
             context: {
@@ -93,7 +93,7 @@ export const Cursor = () => {
                 transition: {
                     type: "spring",
                     damping: 10,
-                    stiffness: 100
+                    stiffness: 150
                 }
             },
             hovered: {
@@ -103,7 +103,7 @@ export const Cursor = () => {
                 transition: {
                     type: "spring",
                     damping: 10,
-                    stiffness: 100
+                    stiffness: 150
                 }
             },
             text: {
@@ -189,9 +189,111 @@ export const Cursor = () => {
         );
     };
 
+    const noCursor = () => {
+        const variants = {
+            default: {
+                x: "-100px",
+                y: "-100px",
+                opacity: "0",
+                borderRadius: "1rem",
+            },
+            context: {
+                x: contextCoordinate.x - 150, y: contextCoordinate.y - 25,
+                width: "300px", height: "auto",
+                borderRadius: "20px",
+                opacity: "1",
+                transition: {
+                    type: "spring",
+                    damping: 10,
+                    stiffness: 150
+                }
+            },
+            hovered: {
+                x: hoveredCoordinate.x, y: hoveredCoordinate.y,
+                width: hoveredCoordinate.width, height: hoveredCoordinate.height,
+                borderRadius: hoveredRadius,
+                opacity: "1",
+                transition: {
+                    type: "spring",
+                    damping: 100,
+                    stiffness: 1000
+                }
+            },
+        };
+
+        const getVariant = () => {
+            if(context) return "context";
+            if(hovered) return "hovered";
+
+            return type;
+        }
+
+        return (
+            <>
+                <AnimatePresence>
+                    {context ?
+                        <motion.div
+                            key={0}
+                            className="fixed bg-neutral-600/70 frosted-glass-light z-40"
+                            initial={{
+                                x: 0,
+                                y: 0,
+                                width: "100vw",
+                                height: "100vh",
+                                opacity: 0
+                            }}
+                            exit={{
+                                x: 0,
+                                y: 0,
+                                opacity: 0,
+                                width: "100vw",
+                                height: "100vh",
+                                transitionDuration: "1"
+                            }}
+                            animate={{
+                                x: 0,
+                                y: 0,
+                                opacity: 1,
+                                width: "100vw",
+                                height: "100vh",
+                                transitionDuration: "1"
+                            }}
+                            onClick={() => eventFactory.fire(new ContextEvent(false, []))}
+                        />
+                    : <></>}
+                    <motion.div
+                        key={1}
+                        ref={ref}
+                        className={`overflow-hidden fixed top-0 left-0 z-40 cursor-glass w-20px h-20px ${ context ? "bg-neutral-800/30 cursor-auto" : "pointer-events-none"}`}
+                        variants={variants}
+                        animate={ getVariant() }
+                        onMouseLeave={() => eventFactory.fire(new ContextEvent(false, []))}
+                    >
+                        {
+                            context || hovered ?
+                        <div className="relative">
+                            <div
+                                className="absolute white-radial-gradient aspect-square w-400px opacity-20"
+                                style={{ left: `${(mouseCoordinate.x - bounds.x) - 200}px`, top: `${(mouseCoordinate.y - bounds.y) - 200}px` }}
+                            />
+                        </div>
+                        : <></>
+                        }
+                        {context ?
+                        <>
+                            <div className="p-10px">
+                                {contextContent}
+                            </div>
+                        </> : <></>}
+                    </motion.div>
+                </AnimatePresence>
+            </>
+        );
+    };
+
     return useScreen(
         QueryMode.MOBILE_FIRST,
-        useView('1000px', render()),
-        useView("default", <></>),
+        useView('1000px', fullCursor()),
+        useView("default", noCursor()),
     );
 }

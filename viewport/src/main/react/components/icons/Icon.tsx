@@ -18,10 +18,30 @@ export const IconName = {
     TRANSFER: "transfer",
     
     SERVER: "server",
+    
+    USER: "user",
+
+    FRIEND: "friends",
+    
+    TARGET: "target",
+    
+    BOUNCE: "bounce",
+    
+    WEIGHT: "weight",
+    
+    LIST: "list",
+    
+    LOCKED: "locked",
+    UNLOCKED: "unlocked",
+
+    BRICKS: "bricks",
+    BRICK_WALL: "bricks",
+
+    SLASH: "slash",
 } as const;
 export type IconName = typeof IconName[keyof typeof IconName];
 
-type Icon = JSX.IntrinsicElements["div"] & {
+export type Icon = JSX.IntrinsicElements["div"] & {
     iconName: IconName;
     inverted?: boolean
 }

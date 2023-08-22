@@ -4,12 +4,12 @@ import { loadSlim } from "tsparticles-slim";
 import { Engine } from "tsparticles-engine";
 import { motion } from "framer-motion";
 import Chart from "react-google-charts";
-import { clickable } from "../../cursor/interactables/Clickable";
-import { Icon, IconName } from "../../icons/Icon";
+import { clickable } from "../../../cursor/interactables/Clickable";
+import { Icon, IconName } from "../../../icons/Icon";
 import useMeasure from "react-use-measure";
 import { HealthIndicator } from "./HealthIndicator";
 
-type ParticleHolder = {
+type Servers = {
     familyHealth: number[];
     className: string;
     balancerLevel: number;
@@ -19,7 +19,7 @@ type ServerPartial = {
     id: string,
     name: string
 };
-export const ServersHolder = (props: ParticleHolder) => {
+export const Servers = (props: Servers) => {
     const [ serverCountRef, serverCountBounds ] = useMeasure();
 
     const [ flipped, setFlipped ] = useState(false);
@@ -53,8 +53,7 @@ export const ServersHolder = (props: ParticleHolder) => {
     return (
         <div className={props.className}>
             <div className="relative w-full h-full">
-                <span className="absolute block top-0 w-full text-center font-bold text-6xl text-neutral-500">Servers</span>
-                <div className="absolute bottom-0 w-500px aspect-square">
+                <div className="absolute w-full aspect-square">
                     <div className="relative w-full h-full">
                         <motion.div
                             className={`relative inset-0 w-full h-full bg-neutral-800 rounded-full overflow-hidden ${flipped ? "duration-700" : "duration-[0.9s]"}`}
@@ -276,8 +275,13 @@ export const ServersHolder = (props: ParticleHolder) => {
                         <span
                             ref={serverCountRef}
                             className={`absolute block w-full text-center font-bold text-8xl text-neutral-500 z-10 duration-200 pointer-events-none ${viewColors ? "opacity-0" : "opacity-95"}`}
-                            style={{ top: `200px` }}
+                            style={{ top: `185px` }}
                             >{props.servers.length}</span>
+                        <span
+                            ref={serverCountRef}
+                            className={`absolute block w-full text-center font-bold text-4xl text-neutral-500 z-10 duration-200 pointer-events-none ${viewColors ? "opacity-0" : "opacity-95"}`}
+                            style={{ top: `270px` }}
+                            >Server{props.servers.length > 1 ? "s" : ""}</span>
                     </div>
                 </div>
             </div>
