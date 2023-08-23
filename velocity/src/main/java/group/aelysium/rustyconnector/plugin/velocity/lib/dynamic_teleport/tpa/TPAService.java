@@ -102,5 +102,8 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         this.allTPAHandlers().forEach(TPAHandler::decompose);
         this.tpaHandlers.clear();
         super.kill();
+
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
+        commandManager.unregister("tpa");
     }
 }

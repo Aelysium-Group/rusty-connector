@@ -159,6 +159,11 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         this.friendRequests.asMap().forEach((key, value) -> value.decompose());
         this.friendRequests.invalidateAll();
         super.kill();
+
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
+        commandManager.unregister("friends");
+        commandManager.unregister("unfriend");
+        commandManager.unregister("fm");
     }
 
     public record FriendsSettings(

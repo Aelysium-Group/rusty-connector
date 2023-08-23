@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.scheduler.Scheduler;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
+import group.aelysium.rustyconnector.core.lib.exception.DuplicateLifecycleException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
@@ -92,13 +93,12 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
 
     public void killServices() {
         this.processor.kill();
+        this.processor = null;
     }
 
-    public void reloadServices() {
-        this.processor.kill();
-        this.processor = null;
-
-        VelocityRustyConnector.lifecycle().loadConfigs();
+    public void reloadServices() throws DuplicateLifecycleException {
+        VelocityRustyConnector.lifecycle().stop();
+        VelocityRustyConnector.lifecycle().start();
     }
 
     public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
