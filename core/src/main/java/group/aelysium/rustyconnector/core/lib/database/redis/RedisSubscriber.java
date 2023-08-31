@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
+import group.aelysium.rustyconnector.core.lib.model.FailService;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
@@ -21,7 +22,7 @@ public class RedisSubscriber {
      * Subscribe to a specific Redis data channel.
      * This method is thread locking.
      */
-    public void subscribeToChannel() {
+    public void subscribeToChannel(FailService failService) {
         if(this.lock.getCount() != 0) throw new RuntimeException("Channel subscription is already active for this RedisIO! Either kill it with .shutdow(). Or create a new RedisIO to use!");
 
         try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
@@ -36,6 +37,7 @@ public class RedisSubscriber {
             this.lock.await();
         } catch (Exception e) {
             e.printStackTrace();
+            failService.trigger("RedisService has failed to many times within the allowed amount of time! Please check the error messages and try again!");
             this.lock.countDown();
         }
     }

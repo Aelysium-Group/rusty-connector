@@ -125,11 +125,7 @@ class ScalarFamilyConnector {
 
         this.validateWhitelist();
 
-        PlayerServer server = this.establishAnyConnection();
-
-        server.playerJoined();
-
-        return server;
+        return this.establishAnyConnection();
     }
 
     public PlayerServer fetchAny() throws RuntimeException {

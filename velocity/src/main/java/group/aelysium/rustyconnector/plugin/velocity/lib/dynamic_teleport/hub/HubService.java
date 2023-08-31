@@ -41,6 +41,7 @@ public class HubService extends Service {
 
     @Override
     public void kill() {
-
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
+        commandManager.unregister("hub");
     }
 }

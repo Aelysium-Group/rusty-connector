@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.events.*;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -42,10 +43,18 @@ public class VelocityLifecycle extends PluginLifecycle {
         try {
             VelocityAPI api = VelocityAPI.get();
 
-            WhitelistConfig.empty();
             DefaultConfig.empty();
-            ScalarFamilyConfig.empty();
+            FamiliesConfig.empty();
             LoggerConfig.empty();
+
+            StaticFamilyConfig.empty();
+            ScalarFamilyConfig.empty();
+            WhitelistConfig.empty();
+
+            PartyConfig.empty();
+            DynamicTeleportConfig.empty();
+            FriendsConfig.empty();
+
 
             try {
                 api.killServices();

@@ -1,8 +1,11 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
+import group.aelysium.rustyconnector.core.lib.model.FailService;
+import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import ninja.leaping.configurate.reactive.TransactionFailedException;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -11,17 +14,19 @@ import java.util.concurrent.TimeUnit;
 
 public class RedisService extends Service {
     private final Vector<RedisSubscriber> liveRedisSubscribers = new Vector<>();
-    private RedisPublisher publisher;
+    private final RedisPublisher publisher;
     private char[] privateKey;
     private final RedisClient.Builder clientBuilder;
     private boolean isAlive = false;
-    ExecutorService executorService;
+    private ExecutorService executorService;
+    private final FailService failService;
 
     public RedisService(RedisClient.Builder clientBuilder, char[] privateKey) {
         this.clientBuilder = clientBuilder.setPrivateKey(privateKey);
         this.privateKey = privateKey;
 
         this.publisher = new RedisPublisher(this.clientBuilder.build());
+        this.failService = new FailService(5, new LiquidTimestamp(2, TimeUnit.SECONDS));
     }
 
     protected void launchNewRedisSubscriber(Class<? extends RedisSubscriber> subscriber) {
@@ -32,11 +37,17 @@ public class RedisService extends Service {
                 RedisSubscriber redis = subscriber.getDeclaredConstructor(RedisClient.class).newInstance(RedisService.this.clientBuilder.build());
                 RedisService.this.liveRedisSubscribers.add(redis);
 
-                redis.subscribeToChannel();
+                redis.subscribeToChannel(RedisService.this.failService);
 
                 RedisService.this.liveRedisSubscribers.remove(redis);
             } catch (Exception e) {
                 e.printStackTrace();
+                try {
+                    RedisService.this.failService.trigger("RedisService has failed to many times within the allowed amount of time! Please check the error messages and try again!");
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                    return;
+                }
             }
 
             RedisService.this.launchNewRedisSubscriber(subscriber);
@@ -59,13 +70,14 @@ public class RedisService extends Service {
 
     /**
      * Kill the service.
-     * This will disconnect all open RedisIOs and then shutdown any remaining threads.
+     * This will disconnect all open RedisSubscribers and then shutdown any remaining threads.
      */
     public void kill() {
         this.isAlive = false;
+        this.failService.kill();
 
-        for (Iterator<RedisSubscriber> it = this.liveRedisSubscribers.elements().asIterator(); it.hasNext(); ) {
-            RedisSubscriber subscriber = it.next();
+        for (Iterator<RedisSubscriber> iterator = this.liveRedisSubscribers.elements().asIterator(); iterator.hasNext(); ) {
+            RedisSubscriber subscriber = iterator.next();
             subscriber.shutdown();
         }
 

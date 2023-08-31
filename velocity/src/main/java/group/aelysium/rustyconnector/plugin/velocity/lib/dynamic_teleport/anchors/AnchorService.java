@@ -88,6 +88,9 @@ public class AnchorService extends Service {
 
     @Override
     public void kill() {
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
+        this.anchors.forEach((name, family) -> commandManager.unregister(name));
+
         this.anchors.clear();
     }
 }

@@ -116,3 +116,6 @@ buildNumber.properties
 
 # Common working directory
 run/
+
+node_modules/
+bin/

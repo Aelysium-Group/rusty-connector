@@ -82,10 +82,10 @@ public class FriendsDataEnclaveService extends Service {
      * @return A list of friends.
      * @throws SQLException If there was an issue.
      */
-    public Optional<List<FriendMapping>> findFriends(Player player, boolean forcePull) {
+    public Optional<List<FriendMapping>> findFriends(FakePlayer player, boolean forcePull) {
         if(!forcePull)
             try {
-                return Optional.of(this.getPlayersCacheEntry(FakePlayer.from(player)));
+                return Optional.of(this.getPlayersCacheEntry(player));
             } catch (Exception ignore) {}
 
         try {
@@ -102,19 +102,11 @@ public class FriendsDataEnclaveService extends Service {
 
     /**
      * Check if two players are friends.
-     * If the players are found as friends in the cache, returns `true`.
-     * If not, search MySQL and return whether they are friends.
      * @param player1 The first player.
      * @param player2 The second player.
-     * @return `true` If the two players are friends in the cache, or on MySQL.
+     * @return `true` If the two players are friends.
      */
     public boolean areFriends(FakePlayer player1, FakePlayer player2) throws RuntimeException {
-        if (
-                this.getPlayersCacheEntry(player1).stream().anyMatch(friendMapping -> friendMapping.friendOf(player1).equals(player2)) ||
-                this.getPlayersCacheEntry(player2).stream().anyMatch(friendMapping -> friendMapping.friendOf(player2).equals(player1))
-        )
-            return true;
-
         return this.mySQLService.areFriends(player1, player2);
     }
 
@@ -124,15 +116,15 @@ public class FriendsDataEnclaveService extends Service {
      * @return The number of friends a player has.
      * @throws SQLException If there was an issue.
      */
-    public Optional<Integer> getFriendCount(Player player) {
+    public Optional<Integer> getFriendCount(FakePlayer player) {
         try {
-            return Optional.of(this.getPlayersCacheEntry(FakePlayer.from(player)).size());
+            return Optional.of(this.getPlayersCacheEntry(player).size());
         } catch (Exception ignore) {}
 
         try {
             List<FriendMapping> mappings = this.mySQLService.findFriends(player).orElseThrow();
             Long snowflake = this.cache.put(mappings);
-            this.players.put(FakePlayer.from(player), snowflake);
+            this.players.put(player, snowflake);
 
             return Optional.of(mappings.size());
         } catch (Exception e) {
@@ -142,11 +134,11 @@ public class FriendsDataEnclaveService extends Service {
         return Optional.empty();
     }
 
-    public Optional<FriendMapping> addFriend(Player player1, Player player2) throws SQLException {
+    public Optional<FriendMapping> addFriend(FakePlayer player1, FakePlayer player2) throws SQLException {
         try {
             FriendMapping mapping = new FriendMapping(player1, player2);
             try {
-                 this.mySQLService.addFriend(player1, player2);
+                 this.mySQLService.addFriends(mapping);
             } catch (SQLIntegrityConstraintViolationException ignore) {}
 
             putMapping(mapping);
@@ -159,10 +151,10 @@ public class FriendsDataEnclaveService extends Service {
         return Optional.empty();
     }
 
-    public void removeFriend(Player player1, Player player2) throws SQLException {
+    public void removeFriend(FakePlayer player1, FakePlayer player2) throws SQLException {
         FriendMapping mapping = new FriendMapping(player1, player2);
         try {
-            this.mySQLService.removeFriend(player1, player2);
+            this.mySQLService.removeFriend(mapping);
         } catch (Exception e) {
             e.printStackTrace();
         }
