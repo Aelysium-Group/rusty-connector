@@ -8,6 +8,7 @@ import { clickable } from "../../../cursor/interactables/Clickable";
 import { Icon, IconName } from "../../../icons/Icon";
 import useMeasure from "react-use-measure";
 import { HealthIndicator } from "./HealthIndicator";
+import { useNavigate } from "react-router-dom";
 
 type Servers = {
     familyHealth: number[];
@@ -21,6 +22,7 @@ type ServerPartial = {
 };
 export const Servers = (props: Servers) => {
     const [ serverCountRef, serverCountBounds ] = useMeasure();
+    const navigate = useNavigate();
 
     const [ flipped, setFlipped ] = useState(false);
     const [ viewColors, setViewColors ] = useState(false);
@@ -103,7 +105,7 @@ export const Servers = (props: Servers) => {
                                             try {
                                                 const selected = props.servers[chart.getSelection()[0].row];
 
-                                                console.log(selected);
+                                                navigate(`../../server/${selected.id}`);
                                             } catch(e) {}
                                         }
                                     }

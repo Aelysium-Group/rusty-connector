@@ -35,14 +35,14 @@ const servers = [
 ];
 const players = [
     new Player("d2281154f3c24ed19c7b5501722c3aaa", "SIVIN_Official"),
-    new Player("a2d983f844db4f30916f927dedb6c37c", "Besoj"),
-    new Player("c67a0be03b3540d48173ccad6672516a", "Bdan"),
+    new Player("a2d983f844db4f30916f927dedb6c37c", "notch"),
+    new Player("c67a0be03b3540d48173ccad6672516a", "jeb_"),
     new Player("1e18d5ff643d45c8b50943b8461d8614", "deadmau5"),
 ];
 
 const familyHealth = [ 0, 0, 0, 0 ];
 
-export const FamilySpecific = () => {
+export const Family = () => {
     const [ view, setView ] = useState("servers");
 
     const desktop = () => (
@@ -51,7 +51,7 @@ export const FamilySpecific = () => {
                 type="scalar"
                 name="Minigames"
                 whitelist={true} />
-            <div className="relative left-50px mx-auto">
+            <div className="relative w-600px left-50px mx-auto">
                     <Servers className={`absolute left-0 top-100px w-500px aspect-square mx-auto duration-500 ${view == "servers" ? "opacity-100" : "opacity-0 -z-10"}`} familyHealth={familyHealth} balancerLevel={40} servers={servers} />
                     <Players className={`absolute left-0 top-100px w-500px aspect-square mx-auto duration-500 ${view == "players" ? "opacity-100" : "opacity-0 -z-10"}`} players={players} />
                     <Overview
