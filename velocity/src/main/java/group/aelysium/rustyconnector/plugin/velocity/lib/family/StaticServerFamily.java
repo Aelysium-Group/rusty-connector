@@ -214,9 +214,6 @@ class StaticFamilyConnector {
         this.validateWhitelist();
 
         PlayerServer server = this.establishAnyConnection();
-        if(server == null) return null;
-
-        server.playerJoined();
 
         return server;
     }
@@ -243,20 +240,6 @@ class StaticFamilyConnector {
         } catch (Exception ignore) {
             server = establishNewConnection(true);
         }
-
-        /*
-        try {
-            PartyService partyService = VelocityAPI.get().services().partyService().orElse(null);
-            if (partyService == null) throw new NoOutputException();
-
-            Party party = partyService.find(player).orElse(null);
-            if (party == null) throw new NoOutputException();
-
-            party.connect(server);
-        } catch (NoOutputException ignore) {
-        } catch (Exception e) {
-            VelocityAPI.get().logger().log("Issue trying to pull party with player! " + e.getMessage());
-        }*/
 
         return server;
     }
