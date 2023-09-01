@@ -50,32 +50,23 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 4
+version: 5
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                        Database                          #
+#                        Messenger                         #
+#                                                          #
+#               ---------------------------                #
+# | Set the name of the messenger connector you want       #
+# | to use.                                                #
+#                                                          #
+#  You can configure your connectors in: `connectors.yml`  #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-
-#########################
-#         Redis         #
-#########################
-#
-# Redis is required in order to provide quick and easy syncing between the proxy and sub-servers
-#
-redis:
-    host: ""
-    port: 3306
-    user: "default"
-    password: "password"
-
-#
-# The name of the data channel that sync information should be sent over.
-# If you don't know what this is, don't mess with it! The default value here is fine.
-# You probably won't break anything, but you generally just shouldn't touch things you don't understand.
-#
-    data-channel: "rustyConnector-sync"
+messenger: "main-redis"
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

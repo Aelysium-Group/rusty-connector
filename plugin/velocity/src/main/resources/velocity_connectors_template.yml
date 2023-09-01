@@ -1,0 +1,40 @@
+#################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                                Discord Webhooks                               #
+#                                                                               #
+#                          ---------------------------                          #
+#                                                                               #
+# | Webhooks allow you to connect directly into Discord                         #
+# | and send messages to specific channels.                                     #
+#                                                                               #
+# | You can use this file to configure as many webhooks                         #
+# | as you want!                                                                #
+#                                                                               #
+#                          ---------------------------                          #
+#                                                                               #
+# | First time working with this file?                                          #
+# | Check out our setup docs:                                                   #
+#                                                                               #
+#    https://github.com/Aelysium-Group/rusty-connector/wiki/Discord-Webhooks    #
+#                                                                               #
+#                          ---------------------------                          #
+#                                                                               #
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#################################################################################
+
+messengers:
+    - name: "main-redis"
+      type: REDIS
+      host: "0.0.0.0"
+      port: 3306
+      user: "default"
+      password: "password"
+      data-channel: "rustyConnector-sync"
+
+storage:
+    - name: "Main RC DataChannel"
+      host: "0.0.0.0"
+      port: 3306
+      user: "default"
+      password: "password"
+      data-channel: "rustyConnector-sync"
