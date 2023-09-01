@@ -75,45 +75,6 @@ players:
     uuid: "00000000-0000-0000-0000-000000000000"
     ip: "127.0.0.1"
 
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                        Countries                         #
-#                                                          #
-#               ---------------------------                #
-# | If you'd only like players from certain countries to   #
-# | be allowed to join your server. You can use this!      #
-# | It's possible that setting this might slow down the    #
-# | time it takes for players to clear this whitelist!     #
-#                                                          #
-# NOTE: VPNs allow members to easily change what location  #
-#       They appear to a network from. This isn't          #
-#       something that can be fixed easily.                #
-# NOTE: This setting involves using player IP Addresses    #
-#       to get a VERY GENERAL idea of where they are.      #
-#       Make sure that if you are working with player      #
-#       IP Addresses that you properly inform your members #
-#       and that you never leak that information!          #
-#                                                          #
-#       There are laws that protect user data!             #
-#       Don't break them!                                  #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-
-#
-# Should the whitelist validate players based on their IP Address' country
-# !!!!!!!!! THIS FEATURE ISN'T YET IMPLEMENTED !!!!!!!!!
-#
-use-country: false
-countries:
-  - US
-  - CA
-  - UK
-
-# !!!!!!!!! THIS FEATURE ISN'T YET IMPLEMENTED !!!!!!!!!
-
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                       Permission                         #

@@ -57,12 +57,18 @@ scalar: []
 #
 static: []
 
-#
-# MySQL is required in order for static families to operate.
-#
-mysql:
-    host: ""
-    port: 3306
-    user: "root"
-    password: "password"
-    database: "RustyConnector"
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                         Storage                          #
+#                                                          #
+#               ---------------------------                #
+# | Set the name of the storage connector you want         #
+# | to use.                                                #
+#                                                          #
+#  You can configure your connectors in: `connectors.yml`  #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+static-family-storage: "main-mysql"

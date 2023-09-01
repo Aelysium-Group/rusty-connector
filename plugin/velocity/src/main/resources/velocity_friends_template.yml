@@ -70,16 +70,21 @@ show-families: true
 ############################################################
 allow-messaging: true
 
-#
-# Set the MySQL database to use for storing friends in.
-#
-mysql:
-    host: ""
-    port: 3306
-    user: "root"
-    password: "password"
-    database: "RustyConnector"
-
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                         Storage                          #
+#                                                          #
+#               ---------------------------                #
+# | Set the name of the storage connector you want         #
+# | to use.                                                #
+#                                                          #
+#  You can configure your connectors in: `connectors.yml`  #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+storage: "main-mysql"
 
 #
 # Additional Commands.

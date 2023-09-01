@@ -40,16 +40,6 @@
 enabled: false
 
 #
-# MySQL is required in order for viewport to operate.
-#
-mysql:
-    host: ""
-    port: 3306
-    user: "root"
-    password: "password"
-    database: "RustyConnector"
-
-#
 # The location where the viewport module will listen for REST api requests.
 # You typically won't have to touch `address`.
 # Make sure you open up whatever port you define below.
@@ -66,6 +56,22 @@ rest:
 websocket:
     hostname: "0.0.0.0"
     port: 5577
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                         Storage                          #
+#                                                          #
+#               ---------------------------                #
+# | Set the name of the storage connector you want         #
+# | to use.                                                #
+#                                                          #
+#  You can configure your connectors in: `connectors.yml`  #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+storage: "main-mysql"
 
 #
 # You can define starting users below.
