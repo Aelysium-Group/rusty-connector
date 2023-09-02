@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;

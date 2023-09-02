@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;
@@ -19,8 +18,8 @@ public class ProcessorServiceHandler extends group.aelysium.rustyconnector.core.
         super();
     }
 
-    public RedisService redisService() {
-        return this.find(RedisService.class).orElseThrow();
+    public RedisConnector redisService() {
+        return this.find(RedisConnector.class).orElseThrow();
     }
     public MagicLinkService magicLinkService() {
         return this.find(MagicLinkService.class).orElseThrow();

@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport;
 
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.AuthenticationService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.GatewayService;
 
 public class ViewportService extends ServiceableService<ViewportServiceHandler> {
@@ -20,8 +19,8 @@ public class ViewportService extends ServiceableService<ViewportServiceHandler> 
             return this;
         }
 
-        public ViewportService.Builder setMySQLService(MySQLService mySQLService) {
-            this.services.add(mySQLService);
+        public ViewportService.Builder setStorageConnector(StorageConnector storageConnector) {
+            this.services.add(storageConnector);
             return this;
         }
 

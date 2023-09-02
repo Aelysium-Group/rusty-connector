@@ -1,19 +1,19 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.database;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnection;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMapping;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
 
-public class HomeServerMappingsDatabase {
+public class StaticFamilyMySQL {
     private static final String FIND_HOME_SERVER_IN_FAMILY = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
     private static final String CHECK_IF_PLAYER_HAS_HOME = "SELECT * FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
     private static final String DELETE_PLAYERS_HOME_SERVER = "DELETE FROM home_server_mappings WHERE player_uuid = ? AND family_name = ?;";
@@ -22,18 +22,26 @@ public class HomeServerMappingsDatabase {
     private static final String UPDATE_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = ? WHERE family_name = ? AND expiration IS NULL;";
     private static final String UPDATE_NOT_NULL_EXPIRATIONS = "UPDATE home_server_mappings SET expiration = NULL WHERE family_name = ? AND expiration IS NOT NULL;";
 
+    private final MySQLConnector connector;
+
+    public StaticFamilyMySQL(MySQLConnector connector) {
+        this.connector = connector;
+    }
+
     /**
      * Initialize the table for home server mappings.
      */
-    public static void init(MySQLService service) throws SQLException, IOException {
+    public void init() throws SQLException, IOException {
         VelocityAPI api = VelocityAPI.get();
         InputStream stream = api.resourceAsStream("home_server_mappings.sql");
         String file = new String(stream.readAllBytes());
 
-        service.connect();
-        PreparedStatement statement = service.prepare(file);
-        service.execute(statement);
-        service.close();
+        MySQLConnection connection = this.connector.connection().orElseThrow();
+
+        connection.connect();
+        PreparedStatement statement = connection.prepare(file);
+        connection.execute(statement);
+        connection.close();
     }
 
     /**
@@ -43,15 +51,16 @@ public class HomeServerMappingsDatabase {
      * @return A home server mapping or `null` if there isn't one.
      * @throws SQLException If there was an issue with the query.
      */
-    public static HomeServerMapping find(Player player, StaticServerFamily family) throws SQLException {
+    public HomeServerMapping find(Player player, StaticServerFamily family) throws SQLException {
         VelocityAPI api = VelocityAPI.get();
-        MySQLService mySQLService = api.services().familyService().mySQLService().orElseThrow();
 
-        mySQLService.connect();
-        PreparedStatement statement = mySQLService.prepare(FIND_HOME_SERVER_IN_FAMILY);
+        MySQLConnection connection = this.connector.connection().orElseThrow();
+
+        connection.connect();
+        PreparedStatement statement = connection.prepare(FIND_HOME_SERVER_IN_FAMILY);
         statement.setString(1, player.getUniqueId().toString());
         statement.setString(2, family.name());
-        ResultSet result = mySQLService.executeQuery(statement);
+        ResultSet result = connection.executeQuery(statement);
 
         if(!result.next()) return null;
 
@@ -59,7 +68,7 @@ public class HomeServerMappingsDatabase {
         if(registeredServer == null) return null;
         PlayerServer server = api.services().serverService().search(registeredServer.getServerInfo());
 
-        mySQLService.close();
+        connection.close();
         return new HomeServerMapping(player, server, family);
     }
 
@@ -70,16 +79,16 @@ public class HomeServerMappingsDatabase {
      * @return `true` if an entry with the player in the family is found. `false` otherwise.
      * @throws SQLException If there was an issue with the query.
      */
-    public static boolean doesPlayerHaveHome(Player player, StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityAPI.get();
-        MySQLService mySQLService = api.services().familyService().mySQLService().orElseThrow();
+    public boolean doesPlayerHaveHome(Player player, StaticServerFamily family) throws SQLException {
 
-        mySQLService.connect();
-        PreparedStatement statement = mySQLService.prepare(CHECK_IF_PLAYER_HAS_HOME);
+        MySQLConnection connection = this.connector.connection().orElseThrow();
+
+        connection.connect();
+        PreparedStatement statement = connection.prepare(CHECK_IF_PLAYER_HAS_HOME);
         statement.setString(1, player.getUniqueId().toString());
         statement.setString(2, family.name());
-        ResultSet result = mySQLService.executeQuery(statement);
-        mySQLService.close();
+        ResultSet result = connection.executeQuery(statement);
+        connection.close();
 
         return result.next();
     }
@@ -90,16 +99,16 @@ public class HomeServerMappingsDatabase {
      * @param family The family to search in.
      * @throws SQLException If there was an issue with the query.
      */
-    public static void delete(Player player, StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityAPI.get();
-        MySQLService mySQLService = api.services().familyService().mySQLService().orElseThrow();
+    public void delete(Player player, StaticServerFamily family) throws SQLException {
 
-        mySQLService.connect();
-        PreparedStatement statement = mySQLService.prepare(DELETE_PLAYERS_HOME_SERVER);
+        MySQLConnection connection = this.connector.connection().orElseThrow();
+
+        connection.connect();
+        PreparedStatement statement = connection.prepare(DELETE_PLAYERS_HOME_SERVER);
         statement.setString(1, player.getUniqueId().toString());
         statement.setString(2, family.name());
-        mySQLService.execute(statement);
-        mySQLService.close();
+        connection.execute(statement);
+        connection.close();
     }
 
     /**
@@ -108,14 +117,13 @@ public class HomeServerMappingsDatabase {
      * @param mapping The mapping to save.
      * @throws SQLException If there was an issue with the query.
      */
-    public static void save(HomeServerMapping mapping) throws SQLException {
-        VelocityAPI api = VelocityAPI.get();
-        MySQLService mySQLService = api.services().familyService().mySQLService().orElseThrow();
+    public void save(HomeServerMapping mapping) throws SQLException {
+        MySQLConnection connection = this.connector.connection().orElseThrow();
 
         LiquidTimestamp expiration = mapping.family().homeServerExpiration();
 
-        mySQLService.connect();
-        PreparedStatement statement = mySQLService.prepare(SAVE_PLAYERS_HOME_SERVER);
+        connection.connect();
+        PreparedStatement statement = connection.prepare(SAVE_PLAYERS_HOME_SERVER);
         statement.setString(1, mapping.player().getUniqueId().toString());
         statement.setString(2, mapping.family().name());
         statement.setString(3, mapping.server().address());
@@ -125,8 +133,8 @@ public class HomeServerMappingsDatabase {
         else
             statement.setLong(5, expiration.epochFromNow());
 
-        mySQLService.execute(statement);
-        mySQLService.close();
+        connection.execute(statement);
+        connection.close();
     }
 
     /**
@@ -134,15 +142,14 @@ public class HomeServerMappingsDatabase {
      * @param family The family to search in.
      * @throws SQLException If there was an issue with the query.
      */
-    public static void purgeExpired(StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityAPI.get();
-        MySQLService mySQLService = api.services().familyService().mySQLService().orElseThrow();
+    public void purgeExpired(StaticServerFamily family) throws SQLException {
+        MySQLConnection connection = this.connector.connection().orElseThrow();
 
-        mySQLService.connect();
-        PreparedStatement statement = mySQLService.prepare(PURGE_FAMILY_EXPIRED_MAPPINGS);
+        connection.connect();
+        PreparedStatement statement = connection.prepare(PURGE_FAMILY_EXPIRED_MAPPINGS);
         statement.setString(1, family.name());
-        mySQLService.execute(statement);
-        mySQLService.close();
+        connection.execute(statement);
+        connection.close();
     }
 
     /**
@@ -151,21 +158,19 @@ public class HomeServerMappingsDatabase {
      * @param family The family to search in.
      * @throws SQLException If there was an issue with the query.
      */
-    public static void updateNullExpirations(StaticServerFamily family) throws SQLException {
+    public void updateNullExpirations(StaticServerFamily family) throws SQLException {
+        MySQLConnection connection = this.connector.connection().orElseThrow();
         LiquidTimestamp liquidExpiration = family.homeServerExpiration();
         if(liquidExpiration == null) return;
 
-        VelocityAPI api = VelocityAPI.get();
-        MySQLService mySQLService = api.services().familyService().mySQLService().orElseThrow();
-
         Timestamp expiration = new Timestamp(liquidExpiration.epochFromNow());
 
-        mySQLService.connect();
-        PreparedStatement statement = mySQLService.prepare(UPDATE_NULL_EXPIRATIONS);
+        connection.connect();
+        PreparedStatement statement = connection.prepare(UPDATE_NULL_EXPIRATIONS);
         statement.setTimestamp(1, expiration);
         statement.setString(2, family.name());
-        mySQLService.execute(statement);
-        mySQLService.close();
+        connection.execute(statement);
+        connection.close();
     }
 
     /**
@@ -174,14 +179,13 @@ public class HomeServerMappingsDatabase {
      * @param family The family to search in.
      * @throws SQLException If there was an issue with the query.
      */
-    public static void updateValidExpirations(StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityAPI.get();
-        MySQLService mySQLService = api.services().familyService().mySQLService().orElseThrow();
+    public void updateValidExpirations(StaticServerFamily family) throws SQLException {
+        MySQLConnection connection = this.connector.connection().orElseThrow();
 
-        mySQLService.connect();
-        PreparedStatement statement = mySQLService.prepare(UPDATE_NOT_NULL_EXPIRATIONS);
+        connection.connect();
+        PreparedStatement statement = connection.prepare(UPDATE_NOT_NULL_EXPIRATIONS);
         statement.setString(1, family.name());
-        mySQLService.execute(statement);
-        mySQLService.close();
+        connection.execute(statement);
+        connection.close();
     }
 }

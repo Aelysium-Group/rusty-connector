@@ -37,7 +37,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(!AddressUtil.addressToString(message.address()).equals(api.services().serverInfoService().address()))
                throw new Exception("Message addressed to another sub-server! Ignoring...");
             try {
-                if (!(api.services().redisService().validatePrivateKey(message.privateKey())))
+                if (!(api.services().redisService().connection().orElseThrow().validatePrivateKey(message.privateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
 

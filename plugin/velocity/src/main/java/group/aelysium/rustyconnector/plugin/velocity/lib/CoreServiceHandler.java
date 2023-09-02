@@ -1,7 +1,8 @@
-package group.aelysium.rustyconnector.plugin.velocity.central;
+package group.aelysium.rustyconnector.plugin.velocity.lib;
 
 
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
@@ -19,11 +20,11 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistServ
 import java.util.Map;
 import java.util.Optional;
 
-public class ProcessorServiceHandler extends group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler {
-    public ProcessorServiceHandler(Map<Class<? extends Service>, Service> services) {
+public class CoreServiceHandler extends group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler {
+    public CoreServiceHandler(Map<Class<? extends Service>, Service> services) {
         super(services);
     }
-    public ProcessorServiceHandler() {
+    public CoreServiceHandler() {
         super();
     }
 
@@ -33,8 +34,11 @@ public class ProcessorServiceHandler extends group.aelysium.rustyconnector.core.
     public ServerService serverService() {
         return this.find(ServerService.class).orElseThrow();
     }
-    public RedisService redisService() {
-        return this.find(RedisService.class).orElseThrow();
+    public ConnectorsService connectorsService() {
+        return this.find(ConnectorsService.class).orElseThrow();
+    }
+    public MessengerConnection backboneMessengerService() {
+        return this.find(MessengerConnection.class).orElseThrow();
     }
     public DataTransitService dataTransitService() {
         return this.find(DataTransitService.class).orElseThrow();

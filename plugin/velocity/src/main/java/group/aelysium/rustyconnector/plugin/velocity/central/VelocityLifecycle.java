@@ -48,7 +48,7 @@ public class VelocityLifecycle extends PluginLifecycle {
             LoggerConfig.empty();
 
             try {
-                api.killServices();
+                api.core().kill();
             } catch (Exception ignore) {}
 
             api.velocityServer().getCommandManager().unregister("rc");
@@ -61,38 +61,6 @@ public class VelocityLifecycle extends PluginLifecycle {
             api.velocityServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerKicked());
             api.velocityServer().getEventManager().unregisterListener(api.accessPlugin(), new OnPlayerDisconnect());
         } catch (Exception ignore) {}
-    }
-
-    protected boolean loadConfigs() {
-        VelocityAPI api = VelocityAPI.get();
-        PluginLogger logger = api.logger();
-        try {
-            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(String.valueOf(api.dataFolder()), "config.yml"), "velocity_config_template.yml");
-            if(!defaultConfig.generate())
-                throw new IllegalStateException("Unable to load or create config.yml!");
-            defaultConfig.register();
-
-            LoggerConfig loggerConfig = LoggerConfig.newConfig(new File(String.valueOf(api.dataFolder()), "logger.yml"), "velocity_logger_template.yml");
-            if(!loggerConfig.generate())
-                throw new IllegalStateException("Unable to load or create logger.yml!");
-            loggerConfig.register();
-            PluginLogger.init(loggerConfig);
-
-            api.configureProcessor(defaultConfig);
-
-            WebhooksConfig webhooksConfig = WebhooksConfig.newConfig(new File(String.valueOf(api.dataFolder()), "webhooks.yml"), "velocity_webhooks_template.yml");
-            if(!webhooksConfig.generate())
-                throw new IllegalStateException("Unable to load or create webhooks.yml!");
-            webhooksConfig.register();
-
-            return true;
-        } catch (NoOutputException ignore) {
-            return false;
-        } catch (Exception e) {
-            e.printStackTrace();
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);
-            return false;
-        }
     }
     protected boolean loadCommands() {
         VelocityAPI api = VelocityAPI.get();

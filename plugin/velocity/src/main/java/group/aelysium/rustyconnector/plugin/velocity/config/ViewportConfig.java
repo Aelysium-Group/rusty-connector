@@ -14,11 +14,7 @@ public class ViewportConfig extends YAML {
 
     private boolean enabled = false;
 
-    private String mysql_host = "";
-    private int mysql_port = 3306;
-    private String mysql_user = "root";
-    private String mysql_password = "password";
-    private String mysql_database = "RustyConnector";
+    private String storage = "";
 
     private InetSocketAddress websocket_address;
 
@@ -30,20 +26,8 @@ public class ViewportConfig extends YAML {
     public boolean isEnabled() {
         return enabled;
     }
-    public String getMysql_host() {
-        return mysql_host;
-    }
-    public int getMysql_port() {
-        return mysql_port;
-    }
-    public String getMysql_user() {
-        return mysql_user;
-    }
-    public String getMysql_password() {
-        return mysql_password;
-    }
-    public String getMysql_database() {
-        return mysql_database;
+    public String storage() {
+        return storage;
     }
     public InetSocketAddress getWebsocket_address() {
         return websocket_address;
@@ -79,7 +63,7 @@ public class ViewportConfig extends YAML {
      * Get the current config.
      * @return The config.
      */
-    public static DefaultConfig getConfig() {
+    public static ViewportConfig getConfig() {
         return config;
     }
 
@@ -104,14 +88,7 @@ public class ViewportConfig extends YAML {
                         this.getNode(this.data, "rest.port", Integer.class)
         );
 
-        this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
-        if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
-
-        this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
-        this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
-        this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
-        this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
-        if (this.mysql_database.equals(""))
-            throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
+        this.storage = this.getNode(this.data, "storage", String.class);
+        if (this.storage.equals("")) throw new IllegalStateException("Please assign a storage method.");
     }
 }

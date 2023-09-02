@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.core.lib.exception.DuplicateLifecycleException;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
@@ -27,7 +28,11 @@ public class VelocityRustyConnector {
 
     @Inject
     public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder, Metrics.Factory metricsFactory) {
-        new VelocityAPI(this, server, logger, dataFolder);
+        try {
+            new VelocityAPI(this, server, logger, dataFolder);
+        } catch (Exception e) {
+            server.getConsoleCommandSource().sendMessage(Component.text(e.getMessage(), NamedTextColor.RED));
+        }
         lifecycle = new VelocityLifecycle();
         this.metricsFactory = metricsFactory;
     }

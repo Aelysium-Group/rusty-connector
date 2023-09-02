@@ -13,11 +13,7 @@ public class DefaultConfig extends YAML {
     private static DefaultConfig config;
     private boolean debug = false;
 
-    private String redis_host = "";
-    private int redis_port = 3306;
-    private String redis_user = "default";
-    private String redis_password = "password";
-    private String redis_dataChannel = "rustyConnector-sync";
+    private String messenger = "";
 
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
@@ -59,24 +55,8 @@ public class DefaultConfig extends YAML {
         return this.debug;
     }
 
-    public String redis_host() {
-        return this.redis_host;
-    }
-
-    public int redis_port() {
-        return this.redis_port;
-    }
-
-    public String redis_password() {
-        return this.redis_password;
-    }
-
-    public String redis_user() {
-        return this.redis_user;
-    }
-
-    public String redis_dataChannel() {
-        return this.redis_dataChannel;
+    public String messenger() {
+        return this.messenger;
     }
 
     public boolean whitelist_enabled() {
@@ -119,21 +99,9 @@ public class DefaultConfig extends YAML {
             this.debug = false;
         }
 
-        // Redis
+        // Connector
 
-        this.redis_host = this.getNode(this.data, "redis.host", String.class);
-        if(this.redis_host.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
-
-        this.redis_port = this.getNode(this.data, "redis.port", Integer.class);
-        this.redis_user = this.getNode(this.data, "redis.user", String.class);
-        this.redis_password = this.getNode(this.data, "redis.password", String.class);
-
-        if(this.redis_password.length() != 0 && this.redis_password.length() < 16)
-            throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
-
-        this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
-        if(this.redis_dataChannel.equals(""))
-            throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
+        this.messenger = this.getNode(this.data, "messenger", String.class);
 
         // Whitelist
 

@@ -40,11 +40,12 @@ public class RedisClient extends io.lettuce.core.RedisClient {
     }
 
     public static class Builder {
-        private static final ClientResources resources = ClientResources.create();
+        private ClientResources resources;
         private String host = "localhost";
         private int port = 3306;
         private String user = "default";
         private char[] password = null;
+        private ProtocolVersion protocolVersion = ProtocolVersion.newestSupported();
         private String dataChannel = "rusty-connector";
         private char[] privateKey = null;
 
@@ -65,8 +66,8 @@ public class RedisClient extends io.lettuce.core.RedisClient {
             return this;
         }
 
-        public Builder setPassword(String password) {
-            this.password = password.toCharArray();
+        public Builder setPassword(char[] password) {
+            this.password = password;
             return this;
         }
 
@@ -77,6 +78,16 @@ public class RedisClient extends io.lettuce.core.RedisClient {
 
         public Builder setPrivateKey(char[] privateKey) {
             this.privateKey = privateKey;
+            return this;
+        }
+
+        public Builder setProtocol(ProtocolVersion protocolVersion) {
+            this.protocolVersion = protocolVersion;
+            return this;
+        }
+
+        public Builder setResources(ClientResources resources) {
+            this.resources = resources;
             return this;
         }
 
@@ -93,7 +104,7 @@ public class RedisClient extends io.lettuce.core.RedisClient {
                     .autoReconnect(true)
                     .socketOptions(socket)
                     .timeoutOptions(timeout)
-                    .protocolVersion(ProtocolVersion.RESP2)
+                    .protocolVersion(this.protocolVersion)
                     .build();
 
             RedisURI uri;
@@ -110,7 +121,7 @@ public class RedisClient extends io.lettuce.core.RedisClient {
                         .withAuthentication(this.user, this.password)
                         .build();
 
-            RedisClient client = RedisClient.create(resources, uri, dataChannel, privateKey);
+            RedisClient client = RedisClient.create(this.resources, uri, dataChannel, privateKey);
             client.setOptions(options);
 
             return client;

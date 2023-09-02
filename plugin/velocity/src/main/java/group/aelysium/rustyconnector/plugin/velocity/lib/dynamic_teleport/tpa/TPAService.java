@@ -82,7 +82,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
                 .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        api.services().redisService().publish(message);
+        api.services().backboneMessengerService().publish(message);
 
         try {
             PlayerServer senderServer = api.services().serverService().search(source.getCurrentServer().orElseThrow().getServerInfo());

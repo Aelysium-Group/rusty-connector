@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubscriber;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
@@ -9,7 +10,7 @@ import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class RedisSubscriber {
+public class RedisSubscriber extends MessengerSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
     public RedisSubscriber(RedisClient client) {

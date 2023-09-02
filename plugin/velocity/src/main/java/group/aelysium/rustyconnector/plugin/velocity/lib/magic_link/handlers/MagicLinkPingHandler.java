@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
@@ -46,7 +47,7 @@ public class MagicLinkPingHandler implements MessageHandler {
     private boolean connectServer(ServerInfo serverInfo) {
         VelocityAPI api = VelocityAPI.get();
         ServerService serverService = api.services().serverService();
-        RedisService redisService = api.services().redisService();
+        MessengerConnection backboneMessenger = api.services().backboneMessengerService();
 
         try {
             PlayerServer server = new ServerService.ServerBuilder()
@@ -68,7 +69,7 @@ public class MagicLinkPingHandler implements MessageHandler {
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.GREEN.toString())
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.serverInterval()))
                     .buildSendable();
-            redisService.publish(message);
+            backboneMessenger.publish(message);
 
             return true;
         } catch(Exception e) {
@@ -80,7 +81,7 @@ public class MagicLinkPingHandler implements MessageHandler {
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.MESSAGE, "Attempt to connect to proxy failed! " + e.getMessage())
                     .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.RED.toString())
                     .buildSendable();
-            redisService.publish(message);
+            backboneMessenger.publish(message);
         }
         return false;
     }

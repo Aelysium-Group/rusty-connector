@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
@@ -6,7 +6,8 @@ import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.config.StaticFamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMapping;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
@@ -53,10 +54,11 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public void registerHomeServer(Player player, PlayerServer server) throws SQLException {
+        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
         HomeServerMapping mapping = new HomeServerMapping(player, server, this);
 
         this.mappingsCache.add(mapping);
-        HomeServerMappingsDatabase.save(mapping);
+        mySQL.save(mapping);
     }
 
     /**
@@ -66,9 +68,10 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public void unregisterHomeServer(Player player) throws SQLException {
+        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
         this.mappingsCache.removeIf(item -> item.player().equals(player) && item.family().equals(this));
 
-        HomeServerMappingsDatabase.delete(player, this);
+        mySQL.delete(player, this);
     }
 
     /**
@@ -77,10 +80,11 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public void updateMappingExpirations() throws SQLException {
+        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
         if(this.homeServerExpiration == null)
-            HomeServerMappingsDatabase.updateValidExpirations(this);
+            mySQL.updateValidExpirations(this);
         else
-            HomeServerMappingsDatabase.updateNullExpirations(this);
+            mySQL.updateNullExpirations(this);
     }
 
     /**
@@ -88,7 +92,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public void purgeExpiredMappings() throws SQLException {
-        HomeServerMappingsDatabase.purgeExpired(this);
+        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
+        mySQL.purgeExpired(this);
     }
 
     /**
@@ -99,10 +104,11 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public HomeServerMapping findHomeServer(Player player) throws SQLException {
+        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
         HomeServerMapping mapping = this.mappingsCache.stream().filter(item -> item.player().equals(player) && item.family().equals(this)).findFirst().orElse(null);
         if (mapping != null) return mapping;
 
-        return HomeServerMappingsDatabase.find(player, this);
+        return mySQL.find(player, this);
     }
 
     /**

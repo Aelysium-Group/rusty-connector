@@ -1,23 +1,25 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubscriber;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class RedisService extends Service {
+public class RedisConnection extends MessengerConnection {
     private final Vector<RedisSubscriber> liveRedisSubscribers = new Vector<>();
-    private RedisPublisher publisher;
+    private final RedisPublisher publisher;
     private char[] privateKey;
     private final RedisClient.Builder clientBuilder;
     private boolean isAlive = false;
     ExecutorService executorService;
 
-    public RedisService(RedisClient.Builder clientBuilder, char[] privateKey) {
+    public RedisConnection(RedisClient.Builder clientBuilder, char[] privateKey) {
         this.clientBuilder = clientBuilder.setPrivateKey(privateKey);
         this.privateKey = privateKey;
 
@@ -29,32 +31,28 @@ public class RedisService extends Service {
 
         this.executorService.submit(() -> {
             try {
-                RedisSubscriber redis = subscriber.getDeclaredConstructor(RedisClient.class).newInstance(RedisService.this.clientBuilder.build());
-                RedisService.this.liveRedisSubscribers.add(redis);
+                RedisSubscriber redis = subscriber.getDeclaredConstructor(RedisClient.class).newInstance(RedisConnection.this.clientBuilder.build());
+                RedisConnection.this.liveRedisSubscribers.add(redis);
 
                 redis.subscribeToChannel();
 
-                RedisService.this.liveRedisSubscribers.remove(redis);
+                RedisConnection.this.liveRedisSubscribers.remove(redis);
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            RedisService.this.launchNewRedisSubscriber(subscriber);
+            RedisConnection.this.launchNewRedisSubscriber(subscriber);
         });
     }
 
-    /**
-     * Start the service.
-     * @param subscriber A class instance of the RedisSubscriber to be used by the service.
-     * @throws IllegalStateException If the service is already running.
-     */
-    public void start(Class<? extends RedisSubscriber> subscriber) {
+    @Override
+    public void startListening(Class<? extends MessengerSubscriber> subscriber) {
         if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
         this.executorService = Executors.newFixedThreadPool(3);
 
         this.isAlive = true;
 
-        this.launchNewRedisSubscriber(subscriber);
+        this.launchNewRedisSubscriber((Class<RedisSubscriber>) subscriber);
     }
 
     /**

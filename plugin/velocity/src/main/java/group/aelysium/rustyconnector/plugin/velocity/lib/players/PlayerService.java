@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 
 import java.io.SyncFailedException;
@@ -8,9 +9,9 @@ import java.util.UUID;
 
 public class PlayerService extends ServiceableService<PlayerServiceHandler> {
 
-    public PlayerService(PlayerMySQLService playerMySQLService) {
+    public PlayerService(MySQLConnector connector) {
         super(new PlayerServiceHandler());
-        this.services.add(new PlayerDataEnclaveService(playerMySQLService));
+        this.services.add(new PlayerDataEnclaveService(connector));
     }
 
     public FakePlayer findPlayer(UUID uuid) throws SyncFailedException {

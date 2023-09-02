@@ -31,7 +31,7 @@ public class RedisMessagerService extends Service {
                     .setParameter(RedisMessageServerPing.ValidParameters.WEIGHT, String.valueOf(serverInfoService.weight()))
                     .setParameter(RedisMessageServerPing.ValidParameters.PLAYER_COUNT, String.valueOf(serverInfoService.playerCount()))
                     .buildSendable();
-            api.services().redisService().publish(message);
+            api.services().redisService().connection().orElseThrow().publish(message);
         } catch (Exception e) {
             Lang.BOXED_MESSAGE_COLORED.send(PaperAPI.get().logger(), Component.text(e.toString()), NamedTextColor.RED);
         }
@@ -54,7 +54,7 @@ public class RedisMessagerService extends Service {
                 .setParameter(RedisMessageSendPlayer.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
                 .buildSendable();
 
-        api.services().redisService().publish(message);
+        api.services().redisService().connection().orElseThrow().publish(message);
     }
 
     @Override

@@ -15,8 +15,8 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -218,7 +218,7 @@ public final class CommandRusty {
                             }
                             defaultConfig.register();
 
-                            api.reloadServices();
+                            api.reloadRustyConnector();
                             logger.log("Done reloading!");
 
                             VelocityLang.RC_ROOT_USAGE.send(logger);

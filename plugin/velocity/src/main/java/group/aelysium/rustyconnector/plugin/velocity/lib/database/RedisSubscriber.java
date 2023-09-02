@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.database;
 
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
@@ -29,7 +29,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
         MessageCacheService messageCacheService = api.services().messageCacheService();
-        RedisService redisService = api.services().redisService();
+        MessengerConnection backboneMessenger = api.services().backboneMessengerService();
 
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
         // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
@@ -43,9 +43,9 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.data
             if(messageCacheService.ignoredType(message)) messageCacheService.removeMessage(cachedMessage.getSnowflake());
             if(message.origin() == MessageOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
             try {
-                redisService.validatePrivateKey(message.privateKey());
+                backboneMessenger.validatePrivateKey(message.privateKey());
 
-                if (!(redisService.validatePrivateKey(message.privateKey())))
+                if (!(backboneMessenger.validatePrivateKey(message.privateKey())))
                     throw new AuthenticationException("This message has an invalid private key!");
 
                 cachedMessage.sentenceMessage(MessageStatus.ACCEPTED);

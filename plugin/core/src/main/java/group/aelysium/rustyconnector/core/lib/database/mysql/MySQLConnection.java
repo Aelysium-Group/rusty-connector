@@ -1,8 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.database.mysql;
 
-import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
-import com.mysql.cj.jdbc.MysqlDataSource;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnection;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -12,11 +10,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MySQLService extends Service {
+public class MySQLConnection extends StorageConnection {
     private DataSource dataSource;
     private Connection connection;
 
-    protected MySQLService(DataSource dataSource) {
+    protected MySQLConnection(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -83,59 +81,5 @@ public class MySQLService extends Service {
         } catch (Exception ignore) {}
 
         this.dataSource = null;
-    }
-
-    public static class Builder {
-        protected String host;
-        protected int port;
-
-        protected String database;
-        protected String user;
-        protected String password;
-
-        public Builder(){}
-
-        public Builder setHost(String host) {
-            this.host = host;
-            return this;
-        }
-
-        public Builder setPort(int port) {
-            this.port = port;
-            return this;
-        }
-
-        public Builder setDatabase(String database) {
-            this.database = database;
-            return this;
-        }
-
-        public Builder setUser(String user) {
-            this.user = user;
-            return this;
-        }
-
-        public Builder setPassword(String password) {
-            this.password = password;
-            return this;
-        }
-
-        public MySQLService build(){
-            MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
-            dataSource.setServerName(this.host);
-            dataSource.setPortNumber(this.port);
-
-            if(this.database != null)
-                dataSource.setDatabaseName(this.database);
-
-            if(this.user != null)
-                dataSource.setUser(this.user);
-
-            if(this.password != null)
-                dataSource.setPassword(this.password);
-
-            return new MySQLService(dataSource);
-        }
-
     }
 }

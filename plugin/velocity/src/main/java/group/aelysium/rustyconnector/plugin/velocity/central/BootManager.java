@@ -1,89 +1,93 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-import com.mysql.cj.jdbc.exceptions.CommunicationsException;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
+import group.aelysium.rustyconnector.core.lib.connectors.Connector;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
-import group.aelysium.rustyconnector.core.lib.model.IKLifecycle;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
-import group.aelysium.rustyconnector.plugin.velocity.lib.database.HomeServerMappingsDatabase;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Core;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.RootServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ScalarServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsMySQLService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsMySQL;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerMySQLService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerMySQL;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.ViewportMySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.GatewayService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-public class Processor extends IKLifecycle<ProcessorServiceHandler> {
-    protected Processor(Map<Class<? extends Service>, Service> services) {
-        super(new ProcessorServiceHandler(services));
-    }
-
-    @Override
-    public void kill() {
-        this.services.killAll();
-    }
-
-    public static Processor init(DefaultConfig config) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException {
+public class BootManager {
+    public static Core buildCore() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException {
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
-        Processor.Builder builder = new Processor.Builder();
+        Map<Class<? extends Service>, Service> services = new HashMap<>();
+        List<String> requestedConnectors = new ArrayList<>();
 
         // Setup private key
-        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.dataFolder()), "private.key"));
-        if (!privateKeyConfig.generate())
-            throw new IllegalStateException("Unable to load or create private.key!");
         char[] privateKey;
-        try {
-            privateKey = privateKeyConfig.get();
-        } catch (Exception ignore) {
-            throw new IllegalAccessException("There was a fatal error while reading private.key!");
+        {
+            PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.dataFolder()), "private.key"));
+            if (!privateKeyConfig.generate())
+                throw new IllegalStateException("Unable to load or create private.key!");
+            try {
+                privateKey = privateKeyConfig.get();
+            } catch (Exception ignore) {
+                throw new IllegalAccessException("There was a fatal error while reading private.key!");
+            }
         }
 
+        // Setup default config
+        DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(String.valueOf(api.dataFolder()), "config.yml"), "velocity_config_template.yml");
         {
-            // Setup Redis
-            logger.send(Component.text("Building Redis...", NamedTextColor.DARK_GRAY));
+            if (!defaultConfig.generate())
+                throw new IllegalStateException("Unable to load or create config.yml!");
+            defaultConfig.register();
+        }
 
-            RedisClient.Builder redisClientBuilder = new RedisClient.Builder()
-                    .setHost(config.redis_host())
-                    .setPort(config.redis_port())
-                    .setUser(config.redis_user())
-                    .setPrivateKey(privateKey)
-                    .setDataChannel(config.redis_dataChannel());
+        // Setup logger config
+        LoggerConfig loggerConfig = LoggerConfig.newConfig(new File(String.valueOf(api.dataFolder()), "logger.yml"), "velocity_logger_template.yml");
+        {
+            if (!loggerConfig.generate())
+                throw new IllegalStateException("Unable to load or create logger.yml!");
+            loggerConfig.register();
+            PluginLogger.init(loggerConfig);
+        }
 
-            if (!config.redis_password().equals(""))
-                redisClientBuilder.setPassword(config.redis_password());
+        // Setup connectors
+        {
+            logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
-            builder.addService(new RedisService(redisClientBuilder, privateKey));
+            ConnectorsConfig connectorsConfig = ConnectorsConfig.newConfig(new File(String.valueOf(api.dataFolder()), "connectors.yml"), "velocity_connectors_template.yml");
+            if (!connectorsConfig.generate())
+                throw new IllegalStateException("Unable to load or create connectorsConfig.yml!");
+            services.put(ConnectorsService.class, connectorsConfig.register(privateKey));
 
-            logger.send(Component.text("Finished building Redis.", NamedTextColor.GREEN));
+            requestedConnectors.add(defaultConfig.messenger());
+
+            logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
         }
 
         {
@@ -95,26 +99,17 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                 throw new IllegalStateException("Unable to load or create families.yml!");
             familiesConfig.register();
 
-            // Setup Static families MySQL
-            java.util.Optional<MySQLService> mySQLService = java.util.Optional.empty();
+            java.util.Optional<MySQLConnector> connector = java.util.Optional.empty();
             {
-                logger.send(Component.text(" | Static families detected. Building static family MySQL...", NamedTextColor.DARK_GRAY));
                 try {
-                    if (!familiesConfig.getStaticFamilies().isEmpty()) {
-                        MySQLService builtMySQLService = new MySQLService.Builder()
-                                .setHost(familiesConfig.getMysql_host())
-                                .setPort(familiesConfig.getMysql_port())
-                                .setDatabase(familiesConfig.getMysql_database())
-                                .setUser(familiesConfig.getMysql_user())
-                                .setPassword(familiesConfig.getMysql_password())
-                                .build();
-
-                        HomeServerMappingsDatabase.init(builtMySQLService);
-
-                        mySQLService = java.util.Optional.of(builtMySQLService);
+                    if (!familiesConfig.staticFamilies().isEmpty()) {
+                        logger.send(Component.text(" | Static families detected. Building static family MySQL...", NamedTextColor.DARK_GRAY));
+                        if(!requestedConnectors.contains(familiesConfig.staticFamilyStorage())) throw new NoOutputException();
+                        Connector<?> fetchedConnector = ((ConnectorsService) services.get(ConnectorsService.class)).get(familiesConfig.staticFamilyStorage());
+                        if(fetchedConnector == null) throw new NoOutputException();
+                        connector = Optional.of((MySQLConnector) fetchedConnector);
                     }
-                } catch (CommunicationsException e) {
-                    throw new IllegalAccessException("Unable to connect to MySQL! Is the server available?");
+                } catch (NoOutputException ignore) {
                 } catch (Exception e) {
                     throw new IllegalAccessException("Unable to connect to initialize MySQL for Static Families!");
                 }
@@ -123,17 +118,17 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
             }
 
             logger.send(Component.text(" | Registering family service to the API...", NamedTextColor.DARK_GRAY));
-            FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers(), mySQLService);
-            builder.addService(familyService);
+            FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers(), connector);
+            services.put(FamilyService.class, familyService);
             logger.send(Component.text(" | Finished registering family service to API.", NamedTextColor.GREEN));
 
             {
                 logger.send(Component.text(" | Building families...", NamedTextColor.DARK_GRAY));
-                for (String familyName : familiesConfig.getScalarFamilies()) {
+                for (String familyName : familiesConfig.scalarFamilies()) {
                     familyService.add(ScalarServerFamily.init(familyName));
                     logger.send(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
                 }
-                for (String familyName : familiesConfig.getStaticFamilies()) {
+                for (String familyName : familiesConfig.staticFamilies()) {
                     familyService.add(StaticServerFamily.init(familyName));
                     logger.send(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
                 }
@@ -143,7 +138,7 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
             {
                 logger.send(Component.text(" | Building root family...", NamedTextColor.DARK_GRAY));
 
-                RootServerFamily rootFamily = RootServerFamily.init(familiesConfig.getRootFamilyName());
+                RootServerFamily rootFamily = RootServerFamily.init(familiesConfig.rootFamilyName());
                 familyService.setRootFamily(rootFamily);
                 logger.send(Component.text(" | Registered root family: "+rootFamily.name(), NamedTextColor.YELLOW));
 
@@ -151,8 +146,8 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
             }
 
             logger.send(Component.text(" | Registering load balancing service to the API...", NamedTextColor.DARK_GRAY));
-            if (config.services_loadBalancing_enabled()) {
-                builder.addService(new LoadBalancingService(familyService.size(), config.services_loadBalancing_interval()));
+            if (defaultConfig.services_loadBalancing_enabled()) {
+                services.put(LoadBalancingService.class, new LoadBalancingService(familyService.size(), defaultConfig.services_loadBalancing_interval()));
             }
             logger.send(Component.text(" | Finished registering load balancing service to the API.", NamedTextColor.GREEN));
 
@@ -163,12 +158,12 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
         {
             logger.send(Component.text("Registering whitelist service to the API...", NamedTextColor.DARK_GRAY));
             WhitelistService whitelistService = new WhitelistService();
-            builder.addService(whitelistService);
+            services.put(WhitelistService.class, whitelistService);
             logger.send(Component.text("Finished registering whitelist service to the API.", NamedTextColor.GREEN));
 
             logger.send(Component.text("Building proxy whitelist...", NamedTextColor.DARK_GRAY));
-            if (config.whitelist_enabled()) {
-                whitelistService.setProxyWhitelist(Whitelist.init(config.whitelist_name()));
+            if (defaultConfig.whitelist_enabled()) {
+                whitelistService.setProxyWhitelist(Whitelist.init(defaultConfig.whitelist_name()));
                 logger.send(Component.text("Finished building proxy whitelist.", NamedTextColor.GREEN));
             } else
                 logger.send(Component.text("Finished building proxy whitelist. No whitelist is enabled for the proxy.", NamedTextColor.GREEN));
@@ -184,7 +179,7 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
 
             {
                 logger.send(Component.text(" | Building message cache service...", NamedTextColor.DARK_GRAY));
-                builder.addService(new MessageCacheService(dataTransitConfig.cache_size(), dataTransitConfig.cache_ignoredStatuses(), dataTransitConfig.cache_ignoredTypes()));
+                services.put(MessageCacheService.class, new MessageCacheService(dataTransitConfig.cache_size(), dataTransitConfig.cache_ignoredStatuses(), dataTransitConfig.cache_ignoredTypes()));
                 logger.send(Component.text(" | Message cache size set to: "+dataTransitConfig.cache_size(), NamedTextColor.YELLOW));
                 logger.send(Component.text(" | Finished building message cache service.", NamedTextColor.GREEN));
             }
@@ -194,7 +189,7 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                     dataTransitConfig.whitelist_enabled(),
                     dataTransitConfig.maxPacketLength()
             );
-            builder.addService(dataTransitService);
+            services.put(DataTransitService.class, dataTransitService);
 
             if (dataTransitConfig.whitelist_enabled())
                 dataTransitConfig.whitelist_addresses().forEach(entry -> {
@@ -220,8 +215,8 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
         {
             logger.send(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-            MagicLinkService magicLinkService = new MagicLinkService(3, config.services_serverLifecycle_serverPingInterval());
-            builder.addService(magicLinkService);
+            MagicLinkService magicLinkService = new MagicLinkService(3, defaultConfig.services_serverLifecycle_serverPingInterval());
+            services.put(MagicLinkService.class, magicLinkService);
 
             logger.send(Component.text("Finished building magic link service.", NamedTextColor.GREEN));
         }
@@ -230,15 +225,47 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
             logger.send(Component.text("Building server service...", NamedTextColor.DARK_GRAY));
 
             ServerService.Builder serverServiceBuilder = new ServerService.Builder()
-                    .setServerTimeout(config.services_serverLifecycle_serverTimeout())
-                    .setServerInterval(config.services_serverLifecycle_serverPingInterval());
+                    .setServerTimeout(defaultConfig.services_serverLifecycle_serverTimeout())
+                    .setServerInterval(defaultConfig.services_serverLifecycle_serverPingInterval());
 
-            builder.addService(serverServiceBuilder.build());
+            services.put(ServerService.class, serverServiceBuilder.build());
 
             logger.send(Component.text("Finished building server service.", NamedTextColor.GREEN));
         }
 
-        return builder.build();
+        {
+            WebhooksConfig webhooksConfig = WebhooksConfig.newConfig(new File(String.valueOf(api.dataFolder()), "webhooks.yml"), "velocity_webhooks_template.yml");
+            if(!webhooksConfig.generate())
+                throw new IllegalStateException("Unable to load or create webhooks.yml!");
+            webhooksConfig.register();
+        }
+
+        // Verify Connectors
+        {
+            logger.send(Component.text("Validating Connector service...", NamedTextColor.DARK_GRAY));
+            ConnectorsService connectorsService = ((ConnectorsService) services.get(ConnectorsService.class));
+
+            /*
+             * Make sure that configs aren't trying to access connectors which don't exist.
+             * Also makes sure that, if there are excess connectors defined, we only load and attempt to boot the ones that are actually being called.
+             */
+            for (String name : requestedConnectors) {
+                logger.send(Component.text(" | Checking and building connector ["+name+"]...", NamedTextColor.DARK_GRAY));
+
+                if(!connectorsService.containsKey(name))
+                    throw new RuntimeException("No connector with the name '"+name+"' was found!");
+
+                Connector connector = connectorsService.get(name);
+                try {
+                    connector.connect();
+                } catch (ConnectException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            logger.send(Component.text("Finished validating Connector service.", NamedTextColor.GREEN));
+        }
+
+        return new Core(services, defaultConfig.messenger());
     }
 
     public static class Initializer {
@@ -283,18 +310,15 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
 
                 if(!viewportConfig.isEnabled()) return Optional.empty();
 
-                ViewportMySQLService builtMySQLService = new ViewportMySQLService.Builder()
-                        .setHost(viewportConfig.getMysql_host())
-                        .setPort(viewportConfig.getMysql_port())
-                        .setDatabase(viewportConfig.getMysql_database())
-                        .setUser(viewportConfig.getMysql_user())
-                        .setPassword(viewportConfig.getMysql_password())
-                        .build();
+                logger.send(Component.text(" | Building viewport MySQL...", NamedTextColor.DARK_GRAY));
+                StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(viewportConfig.storage());
+                if(connector == null) throw new NullPointerException("You must define a storage method for viewport!");
+                logger.send(Component.text(" | Finished building viewport MySQL.", NamedTextColor.GREEN));
 
                 GatewayService gatewayService = new GatewayService(viewportConfig.getWebsocket_address(), viewportConfig.getRest_address());
 
                 ViewportService service = new ViewportService.Builder()
-                        .setMySQLService(builtMySQLService)
+                        .setStorageConnector(connector)
                         .setGatewayService(gatewayService)
                         .build();
 
@@ -323,17 +347,12 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
                         config.isAllowMessaging()
                 );
 
-                FriendsMySQLService friendsMySQLService = new FriendsMySQLService.Builder()
-                        .setHost(config.getMysql_host())
-                        .setPort(config.getMysql_port())
-                        .setDatabase(config.getMysql_database())
-                        .setUser(config.getMysql_user())
-                        .setPassword(config.getMysql_password())
-                        .build();
+                logger.send(Component.text(" | Building friends MySQL...", NamedTextColor.DARK_GRAY));
+                StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(config.storage());
+                if(connector == null) throw new NullPointerException("You must define a storage method for viewport!");
+                logger.send(Component.text(" | Finished building friends MySQL.", NamedTextColor.GREEN));
 
-                friendsMySQLService.init();
-
-                return Optional.of(new FriendsService(settings, friendsMySQLService));
+                return Optional.of(new FriendsService(settings, (MySQLConnector) connector));
             } catch (Exception e) {
                 logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
             }
@@ -351,17 +370,12 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
 
                 if(!config.isEnabled()) return Optional.empty();
 
-                PlayerMySQLService playerMySQLService = new PlayerMySQLService.Builder()
-                        .setHost(config.getMysql_host())
-                        .setPort(config.getMysql_port())
-                        .setDatabase(config.getMysql_database())
-                        .setUser(config.getMysql_user())
-                        .setPassword(config.getMysql_password())
-                        .build();
+                logger.send(Component.text(" | Building friends MySQL...", NamedTextColor.DARK_GRAY));
+                StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(config.storage());
+                if(connector == null) throw new NullPointerException("You must define a storage method for viewport!");
+                logger.send(Component.text(" | Finished building friends MySQL.", NamedTextColor.GREEN));
 
-                playerMySQLService.init();
-
-                return Optional.of(new PlayerService(playerMySQLService));
+                return Optional.of(new PlayerService((MySQLConnector) connector));
             } catch (Exception e) {
                 logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
             }
@@ -386,18 +400,4 @@ public class Processor extends IKLifecycle<ProcessorServiceHandler> {
             return Optional.empty();
         }
     }
-
-    protected static class Builder {
-        protected final Map<Class<? extends Service>, Service> services = new HashMap<>();
-
-        public Builder addService(Service service) {
-            this.services.put(service.getClass(), service);
-            return this;
-        }
-
-        public Processor build() {
-            return new Processor(this.services);
-        }
-    }
-
 }

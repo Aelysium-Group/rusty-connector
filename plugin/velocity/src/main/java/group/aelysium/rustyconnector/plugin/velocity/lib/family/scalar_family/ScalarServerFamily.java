@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;

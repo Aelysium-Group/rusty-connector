@@ -8,10 +8,15 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.scheduler.Scheduler;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
+import group.aelysium.rustyconnector.core.lib.database.redis.RedisConnection;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.config.MemberKeyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.Core;
+import group.aelysium.rustyconnector.plugin.velocity.lib.CoreServiceHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.database.RedisSubscriber;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
@@ -26,6 +31,7 @@ import org.slf4j.Logger;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.net.ConnectException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 
@@ -38,12 +44,12 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
     private String version;
     private final VelocityRustyConnector plugin;
     private final ProxyServer server;
-    private Processor processor = null;
+    private Core core = BootManager.buildCore();
     private final Path dataFolder;
     private final PluginLogger pluginLogger;
     private final char[] memberKey;
 
-    public VelocityAPI(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
+    public VelocityAPI(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) throws SQLException, InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
         instance = this;
 
         try {
@@ -107,34 +113,43 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         return String.valueOf(this.dataFolder);
     }
 
-    public void killServices() {
-        this.processor.kill();
+    public void reloadRustyConnector() throws SQLException, InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
+        this.core.kill();
+        this.core = null;
+
+        this.core = BootManager.buildCore();
     }
 
-    public void reloadServices() {
-        this.processor.kill();
-        this.processor = null;
-
-        VelocityRustyConnector.lifecycle().loadConfigs();
-    }
-
-    public void configureProcessor(DefaultConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
+    public void configureProcessor() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, SQLException {
         PluginLogger logger = VelocityAPI.get().logger();
-        if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
-        this.processor = Processor.init(config);
+        if(this.core != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
+        this.core = BootManager.buildCore();
 
-        logger.send(Component.text("Booting Redis service...", NamedTextColor.DARK_GRAY));
-        this.processor.services().redisService().start(RedisSubscriber.class);
-        logger.send(Component.text("Finished booting Redis service.", NamedTextColor.GREEN));
+        logger.send(Component.text("Booting Connectors service...", NamedTextColor.DARK_GRAY));
+        this.services().connectorsService().messengers().forEach(connector -> {
+            if(connector.connection().isEmpty()) return;
+            MessengerConnection connection = connector.connection().orElseThrow();
+
+            if(connection instanceof RedisConnection) connection.startListening(RedisSubscriber.class);
+        });
+        this.services().connectorsService().storage().forEach(connector -> {
+            if(!connector.connection().isEmpty()) return;
+            try {
+                connector.connect();
+            } catch (ConnectException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        logger.send(Component.text("Finished booting Connectors service.", NamedTextColor.GREEN));
 
         logger.send(Component.text("Booting magic link service...", NamedTextColor.DARK_GRAY));
-        this.processor.services().magicLinkService().startHeartbeat();
+        this.core.services().magicLinkService().startHeartbeat();
         logger.send(Component.text("Finished booting magic link service.", NamedTextColor.GREEN));
 
         try {
             logger.send(Component.text("Booting family service...", NamedTextColor.DARK_GRAY));
 
-            FamilyService familyService = this.processor.services().familyService();
+            FamilyService familyService = this.core.services().familyService();
 
             familyService.dump().forEach(baseServerFamily -> {
                 try {
@@ -149,9 +164,9 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
 
         try {
             VelocityAPI.get().logger().send(Component.text("Building friends service...", NamedTextColor.DARK_GRAY));
-            FriendsService friendsService = Processor.Initializer.buildFriendsService().orElseThrow();
+            FriendsService friendsService = BootManager.Initializer.buildFriendsService().orElseThrow();
 
-            this.processor.services().add(friendsService);
+            this.core.services().add(friendsService);
 
             friendsService.initCommand();
             VelocityAPI.get().logger().send(Component.text("Finished building friends service.", NamedTextColor.GREEN));
@@ -160,15 +175,15 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         }
 
         try {
-            PlayerService playerService = Processor.Initializer.buildPlayerService().orElseThrow();
+            PlayerService playerService = BootManager.Initializer.buildPlayerService().orElseThrow();
 
-            this.processor.services().add(playerService);
+            this.core.services().add(playerService);
         } catch (Exception ignore) {}
         try {
             VelocityAPI.get().logger().send(Component.text("Building party service...", NamedTextColor.DARK_GRAY));
-            PartyService partyService = Processor.Initializer.buildPartyService().orElseThrow();
+            PartyService partyService = BootManager.Initializer.buildPartyService().orElseThrow();
 
-            this.processor.services().add(partyService);
+            this.core.services().add(partyService);
 
             partyService.initCommand();
             VelocityAPI.get().logger().send(Component.text("Finished building party service.", NamedTextColor.GREEN));
@@ -177,9 +192,9 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         }
         try {
             VelocityAPI.get().logger().send(Component.text("Building dynamic teleport service...", NamedTextColor.DARK_GRAY));
-            DynamicTeleportService dynamicTeleportService = Processor.Initializer.buildDynamicTeleportService().orElseThrow();
+            DynamicTeleportService dynamicTeleportService = BootManager.Initializer.buildDynamicTeleportService().orElseThrow();
 
-            this.processor.services().add(dynamicTeleportService);
+            this.core.services().add(dynamicTeleportService);
 
             try {
                 dynamicTeleportService.services().tpaService().orElseThrow()
@@ -201,9 +216,9 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         }
         try {
             VelocityAPI.get().logger().send(Component.text("Building viewport service...", NamedTextColor.DARK_GRAY));
-            ViewportService viewportService = Processor.Initializer.buildViewportService().orElseThrow();
+            ViewportService viewportService = BootManager.Initializer.buildViewportService().orElseThrow();
 
-            this.processor.services().add(viewportService);
+            this.core.services().add(viewportService);
 
             VelocityAPI.get().logger().send(Component.text("Finished building viewport service.", NamedTextColor.GREEN));
         } catch (Exception ignore) {
@@ -211,8 +226,12 @@ public class VelocityAPI extends PluginAPI<Scheduler> {
         }
     }
 
-    public ProcessorServiceHandler services() {
-        return this.processor.services();
+    public CoreServiceHandler services() {
+        return this.core.services();
+    }
+
+    public Core core() {
+        return this.core;
     }
 
     /**

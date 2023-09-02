@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnection;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.Cache;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
@@ -11,18 +13,17 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.*;
 
 /**
- * The data enclave service allows you to store database responses in-memory
- * to be used later.
+ * The data enclave service allows you to store database responses in-memory, to be used later.
  * If a value is available in-memory, data enclave will return that.
  * If not, it will query the database.
  */
 public class FriendsDataEnclaveService extends Service {
     private final Map<FakePlayer, Long> players = new HashMap<>();
     private final Cache<List<FriendMapping>> cache = new Cache<>(100); // Max number of players that can be stored at once
-    private final FriendsMySQLService mySQLService;
+    private final FriendsMySQL mysql;
 
-    public FriendsDataEnclaveService(FriendsMySQLService mySQLService) {
-        this.mySQLService = mySQLService;
+    public FriendsDataEnclaveService(MySQLConnector connection) {
+        this.mysql = new FriendsMySQL(connection);
     }
 
     /**
@@ -89,7 +90,7 @@ public class FriendsDataEnclaveService extends Service {
             } catch (Exception ignore) {}
 
         try {
-            List<FriendMapping> mappings = this.mySQLService.findFriends(player).orElseThrow();
+            List<FriendMapping> mappings = this.mysql.findFriends(player).orElseThrow();
             mappings.forEach(this::putMapping);
 
             return Optional.of(mappings);
@@ -115,7 +116,7 @@ public class FriendsDataEnclaveService extends Service {
         )
             return true;
 
-        return this.mySQLService.areFriends(player1, player2);
+        return this.mysql.areFriends(player1, player2);
     }
 
     /**
@@ -130,7 +131,7 @@ public class FriendsDataEnclaveService extends Service {
         } catch (Exception ignore) {}
 
         try {
-            List<FriendMapping> mappings = this.mySQLService.findFriends(player).orElseThrow();
+            List<FriendMapping> mappings = this.mysql.findFriends(player).orElseThrow();
             Long snowflake = this.cache.put(mappings);
             this.players.put(FakePlayer.from(player), snowflake);
 
@@ -146,7 +147,7 @@ public class FriendsDataEnclaveService extends Service {
         try {
             FriendMapping mapping = new FriendMapping(player1, player2);
             try {
-                 this.mySQLService.addFriend(player1, player2);
+                 this.mysql.addFriend(player1, player2);
             } catch (SQLIntegrityConstraintViolationException ignore) {}
 
             putMapping(mapping);
@@ -162,7 +163,7 @@ public class FriendsDataEnclaveService extends Service {
     public void removeFriend(Player player1, Player player2) throws SQLException {
         FriendMapping mapping = new FriendMapping(player1, player2);
         try {
-            this.mySQLService.removeFriend(player1, player2);
+            this.mysql.removeFriend(player1, player2);
         } catch (Exception e) {
             e.printStackTrace();
         }

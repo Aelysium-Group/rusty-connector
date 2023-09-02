@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnection;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 
@@ -15,10 +17,10 @@ import java.util.*;
  */
 public class PlayerDataEnclaveService extends Service {
     private final Vector<FakePlayer> cache = new Vector<>(); // Max number of players that can be stored at once
-    private final PlayerMySQLService mySQLService;
+    private final PlayerMySQL mysql;
 
-    public PlayerDataEnclaveService(PlayerMySQLService mySQLService) {
-        this.mySQLService = mySQLService;
+    public PlayerDataEnclaveService(MySQLConnector connector) {
+        this.mysql = new PlayerMySQL(connector);
     }
 
     public void uncachePlayer(Player player) {
@@ -61,7 +63,7 @@ public class PlayerDataEnclaveService extends Service {
 
         // Ask MySQL for the player and then cache it.
         try {
-            FakePlayer fakePlayer = this.mySQLService.resolveUUID(uuid).orElseThrow();
+            FakePlayer fakePlayer = this.mysql.resolveUUID(uuid).orElseThrow();
 
             this.cachePlayer(fakePlayer);
 
@@ -75,7 +77,7 @@ public class PlayerDataEnclaveService extends Service {
 
     public void savePlayer(Player player) {
         try {
-            this.mySQLService.addPlayer(player);
+            this.mysql.addPlayer(player);
         } catch (Exception e) {
             e.printStackTrace();
         }

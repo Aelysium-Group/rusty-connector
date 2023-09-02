@@ -17,12 +17,7 @@ public class FamiliesConfig extends YAML {
     private Boolean rootFamily_catchDisconnectingPlayers = false;
     private List<String> scalar = new ArrayList<>();
     private List<String> staticF = new ArrayList<>();
-
-    private String mysql_host = "";
-    private int mysql_port = 3306;
-    private String mysql_user = "root";
-    private String mysql_password = "password";
-    private String mysql_database = "RustyConnector";
+    private String staticFamilyStorage = "";
 
     private FamiliesConfig(File configPointer, String template) {
         super(configPointer, template);
@@ -52,34 +47,22 @@ public class FamiliesConfig extends YAML {
         config = null;
     }
 
-    public String getRootFamilyName() {
+    public String rootFamilyName() {
         return this.rootFamily_name;
     }
     public Boolean shouldRootFamilyCatchDisconnectingPlayers() {
         return this.rootFamily_catchDisconnectingPlayers;
     }
 
-    public List<String> getScalarFamilies() {
+    public List<String> scalarFamilies() {
         return this.scalar;
     }
-    public List<String> getStaticFamilies() {
+    public List<String> staticFamilies() {
         return this.staticF;
     }
 
-    public String getMysql_host() {
-        return this.mysql_host;
-    }
-    public int getMysql_port() {
-        return this.mysql_port;
-    }
-    public String getMysql_password() {
-        return this.mysql_password;
-    }
-    public String getMysql_user() {
-        return this.mysql_user;
-    }
-    public String getMysql_database() {
-        return this.mysql_database;
+    public String staticFamilyStorage() {
+        return this.staticFamilyStorage;
     }
 
     @SuppressWarnings("unchecked")
@@ -132,15 +115,7 @@ public class FamiliesConfig extends YAML {
 
         // MySQL
         if(this.staticF.size() > 0) {
-            this.mysql_host = this.getNode(this.data, "mysql.host", String.class);
-            if (this.mysql_host.equals("")) throw new IllegalStateException("Please configure your MySQL settings.");
-
-            this.mysql_port = this.getNode(this.data, "mysql.port", Integer.class);
-            this.mysql_user = this.getNode(this.data, "mysql.user", String.class);
-            this.mysql_password = this.getNode(this.data, "mysql.password", String.class);
-            this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
-            if (this.mysql_database.equals(""))
-                throw new IllegalStateException("You must pass a proper name for the database to use with MySQL!");
+            this.staticFamilyStorage = this.getNode(this.data, "static-family-storage", String.class);
         }
     }
 

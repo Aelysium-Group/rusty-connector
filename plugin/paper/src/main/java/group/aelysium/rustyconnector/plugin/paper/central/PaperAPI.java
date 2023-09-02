@@ -99,7 +99,7 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     public void configureProcessor(DefaultConfig config) throws IllegalAccessException {
         if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
         this.processor = Processor.init(config);
-        this.processor.services().redisService().start(RedisSubscriber.class);
+        this.processor.services().redisService().connection().orElseThrow().startListening(RedisSubscriber.class);
         this.processor.services().magicLinkService().startHeartbeat();
     }
 

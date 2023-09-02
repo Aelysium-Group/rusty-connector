@@ -1,11 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnection;
+import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamilyMySQL;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -13,19 +17,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class FamilyService extends Service implements NodeManager<BaseServerFamily> {
-    private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
+public class FamilyService extends Service implements NodeManager<BaseServerFamily<?>> {
+    private final Map<String, BaseServerFamily<?>> registeredFamilies = new HashMap<>();
     private WeakReference<RootServerFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
-    private final Optional<MySQLService> mySQLService;
+    private final Optional<StaticFamilyMySQL> staticFamilyMySQL;
 
-    public FamilyService(boolean catchDisconnectingPlayers, Optional<MySQLService> mySQLService) {
+    public FamilyService(boolean catchDisconnectingPlayers, Optional<MySQLConnector> connector) {
         this.catchDisconnectingPlayers = catchDisconnectingPlayers;
-        this.mySQLService = mySQLService;
+        this.staticFamilyMySQL = connector.map(StaticFamilyMySQL::new);
     }
 
-    public Optional<MySQLService> mySQLService() {
-        return this.mySQLService;
+    public Optional<StaticFamilyMySQL> staticFamilyMySQL() {
+        return this.staticFamilyMySQL;
     }
 
     public boolean shouldCatchDisconnectingPlayers() {
@@ -53,7 +57,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * @return A family or `null` if there is no family with the defined name.
      */
     @Override
-    public BaseServerFamily find(String name) {
+    public BaseServerFamily<?> find(String name) {
         return this.registeredFamilies.get(name);
     }
 
@@ -62,7 +66,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * @param family The family to add to this manager.
      */
     @Override
-    public void add(BaseServerFamily family) {
+    public void add(BaseServerFamily<?> family) {
         this.registeredFamilies.put(family.name(),family);
     }
 
@@ -71,12 +75,12 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * @param family The family to remove from this manager.
      */
     @Override
-    public void remove(BaseServerFamily family) {
+    public void remove(BaseServerFamily<?> family) {
         this.registeredFamilies.remove(family.name());
     }
 
     @Override
-    public List<BaseServerFamily> dump() {
+    public List<BaseServerFamily<?>> dump() {
         return this.registeredFamilies.values().stream().toList();
     }
 
@@ -95,10 +99,10 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      */
     public void uncacheHomeServerMappings(Player player) {
         FamilyService familyService = VelocityAPI.get().services().familyService();
-        List<BaseServerFamily> familyList = familyService.dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
+        List<BaseServerFamily<?>> familyList = familyService.dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
         if(familyList.size() == 0) return;
 
-        for (BaseServerFamily family : familyList) {
+        for (BaseServerFamily<?> family : familyList) {
             ((StaticServerFamily) family).uncacheHomeServer(player);
         }
     }
