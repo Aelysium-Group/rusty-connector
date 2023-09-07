@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.database.redis;
 
 import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
@@ -43,7 +44,7 @@ public class RedisPublisher {
 
         RedisPubSubAsyncCommands<String, String> async = connection.async();
 
-        async.publish(this.client.dataChannel(), message.toString());
+        async.publish(this.client.dataChannel(), AESCryptor.encrypt(message.toString(), client.privateKey()));
     }
 
     /**
