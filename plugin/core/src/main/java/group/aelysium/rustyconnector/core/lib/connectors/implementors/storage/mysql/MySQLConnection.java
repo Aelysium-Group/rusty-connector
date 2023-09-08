@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.database.mysql;
+package group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql;
 
 import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnection;
 

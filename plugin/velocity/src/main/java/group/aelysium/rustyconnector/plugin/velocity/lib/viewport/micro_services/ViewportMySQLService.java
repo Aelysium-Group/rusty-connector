@@ -2,26 +2,14 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_service
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
+import group.aelysium.rustyconnector.core.lib.connector.mysql.MySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 public class ViewportMySQLService extends MySQLService {
     private ViewportMySQLService(DataSource dataSource) {

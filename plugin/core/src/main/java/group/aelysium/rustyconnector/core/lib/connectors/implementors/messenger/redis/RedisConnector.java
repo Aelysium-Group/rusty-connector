@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.database.redis;
+package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
 
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.UserPass;

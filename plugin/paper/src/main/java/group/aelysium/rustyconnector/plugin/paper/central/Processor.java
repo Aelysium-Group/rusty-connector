@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisClient;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisClient;
+import group.aelysium.rustyconnector.core.lib.connector.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.model.IKLifecycle;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;

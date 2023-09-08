@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.magic_link;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
+import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
@@ -32,7 +32,7 @@ public class MagicLinkService extends ClockService {
 
         this.scheduleDelayed(() -> {
             try {
-                service.pingProxy(RedisMessageServerPing.ConnectionIntent.CONNECT);
+                service.pingProxy(ServerPingPacket.ConnectionIntent.CONNECT);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -53,7 +53,7 @@ public class MagicLinkService extends ClockService {
 
     public void disconnect() {
         RedisMessagerService service = PaperAPI.get().services().redisMessagerService();
-        service.pingProxy(RedisMessageServerPing.ConnectionIntent.DISCONNECT);
+        service.pingProxy(ServerPingPacket.ConnectionIntent.DISCONNECT);
     }
 
     @Override

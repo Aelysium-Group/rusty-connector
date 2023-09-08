@@ -2,13 +2,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisService;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPingResponse;
+import group.aelysium.rustyconnector.core.lib.connector.redis.RedisService;
+import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
@@ -18,11 +18,11 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.net.InetSocketAddress;
 
-public class MagicLinkPingHandler implements MessageHandler {
-    private final RedisMessageServerPing message;
+public class MagicLinkPingHandler implements PacketHandler {
+    private final ServerPingPacket message;
 
-    public MagicLinkPingHandler(GenericRedisMessage message) {
-        this.message = (RedisMessageServerPing) message;
+    public MagicLinkPingHandler(GenericPacket message) {
+        this.message = (ServerPingPacket) message;
     }
 
     @Override
@@ -38,9 +38,9 @@ public class MagicLinkPingHandler implements MessageHandler {
         if(api.logger().loggerGate().check(GateKey.PING))
             api.logger().send(VelocityLang.PING.build(serverInfo));
 
-        if(message.intent() == RedisMessageServerPing.ConnectionIntent.CONNECT)
+        if(message.intent() == ServerPingPacket.ConnectionIntent.CONNECT)
             this.reviveOrConnectServer(serverInfo);
-        if(message.intent() == RedisMessageServerPing.ConnectionIntent.DISCONNECT)
+        if(message.intent() == ServerPingPacket.ConnectionIntent.DISCONNECT)
             this.disconnectServer(serverInfo);
     }
 
@@ -60,26 +60,26 @@ public class MagicLinkPingHandler implements MessageHandler {
 
             server.register(message.familyName());
 
-            RedisMessageServerPingResponse message = (RedisMessageServerPingResponse) new GenericRedisMessage.Builder()
-                    .setType(RedisMessageType.PING_RESPONSE)
+            ServerPingResponsePacket message = (ServerPingResponsePacket) new GenericPacket.Builder()
+                    .setType(PacketType.PING_RESPONSE)
                     .setAddress(serverInfo.getAddress())
-                    .setOrigin(MessageOrigin.PROXY)
-                    .setParameter(RedisMessageServerPingResponse.ValidParameters.STATUS, String.valueOf(RedisMessageServerPingResponse.PingResponseStatus.ACCEPTED))
-                    .setParameter(RedisMessageServerPingResponse.ValidParameters.MESSAGE, "Connected to the proxy!")
-                    .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.GREEN.toString())
-                    .setParameter(RedisMessageServerPingResponse.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.serverInterval()))
+                    .setOrigin(PacketOrigin.PROXY)
+                    .setParameter(ServerPingResponsePacket.ValidParameters.STATUS, String.valueOf(ServerPingResponsePacket.PingResponseStatus.ACCEPTED))
+                    .setParameter(ServerPingResponsePacket.ValidParameters.MESSAGE, "Connected to the proxy!")
+                    .setParameter(ServerPingResponsePacket.ValidParameters.COLOR, NamedTextColor.GREEN.toString())
+                    .setParameter(ServerPingResponsePacket.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.serverInterval()))
                     .buildSendable();
             backboneMessenger.publish(message);
 
             return true;
         } catch(Exception e) {
-            RedisMessageServerPingResponse message = (RedisMessageServerPingResponse) new GenericRedisMessage.Builder()
-                    .setType(RedisMessageType.PING_RESPONSE)
+            ServerPingResponsePacket message = (ServerPingResponsePacket) new GenericPacket.Builder()
+                    .setType(PacketType.PING_RESPONSE)
                     .setAddress(serverInfo.getAddress())
-                    .setOrigin(MessageOrigin.PROXY)
-                    .setParameter(RedisMessageServerPingResponse.ValidParameters.STATUS, String.valueOf(RedisMessageServerPingResponse.PingResponseStatus.DENIED))
-                    .setParameter(RedisMessageServerPingResponse.ValidParameters.MESSAGE, "Attempt to connect to proxy failed! " + e.getMessage())
-                    .setParameter(RedisMessageServerPingResponse.ValidParameters.COLOR, NamedTextColor.RED.toString())
+                    .setOrigin(PacketOrigin.PROXY)
+                    .setParameter(ServerPingResponsePacket.ValidParameters.STATUS, String.valueOf(ServerPingResponsePacket.PingResponseStatus.DENIED))
+                    .setParameter(ServerPingResponsePacket.ValidParameters.MESSAGE, "Attempt to connect to proxy failed! " + e.getMessage())
+                    .setParameter(ServerPingResponsePacket.ValidParameters.COLOR, NamedTextColor.RED.toString())
                     .buildSendable();
             backboneMessenger.publish(message);
         }

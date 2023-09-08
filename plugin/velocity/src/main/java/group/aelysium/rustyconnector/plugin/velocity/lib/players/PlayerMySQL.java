@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnection;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnection;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
 import net.kyori.adventure.text.Component;

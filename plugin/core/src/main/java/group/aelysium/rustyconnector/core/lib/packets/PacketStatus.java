@@ -1,8 +1,8 @@
-package group.aelysium.rustyconnector.core.lib.database.redis.messages;
+package group.aelysium.rustyconnector.core.lib.packets;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public enum MessageStatus {
+public enum PacketStatus {
     UNDEFINED, // The message hasn't had any status set yet.
     AUTH_DENIAL, // If the message didn't contain the proper credentials (IP Address (for message tunnel), private-key, over max length, etc)
     PARSING_ERROR, // If the message failed to be parsed

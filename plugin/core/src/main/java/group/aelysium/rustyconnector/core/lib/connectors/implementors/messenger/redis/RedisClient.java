@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.database.redis;
+package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
 
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;

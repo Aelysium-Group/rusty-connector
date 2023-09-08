@@ -2,9 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnection;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;

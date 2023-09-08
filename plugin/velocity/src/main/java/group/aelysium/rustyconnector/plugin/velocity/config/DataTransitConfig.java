@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -20,8 +20,8 @@ public class DataTransitConfig extends YAML {
     private int maxPacketLength = 512;
 
     private int cache_size = 100;
-    private final List<RedisMessageType.Mapping> cache_ignoredTypes = new ArrayList<>();
-    private final List<MessageStatus> cache_ignoredStatuses = new ArrayList<>();
+    private final List<PacketType.Mapping> cache_ignoredTypes = new ArrayList<>();
+    private final List<PacketStatus> cache_ignoredStatuses = new ArrayList<>();
 
     private boolean whitelist_enabled = false;
     private List<String> whitelist_addresses = new ArrayList<>();
@@ -36,11 +36,11 @@ public class DataTransitConfig extends YAML {
         return cache_size;
     }
 
-    public List<RedisMessageType.Mapping> cache_ignoredTypes() {
+    public List<PacketType.Mapping> cache_ignoredTypes() {
         return cache_ignoredTypes;
     }
 
-    public List<MessageStatus> cache_ignoredStatuses() {
+    public List<PacketStatus> cache_ignoredStatuses() {
         return cache_ignoredStatuses;
     }
 
@@ -107,7 +107,7 @@ public class DataTransitConfig extends YAML {
             List<String> stringTypes = (List<String>) this.getNode(this.data,"cache.ignored-types",List.class);
             stringTypes.forEach(item -> {
                 try {
-                    this.cache_ignoredTypes.add(RedisMessageType.mapping(item));
+                    this.cache_ignoredTypes.add(PacketType.mapping(item));
                 } catch (Exception ignore) {
                     logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There is no packet type of "+item+"! Ignoring..."), NamedTextColor.YELLOW));
                 }
@@ -119,7 +119,7 @@ public class DataTransitConfig extends YAML {
             List<String> stringStatuses = (List<String>) this.getNode(this.data,"cache.ignored-statuses",List.class);
             stringStatuses.forEach(item -> {
                 try {
-                    this.cache_ignoredStatuses.add(MessageStatus.valueOf(item));
+                    this.cache_ignoredStatuses.add(PacketStatus.valueOf(item));
                 } catch (Exception ignore) {
                     logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There is no packet status type of "+item+"! Ignoring..."), NamedTextColor.YELLOW));
                 }

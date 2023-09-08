@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.core.lib.data_transit.cache;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
+import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
@@ -13,8 +13,8 @@ import java.util.Map;
 
 public class MessageCacheService extends Service {
     private final Snowflake snowflakeGenerator = new Snowflake();
-    private final List<MessageStatus> ignoredStatuses;
-    private final List<RedisMessageType.Mapping> ignoredTypes;
+    private final List<PacketStatus> ignoredStatuses;
+    private final List<PacketType.Mapping> ignoredTypes;
     private int max = 25;
 
     public MessageCacheService(Integer max) {
@@ -25,7 +25,7 @@ public class MessageCacheService extends Service {
         this.ignoredStatuses = new ArrayList<>(0);
         this.ignoredTypes = new ArrayList<>(0);
     }
-    public MessageCacheService(Integer max, List<MessageStatus> ignoredStatuses, List<RedisMessageType.Mapping> ignoredTypes) {
+    public MessageCacheService(Integer max, List<PacketStatus> ignoredStatuses, List<PacketType.Mapping> ignoredTypes) {
         if(max <= 0) max = 0;
         if(max > 500) max = 500;
 
@@ -46,7 +46,7 @@ public class MessageCacheService extends Service {
      * @param message The message to cache.
      * @return The cached message.
      */
-    public CacheableMessage cacheMessage(String message, MessageStatus status) {
+    public CacheableMessage cacheMessage(String message, PacketStatus status) {
         Long snowflake = this.newSnowflake();
 
         CacheableMessage cacheableMessage = new CacheableMessage(snowflake, message, status);
@@ -58,7 +58,7 @@ public class MessageCacheService extends Service {
         return cacheableMessage;
     }
 
-    public boolean ignoredType(GenericRedisMessage message) {
+    public boolean ignoredType(GenericPacket message) {
         return this.ignoredTypes.contains(message.type());
     }
 

@@ -1,18 +1,18 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageHandler;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageCoordinateRequestQueue;
+import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.CoordinateRequest;
 import org.bukkit.entity.Player;
 
-public class CoordinateRequestHandler implements MessageHandler {
-    private final RedisMessageCoordinateRequestQueue message;
+public class CoordinateRequestHandler implements PacketHandler {
+    private final CoordinateRequestQueuePacket message;
 
-    public CoordinateRequestHandler(GenericRedisMessage message) {
-        this.message = (RedisMessageCoordinateRequestQueue) message;
+    public CoordinateRequestHandler(GenericPacket message) {
+        this.message = (CoordinateRequestQueuePacket) message;
     }
 
     @Override

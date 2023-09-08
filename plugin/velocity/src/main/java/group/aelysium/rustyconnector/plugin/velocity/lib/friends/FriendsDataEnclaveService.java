@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnection;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.Cache;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;

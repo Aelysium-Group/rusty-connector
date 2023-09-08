@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 
 import java.io.SyncFailedException;

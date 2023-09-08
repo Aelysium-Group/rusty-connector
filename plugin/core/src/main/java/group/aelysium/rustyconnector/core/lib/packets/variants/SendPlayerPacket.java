@@ -1,17 +1,17 @@
-package group.aelysium.rustyconnector.core.lib.database.redis.messages.variants;
+package group.aelysium.rustyconnector.core.lib.packets.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageSendPlayer extends GenericRedisMessage {
+public class SendPlayerPacket extends GenericPacket {
     private String targetFamilyName;
     private String uuid;
 
@@ -23,10 +23,10 @@ public class RedisMessageSendPlayer extends GenericRedisMessage {
         return uuid;
     }
 
-    public RedisMessageSendPlayer(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(RedisMessageType.SEND_PLAYER, address, origin);
+    public SendPlayerPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(PacketType.SEND_PLAYER, address, origin);
 
-        if(!RedisMessageSendPlayer.validateParameters(ValidParameters.toList(), parameters))
+        if(!SendPlayerPacket.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -39,10 +39,10 @@ public class RedisMessageSendPlayer extends GenericRedisMessage {
             }
         });
     }
-    public RedisMessageSendPlayer(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.SEND_PLAYER, address, origin);
+    public SendPlayerPacket(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, privateKey, PacketType.SEND_PLAYER, address, origin);
 
-        if(!RedisMessageSendPlayer.validateParameters(ValidParameters.toList(), parameters))
+        if(!SendPlayerPacket.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {

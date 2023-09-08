@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
-import group.aelysium.rustyconnector.core.lib.database.redis.RedisConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;

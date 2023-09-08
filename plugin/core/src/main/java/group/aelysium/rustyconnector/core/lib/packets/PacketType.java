@@ -1,10 +1,10 @@
-package group.aelysium.rustyconnector.core.lib.database.redis.messages;
+package group.aelysium.rustyconnector.core.lib.packets;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class RedisMessageType {
+public class PacketType {
     /**
      * Regarding messages, sub-servers never have any way of knowing if the Proxy is actually online or listening.
      * They simply send messages into the Redis Channel in hopes that the proxy is listening.

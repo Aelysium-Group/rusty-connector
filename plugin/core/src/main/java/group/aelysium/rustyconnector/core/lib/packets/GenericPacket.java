@@ -1,7 +1,10 @@
-package group.aelysium.rustyconnector.core.lib.database.redis.messages;
+package group.aelysium.rustyconnector.core.lib.packets;
 
 import com.google.gson.*;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.*;
+import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import io.lettuce.core.KeyValue;
 
@@ -9,9 +12,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import static group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType.*;
-
-public class GenericRedisMessage {
+public class GenericPacket {
     private static final int protocolVersion = 2;
 
     public static int protocolVersion() {
@@ -23,9 +24,9 @@ public class GenericRedisMessage {
     private final int messageVersion;
 
     private char[] privateKey;
-    private final RedisMessageType.Mapping type;
+    private final PacketType.Mapping type;
     private final InetSocketAddress address;
-    private final MessageOrigin origin;
+    private final PacketOrigin origin;
 
     public int messageVersion() { return this.messageVersion; }
 
@@ -33,13 +34,13 @@ public class GenericRedisMessage {
     public String rawMessage() { return this.rawMessage; }
     public char[] privateKey() { return this.privateKey; }
     public InetSocketAddress address() { return this.address; }
-    public RedisMessageType.Mapping type() { return this.type; }
-    public MessageOrigin origin() { return origin; }
+    public PacketType.Mapping type() { return this.type; }
+    public PacketOrigin origin() { return origin; }
 
     /*
      * Constructs a sendable RedisMessage.
      */
-    protected GenericRedisMessage(RedisMessageType.Mapping type, InetSocketAddress address, MessageOrigin origin) {
+    protected GenericPacket(PacketType.Mapping type, InetSocketAddress address, PacketOrigin origin) {
         this.messageVersion = protocolVersion;
         this.sendable = true;
         this.rawMessage = null;
@@ -52,7 +53,7 @@ public class GenericRedisMessage {
     /*
      * Constructs a received RedisMessage.
      */
-    protected GenericRedisMessage(int messageVersion, String rawMessage, char[] privateKey, RedisMessageType.Mapping type, InetSocketAddress address, MessageOrigin origin) {
+    protected GenericPacket(int messageVersion, String rawMessage, char[] privateKey, PacketType.Mapping type, InetSocketAddress address, PacketOrigin origin) {
         this.messageVersion = messageVersion;
         this.sendable = false;
         this.rawMessage = rawMessage;
@@ -91,7 +92,7 @@ public class GenericRedisMessage {
         object.add(MasterValidParameters.PROTOCOL_VERSION, new JsonPrimitive(this.messageVersion));
         object.add(MasterValidParameters.TYPE, new JsonPrimitive(String.valueOf(this.type)));
         object.add(MasterValidParameters.ORIGIN, new JsonPrimitive(String.valueOf(this.origin)));
-        if(this.origin == MessageOrigin.PROXY && this.address == null)
+        if(this.origin == PacketOrigin.PROXY && this.address == null)
             object.add(MasterValidParameters.ADDRESS, new JsonPrimitive("null"));
         else
             object.add(MasterValidParameters.ADDRESS, new JsonPrimitive(this.address.getHostString() + ":" + this.address.getPort()));
@@ -116,9 +117,9 @@ public class GenericRedisMessage {
         private Integer protocolVersion;
         private String rawMessage;
         private char[] privateKey;
-        private RedisMessageType.Mapping type;
+        private PacketType.Mapping type;
         private InetSocketAddress address;
-        private MessageOrigin origin;
+        private PacketOrigin origin;
         private final List<KeyValue<String, JsonPrimitive>> parameters = new ArrayList<>();
 
         public Builder() {}
@@ -140,15 +141,15 @@ public class GenericRedisMessage {
             this.privateKey = privateKey;
             return this;
         }
-        public Builder setType(RedisMessageType.Mapping type) {
+        public Builder setType(PacketType.Mapping type) {
             this.type = type;
             return this;
         }
 
         /**
          * Address has two contexts:
-         * If {@link MessageOrigin} is {@link MessageOrigin#PROXY}: Address is the recipient of the message.
-         * If {@link MessageOrigin} is a {@link MessageOrigin#SERVER}: Address is referring to the sender of the message.
+         * If {@link PacketOrigin} is {@link PacketOrigin#PROXY}: Address is the recipient of the message.
+         * If {@link PacketOrigin} is a {@link PacketOrigin#SERVER}: Address is referring to the sender of the message.
          * @param address The address of this message.
          * @return The Builder.
          */
@@ -158,8 +159,8 @@ public class GenericRedisMessage {
         }
         /**
          * Address has two contexts:
-         * If {@link MessageOrigin} is {@link MessageOrigin#PROXY}: Address is the recipient of the message.
-         * If {@link MessageOrigin} is a {@link MessageOrigin#SERVER}: Address is referring to the sender of the message.
+         * If {@link PacketOrigin} is {@link PacketOrigin#PROXY}: Address is the recipient of the message.
+         * If {@link PacketOrigin} is a {@link PacketOrigin#SERVER}: Address is referring to the sender of the message.
          * @param address The address of this message.
          * @return The Builder.
          */
@@ -167,7 +168,7 @@ public class GenericRedisMessage {
             this.address = address;
             return this;
         }
-        public Builder setOrigin(MessageOrigin origin) {
+        public Builder setOrigin(PacketOrigin origin) {
             this.origin = origin;
             return this;
         }
@@ -200,7 +201,7 @@ public class GenericRedisMessage {
          * @return A RedisMessage that can be published via the RedisPublisher.
          * @throws IllegalStateException If the required parameters are not provided.
          */
-        public GenericRedisMessage buildReceived() {
+        public GenericPacket buildReceived() {
             if (this.protocolVersion == null)
                 throw new IllegalStateException("You must provide `protocolVersion` when building a receivable RedisMessage!");
             if (this.rawMessage == null)
@@ -214,10 +215,10 @@ public class GenericRedisMessage {
             if (this.origin == null)
                 throw new IllegalStateException("You must provide `origin` when building a receivable RedisMessage!");
 
-            if (this.type == PING)              return new RedisMessageServerPing(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if (this.type == PING_RESPONSE)     return new RedisMessageServerPingResponse(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if (this.type == SEND_PLAYER)       return new RedisMessageSendPlayer(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if (this.type == COORDINATE_REQUEST_QUEUE)  return new RedisMessageCoordinateRequestQueue(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == PacketType.PING)              return new ServerPingPacket(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == PacketType.PING_RESPONSE)     return new ServerPingResponsePacket(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == PacketType.SEND_PLAYER)       return new SendPlayerPacket(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == PacketType.COORDINATE_REQUEST_QUEUE)  return new CoordinateRequestQueuePacket(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
         }
@@ -234,16 +235,16 @@ public class GenericRedisMessage {
          * @return A RedisMessage that can be published via the RedisPublisher.
          * @throws IllegalStateException If the required parameters are not provided. Or if protocolVersion is attempted to be set.
          */
-        public GenericRedisMessage buildSendable() {
+        public GenericPacket buildSendable() {
             if(this.protocolVersion != null) throw new IllegalStateException("You're not allowed to set `protocolVersion` when building a sendable RedisMessage!");
             if(this.type == null) throw new IllegalStateException("You must provide `type` when building a sendable RedisMessage!");
             if(this.origin == null) throw new IllegalStateException("You must provide `origin` when building a sendable RedisMessage!");
             if(this.address == null) throw new IllegalStateException("You must provide `address` when building a sendable RedisMessage!");
 
-            if(this.type == PING)               return new RedisMessageServerPing(this.address, this.origin, this.parameters);
-            if(this.type == PING_RESPONSE)      return new RedisMessageServerPingResponse(this.address, this.origin, this.parameters);
-            if(this.type == SEND_PLAYER)        return new RedisMessageSendPlayer(this.address, this.origin, this.parameters);
-            if(this.type == COORDINATE_REQUEST_QUEUE)   return new RedisMessageCoordinateRequestQueue(this.address, this.origin, this.parameters);
+            if(this.type == PacketType.PING)               return new ServerPingPacket(this.address, this.origin, this.parameters);
+            if(this.type == PacketType.PING_RESPONSE)      return new ServerPingResponsePacket(this.address, this.origin, this.parameters);
+            if(this.type == PacketType.SEND_PLAYER)        return new SendPlayerPacket(this.address, this.origin, this.parameters);
+            if(this.type == PacketType.COORDINATE_REQUEST_QUEUE)   return new CoordinateRequestQueuePacket(this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
         }
@@ -255,11 +256,11 @@ public class GenericRedisMessage {
          * @param rawMessage The raw message to parse.
          * @return A received RedisMessage.
          */
-        public GenericRedisMessage parseReceived(String rawMessage) {
+        public GenericPacket parseReceived(String rawMessage) {
             Gson gson = new Gson();
             JsonObject messageObject = gson.fromJson(rawMessage, JsonObject.class);
 
-            GenericRedisMessage.Builder redisMessageBuilder = new GenericRedisMessage.Builder();
+            GenericPacket.Builder redisMessageBuilder = new GenericPacket.Builder();
             redisMessageBuilder.setRawMessage(rawMessage);
 
             messageObject.entrySet().forEach(entry -> {
@@ -270,8 +271,8 @@ public class GenericRedisMessage {
                     case MasterValidParameters.PROTOCOL_VERSION -> redisMessageBuilder.setProtocolVersion(value.getAsInt());
                     case MasterValidParameters.PRIVATE_KEY -> redisMessageBuilder.setPrivateKey(value.getAsString().toCharArray());
                     case MasterValidParameters.ADDRESS -> redisMessageBuilder.setAddress(value.getAsString());
-                    case MasterValidParameters.TYPE -> redisMessageBuilder.setType(RedisMessageType.mapping(value.getAsInt()));
-                    case MasterValidParameters.ORIGIN -> redisMessageBuilder.setOrigin(MessageOrigin.valueOf(value.getAsString()));
+                    case MasterValidParameters.TYPE -> redisMessageBuilder.setType(PacketType.mapping(value.getAsInt()));
+                    case MasterValidParameters.ORIGIN -> redisMessageBuilder.setOrigin(PacketOrigin.valueOf(value.getAsString()));
                     case MasterValidParameters.PARAMETERS -> parseParams(value.getAsJsonObject(), redisMessageBuilder);
                 }
             });
@@ -279,7 +280,7 @@ public class GenericRedisMessage {
             return redisMessageBuilder.buildReceived();
         }
 
-        private void parseParams(JsonObject object, GenericRedisMessage.Builder redisMessageBuilder) {
+        private void parseParams(JsonObject object, GenericPacket.Builder redisMessageBuilder) {
             object.entrySet().forEach(entry -> {
                 String key = entry.getKey();
                 JsonPrimitive value = entry.getValue().getAsJsonPrimitive();

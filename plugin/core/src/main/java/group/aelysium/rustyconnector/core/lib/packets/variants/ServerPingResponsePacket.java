@@ -1,10 +1,10 @@
-package group.aelysium.rustyconnector.core.lib.database.redis.messages.variants;
+package group.aelysium.rustyconnector.core.lib.packets.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.util.ColorMapper;
 import io.lettuce.core.KeyValue;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class RedisMessageServerPingResponse extends GenericRedisMessage {
+public class ServerPingResponsePacket extends GenericPacket {
     private PingResponseStatus status;
     private String message;
     private NamedTextColor color;
@@ -33,10 +33,10 @@ public class RedisMessageServerPingResponse extends GenericRedisMessage {
         return pingInterval;
     }
 
-    public RedisMessageServerPingResponse(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(RedisMessageType.PING_RESPONSE, address, origin);
+    public ServerPingResponsePacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(PacketType.PING_RESPONSE, address, origin);
 
-        if(!RedisMessageServerPingResponse.validateParameters(ValidParameters.toList(), parameters))
+        if(!ServerPingResponsePacket.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -51,10 +51,10 @@ public class RedisMessageServerPingResponse extends GenericRedisMessage {
             }
         });
     }
-    public RedisMessageServerPingResponse(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.PING_RESPONSE, address, origin);
+    public ServerPingResponsePacket(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, privateKey, PacketType.PING_RESPONSE, address, origin);
 
-        if(!RedisMessageServerPingResponse.validateParameters(ValidParameters.toList(), parameters))
+        if(!ServerPingResponsePacket.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {

@@ -1,4 +1,5 @@
 package group.aelysium.rustyconnector.core.lib.connectors.messenger;
 
-public class MessengerSubscriber {
+public abstract class MessengerSubscriber {
+    protected abstract void onMessage(String rawMessage);
 }

@@ -2,8 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnection;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnection;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMapping;

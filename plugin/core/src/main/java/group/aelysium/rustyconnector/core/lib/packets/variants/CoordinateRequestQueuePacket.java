@@ -1,17 +1,17 @@
-package group.aelysium.rustyconnector.core.lib.database.redis.messages.variants;
+package group.aelysium.rustyconnector.core.lib.packets.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisMessageCoordinateRequestQueue extends GenericRedisMessage {
+public class CoordinateRequestQueuePacket extends GenericPacket {
     private String targetUsername;
     private String targetServer;
     private String sourceUsername;
@@ -28,10 +28,10 @@ public class RedisMessageCoordinateRequestQueue extends GenericRedisMessage {
         return targetServer;
     }
 
-    public RedisMessageCoordinateRequestQueue(InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(RedisMessageType.COORDINATE_REQUEST_QUEUE, address, origin);
+    public CoordinateRequestQueuePacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(PacketType.COORDINATE_REQUEST_QUEUE, address, origin);
 
-        if(!RedisMessageCoordinateRequestQueue.validateParameters(ValidParameters.toList(), parameters))
+        if(!CoordinateRequestQueuePacket.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -45,10 +45,10 @@ public class RedisMessageCoordinateRequestQueue extends GenericRedisMessage {
             }
         });
     }
-    public RedisMessageCoordinateRequestQueue(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, MessageOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, RedisMessageType.COORDINATE_REQUEST_QUEUE, address, origin);
+    public CoordinateRequestQueuePacket(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, privateKey, PacketType.COORDINATE_REQUEST_QUEUE, address, origin);
 
-        if(!RedisMessageCoordinateRequestQueue.validateParameters(ValidParameters.toList(), parameters))
+        if(!CoordinateRequestQueuePacket.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {

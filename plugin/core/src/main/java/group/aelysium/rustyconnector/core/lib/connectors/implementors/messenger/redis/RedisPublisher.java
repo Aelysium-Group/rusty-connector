@@ -1,6 +1,6 @@
-package group.aelysium.rustyconnector.core.lib.database.redis;
+package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
@@ -31,7 +31,7 @@ public class RedisPublisher {
      * @param message The message to send.
      * @throws IllegalStateException If you attempt to send a received RedisMessage.
      */
-    public void publish(GenericRedisMessage message) {
+    public void publish(GenericPacket message) {
         if(!message.sendable()) throw new IllegalStateException("Attempted to send a RedisMessage that isn't sendable!");
 
         try {

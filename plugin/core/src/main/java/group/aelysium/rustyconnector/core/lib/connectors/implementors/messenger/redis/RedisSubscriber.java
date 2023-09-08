@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.database.redis;
+package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
 
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubscriber;
 import io.lettuce.core.RedisChannelHandler;
@@ -10,7 +10,7 @@ import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class RedisSubscriber extends MessengerSubscriber {
+public abstract class RedisSubscriber extends MessengerSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
     public RedisSubscriber(RedisClient client) {
@@ -53,14 +53,6 @@ public class RedisSubscriber extends MessengerSubscriber {
         try {
             this.client.shutdownAsync(2, 2, TimeUnit.SECONDS);
         } catch (Exception ignore) {}
-    }
-
-    /**
-     * Called by `.subscribeToChannel()` when a message is received over the data channel.
-     * @param rawMessage The message received.
-     */
-    protected void onMessage(String rawMessage) {
-        // Empty adapter method
     }
 
     protected class RedisMessageListener extends RedisPubSubAdapter<String, String> {

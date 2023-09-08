@@ -2,10 +2,10 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageCoordinateRequestQueue;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
@@ -73,13 +73,13 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
     public void tpaSendPlayer(Player source, Player target, PlayerServer targetServer) {
         VelocityAPI api = VelocityAPI.get();
 
-        RedisMessageCoordinateRequestQueue message = (RedisMessageCoordinateRequestQueue) new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.COORDINATE_REQUEST_QUEUE)
-                .setOrigin(MessageOrigin.PROXY)
+        CoordinateRequestQueuePacket message = (CoordinateRequestQueuePacket) new GenericPacket.Builder()
+                .setType(PacketType.COORDINATE_REQUEST_QUEUE)
+                .setOrigin(PacketOrigin.PROXY)
                 .setAddress(targetServer.address())
-                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.TARGET_SERVER, targetServer.address())
-                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.TARGET_USERNAME, target.getUsername())
-                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.SOURCE_USERNAME, source.getUsername())
+                .setParameter(CoordinateRequestQueuePacket.ValidParameters.TARGET_SERVER, targetServer.address())
+                .setParameter(CoordinateRequestQueuePacket.ValidParameters.TARGET_USERNAME, target.getUsername())
+                .setParameter(CoordinateRequestQueuePacket.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
         api.services().backboneMessengerService().publish(message);
