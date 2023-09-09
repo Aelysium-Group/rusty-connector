@@ -1,8 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
+import group.aelysium.rustyconnector.core.lib.connectors.Connection;
+import group.aelysium.rustyconnector.core.lib.connectors.Connector;
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.websocket.WebSocketConnector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
@@ -59,11 +62,20 @@ public class ConnectorsConfig extends YAML {
                         String dataChannel = this.getNode(this.data, "data-channel", String.class);
                         if (dataChannel.equals("")) throw new IllegalStateException("Please configure your connector settings. `dataChannel` cannot be empty for Redis connectors.");
 
-                        connectorsService.add(name, RedisConnector.create(address, userPass, protocol, dataChannel, privateKey));
+                        connectorsService.add(name, (Connector) RedisConnector.create(address, userPass, protocol, dataChannel, privateKey));
                     }
                     case RABBITMQ -> {
                     }
                     case WEBSOCKET -> {
+                        String connectKey;
+                        try {
+                            connectKey = this.getNode(this.data, "key", String.class);
+                            if (connectKey.equals("")) throw new IllegalStateException("Please configure your connector settings. `key` cannot be empty for WebSocket connectors.");
+                        } catch (Exception ignore) {
+                            throw new IllegalStateException("Please configure your connector settings. `key` cannot be empty for WebSocket connectors.");
+                        }
+
+                        connectorsService.add(name, (Connector) WebSocketConnector.create(address, connectKey, privateKey));
                     }
                 }
             } catch (Exception e) {

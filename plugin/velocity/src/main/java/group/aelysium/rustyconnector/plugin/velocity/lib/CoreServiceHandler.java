@@ -37,9 +37,6 @@ public class CoreServiceHandler extends group.aelysium.rustyconnector.core.lib.s
     public ConnectorsService connectorsService() {
         return this.find(ConnectorsService.class).orElseThrow();
     }
-    public MessengerConnection backboneMessengerService() {
-        return this.find(MessengerConnection.class).orElseThrow();
-    }
     public DataTransitService dataTransitService() {
         return this.find(DataTransitService.class).orElseThrow();
     }

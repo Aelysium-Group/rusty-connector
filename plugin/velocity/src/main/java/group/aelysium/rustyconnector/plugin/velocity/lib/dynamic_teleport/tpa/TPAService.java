@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
@@ -82,7 +83,8 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
                 .setParameter(CoordinateRequestQueuePacket.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        api.services().backboneMessengerService().publish(message);
+        MessengerConnection<?> backboneMessenger = api.core().backbone().connection().orElseThrow();
+        backboneMessenger.publish(message);
 
         try {
             PlayerServer senderServer = api.services().serverService().search(source.getCurrentServer().orElseThrow().getServerInfo());

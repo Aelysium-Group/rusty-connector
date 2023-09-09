@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
-import group.aelysium.rustyconnector.core.lib.connector.redis.RedisService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
@@ -47,7 +46,7 @@ public class MagicLinkPingHandler implements PacketHandler {
     private boolean connectServer(ServerInfo serverInfo) {
         VelocityAPI api = VelocityAPI.get();
         ServerService serverService = api.services().serverService();
-        MessengerConnection backboneMessenger = api.services().backboneMessengerService();
+        MessengerConnection<?> backboneMessenger = api.core().backbone().connection().orElseThrow();
 
         try {
             PlayerServer server = new ServerService.ServerBuilder()

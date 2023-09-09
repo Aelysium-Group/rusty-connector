@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.database;
 
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisClient;
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubscriber;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
@@ -17,6 +19,9 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 
 import javax.naming.AuthenticationException;
 
+import static group.aelysium.rustyconnector.core.lib.packets.PacketType.PING;
+import static group.aelysium.rustyconnector.core.lib.packets.PacketType.SEND_PLAYER;
+
 public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisSubscriber {
     public RedisSubscriber(RedisClient client) {
         super(client);
@@ -27,7 +32,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.conn
         VelocityAPI api = VelocityAPI.get();
         PluginLogger logger = api.logger();
         MessageCacheService messageCacheService = api.services().messageCacheService();
-        MessengerConnection backboneMessenger = api.services().backboneMessengerService();
+        MessengerConnection<?> backboneMessenger = api.core().backbone().connection().orElseThrow();
 
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
         // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
