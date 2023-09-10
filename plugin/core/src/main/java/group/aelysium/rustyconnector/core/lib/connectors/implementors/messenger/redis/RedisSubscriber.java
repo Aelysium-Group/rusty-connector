@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
 
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubscriber;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
@@ -58,7 +59,7 @@ public abstract class RedisSubscriber extends MessengerSubscriber {
     protected class RedisMessageListener extends RedisPubSubAdapter<String, String> {
         @Override
         public void message(String channel, String message) {
-            RedisSubscriber.this.onMessage(message);
+            RedisSubscriber.this.onMessage(AESCryptor.decrypt(message, client.privateKey()));
         }
     }
 
