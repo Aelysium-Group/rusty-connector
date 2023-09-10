@@ -1,11 +1,14 @@
 package group.aelysium.websocket_bridge.websocket;
 
+import com.google.gson.JsonParseException;
 import group.aelysium.websocket_bridge.WebSocketBridge;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+
+import java.util.concurrent.TimeoutException;
 
 @WebSocket
 public class WebSocketHandler {
@@ -14,8 +17,13 @@ public class WebSocketHandler {
         WebSocketService websocket = WebSocketBridge.instance().webSocketService();
         String authentication = session.getUpgradeRequest().getHeader("Authentication");
 
-        if(!websocket.checkKey(authentication.toCharArray())) {
-            session.close(401, "Invalid registration.");
+        try {
+            websocket.checkAuthentication(authentication);
+        } catch (JsonParseException | ArithmeticException ignore) {
+            session.close(498, "Invalid Token.");
+            return;
+        } catch (TimeoutException ignore) {
+            session.close(498, "Expired Token.");
             return;
         }
 
@@ -25,7 +33,7 @@ public class WebSocketHandler {
 
             websocket.register(session, origin);
         } catch (IllegalArgumentException ignore) {
-            session.close(400, "Invalid origin provided.");
+            session.close(422, "Invalid origin provided.");
         }
     }
 

@@ -20,6 +20,8 @@ repositories {
 dependencies {
     implementation "com.sparkjava:spark-core:${project.spark_version}"
     implementation "org.spongepowered:configurate-yaml:${project.configurate_version}"
+
+    shadow "com.google.code.gson:gson:${project.gson_version}"
 }
 
 jar {

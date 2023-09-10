@@ -39,8 +39,12 @@ public class WebSocketBridge {
 
         this.websocketService = new WebSocketService(
                 new InetSocketAddress(defaultConfig.getWebsocket_host(), defaultConfig.getWebsocket_port()),
-                defaultConfig.getWebsocket_connectionKey(),
-                defaultConfig.isWebsocket_corsEnabled()
+                defaultConfig.isWebsocket_corsEnabled(),
+                new WebSocketService.SecureConnectorSettings(
+                        defaultConfig.isSecureConnector_enabled(),
+                        defaultConfig.getSecureConnector_connectionKey(),
+                        defaultConfig.getSecureConnector_timeout()
+                )
         );
         System.out.println("Finished! Listening to websocket on port: "+defaultConfig.getWebsocket_port());
 
