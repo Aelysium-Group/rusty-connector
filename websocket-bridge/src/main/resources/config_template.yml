@@ -1,0 +1,13 @@
+#
+# The address by which to listen for the websocket connections.
+#
+websocket:
+    host: "0.0.0.0"
+    port: 8080
+
+    #
+    # The key that must be set in order to connect.
+    #
+    connection-key: ""
+
+    cors-enabled: false
