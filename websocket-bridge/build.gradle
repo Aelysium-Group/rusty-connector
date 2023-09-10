@@ -30,3 +30,5 @@ jar {
         )
     }
 }
+
+jar.finalizedBy('shadowJar')
