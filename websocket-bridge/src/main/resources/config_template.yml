@@ -66,7 +66,7 @@ secure-connector:
     # The key that loads with this file is a default that all copies of WebSocket Bridge, have!
     # Make sure you change it!
     #
-    connection-key: "29c65b55b18509be642705b4f290800d"
+    connection-key: "29c62552418509be64270534f290800d"
 
     ############################################################################
     #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

@@ -62,7 +62,7 @@ public class DefaultConfig extends YAML {
         this.websocket_corsEnabled = this.getNode(this.data, "websocket.cors-enabled", Boolean.class);
 
         this.secureConnector_enabled = this.getNode(this.data, "secure-connector.enabled", Boolean.class);
-        this.secureConnector_connectionKey = this.getNode(this.data, "websocket.connection-key", String.class).toCharArray();
+        this.secureConnector_connectionKey = this.getNode(this.data, "secure-connector.connection-key", String.class).toCharArray();
         try {
             this.secureConnector_timeout = new LiquidTimestamp(this.getNode(this.data, "secure-connector.timeout", String.class));
         } catch (Exception e) {

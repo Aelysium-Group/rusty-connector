@@ -4,6 +4,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class AESCryptor {
@@ -16,11 +17,11 @@ public class AESCryptor {
     }
 
     private String encode(byte[] data) {
-        return Base64.getEncoder().encodeToString(data);
+        return new String(data, StandardCharsets.UTF_8);
     }
 
     private byte[] decode(String data) {
-        return Base64.getDecoder().decode(data);
+        return data.getBytes(StandardCharsets.UTF_8);
     }
 
     public String encrypt(String data) throws Exception {
@@ -44,7 +45,7 @@ public class AESCryptor {
         if(key.length() % 2 != 0) throw new IllegalArgumentException("Key must be an even number!");
         if(key.length() < 16) throw new IllegalArgumentException("Key must be at least 16 characters!");
 
-        byte[] decodedString = Base64.getDecoder().decode(key);
+        byte[] decodedString = key.getBytes(StandardCharsets.UTF_8);
         SecretKey secretKey = new SecretKeySpec(decodedString, 0, decodedString.length, "AES");
         return new AESCryptor(secretKey);
     }
