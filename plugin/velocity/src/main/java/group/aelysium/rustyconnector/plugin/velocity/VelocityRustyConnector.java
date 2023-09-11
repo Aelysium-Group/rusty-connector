@@ -6,9 +6,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import group.aelysium.rustyconnector.core.lib.exception.DuplicateLifecycleException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -31,7 +29,9 @@ public class VelocityRustyConnector {
     }
 
     @Subscribe
-    public void onLoad(ProxyInitializeEvent event) throws DuplicateLifecycleException {
+    public void onLoad(ProxyInitializeEvent event) {
+        Tinder.get().logger().log("Initializing RustyConnector...");
+
         if(!Tinder.get().velocityServer().getConfiguration().isOnlineMode())
             Tinder.get().logger().log("Offline mode detected");
 

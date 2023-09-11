@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
 
+import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubscriber;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
@@ -14,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 public abstract class RedisSubscriber extends MessengerSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
-    public RedisSubscriber(RedisClient client) {
-        super(client.privateKey());
+    public RedisSubscriber(RedisClient client, MessageCacheService cache, PluginLogger logger) {
+        super(client.privateKey(), cache, logger);
         this.client = client;
         this.client.addListener(new RedisSubscriberListener());
     }

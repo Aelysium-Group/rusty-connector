@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
 
+import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 
@@ -26,12 +28,19 @@ public class RedisConnection extends MessengerConnection<RedisSubscriber> {
     }
 
     @Override
-    protected void subscribe(Class<RedisSubscriber> subscriber) {
+    protected void subscribe(Class<RedisSubscriber> subscriber, MessageCacheService cache, PluginLogger logger) {
         if(!this.isAlive) return;
 
         this.executorService.submit(() -> {
             try {
-                RedisSubscriber redis = subscriber.getDeclaredConstructor(RedisClient.class).newInstance(RedisConnection.this.clientBuilder.build());
+                RedisSubscriber redis = subscriber.getDeclaredConstructor(
+                        RedisClient.class,
+                        MessageCacheService.class,
+                        PluginLogger.class).newInstance(
+                            RedisConnection.this.clientBuilder.build(),
+                            cache,
+                            logger
+                        );
                 RedisConnection.this.subscribers.add(redis);
 
                 redis.subscribeToChannel();
@@ -41,18 +50,18 @@ public class RedisConnection extends MessengerConnection<RedisSubscriber> {
                 e.printStackTrace();
             }
 
-            RedisConnection.this.subscribe(subscriber);
+            RedisConnection.this.subscribe(subscriber, cache, logger);
         });
     }
 
     @Override
-    public void startListening(Class<RedisSubscriber> subscriber) {
+    public void startListening(Class<RedisSubscriber> subscriber, MessageCacheService cache, PluginLogger logger) {
         if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
         this.executorService = Executors.newFixedThreadPool(3);
 
         this.isAlive = true;
 
-        this.subscribe(subscriber);
+        this.subscribe(subscriber, cache, logger);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.paper.lib;
+package group.aelysium.rustyconnector.plugin.paper.central;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -15,7 +15,6 @@ import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.central.config.PrivateKeyConfig;
@@ -45,20 +44,23 @@ import java.util.*;
  * If not, check {@link Tinder}.
  */
 public class Flame extends ServiceableService<CoreServiceHandler> {
+    private int configVersion;
     private final String version;
 
     /**
      * The core message backbone where all RC messages are sent through.
      */
-    private final MessengerConnector<? extends MessengerConnection> backbone;
+    private final MessengerConnector<?> backbone;
 
-    public Flame(String version, Map<Class<? extends Service>, Service> services, String backboneConnector) {
+    public Flame(String version, int configVersion, Map<Class<? extends Service>, Service> services, String backboneConnector) {
         super(new CoreServiceHandler(services));
         this.version = version;
-        this.backbone = (MessengerConnector<? extends MessengerConnection>) this.services().connectors().get(backboneConnector);
+        this.configVersion = configVersion;
+        this.backbone = (MessengerConnector<?>) this.services().connectors().get(backboneConnector);
     }
 
     public String version() { return this.version; }
+    public int configVersion() { return this.configVersion; }
 
     public MessengerConnector<? extends MessengerConnection> backbone() {
         return this.backbone;
@@ -90,10 +92,12 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
         Initialize initialize = new Initialize();
 
         String version = initialize.version();
+        int configVersion = initialize.configVersion();
         char[] privateKey = initialize.privateKey();
         DefaultConfig defaultConfig = initialize.defaultConfig();
 
-        Callable<Runnable> resolveConnectors = initialize.connectors(privateKey);
+        MessageCacheService messageCacheService = initialize.messageCache();
+        Callable<Runnable> resolveConnectors = initialize.connectors(privateKey, messageCacheService, Tinder.get().logger());
 
         initialize.serverInfo(defaultConfig);
         initialize.messageCache();
@@ -107,7 +111,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
         initialize.events(plugin);
         initialize.commands();
 
-        Flame flame = new Flame(version, initialize.getServices(), defaultConfig.getMessenger());
+        Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.getMessenger());
 
         return flame;
     }
@@ -127,6 +131,7 @@ class Initialize {
     private final PluginLogger logger = Tinder.get().logger();
     private final Map<Class<? extends Service>, Service> services = new HashMap<>();
     private final List<String> requestedConnectors = new ArrayList<>();
+    private final List<Component> bootOutput = new ArrayList<>();
 
     public Map<Class<? extends Service>, Service> getServices() {
         return this.services;
@@ -161,9 +166,28 @@ class Initialize {
         }
     }
 
+    public int configVersion() {
+        try {
+            InputStream stream = Tinder.get().resourceAsStream("plugin.yml");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+
+            ConfigurationNode node = YAMLConfigurationLoader.builder()
+                    .setIndent(2)
+                    .setSource(() -> reader)
+                    .build().load();
+
+            stream.close();
+            reader.close();
+            return node.getNode("config-version").getInt();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public char[] privateKey() throws IllegalAccessException {
-        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(String.valueOf(api.dataFolder()), "private.key"));
-        if (!privateKeyConfig.generate())
+        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(api.dataFolder(), "private.key"));
+        if (!privateKeyConfig.generateFilestream(bootOutput))
             throw new IllegalStateException("Unable to load or create private.key!");
 
         try {
@@ -174,10 +198,10 @@ class Initialize {
     }
 
     public DefaultConfig defaultConfig() throws IllegalAccessException {
-        DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(String.valueOf(api.dataFolder()), "config.yml"), "velocity_config_template.yml");
-        if (!defaultConfig.generate())
+        DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.dataFolder(), "config.yml"), "velocity_config_template.yml");
+        if (!defaultConfig.generate(bootOutput))
             throw new IllegalStateException("Unable to load or create config.yml!");
-        defaultConfig.register();
+        defaultConfig.register(this.configVersion());
 
         requestedConnectors.add(defaultConfig.getMessenger());
 
@@ -194,13 +218,13 @@ class Initialize {
      * @param privateKey The plugin's pricate key.
      * @return A runnable which will wrap up the connectors' initialization. Should be run after all other initialization logic has run.
      */
-    public Callable<Runnable> connectors(char[] privateKey) {
+    public Callable<Runnable> connectors(char[] privateKey, MessageCacheService cacheService, PluginLogger logger) {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
-        ConnectorsConfig connectorsConfig = ConnectorsConfig.newConfig(new File(String.valueOf(api.dataFolder()), "connectors.yml"), "paper_connectors_template.yml");
-        if (!connectorsConfig.generate())
+        ConnectorsConfig connectorsConfig = ConnectorsConfig.newConfig(new File(api.dataFolder(), "connectors.yml"), "paper_connectors_template.yml");
+        if (!connectorsConfig.generate(bootOutput))
             throw new IllegalStateException("Unable to load or create connectorsConfig.yml!");
-        ConnectorsService connectorsService = connectorsConfig.register(privateKey, logger, true, false);
+        ConnectorsService connectorsService = connectorsConfig.register(privateKey, true, false);
         services.put(ConnectorsService.class, connectorsService);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
@@ -219,7 +243,7 @@ class Initialize {
                 if(!connectorsService.containsKey(name))
                     throw new RuntimeException("No connector with the name '"+name+"' was found!");
 
-                Connector<Connection> connector = connectorsService.get(name);
+                Connector<?> connector = connectorsService.get(name);
                 try {
                     connector.connect();
                 } catch (ConnectException e) {
@@ -234,7 +258,7 @@ class Initialize {
                 connectorsService.messengers().forEach(connector -> {
                     if(connector.connection().isEmpty()) return;
                     MessengerConnection<PaperMessengerSubscriber> connection = connector.connection().orElseThrow();
-                    connection.startListening(PaperMessengerSubscriber.class);
+                    connection.startListening(PaperMessengerSubscriber.class, cacheService, logger);
                 });
                 logger.send(Component.text("Finished booting Connectors service.", NamedTextColor.GREEN));
             };
@@ -263,9 +287,12 @@ class Initialize {
         services.put(ServerInfoService.class, serverInfoService);
     }
 
-    public void messageCache() {
-        services.put(MessageCacheService.class, new MessageCacheService(50));
+    public MessageCacheService messageCache() {
+        MessageCacheService service = new MessageCacheService(50);
+        services.put(MessageCacheService.class, service);
+
         logger.log("Set message cache size to be: 50");
+        return service;
     }
 
     public PacketBuilderService packetBuilder() {

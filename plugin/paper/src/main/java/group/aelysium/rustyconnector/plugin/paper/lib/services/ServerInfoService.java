@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 
 import java.net.InetSocketAddress;
 
@@ -36,7 +36,7 @@ public class ServerInfoService extends Service implements PlayerServer {
      * @param hardPlayerCap The hard player cap
      */
     private void setPlayerCap(int softPlayerCap, int hardPlayerCap) {
-        PaperAPI api = PaperAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         api.paperServer().setMaxPlayers(hardPlayerCap);
@@ -63,7 +63,7 @@ public class ServerInfoService extends Service implements PlayerServer {
 
     @Override
     public int playerCount() {
-        return PaperAPI.get().paperServer().getOnlinePlayers().size();
+        return Tinder.get().paperServer().getOnlinePlayers().size();
     }
 
     @Override

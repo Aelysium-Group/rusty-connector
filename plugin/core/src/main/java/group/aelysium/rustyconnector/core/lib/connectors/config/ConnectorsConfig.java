@@ -14,6 +14,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.List;
 
 public class ConnectorsConfig extends YAML {
     private static ConnectorsConfig config;
@@ -32,74 +33,67 @@ public class ConnectorsConfig extends YAML {
     }
 
     @SuppressWarnings("unchecked")
-    public ConnectorsService register(char[] privateKey, PluginLogger logger, boolean loadMessengers, boolean loadStorage) throws IllegalStateException {
+    public ConnectorsService register(char[] privateKey, boolean loadMessengers, boolean loadStorage) throws IllegalStateException {
         ConnectorsService connectorsService = new ConnectorsService();
 
         if(loadMessengers)
             YAML.get(this.data,"messengers").getChildrenList().forEach(node -> {
                 String name = this.getNode(node, "name", String.class);
-                try {
-                    ConnectorsService.MessengerConnectors type = ConnectorsService.MessengerConnectors.valueOf(this.getNode(node, "type", String.class).toUpperCase());
-                    String host = this.getNode(this.data, "host", String.class);
-                    if (host.equals("")) throw new IllegalStateException("Please configure your connector settings. `host` cannot be empty.");
-                    int port = this.getNode(this.data, "port", Integer.class);
-                    InetSocketAddress address = new InetSocketAddress(host, port);
+                ConnectorsService.MessengerConnectors type = ConnectorsService.MessengerConnectors.valueOf(this.getNode(node, "type", String.class).toUpperCase());
+                String host = this.getNode(node, "host", String.class);
+                if (host.equals("")) throw new IllegalStateException("Please configure your connector settings. `host` cannot be empty.");
+                int port = this.getNode(node, "port", Integer.class);
+                InetSocketAddress address = new InetSocketAddress(host, port);
 
-                    String user = this.getNode(this.data, "user", String.class);
-                    if (user.equals("")) throw new IllegalStateException("Please configure your connector settings. `user` cannot be empty.");
-                    char[] password = this.getNode(this.data, "password", String.class).toCharArray();
-                    UserPass userPass = new UserPass(user, password);
+                String user = this.getNode(node, "user", String.class);
+                if (user.equals("")) throw new IllegalStateException("Please configure your connector settings. `user` cannot be empty.");
+                char[] password = this.getNode(node, "password", String.class).toCharArray();
+                UserPass userPass = new UserPass(user, password);
 
-                    switch (type) {
-                        case REDIS -> {
-                            ProtocolVersion protocol = ProtocolVersion.RESP2;
-                            try {
-                                protocol = ProtocolVersion.valueOf(this.getNode(this.data, "protocol", String.class));
-                            } catch (Exception ignore) {}
+                switch (type) {
+                    case REDIS -> {
+                        ProtocolVersion protocol = ProtocolVersion.RESP2;
+                        try {
+                            protocol = ProtocolVersion.valueOf(this.getNode(node, "protocol", String.class));
+                        } catch (Exception ignore) {}
 
-                            String dataChannel = this.getNode(this.data, "data-channel", String.class);
-                            if (dataChannel.equals("")) throw new IllegalStateException("Please configure your connector settings. `dataChannel` cannot be empty for Redis connectors.");
+                        String dataChannel = this.getNode(node, "data-channel", String.class);
+                        if (dataChannel.equals("")) throw new IllegalStateException("Please configure your connector settings. `dataChannel` cannot be empty for Redis connectors.");
 
-                            connectorsService.add(name, (Connector) RedisConnector.create(address, userPass, protocol, dataChannel, privateKey));
-                        }
-                        case RABBITMQ -> {
-                        }
-                        case WEBSOCKET -> {
-                            char[] connectKey = null;
-                            try {
-                                connectKey = this.getNode(this.data, "key", String.class).toCharArray();
-                            } catch (Exception ignore) {}
-
-                            connectorsService.add(name, (Connector) WebSocketConnector.create(address, connectKey, privateKey));
-                        }
+                        connectorsService.add(name, (Connector) RedisConnector.create(address, userPass, protocol, dataChannel, privateKey));
                     }
-                } catch (Exception e) {
-                    logger.send(Lang.BOXED_MESSAGE_COLORED.build("There was an issue while building the messenger "+name+": "+e.getMessage(), NamedTextColor.RED));
+                    case RABBITMQ -> {
+                    }
+                    case WEBSOCKET -> {
+                        char[] connectKey = null;
+                        try {
+                            connectKey = this.getNode(node, "key", String.class).toCharArray();
+                        } catch (Exception ignore) {}
+
+                        connectorsService.add(name, (Connector) WebSocketConnector.create(address, connectKey, privateKey));
+                    }
                 }
             });
 
         if(loadStorage)
             get(this.data,"storage").getChildrenList().forEach(node -> {
                 String name = this.getNode(node, "name", String.class);
-                try {
-                    ConnectorsService.StorageConnectors type = ConnectorsService.StorageConnectors.valueOf(this.getNode(node, "type", String.class).toUpperCase());
-                    String host = this.getNode(this.data, "host", String.class);
-                    if (host.equals("")) throw new IllegalStateException("Please configure your connector settings. `host` cannot be empty.");
-                    int port = this.getNode(this.data, "port", Integer.class);
-                    InetSocketAddress address = new InetSocketAddress(host, port);
 
-                    String user = this.getNode(this.data, "user", String.class);
-                    if (user.equals("")) throw new IllegalStateException("Please configure your connector settings. `user` cannot be empty.");
-                    char[] password = this.getNode(this.data, "password", String.class).toCharArray();
-                    UserPass userPass = new UserPass(user, password);
+                ConnectorsService.StorageConnectors type = ConnectorsService.StorageConnectors.valueOf(this.getNode(node, "type", String.class).toUpperCase());
+                String host = this.getNode(node, "host", String.class);
+                if (host.equals("")) throw new IllegalStateException("Please configure your connector settings. `host` cannot be empty.");
+                int port = this.getNode(node, "port", Integer.class);
+                InetSocketAddress address = new InetSocketAddress(host, port);
 
-                    switch (type) {
-                        case MYSQL -> {
+                String user = this.getNode(node, "user", String.class);
+                if (user.equals("")) throw new IllegalStateException("Please configure your connector settings. `user` cannot be empty.");
+                char[] password = this.getNode(node, "password", String.class).toCharArray();
+                UserPass userPass = new UserPass(user, password);
 
-                        }
+                switch (type) {
+                    case MYSQL -> {
+
                     }
-                } catch (Exception e) {
-                    logger.send(Lang.BOXED_MESSAGE_COLORED.build("There was an issue while building the storage "+name+": "+e.getMessage(), NamedTextColor.RED));
                 }
             });
 

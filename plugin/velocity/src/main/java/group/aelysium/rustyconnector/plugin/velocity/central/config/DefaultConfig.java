@@ -1,11 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.central.config;
 
+import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -64,11 +63,11 @@ public class DefaultConfig extends YAML {
     }
 
     @SuppressWarnings("unchecked")
-    public void register() throws IllegalStateException, NoOutputException {
+    public void register(int configVersion) throws IllegalStateException, NoOutputException {
         PluginLogger logger = Tinder.get().logger();
 
         try {
-            this.processVersion(YAML.currentVersion);
+            this.processVersion(configVersion);
         } catch (Exception | UnsupportedClassVersionError e) {
             throw new IllegalStateException(e.getMessage());
         }

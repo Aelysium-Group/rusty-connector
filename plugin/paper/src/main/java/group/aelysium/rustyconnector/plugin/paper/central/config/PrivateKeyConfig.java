@@ -1,12 +1,16 @@
-package group.aelysium.rustyconnector.plugin.paper.config;
+package group.aelysium.rustyconnector.plugin.paper.central.config;
 
+import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 
 public class PrivateKeyConfig extends YAML {
     protected InputStream data;
@@ -21,44 +25,31 @@ public class PrivateKeyConfig extends YAML {
         return new PrivateKeyConfig(configPointer, stream);
     }
 
-    @Override
-    public boolean generate() {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-
-        logger.log("---| Registering "+this.configPointer.getName()+"...");
-        logger.log("-----| Looking for "+this.configPointer.getName()+"...");
-
+    public boolean generateFilestream(List<Component> outputLog) {
+        outputLog.add(Component.text("Building "+this.configPointer.getName()+"...", NamedTextColor.DARK_GRAY));
         if (!this.configPointer.exists()) {
-            logger.log("-------| "+this.configPointer.getName()+" doesn't exist! Setting it up now...");
-            logger.log("-------| Preparing directory...");
             File parent = this.configPointer.getParentFile();
             if (!parent.exists()) {
                 parent.mkdirs();
             }
 
-            if (this.templateStream == null) {
-                logger.error("!!!!! Unable to setup "+this.configPointer.getName()+". This config has no template !!!!!");
-                return false;
-            }
+            InputStream templateStream = getClass().getClassLoader().getResourceAsStream(this.template);
+            if (templateStream == null)
+                throw new RuntimeException("Unable to setup \"+this.configPointer.getName()+\". This config has no template !");
 
             try {
-                logger.log("-------| Cloning template file to new configuration...");
-                Files.copy(this.templateStream, this.configPointer.toPath());
-                logger.log("-------| Finished setting up "+this.configPointer.getName());
-
+                Files.copy(templateStream, this.configPointer.toPath());
             } catch (IOException e) {
-                logger.error("!!!!! Unable to setup "+this.configPointer.getName()+" !!!!!",e);
-                return false;
+                throw new RuntimeException("Unable to setup "+this.configPointer.getName()+"! No further information.");
             }
-        } else {
-            logger.log("-----| Found it!");
         }
 
         try {
             this.data = new FileInputStream(this.configPointer);
+            outputLog.add(Component.text("Finished building "+this.configPointer.getName(), NamedTextColor.GREEN));
             return true;
         } catch (Exception e) {
+            outputLog.add(Component.text("Failed to build "+this.configPointer.getName(), NamedTextColor.RED));
             return false;
         }
     }

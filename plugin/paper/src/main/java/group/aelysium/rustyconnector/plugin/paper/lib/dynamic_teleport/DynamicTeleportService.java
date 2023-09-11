@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport;
 
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.CoordinateRequest;
 import org.bukkit.entity.Player;
 
@@ -32,7 +32,7 @@ public class DynamicTeleportService extends Service {
      * @param player The player to search for.
      */
     public void removeAllPlayersRequests(Player player) {
-        if(PaperAPI.get().isFolia()) {
+        if(Tinder.get().isFolia()) {
             this.requests.removeIf(request ->
                     Objects.equals(request.target(),         player)
                  || Objects.equals(request.clientUsername(), player.getPlayerProfile().getName())

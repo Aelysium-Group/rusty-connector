@@ -1,8 +1,13 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.central.config;
+
+import group.aelysium.rustyconnector.core.lib.config.YAML;
 
 import java.io.File;
 
 public class LoggerConfig extends YAML {
+    private static LoggerConfig config;
+    public static LoggerConfig getConfig() { return config; }
+
     private boolean saveTrashedMessages = true;
     private boolean messaging_registration = false;
     private boolean messaging_unregistration = false;
@@ -101,7 +106,8 @@ public class LoggerConfig extends YAML {
      * @return The newly created config.
      */
     public static LoggerConfig newConfig(File configPointer, String template) {
-        return new LoggerConfig(configPointer, template);
+        config = new LoggerConfig(configPointer, template);
+        return config;
     }
 
     public void register() throws IllegalStateException {

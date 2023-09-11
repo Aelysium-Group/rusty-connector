@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.central.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;

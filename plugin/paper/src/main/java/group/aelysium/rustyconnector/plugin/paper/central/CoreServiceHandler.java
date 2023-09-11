@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.paper.lib;
+package group.aelysium.rustyconnector.plugin.paper.central;
 
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;

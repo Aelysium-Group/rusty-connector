@@ -132,7 +132,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static StaticServerFamily init(String familyName, List<Component> bootOutput) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Tinder api = Tinder.get();
 
         StaticFamilyConfig staticFamilyConfig = StaticFamilyConfig.newConfig(
@@ -140,14 +140,14 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
                 new File(String.valueOf(api.dataFolder()), "families/" + familyName + ".static.yml"),
                 "velocity_static_family_template.yml"
         );
-        if (!staticFamilyConfig.generate()) {
+        if (!staticFamilyConfig.generate(bootOutput)) {
             throw new IllegalStateException("Unable to load or create families/" + familyName + ".static.yml!");
         }
         staticFamilyConfig.register();
 
         Whitelist whitelist = null;
         if (staticFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name());
+            whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name(), bootOutput);
 
             api.services().whitelistService().add(whitelist);
         }

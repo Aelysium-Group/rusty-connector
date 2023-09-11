@@ -115,7 +115,7 @@ public class Whitelist {
      * Initializes a whitelist based on a config.
      * @return A whitelist.
      */
-    public static Whitelist init(String whitelistName) {
+    public static Whitelist init(String whitelistName, List<Component> bootOutput) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         logger.send(Component.text(" | Registering whitelist "+whitelistName+"...", NamedTextColor.DARK_GRAY));
@@ -125,7 +125,7 @@ public class Whitelist {
                 new File(String.valueOf(api.dataFolder()), "whitelists/"+whitelistName+".yml"),
                 "velocity_whitelist_template.yml"
         );
-        if(!whitelistConfig.generate()) {
+        if(!whitelistConfig.generate(bootOutput)) {
             throw new IllegalStateException("Unable to load or create whitelists/"+whitelistName+".yml!");
         }
         whitelistConfig.register();

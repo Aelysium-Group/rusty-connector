@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.config;
 
+import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.Role;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.User;
 

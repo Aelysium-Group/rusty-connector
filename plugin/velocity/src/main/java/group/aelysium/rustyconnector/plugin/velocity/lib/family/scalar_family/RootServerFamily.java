@@ -15,13 +15,14 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 public class RootServerFamily extends ScalarServerFamily {
     private RootServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name, whitelist, clazz, weighted, persistence, attempts, null);
     }
 
-    public static RootServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static RootServerFamily init(String familyName, List<Component> bootOutput) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
@@ -30,14 +31,14 @@ public class RootServerFamily extends ScalarServerFamily {
                 new File(String.valueOf(api.dataFolder()), "families/"+familyName+".scalar.yml"),
                 "velocity_scalar_family_template.yml"
         );
-        if(!scalarFamilyConfig.generate()) {
+        if(!scalarFamilyConfig.generate(bootOutput)) {
             throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
         }
         scalarFamilyConfig.register();
 
         Whitelist whitelist = null;
         if(scalarFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
+            whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name(), bootOutput);
 
             api.services().whitelistService().add(whitelist);
         }

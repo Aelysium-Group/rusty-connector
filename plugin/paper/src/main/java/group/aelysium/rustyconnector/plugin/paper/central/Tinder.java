@@ -6,10 +6,7 @@ import group.aelysium.rustyconnector.core.central.PluginAPI;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.paper.lib.Core;
-import group.aelysium.rustyconnector.plugin.paper.lib.CoreServiceHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -17,22 +14,21 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
-import java.io.SyncFailedException;
 import java.util.function.Function;
 
-public class PaperAPI extends PluginAPI<BukkitScheduler> {
-    private static PaperAPI instance;
-    public static PaperAPI get() {
+public class Tinder extends PluginAPI<BukkitScheduler> {
+    private static Tinder instance;
+    public static Tinder get() {
         return instance;
     }
 
     private PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
-    private Core core = BootManager.init();
+    private Flame flame;
     private final PluginLogger pluginLogger;
 
 
-    public PaperAPI(PaperRustyConnector plugin, Logger logger) throws Exception {
+    private Tinder(PaperRustyConnector plugin, Logger logger) throws Exception {
         instance = this;
         this.plugin = plugin;
         this.pluginLogger = new PluginLogger(logger);
@@ -43,8 +39,30 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
                 Function.identity(),
                 Function.identity()
         );
+    }
 
-        Lang.WORDMARK_RUSTY_CONNECTOR.send(logger, api.version());
+    /**
+     * Ignites a {@link Flame} which effectively starts the RustyConnector kernel.
+     * @return A {@link Flame}.
+     */
+    public Flame ignite() throws RuntimeException {
+        try {
+            this.flame = Flame.fabricateNew(this.plugin);
+            return flame;
+        } catch (Exception e) {
+            this.logger().send(Lang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Restarts the entire RustyConnector kernel by exhausting the current {@link Flame} and igniting a new one.
+     */
+    public void rekindle() {
+        this.flame.exhaust(this.plugin);
+        this.flame = null;
+
+        this.ignite();
     }
 
     @Override
@@ -55,11 +73,6 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     @Override
     public BukkitScheduler scheduler() {
         return Bukkit.getScheduler();
-    }
-
-    @Override
-    public String version() {
-        return null;
     }
 
     @Override
@@ -79,33 +92,20 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
         return this.plugin.getServer();
     }
 
-    public CoreServiceHandler services() {
-        return this.bootManager.services();
-    }
-
-    public void killServices() {
-        this.bootManager.kill();
-    }
-
     /**
-     * Attempt to access the plugin instance directly.
-     * @return The plugin instance.
-     * @throws SyncFailedException If the plugin is currently running.
+     * Returns the currently active RustyConnector kernel.
+     * @return A {@link Flame}.
      */
-    public PaperRustyConnector accessPlugin() throws SyncFailedException {
-        if(PaperRustyConnector.lifecycle().isRunning()) throw new SyncFailedException("You can't get the plugin instance while the plugin is running!");
-        return this.plugin;
+    public Flame flame() {
+        return this.flame;
+    }
+
+    public CoreServiceHandler services() {
+        return this.flame.services();
     }
 
     public PaperCommandManager<CommandSender> commandManager() {
         return commandManager;
-    }
-
-    public void configureProcessor(DefaultConfig config) throws IllegalAccessException {
-        if(this.bootManager != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
-        this.bootManager = BootManager.init(config);
-        this.bootManager.services().redisService().connection().orElseThrow().startListening(RedisSubscriber.class);
-        this.bootManager.services().magicLinkService().startHeartbeat();
     }
 
     public boolean isFolia() {
@@ -114,5 +114,12 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
             return true;
         } catch (ClassNotFoundException ignore) {}
         return false;
+    }
+
+    /**
+     * Creates new {@link Tinder} based on the gathered resources.
+     */
+    public static Tinder gather(PaperRustyConnector plugin, Logger logger) throws Exception {
+        return new Tinder(plugin, logger);
     }
 }

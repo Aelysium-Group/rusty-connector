@@ -2,7 +2,7 @@
   "id":"rustyconnector-velocity",
   "name":"RustyConnector",
   "version":"${version}",
-  "config-version":"${velocity_config_version}",
+  "config-version":"${config_version}",
   "description":"A player and server connection manager for Velocity based Minecraft Networks!",
   "authors":["sivin"],
   "main":"group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector",

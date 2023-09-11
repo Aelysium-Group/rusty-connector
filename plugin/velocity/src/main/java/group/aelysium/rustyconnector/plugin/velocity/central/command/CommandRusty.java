@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.central;
+package group.aelysium.rustyconnector.plugin.velocity.central.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
@@ -212,16 +213,8 @@ public final class CommandRusty {
                     .executes(context -> {
                         logger.log("Reloading the proxy...");
                         try {
-                            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.dataFolder(), "config.yml"), "velocity_config_template.yml");
-                            if(!defaultConfig.generate()) {
-                                throw new IllegalStateException("Unable to load or create config.yml!");
-                            }
-                            defaultConfig.register();
-
                             api.rekindle();
                             logger.log("Done reloading!");
-
-                            VelocityLang.RC_ROOT_USAGE.send(logger);
                             return 1;
                         } catch (Exception e) {
                             logger.error(e.getMessage(),e);

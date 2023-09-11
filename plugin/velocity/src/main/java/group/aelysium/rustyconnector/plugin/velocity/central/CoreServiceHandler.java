@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib;
+package group.aelysium.rustyconnector.plugin.velocity.central;
 
 
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;

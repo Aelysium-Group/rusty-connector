@@ -1,11 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config;
 
+import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ScalarFamilyConfig extends YAML {
     private String parent_family = "";

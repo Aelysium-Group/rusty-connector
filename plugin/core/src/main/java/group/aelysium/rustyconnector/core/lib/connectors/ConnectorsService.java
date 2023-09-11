@@ -14,14 +14,14 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class ConnectorsService extends Service {
-    protected Map<String, Connector<Connection>> connectors = new HashMap<>();
+    protected Map<String, Connector<? extends Connection>> connectors = new HashMap<>();
 
-    public void add(String name, Connector<Connection> connector) throws DuplicateRequestException {
+    public <C extends Connector<? extends Connection>> void add(String name, C connector) throws DuplicateRequestException {
         if(connectors.containsKey(name)) throw new DuplicateRequestException("You can't set the same name for different connectors!");
         connectors.put(name, connector);
     }
 
-    public Connector<Connection> get(String name) {
+    public Connector<? extends Connection> get(String name) {
         return connectors.get(name);
     }
 
@@ -29,19 +29,19 @@ public class ConnectorsService extends Service {
         return connectors.containsKey(name);
     }
 
-    public void forEach(BiConsumer<String, Connector<Connection>> action) {
+    public void forEach(BiConsumer<String, Connector<? extends Connection>> action) {
         this.connectors.forEach(action);
     }
 
-    public List<MessengerConnector<? extends MessengerConnection>> messengers() {
-        List<MessengerConnector<? extends MessengerConnection>> output = new ArrayList<>();
-        this.connectors.values().stream().filter(connector -> connector instanceof MessengerConnector<?>).toList().forEach(item -> output.add((MessengerConnector) output));
+    public List<MessengerConnector<?>> messengers() {
+        List<MessengerConnector<?>> output = new ArrayList<>();
+        this.connectors.values().stream().filter(connector -> connector instanceof MessengerConnector<?>).toList().forEach(item -> output.add((MessengerConnector<?>) item));
         return output;
     }
 
-    public List<StorageConnector<? extends StorageConnection>> storage() {
-        List<StorageConnector<? extends StorageConnection>> output = new ArrayList<>();
-        this.connectors.values().stream().filter(connector -> connector instanceof StorageConnector<?>).toList().forEach(item -> output.add((StorageConnector) output));
+    public List<StorageConnector<?>> storage() {
+        List<StorageConnector<?>> output = new ArrayList<>();
+        this.connectors.values().stream().filter(connector -> connector instanceof StorageConnector<?>).toList().forEach(item -> output.add((StorageConnector<?>) item));
         return output;
     }
 

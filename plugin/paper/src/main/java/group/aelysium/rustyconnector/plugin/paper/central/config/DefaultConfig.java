@@ -1,5 +1,6 @@
-package group.aelysium.rustyconnector.plugin.paper.config;
+package group.aelysium.rustyconnector.plugin.paper.central.config;
 
+import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
@@ -74,11 +75,11 @@ public class DefaultConfig extends YAML {
         config = null;
     }
 
-    public void register() throws IllegalStateException {
+    public void register(int configVersion) throws IllegalStateException {
         PluginLogger logger = Tinder.get().logger();
 
         try {
-            this.processVersion(YAML.currentVersion);
+            this.processVersion(configVersion);
         } catch (Exception | UnsupportedClassVersionError e) {
             throw new IllegalStateException(e.getMessage());
         }

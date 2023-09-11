@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
@@ -11,6 +13,7 @@ import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.time.Instant;
 import java.util.*;
@@ -68,10 +71,18 @@ public class WebSocketConnection extends MessengerConnection<WebSocketSubscriber
     }
 
     @Override
-    protected void subscribe(Class<WebSocketSubscriber> subscriber) {
+    protected void subscribe(Class<WebSocketSubscriber> subscriber, MessageCacheService cache, PluginLogger logger) {
         this.executorService.submit(() -> {
             try {
-                WebSocketSubscriber websocket = subscriber.getDeclaredConstructor().newInstance();
+                WebSocketSubscriber websocket = subscriber.getDeclaredConstructor(
+                        String.class,
+                        MessageCacheService.class,
+                        PluginLogger.class
+                ).newInstance(
+                        Arrays.toString(privateKey),
+                        cache,
+                        logger
+                );
 
                 try(Session session = WebSocketConnection.this.container.connectToServer(websocket.listener(), this.config(), uri)) {
                     session.addMessageHandler(websocket.handler());
@@ -85,7 +96,7 @@ public class WebSocketConnection extends MessengerConnection<WebSocketSubscriber
                     e.printStackTrace();
                 }
 
-                WebSocketConnection.this.subscribe(subscriber);
+                WebSocketConnection.this.subscribe(subscriber, cache, logger);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -93,9 +104,9 @@ public class WebSocketConnection extends MessengerConnection<WebSocketSubscriber
     }
 
     @Override
-    public void startListening(Class<WebSocketSubscriber> subscriber) {
+    public void startListening(Class<WebSocketSubscriber> subscriber, MessageCacheService cache, PluginLogger logger) {
         this.executorService = Executors.newFixedThreadPool(3);
-        this.subscribe(subscriber);
+        this.subscribe(subscriber, cache, logger);
     }
 
     @Override

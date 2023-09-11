@@ -27,10 +27,11 @@ jar.finalizedBy('shadowJar')
 
 def plugin_version = project.plugin_version
 processResources {
-    inputs.property "version", plugin_version
+    def props = ['version': plugin_version, 'config_version': velocity_config_version]
+    inputs.properties props
     filteringCharset "UTF-8"
 
     filesMatching("velocity-plugin.json") {
-        expand "version": plugin_version
+        expand props
     }
 }

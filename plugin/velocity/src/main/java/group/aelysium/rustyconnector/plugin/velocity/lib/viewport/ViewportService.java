@@ -28,7 +28,6 @@ public class ViewportService extends ServiceableService<ViewportServiceHandler> 
         public ViewportService build(){
             // If any of these aren't set, it will throw an exception.
             this.services.gatewayService();
-            this.services.mySQLService();
 
             return new ViewportService(this.services);
         }

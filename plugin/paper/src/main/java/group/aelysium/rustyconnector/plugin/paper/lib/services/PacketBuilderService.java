@@ -7,18 +7,16 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import net.kyori.adventure.text.Component;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 public class PacketBuilderService extends Service {
-
     public void pingProxy(ServerPingPacket.ConnectionIntent intent) {
-        PaperAPI api = PaperAPI.get();
+        Tinder api = Tinder.get();
 
         try {
-            ServerInfoService serverInfoService = api.services().serverInfoService();
+            ServerInfoService serverInfoService = api.services().serverInfo();
             ServerPingPacket message = (ServerPingPacket) new GenericPacket.Builder()
                     .setType(PacketType.PING)
                     .setOrigin(PacketOrigin.SERVER)
@@ -31,9 +29,9 @@ public class PacketBuilderService extends Service {
                     .setParameter(ServerPingPacket.ValidParameters.WEIGHT, String.valueOf(serverInfoService.weight()))
                     .setParameter(ServerPingPacket.ValidParameters.PLAYER_COUNT, String.valueOf(serverInfoService.playerCount()))
                     .buildSendable();
-            api.services().redisService().connection().orElseThrow().publish(message);
+            api.flame().backbone().connection().orElseThrow().publish(message);
         } catch (Exception e) {
-            Lang.BOXED_MESSAGE_COLORED.send(PaperAPI.get().logger(), e.toString(), NamedTextColor.RED);
+            Lang.BOXED_MESSAGE_COLORED.send(Tinder.get().logger(), e.toString(), NamedTextColor.RED);
         }
     }
 
@@ -43,8 +41,8 @@ public class PacketBuilderService extends Service {
      * @param familyName The name of the family to send to.
      */
     public void sendToOtherFamily(Player player, String familyName) {
-        PaperAPI api = PaperAPI.get();
-        ServerInfoService serverInfoService = api.services().serverInfoService();
+        Tinder api = Tinder.get();
+        ServerInfoService serverInfoService = api.services().serverInfo();
 
         SendPlayerPacket message = (SendPlayerPacket) new GenericPacket.Builder()
                 .setType(PacketType.SEND_PLAYER)
@@ -54,7 +52,7 @@ public class PacketBuilderService extends Service {
                 .setParameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
                 .buildSendable();
 
-        api.services().redisService().connection().orElseThrow().publish(message);
+        api.flame().backbone().connection().orElseThrow().publish(message);
     }
 
     @Override

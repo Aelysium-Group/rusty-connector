@@ -18,6 +18,7 @@ import net.kyori.adventure.text.Component;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.ConnectException;
+import java.util.List;
 
 public class ScalarServerFamily extends PlayerFocusedServerFamily {
     protected ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -43,7 +44,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static ScalarServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static ScalarServerFamily init(String familyName, List<Component> bootOutput) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
@@ -52,14 +53,14 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
                 new File(String.valueOf(api.dataFolder()), "families/"+familyName+".scalar.yml"),
                 "velocity_scalar_family_template.yml"
         );
-        if(!scalarFamilyConfig.generate()) {
+        if(!scalarFamilyConfig.generate(bootOutput)) {
             throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
         }
         scalarFamilyConfig.register();
 
         Whitelist whitelist = null;
         if(scalarFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name());
+            whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name(), bootOutput);
 
             api.services().whitelistService().add(whitelist);
         }

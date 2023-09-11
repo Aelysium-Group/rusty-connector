@@ -9,7 +9,7 @@ import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -22,7 +22,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> message(PaperCommandManager<CommandSender> manager) {
-        PaperAPI api = PaperAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
@@ -34,7 +34,7 @@ public final class CommandRusty {
                             try {
                                 final Long snowflake = commandContext.get("snowflake");
 
-                                MessageCacheService messageCacheService = api.services().messageCacheService();
+                                MessageCacheService messageCacheService = api.services().messageCache();
 
                                 CacheableMessage message = messageCacheService.findMessage(snowflake);
 
@@ -48,7 +48,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> send(PaperCommandManager<CommandSender> manager) {
-        PaperAPI api = PaperAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
@@ -62,7 +62,7 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                api.services().redisMessagerService().sendToOtherFamily(player,familyName);
+                                api.services().packetBuilder().sendToOtherFamily(player,familyName);
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
