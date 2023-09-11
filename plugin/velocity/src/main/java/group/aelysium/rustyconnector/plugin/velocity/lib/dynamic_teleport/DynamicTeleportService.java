@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport;
 
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.plugin.velocity.config.DynamicTeleportConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
@@ -17,8 +17,8 @@ public class DynamicTeleportService extends ServiceableService<DynamicTeleportSe
         super(new DynamicTeleportServiceHandler(services));
     }
 
-    public static Optional<DynamicTeleportService> init(DynamicTeleportConfig config) {
-        if(!config.isEnabled()) return Optional.empty();
+    public static DynamicTeleportService init(DynamicTeleportConfig config) {
+        if(!config.isEnabled()) return new DynamicTeleportService(new HashMap<>());
 
         try {
             DynamicTeleportService.Builder builder = new DynamicTeleportService.Builder();
@@ -48,10 +48,12 @@ public class DynamicTeleportService extends ServiceableService<DynamicTeleportSe
                 } catch (Exception ignore) {}
             }
 
-            return Optional.of(builder.build());
-        } catch (Exception ignore) {}
+            return builder.build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        return Optional.empty();
+        return new DynamicTeleportService(new HashMap<>());
     }
 
     protected static class Builder {

@@ -4,7 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import net.kyori.adventure.text.Component;
@@ -21,7 +21,7 @@ public class SendPlayerHandler implements PacketHandler {
 
     @Override
     public void execute() throws Exception {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
         Player player = api.velocityServer().getPlayer(UUID.fromString(message.uuid())).stream().findFirst().orElse(null);
         if(player == null) return;

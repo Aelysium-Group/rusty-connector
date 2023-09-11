@@ -9,8 +9,8 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,7 +27,7 @@ public class MagicLinkPingHandler implements PacketHandler {
     @Override
     public void execute() throws Exception {
         InetSocketAddress address = message.address();
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
         ServerInfo serverInfo = new ServerInfo(
                 message.serverName(),
@@ -44,9 +44,9 @@ public class MagicLinkPingHandler implements PacketHandler {
     }
 
     private boolean connectServer(ServerInfo serverInfo) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         ServerService serverService = api.services().serverService();
-        MessengerConnection<?> backboneMessenger = api.core().backbone().connection().orElseThrow();
+        MessengerConnection<?> backboneMessenger = api.flame().backbone().connection().orElseThrow();
 
         try {
             PlayerServer server = new ServerService.ServerBuilder()
@@ -86,14 +86,14 @@ public class MagicLinkPingHandler implements PacketHandler {
     }
 
     private boolean disconnectServer(ServerInfo serverInfo) throws Exception {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         api.services().serverService().unregisterServer(serverInfo, message.familyName(), true);
 
         return true;
     }
 
     private boolean reviveOrConnectServer(ServerInfo serverInfo) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         ServerService serverService = api.services().serverService();
 
         PlayerServer server = serverService.search(serverInfo);

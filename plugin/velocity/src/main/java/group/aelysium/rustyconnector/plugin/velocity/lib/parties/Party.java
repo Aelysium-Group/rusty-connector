@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -87,7 +87,7 @@ public class Party {
         if(player.equals(leader())) setLeader(null);
 
         if(this.isEmpty())
-            VelocityAPI.get().services().partyService().orElseThrow().disband(this);
+            Tinder.get().services().partyService().orElseThrow().disband(this);
     }
 
     public void broadcast(Component message) {
@@ -105,11 +105,11 @@ public class Party {
     }
 
     public synchronized void connect(PlayerServer server) {
-        SwitchPower switchPower = VelocityAPI.get().services().partyService().orElseThrow().settings().switchPower();
+        SwitchPower switchPower = Tinder.get().services().partyService().orElseThrow().settings().switchPower();
         this.setServer(server);
         Vector<Player> kickedPlayers = new Vector<>();
 
-        VelocityAPI.get().services().partyService().orElseThrow().queueConnector(() -> {
+        Tinder.get().services().partyService().orElseThrow().queueConnector(() -> {
             for (Player player : this.players)
                 try {
                     switch (switchPower) {

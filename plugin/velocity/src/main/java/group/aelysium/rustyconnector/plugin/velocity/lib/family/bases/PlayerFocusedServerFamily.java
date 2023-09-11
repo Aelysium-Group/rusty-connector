@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.annotations.Initializer;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -44,7 +44,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     public void resolveParent() {
-        FamilyService familyService = VelocityAPI.get().services().familyService();
+        FamilyService familyService = Tinder.get().services().familyService();
         BaseServerFamily family = familyService.find(parentName);
 
         this.parentName = null;
@@ -57,7 +57,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     public WeakReference<BaseServerFamily> parent() {
-        FamilyService familyService = VelocityAPI.get().services().familyService();
+        FamilyService familyService = Tinder.get().services().familyService();
         if(familyService.rootFamily().equals(this)) return null;
         return this.parent;
     }
@@ -83,7 +83,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
      * @return The whitelist or `null` if there isn't one.
      */
     public Whitelist whitelist() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         if(this.name == null) return null;
         return api.services().whitelistService().find(this.whitelist);
     }

@@ -2,9 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
@@ -22,7 +22,7 @@ public class RootServerFamily extends ScalarServerFamily {
     }
 
     public static RootServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(
@@ -43,7 +43,7 @@ public class RootServerFamily extends ScalarServerFamily {
         }
 
         if(!scalarFamilyConfig.getParent_family().equals(""))
-            logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("The root family isn't allowed to have a parent family defined! Ignoring..."), NamedTextColor.YELLOW));
+            logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("The root family isn't allowed to have a parent family defined! Ignoring...", NamedTextColor.YELLOW));
 
         switch (Enum.valueOf(AlgorithmType.class, scalarFamilyConfig.getLoadBalancing_algorithm())) {
             case ROUND_ROBIN -> {

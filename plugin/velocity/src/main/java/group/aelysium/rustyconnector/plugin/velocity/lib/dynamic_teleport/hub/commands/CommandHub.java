@@ -9,7 +9,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
@@ -22,7 +22,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 public class CommandHub {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         FamilyService familyService = api.services().familyService();

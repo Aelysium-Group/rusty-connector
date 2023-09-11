@@ -15,6 +15,4 @@ public abstract class PluginAPI<S> {
     abstract public PluginLogger logger();
 
     abstract public String dataFolder();
-
-    abstract public String version();
 }

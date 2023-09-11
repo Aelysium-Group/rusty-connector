@@ -1,8 +1,9 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.parties.config;
 
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.SwitchPower;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,8 +11,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 
 public class PartyConfig extends YAML {
-    private static PartyConfig config;
-
     private boolean enabled = false;
     private int maxMembers = 5;
 
@@ -30,27 +29,11 @@ public class PartyConfig extends YAML {
     }
 
     /**
-     * Get the current config.
-     * @return The config.
-     */
-    public static PartyConfig getConfig() {
-        return config;
-    }
-
-    /**
      * Create a new config for the proxy, this will delete the old config.
      * @return The newly created config.
      */
     public static PartyConfig newConfig(File configPointer, String template) {
-        config = new PartyConfig(configPointer, template);
-        return PartyConfig.getConfig();
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        config = null;
+        return new PartyConfig(configPointer, template);
     }
 
     public boolean isEnabled() {
@@ -98,9 +81,9 @@ public class PartyConfig extends YAML {
         try {
             this.friendsOnly = this.getNode(this.data, "friends-only", Boolean.class);
             if(this.friendsOnly)
-                VelocityAPI.get().services().friendsService().orElseThrow();
+                Tinder.get().services().friendsService().orElseThrow();
         } catch (Exception ignore) {
-            VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("[friends-only] in `party.yml` is set to true. But the friends module isn't enabled! Ignoring..."), NamedTextColor.YELLOW));
+            Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("[friends-only] in `party.yml` is set to true. But the friends module isn't enabled! Ignoring...", NamedTextColor.YELLOW));
             this.friendsOnly = false;
         }
         this.localOnly = this.getNode(this.data, "local-only", Boolean.class);

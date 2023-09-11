@@ -6,7 +6,7 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -88,7 +88,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @throws InvalidAlgorithmParameterException If the family doesn't exist.
      */
     public void register(String familyName) throws Exception {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
         BaseServerFamily family = api.services().familyService().find(familyName);
         if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
@@ -177,7 +177,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      */
     public BaseServerFamily family() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
         BaseServerFamily family = api.services().familyService().find(this.family.name());
         if(family == null) throw new NullPointerException("There is no family with that name!");
@@ -187,7 +187,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
 
     public boolean connect(Player player) throws ConnectException {
         try {
-            PartyService partyService = VelocityAPI.get().services().partyService().orElseThrow();
+            PartyService partyService = Tinder.get().services().partyService().orElseThrow();
             Party party = partyService.find(player).orElseThrow();
 
             try {

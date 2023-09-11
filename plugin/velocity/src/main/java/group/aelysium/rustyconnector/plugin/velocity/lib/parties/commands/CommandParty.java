@@ -10,10 +10,10 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
@@ -27,7 +27,7 @@ import java.util.List;
 
 public final class CommandParty {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         // If this command class loads, then PartyService MUST be set.

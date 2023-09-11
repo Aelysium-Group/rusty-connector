@@ -1,8 +1,9 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.central.config;
 
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -25,7 +26,7 @@ public class PrivateKeyConfig extends YAML {
 
     @Override
     public boolean generate() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         logger.send(Component.text("Building private.key...", NamedTextColor.DARK_GRAY));
 

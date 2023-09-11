@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 
 import java.io.SyncFailedException;
 import java.util.*;
@@ -49,7 +49,7 @@ public class PlayerDataEnclaveService extends Service {
     public FakePlayer findPlayer(UUID uuid) throws SyncFailedException {
         // Check velocity for online players first
         try {
-            FakePlayer fakePlayer = FakePlayer.from(VelocityAPI.get().velocityServer().getPlayer(uuid).orElseThrow());
+            FakePlayer fakePlayer = FakePlayer.from(Tinder.get().velocityServer().getPlayer(uuid).orElseThrow());
             cachePlayer(fakePlayer);
 
             return fakePlayer;

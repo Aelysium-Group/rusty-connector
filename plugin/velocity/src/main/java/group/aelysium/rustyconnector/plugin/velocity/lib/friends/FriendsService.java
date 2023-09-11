@@ -4,11 +4,11 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,8 +26,8 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
     }
 
     public void initCommand() {
-        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
-        VelocityAPI.get().logger().send(Component.text("Building friends service commands...", NamedTextColor.DARK_GRAY));
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        Tinder.get().logger().send(Component.text("Building friends service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("friends"))
             try {
@@ -36,7 +36,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
                         CommandFriends.create()
                 );
 
-                VelocityAPI.get().logger().send(Component.text(" | Registered: /friends", NamedTextColor.YELLOW));
+                Tinder.get().logger().send(Component.text(" | Registered: /friends", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -47,7 +47,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
                         CommandUnFriend.create()
                 );
 
-                VelocityAPI.get().logger().send(Component.text(" | Registered: /unfriend", NamedTextColor.YELLOW));
+                Tinder.get().logger().send(Component.text(" | Registered: /unfriend", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -59,12 +59,12 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
                             CommandFM.create()
                     );
 
-                    VelocityAPI.get().logger().send(Component.text(" | Registered: /fm", NamedTextColor.YELLOW));
+                    Tinder.get().logger().send(Component.text(" | Registered: /fm", NamedTextColor.YELLOW));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-        VelocityAPI.get().logger().send(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
+        Tinder.get().logger().send(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
     }
 
     public FriendsSettings settings() {

@@ -13,23 +13,21 @@ public class DefaultConfig extends YAML {
 
     private static DefaultConfig config;
 
-    private String server_name = "";
-    private String server_address = "";
-    private String server_family = "";
-    private int server_weight = 0;
-    private int server_playerCap_soft = 20;
-    private int server_playerCap_hard = 30;
-
-    private String redis_host = "";
-    private int redis_port = 3306;
-    private String redis_user = "default";
-    private String redis_password = "password";
-    private String redis_dataChannel = "rustyConnector-sync";
+    private String messenger;
+    private String server_name;
+    private String server_address;
+    private String server_family;
+    private int server_weight;
+    private int server_playerCap_soft;
+    private int server_playerCap_hard;
 
     private DefaultConfig(File configPointer, String template) {
         super(configPointer, template);
     }
 
+    public String getMessenger() {
+        return messenger;
+    }
     public String getServer_name() {
         return server_name;
     }
@@ -52,26 +50,6 @@ public class DefaultConfig extends YAML {
 
     public int getServer_playerCap_hard() {
         return server_playerCap_hard;
-    }
-
-    public String getRedis_host() {
-        return redis_host;
-    }
-
-    public int getRedis_port() {
-        return redis_port;
-    }
-
-    public String getRedis_user() {
-        return redis_user;
-    }
-
-    public String getRedis_password() {
-        return redis_password;
-    }
-
-    public String getRedis_dataChannel() {
-        return redis_dataChannel;
     }
 
     /**
@@ -122,27 +100,11 @@ public class DefaultConfig extends YAML {
         this.server_playerCap_soft = this.getNode(this.data,"server.player-cap.soft",Integer.class);
         this.server_playerCap_hard = this.getNode(this.data,"server.player-cap.hard",Integer.class);
         if(this.server_playerCap_soft >= this.server_playerCap_hard)
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, "Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode.", NamedTextColor.YELLOW);
 
 
         // Redis
-        this.redis_host = this.getNode(this.data, "redis.host", String.class);
-        if(this.redis_host.equals("")) throw new IllegalStateException("Please configure your Redis settings.");
-
-        this.redis_port = this.getNode(this.data, "redis.port", Integer.class);
-        this.redis_user = this.getNode(this.data, "redis.user", String.class);
-        this.redis_password = this.getNode(this.data, "redis.password", String.class);
-
-        if(this.redis_password.length() != 0 && this.redis_password.length() < 16)
-            throw new IllegalStateException("Your Redis password is to short! For security purposes, please use a longer password! "+this.redis_password.length()+" < 16");
-
-
-        this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
-        if(this.redis_dataChannel.equals(""))
-            throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
-
-        this.redis_dataChannel = this.getNode(this.data,"redis.data-channel",String.class);
-        if(this.redis_dataChannel.equals(""))
-            throw new IllegalStateException("You must pass a proper name for the data-channel to use with Redis!");
+        this.messenger = this.getNode(this.data, "messenger", String.class);
+        if(this.messenger.equals("")) throw new IllegalStateException("Please set an option for `messenger` (otherwise RC-Paper can't communicate with your proxy!)");
     }
 }

@@ -1,13 +1,13 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config;
 
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ScalarFamilyConfig extends YAML {
-    private static Map<String, ScalarFamilyConfig> configs = new HashMap<>();
     private String parent_family = "";
     private boolean loadBalancing_weighted = false;
     private String loadBalancing_algorithm = "ROUND_ROBIN";
@@ -53,16 +53,7 @@ public class ScalarFamilyConfig extends YAML {
      * @param template The path to the template config file.
      */
     public static ScalarFamilyConfig newConfig(String name, File configPointer, String template) {
-        ScalarFamilyConfig config = new ScalarFamilyConfig(configPointer, template);
-        configs.put(name, config);
-        return config;
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        configs = new HashMap<>();
+        return new ScalarFamilyConfig(configPointer, template);
     }
 
     public void register() throws IllegalStateException {

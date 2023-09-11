@@ -1,17 +1,16 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.friends.config;
 
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 
 public class FriendsConfig extends YAML {
-    private static FriendsConfig config;
-
     private boolean enabled = false;
     private int maxFriends;
     private boolean sendNotifications;
@@ -26,27 +25,11 @@ public class FriendsConfig extends YAML {
     }
 
     /**
-     * Get the current config.
-     * @return The config.
-     */
-    public static FriendsConfig getConfig() {
-        return config;
-    }
-
-    /**
      * Create a new config for the proxy, this will delete the old config.
      * @return The newly created config.
      */
     public static FriendsConfig newConfig(File configPointer, String template) {
-        config = new FriendsConfig(configPointer, template);
-        return FriendsConfig.getConfig();
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        config = null;
+        return new FriendsConfig(configPointer, template);
     }
 
     public boolean isEnabled() {
@@ -75,7 +58,7 @@ public class FriendsConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
-        PluginLogger logger = VelocityAPI.get().logger();
+        PluginLogger logger = Tinder.get().logger();
 
         this.enabled = this.getNode(this.data, "enabled", Boolean.class);
         if(!this.enabled) return;
@@ -83,7 +66,7 @@ public class FriendsConfig extends YAML {
         this.maxFriends = this.getNode(this.data, "max-friends", Integer.class);
         if(maxFriends > 100) {
             this.maxFriends = 100;
-            logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("[max-friends] in friends.yml is to high! Setting to 100."), NamedTextColor.YELLOW));
+            logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("[max-friends] in friends.yml is to high! Setting to 100.", NamedTextColor.YELLOW));
         }
 
         this.sendNotifications = this.getNode(this.data, "send-notifications", Boolean.class);

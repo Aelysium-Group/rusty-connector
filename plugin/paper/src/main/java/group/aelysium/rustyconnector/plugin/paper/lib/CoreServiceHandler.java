@@ -1,20 +1,20 @@
-package group.aelysium.rustyconnector.plugin.paper.central;
+package group.aelysium.rustyconnector.plugin.paper.lib;
 
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.PacketBuilderService;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
 
 import java.util.Map;
 
-public class ProcessorServiceHandler extends group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler {
-    public ProcessorServiceHandler(Map<Class<? extends Service>, Service> services) {
+public class CoreServiceHandler extends group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler {
+    public CoreServiceHandler(Map<Class<? extends Service>, Service> services) {
         super(services);
     }
-    public ProcessorServiceHandler() {
+    public CoreServiceHandler() {
         super();
     }
 
@@ -27,8 +27,8 @@ public class ProcessorServiceHandler extends group.aelysium.rustyconnector.core.
     public MessageCacheService messageCacheService() {
         return this.find(MessageCacheService.class).orElseThrow();
     }
-    public RedisMessagerService redisMessagerService() {
-        return this.find(RedisMessagerService.class).orElseThrow();
+    public PacketBuilderService redisMessagerService() {
+        return this.find(PacketBuilderService.class).orElseThrow();
     }
     public ServerInfoService serverInfoService() {
         return this.find(ServerInfoService.class).orElseThrow();

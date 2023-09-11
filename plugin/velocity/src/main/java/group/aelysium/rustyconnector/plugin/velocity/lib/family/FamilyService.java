@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
@@ -97,7 +97,7 @@ public class FamilyService extends Service implements NodeManager<BaseServerFami
      * @param player The player to uncache mappings for.
      */
     public void uncacheHomeServerMappings(Player player) {
-        FamilyService familyService = VelocityAPI.get().services().familyService();
+        FamilyService familyService = Tinder.get().services().familyService();
         List<BaseServerFamily<?>> familyList = familyService.dump().stream().filter(family -> family instanceof StaticServerFamily).toList();
         if(familyList.size() == 0) return;
 

@@ -1,12 +1,13 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.data_transit.config;
 
 import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -15,8 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataTransitConfig extends YAML {
-    private static DataTransitConfig config;
-
     private int maxPacketLength = 512;
 
     private int cache_size = 100;
@@ -65,42 +64,26 @@ public class DataTransitConfig extends YAML {
     }
 
     /**
-     * Get the current config.
-     * @return The config.
-     */
-    public static DataTransitConfig config() {
-        return config;
-    }
-
-    /**
      * Create a new config for the proxy, this will delete the old config.
      * @return The newly created config.
      */
     public static DataTransitConfig newConfig(File configPointer, String template) {
-        config = new DataTransitConfig(configPointer, template);
-        return DataTransitConfig.config();
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        config = null;
+        return new DataTransitConfig(configPointer, template);
     }
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
-        PluginLogger logger = VelocityAPI.get().logger();
+        PluginLogger logger = Tinder.get().logger();
 
         this.maxPacketLength = this.getNode(this.data,"max-packet-length",Integer.class);
         if(this.maxPacketLength < 384) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Max message length is to small to be effective! " + this.maxPacketLength + " < 384. Max message length set to 384."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, "Max message length is to small to be effective! " + this.maxPacketLength + " < 384. Max message length set to 384.", NamedTextColor.YELLOW);
             this.maxPacketLength = 384;
         }
 
         this.cache_size = this.getNode(this.data,"cache.size",Integer.class);
         if(this.cache_size > 500) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Message cache size is to large! " + this.cache_size + " > 500. Message cache size set to 500."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, "Message cache size is to large! " + this.cache_size + " > 500. Message cache size set to 500.", NamedTextColor.YELLOW);
             this.cache_size = 500;
         }
         try {
@@ -109,7 +92,7 @@ public class DataTransitConfig extends YAML {
                 try {
                     this.cache_ignoredTypes.add(PacketType.mapping(item));
                 } catch (Exception ignore) {
-                    logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There is no packet type of "+item+"! Ignoring..."), NamedTextColor.YELLOW));
+                    logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There is no packet type of "+item+"! Ignoring...", NamedTextColor.YELLOW));
                 }
             });
         } catch (Exception e) {
@@ -121,7 +104,7 @@ public class DataTransitConfig extends YAML {
                 try {
                     this.cache_ignoredStatuses.add(PacketStatus.valueOf(item));
                 } catch (Exception ignore) {
-                    logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There is no packet status type of "+item+"! Ignoring..."), NamedTextColor.YELLOW));
+                    logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There is no packet status type of "+item+"! Ignoring...", NamedTextColor.YELLOW));
                 }
             });
         } catch (Exception e) {

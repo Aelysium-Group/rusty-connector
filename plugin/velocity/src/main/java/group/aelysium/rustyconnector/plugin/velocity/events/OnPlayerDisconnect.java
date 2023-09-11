@@ -6,9 +6,9 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
@@ -28,7 +28,7 @@ public class OnPlayerDisconnect {
      */
     @Subscribe(order = PostOrder.LAST)
     public EventTask onPlayerDisconnect(DisconnectEvent event) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
         return EventTask.async(() -> {
             Player player = event.getPlayer();

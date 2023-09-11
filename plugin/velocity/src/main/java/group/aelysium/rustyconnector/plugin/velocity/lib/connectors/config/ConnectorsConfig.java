@@ -1,14 +1,14 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.connectors.config;
 
-import group.aelysium.rustyconnector.core.lib.connectors.Connection;
 import group.aelysium.rustyconnector.core.lib.connectors.Connector;
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.websocket.WebSocketConnector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import io.lettuce.core.protocol.ProtocolVersion;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -17,24 +17,17 @@ import java.io.File;
 import java.net.InetSocketAddress;
 
 public class ConnectorsConfig extends YAML {
-    private static ConnectorsConfig config;
-
     private ConnectorsConfig(File configPointer, String template) {
         super(configPointer, template);
     }
 
-    public static ConnectorsConfig getConfig() {
-        return config;
-    }
-
     public static ConnectorsConfig newConfig(File configPointer, String template) {
-        config = new ConnectorsConfig(configPointer, template);
-        return ConnectorsConfig.getConfig();
+        return new ConnectorsConfig(configPointer, template);
     }
 
     @SuppressWarnings("unchecked")
     public ConnectorsService register(char[] privateKey) throws IllegalStateException {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         ConnectorsService connectorsService = new ConnectorsService();
 
@@ -67,19 +60,16 @@ public class ConnectorsConfig extends YAML {
                     case RABBITMQ -> {
                     }
                     case WEBSOCKET -> {
-                        String connectKey;
+                        char[] connectKey = null;
                         try {
-                            connectKey = this.getNode(this.data, "key", String.class);
-                            if (connectKey.equals("")) throw new IllegalStateException("Please configure your connector settings. `key` cannot be empty for WebSocket connectors.");
-                        } catch (Exception ignore) {
-                            throw new IllegalStateException("Please configure your connector settings. `key` cannot be empty for WebSocket connectors.");
-                        }
+                            connectKey = this.getNode(this.data, "key", String.class).toCharArray();
+                        } catch (Exception ignore) {}
 
                         connectorsService.add(name, (Connector) WebSocketConnector.create(address, connectKey, privateKey));
                     }
                 }
             } catch (Exception e) {
-                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There was an issue while building the messenger "+name+": "+e.getMessage()), NamedTextColor.RED));
+                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There was an issue while building the messenger "+name+": "+e.getMessage(), NamedTextColor.RED));
             }
         });
 
@@ -103,7 +93,7 @@ public class ConnectorsConfig extends YAML {
                     }
                 }
             } catch (Exception e) {
-                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There was an issue while building the storage "+name+": "+e.getMessage()), NamedTextColor.RED));
+                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There was an issue while building the storage "+name+": "+e.getMessage(), NamedTextColor.RED));
             }
         });
 

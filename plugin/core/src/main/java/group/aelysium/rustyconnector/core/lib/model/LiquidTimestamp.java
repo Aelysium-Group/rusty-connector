@@ -59,7 +59,7 @@ public class LiquidTimestamp {
 
     /**
      * Returns a unix timestamp set `value` number of `units` away from now.
-     * @return The Unix timestamp in milliseconds.
+     * @return The Unix timestamp in seconds.
      */
     public long epochFromNow() {
         long time = Instant.now().getEpochSecond();
@@ -68,6 +68,22 @@ public class LiquidTimestamp {
             case HOURS -> time += ((long) this.value * 60 * 60);
             case MINUTES -> time += ((long) this.value * 60);
             case SECONDS -> time += ((long) this.value);
+        }
+
+        return time * 1000;
+    }
+
+    /**
+     * Returns a unix timestamp set `value` number of `units` before from now.
+     * @return The Unix timestamp in seconds.
+     */
+    public long epochBeforeNow() {
+        long time = Instant.now().getEpochSecond();
+        switch (this.unit) {
+            case DAYS -> time -= ((long) this.value * 24 * 60 * 60);
+            case HOURS -> time -= ((long) this.value * 60 * 60);
+            case MINUTES -> time -= ((long) this.value * 60);
+            case SECONDS -> time -= ((long) this.value);
         }
 
         return time * 1000;

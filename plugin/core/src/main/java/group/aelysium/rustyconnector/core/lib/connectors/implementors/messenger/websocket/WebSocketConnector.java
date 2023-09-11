@@ -9,21 +9,26 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 
 public class WebSocketConnector extends MessengerConnector<WebSocketConnection> {
+    protected final char[] connectKey;
     protected final char[] privateKey;
-    protected final String connectKey;
 
-    private WebSocketConnector(InetSocketAddress address, String connectKey, char[] privateKey) {
+    private WebSocketConnector(InetSocketAddress address, char[] connectKey, char[] privateKey) {
         super(address, null);
-        this.privateKey = privateKey;
         this.connectKey = connectKey;
+        this.privateKey = privateKey;
     }
 
     @Override
     public WebSocketConnection connect() throws ConnectException {
-        this.connection = new WebSocketConnection(
-            URI.create(this.address.getHostName()),
-            this.privateKey
-        );
+        try {
+            this.connection = new WebSocketConnection(
+                    URI.create(this.address.getHostName()),
+                    this.connectKey,
+                    this.privateKey
+            );
+        } catch (IllegalArgumentException e) {
+            throw new ConnectException(e.getMessage());
+        }
 
         return this.connection;
     }
@@ -36,7 +41,7 @@ public class WebSocketConnector extends MessengerConnector<WebSocketConnection> 
      * @param privateKey The private key to use when shipping messages.
      * @return A {@link WebSocketConnector}.
      */
-    public static WebSocketConnector create(InetSocketAddress address, String connectKey, char @NotNull [] privateKey) {
+    public static WebSocketConnector create(InetSocketAddress address, char[] connectKey, char[] privateKey) {
         return new WebSocketConnector(address, connectKey, privateKey);
     }
 }

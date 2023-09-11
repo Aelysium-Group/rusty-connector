@@ -3,9 +3,12 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
+import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.lib.Core;
+import group.aelysium.rustyconnector.plugin.paper.lib.CoreServiceHandler;
 import group.aelysium.rustyconnector.plugin.paper.lib.database.RedisSubscriber;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -25,7 +28,7 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
 
     private PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
-    private Processor processor = null;
+    private Core core = BootManager.init();
     private final PluginLogger pluginLogger;
 
 
@@ -40,6 +43,8 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
                 Function.identity(),
                 Function.identity()
         );
+
+        Lang.WORDMARK_RUSTY_CONNECTOR.send(logger, api.version());
     }
 
     @Override
@@ -74,12 +79,12 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
         return this.plugin.getServer();
     }
 
-    public ProcessorServiceHandler services() {
-        return this.processor.services();
+    public CoreServiceHandler services() {
+        return this.bootManager.services();
     }
 
     public void killServices() {
-        this.processor.kill();
+        this.bootManager.kill();
     }
 
     /**
@@ -97,10 +102,10 @@ public class PaperAPI extends PluginAPI<BukkitScheduler> {
     }
 
     public void configureProcessor(DefaultConfig config) throws IllegalAccessException {
-        if(this.processor != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
-        this.processor = Processor.init(config);
-        this.processor.services().redisService().connection().orElseThrow().startListening(RedisSubscriber.class);
-        this.processor.services().magicLinkService().startHeartbeat();
+        if(this.bootManager != null) throw new IllegalAccessException("Attempted to configure the processor while it's already running!");
+        this.bootManager = BootManager.init(config);
+        this.bootManager.services().redisService().connection().orElseThrow().startListening(RedisSubscriber.class);
+        this.bootManager.services().magicLinkService().startHeartbeat();
     }
 
     public boolean isFolia() {

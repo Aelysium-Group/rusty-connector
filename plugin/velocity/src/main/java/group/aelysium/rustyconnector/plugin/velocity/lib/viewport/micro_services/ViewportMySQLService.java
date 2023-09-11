@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_service
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import group.aelysium.rustyconnector.core.lib.connector.mysql.MySQLService;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class ViewportMySQLService extends MySQLService {
     }
 
     public void init() throws SQLException, IOException {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         InputStream stream = api.resourceAsStream("mysql/viewport.sql");
         String file = new String(stream.readAllBytes());
 

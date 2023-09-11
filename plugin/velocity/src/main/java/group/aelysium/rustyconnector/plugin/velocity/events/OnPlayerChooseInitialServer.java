@@ -7,10 +7,10 @@ import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -31,7 +31,7 @@ public class OnPlayerChooseInitialServer {
      */
     @Subscribe(order = PostOrder.LAST)
     public EventTask onPlayerChooseInitialServer(PlayerChooseInitialServerEvent event) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         Player player = event.getPlayer();
 

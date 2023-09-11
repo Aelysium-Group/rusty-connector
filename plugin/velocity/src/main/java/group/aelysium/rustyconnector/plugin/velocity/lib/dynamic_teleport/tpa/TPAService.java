@@ -8,10 +8,10 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -28,8 +28,8 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         this.settings = settings;
     }
     public void initCommand() {
-        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
-        VelocityAPI.get().logger().send(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        Tinder.get().logger().send(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("tpa"))
             try {
@@ -38,12 +38,12 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
                         CommandTPA.create()
                 );
 
-                VelocityAPI.get().logger().send(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
+                Tinder.get().logger().send(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-        VelocityAPI.get().logger().send(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
+        Tinder.get().logger().send(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
     }
 
     public TPASettings settings() {
@@ -72,7 +72,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
      * @throws NullPointerException If the server doesn't exist in the family.
      */
     public void tpaSendPlayer(Player source, Player target, PlayerServer targetServer) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
         CoordinateRequestQueuePacket message = (CoordinateRequestQueuePacket) new GenericPacket.Builder()
                 .setType(PacketType.COORDINATE_REQUEST_QUEUE)
@@ -83,7 +83,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
                 .setParameter(CoordinateRequestQueuePacket.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        MessengerConnection<?> backboneMessenger = api.core().backbone().connection().orElseThrow();
+        MessengerConnection<?> backboneMessenger = api.flame().backbone().connection().orElseThrow();
         backboneMessenger.publish(message);
 
         try {

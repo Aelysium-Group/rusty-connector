@@ -87,7 +87,7 @@ tpa:
     #                                Expiration                                #
     #                                                                          #
     #                       ---------------------------                        #
-    # | How many minutes a pending tpa request can exist for before            #
+    # | How long a pending tpa request can exist for before                    #
     # | it expires. Players are not allowed to issue new tpa requests if       #
     # | they already have one pending.                                         #
     #                                                                          #

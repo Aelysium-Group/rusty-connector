@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper.lib.magic_link;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.PacketBuilderService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,7 +28,7 @@ public class MagicLinkService extends ClockService {
     }
 
     private void scheduleNextPing() {
-        RedisMessagerService service = PaperAPI.get().services().redisMessagerService();
+        PacketBuilderService service = PaperAPI.get().services().redisMessagerService();
 
         this.scheduleDelayed(() -> {
             try {
@@ -52,7 +52,7 @@ public class MagicLinkService extends ClockService {
     }
 
     public void disconnect() {
-        RedisMessagerService service = PaperAPI.get().services().redisMessagerService();
+        PacketBuilderService service = PaperAPI.get().services().redisMessagerService();
         service.pingProxy(ServerPingPacket.ConnectionIntent.DISCONNECT);
     }
 

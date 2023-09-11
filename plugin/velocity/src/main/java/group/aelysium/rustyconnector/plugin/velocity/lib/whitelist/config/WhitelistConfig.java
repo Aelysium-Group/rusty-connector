@@ -1,8 +1,9 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -13,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public class WhitelistConfig extends YAML {
-    private static Map<String,WhitelistConfig> configs = new HashMap<>();
-
     private boolean use_players = false;
     private List<Object> players = new ArrayList<>();
 
@@ -66,21 +65,12 @@ public class WhitelistConfig extends YAML {
      * @param template The path to the template config file.
      */
     public static WhitelistConfig newConfig(String name, File configPointer, String template) {
-        WhitelistConfig config = new WhitelistConfig(configPointer, template);
-        configs.put(name, config);
-        return config;
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        configs = new HashMap<>();
+        return new WhitelistConfig(configPointer, template);
     }
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
-        PluginLogger logger = VelocityAPI.get().logger();
+        PluginLogger logger = Tinder.get().logger();
 
         this.use_players = this.getNode(this.data,"use-players",Boolean.class);
         try {
@@ -93,7 +83,7 @@ public class WhitelistConfig extends YAML {
 
         this.use_country = this.getNode(this.data,"use-country",Boolean.class);
         if(this.use_country)
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, "RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false.", NamedTextColor.YELLOW);
         this.use_country = false;
         this.countries = new ArrayList<>();
 

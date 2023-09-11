@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -16,7 +16,7 @@ public record FakePlayer(UUID uuid, String username) {
     }
 
     public Optional<Player> resolve() {
-        return VelocityAPI.get().velocityServer().getPlayer(this.uuid);
+        return Tinder.get().velocityServer().getPlayer(this.uuid);
     }
 
     @Override

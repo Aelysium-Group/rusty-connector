@@ -1,9 +1,10 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.config;
 
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FamiliesConfig extends YAML {
-    private static FamiliesConfig config;
     private String rootFamily_name = "lobby";
     private Boolean rootFamily_catchDisconnectingPlayers = false;
     private List<String> scalar = new ArrayList<>();
@@ -24,27 +24,11 @@ public class FamiliesConfig extends YAML {
     }
 
     /**
-     * Get the current config.
-     * @return The config.
-     */
-    public static FamiliesConfig getConfig() {
-        return config;
-    }
-
-    /**
      * Create a new config for the proxy, this will delete the old config.
      * @return The newly created config.
      */
     public static FamiliesConfig newConfig(File configPointer, String template) {
-        config = new FamiliesConfig(configPointer, template);
-        return FamiliesConfig.getConfig();
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        config = null;
+        return new FamiliesConfig(configPointer, template);
     }
 
     public String rootFamilyName() {
@@ -67,14 +51,14 @@ public class FamiliesConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
-        PluginLogger logger = VelocityAPI.get().logger();
+        PluginLogger logger = Tinder.get().logger();
 
         // Families
         try {
             this.rootFamily_name = this.getNode(this.data, "root-family.name", String.class);
             if (this.rootFamily_name.equals("") || this.rootFamily_name.length() < 1) throw new Exception();
         } catch (Exception ignore) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Your [root-family.name] is empty or unparseable. It has been set to the default of \"lobby\""), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.name] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
             this.rootFamily_name = "lobby";
         }
 
@@ -107,7 +91,7 @@ public class FamiliesConfig extends YAML {
             throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of what type the family is!");
 
         if(this.isRootFamilyDuplicated()) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(this.rootFamily_name + " was found duplicated in your family nodes. This is no longer supported. Instead, ONLY place the name of your root family in [root-family.name]. Ignoring..."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, this.rootFamily_name + " was found duplicated in your family nodes. This is no longer supported. Instead, ONLY place the name of your root family in [root-family.name]. Ignoring...", NamedTextColor.YELLOW);
             this.scalar.remove(this.rootFamily_name);
             this.staticF.remove(this.rootFamily_name);
         }

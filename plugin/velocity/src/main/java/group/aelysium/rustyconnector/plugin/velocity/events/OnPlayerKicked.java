@@ -6,7 +6,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -20,7 +20,7 @@ public class OnPlayerKicked {
      */
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerKicked(KickedFromServerEvent event) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         Player player = event.getPlayer();
 
         return EventTask.async(() -> {

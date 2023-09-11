@@ -4,7 +4,7 @@ import javax.websocket.*;
 import java.util.concurrent.CountDownLatch;
 
 @ClientEndpoint
-public class WebSocketListener {
+public class WebSocketListener extends Endpoint {
     private CountDownLatch lock = new CountDownLatch(0);
 
     public void awaitClose() throws InterruptedException {
@@ -12,7 +12,7 @@ public class WebSocketListener {
     }
 
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session, EndpointConfig config) {
         this.lock = new CountDownLatch(1);
     }
 

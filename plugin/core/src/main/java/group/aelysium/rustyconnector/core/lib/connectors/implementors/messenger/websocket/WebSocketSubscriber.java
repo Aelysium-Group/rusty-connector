@@ -5,6 +5,10 @@ import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubs
 public abstract class WebSocketSubscriber extends MessengerSubscriber {
     protected WebSocketListener listener = new WebSocketListener();
 
+    public WebSocketSubscriber(char[] privateKey) {
+        super(privateKey);
+    }
+
     public MessageHandler handler() {
         return new MessageHandler();
     }

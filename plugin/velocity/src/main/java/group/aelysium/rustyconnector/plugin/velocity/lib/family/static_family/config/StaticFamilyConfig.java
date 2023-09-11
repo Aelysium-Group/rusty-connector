@@ -1,7 +1,8 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config;
 
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.UnavailableProtocol;
 
 import java.io.File;
@@ -10,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StaticFamilyConfig extends YAML {
-    private static Map<String, StaticFamilyConfig> configs = new HashMap<>();
     private String parent_family = "";
     private boolean firstConnection_loadBalancing_weighted = false;
     private String firstConnection_loadBalancing_algorithm = "ROUND_ROBIN";
@@ -65,16 +65,7 @@ public class StaticFamilyConfig extends YAML {
      * @param template The path to the template config file.
      */
     public static StaticFamilyConfig newConfig(String name, File configPointer, String template) {
-        StaticFamilyConfig config = new StaticFamilyConfig(configPointer, template);
-        configs.put(name, config);
-        return config;
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        configs = new HashMap<>();
+        return new StaticFamilyConfig(configPointer, template);
     }
 
     public void register() throws IllegalStateException {

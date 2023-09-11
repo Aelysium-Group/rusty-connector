@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_service
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.APIResponse;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.Session;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
  * Route: /login
  */
 public class LoginEndpoint implements Route {
-    ViewportService viewportService = VelocityAPI.get().services().viewportService().orElseThrow();
+    ViewportService viewportService = Tinder.get().services().viewportService().orElseThrow();
 
     @Override
     public APIResponse handle(Request request, Response response) throws Exception {

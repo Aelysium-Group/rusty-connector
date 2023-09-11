@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging;
+package group.aelysium.rustyconnector.plugin.velocity.lib.lang;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.core.lib.lang_messaging.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
@@ -158,7 +158,7 @@ public interface VelocityLang extends Lang {
     );
 
     Message RC_FAMILY = () -> {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         Component families = text("");
         for (BaseServerFamily family : api.services().familyService().dump()) {
             if(family instanceof ScalarServerFamily)
@@ -225,7 +225,7 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = VelocityAPI.get().services().familyService().rootFamily();
+        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -290,7 +290,7 @@ public interface VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = VelocityAPI.get().services().familyService().rootFamily();
+        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -395,7 +395,7 @@ public interface VelocityLang extends Lang {
             boolean isLeader = party.leader().equals(member);
             boolean canInvite;
             try {
-                boolean onlyLeaderCanInvite = VelocityAPI.get().services().partyService().orElseThrow().settings().onlyLeaderCanInvite();
+                boolean onlyLeaderCanInvite = Tinder.get().services().partyService().orElseThrow().settings().onlyLeaderCanInvite();
                 canInvite = !onlyLeaderCanInvite || isLeader;
             } catch (Exception ignore) {
                 canInvite = isLeader;
@@ -507,7 +507,7 @@ public interface VelocityLang extends Lang {
     Message PARTY_DISBANDED = () -> text("Your party has been disbanded.",GRAY);
 
     ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         FriendsService friendsService = api.services().friendsService().orElseThrow();
         int maxFriends = friendsService.settings().maxFriends();
         player.sendMessage(text("Getting friends...", GRAY));
@@ -591,7 +591,7 @@ public interface VelocityLang extends Lang {
             )
     );
     ParameterizedMessage1<Player> FRIEND_JOIN = (player) -> {
-        FriendsService friendsService = VelocityAPI.get().services().friendsService().orElseThrow();
+        FriendsService friendsService = Tinder.get().services().friendsService().orElseThrow();
 
         if(friendsService.settings().allowMessaging())
             return join(

@@ -1,16 +1,16 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.central.config;
 
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 
 public class DefaultConfig extends YAML {
-    private static DefaultConfig config;
     private boolean debug = false;
 
     private String messenger = "";
@@ -28,31 +28,11 @@ public class DefaultConfig extends YAML {
     }
 
     /**
-     * Get the current config.
-     * @return The config.
-     */
-    public static DefaultConfig config() {
-        return config;
-    }
-
-    /**
      * Create a new config for the proxy, this will delete the old config.
      * @return The newly created config.
      */
     public static DefaultConfig newConfig(File configPointer, String template) {
-        config = new DefaultConfig(configPointer, template);
-        return DefaultConfig.config();
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        config = null;
-    }
-
-    public boolean shouldDebug() {
-        return this.debug;
+        return new DefaultConfig(configPointer, template);
     }
 
     public String messenger() {
@@ -85,7 +65,7 @@ public class DefaultConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
-        PluginLogger logger = VelocityAPI.get().logger();
+        PluginLogger logger = Tinder.get().logger();
 
         try {
             this.processVersion(YAML.currentVersion);
@@ -115,16 +95,16 @@ public class DefaultConfig extends YAML {
         // Hearts
         this.services_serverLifecycle_serverTimeout = this.getNode(this.data,"services.server-lifecycle.server-timeout",Integer.class);
         if(this.services_serverLifecycle_serverTimeout < 5) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server timeout is set dangerously fast: " + this.services_serverLifecycle_serverTimeout + "s. Setting to default of 5s."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, "Server timeout is set dangerously fast: " + this.services_serverLifecycle_serverTimeout + "s. Setting to default of 5s.", NamedTextColor.YELLOW);
             this.services_serverLifecycle_serverTimeout= 5;
         }
         this.services_serverLifecycle_serverPingInterval = this.getNode(this.data,"services.server-lifecycle.server-ping-interval",Integer.class);
         if(this.services_serverLifecycle_serverPingInterval < 5) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server ping interval is set dangerously fast: " + this.services_serverLifecycle_serverPingInterval + "s. Setting to default of 5s."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, "Server ping interval is set dangerously fast: " + this.services_serverLifecycle_serverPingInterval + "s. Setting to default of 5s.", NamedTextColor.YELLOW);
             this.services_serverLifecycle_serverPingInterval = 5;
         }
         if(this.services_serverLifecycle_serverTimeout < this.services_serverLifecycle_serverPingInterval) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server timeout can't be less that server ping interval!"), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, "Server timeout can't be less that server ping interval!", NamedTextColor.YELLOW);
             this.services_serverLifecycle_serverPingInterval = this.services_serverLifecycle_serverTimeout - 2;
         }
 
@@ -132,7 +112,7 @@ public class DefaultConfig extends YAML {
         this.services_loadBalancing_enabled = this.getNode(this.data,"services.load-balancing.enabled",Boolean.class);
         this.services_loadBalancing_interval = this.getNode(this.data,"services.load-balancing.interval",Integer.class);
         if(this.services_loadBalancing_interval < 7) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text("Server sorting interval is set dangerously fast: " + this.services_loadBalancing_interval + "ms. Setting to default of 20ms."), NamedTextColor.YELLOW);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, "Server sorting interval is set dangerously fast: " + this.services_loadBalancing_interval + "ms. Setting to default of 20ms.", NamedTextColor.YELLOW);
             this.services_loadBalancing_interval = 20;
         }
     }

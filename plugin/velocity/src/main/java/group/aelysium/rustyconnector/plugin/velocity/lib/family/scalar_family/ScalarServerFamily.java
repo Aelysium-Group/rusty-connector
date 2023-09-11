@@ -4,8 +4,8 @@ import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.config.ScalarFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
@@ -44,7 +44,7 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
      * @return A list of all server families.
      */
     public static ScalarServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.newConfig(

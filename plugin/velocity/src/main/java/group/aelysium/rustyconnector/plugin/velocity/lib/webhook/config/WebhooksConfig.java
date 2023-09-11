@@ -1,7 +1,8 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config;
 
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhook;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -15,24 +16,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WebhooksConfig extends YAML {
-    private static WebhooksConfig config;
-
     private WebhooksConfig(File configPointer, String template) {
         super(configPointer, template);
     }
 
-    public static WebhooksConfig getConfig() {
-        return config;
-    }
-
     public static WebhooksConfig newConfig(File configPointer, String template) {
-        config = new WebhooksConfig(configPointer, template);
-        return WebhooksConfig.getConfig();
+        return new WebhooksConfig(configPointer, template);
     }
 
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         Boolean enabled = this.getNode(this.data, "enabled", Boolean.class);

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -30,7 +30,7 @@ public class FriendRequest {
      * This will subsequently connect the player to the party's server and then decompose the invite and remove it from the PartyService that it belongs to.
      */
     public synchronized void accept() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         if(api.services().friendsService().orElse(null) == null)
             throw new IllegalStateException("The friends module is disabled!");
         FriendsService friendsService = api.services().friendsService().orElseThrow();
@@ -73,7 +73,7 @@ public class FriendRequest {
      * This will subsequently decompose the invite and remove it from the PartyService that it belongs to.
      */
     public synchronized void ignore() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         if(api.services().friendsService().orElse(null) == null)
             throw new IllegalStateException("The friends module is disabled!");
         FriendsService friendsService = api.services().friendsService().orElseThrow();

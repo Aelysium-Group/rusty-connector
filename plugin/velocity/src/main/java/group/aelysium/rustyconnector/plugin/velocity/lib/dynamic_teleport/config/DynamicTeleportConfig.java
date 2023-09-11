@@ -1,9 +1,10 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config;
 
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -14,8 +15,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class DynamicTeleportConfig extends YAML {
-    private static DynamicTeleportConfig config;
-
     private boolean enabled = false;
     private boolean tpa_enabled = false;
     private boolean tpa_friendsOnly = false;
@@ -35,27 +34,11 @@ public class DynamicTeleportConfig extends YAML {
     }
 
     /**
-     * Get the current config.
-     * @return The config.
-     */
-    public static DynamicTeleportConfig getConfig() {
-        return config;
-    }
-
-    /**
      * Create a new config for the proxy, this will delete the old config.
      * @return The newly created config.
      */
     public static DynamicTeleportConfig newConfig(File configPointer, String template) {
-        config = new DynamicTeleportConfig(configPointer, template);
-        return DynamicTeleportConfig.getConfig();
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        config = null;
+        return new DynamicTeleportConfig(configPointer, template);
     }
 
     public boolean isEnabled() {
@@ -120,7 +103,7 @@ public class DynamicTeleportConfig extends YAML {
                 String expiration = this.getNode(this.data, "tpa.expiration", String.class);
                 if (expiration.equals("NEVER")) {
                     this.tpa_expiration = new LiquidTimestamp(5, TimeUnit.MINUTES);
-                    VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes."), NamedTextColor.YELLOW));
+                    Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes.", NamedTextColor.YELLOW));
                 } else this.tpa_expiration = new LiquidTimestamp(expiration);
             } catch (ParseException e) {
                 throw new IllegalStateException("You must provide a valid time value for [tpa.expiration] in dynamic_teleport.yml!");

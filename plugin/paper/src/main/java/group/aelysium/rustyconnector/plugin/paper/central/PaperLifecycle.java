@@ -16,7 +16,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 
-public class PaperLifecycle extends PluginLifecycle {
+public class PaperLifecycle {
     public boolean start() throws DuplicateLifecycleException {
         PaperAPI api = PaperAPI.get();
         if(this.isRunning()) throw new DuplicateLifecycleException(
@@ -25,7 +25,6 @@ public class PaperLifecycle extends PluginLifecycle {
 
         MigrationDirections.init();
 
-        if(!loadConfigs()) return false;
         if(!loadCommands()) return false;
         if(!loadEvents()) return false;
 
@@ -43,29 +42,6 @@ public class PaperLifecycle extends PluginLifecycle {
         api.commandManager().deleteRootCommand("rc");
     }
 
-    protected boolean loadConfigs() {
-        PaperAPI api = PaperAPI.get();
-        PluginLogger logger = api.logger();
-        try {
-            DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.dataFolder(), "config.yml"), "paper_config_template.yml");
-            if(!defaultConfig.generate()) {
-                throw new IllegalStateException("Unable to load or create config.yml!");
-            }
-            defaultConfig.register();
-
-            api.configureProcessor(defaultConfig);
-
-            Lang.WORDMARK_RUSTY_CONNECTOR.send(logger, api.version());
-
-            DefaultConfig.empty();
-
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);
-            return false;
-        }
-    }
     protected boolean loadCommands() {
         PaperAPI api = PaperAPI.get();
         PluginLogger logger = api.logger();
@@ -91,7 +67,7 @@ public class PaperLifecycle extends PluginLifecycle {
 
             return true;
         } catch (Exception e) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, Component.text(e.getMessage()), NamedTextColor.RED);
+            Lang.BOXED_MESSAGE_COLORED.send(logger, e.getMessage(), NamedTextColor.RED);
             return false;
         }
     }

@@ -11,12 +11,12 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
@@ -36,7 +36,7 @@ public final class CommandTPA {
      * @return `true` is /tpa is allowed. `false` otherwise.
      */
     public static boolean tpaEnabled(Player sender) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         try {
             TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
                                        .services().tpaService().orElseThrow();
@@ -51,7 +51,7 @@ public final class CommandTPA {
     }
 
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         FamilyService familyService = api.services().familyService();

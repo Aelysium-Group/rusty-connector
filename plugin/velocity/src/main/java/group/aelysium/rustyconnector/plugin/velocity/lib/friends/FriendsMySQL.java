@@ -3,8 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import net.kyori.adventure.text.Component;
@@ -34,7 +34,7 @@ public class FriendsMySQL {
 
     public void init() throws SQLException, IOException {
         MySQLConnection connection = this.connector.connection().orElseThrow();
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         InputStream stream = api.resourceAsStream("friends.sql");
         String file = new String(stream.readAllBytes());
 
@@ -51,7 +51,7 @@ public class FriendsMySQL {
      */
     public Optional<List<FriendMapping>> findFriends(Player player) {
         MySQLConnection connection = this.connector.connection().orElseThrow();
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PlayerService playerService = api.services().playerService().orElseThrow();
 
         try {
@@ -76,7 +76,7 @@ public class FriendsMySQL {
             connection.close();
             return Optional.of(friends);
         } catch (Exception e) {
-            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
         }
 
         return Optional.empty();
@@ -84,7 +84,7 @@ public class FriendsMySQL {
 
     public boolean areFriends(FakePlayer player1, FakePlayer player2) {
         MySQLConnection connection = this.connector.connection().orElseThrow();
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         FriendMapping orderedMapping = new FriendMapping(player1, player2);
 
         try {
@@ -99,7 +99,7 @@ public class FriendsMySQL {
             connection.close();
             return true;
         } catch (Exception e) {
-            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
         }
 
         return false;

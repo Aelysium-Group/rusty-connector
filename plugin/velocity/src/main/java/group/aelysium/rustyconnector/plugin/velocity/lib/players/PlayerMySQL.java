@@ -3,8 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -28,7 +28,7 @@ public class PlayerMySQL {
 
     public void init() throws SQLException, IOException {
         MySQLConnection connection = this.connector.connection().orElseThrow();
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         InputStream stream = api.resourceAsStream("players.sql");
         String file = new String(stream.readAllBytes());
 
@@ -40,7 +40,7 @@ public class PlayerMySQL {
 
     public Optional<FakePlayer> resolveUUID(UUID uuid) {
         MySQLConnection connection = this.connector.connection().orElseThrow();
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
         try {
             connection.connect();
@@ -55,7 +55,7 @@ public class PlayerMySQL {
             connection.close();
             return Optional.of(new FakePlayer(uuid, username));
         } catch (Exception e) {
-            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text(e.getMessage()), NamedTextColor.RED));
+            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
         }
 
         return Optional.empty();

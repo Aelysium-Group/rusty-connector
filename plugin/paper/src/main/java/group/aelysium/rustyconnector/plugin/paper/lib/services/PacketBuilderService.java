@@ -12,7 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
-public class RedisMessagerService extends Service {
+public class PacketBuilderService extends Service {
 
     public void pingProxy(ServerPingPacket.ConnectionIntent intent) {
         PaperAPI api = PaperAPI.get();
@@ -33,7 +33,7 @@ public class RedisMessagerService extends Service {
                     .buildSendable();
             api.services().redisService().connection().orElseThrow().publish(message);
         } catch (Exception e) {
-            Lang.BOXED_MESSAGE_COLORED.send(PaperAPI.get().logger(), Component.text(e.toString()), NamedTextColor.RED);
+            Lang.BOXED_MESSAGE_COLORED.send(PaperAPI.get().logger(), e.toString(), NamedTextColor.RED);
         }
     }
 

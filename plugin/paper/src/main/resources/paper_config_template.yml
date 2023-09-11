@@ -49,7 +49,13 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 4
+version: 5
+
+#
+# The messanger connector to use!
+# You can configure your connectors in `connectors.yml`
+#
+messenger: "main-redis"
 
 server:
 #
@@ -80,7 +86,7 @@ server:
 # | your sub-servers appropriately.                        #
 #                                                          #
 # | If your sub-servers use family names that don't match  #
-# | what you define in your  proxy, they will not          #
+# | what you define in your proxy, they will not           #
 # | be registered.                                         #
 #               ---------------------------                #
 #                                                          #
@@ -88,7 +94,7 @@ server:
 ############################################################
 #
 # The name of the family that this plugin should be registered into.
-# If this name does not match one of the names listed on your proxy; yhis server will not get registered.
+# If this name does not match one of the names listed on your proxy; this server will not get registered.
 #
     family: ""
 
@@ -133,39 +139,11 @@ server:
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                          Redis                           #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-
-#
-# Redis is required in order to provide quick and easy syncing between the proxy and sub-servers
-#
-# Every server that you define will connect to your Redis database. Make sure your database has enough available "connections"
-# so that you don't run into issues creating new servers and registering them.
-#
-redis:
-    host: ""
-    port: 3306
-    user: "default"
-    password: "password"
-
-#
-# The name of the data channel that information should be sent over.
-# If you don't know what this is, don't mess with it! The default value here is fine.
-# You probably won't break anything, but you generally just shouldn't touch things you don't understand.
-#
-# NOTE: Make sure that, if you do change this. It matches the data-channel that is set in your proxy!
-#
-    data-channel: "rustyConnector-sync"
-
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Whitelist                         #
 #                                                          #
 #               ---------------------------                #
 # | At this time RustyConnector-paper provides support for #
-# | Minecraft's built in whitelist!                        #
+# | Minecraft's built-in whitelist!                        #
 # | If RustyConnector attempts to connect a player to a    #
 # | server with a whitelist and the attempt fails,         #
 # | the attempt will then act in accordance with           #

@@ -14,11 +14,11 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
@@ -30,7 +30,7 @@ import java.util.List;
 
 public final class CommandRusty {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         MessageCacheService messageCacheService = api.services().messageCacheService();
@@ -218,7 +218,7 @@ public final class CommandRusty {
                             }
                             defaultConfig.register();
 
-                            api.reloadRustyConnector();
+                            api.rekindle();
                             logger.log("Done reloading!");
 
                             VelocityLang.RC_ROOT_USAGE.send(logger);
@@ -263,7 +263,7 @@ public final class CommandRusty {
 
                                             ((PlayerFocusedServerFamily) family).connect(player);
                                         } catch (Exception e) {
-                                            logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There was an issue using that command! "+e.getMessage()), NamedTextColor.RED));
+                                            logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                                         }
                                         return Command.SINGLE_SUCCESS;
                                     })
@@ -305,7 +305,7 @@ public final class CommandRusty {
 
                                                     server.connect(player);
                                                 } catch (Exception e) {
-                                                    logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("There was an issue using that command! "+e.getMessage()), NamedTextColor.RED));
+                                                    logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                                                 }
 
                                                 return Command.SINGLE_SUCCESS;

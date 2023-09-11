@@ -15,6 +15,7 @@ public abstract class RedisSubscriber extends MessengerSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
     public RedisSubscriber(RedisClient client) {
+        super(client.privateKey());
         this.client = client;
         this.client.addListener(new RedisSubscriberListener());
     }
@@ -59,7 +60,7 @@ public abstract class RedisSubscriber extends MessengerSubscriber {
     protected class RedisMessageListener extends RedisPubSubAdapter<String, String> {
         @Override
         public void message(String channel, String message) {
-            RedisSubscriber.this.onMessage(AESCryptor.decrypt(message, client.privateKey()));
+            RedisSubscriber.this.onMessage(message);
         }
     }
 

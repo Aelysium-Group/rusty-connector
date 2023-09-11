@@ -87,7 +87,17 @@ public interface Lang {
             BORDER,
             SPACING
     );
-    ParameterizedMessage2<Component, NamedTextColor> BOXED_MESSAGE_COLORED = (message, color) -> join(
+    ParameterizedMessage2<String, NamedTextColor> BOXED_MESSAGE_COLORED = (message, color) -> join(
+            newlines(),
+            SPACING,
+            BORDER.color(color),
+            SPACING,
+            text(message).color(color),
+            SPACING,
+            BORDER.color(color),
+            SPACING
+    );
+    ParameterizedMessage2<Component, NamedTextColor> BOXED_COMPONENT_COLORED = (message, color) -> join(
             newlines(),
             SPACING,
             BORDER.color(color),

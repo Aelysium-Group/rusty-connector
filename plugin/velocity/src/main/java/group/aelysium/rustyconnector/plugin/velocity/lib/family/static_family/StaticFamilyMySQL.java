@@ -5,7 +5,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
@@ -32,7 +32,7 @@ public class StaticFamilyMySQL {
      * Initialize the table for home server mappings.
      */
     public void init() throws SQLException, IOException {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         InputStream stream = api.resourceAsStream("home_server_mappings.sql");
         String file = new String(stream.readAllBytes());
 
@@ -52,7 +52,7 @@ public class StaticFamilyMySQL {
      * @throws SQLException If there was an issue with the query.
      */
     public HomeServerMapping find(Player player, StaticServerFamily family) throws SQLException {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
         MySQLConnection connection = this.connector.connection().orElseThrow();
 

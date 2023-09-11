@@ -1,17 +1,17 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib;
+package group.aelysium.rustyconnector.plugin.paper.lib;
 
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
 
 import java.util.Map;
 
 /**
  * The core module of RustyConnector.
  * All aspects of the plugin should be accessible from here.
- * If not, check {@link VelocityAPI}.
+ * If not, check {@link PaperAPI}.
  */
 public class Core extends ServiceableService<CoreServiceHandler> {
     /**
@@ -26,5 +26,8 @@ public class Core extends ServiceableService<CoreServiceHandler> {
 
     public MessengerConnector<? extends MessengerConnection> backbone() {
         return this.backbone;
+    }
+
+    public void boot() {
     }
 }

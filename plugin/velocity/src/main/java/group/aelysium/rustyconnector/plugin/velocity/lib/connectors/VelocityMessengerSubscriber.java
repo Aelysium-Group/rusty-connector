@@ -1,8 +1,6 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.database;
+package group.aelysium.rustyconnector.plugin.velocity.lib.connectors;
 
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisClient;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubscriber;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
@@ -12,52 +10,49 @@ import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers.MagicLinkPingHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.*;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 
-import javax.naming.AuthenticationException;
-
 import static group.aelysium.rustyconnector.core.lib.packets.PacketType.PING;
 import static group.aelysium.rustyconnector.core.lib.packets.PacketType.SEND_PLAYER;
 
-public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisSubscriber {
-    public RedisSubscriber(RedisClient client) {
-        super(client);
+public class VelocityMessengerSubscriber extends MessengerSubscriber {
+    public VelocityMessengerSubscriber(RedisClient client) {
+        super(client.privateKey());
     }
 
     @Override
     public void onMessage(String rawMessage) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         MessageCacheService messageCacheService = api.services().messageCacheService();
-        MessengerConnection<?> backboneMessenger = api.core().backbone().connection().orElseThrow();
 
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
         // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
         if(messageCacheService == null) messageCacheService = new MessageCacheService(1);
 
-        CacheableMessage cachedMessage = messageCacheService.cacheMessage(rawMessage, PacketStatus.UNDEFINED);
+        CacheableMessage cachedMessage = null;
         try {
+            String decryptedMessage;
+            try {
+                decryptedMessage = this.cryptor().decrypt(rawMessage);
+                cachedMessage = messageCacheService.cacheMessage(decryptedMessage, PacketStatus.UNDEFINED);
+            } catch (Exception e) {
+                cachedMessage = messageCacheService.cacheMessage(rawMessage, PacketStatus.UNDEFINED);
+                cachedMessage.sentenceMessage(PacketStatus.AUTH_DENIAL, "This message was encrypted using a different private key from what I have!");
+                return;
+            }
+
             GenericPacket.Serializer serializer = new GenericPacket.Serializer();
-            GenericPacket message = serializer.parseReceived(rawMessage);
+            GenericPacket message = serializer.parseReceived(decryptedMessage);
 
             if(messageCacheService.ignoredType(message)) messageCacheService.removeMessage(cachedMessage.getSnowflake());
             if(message.origin() == PacketOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
             try {
-                backboneMessenger.validatePrivateKey(message.privateKey());
-
-                if (!(backboneMessenger.validatePrivateKey(message.privateKey())))
-                    throw new AuthenticationException("This message has an invalid private key!");
-
                 cachedMessage.sentenceMessage(PacketStatus.ACCEPTED);
-                RedisSubscriber.processParameters(message, cachedMessage);
-            } catch (AuthenticationException e) {
-                cachedMessage.sentenceMessage(PacketStatus.AUTH_DENIAL, e.getMessage());
-
-                logger.error("An incoming message from: "+message.address().toString()+" had an invalid private-key!");
-                logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
+                VelocityMessengerSubscriber.processParameters(message, cachedMessage);
             } catch (BlockedMessageException e) {
                 cachedMessage.sentenceMessage(PacketStatus.AUTH_DENIAL, e.getMessage());
 
@@ -69,6 +64,8 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.conn
                 cachedMessage.sentenceMessage(PacketStatus.AUTH_DENIAL, e.getMessage());
             }
         } catch (Exception e) {
+            if(cachedMessage == null) cachedMessage = messageCacheService.cacheMessage(rawMessage, PacketStatus.UNDEFINED);
+
             if(logger.loggerGate().check(GateKey.SAVE_TRASH_MESSAGES))
                 cachedMessage.sentenceMessage(PacketStatus.TRASHED, e.getMessage());
             else
@@ -82,7 +79,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.conn
     }
 
     private static void processParameters(GenericPacket message, CacheableMessage cachedMessage) {
-        PluginLogger logger = VelocityAPI.get().logger();
+        PluginLogger logger = Tinder.get().logger();
 
         try {
             if(message.type() == PING)           new MagicLinkPingHandler(message).execute();

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -18,7 +18,7 @@ public class YAML extends group.aelysium.rustyconnector.core.lib.config.YAML {
 
     @Override
     public boolean generate() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         logger.send(Component.text("Building "+this.configPointer.getName()+"...", NamedTextColor.DARK_GRAY));
         if (!this.configPointer.exists()) {

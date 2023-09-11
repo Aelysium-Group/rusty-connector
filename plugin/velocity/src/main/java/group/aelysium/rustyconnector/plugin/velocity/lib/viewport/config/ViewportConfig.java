@@ -1,6 +1,7 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.config;
 
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.plugin.velocity.config.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.Role;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.User;
 
@@ -10,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ViewportConfig extends YAML {
-    private static ViewportConfig config;
-
     private boolean enabled = false;
 
     private String storage = "";
@@ -51,27 +50,7 @@ public class ViewportConfig extends YAML {
      * @return The newly created config.
      */
     public static ViewportConfig newConfig(File configPointer, String template) {
-        config = new ViewportConfig(configPointer, template);
-        return ViewportConfig.config();
-    }
-
-    private static ViewportConfig config() {
-        return config;
-    }
-
-    /**
-     * Get the current config.
-     * @return The config.
-     */
-    public static ViewportConfig getConfig() {
-        return config;
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        config = null;
+        return new ViewportConfig(configPointer, template);
     }
 
     @SuppressWarnings("unchecked")

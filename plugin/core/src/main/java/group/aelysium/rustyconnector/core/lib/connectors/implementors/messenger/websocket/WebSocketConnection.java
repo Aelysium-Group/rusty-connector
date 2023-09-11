@@ -1,14 +1,19 @@
 package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.websocket;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
+import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 
+import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Vector;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -17,13 +22,49 @@ public class WebSocketConnection extends MessengerConnection<WebSocketSubscriber
     private final Vector<Session> subscribers = new Vector<>();
     ExecutorService executorService;
     private final char[] privateKey;
+    private Optional<AESCryptor> cryptor = Optional.empty();
     private final WebSocketContainer container;
     private final URI uri;
 
-    public WebSocketConnection(URI uri, char[] privateKey) {
+    public WebSocketConnection(URI uri, char[] connectKey, char[] privateKey) throws IllegalArgumentException {
         this.container = ContainerProvider.getWebSocketContainer();
         this.uri = uri;
         this.privateKey = privateKey;
+        if(connectKey != null) this.cryptor = Optional.of(AESCryptor.create(Arrays.toString(connectKey)));
+    }
+
+    protected ClientEndpointConfig config() {
+        Map<String, List<String>> headers = new HashMap<>();
+
+        {
+            List<String> authentication = new ArrayList<>();
+
+            JsonObject object = new JsonObject();
+            object.add("hash", new JsonPrimitive(MD5.generateMD5()));
+            object.add("time", new JsonPrimitive(Instant.now().getEpochSecond()));
+            String payload = object.toString();
+
+            try {
+                if (this.cryptor.isPresent()) payload = cryptor.get().encrypt(payload);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            authentication.add(payload);
+
+            headers.put("Authentication", authentication);
+        }
+
+        {
+            List<String> origin = new ArrayList<>();
+            origin.add("PROXY");
+            headers.put("RC-Origin", origin);
+        }
+
+        ClientEndpointConfig.Configurator configurator = new ClientEndpointConfig.Configurator();
+        configurator.beforeRequest(headers);
+
+        return ClientEndpointConfig.Builder.create().configurator(configurator).build();
     }
 
     @Override
@@ -31,7 +72,8 @@ public class WebSocketConnection extends MessengerConnection<WebSocketSubscriber
         this.executorService.submit(() -> {
             try {
                 WebSocketSubscriber websocket = subscriber.getDeclaredConstructor().newInstance();
-                try(Session session = WebSocketConnection.this.container.connectToServer(websocket.listener(), uri)) {
+
+                try(Session session = WebSocketConnection.this.container.connectToServer(websocket.listener(), this.config(), uri)) {
                     session.addMessageHandler(websocket.handler());
                     this.subscribers.add(session);
 

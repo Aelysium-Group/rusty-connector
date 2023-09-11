@@ -4,12 +4,12 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.config.StaticFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
@@ -54,7 +54,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public void registerHomeServer(Player player, PlayerServer server) throws SQLException {
-        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
+        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
         HomeServerMapping mapping = new HomeServerMapping(player, server, this);
 
         this.mappingsCache.add(mapping);
@@ -68,7 +68,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public void unregisterHomeServer(Player player) throws SQLException {
-        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
+        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
         this.mappingsCache.removeIf(item -> item.player().equals(player) && item.family().equals(this));
 
         mySQL.delete(player, this);
@@ -80,7 +80,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public void updateMappingExpirations() throws SQLException {
-        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
+        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
         if(this.homeServerExpiration == null)
             mySQL.updateValidExpirations(this);
         else
@@ -92,7 +92,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public void purgeExpiredMappings() throws SQLException {
-        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
+        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
         mySQL.purgeExpired(this);
     }
 
@@ -104,7 +104,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @throws SQLException If there was an issue with MySQL.
      */
     public HomeServerMapping findHomeServer(Player player) throws SQLException {
-        StaticFamilyMySQL mySQL = VelocityAPI.get().services().familyService().staticFamilyMySQL().orElseThrow();
+        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
         HomeServerMapping mapping = this.mappingsCache.stream().filter(item -> item.player().equals(player) && item.family().equals(this)).findFirst().orElse(null);
         if (mapping != null) return mapping;
 
@@ -133,8 +133,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      * @return A list of all server families.
      */
     public static StaticServerFamily init(String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        VelocityAPI api = VelocityAPI.get();
-        PluginLogger logger = api.logger();
+        Tinder api = Tinder.get();
 
         StaticFamilyConfig staticFamilyConfig = StaticFamilyConfig.newConfig(
                 familyName,
@@ -288,7 +287,7 @@ class StaticFamilyConnector {
         try {
             this.family.registerHomeServer(this.player, server);
         } catch (Exception e) {
-            VelocityAPI.get().logger().send(Component.text("Unable to save "+ this.player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
+            Tinder.get().logger().send(Component.text("Unable to save "+ this.player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
             e.printStackTrace();
         }
 
