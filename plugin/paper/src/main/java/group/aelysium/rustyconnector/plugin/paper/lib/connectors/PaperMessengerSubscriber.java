@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.database;
+package group.aelysium.rustyconnector.plugin.paper.lib.connectors;
 
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisClient;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
 import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers.MagicLink_PingResponseHandler;
 
@@ -20,7 +20,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.conn
 
     @Override
     public void onMessage(String rawMessage) {
-        PaperAPI api = PaperAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         CacheableMessage cachedMessage = api.services().messageCacheService().cacheMessage(rawMessage, PacketStatus.UNDEFINED);
@@ -57,7 +57,7 @@ public class RedisSubscriber extends group.aelysium.rustyconnector.core.lib.conn
     }
 
     private static void processParameters(GenericPacket message, CacheableMessage cachedMessage) {
-        PluginLogger logger = PaperAPI.get().logger();
+        PluginLogger logger = Tinder.get().logger();
 
         try {
             if(message.type() == PING_RESPONSE)      new MagicLink_PingResponseHandler(message).execute();

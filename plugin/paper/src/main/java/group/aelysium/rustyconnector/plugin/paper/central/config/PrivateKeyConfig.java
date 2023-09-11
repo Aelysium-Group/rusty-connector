@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.plugin.paper.config;
 
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +23,7 @@ public class PrivateKeyConfig extends YAML {
 
     @Override
     public boolean generate() {
-        PaperAPI api = PaperAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         logger.log("---| Registering "+this.configPointer.getName()+"...");

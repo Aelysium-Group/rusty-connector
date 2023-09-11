@@ -1,10 +1,8 @@
 package group.aelysium.rustyconnector.plugin.paper.config;
 
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import net.kyori.adventure.text.Component;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -77,7 +75,7 @@ public class DefaultConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
-        PluginLogger logger = PaperAPI.get().logger();
+        PluginLogger logger = Tinder.get().logger();
 
         try {
             this.processVersion(YAML.currentVersion);
