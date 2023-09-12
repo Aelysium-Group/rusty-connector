@@ -163,11 +163,13 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             initialize.viewportService();
             logger.send(Component.text("Initializing 90%...", NamedTextColor.DARK_GRAY));
 
+            Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.messenger(), initialize.getBootOutput());
+
             initialize.events(plugin);
-            initialize.commands();
+            initialize.commands(flame, logger);
             logger.send(Component.text("Initializing 100%...", NamedTextColor.DARK_GRAY));
 
-            return new Flame(version, configVersion, initialize.getServices(), defaultConfig.messenger(), initialize.getBootOutput());
+            return flame;
         } catch (Exception e) {
             logger.send(Component.text("A fatal error occurred! Sending boot output and then the error!").color(NamedTextColor.RED));
             logger.send(Lang.BORDER.color(NamedTextColor.RED));
@@ -208,14 +210,14 @@ class Initialize {
         eventManager.register(plugin, new OnPlayerDisconnect());
     }
 
-    public void commands() {
+    public void commands(Flame flame, PluginLogger logger) {
         CommandManager commandManager = api.velocityServer().getCommandManager();
 
         commandManager.register(
                 commandManager.metaBuilder("rc")
                         .aliases("/rc", "//") // Add slash variants so that they can be used in console as well
                         .build(),
-                CommandRusty.create()
+                CommandRusty.create(flame, logger)
         );
 
         commandManager.unregister("server");

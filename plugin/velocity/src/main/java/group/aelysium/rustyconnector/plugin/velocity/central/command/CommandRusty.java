@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
+import group.aelysium.rustyconnector.plugin.velocity.central.Flame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
@@ -30,11 +31,8 @@ import java.io.File;
 import java.util.List;
 
 public final class CommandRusty {
-    public static BrigadierCommand create() {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-
-        MessageCacheService messageCacheService = api.services().messageCacheService();
+    public static BrigadierCommand create(Flame flame, PluginLogger logger) {
+        MessageCacheService messageCacheService = flame.services().messageCacheService();
 
         LiteralCommandNode<CommandSource> rusty = LiteralArgumentBuilder
             .<CommandSource>literal("rc")
@@ -130,7 +128,7 @@ public final class CommandRusty {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                BaseServerFamily family = api.services().familyService().find(familyName);
+                                BaseServerFamily family = flame.services().familyService().find(familyName);
                                 if(family == null) throw new NullPointerException();
 
                                 if(family instanceof ScalarServerFamily)
@@ -148,7 +146,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        BaseServerFamily family = api.services().familyService().find(familyName);
+                                        BaseServerFamily family = flame.services().familyService().find(familyName);
                                         if(family == null) throw new NullPointerException();
                                         if(!(family instanceof PlayerFocusedServerFamily)) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on scalar and static families!");
@@ -173,7 +171,7 @@ public final class CommandRusty {
                                 .executes(context -> {
                                     try {
                                         String familyName = context.getArgument("familyName", String.class);
-                                        BaseServerFamily family = api.services().familyService().find(familyName);
+                                        BaseServerFamily family = flame.services().familyService().find(familyName);
                                         if(family == null) throw new NullPointerException();
                                         if(!(family instanceof PlayerFocusedServerFamily)) {
                                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only use sort on scalar and static families!");
@@ -199,7 +197,7 @@ public final class CommandRusty {
             .then(LiteralArgumentBuilder.<CommandSource>literal("parties")
                     .executes(context -> {
                         try {
-                            api.services().partyService().orElseThrow().dump().forEach(party -> {
+                            flame.services().partyService().orElseThrow().dump().forEach(party -> {
                                 logger.log(party.toString());
                             });
                         } catch (Exception e) {
@@ -213,7 +211,7 @@ public final class CommandRusty {
                     .executes(context -> {
                         logger.log("Reloading the proxy...");
                         try {
-                            api.rekindle();
+                            Tinder.get().rekindle();
                             logger.log("Done reloading!");
                             return 1;
                         } catch (Exception e) {
@@ -238,13 +236,13 @@ public final class CommandRusty {
                                             String familyName = context.getArgument("familyName", String.class);
                                             String username = context.getArgument("username", String.class);
 
-                                            Player player = api.velocityServer().getPlayer(username).orElse(null);
+                                            Player player = Tinder.get().velocityServer().getPlayer(username).orElse(null);
                                             if(player == null) {
                                                 logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            BaseServerFamily family = api.services().familyService().find(familyName);
+                                            BaseServerFamily family = flame.services().familyService().find(familyName);
                                             if(family == null) {
                                                 logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                                                 return Command.SINGLE_SUCCESS;
@@ -278,19 +276,19 @@ public final class CommandRusty {
                                                     String serverName = context.getArgument("serverName", String.class);
                                                     String username = context.getArgument("username", String.class);
 
-                                                    Player player = api.velocityServer().getPlayer(username).orElse(null);
+                                                    Player player = Tinder.get().velocityServer().getPlayer(username).orElse(null);
                                                     if (player == null) {
                                                         logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
                                                         return Command.SINGLE_SUCCESS;
                                                     }
 
-                                                    RegisteredServer registeredServer = api.velocityServer().getServer(serverName).orElse(null);
+                                                    RegisteredServer registeredServer = Tinder.get().velocityServer().getServer(serverName).orElse(null);
                                                     if (registeredServer == null) {
                                                         logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
                                                         return Command.SINGLE_SUCCESS;
                                                     }
 
-                                                    PlayerServer server = api.services().serverService().search(registeredServer.getServerInfo());
+                                                    PlayerServer server = flame.services().serverService().search(registeredServer.getServerInfo());
                                                     if (server == null) {
                                                         logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
                                                         return Command.SINGLE_SUCCESS;

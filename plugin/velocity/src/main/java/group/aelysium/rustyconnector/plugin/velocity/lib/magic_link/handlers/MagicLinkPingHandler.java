@@ -43,7 +43,7 @@ public class MagicLinkPingHandler extends PacketHandler {
     private static void connectServer(ServerInfo serverInfo, ServerPingPacket packet) {
         Tinder api = Tinder.get();
         ServerService serverService = api.services().serverService();
-        MessengerConnection<?> backboneMessenger = api.flame().backbone().connection().orElseThrow();
+        MessengerConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
 
         try {
             PlayerServer server = new ServerService.ServerBuilder()
