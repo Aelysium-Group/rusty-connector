@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
@@ -17,33 +18,29 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.net.InetSocketAddress;
 
-public class MagicLinkPingHandler implements PacketHandler {
-    private final ServerPingPacket message;
-
-    public MagicLinkPingHandler(GenericPacket message) {
-        this.message = (ServerPingPacket) message;
-    }
-
+public class MagicLinkPingHandler extends PacketHandler {
     @Override
-    public void execute() throws Exception {
-        InetSocketAddress address = message.address();
+    public void execute(GenericPacket genericPacket) throws Exception {
+        ServerPingPacket packet = (ServerPingPacket) genericPacket;
+
+        InetSocketAddress address = packet.address();
         Tinder api = Tinder.get();
 
         ServerInfo serverInfo = new ServerInfo(
-                message.serverName(),
+                packet.serverName(),
                 address
         );
 
         if(api.logger().loggerGate().check(GateKey.PING))
             api.logger().send(VelocityLang.PING.build(serverInfo));
 
-        if(message.intent() == ServerPingPacket.ConnectionIntent.CONNECT)
-            this.reviveOrConnectServer(serverInfo);
-        if(message.intent() == ServerPingPacket.ConnectionIntent.DISCONNECT)
-            this.disconnectServer(serverInfo);
+        if(packet.intent() == ServerPingPacket.ConnectionIntent.CONNECT)
+            reviveOrConnectServer(serverInfo, packet);
+        if(packet.intent() == ServerPingPacket.ConnectionIntent.DISCONNECT)
+            disconnectServer(serverInfo, packet);
     }
 
-    private boolean connectServer(ServerInfo serverInfo) {
+    private static void connectServer(ServerInfo serverInfo, ServerPingPacket packet) {
         Tinder api = Tinder.get();
         ServerService serverService = api.services().serverService();
         MessengerConnection<?> backboneMessenger = api.flame().backbone().connection().orElseThrow();
@@ -51,13 +48,13 @@ public class MagicLinkPingHandler implements PacketHandler {
         try {
             PlayerServer server = new ServerService.ServerBuilder()
                     .setServerInfo(serverInfo)
-                    .setFamilyName(message.familyName())
-                    .setSoftPlayerCap(message.softCap())
-                    .setHardPlayerCap(message.hardCap())
-                    .setWeight(message.weight())
+                    .setFamilyName(packet.familyName())
+                    .setSoftPlayerCap(packet.softCap())
+                    .setHardPlayerCap(packet.hardCap())
+                    .setWeight(packet.weight())
                     .build();
 
-            server.register(message.familyName());
+            server.register(packet.familyName());
 
             ServerPingResponsePacket message = (ServerPingResponsePacket) new GenericPacket.Builder()
                     .setType(PacketType.PING_RESPONSE)
@@ -70,7 +67,6 @@ public class MagicLinkPingHandler implements PacketHandler {
                     .buildSendable();
             backboneMessenger.publish(message);
 
-            return true;
         } catch(Exception e) {
             ServerPingResponsePacket message = (ServerPingResponsePacket) new GenericPacket.Builder()
                     .setType(PacketType.PING_RESPONSE)
@@ -82,27 +78,25 @@ public class MagicLinkPingHandler implements PacketHandler {
                     .buildSendable();
             backboneMessenger.publish(message);
         }
-        return false;
     }
 
-    private boolean disconnectServer(ServerInfo serverInfo) throws Exception {
+    private static void disconnectServer(ServerInfo serverInfo, ServerPingPacket packet) throws Exception {
         Tinder api = Tinder.get();
-        api.services().serverService().unregisterServer(serverInfo, message.familyName(), true);
+        api.services().serverService().unregisterServer(serverInfo, packet.familyName(), true);
 
-        return true;
     }
 
-    private boolean reviveOrConnectServer(ServerInfo serverInfo) {
+    private static void reviveOrConnectServer(ServerInfo serverInfo, ServerPingPacket packet) {
         Tinder api = Tinder.get();
         ServerService serverService = api.services().serverService();
 
         PlayerServer server = serverService.search(serverInfo);
         if (server == null) {
-            return this.connectServer(serverInfo);
+            connectServer(serverInfo, packet);
+            return;
         }
 
         server.setTimeout(serverService.serverTimeout());
-        server.setPlayerCount(this.message.playerCount());
-        return true;
+        server.setPlayerCount(packet.playerCount());
     }
 }

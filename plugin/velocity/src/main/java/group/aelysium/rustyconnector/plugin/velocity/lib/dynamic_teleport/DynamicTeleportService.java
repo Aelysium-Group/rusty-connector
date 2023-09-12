@@ -7,17 +7,19 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchor
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPASettings;
+import net.kyori.adventure.text.Component;
 
+import java.awt.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class DynamicTeleportService extends ServiceableService<DynamicTeleportServiceHandler> {
     protected DynamicTeleportService(Map<Class<? extends Service>, Service> services) {
         super(new DynamicTeleportServiceHandler(services));
     }
 
-    public static DynamicTeleportService init(DynamicTeleportConfig config) {
+    public static DynamicTeleportService init(DynamicTeleportConfig config, List<Component> bootOutput) {
         if(!config.isEnabled()) return new DynamicTeleportService(new HashMap<>());
 
         try {

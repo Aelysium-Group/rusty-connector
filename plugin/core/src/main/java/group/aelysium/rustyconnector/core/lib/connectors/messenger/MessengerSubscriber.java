@@ -7,28 +7,30 @@ import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
+import group.aelysium.rustyconnector.core.lib.packets.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class MessengerSubscriber {
     private final AESCryptor cryptor;
     private final PluginLogger logger;
     private MessageCacheService messageCache;
+    private Map<PacketType.Mapping, PacketHandler> handlers;
 
-    public MessengerSubscriber(char[] privateKey, MessageCacheService messageCache, PluginLogger logger) {
+    public MessengerSubscriber(char[] privateKey, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
         this.cryptor = AESCryptor.create(Arrays.toString(privateKey));
         this.messageCache = messageCache;
         this.logger = logger;
+        this.handlers = handlers;
     }
 
     public AESCryptor cryptor() { return this.cryptor; }
 
     protected void onMessage(String rawMessage) {
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
-        // Send a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
+        // Set a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
         if(messageCache == null) messageCache = new MessageCacheService(1);
 
         CacheableMessage cachedMessage = null;
@@ -50,7 +52,11 @@ public abstract class MessengerSubscriber {
             if(message.origin() == PacketOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
             try {
                 cachedMessage.sentenceMessage(PacketStatus.ACCEPTED);
-                this.processParameters(message, cachedMessage);
+
+                PacketHandler handler = this.handlers.get(message.type());
+                if(handler == null) throw new NullPointerException("No packet handler with the type "+message.type().name()+" exists!");
+
+                handler.execute(message);
             } catch (BlockedMessageException e) {
                 cachedMessage.sentenceMessage(PacketStatus.AUTH_DENIAL, e.getMessage());
 
@@ -75,6 +81,4 @@ public abstract class MessengerSubscriber {
             logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
         }
     }
-
-    protected abstract void processParameters(GenericPacket message, CacheableMessage cachedMessage);
 }

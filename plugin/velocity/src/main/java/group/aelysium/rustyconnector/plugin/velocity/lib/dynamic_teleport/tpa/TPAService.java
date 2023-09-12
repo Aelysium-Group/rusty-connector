@@ -83,7 +83,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
                 .setParameter(CoordinateRequestQueuePacket.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        MessengerConnection<?> backboneMessenger = api.flame().backbone().connection().orElseThrow();
+        MessengerConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
         backboneMessenger.publish(message);
 
         try {

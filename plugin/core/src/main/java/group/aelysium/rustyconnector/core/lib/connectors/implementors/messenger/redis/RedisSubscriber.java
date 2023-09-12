@@ -5,20 +5,23 @@ import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubs
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.model.FailService;
+import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public abstract class RedisSubscriber extends MessengerSubscriber {
+public class RedisSubscriber extends MessengerSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
-    public RedisSubscriber(RedisClient client, MessageCacheService cache, PluginLogger logger) {
-        super(client.privateKey(), cache, logger);
+    public RedisSubscriber(RedisClient client, MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler > handlers) {
+        super(client.privateKey(), cache, logger, handlers);
         this.client = client;
         this.client.addListener(new RedisSubscriberListener());
     }

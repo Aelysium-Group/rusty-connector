@@ -6,6 +6,8 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.model.FailService;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -16,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class RedisConnection extends MessengerConnection<RedisSubscriber> {
+public class RedisConnection extends MessengerConnection {
     private final Vector<RedisSubscriber> subscribers = new Vector<>();
     private final RedisPublisher publisher;
     private final char[] privateKey;
@@ -34,19 +36,12 @@ public class RedisConnection extends MessengerConnection<RedisSubscriber> {
     }
 
     @Override
-    protected void subscribe(Class<RedisSubscriber> subscriber, MessageCacheService cache, PluginLogger logger) {
+    protected void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
         if(!this.isAlive) return;
 
         this.executorService.submit(() -> {
             try {
-                RedisSubscriber redis = subscriber.getDeclaredConstructor(
-                        RedisClient.class,
-                        MessageCacheService.class,
-                        PluginLogger.class).newInstance(
-                            RedisConnection.this.clientBuilder.build(),
-                            cache,
-                            logger
-                        );
+                RedisSubscriber redis = new RedisSubscriber(RedisConnection.this.clientBuilder.build(), cache, logger, handlers);
                 RedisConnection.this.subscribers.add(redis);
 
                 redis.subscribeToChannel(RedisConnection.this.failService);
@@ -62,18 +57,18 @@ public class RedisConnection extends MessengerConnection<RedisSubscriber> {
                 }
             }
 
-            RedisConnection.this.subscribe(subscriber, cache, logger);
+            RedisConnection.this.subscribe(cache, logger, handlers);
         });
     }
 
     @Override
-    public void startListening(Class<RedisSubscriber> subscriber, MessageCacheService cache, PluginLogger logger) {
+    public void startListening(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
         if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
         this.executorService = Executors.newFixedThreadPool(3);
 
         this.isAlive = true;
 
-        this.subscribe(subscriber, cache, logger);
+        this.subscribe(cache, logger, handlers);
     }
 
     @Override

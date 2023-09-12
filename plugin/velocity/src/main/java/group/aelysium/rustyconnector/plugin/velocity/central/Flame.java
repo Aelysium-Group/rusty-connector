@@ -16,6 +16,8 @@ import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -29,7 +31,6 @@ import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerDisconnect;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerKicked;
-import group.aelysium.rustyconnector.plugin.velocity.lib.connectors.VelocityMessengerSubscriber;
 import group.aelysium.rustyconnector.plugin.velocity.lib.data_transit.config.DataTransitConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
@@ -44,6 +45,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsC
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers.MagicLinkPingHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.SendPlayerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.config.PartyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
@@ -318,7 +321,7 @@ class Initialize {
 
         bootOutput.add(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
 
-        // Needs to be run after all other services boot so that we can setup the connectors we actually need.
+        // Needs to be run after all other services boot so that we can set up the connectors that are actually called by code.
         return () -> {
             bootOutput.add(Component.text("Validating Connector service...", NamedTextColor.DARK_GRAY));
 
@@ -335,6 +338,7 @@ class Initialize {
                 Connector<?> connector = connectorsService.get(name);
                 try {
                     connector.connect();
+                    bootOutput.add(Component.text(" | Finished building connector ["+name+"].", NamedTextColor.GREEN));
                 } catch (ConnectException e) {
                     throw new RuntimeException(e);
                 }
@@ -344,10 +348,15 @@ class Initialize {
             // Needs to run even later to actually boot all the connectors and connect them to their remote resources.
             return () -> {
                 bootOutput.add(Component.text("Booting Connectors service...", NamedTextColor.DARK_GRAY));
+
+                Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
+                handlers.put(PacketType.PING, new MagicLinkPingHandler());
+                handlers.put(PacketType.SEND_PLAYER, new SendPlayerHandler());
+
                 connectorsService.messengers().forEach(connector -> {
                     if(connector.connection().isEmpty()) return;
-                    MessengerConnection<VelocityMessengerSubscriber> connection = connector.connection().orElseThrow();
-                    connection.startListening(VelocityMessengerSubscriber.class, cacheService, logger);
+                    MessengerConnection connection = connector.connection().orElseThrow();
+                    connection.startListening(cacheService, logger, handlers);
                 });
                 connectorsService.storage().forEach(connector -> {
                     if(connector.connection().isPresent()) return;
@@ -538,14 +547,14 @@ class Initialize {
 
     public void partyService() {
         try {
-            Tinder.get().logger().send(Component.text("Building party service...", NamedTextColor.DARK_GRAY));
+            bootOutput.add(Component.text("Building party service...", NamedTextColor.DARK_GRAY));
             PartyConfig config = PartyConfig.newConfig(new File(api.dataFolder(), "party.yml"), "velocity_party_template.yml");
             if (!config.generate(bootOutput))
                 throw new IllegalStateException("Unable to load or create party.yml!");
             config.register();
 
             if(!config.isEnabled()) {
-                Tinder.get().logger().send(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
+                bootOutput.add(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
                 return;
             }
 
@@ -565,10 +574,10 @@ class Initialize {
             service.initCommand();
 
             services.put(PartyService.class, service);
-            Tinder.get().logger().send(Component.text("Finished building party service.", NamedTextColor.GREEN));
+            bootOutput.add(Component.text("Finished building party service.", NamedTextColor.GREEN));
         } catch (Exception e) {
             bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
-            Tinder.get().logger().send(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
+            bootOutput.add(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
         }
     }
     public void viewportService() {
@@ -581,7 +590,7 @@ class Initialize {
             viewportConfig.register();
 
             if(!viewportConfig.isEnabled()) {
-                Tinder.get().logger().send(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
+                bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
                 return;
             }
 
@@ -600,13 +609,13 @@ class Initialize {
             services.put(ViewportService.class, service);
         } catch (Exception e) {
             bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
-            Tinder.get().logger().send(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
+            bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
         }
     }
 
     public void friendsService() {
         try {
-            Tinder.get().logger().send(Component.text("Building friends service...", NamedTextColor.DARK_GRAY));
+            bootOutput.add(Component.text("Building friends service...", NamedTextColor.DARK_GRAY));
 
             FriendsConfig config = FriendsConfig.newConfig(new File(api.dataFolder(), "friends.yml"), "velocity_friends_template.yml");
             if (!config.generate(bootOutput))
@@ -614,7 +623,7 @@ class Initialize {
             config.register();
 
             if(!config.isEnabled()) {
-                Tinder.get().logger().send(Component.text("The friends service wasn't enabled.", NamedTextColor.GRAY));
+                bootOutput.add(Component.text("The friends service wasn't enabled.", NamedTextColor.GRAY));
                 return;
             }
 
@@ -635,37 +644,31 @@ class Initialize {
             service.initCommand();
 
             services.put(FriendsService.class, service);
-            Tinder.get().logger().send(Component.text("Finished building friends service.", NamedTextColor.GREEN));
+            bootOutput.add(Component.text("Finished building friends service.", NamedTextColor.GREEN));
         } catch (Exception e) {
             bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
-            Tinder.get().logger().send(Component.text("The friends service wasn't enabled.", NamedTextColor.GRAY));
+            bootOutput.add(Component.text("The friends service wasn't enabled.", NamedTextColor.GRAY));
         }
     }
 
     public void playerService() {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-        try {
-            FriendsConfig config = FriendsConfig.newConfig(new File(api.dataFolder(), "friends.yml"), "velocity_friends_template.yml");
-            if (!config.generate(bootOutput))
-                throw new IllegalStateException("Unable to load or create friends.yml!");
-            config.register();
+        FriendsConfig config = FriendsConfig.newConfig(new File(api.dataFolder(), "friends.yml"), "velocity_friends_template.yml");
+        if (!config.generate(bootOutput))
+            throw new IllegalStateException("Unable to load or create friends.yml!");
+        config.register();
 
-            if(!config.isEnabled()) return;
+        if(!config.isEnabled()) return;
 
-            logger.send(Component.text(" | Building friends MySQL...", NamedTextColor.DARK_GRAY));
-            StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(config.storage());
-            if(connector == null) throw new NullPointerException("You must define a storage method for viewport!");
-            logger.send(Component.text(" | Finished building friends MySQL.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text(" | Building friends MySQL...", NamedTextColor.DARK_GRAY));
+        StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(config.storage());
+        if(connector == null) throw new NullPointerException("You must define a storage method for viewport!");
+        bootOutput.add(Component.text(" | Finished building friends MySQL.", NamedTextColor.GREEN));
 
-            services.put(PlayerService.class, new PlayerService((MySQLConnector) connector));
-        } catch (Exception e) {
-            logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
-        }
+        services.put(PlayerService.class, new PlayerService((MySQLConnector) connector));
     }
 
     public void dynamicTeleportService() {
-        Tinder.get().logger().send(Component.text("Building dynamic teleport service...", NamedTextColor.DARK_GRAY));
+        bootOutput.add(Component.text("Building dynamic teleport service...", NamedTextColor.DARK_GRAY));
         try {
             DynamicTeleportConfig config = DynamicTeleportConfig.newConfig(new File(api.dataFolder(), "dynamic_teleport.yml"), "velocity_dynamic_teleport_template.yml");
             if (!config.generate(bootOutput))
@@ -673,11 +676,11 @@ class Initialize {
             config.register();
 
             if(!config.isEnabled()) {
-                Tinder.get().logger().send(Component.text("The dynamic teleport service wasn't enabled.", NamedTextColor.GRAY));
+                bootOutput.add(Component.text("The dynamic teleport service wasn't enabled.", NamedTextColor.GRAY));
                 return;
             }
 
-            DynamicTeleportService dynamicTeleportService = DynamicTeleportService.init(config);
+            DynamicTeleportService dynamicTeleportService = DynamicTeleportService.init(config, bootOutput);
 
             try {
                 dynamicTeleportService.services().tpaService().orElseThrow()
@@ -695,10 +698,10 @@ class Initialize {
 
             services.put(DynamicTeleportService.class, dynamicTeleportService);
 
-            Tinder.get().logger().send(Component.text("Finished building dynamic teleport service.", NamedTextColor.GREEN));
+            bootOutput.add(Component.text("Finished building dynamic teleport service.", NamedTextColor.GREEN));
         } catch (Exception e) {
             bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
-            Tinder.get().logger().send(Component.text("The dynamic teleport service wasn't enabled.", NamedTextColor.GRAY));
+            bootOutput.add(Component.text("The dynamic teleport service wasn't enabled.", NamedTextColor.GRAY));
         }
     }
 }

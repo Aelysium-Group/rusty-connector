@@ -1,15 +1,14 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.connectors.Connection;
 import group.aelysium.rustyconnector.core.lib.connectors.Connector;
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
@@ -21,9 +20,10 @@ import group.aelysium.rustyconnector.plugin.paper.central.config.PrivateKeyConfi
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
-import group.aelysium.rustyconnector.plugin.paper.lib.connectors.PaperMessengerSubscriber;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;
+import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
 import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers.MagicLink_PingResponseHandler;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.PacketBuilderService;
 import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
 import net.kyori.adventure.text.Component;
@@ -255,10 +255,15 @@ class Initialize {
             // Needs to run even later to actually boot all the connectors and connect them to their remote resources.
             return () -> {
                 logger.send(Component.text("Booting Connectors service...", NamedTextColor.DARK_GRAY));
+
+                Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
+                handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler());
+                handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler());
+
                 connectorsService.messengers().forEach(connector -> {
                     if(connector.connection().isEmpty()) return;
-                    MessengerConnection<PaperMessengerSubscriber> connection = connector.connection().orElseThrow();
-                    connection.startListening(PaperMessengerSubscriber.class, cacheService, logger);
+                    MessengerConnection connection = connector.connection().orElseThrow();
+                    connection.startListening(cacheService, logger, handlers);
                 });
                 logger.send(Component.text("Finished booting Connectors service.", NamedTextColor.GREEN));
             };
