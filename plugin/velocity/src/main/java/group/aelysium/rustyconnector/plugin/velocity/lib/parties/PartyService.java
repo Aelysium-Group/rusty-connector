@@ -134,7 +134,7 @@ public class PartyService extends Service {
         this.invites.clear();
         this.connector.shutdown();
 
-        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         commandManager.unregister("party");
     }
 

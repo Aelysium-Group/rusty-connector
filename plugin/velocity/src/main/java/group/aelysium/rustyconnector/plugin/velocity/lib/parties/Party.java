@@ -79,7 +79,7 @@ public class Party {
         this.players.remove(player);
 
         if(this.isEmpty()) { // This was the last member of the party
-            VelocityAPI.get().services().partyService().orElseThrow().disband(this);
+            Tinder.get().services().partyService().orElseThrow().disband(this);
             return;
         }
 

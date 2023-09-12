@@ -18,6 +18,7 @@ import java.util.UUID;
 
 public class PlayerMySQL {
     private static final String FIND_PLAYER = "SELECT * FROM players WHERE uuid = ?;";
+    private static final String FIND_PLAYER_USERNAME = "SELECT * FROM players WHERE username = ?;";
     private static final String ADD_PLAYER = "REPLACE INTO players (uuid, username) VALUES(?, ?);";
 
     private final MySQLConnector connector;
@@ -51,6 +52,29 @@ public class PlayerMySQL {
             if(!result.next()) return Optional.empty();
 
             String username = result.getString("username");
+
+            connection.close();
+            return Optional.of(new FakePlayer(uuid, username));
+        } catch (Exception e) {
+            api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<FakePlayer> resolveUsername(String username) {
+        MySQLConnection connection = this.connector.connection().orElseThrow();
+        Tinder api = Tinder.get();
+
+        try {
+            connection.connect();
+            PreparedStatement statement = connection.prepare(FIND_PLAYER_USERNAME);
+            statement.setString(1, username);
+
+            ResultSet result = connection.executeQuery(statement);
+            if(!result.next()) return Optional.empty();
+
+            UUID uuid = UUID.fromString(result.getString("uuid"));
 
             connection.close();
             return Optional.of(new FakePlayer(uuid, username));

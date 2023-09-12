@@ -6,13 +6,10 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.model.FailService;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import ninja.leaping.configurate.reactive.TransactionFailedException;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -52,13 +49,13 @@ public class RedisConnection extends MessengerConnection<RedisSubscriber> {
                         );
                 RedisConnection.this.subscribers.add(redis);
 
-                redis.subscribeToChannel(RedisService.this.failService);
+                redis.subscribeToChannel(RedisConnection.this.failService);
 
                 RedisConnection.this.subscribers.remove(redis);
             } catch (Exception e) {
                 e.printStackTrace();
                 try {
-                    RedisService.this.failService.trigger("RedisService has failed to many times within the allowed amount of time! Please check the error messages and try again!");
+                    RedisConnection.this.failService.trigger("RedisService has failed to many times within the allowed amount of time! Please check the error messages and try again!");
                 } catch (Exception e2) {
                     e2.printStackTrace();
                     return;

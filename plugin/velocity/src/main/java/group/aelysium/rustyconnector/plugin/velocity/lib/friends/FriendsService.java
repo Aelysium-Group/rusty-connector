@@ -161,7 +161,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         this.friendRequests.invalidateAll();
         super.kill();
 
-        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         commandManager.unregister("friends");
         commandManager.unregister("unfriend");
         commandManager.unregister("fm");

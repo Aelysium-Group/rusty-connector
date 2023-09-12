@@ -77,7 +77,7 @@ public class PlayerDataEnclaveService extends Service {
     public FakePlayer findPlayer(String username) throws SyncFailedException {
         // Check velocity for online players first
         try {
-            FakePlayer fakePlayer = FakePlayer.from(VelocityAPI.get().velocityServer().getPlayer(username).orElseThrow());
+            FakePlayer fakePlayer = FakePlayer.from(Tinder.get().velocityServer().getPlayer(username).orElseThrow());
             cachePlayer(fakePlayer);
 
             return fakePlayer;
@@ -90,7 +90,7 @@ public class PlayerDataEnclaveService extends Service {
 
         // Ask MySQL for the player and then cache it.
         try {
-            FakePlayer fakePlayer = this.mySQLService.resolveUsername(username).orElseThrow();
+            FakePlayer fakePlayer = this.mysql.resolveUsername(username).orElseThrow();
 
             this.cachePlayer(fakePlayer);
 
