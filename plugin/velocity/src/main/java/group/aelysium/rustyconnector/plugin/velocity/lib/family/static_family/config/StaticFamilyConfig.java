@@ -67,7 +67,11 @@ public class StaticFamilyConfig extends YAML {
     }
 
     public void register() throws IllegalStateException {
-        this.parent_family = this.getNode(this.data, "parent-family", String.class);
+        try {
+            this.parent_family = this.getNode(this.data, "parent-family", String.class);
+        } catch (Exception ignore) {
+            this.parent_family = "";
+        }
 
         this.firstConnection_loadBalancing_weighted = this.getNode(this.data,"first-connection.load-balancing.weighted",Boolean.class);
         this.firstConnection_loadBalancing_algorithm = this.getNode(this.data,"first-connection.load-balancing.algorithm",String.class);

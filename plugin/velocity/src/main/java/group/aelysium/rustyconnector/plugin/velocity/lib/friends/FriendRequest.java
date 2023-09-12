@@ -2,25 +2,35 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
+import java.util.NoSuchElementException;
 
 public class FriendRequest {
-    private final WeakReference<Player> sender;
-    private Player target;
+    private long id;
+    private FakePlayer sender;
+    private FakePlayer target;
     private Boolean isAcknowledged = null;
 
-    public FriendRequest(Player sender, Player target) {
-        this.sender = new WeakReference<>(sender);
+    public FriendRequest(long id, FakePlayer sender, FakePlayer target) {
+        this.sender = sender;
         this.target = target;
     }
-
-    public Player sender() {
-        return this.sender.get();
+    public FriendRequest(long id, Player sender, Player target) {
+        this.sender = FakePlayer.from(sender);
+        this.target = FakePlayer.from(target);
     }
-    public Player target() {
+
+    public long id() {
+        return this.id;
+    }
+    public FakePlayer sender() {
+        return this.sender;
+    }
+    public FakePlayer target() {
         return this.target;
     }
 
@@ -47,18 +57,18 @@ public class FriendRequest {
 
         if(this.isAcknowledged != null)
             throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
-        if(this.sender.get() == null)
-            throw new IllegalStateException("The sender of this friend request doesn't exist! (How did this happen?)");
 
         try {
-            friendsService.services().dataEnclave().addFriend(this.sender.get(), this.target);
+            friendsService.services().dataEnclave().addFriend(this.sender, this.target);
 
             try {
-                this.target().sendMessage(Component.text("You and " + this.sender().getUsername() + " are now friends!", NamedTextColor.GREEN));
-                this.sender().sendMessage(Component.text("You and " + this.target().getUsername() + " are now friends!", NamedTextColor.GREEN));
-            } catch (Exception ignore) {
-                this.target.sendMessage(Component.text("You accepted the friend request!", NamedTextColor.GREEN));
-            }
+                Player resolved = this.target.resolve().orElseThrow();
+                resolved.sendMessage(Component.text("You and " + this.sender().username() + " are now friends!", NamedTextColor.GREEN));
+            } catch (NoSuchElementException ignore) {}
+            try {
+                Player resolved = this.sender.resolve().orElseThrow();
+                resolved.sendMessage(Component.text("You and " + this.target().username() + " are now friends!", NamedTextColor.GREEN));
+            } catch (NoSuchElementException ignore) {}
 
             friendsService.closeInvite(this);
             this.isAcknowledged = true;
@@ -87,7 +97,8 @@ public class FriendRequest {
     }
 
     public synchronized void decompose() {
-        this.sender.clear();
+        this.id = 0;
+        this.sender = null;
         this.target = null;
     }
 }

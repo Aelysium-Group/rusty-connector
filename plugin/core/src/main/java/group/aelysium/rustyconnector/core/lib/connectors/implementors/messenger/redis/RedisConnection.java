@@ -4,10 +4,17 @@ import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.model.FailService;
+import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
+import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import ninja.leaping.configurate.reactive.TransactionFailedException;
+
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -18,13 +25,15 @@ public class RedisConnection extends MessengerConnection<RedisSubscriber> {
     private final char[] privateKey;
     private final RedisClient.Builder clientBuilder;
     private boolean isAlive = false;
-    ExecutorService executorService;
+    private ExecutorService executorService;
+    private final FailService failService;
 
     public RedisConnection(RedisClient.Builder clientBuilder, char[] privateKey) {
         this.clientBuilder = clientBuilder.setPrivateKey(privateKey);
         this.privateKey = privateKey;
 
         this.publisher = new RedisPublisher(this.clientBuilder.build());
+        this.failService = new FailService(5, new LiquidTimestamp(2, TimeUnit.SECONDS));
     }
 
     @Override
@@ -43,11 +52,17 @@ public class RedisConnection extends MessengerConnection<RedisSubscriber> {
                         );
                 RedisConnection.this.subscribers.add(redis);
 
-                redis.subscribeToChannel();
+                redis.subscribeToChannel(RedisService.this.failService);
 
                 RedisConnection.this.subscribers.remove(redis);
             } catch (Exception e) {
                 e.printStackTrace();
+                try {
+                    RedisService.this.failService.trigger("RedisService has failed to many times within the allowed amount of time! Please check the error messages and try again!");
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                    return;
+                }
             }
 
             RedisConnection.this.subscribe(subscriber, cache, logger);
@@ -67,9 +82,10 @@ public class RedisConnection extends MessengerConnection<RedisSubscriber> {
     @Override
     public void kill() {
         this.isAlive = false;
+        this.failService.kill();
 
-        for (Iterator<RedisSubscriber> it = this.subscribers.elements().asIterator(); it.hasNext(); ) {
-            RedisSubscriber subscriber = it.next();
+        for (Iterator<RedisSubscriber> iterator = this.subscribers.elements().asIterator(); iterator.hasNext(); ) {
+            RedisSubscriber subscriber = iterator.next();
             subscriber.shutdown();
         }
 

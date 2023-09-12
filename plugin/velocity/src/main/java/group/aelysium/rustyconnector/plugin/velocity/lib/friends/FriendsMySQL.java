@@ -49,7 +49,7 @@ public class FriendsMySQL {
      * @return A list of friends.
      * @throws SQLException If there was an issue.
      */
-    public Optional<List<FriendMapping>> findFriends(Player player) {
+    public Optional<List<FriendMapping>> findFriends(FakePlayer player) {
         MySQLConnection connection = this.connector.connection().orElseThrow();
         Tinder api = Tinder.get();
         PlayerService playerService = api.services().playerService().orElseThrow();
@@ -57,8 +57,8 @@ public class FriendsMySQL {
         try {
             connection.connect();
             PreparedStatement statement = connection.prepare(FIND_FRIENDS);
-            statement.setString(1, player.getUniqueId().toString());
-            statement.setString(2, player.getUniqueId().toString());
+            statement.setString(1, player.uuid().toString());
+            statement.setString(2, player.uuid().toString());
 
             ResultSet result = connection.executeQuery(statement);
 
@@ -105,28 +105,25 @@ public class FriendsMySQL {
         return false;
     }
 
-    public void addFriend(Player player1, Player player2) throws SQLException {
+    public void addFriends(FriendMapping mapping) throws SQLException {
         MySQLConnection connection = this.connector.connection().orElseThrow();
-        FriendMapping orderedMapping = new FriendMapping(player1, player2);
-
         connection.connect();
         PreparedStatement statement = connection.prepare(ADD_FRIEND);
-        statement.setString(1, orderedMapping.player1().uuid().toString());
-        statement.setString(2, orderedMapping.player2().uuid().toString());
+        statement.setString(1, mapping.player1().uuid().toString());
+        statement.setString(2, mapping.player2().uuid().toString());
 
         connection.execute(statement);
 
         connection.close();
     }
 
-    public void removeFriend(Player player1, Player player2) throws SQLException {
+    public void removeFriend(FriendMapping mapping) throws SQLException {
         MySQLConnection connection = this.connector.connection().orElseThrow();
-        FriendMapping orderedMapping = new FriendMapping(player1, player2);
 
         connection.connect();
         PreparedStatement statement = connection.prepare(DELETE_FRIEND);
-        statement.setString(1, orderedMapping.player1().uuid().toString());
-        statement.setString(2, orderedMapping.player2().uuid().toString());
+        statement.setString(1, mapping.player1().uuid().toString());
+        statement.setString(2, mapping.player2().uuid().toString());
 
         connection.execute(statement);
 

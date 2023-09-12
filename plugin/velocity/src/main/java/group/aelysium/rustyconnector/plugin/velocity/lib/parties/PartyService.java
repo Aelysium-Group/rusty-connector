@@ -133,6 +133,9 @@ public class PartyService extends Service {
         this.parties.clear();
         this.invites.clear();
         this.connector.shutdown();
+
+        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
+        commandManager.unregister("party");
     }
 
     public record PartySettings(

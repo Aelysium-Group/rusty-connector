@@ -17,6 +17,9 @@ public class PlayerService extends ServiceableService<PlayerServiceHandler> {
     public FakePlayer findPlayer(UUID uuid) throws SyncFailedException {
         return this.services.dataEnclave().findPlayer(uuid);
     }
+    public FakePlayer findPlayer(String username) throws SyncFailedException {
+        return this.services.dataEnclave().findPlayer(username);
+    }
 
     public void cachePlayer(Player player) {
         this.services.dataEnclave().cachePlayer(player);

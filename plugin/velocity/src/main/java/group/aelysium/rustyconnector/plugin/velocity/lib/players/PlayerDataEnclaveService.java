@@ -74,6 +74,34 @@ public class PlayerDataEnclaveService extends Service {
         throw new SyncFailedException("The requested player has never joined the network!");
     }
 
+    public FakePlayer findPlayer(String username) throws SyncFailedException {
+        // Check velocity for online players first
+        try {
+            FakePlayer fakePlayer = FakePlayer.from(VelocityAPI.get().velocityServer().getPlayer(username).orElseThrow());
+            cachePlayer(fakePlayer);
+
+            return fakePlayer;
+        } catch (Exception ignore) {}
+
+        // Check the local cache for a matching player
+        try {
+            return this.cache.stream().filter(fakePlayer1 -> fakePlayer1.username().equals(username)).findFirst().orElseThrow();
+        } catch (Exception ignore) {}
+
+        // Ask MySQL for the player and then cache it.
+        try {
+            FakePlayer fakePlayer = this.mySQLService.resolveUsername(username).orElseThrow();
+
+            this.cachePlayer(fakePlayer);
+
+            return fakePlayer;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        throw new SyncFailedException("The requested player has never joined the network!");
+    }
+
     public void savePlayer(Player player) {
         try {
             this.mysql.addPlayer(player);
