@@ -14,7 +14,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.Sc
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import net.kyori.adventure.text.Component;
@@ -522,7 +522,7 @@ public interface VelocityLang extends Lang {
         boolean isFriendMessagingEnabled = friendsService.settings().allowMessaging();
         boolean canSeeFriendFamilies = friendsService.settings().showFamilies();
 
-        List<FakePlayer> friends = friendsService.findFriends(player, true).orElse(null);
+        List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, true).orElse(null);
 
         if(friends != null && friends.size() != 0) {
             final Component[] playersList = {text("")};

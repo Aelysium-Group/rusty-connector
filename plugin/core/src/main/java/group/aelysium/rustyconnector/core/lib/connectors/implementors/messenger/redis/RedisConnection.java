@@ -32,7 +32,7 @@ public class RedisConnection extends MessengerConnection {
         this.privateKey = privateKey;
 
         this.publisher = new RedisPublisher(this.clientBuilder.build());
-        this.failService = new FailService(5, new LiquidTimestamp(2, TimeUnit.SECONDS));
+        this.failService = new FailService(5, LiquidTimestamp.from(2, TimeUnit.SECONDS));
     }
 
     @Override

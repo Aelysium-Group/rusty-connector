@@ -101,7 +101,7 @@ public class DynamicTeleportConfig extends YAML {
             try {
                 String expiration = this.getNode(this.data, "tpa.expiration", String.class);
                 if (expiration.equals("NEVER")) {
-                    this.tpa_expiration = new LiquidTimestamp(5, TimeUnit.MINUTES);
+                    this.tpa_expiration = LiquidTimestamp.from(5, TimeUnit.MINUTES);
                     Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes.", NamedTextColor.YELLOW));
                 } else this.tpa_expiration = new LiquidTimestamp(expiration);
             } catch (ParseException e) {

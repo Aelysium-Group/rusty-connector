@@ -13,7 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -53,7 +53,7 @@ public final class CommandFM {
                             if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                             try {
-                                List<FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
+                                List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -98,7 +98,10 @@ public final class CommandFM {
                                     return closeMessage(player, Component.text(username + " doesn't seem to exist!", NamedTextColor.RED));
                                 if(player.equals(targetPlayer))
                                     return closeMessage(player, Component.text("You can't message yourself!", NamedTextColor.RED));
-                                if(!friendsService.areFriends(player, targetPlayer))
+                                if(!friendsService.services().dataEnclave().areFriends(
+                                        PlayerDataEnclave.FakePlayer.from(player),
+                                        PlayerDataEnclave.FakePlayer.from(targetPlayer)
+                                ))
                                     return closeMessage(player, Component.text("You can only send messages to your friends!", NamedTextColor.RED));
 
                                 String message = context.getArgument("message", String.class);

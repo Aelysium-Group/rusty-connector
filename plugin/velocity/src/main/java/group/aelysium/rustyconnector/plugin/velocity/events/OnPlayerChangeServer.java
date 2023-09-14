@@ -53,22 +53,9 @@ public class OnPlayerChangeServer {
                     }
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_SERVER, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_SERVER.build(player, oldServer, newServer));
-
-                    if(!isTheSameFamily) handleHomeServerCache(oldServer.family(), player);
                 } catch (Exception e) {
                     logger.log(e.getMessage());
                 }
             });
-    }
-
-    public void handleHomeServerCache(BaseServerFamily family, Player player) {
-        PluginLogger logger = Tinder.get().logger();
-
-        try {
-            if (!(family instanceof StaticServerFamily)) return;
-            ((StaticServerFamily) family).uncacheHomeServer(player);
-        } catch (Exception e) {
-            logger.log(e.getMessage());
-        }
     }
 }

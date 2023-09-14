@@ -77,8 +77,6 @@ public class OnPlayerKicked {
                 else
                     event.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("Kicked by server.")));
 
-                api.services().familyService().uncacheHomeServerMappings(player);
-
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));
             } catch (Exception e) {
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));

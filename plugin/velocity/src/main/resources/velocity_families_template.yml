@@ -56,19 +56,3 @@ scalar: []
 # Static families require that MySQL is set up.
 #
 static: []
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                         Storage                          #
-#                                                          #
-#               ---------------------------                #
-# | Set the name of the storage connector you want         #
-# | to use.                                                #
-#                                                          #
-#  You can configure your connectors in: `connectors.yml`  #
-#                                                          #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-static-family-storage: "main-mysql"

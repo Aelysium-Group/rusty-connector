@@ -1,12 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.lib.connectors.Connector;
+import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config.StaticFamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.HomeServerMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -23,18 +26,19 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.ConnectException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class StaticServerFamily extends PlayerFocusedServerFamily {
-    List<HomeServerMapping> mappingsCache = new ArrayList<>();
-    LiquidTimestamp homeServerExpiration;
-    UnavailableProtocol unavailableProtocol;
+    protected LiquidTimestamp homeServerExpiration;
+    protected UnavailableProtocol unavailableProtocol;
+    protected ResidenceDataEnclave dataEnclave;
 
-    private StaticServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private StaticServerFamily(String name, StorageConnector<?> connector, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration, String parentFamily) throws Exception {
         super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
         this.unavailableProtocol = unavailableProtocol;
         this.homeServerExpiration = homeServerExpiration;
+        this.dataEnclave = new ResidenceDataEnclave(connector);
     }
 
     public UnavailableProtocol unavailableProtocol() {
@@ -44,80 +48,8 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
     public LiquidTimestamp homeServerExpiration() {
         return this.homeServerExpiration;
     }
-
-    /**
-     * Registers a new home server for a player in this family.
-     * If a home server already exists, this overwrites it.
-     *
-     * @param player The player to register the home server for.
-     * @param server The server to register as the home server.
-     * @throws SQLException If there was an issue with MySQL.
-     */
-    public void registerHomeServer(Player player, PlayerServer server) throws SQLException {
-        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
-        HomeServerMapping mapping = new HomeServerMapping(player, server, this);
-
-        this.mappingsCache.add(mapping);
-        mySQL.save(mapping);
-    }
-
-    /**
-     * Unregisters a home server from a player in this family.
-     *
-     * @param player The player whose home server is to be unregistered.
-     * @throws SQLException If there was an issue with MySQL.
-     */
-    public void unregisterHomeServer(Player player) throws SQLException {
-        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
-        this.mappingsCache.removeIf(item -> item.player().equals(player) && item.family().equals(this));
-
-        mySQL.delete(player, this);
-    }
-
-    /**
-     * If mappings related to this family have a null expiration and this family's expiration isn't null.
-     * This will update the expirations.
-     * @throws SQLException If there was an issue with MySQL.
-     */
-    public void updateMappingExpirations() throws SQLException {
-        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
-        if(this.homeServerExpiration == null)
-            mySQL.updateValidExpirations(this);
-        else
-            mySQL.updateNullExpirations(this);
-    }
-
-    /**
-     * Delete any mappings in this server that are expired.
-     * @throws SQLException If there was an issue with MySQL.
-     */
-    public void purgeExpiredMappings() throws SQLException {
-        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
-        mySQL.purgeExpired(this);
-    }
-
-    /**
-     * Find a player's home server within this family.
-     *
-     * @param player The player whose home server we want to find.
-     * @return A home server mapping or `null` if none can be found.
-     * @throws SQLException If there was an issue with MySQL.
-     */
-    public HomeServerMapping findHomeServer(Player player) throws SQLException {
-        StaticFamilyMySQL mySQL = Tinder.get().services().familyService().staticFamilyMySQL().orElseThrow();
-        HomeServerMapping mapping = this.mappingsCache.stream().filter(item -> item.player().equals(player) && item.family().equals(this)).findFirst().orElse(null);
-        if (mapping != null) return mapping;
-
-        return mySQL.find(player, this);
-    }
-
-    /**
-     * Remove a player's home server from the plugin cache.
-     *
-     * @param player The player whose home server is to be uncached.
-     */
-    public void uncacheHomeServer(Player player) {
-        this.mappingsCache.removeIf(item -> item.player().equals(player) && item.family().equals(this));
+    public ResidenceDataEnclave dataEnclave() {
+        return this.dataEnclave;
     }
 
     @Override
@@ -132,7 +64,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticServerFamily init(String familyName, List<Component> bootOutput) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static StaticServerFamily init(String familyName, List<Component> bootOutput, List<String> requestedConnectors, ConnectorsService connectorsService) throws Exception {
         Tinder api = Tinder.get();
 
         StaticFamilyConfig staticFamilyConfig = StaticFamilyConfig.newConfig(
@@ -152,10 +84,18 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
             api.services().whitelistService().add(whitelist);
         }
 
+        requestedConnectors.add(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
+        bootOutput.add(Component.text(" | Building "+familyName+"'s connector...", NamedTextColor.DARK_GRAY));
+        StorageConnector<?> connector = (StorageConnector<?>) connectorsService.get(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
+        if(connector == null) throw new NullPointerException("You must define a storage method for your static family:"+familyName);
+        requestedConnectors.add(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
+        bootOutput.add(Component.text(" | Finished building  "+familyName+"'s connector.", NamedTextColor.GREEN));
+
         StaticServerFamily family = null;
         switch (Enum.valueOf(AlgorithmType.class, staticFamilyConfig.getFirstConnection_loadBalancing_algorithm())) {
             case ROUND_ROBIN -> family = new StaticServerFamily(
                     familyName,
+                    connector,
                     whitelist,
                     RoundRobin.class,
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
@@ -167,6 +107,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
             );
             case LEAST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
+                    connector,
                     whitelist,
                     LeastConnection.class,
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
@@ -178,6 +119,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
             );
             case MOST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
+                    connector,
                     whitelist,
                     MostConnection.class,
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
@@ -192,7 +134,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
         if(family == null) throw new RuntimeException("The name used for " + familyName + "'s load balancer is invalid!");
 
         try {
-            family.updateMappingExpirations();
+            family.dataEnclave().updateExpirations(staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(), family);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("There was an issue with MySQL! " + e.getMessage());
@@ -268,7 +210,7 @@ class StaticFamilyConnector {
         if(!shouldRegisterNew) return server;
 
         try {
-            this.family.registerHomeServer(this.player, server);
+            this.family.dataEnclave().save(player, server, this.family);
         } catch (Exception e) {
             Tinder.get().logger().send(Component.text("Unable to save "+ this.player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
             e.printStackTrace();
@@ -286,15 +228,15 @@ class StaticFamilyConnector {
      */
     public PlayerServer connectHomeServer() throws RuntimeException {
         try {
-            HomeServerMapping mapping = this.family.findHomeServer(this.player);
+            Optional<ResidenceDataEnclave.ServerResidence> residence = this.family.dataEnclave().fetch(player, this.family);
 
-            if(mapping != null) {
-                mapping.server().connect(this.player);
-                return mapping.server();
+            if(residence.isPresent()) {
+                residence.orElseThrow().server().connect(this.player);
+                return residence.orElseThrow().server();
             }
             switch (this.family.unavailableProtocol()) {
                 case ASSIGN_NEW_HOME -> {
-                    this.family.unregisterHomeServer(this.player);
+                    this.family.dataEnclave().delete(player, this.family);
                     return this.establishNewConnection(true);
                 }
                 case CONNECT_WITH_ERROR -> {

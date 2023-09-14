@@ -151,42 +151,62 @@ first-connection:
 #                 Consecutive Connections                  #
 #                                                          #
 #               ---------------------------                #
+#                                                          #
 # | When a player connects to the family again after       #
 # | already connecting at least once, they'll be routed    #
-# | Directly to their home server if it's available.       #
+# | Directly to their resident server if it's available.   #
+#                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 consecutive-connections:
+    ############################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                    Residency Storage                     #
+    #                                                          #
+    #               ---------------------------                #
+    #                                                          #
+    # | Set the name of the storage connector you want         #
+    # | to use for player residency.                           #
+    #                                                          #
+    #  You can configure your connectors in: `connectors.yml`  #
+    #                                                          #
+    #               ---------------------------                #
+    #                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################
+    residency-storage: "main-mysql"
 
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#            If The Home Server is Unavailable             #
-#                                                          #
-#               ---------------------------                #
-# | If the home server is unavailable, what should happen  #
-# | to the player?                                         #
-#                                                          #
-#  ⚫ CANCEL_CONNECTION_ATTEMPT -                          #
-#             Stop the player from connecting to this      #
-#             family. Tell them that their server is       #
-#             unavailable and that they should try again   #
-#             later.                                       #
-#  ⚫ ASSIGN_NEW_HOME -                                    #
-#             Connect the player to the load balancer and  #
-#             give them a new home server.                 #
-#             This option does not display an error to     #
-#             the player.                                  #
-#  ⚫ CONNECT_WITH_ERROR -                                 #
-#             Connect the player to a random server in     #
-#             the family (in accordance with the load      #
-#             balancing algorithm) and inform them that    #
-#             their home server was unavailable.           #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
+    ############################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #            If Resident Server is Unavailable             #
+    #                                                          #
+    #               ---------------------------                #
+    #                                                          #
+    # | If the home server is unavailable, what should happen  #
+    # | to the player?                                         #
+    #                                                          #
+    #  ⚫ CANCEL_CONNECTION_ATTEMPT -                          #
+    #             Stop the player from connecting to this      #
+    #             family. Tell them that their server is       #
+    #             unavailable and that they should try again   #
+    #             later.                                       #
+    #  ⚫ ASSIGN_NEW_HOME -                                    #
+    #             Connect the player to the load balancer and  #
+    #             give them a new home server.                 #
+    #             This option does not display an error to     #
+    #             the player.                                  #
+    #  ⚫ CONNECT_WITH_ERROR -                                 #
+    #             Connect the player to a random server in     #
+    #             the family (in accordance with the load      #
+    #             balancing algorithm) and inform them that    #
+    #             their home server was unavailable.           #
+    #                                                          #
+    #               ---------------------------                #
+    #                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################
     home-server:
         if-unavailable: CANCEL_CONNECTION_ATTEMPT
 
@@ -195,6 +215,7 @@ consecutive-connections:
 #                                Expiration                                #
 #                                                                          #
 #                       ---------------------------                        #
+#                                                                          #
 # | Set whether a player's home server should expire                       #
 # | after a certain amount of time.                                        #
 #                                                                          #

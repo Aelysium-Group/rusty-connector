@@ -373,7 +373,7 @@ class Initialize {
         };
     }
 
-    public void families(DefaultConfig defaultConfig, ConnectorsService connectorsService) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
+    public void families(DefaultConfig defaultConfig, ConnectorsService connectorsService) throws Exception {
         bootOutput.add(Component.text("Building families service...", NamedTextColor.DARK_GRAY));
 
         FamiliesConfig familiesConfig = FamiliesConfig.newConfig(new File(api.dataFolder(), "families.yml"), "velocity_families_template.yml");
@@ -381,26 +381,8 @@ class Initialize {
             throw new IllegalStateException("Unable to load or create families.yml!");
         familiesConfig.register();
 
-        java.util.Optional<MySQLConnector> connector = java.util.Optional.empty();
-        {
-            try {
-                if (!familiesConfig.staticFamilies().isEmpty()) {
-                    bootOutput.add(Component.text(" | Static families detected. Building static family MySQL...", NamedTextColor.DARK_GRAY));
-                    if(!requestedConnectors.contains(familiesConfig.staticFamilyStorage())) throw new NoOutputException();
-                    Connector<?> fetchedConnector = connectorsService.get(familiesConfig.staticFamilyStorage());
-                    if(fetchedConnector == null) throw new NoOutputException();
-                    connector = Optional.of((MySQLConnector) fetchedConnector);
-                }
-            } catch (NoOutputException ignore) {
-            } catch (Exception e) {
-                throw new IllegalAccessException("Unable to connect to initialize MySQL for Static Families!");
-            }
-
-            bootOutput.add(Component.text(" | Finished building static family MySQL.", NamedTextColor.GREEN));
-        }
-
         bootOutput.add(Component.text(" | Registering family service to the API...", NamedTextColor.DARK_GRAY));
-        FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers(), connector);
+        FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers());
         services.put(FamilyService.class, familyService);
         bootOutput.add(Component.text(" | Finished registering family service to API.", NamedTextColor.GREEN));
 
@@ -411,7 +393,7 @@ class Initialize {
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             for (String familyName : familiesConfig.staticFamilies()) {
-                familyService.add(StaticServerFamily.init(familyName, bootOutput));
+                familyService.add(StaticServerFamily.init(familyName, bootOutput, requestedConnectors, connectorsService));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             bootOutput.add(Component.text(" | Finished building families.", NamedTextColor.GREEN));
@@ -599,6 +581,7 @@ class Initialize {
             bootOutput.add(Component.text(" | Building viewport MySQL...", NamedTextColor.DARK_GRAY));
             StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(viewportConfig.storage());
             if(connector == null) throw new NullPointerException("You must define a storage method for viewport!");
+            requestedConnectors.add(viewportConfig.storage());
             bootOutput.add(Component.text(" | Finished building viewport MySQL.", NamedTextColor.GREEN));
 
             GatewayService gatewayService = new GatewayService(viewportConfig.getWebsocket_address(), viewportConfig.getRest_address());
@@ -636,10 +619,11 @@ class Initialize {
                     config.isAllowMessaging()
             );
 
-            bootOutput.add(Component.text(" | Building friends MySQL...", NamedTextColor.DARK_GRAY));
+            bootOutput.add(Component.text(" | Building friends connector...", NamedTextColor.DARK_GRAY));
             StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(config.storage());
-            if(connector == null) throw new NullPointerException("You must define a storage method for viewport!");
-            bootOutput.add(Component.text(" | Finished building friends MySQL.", NamedTextColor.GREEN));
+            if(connector == null) throw new NullPointerException("You must define a storage method for the friends service!");
+            requestedConnectors.add(config.storage());
+            bootOutput.add(Component.text(" | Finished building friends connector.", NamedTextColor.GREEN));
 
             FriendsService service = new FriendsService(settings, (MySQLConnector) connector);
 
@@ -653,7 +637,7 @@ class Initialize {
         }
     }
 
-    public void playerService() {
+    public void playerService() throws Exception {
         FriendsConfig config = FriendsConfig.newConfig(new File(api.dataFolder(), "friends.yml"), "velocity_friends_template.yml");
         if (!config.generate(bootOutput))
             throw new IllegalStateException("Unable to load or create friends.yml!");
@@ -663,7 +647,8 @@ class Initialize {
 
         bootOutput.add(Component.text(" | Building friends MySQL...", NamedTextColor.DARK_GRAY));
         StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(config.storage());
-        if(connector == null) throw new NullPointerException("You must define a storage method for viewport!");
+        if(connector == null) throw new NullPointerException("You must define a storage method for the friends service!");
+        requestedConnectors.add(config.storage());
         bootOutput.add(Component.text(" | Finished building friends MySQL.", NamedTextColor.GREEN));
 
         services.put(PlayerService.class, new PlayerService((MySQLConnector) connector));

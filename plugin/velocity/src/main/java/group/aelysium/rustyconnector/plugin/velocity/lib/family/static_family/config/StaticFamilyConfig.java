@@ -15,6 +15,7 @@ public class StaticFamilyConfig extends YAML {
     private boolean firstConnection_loadBalancing_persistence_enabled = false;
     private int firstConnection_loadBalancing_persistence_attempts = 5;
 
+    private String consecutiveConnections_residencyStorage;
     private UnavailableProtocol consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.ASSIGN_NEW_HOME;
     private LiquidTimestamp consecutiveConnections_homeServer_expiration = null;
     private boolean whitelist_enabled = false;
@@ -48,6 +49,10 @@ public class StaticFamilyConfig extends YAML {
 
     public String getWhitelist_name() {
         return whitelist_name;
+    }
+
+    public String getConsecutiveConnections_residencyStorage() {
+        return this.consecutiveConnections_residencyStorage;
     }
     public UnavailableProtocol getConsecutiveConnections_homeServer_ifUnavailable() {
         return consecutiveConnections_homeServer_ifUnavailable;
@@ -87,6 +92,7 @@ public class StaticFamilyConfig extends YAML {
         if(this.firstConnection_loadBalancing_persistence_enabled && this.firstConnection_loadBalancing_persistence_attempts <= 0)
             throw new IllegalStateException("Load balancing persistence must allow at least 1 attempt.");
 
+        this.consecutiveConnections_residencyStorage = this.getNode(this.data,"consecutive-connections.residency-storage",String.class);
         try {
             this.consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.valueOf(this.getNode(this.data,"consecutive-connections.home-server.if-unavailable",String.class));
         } catch (IllegalArgumentException ignore) {

@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.Comman
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -24,9 +24,9 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
     private final FriendsSettings settings;
     private final Snowflake snowflakeGenerator = new Snowflake();
 
-    public FriendsService(FriendsSettings settings, MySQLConnector storage) {
+    public FriendsService(FriendsSettings settings, MySQLConnector storage) throws Exception {
         super(new FriendsServiceHandler());
-        this.services().add(new FriendsDataEnclaveService(storage));
+        this.services().add(new FriendsDataEnclave(storage));
         this.settings = settings;
 
         this.friendRequests = CacheBuilder.newBuilder()
@@ -81,7 +81,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         return this.settings;
     }
 
-    public List<FriendRequest> findRequestsToTarget(FakePlayer target) {
+    public List<FriendRequest> findRequestsToTarget(PlayerDataEnclave.FakePlayer target) {
         List<Map.Entry<Long, FriendRequest>> entries = this.friendRequests.asMap().entrySet().stream().filter(request -> request.getValue().target().equals(target)).findAny().stream().toList();
 
         List<FriendRequest> requests = new ArrayList<>();
@@ -90,14 +90,14 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
 
         return requests;
     }
-    public Optional<FriendRequest> findRequest(FakePlayer target, FakePlayer sender) {
+    public Optional<FriendRequest> findRequest(PlayerDataEnclave.FakePlayer target, PlayerDataEnclave.FakePlayer sender) {
         Optional<Map.Entry<Long, FriendRequest>> entry = this.friendRequests.asMap().entrySet().stream().filter(invite -> invite.getValue().target().equals(target) && invite.getValue().sender().equals(sender)).findFirst();
         return entry.map(Map.Entry::getValue);
     }
 
-    public Optional<List<FakePlayer>> findFriends(Player player, boolean forcePull) {
-        List<FakePlayer> friends = new ArrayList<>();
-        List<FriendMapping> friendMappings = this.services.dataEnclave().findFriends(FakePlayer.from(player), forcePull).orElse(null);
+    public Optional<List<PlayerDataEnclave.FakePlayer>> findFriends(Player player, boolean forcePull) {
+        List<PlayerDataEnclave.FakePlayer> friends = new ArrayList<>();
+        List<FriendsDataEnclave.FriendMapping> friendMappings = this.services.dataEnclave().findFriends(PlayerDataEnclave.FakePlayer.from(player), forcePull).orElse(null);
         if(friendMappings == null) return Optional.empty();
 
         friendMappings.forEach(mapping -> {
@@ -109,19 +109,11 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         return Optional.of(friends);
     }
 
-    public boolean areFriends(Player player1, Player player2) {
-        return this.services.dataEnclave().areFriends(FakePlayer.from(player1), FakePlayer.from(player2));
-    }
-
-    public boolean areFriends(FakePlayer player1, FakePlayer player2) {
-        return this.services.dataEnclave().areFriends(player1, player2);
-    }
-
-    public FriendMapping sendRequest(Player sender, FakePlayer target) {
-        if(this.friendCount(FakePlayer.from(sender)).orElseThrow() > this.settings().maxFriends())
+    public FriendsDataEnclave.FriendMapping sendRequest(Player sender, PlayerDataEnclave.FakePlayer target) {
+        if(this.friendCount(PlayerDataEnclave.FakePlayer.from(sender)).orElseThrow() > this.settings().maxFriends())
             sender.sendMessage(Component.text("You have reached the max number of friends!", NamedTextColor.RED));
 
-        FakePlayer fakeSender = FakePlayer.from(sender);
+        PlayerDataEnclave.FakePlayer fakeSender = PlayerDataEnclave.FakePlayer.from(sender);
         FriendRequest friendRequest = new FriendRequest(snowflakeGenerator.nextId(), fakeSender, target);
         this.friendRequests.put(friendRequest.id(), friendRequest);
 
@@ -133,17 +125,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
             sender.sendMessage(Component.text(target.username() + " doesn't seem to be online, we'll let them know about your friend request when they log in! Your request will expire in 10 minutes.", NamedTextColor.GREEN));
         }
 
-        return new FriendMapping(fakeSender, target);
-    }
-
-    public boolean removeFriend(FakePlayer sender, FakePlayer target) {
-        try {
-            this.services().dataEnclave().removeFriend(sender, target);
-            return true;
-        } catch (IllegalStateException e) {
-            throw e;
-        } catch (Exception ignore) {}
-        return false;
+        return FriendsDataEnclave.FriendMapping.from(fakeSender, target);
     }
 
     public void closeInvite(FriendRequest request) {
@@ -151,7 +133,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         request.decompose();
     }
 
-    public Optional<Integer> friendCount(FakePlayer player) {
+    public Optional<Integer> friendCount(PlayerDataEnclave.FakePlayer player) {
         return this.services().dataEnclave().getFriendCount(player);
     }
 

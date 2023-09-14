@@ -2,35 +2,34 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.lang.ref.WeakReference;
 import java.util.NoSuchElementException;
 
 public class FriendRequest {
     private long id;
-    private FakePlayer sender;
-    private FakePlayer target;
+    private PlayerDataEnclave.FakePlayer sender;
+    private PlayerDataEnclave.FakePlayer target;
     private Boolean isAcknowledged = null;
 
-    public FriendRequest(long id, FakePlayer sender, FakePlayer target) {
+    public FriendRequest(long id, PlayerDataEnclave.FakePlayer sender, PlayerDataEnclave.FakePlayer target) {
         this.sender = sender;
         this.target = target;
     }
     public FriendRequest(long id, Player sender, Player target) {
-        this.sender = FakePlayer.from(sender);
-        this.target = FakePlayer.from(target);
+        this.sender = PlayerDataEnclave.FakePlayer.from(sender);
+        this.target = PlayerDataEnclave.FakePlayer.from(target);
     }
 
     public long id() {
         return this.id;
     }
-    public FakePlayer sender() {
+    public PlayerDataEnclave.FakePlayer sender() {
         return this.sender;
     }
-    public FakePlayer target() {
+    public PlayerDataEnclave.FakePlayer target() {
         return this.target;
     }
 

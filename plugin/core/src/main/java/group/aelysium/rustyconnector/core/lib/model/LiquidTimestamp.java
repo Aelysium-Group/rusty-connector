@@ -10,7 +10,7 @@ public class LiquidTimestamp {
     protected TimeUnit unit;
     protected int value;
 
-    public LiquidTimestamp(int value, TimeUnit unit) {
+    private LiquidTimestamp(int value, TimeUnit unit) {
         this.value = value;
         this.unit = unit;
     }
@@ -93,5 +93,9 @@ public class LiquidTimestamp {
     @Override
     public String toString() {
         return this.initialValue;
+    }
+
+    public static LiquidTimestamp from(int value, TimeUnit unit) {
+        return new LiquidTimestamp(value, unit);
     }
 }

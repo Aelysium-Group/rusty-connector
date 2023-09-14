@@ -12,8 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.Ro
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -64,14 +63,14 @@ public class OnPlayerChooseInitialServer {
 
             // Save player if they haven't joined before
             try {
-                PlayerService playerService = api.services().playerService().orElseThrow();
-                playerService.savePlayer(player);
+                PlayerDataEnclave dataEnclave = api.services().playerService().orElseThrow().dataEnclave();
+                dataEnclave.savePlayer(player);
             } catch (Exception ignore) {}
 
             // Check for active friend requests
             try {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
-                List<FriendRequest> requests = friendsService.findRequestsToTarget(FakePlayer.from(player));
+                List<FriendRequest> requests = friendsService.findRequestsToTarget(PlayerDataEnclave.FakePlayer.from(player));
 
                 if(requests.size() == 0) throw new NoOutputException();
 
@@ -98,7 +97,7 @@ public class OnPlayerChooseInitialServer {
             // Check for online friends
             try {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
-                List<FakePlayer> friends = friendsService.findFriends(player, true).orElseThrow();
+                List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, true).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 

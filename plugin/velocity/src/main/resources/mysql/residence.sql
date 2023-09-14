@@ -1,4 +1,9 @@
-CREATE TABLE IF NOT EXISTS home_server_mappings (
+-- ################################################ --
+--  MIGRATE TABLE TO v0.7.0 FROM PREVIOUS VERSIONS  --
+RENAME TABLE home_server_mappings TO residence;
+-- ################################################ --
+
+CREATE TABLE IF NOT EXISTS residence (
     player_uuid VARCHAR(36) NOT NULL,
     family_name VARCHAR(32) NOT NULL,
     server_address VARCHAR(128) NOT NULL,

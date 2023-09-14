@@ -1,85 +1,61 @@
 package group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql;
 
 import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnection;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageQuery;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
 
 public class MySQLConnection extends StorageConnection {
     private DataSource dataSource;
-    private Connection connection;
 
     protected MySQLConnection(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
     /**
-     * Gets the connection to the MySQL server.
+     * Opens the connection so a query can be sent.
      */
-    public void connect() throws SQLException {
+    protected Connection open() throws SQLException {
         Connection connection = this.dataSource.getConnection();
         if (connection.isValid(1000))
-            this.connection = connection;
+            return connection;
         else
             throw new SQLException("The MySQL connection is invalid! No further information.");
     }
 
-    /**
-     * Closes the connection to the MySQL server.
-     */
-    public void close() throws SQLException {
-        if(this.connection == null) return;
-        try {
-            this.connection.commit();
-        } catch (Exception ignore) {} // If autocommit=true this throws an exception. Just ignore it.
-        this.connection.close();
-    }
+    @Override
+    public MySQLStorageResponse query(StorageQuery query, Object ...inputs) {
+        try (Connection connection = this.open()) {
+            try (PreparedStatement statement = connection.prepareStatement(query.mysql())) {
 
-    public List<PreparedStatement> prepareMultiple(String statement) throws SQLException {
-        String[] queries = statement.split(";");
+                int i = 1;
+                for (Object input : inputs) {
+                    if (input instanceof String) statement.setString(i, (String) input);
+                    else if (input instanceof Boolean) statement.setBoolean(i, (Boolean) input);
+                    else if (input instanceof Integer) statement.setInt(i, (Integer) input);
+                    else if (input instanceof Long) statement.setLong(i, (Long) input);
+                    else if (input instanceof Double) statement.setDouble(i, (Double) input);
+                    else if (input == null) statement.setNull(i, Types.NULL);
 
-        List<PreparedStatement> statements = new ArrayList<>();
-        for (String query : queries) {
-            if (query.replaceAll("\\s","").isEmpty()) continue;
+                    i++;
+                }
 
-            Connection connection = this.connection;
-            if(connection == null) throw new SQLException("There is no open MySQL connection!");
-
-            statements.add(connection.prepareStatement(query));
-        }
-
-        return statements;
-    }
-
-    public PreparedStatement prepare(String statement) throws SQLException {
-        return connection.prepareStatement(statement);
-    }
-
-    public boolean execute(PreparedStatement statement) throws SQLException {
-        return statement.execute();
-    }
-
-    public ResultSet executeQuery(PreparedStatement statement) throws SQLException {
-        return statement.executeQuery();
-    }
-
-    public void executeMultiple(List<PreparedStatement> statements) throws SQLException {
-        for (PreparedStatement statement : statements) {
-            statement.execute();
+                try (ResultSet result = statement.executeQuery();) {
+                    return new MySQLStorageResponse(true, result.getFetchSize(), result);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public void kill() {
-        try {
-            this.connection.close();
-        } catch (Exception ignore) {}
-
         this.dataSource = null;
     }
 }

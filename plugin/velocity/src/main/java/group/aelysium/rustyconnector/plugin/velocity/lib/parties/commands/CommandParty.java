@@ -17,7 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -274,7 +274,7 @@ public final class CommandParty {
                                         }
 
                                         FriendsService friendsService = api.services().friendsService().orElseThrow();
-                                        List<FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
+                                        List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
                                             return builder.buildFuture();
@@ -331,7 +331,10 @@ public final class CommandParty {
                                     } catch (Exception ignore) {}
                                     try {
                                         if (partyService.settings().friendsOnly())
-                                            if (!api.services().friendsService().orElseThrow().areFriends(player, targetPlayer))
+                                            if (!api.services().friendsService().orElseThrow().services().dataEnclave().areFriends(
+                                                    PlayerDataEnclave.FakePlayer.from(player),
+                                                    PlayerDataEnclave.FakePlayer.from(targetPlayer)
+                                            ))
                                                 return closeMessage(player, Component.text("You can only send invites to your friends!", NamedTextColor.RED));
                                     } catch (Exception ignore) {}
                                     if(targetPlayer.equals(player))
