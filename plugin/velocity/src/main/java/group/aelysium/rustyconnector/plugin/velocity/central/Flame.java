@@ -15,8 +15,10 @@ import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnecto
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
@@ -129,14 +131,14 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             logger.send(Component.text("Initializing 0%...", NamedTextColor.DARK_GRAY));
             String version = initialize.version();
             int configVersion = initialize.configVersion();
-            char[] privateKey = initialize.privateKey();
+            AESCryptor cryptor = initialize.privateKey();
             DefaultConfig defaultConfig = initialize.defaultConfig();
             initialize.loggerConfig();
 
 
             logger.send(Component.text("Initializing 10%...", NamedTextColor.DARK_GRAY));
             MessageCacheService messageCacheService = initialize.dataTransit();
-            Callable<Runnable> resolveConnectors = initialize.connectors(privateKey, messageCacheService, Tinder.get().logger());
+            Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger());
 
             logger.send(Component.text("Initializing 20%...", NamedTextColor.DARK_GRAY));
             ConnectorsService connectorsService = (ConnectorsService) initialize.getServices().get(ConnectorsService.class);
@@ -253,15 +255,15 @@ class Initialize {
         }
     }
 
-    public char[] privateKey() throws IllegalAccessException {
+    public AESCryptor privateKey() {
         PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(api.dataFolder(), "private.key"));
         if (!privateKeyConfig.generateFilestream(bootOutput))
             throw new IllegalStateException("Unable to load or create private.key!");
 
         try {
             return privateKeyConfig.get();
-        } catch (Exception ignore) {
-            throw new IllegalAccessException("There was a fatal error while reading private.key!");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -309,16 +311,16 @@ class Initialize {
      * {@link Callable} - Runs linting to only build the connectors actually being referenced by the configs. Returns:
      * <p>
      * a {@link Runnable} - Starts up all connectors and connects them to their remote resources.
-     * @param privateKey The plugin's pricate key.
+     * @param cryptor The plugin's cryptor.
      * @return A runnable which will wrap up the connectors' initialization. Should be run after all other initialization logic has run.
      */
-    public Callable<Runnable> connectors(char[] privateKey, MessageCacheService cacheService, PluginLogger logger) {
+    public Callable<Runnable> connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger) {
         bootOutput.add(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
         ConnectorsConfig connectorsConfig = ConnectorsConfig.newConfig(new File(api.dataFolder(), "connectors.yml"), "velocity_connectors_template.yml");
         if (!connectorsConfig.generate(bootOutput))
             throw new IllegalStateException("Unable to load or create connectors.yml!");
-        ConnectorsService connectorsService = connectorsConfig.register(privateKey, true, true);
+        ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, true, PacketOrigin.PROXY);
         services.put(ConnectorsService.class, connectorsService);
 
         bootOutput.add(Component.text("Finished building Connectors.", NamedTextColor.GREEN));

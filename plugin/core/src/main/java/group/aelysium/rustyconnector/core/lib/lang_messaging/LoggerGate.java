@@ -20,6 +20,9 @@ public class LoggerGate {
     public boolean check(GateKey key) {
         if(key == null) return false;
 
-        return this.nodes.get(key);
+        Boolean response = this.nodes.get(key);
+        if(response == null) return false;
+
+        return response;
     }
 }

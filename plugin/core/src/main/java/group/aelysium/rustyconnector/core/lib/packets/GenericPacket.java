@@ -22,8 +22,6 @@ public class GenericPacket {
     private final boolean sendable;
     private String rawMessage;
     private final int messageVersion;
-
-    private char[] privateKey;
     private final PacketType.Mapping type;
     private final InetSocketAddress address;
     private final PacketOrigin origin;
@@ -32,7 +30,6 @@ public class GenericPacket {
 
     public boolean sendable() { return this.sendable; }
     public String rawMessage() { return this.rawMessage; }
-    public char[] privateKey() { return this.privateKey; }
     public InetSocketAddress address() { return this.address; }
     public PacketType.Mapping type() { return this.type; }
     public PacketOrigin origin() { return origin; }
@@ -44,7 +41,6 @@ public class GenericPacket {
         this.messageVersion = protocolVersion;
         this.sendable = true;
         this.rawMessage = null;
-        this.privateKey = null;
         this.type = type;
         this.address = address;
         this.origin = origin;
@@ -53,25 +49,13 @@ public class GenericPacket {
     /*
      * Constructs a received RedisMessage.
      */
-    protected GenericPacket(int messageVersion, String rawMessage, char[] privateKey, PacketType.Mapping type, InetSocketAddress address, PacketOrigin origin) {
+    protected GenericPacket(int messageVersion, String rawMessage, PacketType.Mapping type, InetSocketAddress address, PacketOrigin origin) {
         this.messageVersion = messageVersion;
         this.sendable = false;
         this.rawMessage = rawMessage;
-        this.privateKey = privateKey;
         this.type = type;
         this.address = address;
         this.origin = origin;
-    }
-
-    /**
-     * Sign a sendable message with a private key.
-     * @param privateKey The private key to sign with.
-     * @throws IllegalStateException If you attempt to sign a received message. Or if the message is already signed.
-     */
-    public void signMessage(char[] privateKey) {
-        if(!this.sendable()) throw new IllegalStateException("Attempted to sign a received message! You can only sign sendable messages!");
-        if(this.privateKey != null) throw new IllegalStateException("Attempted to sign a message that was already signed!");
-        this.privateKey = privateKey;
     }
 
     /**
@@ -88,7 +72,6 @@ public class GenericPacket {
     public JsonObject toJSON() {
         JsonObject object = new JsonObject();
 
-        object.add(MasterValidParameters.PRIVATE_KEY, new JsonPrimitive(String.valueOf(this.privateKey)));
         object.add(MasterValidParameters.PROTOCOL_VERSION, new JsonPrimitive(this.messageVersion));
         object.add(MasterValidParameters.TYPE, new JsonPrimitive(String.valueOf(this.type)));
         object.add(MasterValidParameters.ORIGIN, new JsonPrimitive(String.valueOf(this.origin)));
@@ -116,7 +99,6 @@ public class GenericPacket {
     public static class Builder {
         private Integer protocolVersion;
         private String rawMessage;
-        private char[] privateKey;
         private PacketType.Mapping type;
         private InetSocketAddress address;
         private PacketOrigin origin;
@@ -129,18 +111,6 @@ public class GenericPacket {
             return this;
         }
 
-        /**
-         * Sets the private key for this RedisMessage.
-         * If you're building this RedisMessage as a sendable message.
-         * You shouldn't have to set this because RedisPublisher will sign the message,
-         * when you attempt to publish it.
-         * @param privateKey The private key to set.
-         * @return Builder
-         */
-        public Builder setPrivateKey(char[] privateKey) {
-            this.privateKey = privateKey;
-            return this;
-        }
         public Builder setType(PacketType.Mapping type) {
             this.type = type;
             return this;
@@ -206,8 +176,6 @@ public class GenericPacket {
                 throw new IllegalStateException("You must provide `protocolVersion` when building a receivable RedisMessage!");
             if (this.rawMessage == null)
                 throw new IllegalStateException("You must provide `rawMessage` when building a receivable RedisMessage!");
-            if (this.privateKey == null)
-                throw new IllegalStateException("You must provide `privateKey` when building a receivable RedisMessage!");
             if (this.type == null)
                 throw new IllegalStateException("You must provide `type` when building a receivable RedisMessage!");
             if (this.address == null)
@@ -215,10 +183,10 @@ public class GenericPacket {
             if (this.origin == null)
                 throw new IllegalStateException("You must provide `origin` when building a receivable RedisMessage!");
 
-            if (this.type == PacketType.PING)              return new ServerPingPacket(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if (this.type == PacketType.PING_RESPONSE)     return new ServerPingResponsePacket(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if (this.type == PacketType.SEND_PLAYER)       return new SendPlayerPacket(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
-            if (this.type == PacketType.COORDINATE_REQUEST_QUEUE)  return new CoordinateRequestQueuePacket(this.protocolVersion, this.rawMessage, this.privateKey, this.address, this.origin, this.parameters);
+            if (this.type == PacketType.PING)              return new ServerPingPacket(this.protocolVersion, this.rawMessage, this.address, this.origin, this.parameters);
+            if (this.type == PacketType.PING_RESPONSE)     return new ServerPingResponsePacket(this.protocolVersion, this.rawMessage, this.address, this.origin, this.parameters);
+            if (this.type == PacketType.SEND_PLAYER)       return new SendPlayerPacket(this.protocolVersion, this.rawMessage, this.address, this.origin, this.parameters);
+            if (this.type == PacketType.COORDINATE_REQUEST_QUEUE)  return new CoordinateRequestQueuePacket(this.protocolVersion, this.rawMessage, this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
         }
@@ -269,7 +237,6 @@ public class GenericPacket {
 
                 switch (key) {
                     case MasterValidParameters.PROTOCOL_VERSION -> redisMessageBuilder.setProtocolVersion(value.getAsInt());
-                    case MasterValidParameters.PRIVATE_KEY -> redisMessageBuilder.setPrivateKey(value.getAsString().toCharArray());
                     case MasterValidParameters.ADDRESS -> redisMessageBuilder.setAddress(value.getAsString());
                     case MasterValidParameters.TYPE -> redisMessageBuilder.setType(PacketType.mapping(value.getAsInt()));
                     case MasterValidParameters.ORIGIN -> redisMessageBuilder.setOrigin(PacketOrigin.valueOf(value.getAsString()));
@@ -293,7 +260,6 @@ public class GenericPacket {
 
     public interface MasterValidParameters {
         String PROTOCOL_VERSION = "v";
-        String PRIVATE_KEY = "k";
         String TYPE = "t";
         String ADDRESS = "a";
         String ORIGIN = "o";
@@ -302,7 +268,6 @@ public class GenericPacket {
         static List<String> toList() {
             List<String> list = new ArrayList<>();
             list.add(PROTOCOL_VERSION);
-            list.add(PRIVATE_KEY);
             list.add(TYPE);
             list.add(ADDRESS);
             list.add(ORIGIN);

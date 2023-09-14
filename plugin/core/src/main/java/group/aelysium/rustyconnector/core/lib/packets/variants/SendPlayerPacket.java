@@ -39,8 +39,8 @@ public class SendPlayerPacket extends GenericPacket {
             }
         });
     }
-    public SendPlayerPacket(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, PacketType.SEND_PLAYER, address, origin);
+    public SendPlayerPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, PacketType.SEND_PLAYER, address, origin);
 
         if(!SendPlayerPacket.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");

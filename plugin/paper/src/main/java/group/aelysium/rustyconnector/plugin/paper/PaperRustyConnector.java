@@ -12,11 +12,10 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        Tinder.get().logger().log("Initializing RustyConnector...");
-
         try {
             this.tinder = Tinder.gather(this, this.getSLF4JLogger());
             this.tinder.ignite();
+            Tinder.get().logger().log("Initializing RustyConnector...");
 
             Lang.WORDMARK_RUSTY_CONNECTOR.send(this.tinder.logger(), this.tinder.flame().version());
 

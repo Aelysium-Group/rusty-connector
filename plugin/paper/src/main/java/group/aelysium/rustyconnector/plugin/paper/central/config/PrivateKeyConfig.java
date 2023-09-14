@@ -1,28 +1,23 @@
 package group.aelysium.rustyconnector.plugin.paper.central.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public class PrivateKeyConfig extends YAML {
     protected InputStream data;
-    protected InputStream templateStream;
-    private PrivateKeyConfig(File configPointer, InputStream templateStream) {
+    private PrivateKeyConfig(File configPointer) {
         super(configPointer, "");
-        this.templateStream = templateStream;
     }
 
     public static PrivateKeyConfig newConfig(File configPointer) {
-        InputStream stream = new ByteArrayInputStream(MD5.generatePrivateKey().getBytes(StandardCharsets.UTF_8));
-        return new PrivateKeyConfig(configPointer, stream);
+        return new PrivateKeyConfig(configPointer);
     }
 
     public boolean generateFilestream(List<Component> outputLog) {
@@ -33,14 +28,13 @@ public class PrivateKeyConfig extends YAML {
                 parent.mkdirs();
             }
 
-            InputStream templateStream = getClass().getClassLoader().getResourceAsStream(this.template);
-            if (templateStream == null)
-                throw new RuntimeException("Unable to setup \"+this.configPointer.getName()+\". This config has no template !");
-
             try {
-                Files.copy(templateStream, this.configPointer.toPath());
+                InputStream stream = new ByteArrayInputStream(AESCryptor.createKey());
+                Files.copy(stream, this.configPointer.toPath());
             } catch (IOException e) {
                 throw new RuntimeException("Unable to setup "+this.configPointer.getName()+"! No further information.");
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -54,7 +48,7 @@ public class PrivateKeyConfig extends YAML {
         }
     }
 
-    public char[] get() throws IOException {
-        return new String(this.data.readAllBytes(), StandardCharsets.UTF_8).toCharArray();
+    public AESCryptor get() throws IOException {
+        return AESCryptor.from(this.data.readAllBytes());
     }
 }

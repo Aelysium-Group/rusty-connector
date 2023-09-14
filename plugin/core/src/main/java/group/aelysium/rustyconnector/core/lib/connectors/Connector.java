@@ -19,5 +19,5 @@ public abstract class Connector<C extends Connection> extends Service {
      * @return A {@link Connection}.
      * @throws ConnectException If there was an issue connecting to the remote resource.
      */
-    public abstract C connect() throws ConnectException;
+public abstract C connect() throws ConnectException;
 }

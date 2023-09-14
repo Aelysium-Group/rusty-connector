@@ -45,8 +45,8 @@ public class CoordinateRequestQueuePacket extends GenericPacket {
             }
         });
     }
-    public CoordinateRequestQueuePacket(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, PacketType.COORDINATE_REQUEST_QUEUE, address, origin);
+    public CoordinateRequestQueuePacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, PacketType.COORDINATE_REQUEST_QUEUE, address, origin);
 
         if(!CoordinateRequestQueuePacket.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");

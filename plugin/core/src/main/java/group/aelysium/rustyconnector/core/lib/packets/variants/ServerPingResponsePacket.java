@@ -51,8 +51,8 @@ public class ServerPingResponsePacket extends GenericPacket {
             }
         });
     }
-    public ServerPingResponsePacket(int messageVersion, String rawMessage, char[] privateKey, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, privateKey, PacketType.PING_RESPONSE, address, origin);
+    public ServerPingResponsePacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, PacketType.PING_RESPONSE, address, origin);
 
         if(!ServerPingResponsePacket.validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");

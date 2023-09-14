@@ -18,9 +18,10 @@ public abstract class MessengerSubscriber {
     private final PluginLogger logger;
     private MessageCacheService messageCache;
     private Map<PacketType.Mapping, PacketHandler> handlers;
+    private PacketOrigin origin;
 
-    public MessengerSubscriber(char[] privateKey, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
-        this.cryptor = AESCryptor.create(Arrays.toString(privateKey));
+    public MessengerSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin) {
+        this.cryptor = cryptor;
         this.messageCache = messageCache;
         this.logger = logger;
         this.handlers = handlers;
@@ -49,7 +50,7 @@ public abstract class MessengerSubscriber {
             GenericPacket message = serializer.parseReceived(decryptedMessage);
 
             if(messageCache.ignoredType(message)) messageCache.removeMessage(cachedMessage.getSnowflake());
-            if(message.origin() == PacketOrigin.PROXY) throw new Exception("Message from the proxy! Ignoring...");
+            if(message.origin() == this.origin) throw new Exception("Message from the "+this.origin.name()+"! Ignoring...");
             try {
                 cachedMessage.sentenceMessage(PacketStatus.ACCEPTED);
 

@@ -9,13 +9,13 @@ import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
-import java.lang.reflect.Array;
 import java.net.URI;
 import java.time.Instant;
 import java.util.*;
@@ -26,16 +26,17 @@ import java.util.concurrent.TimeUnit;
 public class WebSocketConnection extends MessengerConnection {
     private final Vector<Session> subscribers = new Vector<>();
     ExecutorService executorService;
-    private final char[] privateKey;
-    private Optional<AESCryptor> cryptor = Optional.empty();
+    private Optional<AESCryptor> connectCryptor = Optional.empty();
+    private final AESCryptor packetCryptor;
     private final WebSocketContainer container;
     private final URI uri;
 
-    public WebSocketConnection(URI uri, char[] connectKey, char[] privateKey) throws IllegalArgumentException {
+    public WebSocketConnection(PacketOrigin origin, URI uri, AESCryptor connectCryptor, AESCryptor packetCryptor) throws IllegalArgumentException {
+        super(origin);
         this.container = ContainerProvider.getWebSocketContainer();
         this.uri = uri;
-        this.privateKey = privateKey;
-        if(connectKey != null) this.cryptor = Optional.of(AESCryptor.create(Arrays.toString(connectKey)));
+        if(connectCryptor != null) this.connectCryptor = Optional.of(connectCryptor);
+        this.packetCryptor = packetCryptor;
     }
 
     protected ClientEndpointConfig config() {
@@ -50,7 +51,7 @@ public class WebSocketConnection extends MessengerConnection {
             String payload = object.toString();
 
             try {
-                if (this.cryptor.isPresent()) payload = cryptor.get().encrypt(payload);
+                if (this.connectCryptor.isPresent()) payload = connectCryptor.get().encrypt(payload);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -76,7 +77,7 @@ public class WebSocketConnection extends MessengerConnection {
     protected void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
         this.executorService.submit(() -> {
             try {
-                WebSocketSubscriber websocket = new WebSocketSubscriber(this.privateKey, cache, logger, handlers);
+                WebSocketSubscriber websocket = new WebSocketSubscriber(this.packetCryptor, cache, logger, handlers, this.origin);
 
                 try(Session session = WebSocketConnection.this.container.connectToServer(websocket.listener(), this.config(), uri)) {
                     session.addMessageHandler(websocket.handler());
@@ -130,19 +131,17 @@ public class WebSocketConnection extends MessengerConnection {
     public void publish(GenericPacket message) {
         if(!message.sendable()) throw new IllegalStateException("Attempted to send a Message that isn't sendable!");
 
+        String signedPacket;
         try {
-            message.signMessage(this.privateKey);
-        } catch (IllegalStateException ignore) {} // If there's an issue it's because the message is already signed. Thus ready to send.
+            signedPacket = this.packetCryptor.encrypt(message.toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         try(Session session = WebSocketConnection.this.container.connectToServer(new WebSocketListener(), uri)) {
-            session.getBasicRemote().sendText(message.toString());
+            session.getBasicRemote().sendText(signedPacket);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public boolean validatePrivateKey(char[] privateKey) {
-        return Arrays.equals(this.privateKey, privateKey);
     }
 }

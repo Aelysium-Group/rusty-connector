@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.core.lib.connectors.messenger;
 
 import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
 import group.aelysium.rustyconnector.core.lib.connectors.Connector;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
@@ -9,9 +11,13 @@ import java.util.Optional;
 
 public abstract class MessengerConnector<C extends MessengerConnection> extends Connector<C> {
     protected C connection;
+    protected AESCryptor cryptor;
+    protected PacketOrigin origin;
 
-    protected MessengerConnector(InetSocketAddress address, UserPass userPass) {
+    protected MessengerConnector(AESCryptor cryptor, PacketOrigin origin, InetSocketAddress address, UserPass userPass) {
         super(address, userPass);
+        this.origin = origin;
+        this.cryptor = cryptor;
     }
 
     /**

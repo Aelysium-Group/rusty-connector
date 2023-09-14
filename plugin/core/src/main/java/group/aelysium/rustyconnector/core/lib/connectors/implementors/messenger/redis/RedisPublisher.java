@@ -7,14 +7,17 @@ import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class RedisPublisher {
     private final RedisClient client;
     private StatefulRedisPubSubConnection<String, String> connection;
-    protected RedisPublisher(RedisClient client) {
+    private final AESCryptor cryptor;
+    protected RedisPublisher(RedisClient client, AESCryptor cryptor) {
         this.client = client;
         this.client.addListener(new RedisPublisherListener());
+        this.cryptor = cryptor;
     }
 
     /**
@@ -35,16 +38,19 @@ public class RedisPublisher {
     public void publish(GenericPacket message) {
         if(!message.sendable()) throw new IllegalStateException("Attempted to send a RedisMessage that isn't sendable!");
 
+        String signedPacket;
         try {
-            message.signMessage(client.privateKey());
-        } catch (IllegalStateException ignore) {} // If there's an issue it's because the message is already signed. Thus ready to send.
+            signedPacket = this.cryptor.encrypt(message.toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         if(this.connection == null) this.connection = this.client.connectPubSub();
         if(!this.connection.isOpen()) this.connection = this.client.connectPubSub();
 
         RedisPubSubAsyncCommands<String, String> async = connection.async();
 
-        async.publish(this.client.dataChannel(), message.toString());
+        async.publish(this.client.dataChannel(), signedPacket);
     }
 
     /**

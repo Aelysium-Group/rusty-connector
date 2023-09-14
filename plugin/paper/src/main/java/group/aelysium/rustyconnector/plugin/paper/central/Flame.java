@@ -7,7 +7,9 @@ import group.aelysium.rustyconnector.core.lib.connectors.config.ConnectorsConfig
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
@@ -93,11 +95,11 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
 
         String version = initialize.version();
         int configVersion = initialize.configVersion();
-        char[] privateKey = initialize.privateKey();
+        AESCryptor cryptor = initialize.privateKey();
         DefaultConfig defaultConfig = initialize.defaultConfig();
 
         MessageCacheService messageCacheService = initialize.messageCache();
-        Callable<Runnable> resolveConnectors = initialize.connectors(privateKey, messageCacheService, Tinder.get().logger());
+        Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger());
 
         initialize.serverInfo(defaultConfig);
         initialize.messageCache();
@@ -185,19 +187,19 @@ class Initialize {
         }
     }
 
-    public char[] privateKey() throws IllegalAccessException {
+    public AESCryptor privateKey() {
         PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(api.dataFolder(), "private.key"));
         if (!privateKeyConfig.generateFilestream(bootOutput))
             throw new IllegalStateException("Unable to load or create private.key!");
 
         try {
             return privateKeyConfig.get();
-        } catch (Exception ignore) {
-            throw new IllegalAccessException("There was a fatal error while reading private.key!");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public DefaultConfig defaultConfig() throws IllegalAccessException {
+    public DefaultConfig defaultConfig() {
         DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.dataFolder(), "config.yml"), "velocity_config_template.yml");
         if (!defaultConfig.generate(bootOutput))
             throw new IllegalStateException("Unable to load or create config.yml!");
@@ -215,16 +217,15 @@ class Initialize {
      * {@link Callable} - Runs linting to only build the connectors actually being referenced by the configs. Returns:
      * <p>
      * a {@link Runnable} - Starts up all connectors and connects them to their remote resources.
-     * @param privateKey The plugin's pricate key.
      * @return A runnable which will wrap up the connectors' initialization. Should be run after all other initialization logic has run.
      */
-    public Callable<Runnable> connectors(char[] privateKey, MessageCacheService cacheService, PluginLogger logger) {
+    public Callable<Runnable> connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger) {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
         ConnectorsConfig connectorsConfig = ConnectorsConfig.newConfig(new File(api.dataFolder(), "connectors.yml"), "paper_connectors_template.yml");
         if (!connectorsConfig.generate(bootOutput))
             throw new IllegalStateException("Unable to load or create connectorsConfig.yml!");
-        ConnectorsService connectorsService = connectorsConfig.register(privateKey, true, false);
+        ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, false, PacketOrigin.PROXY);
         services.put(ConnectorsService.class, connectorsService);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
@@ -246,7 +247,7 @@ class Initialize {
                 Connector<?> connector = connectorsService.get(name);
                 try {
                     connector.connect();
-                } catch (ConnectException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }

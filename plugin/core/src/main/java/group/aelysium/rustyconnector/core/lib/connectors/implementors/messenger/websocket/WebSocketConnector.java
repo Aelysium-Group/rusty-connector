@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger
 
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.ConnectException;
@@ -9,22 +11,21 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 
 public class WebSocketConnector extends MessengerConnector<WebSocketConnection> {
-    protected final char[] connectKey;
-    protected final char[] privateKey;
+    protected final AESCryptor connectCryptor;
 
-    private WebSocketConnector(InetSocketAddress address, char[] connectKey, char[] privateKey) {
-        super(address, null);
-        this.connectKey = connectKey;
-        this.privateKey = privateKey;
+    private WebSocketConnector(AESCryptor packetCryptor, PacketOrigin origin, AESCryptor connectCryptor, InetSocketAddress address) {
+        super(packetCryptor, origin, address, null);
+        this.connectCryptor = connectCryptor;
     }
 
     @Override
     public WebSocketConnection connect() throws ConnectException {
         try {
             this.connection = new WebSocketConnection(
+                    origin,
                     URI.create(this.address.getHostName()),
-                    this.connectKey,
-                    this.privateKey
+                    cryptor,
+                    connectCryptor
             );
         } catch (IllegalArgumentException e) {
             throw new ConnectException(e.getMessage());
@@ -36,12 +37,12 @@ public class WebSocketConnector extends MessengerConnector<WebSocketConnection> 
     /**
      * Creates a new {@link WebSocketConnector} and returns it.
      * The created {@link WebSocketConnector} is also automatically added to the {@link ConnectorsService}.
+     * @param packetCryptor The cryptor to use when logging into the websocket.
+     * @param connectCryptor The cryptor to use when shipping messages.
      * @param address The {@link InetSocketAddress} that the connector points to.
-     * @param connectKey The key to use when logging into the websocket.
-     * @param privateKey The private key to use when shipping messages.
      * @return A {@link WebSocketConnector}.
      */
-    public static WebSocketConnector create(InetSocketAddress address, char[] connectKey, char[] privateKey) {
-        return new WebSocketConnector(address, connectKey, privateKey);
+    public static WebSocketConnector create(AESCryptor packetCryptor, PacketOrigin origin, AESCryptor connectCryptor, InetSocketAddress address) {
+        return new WebSocketConnector(packetCryptor, origin, connectCryptor, address);
     }
 }

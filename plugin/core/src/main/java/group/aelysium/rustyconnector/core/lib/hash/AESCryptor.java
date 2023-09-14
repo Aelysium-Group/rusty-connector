@@ -1,10 +1,14 @@
 package group.aelysium.rustyconnector.core.lib.hash;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Base64;
 
 public class AESCryptor {
     private final SecretKey key;
@@ -24,28 +28,35 @@ public class AESCryptor {
     }
 
     public String encrypt(String data) throws Exception {
-        byte[] dataInBytes = data.getBytes();
-        encryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
-        encryptionCipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encryptedBytes = encryptionCipher.doFinal(dataInBytes);
-        return encode(encryptedBytes);
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, this.key);
+        byte[] encryptedBytes = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+
+        return Base64.getEncoder().encodeToString(encryptedBytes);
     }
 
     public String decrypt(String encryptedData) throws Exception {
-        byte[] dataInBytes = decode(encryptedData);
-        Cipher decryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
-        GCMParameterSpec spec = new GCMParameterSpec(DATA_LENGTH, encryptionCipher.getIV());
-        decryptionCipher.init(Cipher.DECRYPT_MODE, key, spec);
-        byte[] decryptedBytes = decryptionCipher.doFinal(dataInBytes);
-        return new String(decryptedBytes);
+        byte[] encryptedBytes = Base64.getDecoder().decode(encryptedData);
+
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, this.key);
+        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+
+        return new String(decryptedBytes, StandardCharsets.UTF_8);
     }
 
-    public static AESCryptor create(String key) throws IllegalArgumentException {
-        if(key.length() % 2 != 0) throw new IllegalArgumentException("Key must be an even number!");
-        if(key.length() < 16) throw new IllegalArgumentException("Key must be at least 16 characters!");
 
-        byte[] decodedString = key.getBytes(StandardCharsets.UTF_8);
-        SecretKey secretKey = new SecretKeySpec(decodedString, 0, decodedString.length, "AES");
+    public static byte[] createKey() throws NoSuchAlgorithmException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(128);
+        SecretKey secretKey = keyGenerator.generateKey();
+
+        return secretKey.getEncoded();
+    }
+
+    public static AESCryptor from(byte[] key) {
+        SecretKey secretKey = new SecretKeySpec(key, "AES");
+
         return new AESCryptor(secretKey);
     }
 }

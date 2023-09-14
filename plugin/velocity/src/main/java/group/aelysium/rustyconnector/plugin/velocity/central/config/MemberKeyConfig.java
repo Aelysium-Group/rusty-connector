@@ -21,7 +21,7 @@ public class MemberKeyConfig extends YAML {
     }
 
     public static MemberKeyConfig newConfig(File configPointer) {
-        InputStream stream = new ByteArrayInputStream(MD5.generatePrivateKey().getBytes(StandardCharsets.UTF_8));
+        InputStream stream = new ByteArrayInputStream(MD5.generateMD5().getBytes(StandardCharsets.UTF_8));
         return new MemberKeyConfig(configPointer, stream);
     }
 

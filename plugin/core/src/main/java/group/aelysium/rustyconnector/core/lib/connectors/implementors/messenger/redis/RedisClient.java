@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
 
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SocketOptions;
@@ -11,32 +12,21 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Duration;
 
 public class RedisClient extends io.lettuce.core.RedisClient {
-    private final char[] privateKey;
     private final String dataChannel;
 
-    protected RedisClient(ClientResources clientResources, RedisURI redisURI, @NotNull String dataChannel, char @NotNull [] privateKey) {
+    protected RedisClient(ClientResources clientResources, RedisURI redisURI, @NotNull String dataChannel) {
         super(clientResources, redisURI);
 
         this.dataChannel = dataChannel;
-        this.privateKey = privateKey;
     }
 
     public String dataChannel() {
         return dataChannel;
     }
 
-    /*
-     * RedisClient is specifically never used in a way that it can be accessed through the public plugin API.
-     * And it should remain that way.
-     * That's why this field is allowed to be public.
-     */
-    public char[] privateKey() {
-        return privateKey;
-    }
 
-
-    public static RedisClient create(ClientResources resources, RedisURI uri, @NotNull String dataChannel, char @NotNull [] privateKey) {
-        return new RedisClient(resources, uri, dataChannel, privateKey);
+    public static RedisClient create(ClientResources resources, RedisURI uri, @NotNull String dataChannel) {
+        return new RedisClient(resources, uri, dataChannel);
     }
 
     public static class Builder {
@@ -47,7 +37,6 @@ public class RedisClient extends io.lettuce.core.RedisClient {
         private char[] password = null;
         private ProtocolVersion protocolVersion = ProtocolVersion.newestSupported();
         private String dataChannel = "rusty-connector";
-        private char[] privateKey = null;
 
         public Builder() {}
 
@@ -73,11 +62,6 @@ public class RedisClient extends io.lettuce.core.RedisClient {
 
         public Builder setDataChannel(String dataChannel) {
             this.dataChannel = dataChannel;
-            return this;
-        }
-
-        public Builder setPrivateKey(char[] privateKey) {
-            this.privateKey = privateKey;
             return this;
         }
 
@@ -121,7 +105,7 @@ public class RedisClient extends io.lettuce.core.RedisClient {
                         .withAuthentication(this.user, this.password)
                         .build();
 
-            RedisClient client = RedisClient.create(this.resources, uri, dataChannel, privateKey);
+            RedisClient client = RedisClient.create(this.resources, uri, dataChannel);
             client.setOptions(options);
 
             return client;

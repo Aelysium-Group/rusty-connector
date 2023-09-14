@@ -2,11 +2,13 @@ package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger
 
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.model.FailService;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 
 import java.util.Arrays;
@@ -21,18 +23,19 @@ import java.util.concurrent.TimeUnit;
 public class RedisConnection extends MessengerConnection {
     private final Vector<RedisSubscriber> subscribers = new Vector<>();
     private final RedisPublisher publisher;
-    private final char[] privateKey;
     private final RedisClient.Builder clientBuilder;
     private boolean isAlive = false;
     private ExecutorService executorService;
     private final FailService failService;
+    private AESCryptor cryptor;
 
-    public RedisConnection(RedisClient.Builder clientBuilder, char[] privateKey) {
-        this.clientBuilder = clientBuilder.setPrivateKey(privateKey);
-        this.privateKey = privateKey;
+    public RedisConnection(PacketOrigin origin, RedisClient.Builder clientBuilder, AESCryptor cryptor) {
+        super(origin);
+        this.clientBuilder = clientBuilder;
 
-        this.publisher = new RedisPublisher(this.clientBuilder.build());
+        this.publisher = new RedisPublisher(this.clientBuilder.build(), cryptor);
         this.failService = new FailService(5, LiquidTimestamp.from(2, TimeUnit.SECONDS));
+        this.cryptor = cryptor;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class RedisConnection extends MessengerConnection {
 
         this.executorService.submit(() -> {
             try {
-                RedisSubscriber redis = new RedisSubscriber(RedisConnection.this.clientBuilder.build(), cache, logger, handlers);
+                RedisSubscriber redis = new RedisSubscriber(this.cryptor, RedisConnection.this.clientBuilder.build(), cache, logger, handlers, this.origin);
                 RedisConnection.this.subscribers.add(redis);
 
                 redis.subscribeToChannel(RedisConnection.this.failService);
@@ -101,10 +104,5 @@ public class RedisConnection extends MessengerConnection {
     @Override
     public void publish(GenericPacket message) {
         this.publisher.publish(message);
-    }
-
-    @Override
-    public boolean validatePrivateKey(char[] privateKey) {
-        return Arrays.equals(this.privateKey, privateKey);
     }
 }

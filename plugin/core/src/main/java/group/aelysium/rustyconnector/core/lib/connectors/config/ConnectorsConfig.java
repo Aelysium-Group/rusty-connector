@@ -6,6 +6,8 @@ import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.websocket.WebSocketConnector;
+import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import io.lettuce.core.protocol.ProtocolVersion;
 
 import java.io.File;
@@ -29,7 +31,7 @@ public class ConnectorsConfig extends YAML {
     }
 
     @SuppressWarnings("unchecked")
-    public ConnectorsService register(char[] privateKey, boolean loadMessengers, boolean loadStorage) throws IllegalStateException {
+    public ConnectorsService register(AESCryptor cryptor, boolean loadMessengers, boolean loadStorage, PacketOrigin origin) throws IllegalStateException {
         ConnectorsService connectorsService = new ConnectorsService();
 
         if(loadMessengers)
@@ -56,17 +58,17 @@ public class ConnectorsConfig extends YAML {
                         String dataChannel = this.getNode(node, "data-channel", String.class);
                         if (dataChannel.equals("")) throw new IllegalStateException("Please configure your connector settings. `dataChannel` cannot be empty for Redis connectors.");
 
-                        connectorsService.add(name, (Connector) RedisConnector.create(address, userPass, protocol, dataChannel, privateKey));
+                        connectorsService.add(name, (Connector) RedisConnector.create(cryptor, origin, address, userPass, protocol, dataChannel));
                     }
                     case RABBITMQ -> {
                     }
                     case WEBSOCKET -> {
-                        char[] connectKey = null;
+                        AESCryptor connectCryptor = null;
                         try {
-                            connectKey = this.getNode(node, "key", String.class).toCharArray();
+                            connectCryptor = AESCryptor.from(this.getNode(node, "key", String.class).getBytes());
                         } catch (Exception ignore) {}
 
-                        connectorsService.add(name, (Connector) WebSocketConnector.create(address, connectKey, privateKey));
+                        connectorsService.add(name, (Connector) WebSocketConnector.create(cryptor, origin, connectCryptor, address));
                     }
                 }
             });

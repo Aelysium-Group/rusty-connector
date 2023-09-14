@@ -40,12 +40,3 @@ messengers:
       user: "default"
       password: "password"
       data-channel: "rustyConnector-sync"
-
-storage:
-    - name: "main-mysql"
-      type: MYSQL
-      host: "0.0.0.0"
-      port: 3306
-      user: "default"
-      password: "password"
-      database: "RustyConnector"
