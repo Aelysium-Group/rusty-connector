@@ -48,7 +48,7 @@ public class AESCryptor {
 
     public static byte[] createKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(128);
+        keyGenerator.init(256);
         SecretKey secretKey = keyGenerator.generateKey();
 
         return secretKey.getEncoded();
