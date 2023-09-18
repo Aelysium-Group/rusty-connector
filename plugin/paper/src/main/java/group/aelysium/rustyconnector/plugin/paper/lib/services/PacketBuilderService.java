@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import net.kyori.adventure.text.format.NamedTextColor;

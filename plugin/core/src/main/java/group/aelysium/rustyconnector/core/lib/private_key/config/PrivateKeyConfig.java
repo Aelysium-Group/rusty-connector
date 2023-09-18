@@ -1,6 +1,5 @@
-package group.aelysium.rustyconnector.plugin.paper.central.config;
+package group.aelysium.rustyconnector.core.lib.private_key.config;
 
-import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,10 +9,11 @@ import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-public class PrivateKeyConfig extends YAML {
+public class PrivateKeyConfig {
     protected InputStream data;
+    protected File configPointer;
     private PrivateKeyConfig(File configPointer) {
-        super(configPointer, "");
+        this.configPointer = configPointer;
     }
 
     public static PrivateKeyConfig newConfig(File configPointer) {
@@ -24,9 +24,8 @@ public class PrivateKeyConfig extends YAML {
         outputLog.add(Component.text("Building "+this.configPointer.getName()+"...", NamedTextColor.DARK_GRAY));
         if (!this.configPointer.exists()) {
             File parent = this.configPointer.getParentFile();
-            if (!parent.exists()) {
+            if (!parent.exists())
                 parent.mkdirs();
-            }
 
             try {
                 InputStream stream = new ByteArrayInputStream(AESCryptor.createKey());

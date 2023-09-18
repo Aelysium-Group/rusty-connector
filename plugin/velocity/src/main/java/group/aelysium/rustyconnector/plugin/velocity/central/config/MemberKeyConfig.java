@@ -16,42 +16,13 @@ public class MemberKeyConfig extends YAML {
     protected InputStream data;
     protected InputStream templateStream;
     private MemberKeyConfig(File configPointer, InputStream templateStream) {
-        super(configPointer, "");
+        super(configPointer);
         this.templateStream = templateStream;
     }
 
     public static MemberKeyConfig newConfig(File configPointer) {
         InputStream stream = new ByteArrayInputStream(MD5.generateMD5().getBytes(StandardCharsets.UTF_8));
         return new MemberKeyConfig(configPointer, stream);
-    }
-
-    public boolean generateFilestream(List<Component> outputLog) {
-        outputLog.add(Component.text("Building "+this.configPointer.getName()+"...", NamedTextColor.DARK_GRAY));
-        if (!this.configPointer.exists()) {
-            File parent = this.configPointer.getParentFile();
-            if (!parent.exists()) {
-                parent.mkdirs();
-            }
-
-            InputStream templateStream = getClass().getClassLoader().getResourceAsStream(this.template);
-            if (templateStream == null)
-                throw new RuntimeException("Unable to setup \"+this.configPointer.getName()+\". This config has no template !");
-
-            try {
-                Files.copy(templateStream, this.configPointer.toPath());
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to setup "+this.configPointer.getName()+"! No further information.");
-            }
-        }
-
-        try {
-            this.data = new FileInputStream(this.configPointer);
-            outputLog.add(Component.text("Finished building "+this.configPointer.getName(), NamedTextColor.GREEN));
-            return true;
-        } catch (Exception e) {
-            outputLog.add(Component.text("Failed to build "+this.configPointer.getName(), NamedTextColor.RED));
-            return false;
-        }
     }
 
     public char[] get() throws IOException {

@@ -1,0 +1,171 @@
+#
+# Language
+# This file contains all non-config text messages that are sent by RC.
+# This obviously excludes Exception and Error messages that are sent to console.
+#
+# Text represented as variables are defined as: ${variable_name}
+# These variable names must not be changed, but feel free to move them around so that
+# the injected data appears properly in your translated text!
+#
+# Strings support Lenient MiniMessage formatting. For more info, read here:
+# https://docs.advntr.dev/minimessage/format.html#minimessage-format
+#
+# Nodes with a hashtag after them do not support MiniMessage.
+# These nodes are dynamically colored by the plugin.
+#
+# Targeted Language: zh-cn
+# Translated by: chencu
+#
+version: "v0.7.0"
+core:
+    single_word:
+        reason: "原因"
+        status: "状态"
+        id: "ID"
+        timestamp: "时间戳"
+        contents: "内容"
+        pages: "页数"
+        usage: "用法"
+        leader: "Leader" #
+        party: "派对" #
+        leave: "离开派对" #
+        disband: "解散派对" #
+        accept: "接受" #
+        deny: "Deny" #
+        ignore: "忽略" #
+        date: "日期" #
+    boot_wordmark:
+        developed_by: "由 Aelysium | Nathan M 开发" #
+        usage: "使用: `/rc` 快速开始" #
+velocity:
+    commands:
+        no_permission: "<red>你没有权限使用该命令。</red>"
+        root:
+            usage:
+                description:
+                - "<gray>蓝色命令将向您返回信息或数据，它们不会导致任何更改或变化。</gray>"
+                - "<gray>橙色命令会使插件发挥作用，请在使用这些命令前了解并知晓它们的作用!</gray>"
+                command_description:
+                    family: "<dark_gray>查看家族相关的信息。</dark_gray>"
+                    message: "<dark_gray>查询或访问RustyConnector产生的相关信息。</dark_gray>"
+                    reload: "<dark_gray>重载插件。</dark_gray>"
+                    send: "<dark_gray>将玩家从一个家庭服务器发送至另外一个家庭服务器。</dark_gray>"
+        message:
+            usage:
+                get: "<dark_gray>从信息缓存中查询信息（若信息过旧可能会失效无法查询）。</dark_gray>"
+                list: "<dark_gray>列出所有当前已缓存的信息（如有新信息产生，旧信息将会被自动从缓存中移除）。</dark_gray>"
+            get:
+                usage: "<dark_gray>从信息缓存中查询信息（若信息过旧可能会失效无法查询）。</dark_gray>"
+            send:
+                usage:
+                    family: "<dark_gray>将玩家从一个家庭发送至另外一个家庭。</dark_gray>"
+                    server:
+                    - "<dark_gray>强制玩家连接到代理端上特定的服务器（无视玩家上线和白名单）。</dark_gray>"
+                    - "<dark_gray>注：若您有多个同名服务器，此功能可能会将玩家传送至您预期之外的服务器。</dark_gray>"
+        tpa:
+            ignore: "<gray>拒绝玩家的tpa请求。</gray>"
+            accept: "<gray>接受玩家的tpa请求。</gray>"
+            sender_failure: "<red>无法将您TPA传送至 ${username}!</red>"
+            receiver_failure: "<red>无法将玩家 ${username} 传送至您的位置!</red>"
+            self_failure: "<red>你无法传送你自己!</red>"
+            not_online: "<red>${username} TA不在线或不存在!</red>"
+            no_requests: "<red>${username} 最近没有向您发起任何TPA请求!</red>"
+            pending_request: "<red>你已对玩家 ${username} 发起了TPA传送请求，请等待对方处理!</red>"
+            request_confirmation: "<green>你的TPA传送请求已发送至玩家 ${username}!</green>"
+            target_request_query: "<gold>嘿，${username} 请求传送至您的位置!</gold>"
+            sender_accepted:
+                - "<green>${username} 接受了你的请求!</green>"
+                - "<gray>正在尝试传送中...</gray>"
+            target_accepted:
+                - "<green>${username} 的TPA传送请求已接受!</green>"
+                - "<gray>正在尝试传送中...</gray>"
+            sender_deny:
+                - "<red>${username} 拒绝了你的请求!</red>"
+            target_deny:
+                - "<red>${username} 的TPA传送请求已拒绝!</red>"
+                - "<gray>TA将会收到通知消息...</gray>"
+            expired_request: "<gray>你对玩家 ${username} 发起的TPA请求已过期!</gray>"
+        send:
+            no_player: "<red>未找到玩家: ${username} 请检查TA是否在线或存在!</red>"
+            no_family: "<red>未找到家庭: ${family_name} 请检查该家庭是否有效!</red>"
+            no_server: "<red>未找到服务器: ${server_name} 请检查该服务器是否在线或有效!</red>"
+    family:
+        panel:
+            description: "<gray><gold>Gold families</gold>为Scalar类型，<green>Green families</green>为Static类型。</gray>"
+            details_usage: "<gray>若要查看特定家庭的相关详细信息，请使用：</gray>"
+            velocity.scalar_family.panel:
+            no_registered_servers: "<dark_gray>这里没有任何已注册的服务器。</dark_gray>"
+            info:
+                - "   ---| 在线玩家: ${player_count}"
+                - "   ---| 已注册服务器数量: ${server_count}"
+                - "   ---| 父级家庭: ${parent_family_name}"
+                - "   ---| 负载均衡:"
+                - "      | - 算法: ${balancing_algorithm}"
+                - "      | - 加权排序: ${weighted}"
+                - "      | - Persistence: ${persistence}"
+                - "      | - 最大重连次数: ${persistence_attempts}"
+            registered_servers: "<aqua>已注册的服务器</aqua>"
+            commands:
+                sort: "<dark_gray>将会让家庭以配置文件中的负载均衡算法重新排序。</dark_gray>"
+                reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
+        static_family:
+            residence:
+                missing: "<red>您连接的服务器暂时不可用，在此期间我们已将您转移至备用服务器!</red>"
+                blocked_join_attempt: "<red>您连接的服务器暂时不可用，请稍后再试!</red>"
+            panel:
+                no_registered_servers: "<dark_gray>这里没有任何已注册的服务器。</dark_gray>"
+                info:
+                    - "   ---| 在线玩家: ${player_count}"
+                    - "   ---| 已注册服务器数量: ${server_count}"
+                    - "   ---| 父级家庭: ${parent_family_name}"
+                    - "   ---| Resident Server Expiration: ${residence_expiration}"
+                    - "   ---| 负载均衡:"
+                    - "      | - 算法: ${balancing_algorithm}"
+                    - "      | - 加权排序: ${weighted}"
+                    - "      | - Persistence: ${persistence}"
+                    - "      | - 最大重连次数: ${persistence_attempts}"
+                registered_servers: "Registered Servers"
+                sort: "<dark_gray>将会让家庭以配置文件中的负载均衡算法重新排序。</dark_gray>"
+                reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
+    party:
+        panel:
+            create_party: "<yellow><u>点此创建一个新的派对。</u></yellow>"
+        receiver_invite_query:
+            query: "<gray>嘿，${username} 想加入您的派对!</gray>"
+            hover:
+                accept: "接受派对邀请"
+                ignore: "忽略派对邀请"
+        disbanded: "<gray>你的派对已解散。</gray>"
+        kick: "踢出该玩家"
+        promote: "升为Leader"
+        leave: "离开派对"
+        invite: "邀请玩家"
+    friends:
+        panel:
+            header:
+                main: "<white> 好友 (${friend_count}/${max_friends})</white>"
+                add-friend: "添加好友"
+            pending: "<gray>获取好友...</gray>"
+            unfriend: "<red>Unfriend ${username}</red>"
+            message: "<yellow>Message ${username}</yellow>"
+            invite_party: "<blue>Invite ${username} to your party</blue>"
+            offline: "<gray>Offline</gray>"
+            online: "<white>Offline</white>"
+            currently_playing: "<gray>Currently Playing: </gray><aqua>${name}</aqua>"
+            add_friend: "<white>Add Friend</white>"
+            send_friend_request: "<yellow><u>点击发送好友请求</u></yellow>"
+        friend_request_query:
+            query: "<gray>嘿， ${username} 请求添加您为好友!</gray>"
+            hover:
+                accept: "同意好友申请"
+                ignore: "忽略好友申请"
+        friend_joined:
+            resolved: "<gray>你的好友 <aqua hover:show_text:'点击即可对 ${username} 发起好友聊天' click:suggest_command:'/fm ${username}'><u>${username}</u></aqua> 上线了!</gray>"
+            unresolved: "<gray>你的好友 ${username} 上线了!</gray>"
+        friend_leaves: "<gray>你的好友 ${username} 已离线!</gray>"
+paper:
+    commands:
+        send:
+            usage: "<gray>将玩家从当前服务器发送至另外一个家庭。</gray>"
+    tpa:
+        sender_failed_teleport: "<red>Oops，传送时出现了问题，无法将您传送至 ${username}!</red>"

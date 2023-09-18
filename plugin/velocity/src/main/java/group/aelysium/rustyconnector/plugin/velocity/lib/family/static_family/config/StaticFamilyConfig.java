@@ -21,8 +21,8 @@ public class StaticFamilyConfig extends YAML {
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
-    private StaticFamilyConfig(File configPointer, String template) {
-        super(configPointer, template);
+    public StaticFamilyConfig(File configPointer) {
+        super(configPointer);
     }
 
     public String getParent_family() { return parent_family; }
@@ -59,16 +59,6 @@ public class StaticFamilyConfig extends YAML {
     }
     public LiquidTimestamp getConsecutiveConnections_homeServer_expiration() {
         return consecutiveConnections_homeServer_expiration;
-    }
-
-    /**
-     * Add a whitelist config to the proxy.
-     * @param name The name of the whitelist family to save.
-     * @param configPointer The config file.
-     * @param template The path to the template config file.
-     */
-    public static StaticFamilyConfig newConfig(String name, File configPointer, String template) {
-        return new StaticFamilyConfig(configPointer, template);
     }
 
     public void register() throws IllegalStateException {

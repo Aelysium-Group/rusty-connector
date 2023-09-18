@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -58,16 +58,8 @@ public class DataTransitConfig extends YAML {
         return denylist_addresses;
     }
 
-    private DataTransitConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static DataTransitConfig newConfig(File configPointer, String template) {
-        return new DataTransitConfig(configPointer, template);
+    public DataTransitConfig(File configPointer) {
+        super(configPointer);
     }
 
     @SuppressWarnings("unchecked")

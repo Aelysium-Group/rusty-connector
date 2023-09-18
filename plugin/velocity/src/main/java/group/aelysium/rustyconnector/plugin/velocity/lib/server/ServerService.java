@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
+import group.aelysium.rustyconnector.core.lib.lang.GateKey;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;

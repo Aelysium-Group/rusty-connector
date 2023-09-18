@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.lang_messaging;
+package group.aelysium.rustyconnector.core.lib.lang;
 
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;

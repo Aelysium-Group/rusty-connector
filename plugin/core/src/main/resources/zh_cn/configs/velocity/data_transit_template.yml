@@ -1,0 +1,97 @@
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#                                                                                                         #
+#                                 _____     ______     ______   ______                                    #
+#                                /\  __-.  /\  __ \   /\__  _\ /\  __ \                                   #
+#                                \ \ \/\ \ \ \  __ \  \/_/\ \/ \ \  __ \                                  #
+#                                 \ \____-  \ \_\ \_\    \ \_\  \ \_\ \_\                                 #
+#                                  \/____/   \/_/\/_/     \/_/   \/_/\/_/                                 #
+#                   ______   ______     ______     __   __     ______     __     ______                   #
+#                  /\__  _\ /\  == \   /\  __ \   /\ "-.\ \   /\  ___\   /\ \   /\__  _\                  #
+#                  \/_/\ \/ \ \  __<   \ \  __ \  \ \ \-.  \  \ \___  \  \ \ \  \/_/\ \/                  #
+#                     \ \_\  \ \_\ \_\  \ \_\ \_\  \ \_\\"\_\  \/\_____\  \ \_\    \ \_\                  #
+#                      \/_/   \/_/ /_/   \/_/\/_/   \/_/ \/_/   \/_____/   \/_/     \/_/                  #
+#                                                                                                         #
+#                                                                                                         #
+#                                         Welcome to Data Transit!                                        #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+#                    | Manage which messages you want to allow to speak to RustyConnector!                #
+#                    | Setup your message cache to control what data packets will be cached               #
+#                    | and how many to cache before old packets get thrown away!                          #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+
+#
+# Should Data Transit operate via an AES SecureTransit protocol?
+#
+secure-transit: true
+
+#
+# The max length that packets are allowed to be.
+# If a packet is over this value it will be thrown away.
+# The size below should work for just about everything that is sent by RustyConnector.
+# If you are defining larger addresses or names on your paper servers, you might want to increase this.
+#
+max-packet-length: 512
+
+
+#
+# The cache allows you to view messages after they've been received.
+# This is helpful for debugging issues and seeing what's happening under the hood.
+#
+cache:
+#
+# The number of packets that will be saved into memory at any time.
+# As new packets are received, old packets will get pushed out of the cache.
+#
+# You can view cached messages using the `/rc message` command.
+#
+    size: 100
+
+#
+# The packet types that should be ignored.
+# If a packet is of a type that is contained below, it will not be cached.
+#
+    ignored-types: []
+
+#
+# The packet statuses to ignore.
+# If a packet matches a status listed below, it will not be cached.
+#
+    ignored-statuses: []
+
+
+#
+# By listing IP addresses here. The plugin will NEVER accept packets if they don't contain one of these IP Addresses!
+# If you know exactly which IP Addresses you want to allow packets from. You can whitelist them here!
+#
+# VERY IMPORTANT: If you are getting packets over your redis network that you don't recognize:
+#                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
+#                 This feature only exists to give you a bit more flexibility in how strict your plugin can be.
+#
+whitelist:
+    enabled: false
+    addresses:
+      - "127.0.0.1"
+
+#
+# By listing IP addresses here. The plugin will NEVER accept packets containing one of these IP Addresses!
+#
+# NOTE: The denylist has precedence over the whitelist. If an IP is defined in both the whitelist AND the denylist
+#       it will not be accepted.
+#
+# VERY IMPORTANT: If you are getting packets over your redis network that you don't recognize:
+#                 YOU SHOULD RESET YOUR REDIS CREDENTIALS IMMEDIATELY!
+#                 This feature only exists to give you a bit more flexibility in how strict your plugin can be.
+#
+denylist:
+    enabled: false
+    addresses:
+      - "127.0.0.1"

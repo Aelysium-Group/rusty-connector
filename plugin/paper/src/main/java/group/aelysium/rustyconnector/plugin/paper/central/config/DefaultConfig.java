@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.central.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -9,9 +9,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 
 public class DefaultConfig extends YAML {
-
-    private static DefaultConfig config;
-
     private String messenger;
     private String server_name;
     private String server_address;
@@ -20,8 +17,8 @@ public class DefaultConfig extends YAML {
     private int server_playerCap_soft;
     private int server_playerCap_hard;
 
-    private DefaultConfig(File configPointer, String template) {
-        super(configPointer, template);
+    public DefaultConfig(File configPointer) {
+        super(configPointer);
     }
 
     public String getMessenger() {
@@ -49,30 +46,6 @@ public class DefaultConfig extends YAML {
 
     public int getServer_playerCap_hard() {
         return server_playerCap_hard;
-    }
-
-    /**
-     * Get the current config.
-     * @return The config.
-     */
-    public static DefaultConfig getConfig() {
-        return config;
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static DefaultConfig newConfig(File configPointer, String template) {
-        config = new DefaultConfig(configPointer, template);
-        return DefaultConfig.getConfig();
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        config = null;
     }
 
     public void register(int configVersion) throws IllegalStateException {

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
-import group.aelysium.rustyconnector.core.lib.lang_messaging.*;
+import group.aelysium.rustyconnector.core.lib.lang.*;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.central.config.LoggerConfig;
 import net.kyori.adventure.text.Component;

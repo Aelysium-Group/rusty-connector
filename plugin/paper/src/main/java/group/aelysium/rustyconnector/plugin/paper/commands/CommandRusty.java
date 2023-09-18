@@ -9,7 +9,7 @@ import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;

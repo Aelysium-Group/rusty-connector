@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -18,16 +18,8 @@ public class FamiliesConfig extends YAML {
     private List<String> staticF = new ArrayList<>();
     private String staticFamilyStorage = "";
 
-    private FamiliesConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static FamiliesConfig newConfig(File configPointer, String template) {
-        return new FamiliesConfig(configPointer, template);
+    public FamiliesConfig(File configPointer) {
+        super(configPointer);
     }
 
     public String rootFamilyName() {

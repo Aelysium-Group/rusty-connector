@@ -29,8 +29,8 @@ public class LoggerConfig extends YAML {
     private String consoleIcons_familyBalancing = "▲▼▲▼▲";
     private String consoleIcons_ping = "|>>>>";
 
-    private LoggerConfig(File configPointer, String template) {
-        super(configPointer, template);
+    private LoggerConfig(File configPointer) {
+        super(configPointer);
     }
 
     public boolean shouldSaveTrashedMessages() {
@@ -105,8 +105,8 @@ public class LoggerConfig extends YAML {
      * Create a new config for the proxy, this will delete the old config.
      * @return The newly created config.
      */
-    public static LoggerConfig newConfig(File configPointer, String template) {
-        config = new LoggerConfig(configPointer, template);
+    public static LoggerConfig newConfig(File configPointer) {
+        config = new LoggerConfig(configPointer);
         return config;
     }
 

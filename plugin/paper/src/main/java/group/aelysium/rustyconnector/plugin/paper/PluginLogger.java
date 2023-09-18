@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import group.aelysium.rustyconnector.core.lib.lang_messaging.LoggerGate;
+import group.aelysium.rustyconnector.core.lib.lang.LoggerGate;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;

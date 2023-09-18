@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.lang_messaging;
+package group.aelysium.rustyconnector.core.lib.lang;
 
 import java.util.HashMap;
 import java.util.Map;

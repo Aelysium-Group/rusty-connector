@@ -15,19 +15,8 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 public class ConnectorsConfig extends YAML {
-    private static ConnectorsConfig config;
-
-    private ConnectorsConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    public static ConnectorsConfig getConfig() {
-        return config;
-    }
-
-    public static ConnectorsConfig newConfig(File configPointer, String template) {
-        config = new ConnectorsConfig(configPointer, template);
-        return ConnectorsConfig.getConfig();
+    public ConnectorsConfig(File configPointer) {
+        super(configPointer);
     }
 
     @SuppressWarnings("unchecked")

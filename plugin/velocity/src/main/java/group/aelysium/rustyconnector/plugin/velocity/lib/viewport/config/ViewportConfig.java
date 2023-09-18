@@ -41,16 +41,8 @@ public class ViewportConfig extends YAML {
         return users;
     }
 
-    private ViewportConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static ViewportConfig newConfig(File configPointer, String template) {
-        return new ViewportConfig(configPointer, template);
+    public ViewportConfig(File configPointer) {
+        super(configPointer);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.plugin.paper.lib.bstats.Metrics;
 import org.bukkit.Bukkit;

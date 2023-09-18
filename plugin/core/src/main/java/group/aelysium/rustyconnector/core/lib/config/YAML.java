@@ -1,11 +1,14 @@
 package group.aelysium.rustyconnector.core.lib.config;
 
+import group.aelysium.rustyconnector.core.lib.lang.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -14,14 +17,12 @@ import java.util.List;
 
 public abstract class YAML {
     protected File configPointer;
-    protected String template;
     protected ConfigurationNode data;
 
     public ConfigurationNode getData() { return this.data; }
 
-    public YAML(File configPointer, String template) {
+    public YAML(File configPointer) {
         this.configPointer = configPointer;
-        this.template = template;
     }
     public String getName() {
         return this.configPointer.getName();
@@ -65,36 +66,46 @@ public abstract class YAML {
     /**
      * Generate and then load the yaml file.
      * If it already exists, just load it.
+     * This method also closes the passed {@link InputStream} once it's done.
      * @return `true` If the file successfully loaded. `false` otherwise.
      */
-    public boolean generate(List<Component> outputLog) {
+    public boolean generate(List<Component> outputLog, LangService lang, LangFileMappings.Mapping template) throws IOException {
         outputLog.add(Component.text("Building "+this.configPointer.getName()+"...", NamedTextColor.DARK_GRAY));
         if (!this.configPointer.exists()) {
             File parent = this.configPointer.getParentFile();
-            if (!parent.exists()) {
+            if (!parent.exists())
                 parent.mkdirs();
-            }
 
-            InputStream templateStream = getClass().getClassLoader().getResourceAsStream(this.template);
-            if (templateStream == null)
-                throw new RuntimeException("Unable to setup \"+this.configPointer.getName()+\". This config has no template !");
+            InputStream stream;
+            if(lang.isInline())
+                stream = YAML.getResource("en_us/"+template.path());
+            else
+                stream = new FileInputStream(lang.get(template));
 
             try {
-                Files.copy(templateStream, this.configPointer.toPath());
+                Files.copy(stream, this.configPointer.toPath());
             } catch (IOException e) {
-                throw new RuntimeException("Unable to setup "+this.configPointer.getName()+"! No further information.");
+                throw new RuntimeException("Unable to setup " + this.configPointer.getName() + "! No further information.");
             }
+
+            stream.close();
         }
 
         try {
             this.data = this.loadYAML(this.configPointer);
             if(this.data == null) return false;
             outputLog.add(Component.text("Finished building "+this.configPointer.getName(), NamedTextColor.GREEN));
+
             return true;
         } catch (Exception e) {
             outputLog.add(Component.text("Failed to build "+this.configPointer.getName(), NamedTextColor.RED));
+
             return false;
         }
+    }
+
+    public static InputStream getResource(String path) {
+        return YAML.class.getClassLoader().getResourceAsStream(path);
     }
 
     public ConfigurationNode loadYAML(File file) throws IOException {

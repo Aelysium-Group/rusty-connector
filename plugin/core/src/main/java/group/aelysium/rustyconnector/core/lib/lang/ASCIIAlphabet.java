@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.lang_messaging;
+package group.aelysium.rustyconnector.core.lib.lang;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static group.aelysium.rustyconnector.core.lib.lang_messaging.Lang.newlines;
+import static group.aelysium.rustyconnector.core.lib.lang.Lang.newlines;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 

@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.central.PluginAPI;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,7 +13,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.function.Function;
 
 public class Tinder extends PluginAPI<BukkitScheduler> {
@@ -83,6 +85,10 @@ public class Tinder extends PluginAPI<BukkitScheduler> {
     @Override
     public String dataFolder() {
         return plugin.getDataFolder().getPath();
+    }
+
+    public Path dataFolderPath() {
+        return plugin.getDataFolder().toPath();
     }
 
     /**

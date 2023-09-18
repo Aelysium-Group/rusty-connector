@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,8 +22,8 @@ public class WhitelistConfig extends YAML {
     private boolean strict = false;
     private boolean inverted = false;
 
-    private WhitelistConfig(File configPointer, String template) {
-        super(configPointer, template);
+    public WhitelistConfig(File configPointer) {
+        super(configPointer);
     }
     public boolean getUse_players() {
         return use_players;
@@ -53,16 +53,6 @@ public class WhitelistConfig extends YAML {
     }
     public boolean isInverted() {
         return inverted;
-    }
-
-    /**
-     * Add a whitelist config to the proxy.
-     * @param name The name of the whitelist family to save.
-     * @param configPointer The config file.
-     * @param template The path to the template config file.
-     */
-    public static WhitelistConfig newConfig(String name, File configPointer, String template) {
-        return new WhitelistConfig(configPointer, template);
     }
 
     @SuppressWarnings("unchecked")

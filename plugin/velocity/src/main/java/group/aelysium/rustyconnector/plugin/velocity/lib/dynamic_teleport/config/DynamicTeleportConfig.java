@@ -28,16 +28,8 @@ public class DynamicTeleportConfig extends YAML {
     private boolean hub_enabled = false;
     private List<String> hub_enabledFamilies = new ArrayList<>();
 
-    private DynamicTeleportConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static DynamicTeleportConfig newConfig(File configPointer, String template) {
-        return new DynamicTeleportConfig(configPointer, template);
+    public DynamicTeleportConfig(File configPointer) {
+        super(configPointer);
     }
 
     public boolean isEnabled() {

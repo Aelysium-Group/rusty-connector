@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.central.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,16 +22,8 @@ public class DefaultConfig extends YAML {
     private Boolean services_loadBalancing_enabled = true;
     private Integer services_loadBalancing_interval = 20;
 
-    private DefaultConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static DefaultConfig newConfig(File configPointer, String template) {
-        return new DefaultConfig(configPointer, template);
+    public DefaultConfig(File configPointer) {
+        super(configPointer);
     }
 
     public String messenger() {
