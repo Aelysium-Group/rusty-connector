@@ -112,12 +112,11 @@
 - ### ✅ Automatically unregister frozen servers from the proxy
 - ### ✅ Set soft and hard player limits for servers
 - ### ✅ Built for stateful Minecraft servers!
-- ### ✅ Whitelist players based on permission, Username, UUID, or IP Address
-- ### ✅ Allow players to /tpa between servers
+- ### ✅ End-to-end packet encryption
 - ### ✅ Works with LuckPerms-Velocity
 - ### ✅ Works with Kubernetes
 - ### ✅ Works with Folia
-- ### ❌ Can't give you a hug
+- ### ❌ Can give you a hug
 ---
 # 🎨 Statistics
 
