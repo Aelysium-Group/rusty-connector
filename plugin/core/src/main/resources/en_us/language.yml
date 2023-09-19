@@ -153,7 +153,7 @@ velocity:
             message: "<yellow>Message <username></yellow>"
             invite_party: "<blue>Invite <username> to your party</blue>"
             offline: "<gray>Offline</gray>"
-            online: "<white>Offline</white>"
+            online: "<white>Online</white>"
             currently_playing: "<gray>Currently Playing: </gray><aqua><family_name></aqua>"
             add_friend: "<white>Add Friend</white>"
             send_friend_request: "<yellow><u>Click here to send a friend request.</u></yellow>"
