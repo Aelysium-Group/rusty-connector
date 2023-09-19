@@ -16,7 +16,7 @@ import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
-import group.aelysium.rustyconnector.core.lib.lang.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
@@ -121,15 +121,15 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static Flame fabricateNew(VelocityRustyConnector plugin) throws RuntimeException {
+    public static Flame fabricateNew(VelocityRustyConnector plugin, LangService langService) throws RuntimeException {
         PluginLogger logger = Tinder.get().logger();
         Initialize initialize = new Initialize();
+        logger.send(Component.text("Initializing 0%...", NamedTextColor.DARK_GRAY));
+
         try {
-            logger.send(Component.text("Initializing 0%...", NamedTextColor.DARK_GRAY));
             String version = initialize.version();
             int configVersion = initialize.configVersion();
             AESCryptor cryptor = initialize.privateKey();
-            LangService langService = initialize.lang();
 
             DefaultConfig defaultConfig = initialize.defaultConfig(langService);
             initialize.loggerConfig(langService);
@@ -173,7 +173,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             return flame;
         } catch (Exception e) {
             logger.send(Component.text("A fatal error occurred! Sending boot output and then the error!").color(NamedTextColor.RED));
-            logger.send(Lang.BORDER.color(NamedTextColor.RED));
+            logger.send(VelocityLang.BORDER.color(NamedTextColor.RED));
 
             initialize.getBootOutput().forEach(logger::send);
 
@@ -264,15 +264,6 @@ class Initialize {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public LangService lang() throws Exception {
-        RootLanguageConfig config = new RootLanguageConfig(new File(api.dataFolder(), "language.yml"));
-        if (!config.generate(bootOutput))
-            throw new IllegalStateException("Unable to load or create language.yml!");
-        config.register();
-
-        return LangService.resolveLanguageCode(config.getLanguage(), api.dataFolderPath());
     }
 
     public DefaultConfig defaultConfig(LangService lang) throws IOException {

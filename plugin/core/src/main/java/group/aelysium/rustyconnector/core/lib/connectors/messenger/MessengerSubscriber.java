@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheSer
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.core.lib.lang.GateKey;
+import group.aelysium.rustyconnector.core.lib.lang.log_gate.GateKey;
 import group.aelysium.rustyconnector.core.lib.packets.*;
 
 import java.util.Map;

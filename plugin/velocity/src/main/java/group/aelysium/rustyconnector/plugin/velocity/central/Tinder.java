@@ -5,11 +5,10 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.scheduler.Scheduler;
-import group.aelysium.rustyconnector.core.central.PluginAPI;
-import group.aelysium.rustyconnector.core.lib.lang.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
 
 import java.io.*;
@@ -18,7 +17,7 @@ import java.nio.file.Path;
 /**
  * The root api endpoint for the entire RustyConnector api.
  */
-public class Tinder extends PluginAPI<Scheduler> {
+public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Scheduler> {
     private static Tinder instance;
     public static Tinder get() {
         return instance;
@@ -29,14 +28,16 @@ public class Tinder extends PluginAPI<Scheduler> {
     private Flame flame;
     private final Path dataFolder;
     private final PluginLogger pluginLogger;
+    private final LangService lang;
 
-    private Tinder(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
+    private Tinder(VelocityRustyConnector plugin, ProxyServer server, PluginLogger logger, @DataDirectory Path dataFolder, LangService lang) {
         instance = this;
 
         this.plugin = plugin;
         this.server = server;
-        this.pluginLogger = new PluginLogger(logger);
+        this.pluginLogger = logger;
         this.dataFolder = dataFolder;
+        this.lang = lang;
     }
 
     /**
@@ -44,13 +45,8 @@ public class Tinder extends PluginAPI<Scheduler> {
      * @return A {@link Flame}.
      */
     public Flame ignite() throws RuntimeException {
-        try {
-            this.flame = Flame.fabricateNew(this.plugin);
-            return flame;
-        } catch (Exception e) {
-            this.logger().send(Lang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
-            throw new RuntimeException(e);
-        }
+        this.flame = Flame.fabricateNew(this.plugin, this.lang);
+        return flame;
     }
 
     @Override
@@ -73,18 +69,23 @@ public class Tinder extends PluginAPI<Scheduler> {
         return String.valueOf(this.dataFolder);
     }
 
-    public Path dataFolderPath() {
-        return this.dataFolder;
+    @Override
+    public LangService lang() {
+        return this.lang;
     }
 
     /**
      * Restarts the entire RustyConnector kernel by exhausting the current {@link Flame} and igniting a new one.
      */
     public void rekindle() {
-        this.flame.exhaust(this.plugin);
-        this.flame = null;
+        try {
+            this.flame.exhaust(this.plugin);
+            this.flame = null;
 
-        this.ignite();
+            this.ignite();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public CoreServiceHandler services() {
@@ -129,6 +130,18 @@ public class Tinder extends PluginAPI<Scheduler> {
      * Creates new {@link Tinder} based on the gathered resources.
      */
     public static Tinder gather(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
-        return new Tinder(plugin, server, logger, dataFolder);
+        try {
+            PluginLogger pluginLogger = new PluginLogger(logger);
+            RootLanguageConfig config = new RootLanguageConfig(new File(String.valueOf(dataFolder), "language.yml"));
+            if (!config.generate(pluginLogger))
+                throw new IllegalStateException("Unable to load or create language.yml!");
+            config.register();
+
+            LangService langService = LangService.resolveLanguageCode(config.getLanguage(), dataFolder);
+
+            return new Tinder(plugin, server, pluginLogger, dataFolder, langService);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

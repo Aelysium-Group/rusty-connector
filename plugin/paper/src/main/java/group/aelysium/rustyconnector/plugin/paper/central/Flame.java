@@ -8,7 +8,8 @@ import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConn
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.core.lib.lang.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
@@ -89,33 +90,36 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static Flame fabricateNew(PaperRustyConnector plugin) throws Exception {
+    public static Flame fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
         Initialize initialize = new Initialize();
 
-        String version = initialize.version();
-        int configVersion = initialize.configVersion();
-        AESCryptor cryptor = initialize.privateKey();
-        LangService langService = initialize.lang();
-        DefaultConfig defaultConfig = initialize.defaultConfig(langService);
+        try {
+            String version = initialize.version();
+            int configVersion = initialize.configVersion();
+            AESCryptor cryptor = initialize.privateKey();
+            DefaultConfig defaultConfig = initialize.defaultConfig(langService);
 
-        MessageCacheService messageCacheService = initialize.messageCache();
-        Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService);
+            MessageCacheService messageCacheService = initialize.messageCache();
+            Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService);
 
-        initialize.serverInfo(defaultConfig);
-        initialize.messageCache();
-        PacketBuilderService packetBuilderService = initialize.packetBuilder();
-        initialize.dynamicTeleport();
-        initialize.magicLink(packetBuilderService);
+            initialize.serverInfo(defaultConfig);
+            initialize.messageCache();
+            PacketBuilderService packetBuilderService = initialize.packetBuilder();
+            initialize.dynamicTeleport();
+            initialize.magicLink(packetBuilderService);
 
-        Runnable connectRemotes = resolveConnectors.execute();
-        connectRemotes.run();
+            Runnable connectRemotes = resolveConnectors.execute();
+            connectRemotes.run();
 
-        initialize.events(plugin);
-        initialize.commands();
+            initialize.events(plugin);
+            initialize.commands();
 
-        Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.getMessenger());
+            Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.getMessenger());
 
-        return flame;
+            return flame;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
@@ -147,15 +151,6 @@ class Initialize {
 
     public void commands() {
         CommandRusty.create(api.commandManager());
-    }
-
-    public LangService lang() throws Exception {
-        RootLanguageConfig config = new RootLanguageConfig(new File(api.dataFolder(), "language.yml"));
-        if (!config.generate(bootOutput))
-            throw new IllegalStateException("Unable to load or create language.yml!");
-        config.register();
-
-        return LangService.resolveLanguageCode(config.getLanguage(), api.dataFolderPath());
     }
 
     public String version() {

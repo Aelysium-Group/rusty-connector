@@ -12,6 +12,7 @@ dependencies {
     implementation "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
     implementation "javax.websocket:javax.websocket-api:${project.javax_websocket_version}"
     implementation "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
+    implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
 
     // Dev only
     shadow "net.kyori:adventure-api:${project.adventure_version}"

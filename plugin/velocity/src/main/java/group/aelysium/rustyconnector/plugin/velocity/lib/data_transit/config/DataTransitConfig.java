@@ -68,13 +68,13 @@ public class DataTransitConfig extends YAML {
 
         this.maxPacketLength = this.getNode(this.data,"max-packet-length",Integer.class);
         if(this.maxPacketLength < 384) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, "Max message length is to small to be effective! " + this.maxPacketLength + " < 384. Max message length set to 384.", NamedTextColor.YELLOW);
+            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Max message length is to small to be effective! " + this.maxPacketLength + " < 384. Max message length set to 384.", NamedTextColor.YELLOW);
             this.maxPacketLength = 384;
         }
 
         this.cache_size = this.getNode(this.data,"cache.size",Integer.class);
         if(this.cache_size > 500) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, "Message cache size is to large! " + this.cache_size + " > 500. Message cache size set to 500.", NamedTextColor.YELLOW);
+            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Message cache size is to large! " + this.cache_size + " > 500. Message cache size set to 500.", NamedTextColor.YELLOW);
             this.cache_size = 500;
         }
         try {

@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -72,7 +73,7 @@ public class DefaultConfig extends YAML {
         this.server_playerCap_soft = this.getNode(this.data,"server.player-cap.soft",Integer.class);
         this.server_playerCap_hard = this.getNode(this.data,"server.player-cap.hard",Integer.class);
         if(this.server_playerCap_soft >= this.server_playerCap_hard)
-            Lang.BOXED_MESSAGE_COLORED.send(logger, "Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode.", NamedTextColor.YELLOW);
+            PaperLang.BOXED_MESSAGE_COLORED.send(logger, "Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode.", NamedTextColor.YELLOW);
 
 
         // Redis

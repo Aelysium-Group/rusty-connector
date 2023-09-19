@@ -35,7 +35,12 @@ public class VelocityRustyConnector {
         if(!Tinder.get().velocityServer().getConfiguration().isOnlineMode())
             Tinder.get().logger().log("Offline mode detected");
 
-        this.tinder.ignite();
+        try {
+            this.tinder.ignite();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
         try {
             metricsFactory.make(this, 17972);
@@ -44,7 +49,7 @@ public class VelocityRustyConnector {
             Tinder.get().logger().log("Failed to register to bstats!");
         }
 
-        Lang.WORDMARK_RUSTY_CONNECTOR.send(Tinder.get().logger(), Tinder.get().flame().version());
+        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(Tinder.get().logger(), Tinder.get().flame().version());
 
         if(!Tinder.get().velocityServer().getConfiguration().isOnlineMode())
             Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!", NamedTextColor.RED));

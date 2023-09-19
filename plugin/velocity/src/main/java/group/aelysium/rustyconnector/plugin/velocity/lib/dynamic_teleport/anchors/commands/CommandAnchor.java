@@ -39,7 +39,7 @@ public class CommandAnchor {
                         return Command.SINGLE_SUCCESS;
                     }
                     if(!Permission.validate(player, "rustyconnector.command.anchor", "rustyconnector.command.anchor."+anchor)) {
-                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                        player.sendMessage(VelocityLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 

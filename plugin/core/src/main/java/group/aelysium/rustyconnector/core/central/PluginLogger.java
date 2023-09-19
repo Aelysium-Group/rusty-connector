@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.central;
 
-import group.aelysium.rustyconnector.core.lib.lang.LoggerGate;
+import group.aelysium.rustyconnector.core.lib.lang.log_gate.LoggerGate;
 import net.kyori.adventure.text.Component;
 
 public interface PluginLogger {

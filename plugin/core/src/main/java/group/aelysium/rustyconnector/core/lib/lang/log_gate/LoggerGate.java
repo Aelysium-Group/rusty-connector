@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.lang;
+package group.aelysium.rustyconnector.core.lib.lang.log_gate;
 
 import java.util.HashMap;
 import java.util.Map;

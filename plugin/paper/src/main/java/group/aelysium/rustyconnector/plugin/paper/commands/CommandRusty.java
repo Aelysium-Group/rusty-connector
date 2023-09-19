@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheSer
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -71,14 +71,14 @@ public final class CommandRusty {
 
                                         List<CacheableMessage> messagesPage = messageCacheService.fetchMessagesPage(1);
 
-                                        Lang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
+                                        PaperLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
                                         return;
                                     }
 
                                     List<CacheableMessage> messages = messageCacheService.messages();
 
-                                    Lang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
+                                    PaperLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
                                 } catch (Exception e) {
                                     logger.log("There was an issue getting those messages!\n"+e.getMessage());

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.lang;
+package group.aelysium.rustyconnector.core.lib.lang.log_gate;
 
 public enum GateKey {
     SAVE_TRASH_MESSAGES,

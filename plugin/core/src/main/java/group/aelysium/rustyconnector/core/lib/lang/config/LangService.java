@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.core.lib.lang.config;
 
-import group.aelysium.rustyconnector.core.lib.lang.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.resolver.LanguageResolver;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.io.*;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -12,11 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 public class LangService extends Service {
+    protected LanguageResolver resolver;
     protected String code;
     protected Map<LangFileMappings.Mapping, File> files;
     protected LangService(String languageCode, Map<LangFileMappings.Mapping, File> files) {
         this.code = languageCode;
         this.files = files;
+        this.resolver = LanguageResolver.create(this, this.code.equals("en_us"));
     }
 
     /**
@@ -25,6 +27,10 @@ public class LangService extends Service {
     public String code() { return this.code; }
 
     public boolean isInline() { return this.code.equals("en_us"); }
+
+    public LanguageResolver resolver() {
+        return this.resolver;
+    }
 
     /**
      * Fetches a file from the Lang file that this {@link LangService} is pointing to.

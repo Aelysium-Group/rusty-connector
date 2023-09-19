@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
-import group.aelysium.rustyconnector.core.lib.lang.GateKey;
+import group.aelysium.rustyconnector.core.lib.lang.log_gate.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;

@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static group.aelysium.rustyconnector.core.lib.lang.Lang.newlines;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.JoinConfiguration.newlines;
 
 public interface ASCIIAlphabet {
     int font_size = 6;
