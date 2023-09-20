@@ -4,9 +4,9 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
@@ -31,8 +31,8 @@ public class PartyService extends Service {
     }
 
     public void initCommand() {
-        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
-        VelocityAPI.get().logger().send(Component.text("Building party service commands...", NamedTextColor.DARK_GRAY));
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        Tinder.get().logger().send(Component.text("Building party service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("party"))
             try {
@@ -41,12 +41,12 @@ public class PartyService extends Service {
                         CommandParty.create()
                 );
 
-                VelocityAPI.get().logger().send(Component.text(" | Registered: /party", NamedTextColor.YELLOW));
+                Tinder.get().logger().send(Component.text(" | Registered: /party", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-        VelocityAPI.get().logger().send(Component.text("Finished building party service commands.", NamedTextColor.GREEN));
+        Tinder.get().logger().send(Component.text("Finished building party service commands.", NamedTextColor.GREEN));
     }
 
     public void queueConnector(Runnable runnable) {
@@ -84,7 +84,7 @@ public class PartyService extends Service {
     }
 
     public PartyInvite invitePlayer(Party party, Player sender, Player target) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
         if(party.leader() != sender && this.settings.onlyLeaderCanInvite)
             throw new IllegalStateException("Hey! Only the party leader can invite other players!");
@@ -133,6 +133,9 @@ public class PartyService extends Service {
         this.parties.clear();
         this.invites.clear();
         this.connector.shutdown();
+
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        commandManager.unregister("party");
     }
 
     public record PartySettings(

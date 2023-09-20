@@ -6,11 +6,10 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import group.aelysium.rustyconnector.core.lib.exception.DuplicateLifecycleException;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityLifecycle;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,37 +19,44 @@ import java.nio.file.Path;
 
 public class VelocityRustyConnector {
     private final Metrics.Factory metricsFactory;
-    private static VelocityLifecycle lifecycle;
-    public static VelocityLifecycle lifecycle() {
-        return lifecycle;
-    }
+    private final Tinder tinder;
 
     @Inject
     public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder, Metrics.Factory metricsFactory) {
-        new VelocityAPI(this, server, logger, dataFolder);
-        lifecycle = new VelocityLifecycle();
+        this.tinder = Tinder.gather(this, server, logger, dataFolder);
+
         this.metricsFactory = metricsFactory;
     }
 
     @Subscribe
-    public void onLoad(ProxyInitializeEvent event) throws DuplicateLifecycleException {
-        if(!VelocityAPI.get().velocityServer().getConfiguration().isOnlineMode())
-            VelocityAPI.get().logger().log("Offline mode detected");
+    public void onLoad(ProxyInitializeEvent event) {
+        Tinder.get().logger().log("Initializing RustyConnector...");
 
-        if(!lifecycle.start()) lifecycle.stop();
+        if(!Tinder.get().velocityServer().getConfiguration().isOnlineMode())
+            Tinder.get().logger().log("Offline mode detected");
+
         try {
-            metricsFactory.make(this, 17972);
-            VelocityAPI.get().logger().log("Registered to bstats!");
+            this.tinder.ignite();
         } catch (Exception e) {
-            VelocityAPI.get().logger().log("Failed to register to bstats!");
+            e.printStackTrace();
+            return;
         }
 
-        if(!VelocityAPI.get().velocityServer().getConfiguration().isOnlineMode())
-            VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!"), NamedTextColor.RED));
+        try {
+            metricsFactory.make(this, 17972);
+            Tinder.get().logger().log("Registered to bstats!");
+        } catch (Exception e) {
+            Tinder.get().logger().log("Failed to register to bstats!");
+        }
+
+        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(Tinder.get().logger(), Tinder.get().flame().version());
+
+        if(!Tinder.get().velocityServer().getConfiguration().isOnlineMode())
+            Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!", NamedTextColor.RED));
 
         // Velocity requires that at least one server is always defined in velocity.toml
-        if(VelocityAPI.get().velocityServer().getConfiguration().getServers().size() > 1)
-            VelocityAPI.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(
+        if(Tinder.get().velocityServer().getConfiguration().getServers().size() > 1)
+            Tinder.get().logger().send(VelocityLang.BOXED_COMPONENT_COLORED.build(
                     Component.join(
                             JoinConfiguration.newlines(),
                             Component.text("Your network is identified as having multiple, pre-defined, non-RC servers, in it!"),
@@ -62,9 +68,9 @@ public class VelocityRustyConnector {
     @Subscribe
     public void onUnload(ProxyShutdownEvent event) {
         try {
-            lifecycle.stop();
+            this.tinder.flame().exhaust(this);
         } catch (Exception e) {
-            VelocityAPI.get().logger().log("RustyConnector: " + e.getMessage());
+            Tinder.get().logger().log("RustyConnector: " + e.getMessage());
         }
     }
 }

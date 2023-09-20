@@ -9,11 +9,11 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -23,7 +23,7 @@ import java.util.List;
 
 public final class CommandFM {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         FriendsService friendsService = api.services().friendsService().orElse(null);
@@ -42,7 +42,7 @@ public final class CommandFM {
                     }
 
                     if(!Permission.validate(player, "rustyconnector.command.fm")) {
-                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                        player.sendMessage(VelocityLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
@@ -53,7 +53,7 @@ public final class CommandFM {
                             if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                             try {
-                                List<FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
+                                List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -74,7 +74,7 @@ public final class CommandFM {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.fm")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -87,7 +87,7 @@ public final class CommandFM {
                                 }
 
                                 if(!Permission.validate(player, "rustyconnector.command.fm")) {
-                                    player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                    player.sendMessage(VelocityLang.NO_PERMISSION);
                                     return Command.SINGLE_SUCCESS;
                                 }
 
@@ -98,7 +98,10 @@ public final class CommandFM {
                                     return closeMessage(player, Component.text(username + " doesn't seem to exist!", NamedTextColor.RED));
                                 if(player.equals(targetPlayer))
                                     return closeMessage(player, Component.text("You can't message yourself!", NamedTextColor.RED));
-                                if(!friendsService.areFriends(player, targetPlayer))
+                                if(!friendsService.services().dataEnclave().areFriends(
+                                        PlayerDataEnclave.FakePlayer.from(player),
+                                        PlayerDataEnclave.FakePlayer.from(targetPlayer)
+                                ))
                                     return closeMessage(player, Component.text("You can only send messages to your friends!", NamedTextColor.RED));
 
                                 String message = context.getArgument("message", String.class);

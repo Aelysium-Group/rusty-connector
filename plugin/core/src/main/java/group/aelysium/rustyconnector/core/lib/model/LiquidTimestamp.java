@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.core.lib.model;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
@@ -10,7 +11,7 @@ public class LiquidTimestamp implements Comparable<LiquidTimestamp> {
     protected TimeUnit unit;
     protected int value;
 
-    public LiquidTimestamp(int value, TimeUnit unit) {
+    private LiquidTimestamp(int value, TimeUnit unit) {
         this.value = value;
         this.unit = unit;
     }
@@ -58,7 +59,7 @@ public class LiquidTimestamp implements Comparable<LiquidTimestamp> {
 
     /**
      * Returns a unix timestamp set `value` number of `units` away from now.
-     * @return The Unix timestamp in milliseconds.
+     * @return The Unix timestamp in seconds.
      */
     public long epochFromNow() {
         if(this.unit() == null) return 0;
@@ -73,6 +74,22 @@ public class LiquidTimestamp implements Comparable<LiquidTimestamp> {
         return time * 1000;
     }
 
+    /**
+     * Returns a unix timestamp set `value` number of `units` before from now.
+     * @return The Unix timestamp in seconds.
+     */
+    public long epochBeforeNow() {
+        long time = Instant.now().getEpochSecond();
+        switch (this.unit) {
+            case DAYS -> time -= ((long) this.value * 24 * 60 * 60);
+            case HOURS -> time -= ((long) this.value * 60 * 60);
+            case MINUTES -> time -= ((long) this.value * 60);
+            case SECONDS -> time -= ((long) this.value);
+        }
+
+        return time * 1000;
+    }
+
     @Override
     public String toString() {
         return this.value + " " + this.unit.toString();
@@ -81,5 +98,9 @@ public class LiquidTimestamp implements Comparable<LiquidTimestamp> {
     @Override
     public int compareTo(@NotNull LiquidTimestamp o) {
         return Long.compare(this.epochFromNow(), o.epochFromNow());
+    }
+
+    public static LiquidTimestamp from(int value, TimeUnit unit) {
+        return new LiquidTimestamp(value, unit);
     }
 }

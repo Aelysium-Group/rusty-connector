@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import group.aelysium.rustyconnector.core.lib.lang_messaging.LoggerGate;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
+import group.aelysium.rustyconnector.core.lib.lang.log_gate.LoggerGate;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
@@ -58,6 +58,8 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
 
     @Override
     public void send(Component message) {
-        PaperAPI.get().paperServer().getConsoleSender().sendMessage(message);
+        try {
+            Tinder.get().paperServer().getConsoleSender().sendMessage(message);
+        } catch (Exception ignore) {}
     }
 }

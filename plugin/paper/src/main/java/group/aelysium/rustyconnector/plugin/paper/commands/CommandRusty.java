@@ -2,39 +2,45 @@ package group.aelysium.rustyconnector.plugin.paper.commands;
 
 import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
+import cloud.commandframework.arguments.StaticArgument;
 import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public final class CommandRusty {
     public static void create(PaperCommandManager<CommandSender> manager) {
-        manager.command(message(manager));
+        manager.command(messageList(manager));
+        manager.command(messageGet(manager));
         manager.command(send(manager));
     }
 
-    private static Command.Builder<CommandSender> message(PaperCommandManager<CommandSender> manager) {
-        PaperAPI api = PaperAPI.get();
+    private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager) {
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
         return builder.literal("message")
                 .senderType(ConsoleCommandSender.class)
+                .argument(StaticArgument.of("get"))
                 .argument(LongArgument.of("snowflake"), ArgumentDescription.of("Message ID"))
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                             try {
                                 final Long snowflake = commandContext.get("snowflake");
 
-                                MessageCacheService messageCacheService = api.services().messageCacheService();
+                                MessageCacheService messageCacheService = api.services().messageCache();
 
                                 CacheableMessage message = messageCacheService.findMessage(snowflake);
 
@@ -47,8 +53,46 @@ public final class CommandRusty {
                         }).execute());
     }
 
+    private static Command.Builder<CommandSender> messageList(PaperCommandManager<CommandSender> manager) {
+        Tinder api = Tinder.get();
+        PluginLogger logger = api.logger();
+        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
+
+        return builder.literal("message")
+                .senderType(ConsoleCommandSender.class)
+                .argument(StaticArgument.of("list"))
+                .handler(context -> manager.taskRecipe().begin(context)
+                        .asynchronous(commandContext -> {
+                            try {
+                                MessageCacheService messageCacheService = api.services().messageCache();
+                                try {
+                                    if(messageCacheService.size() > 10) {
+                                        int numberOfPages = Math.floorDiv(messageCacheService.size(),10) + 1;
+
+                                        List<CacheableMessage> messagesPage = messageCacheService.fetchMessagesPage(1);
+
+                                        PaperLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
+
+                                        return;
+                                    }
+
+                                    List<CacheableMessage> messages = messageCacheService.messages();
+
+                                    PaperLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
+
+                                } catch (Exception e) {
+                                    logger.log("There was an issue getting those messages!\n"+e.getMessage());
+                                }
+                            } catch (NullPointerException e) {
+                                logger.log("That message either doesn't exist or is no-longer available in the cache!");
+                            } catch (Exception e) {
+                                logger.log("An error stopped us from getting that message!", e);
+                            }
+                        }).execute());
+    }
+
     private static Command.Builder<CommandSender> send(PaperCommandManager<CommandSender> manager) {
-        PaperAPI api = PaperAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
@@ -62,7 +106,7 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                api.services().redisMessagerService().sendToOtherFamily(player,familyName);
+                                api.services().packetBuilder().sendToOtherFamily(player,familyName);
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {

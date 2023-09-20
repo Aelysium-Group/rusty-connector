@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,13 +14,14 @@ import java.util.Vector;
 public class Party {
     private final Vector<Player> players;
     private final int maxSize;
-    private WeakReference<Player> leader;
+    private Player leader;
     private WeakReference<PlayerServer> server;
 
     public Party(int maxSize, Player host, PlayerServer server) {
         this.players = new Vector<>(maxSize);
         this.maxSize = maxSize;
-        this.setLeader(host);
+        this.leader = host;
+        this.players.add(host);
         this.server = new WeakReference<>(server);
     }
 
@@ -35,29 +36,24 @@ public class Party {
 
     public synchronized Player leader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
-        if(this.leader.get() == null) {
-            Player newLeader = players.lastElement();
-            this.setLeader(newLeader);
-            this.broadcast(Component.text("The old party leader is no-longer available! "+newLeader.getUsername()+" is the new leader!", NamedTextColor.YELLOW));
+        if(!this.players.contains(this.leader)) {
+            this.newRandomLeader();
+            this.broadcast(Component.text("The old party leader is no-longer available! "+this.leader.getUsername()+" is the new leader!", NamedTextColor.YELLOW));
         }
 
-        return this.leader.get();
+        return this.leader;
     }
 
-    /**
-     * Assign a new leader to the party.
-     * If `null` is passed, this will find a random player and make them leader.
-     * @param player The player to make leader. Or `null` to assign a random member.
-     */
     public void setLeader(Player player) {
-        if(player == null) {
-            this.leader.clear();
-            leader();
-        }
-
         if(!this.players.contains(player))
-            this.players.add(player);
-        this.leader = new WeakReference<>(player);
+            throw new IllegalStateException(player.getUsername() + " isn't in this party, they can't be made leader!");
+        this.leader = player;
+    }
+
+    public void newRandomLeader() {
+        if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
+
+        this.leader = this.players.firstElement();
     }
 
     public boolean isEmpty() {
@@ -82,12 +78,20 @@ public class Party {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
         this.players.remove(player);
 
+        if(this.isEmpty()) { // This was the last member of the party
+            Tinder.get().services().partyService().orElseThrow().disband(this);
+            return;
+        }
+
         this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
 
-        if(player.equals(leader())) setLeader(null);
+        if(player.equals(this.leader)) {
+            newRandomLeader();
+            this.broadcast(Component.text(this.leader.getUsername()+" is the new party leader!", NamedTextColor.YELLOW));
+        }
 
         if(this.isEmpty())
-            VelocityAPI.get().services().partyService().orElseThrow().disband(this);
+            Tinder.get().services().partyService().orElseThrow().disband(this);
     }
 
     public void broadcast(Component message) {
@@ -100,16 +104,15 @@ public class Party {
 
     public void decompose() {
         this.players.clear();
-        this.leader.clear();
         this.leader = null;
     }
 
     public synchronized void connect(PlayerServer server) {
-        SwitchPower switchPower = VelocityAPI.get().services().partyService().orElseThrow().settings().switchPower();
+        SwitchPower switchPower = Tinder.get().services().partyService().orElseThrow().settings().switchPower();
         this.setServer(server);
         Vector<Player> kickedPlayers = new Vector<>();
 
-        VelocityAPI.get().services().partyService().orElseThrow().queueConnector(() -> {
+        Tinder.get().services().partyService().orElseThrow().queueConnector(() -> {
             for (Player player : this.players)
                 try {
                     switch (switchPower) {
@@ -143,7 +146,7 @@ public class Party {
     @Override
     public String toString() {
         try {
-            return "<Party players=" + this.players.size() + " leader=" + Objects.requireNonNull(this.leader.get()).getUsername() + ">";
+            return "<Party players=" + this.players.size() + " leader=" + this.leader.getUsername() + ">";
         } catch (Exception ignore) {
             return "<Party players=" + this.players.size() + " leader=null>";
         }

@@ -1,32 +1,19 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
-import java.io.SyncFailedException;
-import java.util.UUID;
+public class PlayerService extends Service {
+    protected PlayerDataEnclave dataEnclave;
 
-public class PlayerService extends ServiceableService<PlayerServiceHandler> {
-
-    public PlayerService(PlayerMySQLService playerMySQLService) {
-        super(new PlayerServiceHandler());
-        this.services.add(new PlayerDataEnclaveService(playerMySQLService));
+    public PlayerService(MySQLConnector connector) throws Exception {
+        this.dataEnclave = new PlayerDataEnclave(connector);
     }
 
-    public FakePlayer findPlayer(UUID uuid) throws SyncFailedException {
-        return this.services.dataEnclave().findPlayer(uuid);
-    }
-
-    public void cachePlayer(Player player) {
-        this.services.dataEnclave().cachePlayer(player);
-    }
-
-    public void savePlayer(Player player) {
-        this.services.dataEnclave().savePlayer(player);
-    }
+    public PlayerDataEnclave dataEnclave() { return this.dataEnclave; }
 
     @Override
     public void kill() {
-        this.services.killAll();
+        this.dataEnclave.kill();
     }
 }

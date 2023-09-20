@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.data_transit;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
@@ -35,11 +35,11 @@ public class DataTransitService extends Service {
      * @param message The message to check.
      * @throws BlockedMessageException If the message should be blocked.
      */
-    public void validate(GenericRedisMessage message) throws BlockedMessageException, NoOutputException {
-        if(message.messageVersion() > GenericRedisMessage.protocolVersion())
-            throw new BlockedMessageException("The incoming message contained a protocol version greater than expected! " + message.messageVersion() + " > " + GenericRedisMessage.protocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
-        if(message.messageVersion() < GenericRedisMessage.protocolVersion())
-            throw new BlockedMessageException("The incoming message contained a protocol version that was less than expected! " + message.messageVersion() + " < " + GenericRedisMessage.protocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
+    public void validate(GenericPacket message) throws BlockedMessageException, NoOutputException {
+        if(message.messageVersion() > GenericPacket.protocolVersion())
+            throw new BlockedMessageException("The incoming message contained a protocol version greater than expected! " + message.messageVersion() + " > " + GenericPacket.protocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
+        if(message.messageVersion() < GenericPacket.protocolVersion())
+            throw new BlockedMessageException("The incoming message contained a protocol version that was less than expected! " + message.messageVersion() + " < " + GenericPacket.protocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
 
         if(message.toString().length() > this.maxLength)
             throw new BlockedMessageException("The message is to long!");

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.http;
 
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -23,7 +23,7 @@ public class SimpleRequest {
         connection.setRequestProperty("Accept", "application/json");
         connection.setRequestProperty("Content-Length", Integer.toString(contents.length()));
         connection.setUseCaches(false);
-        VelocityAPI.get().logger().log(contents);
+        Tinder.get().logger().log(contents);
 
         try (DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream())) {
             dataOutputStream.writeBytes(contents);
@@ -34,10 +34,10 @@ public class SimpleRequest {
         {
             String line;
             while ((line = bf.readLine()) != null) {
-                VelocityAPI.get().logger().log(line);
+                Tinder.get().logger().log(line);
             }
         }
-        VelocityAPI.get().logger().log(connection.getResponseMessage());
+        Tinder.get().logger().log(connection.getResponseMessage());
 
     }
 }

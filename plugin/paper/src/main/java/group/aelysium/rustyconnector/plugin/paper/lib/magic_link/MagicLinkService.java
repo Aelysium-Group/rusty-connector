@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.plugin.paper.lib.magic_link;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageServerPing;
+import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
-import group.aelysium.rustyconnector.plugin.paper.central.PaperAPI;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.RedisMessagerService;
+import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.plugin.paper.lib.services.PacketBuilderService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,22 +27,20 @@ public class MagicLinkService extends ClockService {
         upcomingPingDelay.set(delay);
     }
 
-    private void scheduleNextPing() {
-        RedisMessagerService service = PaperAPI.get().services().redisMessagerService();
-
+    private void scheduleNextPing(PacketBuilderService packetBuilderService) {
         this.scheduleDelayed(() -> {
             try {
-                service.pingProxy(RedisMessageServerPing.ConnectionIntent.CONNECT);
+                packetBuilderService.pingProxy(ServerPingPacket.ConnectionIntent.CONNECT);
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            MagicLinkService.this.scheduleNextPing();
+            MagicLinkService.this.scheduleNextPing(packetBuilderService);
         }, this.upcomingPingDelay.get());
     }
 
-    public void startHeartbeat() {
-        this.scheduleNextPing();
+    public void startHeartbeat(PacketBuilderService packetBuilderService) {
+        this.scheduleNextPing(packetBuilderService);
     }
 
     public enum Status {
@@ -52,12 +50,13 @@ public class MagicLinkService extends ClockService {
     }
 
     public void disconnect() {
-        RedisMessagerService service = PaperAPI.get().services().redisMessagerService();
-        service.pingProxy(RedisMessageServerPing.ConnectionIntent.DISCONNECT);
+        PacketBuilderService service = Tinder.get().services().packetBuilder();
+        service.pingProxy(ServerPingPacket.ConnectionIntent.DISCONNECT);
     }
 
     @Override
     public void kill() {
         super.kill();
+        this.disconnect();
     }
 }

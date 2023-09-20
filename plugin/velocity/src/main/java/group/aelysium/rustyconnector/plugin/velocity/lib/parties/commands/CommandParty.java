@@ -10,14 +10,14 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,7 +27,7 @@ import java.util.List;
 
 public final class CommandParty {
     public static BrigadierCommand create() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         // If this command class loads, then PartyService MUST be set.
@@ -43,7 +43,7 @@ public final class CommandParty {
                     }
 
                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                        player.sendMessage(VelocityLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
@@ -60,7 +60,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -96,7 +96,7 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
@@ -111,7 +111,7 @@ public final class CommandParty {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
@@ -144,7 +144,7 @@ public final class CommandParty {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
@@ -181,7 +181,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -207,7 +207,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -229,7 +229,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -249,7 +249,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -274,7 +274,7 @@ public final class CommandParty {
                                         }
 
                                         FriendsService friendsService = api.services().friendsService().orElseThrow();
-                                        List<FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
+                                        List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
                                             return builder.buildFuture();
@@ -299,7 +299,7 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
@@ -331,7 +331,10 @@ public final class CommandParty {
                                     } catch (Exception ignore) {}
                                     try {
                                         if (partyService.settings().friendsOnly())
-                                            if (!api.services().friendsService().orElseThrow().areFriends(player, targetPlayer))
+                                            if (!api.services().friendsService().orElseThrow().services().dataEnclave().areFriends(
+                                                    PlayerDataEnclave.FakePlayer.from(player),
+                                                    PlayerDataEnclave.FakePlayer.from(targetPlayer)
+                                            ))
                                                 return closeMessage(player, Component.text("You can only send invites to your friends!", NamedTextColor.RED));
                                     } catch (Exception ignore) {}
                                     if(targetPlayer.equals(player))
@@ -356,7 +359,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -392,7 +395,7 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
@@ -428,7 +431,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -464,7 +467,7 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
@@ -496,6 +499,8 @@ public final class CommandParty {
                                         });
 
                                         context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
+                                    } catch (IllegalStateException e) {
+                                        return closeMessage(player, Component.text(targetPlayer.getUsername() + " isn't in this party, they can't be made leader!", NamedTextColor.RED));
                                     } catch (Exception e) {
                                         return closeMessage(player, Component.text(username + "There was an issue doing that!", NamedTextColor.RED));
                                     }

@@ -112,30 +112,16 @@
 - ### ✅ Automatically unregister frozen servers from the proxy
 - ### ✅ Set soft and hard player limits for servers
 - ### ✅ Built for stateful Minecraft servers!
-- ### ✅ Whitelist players based on permission, Username, UUID, or IP Address
-- ### ✅ Allow players to /tpa between servers
+- ### ✅ End-to-end packet encryption
 - ### ✅ Works with LuckPerms-Velocity
 - ### ✅ Works with Kubernetes
 - ### ✅ Works with Folia
-- ### ❌ Can't give you a hug
+- ### ❌ Can give you a hug
 ---
 # 🎨 Statistics
 
 ## 🌌 Networks Served ([Click to view](https://bstats.org/plugin/velocity/RustyConnector/17972)):
 [![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)](https://bstats.org/signatures/velocity/RustyConnector.svg)
-## 🌌 Sub-Servers Served ([Click to view](https://bstats.org/plugin/bukkit/RustyConnector/17973)):
-[![RustyConnector bstats graph](https://bstats.org/signatures/bukkit/RustyConnector.svg)](https://bstats.org/signatures/bukkit/RustyConnector.svg)
----
-## 🛠 Incoming Features/Changes
-- [ ] Player parties (join your friend's party and follow them around the network as they connect to different families!) [__Under Development__]
-- [ ] Websocket as a backup for if Redis fails [__Under Research__]
-- [ ] Example RustyConnector Networks for Documentation Purposes [__Under Development__]
-- [ ] Kubernetes auto-scaling [__Under Research__]
-- [ ] RustyConnector API (May not come out for a while!)
-- [ ] Player routing based on client version (Low Priority)
-- [ ] Teleport players to specific coordinates on other servers (Low Priority)
-
-\*Checked boxes indicate that the feature has been added and is awaiting release in an official version. There is no promise on when these features may be added.
 
 ---
 

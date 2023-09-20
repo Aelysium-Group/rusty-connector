@@ -3,8 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.ancho
 import com.velocitypowered.api.command.CommandManager;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.config.DynamicTeleportConfig;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.commands.CommandAnchor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
@@ -22,11 +22,11 @@ public class AnchorService extends Service {
     }
 
     public void initCommands() {
-        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
-        VelocityAPI api = VelocityAPI.get();
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        VelocityAPI.get().logger().send(Component.text("Building anchor service commands...", NamedTextColor.DARK_GRAY));
+        Tinder.get().logger().send(Component.text("Building anchor service commands...", NamedTextColor.DARK_GRAY));
         this.anchors.forEach((name, family) -> {
             if(commandManager.hasCommand(name)) {
                 logger.send(Component.text("Issue initializing Family Anchors! A command called /"+name+" already exists! Please find another name for this anchor!", NamedTextColor.RED));
@@ -39,13 +39,13 @@ public class AnchorService extends Service {
                         CommandAnchor.create(name)
                 );
 
-                VelocityAPI.get().logger().send(Component.text(" | Registered: /"+name, NamedTextColor.YELLOW));
+                Tinder.get().logger().send(Component.text(" | Registered: /"+name, NamedTextColor.YELLOW));
             } catch (Exception e) {
                 logger.send(Component.text("Issue initializing Family Anchors! "+ e.getMessage(), NamedTextColor.RED));
             }
         });
 
-        VelocityAPI.get().logger().send(Component.text("Finished building anchor service commands.", NamedTextColor.GREEN));
+        Tinder.get().logger().send(Component.text("Finished building anchor service commands.", NamedTextColor.GREEN));
     }
 
     public Optional<BaseServerFamily> family(String anchor) {
@@ -60,7 +60,7 @@ public class AnchorService extends Service {
     }
 
     public static Optional<AnchorService> init(DynamicTeleportConfig config) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         FamilyService familyService = api.services().familyService();
 
@@ -88,6 +88,9 @@ public class AnchorService extends Service {
 
     @Override
     public void kill() {
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        this.anchors.forEach((name, family) -> commandManager.unregister(name));
+
         this.anchors.clear();
     }
 }

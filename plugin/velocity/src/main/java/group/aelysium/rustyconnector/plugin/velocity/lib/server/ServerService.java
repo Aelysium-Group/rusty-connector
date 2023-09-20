@@ -3,13 +3,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.GateKey;
+import group.aelysium.rustyconnector.core.lib.lang.log_gate.GateKey;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -44,7 +44,7 @@ public class ServerService extends Service {
      * @return A server or `null`
      */
     public PlayerServer search(ServerInfo serverInfo) {
-        for(BaseServerFamily family : VelocityAPI.get().services().familyService().dump()) {
+        for(BaseServerFamily family : Tinder.get().services().familyService().dump()) {
             PlayerServer server = family.findServer(serverInfo);
             if(server == null) continue;
 
@@ -58,7 +58,7 @@ public class ServerService extends Service {
     }
 
     public boolean contains(ServerInfo serverInfo) {
-        for(BaseServerFamily family : VelocityAPI.get().services().familyService().dump()) {
+        for(BaseServerFamily family : Tinder.get().services().familyService().dump()) {
             if(family.containsServer(serverInfo)) return true;
         }
         return false;
@@ -68,7 +68,7 @@ public class ServerService extends Service {
      * Registers fake servers into the proxy to help with testing systems.
      */
     public void registerFakeServers() {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         for (BaseServerFamily family : api.services().familyService().dump()) {
@@ -101,7 +101,7 @@ public class ServerService extends Service {
      * @return A RegisteredServer node.
      */
     public RegisteredServer registerServer(PlayerServer server, BaseServerFamily family) throws Exception {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         try {
@@ -137,7 +137,7 @@ public class ServerService extends Service {
      * @param removeFromFamily Should the server be removed from it's associated family?
      */
     public void unregisterServer(ServerInfo serverInfo, String familyName, Boolean removeFromFamily) throws Exception {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         try {
             PlayerServer server = this.search(serverInfo);
@@ -241,7 +241,7 @@ public class ServerService extends Service {
         }
 
         public PlayerServer build() {
-            this.initialTimeout = VelocityAPI.get().services().serverService().serverTimeout();
+            this.initialTimeout = Tinder.get().services().serverService().serverTimeout();
 
             return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
         }

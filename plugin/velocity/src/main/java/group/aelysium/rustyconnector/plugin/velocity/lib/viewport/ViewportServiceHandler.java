@@ -5,7 +5,6 @@ import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.AuthenticationService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.PrintingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.RequestResolverService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.ViewportMySQLService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.GatewayService;
 
 import java.util.Map;
@@ -18,9 +17,6 @@ public class ViewportServiceHandler extends group.aelysium.rustyconnector.core.l
         super();
     }
 
-    public ViewportMySQLService mySQLService() {
-        return this.find(ViewportMySQLService.class).orElseThrow();
-    }
     public PrintingService printingService() {
         return this.find(PrintingService.class).orElseThrow();
     }

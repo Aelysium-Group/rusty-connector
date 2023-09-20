@@ -7,9 +7,9 @@ import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -22,7 +22,7 @@ public class OnPlayerChangeServer {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerChangeServer(ServerConnectedEvent event) {
             return EventTask.async(() -> {
-                VelocityAPI api = VelocityAPI.get();
+                Tinder api = Tinder.get();
                 PluginLogger logger = api.logger();
 
                 try {
@@ -53,22 +53,9 @@ public class OnPlayerChangeServer {
                     }
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_SERVER, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_SERVER.build(player, oldServer, newServer));
-
-                    if(!isTheSameFamily) handleHomeServerCache(oldServer.family(), player);
                 } catch (Exception e) {
                     logger.log(e.getMessage());
                 }
             });
-    }
-
-    public void handleHomeServerCache(BaseServerFamily family, Player player) {
-        PluginLogger logger = VelocityAPI.get().logger();
-
-        try {
-            if (!(family instanceof StaticServerFamily)) return;
-            ((StaticServerFamily) family).uncacheHomeServer(player);
-        } catch (Exception e) {
-            logger.log(e.getMessage());
-        }
     }
 }

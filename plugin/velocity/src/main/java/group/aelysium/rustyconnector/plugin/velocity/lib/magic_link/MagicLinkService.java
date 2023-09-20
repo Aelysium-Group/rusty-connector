@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link;
 
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 
@@ -15,10 +14,7 @@ public class MagicLinkService extends ClockService {
         this.interval = interval;
     }
 
-    public void startHeartbeat() {
-        VelocityAPI api = VelocityAPI.get();
-        ServerService serverService = api.services().serverService();
-
+    public void startHeartbeat(ServerService serverService) {
         this.scheduleRecurring(() -> {
             try {
                 serverService.servers().forEach(serverReference -> {

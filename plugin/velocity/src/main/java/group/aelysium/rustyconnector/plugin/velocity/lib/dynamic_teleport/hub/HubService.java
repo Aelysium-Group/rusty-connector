@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub;
 
 import com.velocitypowered.api.command.CommandManager;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.commands.CommandHub;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -21,9 +21,9 @@ public class HubService extends Service {
     }
 
     public void initCommand() {
-        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
 
-        VelocityAPI.get().logger().send(Component.text("Building hub service commands...", NamedTextColor.DARK_GRAY));
+        Tinder.get().logger().send(Component.text("Building hub service commands...", NamedTextColor.DARK_GRAY));
         if(!commandManager.hasCommand("hub"))
             try {
                 commandManager.register(
@@ -31,16 +31,17 @@ public class HubService extends Service {
                         CommandHub.create()
                 );
 
-                VelocityAPI.get().logger().send(Component.text(" | Registered: /hub", NamedTextColor.YELLOW));
+                Tinder.get().logger().send(Component.text(" | Registered: /hub", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-        VelocityAPI.get().logger().send(Component.text("Finished building hub service commands.", NamedTextColor.GREEN));
+        Tinder.get().logger().send(Component.text("Finished building hub service commands.", NamedTextColor.GREEN));
     }
 
     @Override
     public void kill() {
-
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        commandManager.unregister("hub");
     }
 }

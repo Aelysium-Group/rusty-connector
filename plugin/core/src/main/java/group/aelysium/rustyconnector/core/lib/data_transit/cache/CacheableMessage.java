@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.data_transit.cache;
 
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageStatus;
+import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
 
 import java.util.Date;
 
@@ -9,9 +9,9 @@ public class CacheableMessage {
     private final Date date;
     private final String contents;
     private String reason;
-    private MessageStatus status;
+    private PacketStatus status;
 
-    public CacheableMessage(Long snowflake, String contents, MessageStatus status) {
+    public CacheableMessage(Long snowflake, String contents, PacketStatus status) {
         this.snowflake = snowflake;
         this.contents = contents;
         this.date = new Date();
@@ -30,7 +30,7 @@ public class CacheableMessage {
         return this.date;
     }
 
-    public MessageStatus getSentence() {
+    public PacketStatus getSentence() {
         return this.status;
     }
     public String getSentenceReason() {
@@ -42,7 +42,7 @@ public class CacheableMessage {
      * Will also unset `reason`.
      * @param status The new status to issue.
      */
-    public void sentenceMessage(MessageStatus status) {
+    public void sentenceMessage(PacketStatus status) {
         this.status = status;
         this.reason = null;
     }
@@ -52,7 +52,7 @@ public class CacheableMessage {
      * @param status The new status to issue.
      * @param reason The reason for the sentence.
      */
-    public void sentenceMessage(MessageStatus status, String reason) {
+    public void sentenceMessage(PacketStatus status, String reason) {
         this.status = status;
         this.reason = reason;
     }

@@ -101,7 +101,6 @@ $RECYCLE.BIN/
 
 target/
 build
-dist
 
 pom.xml.tag
 pom.xml.releaseBackup
@@ -119,5 +118,5 @@ buildNumber.properties
 # Common working directory
 run/
 
-
-node_modules
+node_modules/
+bin/

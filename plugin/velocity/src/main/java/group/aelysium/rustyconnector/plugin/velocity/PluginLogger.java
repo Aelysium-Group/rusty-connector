@@ -1,8 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
-import group.aelysium.rustyconnector.core.lib.lang_messaging.*;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.config.LoggerConfig;
+import group.aelysium.rustyconnector.core.lib.lang.log_gate.GateKey;
+import group.aelysium.rustyconnector.core.lib.lang.log_gate.LoggerGate;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.central.config.LoggerConfig;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
@@ -59,12 +60,13 @@ public class PluginLogger implements group.aelysium.rustyconnector.core.central.
     }
 
     public void send(Component message) {
-        VelocityAPI api = VelocityAPI.get();
-        api.velocityServer().getConsoleCommandSource().sendMessage(message);
+        try {
+            Tinder.get().velocityServer().getConsoleCommandSource().sendMessage(message);
+        } catch (Exception ignore) {}
     }
 
     public static void init(LoggerConfig config) {
-        PluginLogger pluginLogger = VelocityAPI.get().logger();
+        PluginLogger pluginLogger = Tinder.get().logger();
 
         LoggerGate gate = pluginLogger.loggerGate();
 

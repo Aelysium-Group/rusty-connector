@@ -2,15 +2,16 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.GenericRedisMessage;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.MessageOrigin;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.variants.RedisMessageCoordinateRequestQueue;
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
+import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
+import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang_messaging.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,8 +28,8 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         this.settings = settings;
     }
     public void initCommand() {
-        CommandManager commandManager = VelocityAPI.get().velocityServer().getCommandManager();
-        VelocityAPI.get().logger().send(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        Tinder.get().logger().send(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("tpa"))
             try {
@@ -37,12 +38,12 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
                         CommandTPA.create()
                 );
 
-                VelocityAPI.get().logger().send(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
+                Tinder.get().logger().send(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-        VelocityAPI.get().logger().send(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
+        Tinder.get().logger().send(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
     }
 
     public TPASettings settings() {
@@ -71,18 +72,19 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
      * @throws NullPointerException If the server doesn't exist in the family.
      */
     public void tpaSendPlayer(Player source, Player target, PlayerServer targetServer) {
-        VelocityAPI api = VelocityAPI.get();
+        Tinder api = Tinder.get();
 
-        RedisMessageCoordinateRequestQueue message = (RedisMessageCoordinateRequestQueue) new GenericRedisMessage.Builder()
-                .setType(RedisMessageType.COORDINATE_REQUEST_QUEUE)
-                .setOrigin(MessageOrigin.PROXY)
+        CoordinateRequestQueuePacket message = (CoordinateRequestQueuePacket) new GenericPacket.Builder()
+                .setType(PacketType.COORDINATE_REQUEST_QUEUE)
+                .setOrigin(PacketOrigin.PROXY)
                 .setAddress(targetServer.address())
-                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.TARGET_SERVER, targetServer.address())
-                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.TARGET_USERNAME, target.getUsername())
-                .setParameter(RedisMessageCoordinateRequestQueue.ValidParameters.SOURCE_USERNAME, source.getUsername())
+                .setParameter(CoordinateRequestQueuePacket.ValidParameters.TARGET_SERVER, targetServer.address())
+                .setParameter(CoordinateRequestQueuePacket.ValidParameters.TARGET_USERNAME, target.getUsername())
+                .setParameter(CoordinateRequestQueuePacket.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        api.services().redisService().publish(message);
+        MessengerConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
+        backboneMessenger.publish(message);
 
         try {
             PlayerServer senderServer = api.services().serverService().search(source.getCurrentServer().orElseThrow().getServerInfo());
@@ -102,5 +104,8 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         this.allTPAHandlers().forEach(TPAHandler::decompose);
         this.tpaHandlers.clear();
         super.kill();
+
+        CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        commandManager.unregister("tpa");
     }
 }
