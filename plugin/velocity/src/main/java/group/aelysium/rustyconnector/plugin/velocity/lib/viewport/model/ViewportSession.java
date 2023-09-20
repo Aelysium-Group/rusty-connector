@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model;
 
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.GatewayService;
 import org.eclipse.jetty.websocket.api.Session;
@@ -31,7 +31,7 @@ public class ViewportSession {
     }
 
     public void logout() {
-        ViewportService viewportService = VelocityAPI.get().services().viewportService().orElseThrow();
+        ViewportService viewportService = Tinder.get().services().viewportService().orElseThrow();
         viewportService.services().gatewayService().websocket().leave(this);
     }
 
@@ -42,7 +42,7 @@ public class ViewportSession {
      * @throws AuthenticationException If no {@link ViewportSession} matching the token could be found.
      */
     public static ViewportSession with(char[] token) throws AuthenticationException {
-        GatewayService gatewayService = VelocityAPI.get().services().viewportService().orElseThrow().services().gatewayService();
+        GatewayService gatewayService = Tinder.get().services().viewportService().orElseThrow().services().gatewayService();
         return gatewayService.resolveConnection(token);
     }
 
@@ -54,7 +54,7 @@ public class ViewportSession {
      * @return A {@link ViewportSession}.
      */
     public static ViewportSession from(SyncedUser user) {
-        GatewayService gatewayService = VelocityAPI.get().services().viewportService().orElseThrow().services().gatewayService();
+        GatewayService gatewayService = Tinder.get().services().viewportService().orElseThrow().services().gatewayService();
         return new ViewportSession(gatewayService.generateToken(), user);
     }
 }

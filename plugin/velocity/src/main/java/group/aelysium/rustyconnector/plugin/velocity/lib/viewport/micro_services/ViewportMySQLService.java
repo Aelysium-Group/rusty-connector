@@ -2,17 +2,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_service
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.SyncedUser;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class ViewportMySQLService extends MySQLService {
 

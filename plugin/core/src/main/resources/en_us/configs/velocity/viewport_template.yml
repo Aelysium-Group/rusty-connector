@@ -40,38 +40,51 @@
 enabled: false
 
 #
-# The location where the viewport module will listen for REST api requests.
+# The storage connector to use.
+#
+storage: "mysql"
+
+#
+# The location where the viewport website will be available to join.
 # You typically won't have to touch `address`.
 # Make sure you open up whatever port you define below.
 #
-rest:
+public:
+    hostname: "0.0.0.0"
+    port: 5575
+
+
+
+    ############################################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                             Session Duration                             #
+    #                                                                          #
+    #                       ---------------------------                        #
+    # | The amount of time a user is allowed to remain logged into             #
+    # | the dashboard while being afk.                                         #
+    #                                                                          #
+    # | Once a user's session expires, they will automatically be logged out.  #
+    #                                                                          #
+    # | Sessions will remain active as long as the user is active or until     #
+    # | the session is forcefully terminated.                                  #
+    #                                                                          #
+    # | This data value is a Liquid Timestamp. Read more here:                 #
+    # https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
+    #                                                                          #
+    #   NOTE: The Liquid Timestamp must be at least 30 minutes.
+    #                                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################################
+    afk-expiration: 1 HOUR
+
+#
+# The location where the viewport module will listen for api requests.
+# You typically won't have to touch `address`.
+# Make sure you open up whatever port you define below.
+#
+api:
     hostname: "0.0.0.0"
     port: 5576
-
-#
-# The location where the viewport module will listen for websocket requests.
-# You typically won't have to touch `address`.
-# Make sure you open up whatever port you define below.
-#
-websocket:
-    hostname: "0.0.0.0"
-    port: 5577
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                         Storage                          #
-#                                                          #
-#               ---------------------------                #
-# | Set the name of the storage connector you want         #
-# | to use.                                                #
-#                                                          #
-#  You can configure your connectors in: `connectors.yml`  #
-#                                                          #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-storage: "main-mysql"
 
 #
 # You can define starting users below.

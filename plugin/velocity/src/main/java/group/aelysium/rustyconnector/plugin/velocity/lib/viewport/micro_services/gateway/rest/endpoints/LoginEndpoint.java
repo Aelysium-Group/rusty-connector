@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_service
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.GatewayService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.rest.APIService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.APIResponse;
@@ -14,10 +14,9 @@ import spark.Response;
 import spark.Route;
 
 import javax.naming.AuthenticationException;
-import java.util.Optional;
 
 public class LoginEndpoint implements Route {
-    GatewayService gatewayService = VelocityAPI.get().services().viewportService().orElseThrow().services().gatewayService();
+    GatewayService gatewayService = Tinder.get().services().viewportService().orElseThrow().services().gatewayService();
 
     @Override
     public APIResponse handle(Request request, Response response) {

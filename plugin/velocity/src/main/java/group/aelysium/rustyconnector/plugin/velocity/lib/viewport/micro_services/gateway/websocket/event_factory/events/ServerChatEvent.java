@@ -3,10 +3,15 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_service
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket.event_factory.ViewportEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ServerChatEvent extends ViewportEvent {
     private final Player player;
@@ -26,6 +31,15 @@ public class ServerChatEvent extends ViewportEvent {
         object.add(ValidParameters.PLAYER_UUID, new JsonPrimitive(message));
 
         return object.toString();
+    }
+
+    public Optional<PlayerServer> server() {
+        ServerService serverService = Tinder.get().services().serverService();
+        try {
+            return Optional.of(serverService.search(this.player.getCurrentServer().orElseThrow().getServerInfo()));
+        } catch (Exception ignore) {
+            return Optional.empty();
+        }
     }
 
     public interface ValidParameters {

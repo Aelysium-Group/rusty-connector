@@ -1,8 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.core.lib.database.redis.messages.RedisMessageType;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket.event_factory.ViewportEvent;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket.event_factory.events.ServerChatEvent;

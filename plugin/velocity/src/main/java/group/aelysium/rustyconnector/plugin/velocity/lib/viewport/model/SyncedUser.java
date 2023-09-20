@@ -4,9 +4,6 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.core.lib.database.mysql.MySQLService;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
-import org.jetbrains.annotations.NotNull;
 
 import javax.naming.AuthenticationException;
 import java.sql.PreparedStatement;

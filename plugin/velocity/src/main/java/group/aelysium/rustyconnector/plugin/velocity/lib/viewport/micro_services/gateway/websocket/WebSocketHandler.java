@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket;
 
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.ViewportSession;
 import org.eclipse.jetty.websocket.api.Session;
@@ -17,7 +17,8 @@ public class WebSocketHandler {
 
     @OnWebSocketConnect
     public void onConnect(Session session) throws Exception {
-        ViewportService viewportService = VelocityAPI.get().services().viewportService().orElseThrow();
+        ViewportService viewportService = Tinder.get().services().viewportService().orElseThrow();
+        System.out.println("connection!");
         ViewportSession viewportSession = ViewportSession.with(session.getUpgradeRequest().getHeader("Authentication").toCharArray());
 
         if(viewportSession == null) {
@@ -29,6 +30,7 @@ public class WebSocketHandler {
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) throws AuthenticationException {
+        System.out.println("disconnection!");
         ViewportSession viewportSession = ViewportSession.with(session.getUpgradeRequest().getHeader("Authentication").toCharArray());
 
         if(viewportSession == null) return;

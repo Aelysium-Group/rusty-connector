@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_service
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.APIResponse;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.ViewportSession;
@@ -14,7 +14,7 @@ import spark.Route;
 import javax.naming.AuthenticationException;
 
 public class LogoutEndpoint implements Route {
-    ViewportService viewportService = VelocityAPI.get().services().viewportService().orElseThrow();
+    ViewportService viewportService = Tinder.get().services().viewportService().orElseThrow();
 
     @Override
     public APIResponse handle(Request request, Response response) throws Exception {

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.rest.endpoints;
 
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.plugin.velocity.central.VelocityAPI;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.GatewayService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket.WebSocketService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.model.APIResponse;
@@ -14,7 +14,7 @@ import javax.naming.AuthenticationException;
 import java.util.NoSuchElementException;
 
 public class SwitchChannelEndpoint implements Route {
-    GatewayService gatewayService = VelocityAPI.get().services().viewportService().orElseThrow().services().gatewayService();
+    GatewayService gatewayService = Tinder.get().services().viewportService().orElseThrow().services().gatewayService();
 
     @Override
     public APIResponse handle(Request request, Response response) {
