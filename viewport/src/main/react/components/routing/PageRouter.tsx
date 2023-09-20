@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 
 import { Routes, Route, useLocation } from "react-router-dom";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
-import { NetworkOverview } from '../pages/NetworkOverview';
-import { Family } from '../pages/family_specific/Family';
-import { Server } from '../pages/server/Server';
 import { Overview } from '../pages/overview/Overview';
+import { ServerList } from '../servers/ServerList';
+import { ServerChat } from '../chat/ServerChat';
 
 interface PageRouter {
 }
@@ -34,33 +33,13 @@ export const PageRouter = (props: PageRouter) => {
 
     const render = () => {
         return (
-            <TransitionGroup component={null}>
-                <CSSTransition
-                    key={location.pathname}
-                    classNames={transitionType}
-                    timeout={1000}>
-                    <Routes location={location}>
-                        <Route path='/'    element={<Overview />}>
-                            <Route path=':family_id'    element={<></>}>
-                                <Route path=':server_id'    element={<></>} />
-                            </Route>
-                        </Route>
-                        {/*
-                        <Route path='*'        element={<Page404 />}/>
-                        <Route path='login'    element={<LoginPage />}/>
-                        <Route path='you'      element={<OwnProfilePage />}/>
-                        <Route path='reports'  element={<Page404 />}>
-                            { canViewBugReports     && Navigator.get('bugReports'   ).routes() }
-                            { canViewPlayerReports  && Navigator.get('playerReports').routes() }
-                        </Route>
-                        { canViewPlayerProfiles     && Navigator.get('profiles'     ).routes() }
-                        { canViewPunishments        && Navigator.get('punishments'  ).routes() }
-                        { canViewServers            && Navigator.get('servers'      ).routes() }
-                        { canViewRoles              && Navigator.get('roles'        ).routes() }
-        */}
-                    </Routes>
-                </CSSTransition>
-            </TransitionGroup>
+            <Routes location={location}>
+                <Route path='/'    element={<Overview />}>
+                    <Route path=':family_id'    element={<ServerList />}>
+                        <Route path=':server_id'    element={<ServerChat />} />
+                    </Route>
+                </Route>
+            </Routes>
         );
     }
 

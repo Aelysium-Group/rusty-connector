@@ -2,7 +2,6 @@ import useMeasure, { RectReadOnly } from "react-use-measure";
 import { ViewportServices } from "../../../lib/services/ViewportServices";
 import { useEffect, useState } from "react";
 import { CursorHoverEvent, Radius } from "../events/CursorHoverEvent";
-import { Link, LinkProps } from "react-router-dom";
 const eventFactory = ViewportServices.get().eventFactory();
 
 const mouseHover = (bounds: RectReadOnly, hovered: boolean, borderRadius: Radius, callback: (hovered: boolean) => void) => {
@@ -18,10 +17,10 @@ type div = JSX.IntrinsicElements["div"] & {
 }
   
 const div = ({borderRadius, hoverClassNames, blurredClassNames, forceClosed, children, ...rest }: div) => {
-    const [ ref, bounds ] = useMeasure();
+    const [ ref, bounds ] = useMeasure({ offsetSize: true });
     const [ hovered, setHovered ] = useState(false);
 
-    useEffect(()=>{},[ bounds ]);
+    useEffect(()=>{},[ bounds, hovered ]);
 
     return (
         <div
@@ -42,10 +41,10 @@ type p = JSX.IntrinsicElements["p"] & {
 }
   
 const p = ({borderRadius, hoverClassNames, blurredClassNames, forceClosed, children, ...rest }: div) => {
-    const [ ref, bounds ] = useMeasure();
+    const [ ref, bounds ] = useMeasure({ offsetSize: true });
     const [ hovered, setHovered ] = useState(false);
 
-    useEffect(()=>{},[ bounds ]);
+    useEffect(()=>{},[ bounds, hovered ]);
 
     return (
         <p
@@ -66,10 +65,10 @@ type span = JSX.IntrinsicElements["p"] & {
 }
   
 const span = ({borderRadius, hoverClassNames, blurredClassNames, forceClosed, children, ...rest }: span) => {
-    const [ ref, bounds ] = useMeasure();
+    const [ ref, bounds ] = useMeasure({ offsetSize: true });
     const [ hovered, setHovered ] = useState(false);
 
-    useEffect(()=>{},[ bounds ]);
+    useEffect(()=>{},[ bounds, hovered ]);
 
     return (
         <span

@@ -1,7 +1,7 @@
 import { QueryMode, useScreen, useView } from "react-ui-breakpoints";
 import { Player } from "../../../lib/entities/Player";
 import { Players } from "./sub/Players";
-import { Servers } from "./sub/Servers";
+import { Servers } from "../../servers/ServersParticleVisualizer";
 import { Icon, IconName } from "../../icons/Icon";
 import { clickable } from "../../cursor/interactables/Clickable";
 import { useState } from 'react';

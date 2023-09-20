@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { QueryMode, useScreen, useView } from "react-ui-breakpoints";
 import { Coordinate } from "../../lib/modals/Coordinate";
 import { ViewportServices } from "../../lib/services/ViewportServices";
 import useMeasure, { RectReadOnly } from "react-use-measure";
@@ -9,11 +8,13 @@ import { ContextEvent } from "../context_menu/events/ContextEvent";
 import { ViewportEvent } from "../../lib/services/event_factory/ViewportEvent";
 import { EventListener } from "../../lib/services/event_factory/EventListener";
 import { CursorHoverEvent } from "./events/CursorHoverEvent";
+import useWindowDimensions from "../../lib/hooks/useWindowDimensions";
 
 const eventFactory = ViewportServices.get().eventFactory();
 
 export const Cursor = () => {
     const [ ref, bounds ] = useMeasure();
+    const windowD = useWindowDimensions();
     const [ mouseCoordinate, setMouseCoordinate ] = useState(new Coordinate(0, 0));
     const [ type, setType ]: [ CursorType, Dispatch<SetStateAction<CursorType>> ] = useState("default" as CursorType);
 
@@ -38,13 +39,19 @@ export const Cursor = () => {
     }
 
     const contextMenu = (event: ContextEvent) => {
-        if(event.open) setContextCoordinate(mouseCoordinate);
+        if(event.open) {
+            let coordinate = mouseCoordinate;
+            if((coordinate.x + 150) > windowD.width) coordinate.x = windowD.width - 150;
+            if(coordinate.x < 150) coordinate.x = 150;
+            if((coordinate.y + bounds.height) > windowD.height) coordinate.y = windowD.height - bounds.height;
+            setContextCoordinate(coordinate);
+        }
         setContext(event.open);
         setContextContent(event.children);
     }
 
     const cursorHover = (event: CursorHoverEvent) => {
-        if(event.entering) {
+        /*if(event.entering) {
             setHoveredCoordinate(event.boundingBox);
             setHovered(true);
             setHoveredRadius(event.radius);
@@ -52,7 +59,7 @@ export const Cursor = () => {
             setHoveredCoordinate({} as RectReadOnly);
             setHovered(false);
             setHoveredRadius("1rem");
-        }
+        }*/
     }
 
     const cursorType = (event: CursorChangeEvent) => {
@@ -121,7 +128,7 @@ export const Cursor = () => {
 
         const getVariant = () => {
             if(context) return "context";
-            if(hovered) return "hovered";
+            //if(hovered) return "hovered";
 
             return type;
         }
@@ -192,16 +199,21 @@ export const Cursor = () => {
     const noCursor = () => {
         const variants = {
             default: {
-                x: "-100px",
-                y: "-100px",
-                opacity: "0",
+                x: mouseCoordinate.x,
+                y: mouseCoordinate.y,
                 borderRadius: "1rem",
+                width: "0px",
+                height: "0px",
+                transition: {
+                    type: "spring",
+                    damping: 50,
+                    stiffness: 1000
+                }
             },
             context: {
                 x: contextCoordinate.x - 150, y: contextCoordinate.y - 25,
                 width: "300px", height: "auto",
                 borderRadius: "20px",
-                opacity: "1",
                 transition: {
                     type: "spring",
                     damping: 10,
@@ -212,18 +224,28 @@ export const Cursor = () => {
                 x: hoveredCoordinate.x, y: hoveredCoordinate.y,
                 width: hoveredCoordinate.width, height: hoveredCoordinate.height,
                 borderRadius: hoveredRadius,
-                opacity: "1",
                 transition: {
                     type: "spring",
-                    damping: 100,
-                    stiffness: 1000
+                    damping: 10,
+                    stiffness: 150
                 }
             },
+            text: {
+                x: mouseCoordinate.x + 10,
+                y: mouseCoordinate.y + 10,
+                width: "4px",
+                borderRadius: "1rem",
+                transition: {
+                    type: "spring",
+                    damping: 30,
+                    stiffness: 800
+                }
+            }
         };
 
         const getVariant = () => {
             if(context) return "context";
-            if(hovered) return "hovered";
+            //if(hovered) return "hovered";
 
             return type;
         }
@@ -264,7 +286,7 @@ export const Cursor = () => {
                     <motion.div
                         key={1}
                         ref={ref}
-                        className={`overflow-hidden fixed top-0 left-0 z-40 cursor-glass w-20px h-20px ${ context ? "bg-neutral-800/30 cursor-auto" : "pointer-events-none"}`}
+                        className={`overflow-hidden fixed top-0 left-0 z-40 cursor-glass ${ context ? "bg-neutral-800/30 cursor-auto" : "pointer-events-none"}`}
                         variants={variants}
                         animate={ getVariant() }
                         onMouseLeave={() => eventFactory.fire(new ContextEvent(false, []))}
@@ -291,9 +313,5 @@ export const Cursor = () => {
         );
     };
 
-    return useScreen(
-        QueryMode.MOBILE_FIRST,
-        useView('1000px', fullCursor()),
-        useView("default", noCursor()),
-    );
+    return noCursor();
 }

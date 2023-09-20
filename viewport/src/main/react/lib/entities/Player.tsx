@@ -50,9 +50,53 @@ export class Player extends Cacheable {
             </clickable.div>
         );
     }
-
     
+    public labelComponent = (key: number = 0) => {
+        const [ forceClosed, setForceClosed ] = useState(false);
+
+        return (
+            <clickable.div
+                key={key}
+                className="relative p-7px w-full h-40px aspect-square overflow-hidden rounded-md inline-block hover:bg-neutral-300 hover:text-neutral-900 m-2px cursor-pointer"
+                borderRadius="0.5rem"
+                onClick={() => {
+                    eventFactory.fire(new ContextEvent(true, [this.profileComponent()]));
+                    setForceClosed(true);
+                }}
+                onMouseLeave={() => setForceClosed(false)}
+                onBlur={() => setForceClosed(false)}
+                forceClosed={forceClosed}
+                >
+                    <div className="relative -top-2px w-30px aspect-square">
+                        <img className="w-full aspect-square pointer-events-none" src={this.icon()} alt={`${this.username}'s minecraft profile picture`}/>
+                    </div>
+                    <span className="absolute left-50px top-8px text-white hover:text-black">{this.username}</span>
+            </clickable.div>
+        );
+    }
+
     public profileComponent = (key: number = 0) => {
+        return (
+            <div className="w-full h-300px">
+                <div className="relative bg-neutral-600/50 w-[75%] p-25px mt-15px mx-auto aspect-square overflow-hidden rounded-lg">
+                    <div
+                        className="absolute top-10px right-10px rounded p-5px w-40px aspect-square bg-transparent duration-500 hover:bg-neutral-400/80"
+                        >
+                        <Icon
+                            iconName={IconName.SERVER}
+                            inverted={true}
+                            className="w-full aspect-square bg-contain object-fit"
+                            title={`Go to ${this.username}'s Server`} />
+                    </div>
+                    <img className="w-full aspect-square pointer-events-none bg-contain object-contain" src={this.avatar()} alt={`${this.username}'s minecraft profile picture`}/>
+                </div>
+                <span className="block text-neutral-300 text-2xl mt-10px font-bold text-center">{this.username}</span>
+                <span className="block text-neutral-300 text-2xs font-bold text-center">{this.uuid}</span>
+            </div>
+        );
+    }
+
+    public chatComponent = (key: number = 0) => {
         return (
             <div className="w-full h-300px">
                 <div className="relative bg-neutral-600/50 w-[75%] p-25px mt-15px mx-auto aspect-square overflow-hidden rounded-lg">
