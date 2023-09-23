@@ -5,7 +5,7 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.websocket.event_factory.events.ServerChatEvent;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerChatEvent;
 
 public class OnPlayerChat {
     /**
@@ -19,7 +19,7 @@ public class OnPlayerChat {
             if(api.services().viewportService().isEmpty()) return;
 
             try {
-                api.services().viewportService().orElseThrow().services().gatewayService().websocket().fire(new ServerChatEvent(event.getPlayer(), event.getMessage()));
+                api.services().viewportService().orElseThrow().services().api().websocket().fire(new ServerChatEvent(event.getPlayer(), event.getMessage()));
             } catch (Exception ignore) {}
         });
     }

@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
 import group.aelysium.rustyconnector.core.lib.Callable;
+import group.aelysium.rustyconnector.core.lib.Version;
 import group.aelysium.rustyconnector.core.lib.connectors.Connector;
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.config.ConnectorsConfig;
@@ -15,9 +16,8 @@ import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnecto
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.core.lib.lang.Lang;
+import group.aelysium.rustyconnector.core.lib.key.config.MemberKeyConfig;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
@@ -28,7 +28,7 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.command.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.central.config.DefaultConfig;
-import group.aelysium.rustyconnector.core.lib.private_key.config.PrivateKeyConfig;
+import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.central.config.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
@@ -56,7 +56,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.config.ViewportConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.micro_services.gateway.GatewayService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config.WebhooksConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
@@ -66,7 +65,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * The core RustyConnector kernel.
@@ -74,25 +75,28 @@ import java.util.*;
  * If not, check {@link Tinder}.
  */
 public class Flame extends ServiceableService<CoreServiceHandler> {
-    private int configVersion;
-    private String version;
-    private List<Component> bootOutput;
+    private final int configVersion;
+    private final Version version;
+    private final List<Component> bootOutput;
+    private final Optional<char[]> memberKey;
 
     /**
      * The core message backbone where all RC messages are sent through.
      */
     private final MessengerConnector<?> backbone;
 
-    protected Flame(String version, int configVersion, Map<Class<? extends Service>, Service> services, String backboneConnector, List<Component> bootOutput) {
+    protected Flame(Version version, int configVersion, Optional<char[]> memberKey, Map<Class<? extends Service>, Service> services, String backboneConnector, List<Component> bootOutput) {
         super(new CoreServiceHandler(services));
         this.backbone = (MessengerConnector<?>) this.services().connectorsService().get(backboneConnector);
         this.version = version;
         this.configVersion = configVersion;
         this.bootOutput = bootOutput;
+        this.memberKey = memberKey;
     }
 
-    public String version() { return this.version; }
+    public Version version() { return this.version; }
     public int configVersion() { return this.configVersion; }
+    public List<Component> bootLog() { return this.bootOutput; }
 
     public MessengerConnector<? extends MessengerConnection> backbone() {
         return this.backbone;
@@ -130,6 +134,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             String version = initialize.version();
             int configVersion = initialize.configVersion();
             AESCryptor cryptor = initialize.privateKey();
+            Optional<char[]> memberKey = initialize.memberKey();
 
             DefaultConfig defaultConfig = initialize.defaultConfig(langService);
             initialize.loggerConfig(langService);
@@ -161,14 +166,16 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             initialize.dynamicTeleportService(langService);
             logger.send(Component.text("Initializing 80%...", NamedTextColor.DARK_GRAY));
 
-            initialize.viewportService(langService);
+            Consumer<PluginLogger> printViewportURI = initialize.viewportService(langService, memberKey);
             logger.send(Component.text("Initializing 90%...", NamedTextColor.DARK_GRAY));
 
-            Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.messenger(), initialize.getBootOutput());
+            Flame flame = new Flame(new Version(version), configVersion, memberKey, initialize.getServices(), defaultConfig.messenger(), initialize.getBootOutput());
 
             initialize.events(plugin);
             initialize.commands(flame, logger);
             logger.send(Component.text("Initializing 100%...", NamedTextColor.DARK_GRAY));
+
+            printViewportURI.accept(logger);
 
             return flame;
         } catch (Exception e) {
@@ -255,14 +262,26 @@ class Initialize {
     }
 
     public AESCryptor privateKey() {
-        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(api.dataFolder(), "private.key"));
-        if (!privateKeyConfig.generateFilestream(bootOutput))
+        PrivateKeyConfig config = new PrivateKeyConfig(new File(api.dataFolder(), "private.key"));
+        if (!config.generateFilestream(bootOutput))
             throw new IllegalStateException("Unable to load or create private.key!");
 
         try {
-            return privateKeyConfig.get();
+            return config.get();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<char[]> memberKey() {
+        MemberKeyConfig config = new MemberKeyConfig(new File(api.dataFolder(), "member.key"));
+        if (!config.generateFilestream(bootOutput))
+            throw new IllegalStateException("Unable to load or create private.key!");
+
+        try {
+            return Optional.of(config.get());
+        } catch (Exception e) {
+            return Optional.empty();
         }
     }
 
@@ -549,7 +568,7 @@ class Initialize {
             bootOutput.add(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
         }
     }
-    public void viewportService(LangService lang) {
+    public Consumer<PluginLogger> viewportService(LangService lang, Optional<char[]> memberKey) {
         try {
             bootOutput.add(Component.text("Building viewport service...", NamedTextColor.DARK_GRAY));
 
@@ -560,27 +579,37 @@ class Initialize {
 
             if(!viewportConfig.isEnabled()) {
                 bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
-                return;
+                return (l)->{};
             }
 
-            bootOutput.add(Component.text(" | Building viewport MySQL...", NamedTextColor.DARK_GRAY));
-            StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(viewportConfig.storage());
-            if(connector == null) throw new NullPointerException("You must define a storage method for viewport!");
-            requestedConnectors.add(viewportConfig.storage());
-            bootOutput.add(Component.text(" | Finished building viewport MySQL.", NamedTextColor.GREEN));
+            if(memberKey.isEmpty()) {
+                bootOutput.add(Component.text("You must have an Aelysium Premier membership in order to use Viewport!", NamedTextColor.RED));
+                bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
+                return (l)->{};
+            }
 
-            GatewayService gatewayService = new GatewayService(viewportConfig.getWebsocket_address(), viewportConfig.getRest_address());
-
-            ViewportService service = new ViewportService.Builder()
-                    .setStorageConnector(connector)
-                    .setGatewayService(gatewayService)
-                    .build();
+            ViewportService service = ViewportService.create(viewportConfig);
 
             services.put(ViewportService.class, service);
+
+            return (logger) -> {
+                if(viewportConfig.isSendURI()) {
+                    logger.send(Component.text("You can sign into Viewport with the token:", NamedTextColor.GREEN));
+
+                    String address = viewportConfig.getApi_address().getHostName()+":"+viewportConfig.getApi_address().getPort();
+                    if (viewportConfig.isApi_ssl())
+                        logger.send(Component.text(new String(memberKey.orElseThrow())+";t;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
+                    else {
+                        logger.send(Component.text(new String(memberKey.orElseThrow())+";f;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
+                        logger.send(Component.text("Because this connection will be unencrypted, you may be required to enable \"Display Insecure Resources\" on your browser for the Viewport website.", NamedTextColor.YELLOW));
+                    }
+                }
+            };
         } catch (Exception e) {
             bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
             bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
         }
+        return (l)->{};
     }
 
     public void friendsService(LangService lang) {

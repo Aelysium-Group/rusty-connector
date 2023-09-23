@@ -8,14 +8,12 @@ import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConn
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
-import group.aelysium.rustyconnector.core.lib.private_key.config.PrivateKeyConfig;
+import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
@@ -38,6 +36,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.*;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -191,8 +190,8 @@ class Initialize {
         }
     }
 
-    public AESCryptor privateKey() {
-        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(api.dataFolder(), "private.key"));
+    public AESCryptor privateKey() throws NoSuchAlgorithmException {
+        PrivateKeyConfig privateKeyConfig = new PrivateKeyConfig(new File(api.dataFolder(), "private.key"));
         if (!privateKeyConfig.generateFilestream(bootOutput))
             throw new IllegalStateException("Unable to load or create private.key!");
 

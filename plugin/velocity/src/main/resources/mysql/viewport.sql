@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
     uuid VARCHAR(36) NOT NULL PRIMARY KEY,
     username VARCHAR(36) NOT NULL UNIQUE,
-    email VARCHAR(320) NOT NULL,
     password  VARCHAR(256) NOT NULL,
     mfa_key VARCHAR(32) NOT NULL,
     locked TINYINT unsigned default 0,

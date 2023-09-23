@@ -40,42 +40,31 @@
 enabled: false
 
 #
-# The storage connector to use.
+# Once the Viewport driver starts up, should it send the connection token in console?
 #
-storage: "mysql"
+send-uri: true
 
-#
-# The location where the viewport website will be available to join.
-# You typically won't have to touch `address`.
-# Make sure you open up whatever port you define below.
-#
-public:
-    hostname: "0.0.0.0"
-    port: 5575
-
-
-
-    ############################################################################
-    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-    #                             Session Duration                             #
-    #                                                                          #
-    #                       ---------------------------                        #
-    # | The amount of time a user is allowed to remain logged into             #
-    # | the dashboard while being afk.                                         #
-    #                                                                          #
-    # | Once a user's session expires, they will automatically be logged out.  #
-    #                                                                          #
-    # | Sessions will remain active as long as the user is active or until     #
-    # | the session is forcefully terminated.                                  #
-    #                                                                          #
-    # | This data value is a Liquid Timestamp. Read more here:                 #
-    # https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
-    #                                                                          #
-    #   NOTE: The Liquid Timestamp must be at least 30 minutes.
-    #                                                                          #
-    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-    ############################################################################
-    afk-expiration: 1 HOUR
+############################################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                             Session Duration                             #
+#                                                                          #
+#                       ---------------------------                        #
+# | The amount of time a user is allowed to remain logged into             #
+# | the dashboard while being afk.                                         #
+#                                                                          #
+# | Once a user's session expires, they will automatically be logged out.  #
+#                                                                          #
+# | Sessions will remain active as long as the user is active or until     #
+# | the session is forcefully terminated.                                  #
+#                                                                          #
+# | This data value is a Liquid Timestamp. Read more here:                 #
+# https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
+#                                                                          #
+#   NOTE: The Liquid Timestamp must be at least 30 minutes.
+#                                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################################
+afk-expiration: 1 HOUR
 
 #
 # The location where the viewport module will listen for api requests.
@@ -87,26 +76,17 @@ api:
     port: 5576
 
 #
-# You can define starting users below.
-# When Viewport boots up, it will create accounts for any users that don't already exist.
-# You can also create new user accounts directly from the dashboard.
+# Should viewport be using a ssl connection (https and wss) when connecting to your api?
+# If this is false you might be required to give the viewport website permission to "Display Insecure Resources"
 #
-# Any passwords defined below will be encrypted before being entered into the database.
-#
-users:
-    - name: "root"
-      password: "admin"
-      roles:
-          - "admin"
+    ssl: false
 
 #
-# You can define starting roles below.
-# When Viewport boots up, it will create any role that doesn't already exist.
-# You can also create new roles directly from the dashboard.
+# Define the login credentials for Viewport here.
+# Currently, viewport only allows one single "root" user.
 #
-# You can read up on available permissions at:
+# Plans to have multi-user support are in the works.
 #
-#
-roles:
-    - name: "admin"
-      permissions: []
+credentials:
+    username: "root"
+    password: "4e016366d2cfc6b381e4185f42f7585e9d936a33"

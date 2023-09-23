@@ -49,7 +49,7 @@ public class VelocityRustyConnector {
             Tinder.get().logger().log("Failed to register to bstats!");
         }
 
-        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(Tinder.get().logger(), Tinder.get().flame().version());
+        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(Tinder.get().logger(), "v"+Tinder.get().flame().version().toString());
 
         if(!Tinder.get().velocityServer().getConfiguration().isOnlineMode())
             Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!", NamedTextColor.RED));
