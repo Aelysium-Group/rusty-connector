@@ -65,7 +65,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -569,6 +568,9 @@ class Initialize {
         }
     }
     public Consumer<PluginLogger> viewportService(LangService lang, Optional<char[]> memberKey) {
+        // If there's no membership key they can't even use Viewport so don't even load a config file.
+        if(memberKey.isEmpty()) return (l)->{};
+
         try {
             bootOutput.add(Component.text("Building viewport service...", NamedTextColor.DARK_GRAY));
 
