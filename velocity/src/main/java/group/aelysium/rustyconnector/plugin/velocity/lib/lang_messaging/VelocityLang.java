@@ -207,7 +207,13 @@ public interface VelocityLang extends Lang {
         if(family.registeredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
         else if(family.registeredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
         else for (PlayerServer server : family.registeredServers()) {
-                if(family.loadBalancer().index() == i)
+                if (!family.isJoinable(server))
+                    servers = servers.append(
+                        text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                        "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                        "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] XXXXX"
+                                , RED));
+                else if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
                                             "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
@@ -242,6 +248,7 @@ public interface VelocityLang extends Lang {
                 SPACING,
                 text("   ---| Online Players: "+family.playerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
+                text("   ---| Joinable Servers: "+family.loadBalancer().size()),
                 text("   ---| Parent Family: "+ parentFamilyName),
                 text("   ---| Load Balancing:"),
                 text("      | - Algorithm: "+family.loadBalancer()),
@@ -272,7 +279,13 @@ public interface VelocityLang extends Lang {
         if(family.registeredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
         else if(family.registeredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
         else for (PlayerServer server : family.registeredServers()) {
-                if(family.loadBalancer().index() == i)
+                if (!family.isJoinable(server))
+                    servers = servers.append(
+                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] XXXXX"
+                                    , RED));
+                else if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
                                             "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
@@ -311,6 +324,7 @@ public interface VelocityLang extends Lang {
                 SPACING,
                 text("   ---| Online Players: "+family.playerCount()),
                 text("   ---| Registered Servers: "+family.serverCount()),
+                text("   ---| Joinable Servers: "+family.loadBalancer().size()),
                 text("   ---| Parent Family: "+ parentFamilyName),
                 text("   ---| Home Server Expiration: "+homeServerExpiration),
                 text("   ---| Load Balancing:"),

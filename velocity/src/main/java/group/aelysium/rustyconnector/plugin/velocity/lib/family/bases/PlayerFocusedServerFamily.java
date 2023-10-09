@@ -88,7 +88,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         return api.services().whitelistService().find(this.whitelist);
     }
 
-    public long serverCount() { return this.loadBalancer.size(); }
+    public long serverCount() { return this.registeredServers().size(); }
 
     @Override
     public long playerCount() {
@@ -100,17 +100,43 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
     @Override
     public List<PlayerServer> registeredServers() {
-        return this.loadBalancer.dump();
+        List<PlayerServer> servers = new ArrayList<>();
+        servers.addAll(this.loadBalancer.dump());
+        servers.addAll(this.closedServers);
+        return servers;
     }
 
     @Override
     public void addServer(PlayerServer server) {
-        this.loadBalancer.add(server);
+        if (registeredServers().size() > 0)
+            this.closedServers.add(server);
+        else this.loadBalancer.add(server);
     }
 
     @Override
     public void removeServer(PlayerServer server) {
         this.loadBalancer.remove(server);
+        this.closedServers.remove(server);
+    }
+
+    @Override
+    public void openServer(PlayerServer server) {
+        if (!this.closedServers.contains(server)) return;
+        this.closedServers.remove(server);
+        this.loadBalancer.add(server);
+    }
+
+    @Override
+    public void closeServer(PlayerServer server) {
+        if (!this.loadBalancer.dump().contains(server)) return;
+        this.loadBalancer.remove(server);
+        this.closedServers.add(server);
+    }
+
+    @Override
+    public boolean isJoinable(PlayerServer server) {
+        if (!this.registeredServers().contains(server)) return false;
+        return !this.closedServers.contains(server);
     }
 
     @Override
