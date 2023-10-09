@@ -108,9 +108,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
     @Override
     public void addServer(PlayerServer server) {
-        if (registeredServers().size() > 0)
-            this.closedServers.add(server);
-        else this.loadBalancer.add(server);
+        this.loadBalancer.add(server);
     }
 
     @Override
