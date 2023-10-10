@@ -129,6 +129,7 @@ public final class CommandRusty {
                         .asynchronous(commandContext -> {
                     try {
                         api.services().packetBuilder().unlockServer();
+                        logger.log("Unlocking server.");
                     } catch (NullPointerException e) {
                         PaperLang.RC_SEND_USAGE.send(logger);
                     } catch (Exception e) {
@@ -149,6 +150,7 @@ public final class CommandRusty {
                         .asynchronous(commandContext -> {
                             try {
                                 api.services().packetBuilder().lockServer();
+                                logger.log("Locking server.");
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
