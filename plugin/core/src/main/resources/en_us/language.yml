@@ -99,7 +99,7 @@ velocity:
             panel:
                 no_registered_servers: "<dark_gray>There are no registered servers.</dark_gray>"
                 no_locked_servers: "<dark_gray>There are no locked servers.</dark_gray>"
-                no_unlocked_servers: "<dark_gray>There are unlocked servers.</dark_gray>"
+                no_unlocked_servers: "<dark_gray>There are no unlocked servers.</dark_gray>"
                 info:
                     - "   ---| Online Players: <player_count>"
                     - "   ---| Registered Servers: <server_count>"
@@ -122,7 +122,7 @@ velocity:
             panel:
                 no_registered_servers: "<dark_gray>There are no registered servers.</dark_gray>"
                 no_locked_servers: "<dark_gray>There are no locked servers.</dark_gray>"
-                no_unlocked_servers: "<dark_gray>There are unlocked servers.</dark_gray>"
+                no_unlocked_servers: "<dark_gray>There are no unlocked servers.</dark_gray>"
                 info:
                     - "   ---| Online Players: <player_count>"
                     - "   ---| Registered Servers: <server_count>"
