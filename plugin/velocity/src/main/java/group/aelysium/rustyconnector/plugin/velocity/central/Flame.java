@@ -49,7 +49,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers.MagicLinkPingHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.LockServerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.SendPlayerHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.UnlockServerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.config.PartyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
@@ -354,6 +356,8 @@ class Initialize {
                 Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
                 handlers.put(PacketType.PING, new MagicLinkPingHandler());
                 handlers.put(PacketType.SEND_PLAYER, new SendPlayerHandler());
+                handlers.put(PacketType.LOCK_SERVER, new LockServerHandler());
+                handlers.put(PacketType.UNLOCK_SERVER, new UnlockServerHandler());
 
                 connectorsService.messengers().forEach(connector -> {
                     if(connector.connection().isEmpty()) return;

@@ -371,7 +371,8 @@ public class VelocityLang extends Lang {
 
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
-        else for (PlayerServer server : family.registeredServers()) {
+        else if(family.loadBalancer().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_unlocked_servers");
+        else for (PlayerServer server : family.loadBalancer().dump()) {
                 if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
@@ -409,6 +410,7 @@ public class VelocityLang extends Lang {
                         "velocity.family.scalar_family.panel.info",
                         LanguageResolver.tagHandler("player_count", family.playerCount()),
                         LanguageResolver.tagHandler("server_count", family.serverCount()),
+                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
                         LanguageResolver.tagHandler("weighted", family.isWeighted()),
@@ -426,6 +428,74 @@ public class VelocityLang extends Lang {
                 text("/rc family <family name> resetIndex", GOLD),
                 resolver().get("velocity.family.scalar_family.panel.commands.reset_index"),
                 SPACING,
+                text("/rc family <family name> locked", GOLD),
+                resolver().get("velocity.family.scalar_family.panel.commands.locked"),
+                SPACING,
+                servers,
+                SPACING,
+                BORDER
+        );
+    };
+
+    public final static ParameterizedMessage1<ScalarServerFamily> RC_SCALAR_FAMILY_INFO_LOCKED = (family) -> {
+        Component servers = text("");
+        int i = 0;
+
+        if(family.registeredServers() == null) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
+        else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
+        else if(family.lockedServers().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_locked_servers");
+        else for (PlayerServer server : family.lockedServers()) {
+                servers = servers.append(
+                        text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                        "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                        "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
+                                , RED));
+
+                servers = servers.append(newline());
+
+                i++;
+            }
+
+        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        String parentFamilyName = rootFamily.name();
+        try {
+            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+        } catch (Exception ignore) {}
+        if(family.equals(rootFamily)) parentFamilyName = "none";
+
+        return join(
+                newlines(),
+                BORDER,
+                SPACING,
+                ASCIIAlphabet.generate(family.name(), AQUA),
+                SPACING,
+                BORDER,
+                SPACING,
+                resolver().getArray(
+                        "velocity.family.scalar_family.panel.info",
+                        LanguageResolver.tagHandler("player_count", family.playerCount()),
+                        LanguageResolver.tagHandler("server_count", family.serverCount()),
+                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
+                        LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
+                        LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
+                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
+                        LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
+                ),
+                SPACING,
+                BORDER,
+                SPACING,
+                resolver().get("velocity.family.scalar_family.panel.registered_servers"),
+                SPACING,
+                text("/rc family <family name> sort", GOLD),
+                resolver().get("velocity.family.scalar_family.panel.commands.sort"),
+                SPACING,
+                text("/rc family <family name> resetIndex", GOLD),
+                resolver().get("velocity.family.scalar_family.panel.commands.reset_index"),
+                SPACING,
+                text("/rc family <family name> locked", GOLD),
+                resolver().get("velocity.family.scalar_family.panel.commands.locked"),
+                SPACING,
                 servers,
                 SPACING,
                 BORDER
@@ -438,7 +508,8 @@ public class VelocityLang extends Lang {
 
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
-        else for (PlayerServer server : family.registeredServers()) {
+        else if(family.loadBalancer().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_unlocked_servers");
+        else for (PlayerServer server : family.loadBalancer().dump()) {
                 if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
@@ -480,6 +551,7 @@ public class VelocityLang extends Lang {
                         "velocity.family.static_family.panel.info",
                         LanguageResolver.tagHandler("player_count", family.playerCount()),
                         LanguageResolver.tagHandler("server_count", family.serverCount()),
+                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
@@ -497,6 +569,79 @@ public class VelocityLang extends Lang {
                 SPACING,
                 text("/rc family <family name> resetIndex", GOLD),
                 resolver().get("velocity.family.static_family.panel.commands.reset_index"),
+                SPACING,
+                text("/rc family <family name> locked", GOLD),
+                resolver().get("velocity.family.static_family.panel.commands.locked"),
+                SPACING,
+                servers,
+                SPACING,
+                BORDER
+        );
+    };
+
+    public final static ParameterizedMessage1<StaticServerFamily> RC_STATIC_FAMILY_INFO_LOCKED = (family) -> {
+        Component servers = text("");
+        int i = 0;
+
+        if(family.registeredServers() == null) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
+        else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
+        else if(family.lockedServers().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_locked_servers");
+        else for (PlayerServer server : family.lockedServers()) {
+                servers = servers.append(
+                        text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
+                                        "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
+                                        "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
+                                , RED));
+
+                servers = servers.append(newline());
+
+                i++;
+            }
+
+        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        String parentFamilyName = rootFamily.name();
+        try {
+            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+        } catch (Exception ignore) {}
+        if(family.equals(rootFamily)) parentFamilyName = "none";
+
+        LiquidTimestamp expiration = family.homeServerExpiration();
+        String homeServerExpiration = "NEVER";
+        if(expiration != null) homeServerExpiration = expiration.toString();
+
+        return join(
+                newlines(),
+                BORDER,
+                SPACING,
+                ASCIIAlphabet.generate(family.name(), AQUA),
+                SPACING,
+                BORDER,
+                SPACING,
+                resolver().getArray(
+                        "velocity.family.static_family.panel.info",
+                        LanguageResolver.tagHandler("player_count", family.playerCount()),
+                        LanguageResolver.tagHandler("server_count", family.serverCount()),
+                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
+                        LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
+                        LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
+                        LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
+                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
+                        LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
+                ),
+                SPACING,
+                BORDER,
+                SPACING,
+                resolver().get("velocity.family.static_family.panel.registered_servers"),
+                SPACING,
+                text("/rc family <family name> sort", GOLD),
+                resolver().get("velocity.family.static_family.panel.commands.sort"),
+                SPACING,
+                text("/rc family <family name> resetIndex", GOLD),
+                resolver().get("velocity.family.static_family.panel.commands.reset_index"),
+                SPACING,
+                text("/rc family <family name> locked", GOLD),
+                resolver().get("velocity.family.static_family.panel.commands.locked"),
                 SPACING,
                 servers,
                 SPACING,

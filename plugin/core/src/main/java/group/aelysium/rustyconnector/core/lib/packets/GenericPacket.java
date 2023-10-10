@@ -1,7 +1,9 @@
 package group.aelysium.rustyconnector.core.lib.packets;
 
 import com.google.gson.*;
+import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
@@ -187,6 +189,8 @@ public class GenericPacket {
             if (this.type == PacketType.PING_RESPONSE)     return new ServerPingResponsePacket(this.protocolVersion, this.rawMessage, this.address, this.origin, this.parameters);
             if (this.type == PacketType.SEND_PLAYER)       return new SendPlayerPacket(this.protocolVersion, this.rawMessage, this.address, this.origin, this.parameters);
             if (this.type == PacketType.COORDINATE_REQUEST_QUEUE)  return new CoordinateRequestQueuePacket(this.protocolVersion, this.rawMessage, this.address, this.origin, this.parameters);
+            if (this.type == PacketType.UNLOCK_SERVER)   return new UnlockServerPacket(this.address, this.origin, this.parameters);
+            if (this.type == PacketType.LOCK_SERVER)   return new LockServerPacket(this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
         }
@@ -213,6 +217,8 @@ public class GenericPacket {
             if(this.type == PacketType.PING_RESPONSE)      return new ServerPingResponsePacket(this.address, this.origin, this.parameters);
             if(this.type == PacketType.SEND_PLAYER)        return new SendPlayerPacket(this.address, this.origin, this.parameters);
             if(this.type == PacketType.COORDINATE_REQUEST_QUEUE)   return new CoordinateRequestQueuePacket(this.address, this.origin, this.parameters);
+            if(this.type == PacketType.UNLOCK_SERVER)   return new UnlockServerPacket(this.address, this.origin, this.parameters);
+            if(this.type == PacketType.LOCK_SERVER)   return new LockServerPacket(this.address, this.origin, this.parameters);
 
             throw new IllegalStateException("Invalid RedisMessage type encountered!");
         }

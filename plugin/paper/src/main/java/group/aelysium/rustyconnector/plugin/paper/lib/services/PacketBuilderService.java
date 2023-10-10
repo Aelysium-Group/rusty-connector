@@ -3,6 +3,8 @@ package group.aelysium.rustyconnector.plugin.paper.lib.services;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
@@ -51,6 +53,40 @@ public class PacketBuilderService extends Service {
                 .setAddress(serverInfoService.address())
                 .setParameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
                 .setParameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
+                .buildSendable();
+
+        api.flame().backbone().connection().orElseThrow().publish(message);
+    }
+
+    /**
+     * Tells the proxy to open the server running the command.
+     */
+    public void unlockServer() {
+        Tinder api = Tinder.get();
+        ServerInfoService serverInfoService = api.services().serverInfo();
+
+        UnlockServerPacket message = (UnlockServerPacket) new GenericPacket.Builder()
+                .setType(PacketType.UNLOCK_SERVER)
+                .setOrigin(PacketOrigin.SERVER)
+                .setAddress(serverInfoService.address())
+                .setParameter(UnlockServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
+                .buildSendable();
+
+        api.flame().backbone().connection().orElseThrow().publish(message);
+    }
+
+    /**
+     * Tells the proxy to close the server running the command.
+     */
+    public void lockServer() {
+        Tinder api = Tinder.get();
+        ServerInfoService serverInfoService = api.services().serverInfo();
+
+        LockServerPacket message = (LockServerPacket) new GenericPacket.Builder()
+                .setType(PacketType.LOCK_SERVER)
+                .setOrigin(PacketOrigin.SERVER)
+                .setAddress(serverInfoService.address())
+                .setParameter(UnlockServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
                 .buildSendable();
 
         api.flame().backbone().connection().orElseThrow().publish(message);

@@ -32,12 +32,24 @@ public class PacketType {
      */
     public static Mapping COORDINATE_REQUEST_QUEUE = new Mapping(300, "TPA_QUEUE_PLAYER");
 
+    /**
+     * `Server > Proxy` | Tells the proxy to open a server.
+     */
+    public static Mapping UNLOCK_SERVER = new Mapping(400, "UNLOCK_SERVER");
+
+    /**
+     * `Server > Proxy` | Tells the proxy to close a server.
+     */
+    public static Mapping LOCK_SERVER = new Mapping(401, "LOCK_SERVER");
+
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();
         list.add(PING);
         list.add(PING_RESPONSE);
         list.add(SEND_PLAYER);
         list.add(COORDINATE_REQUEST_QUEUE);
+        list.add(UNLOCK_SERVER);
+        list.add(LOCK_SERVER);
 
         return list;
     }

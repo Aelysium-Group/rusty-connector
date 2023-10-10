@@ -190,6 +190,25 @@ public final class CommandRusty {
                                     return 1;
                                 })
                         )
+                        .then(LiteralArgumentBuilder.<CommandSource>literal("locked")
+                                .executes(context -> {
+                                    try {
+                                        String familyName = context.getArgument("familyName", String.class);
+                                        BaseServerFamily family = flame.services().familyService().find(familyName);
+                                        if(family == null) throw new NullPointerException();
+
+                                        if(family instanceof ScalarServerFamily)
+                                            VelocityLang.RC_SCALAR_FAMILY_INFO_LOCKED.send(logger, (ScalarServerFamily) family);
+                                        if(family instanceof StaticServerFamily)
+                                            VelocityLang.RC_STATIC_FAMILY_INFO_LOCKED.send(logger, (StaticServerFamily) family);
+                                    } catch (NullPointerException e) {
+                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
+                                    } catch (Exception e) {
+                                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
+                                    }
+                                    return 1;
+                                })
+                        )
                 )
             )
             .then(LiteralArgumentBuilder.<CommandSource>literal("parties")
