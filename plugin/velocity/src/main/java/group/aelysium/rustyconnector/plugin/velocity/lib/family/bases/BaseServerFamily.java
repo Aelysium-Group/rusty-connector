@@ -13,7 +13,7 @@ import java.util.Objects;
 public abstract class BaseServerFamily<S extends PlayerServer> {
     protected final String name;
 
-    protected final List<PlayerServer> closedServers = new ArrayList<>();
+    protected final List<S> closedServers = new ArrayList<>();
 
     protected BaseServerFamily(String name) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         this.name = name;
