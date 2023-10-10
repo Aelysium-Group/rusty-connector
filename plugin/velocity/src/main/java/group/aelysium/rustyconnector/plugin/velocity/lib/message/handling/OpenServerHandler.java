@@ -25,8 +25,6 @@ public class OpenServerHandler extends PacketHandler {
         OpenServerPacket packet = (OpenServerPacket) genericPacket;
         Tinder api = Tinder.get();
 
-        api.logger().log("Executing OpenServer " + packet.serverName());
-
         ServerInfo serverInfo = new ServerInfo(packet.serverName(), packet.address());
         PlayerServer server = api.services().serverService().search(serverInfo);
 
