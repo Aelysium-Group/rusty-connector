@@ -119,7 +119,7 @@ velocity:
                 missing: "<red>The server you were meant to be connected to is unavailable! In the meantime you've been connected to a fallback server!</red>"
                 blocked_join_attempt: "<red>The server you were meant to be connected to is unavailable! Please try again later!</red>"
             panel:
-                no_registered_servers: "There are no registered servers."
+                no_registered_servers: "<dark_gray>There are no registered servers.</dark_gray>"
                 no_locked_servers: "<dark_gray>There are no locked servers.</dark_gray>"
                 no_unlocked_servers: "<dark_gray>There are unlocked servers.</dark_gray>"
                 info:
