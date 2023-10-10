@@ -114,6 +114,7 @@ velocity:
                 commands:
                     sort: "<dark_gray>Will cause the family to completely resort itself in accordance with it's load balancing algorithm.</dark_gray>"
                     reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
+                    locked: "<dark_gray>Shows all locked servers instead of unlocked.</dark_gray>"
         static_family:
             residence:
                 missing: "<red>The server you were meant to be connected to is unavailable! In the meantime you've been connected to a fallback server!</red>"
@@ -137,6 +138,7 @@ velocity:
                 commands:
                     sort: "<dark_gray>Will cause the family to completely resort itself in accordance with it's load balancing algorithm.</dark_gray>"
                     reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
+                    locked: "<dark_gray>Shows all locked servers instead of unlocked.</dark_gray>"
     party:
         receiver_invite_query:
             query: "<gray>Hey! <username> wants you to join their party!</gray>"
