@@ -19,8 +19,6 @@ public class CloseServerHandler extends PacketHandler {
         CloseServerPacket packet = (CloseServerPacket) genericPacket;
         Tinder api = Tinder.get();
 
-        api.logger().log("Executing CloseServer");
-
         ServerInfo serverInfo = new ServerInfo(packet.serverName(), packet.address());
         PlayerServer server = api.services().serverService().search(serverInfo);
 
