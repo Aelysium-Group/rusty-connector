@@ -32,8 +32,8 @@ public class LoadBalancer implements group.aelysium.rustyconnector.core.lib.Load
     public PlayerServer current() {
         PlayerServer item;
         if(this.index >= this.size()) {
-            item = this.items.get(this.index);
             this.index = 0;
+            item = this.items.get(this.index);
         } else item = this.items.get(this.index);
 
         assert item != null;
