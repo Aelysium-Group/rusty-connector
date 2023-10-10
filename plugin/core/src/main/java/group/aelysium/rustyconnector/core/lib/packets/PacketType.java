@@ -36,6 +36,12 @@ public class PacketType {
      * `Server > Proxy` | Tells the proxy to open a server.
      */
     public static Mapping OPEN_SERVER = new Mapping(400, "OPEN_SERVER");
+
+    /**
+     * `Server > Proxy` | Tells the proxy to close a server.
+     */
+    public static Mapping CLOSE_SERVER = new Mapping(401, "CLOSE_SERVER");
+
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();
         list.add(PING);
@@ -43,6 +49,7 @@ public class PacketType {
         list.add(SEND_PLAYER);
         list.add(COORDINATE_REQUEST_QUEUE);
         list.add(OPEN_SERVER);
+        list.add(CLOSE_SERVER);
 
         return list;
     }

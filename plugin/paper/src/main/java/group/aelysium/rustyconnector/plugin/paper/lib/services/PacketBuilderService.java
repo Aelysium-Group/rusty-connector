@@ -3,6 +3,8 @@ package group.aelysium.rustyconnector.plugin.paper.lib.services;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.variants.CloseServerPacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.OpenServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
@@ -71,6 +73,24 @@ public class PacketBuilderService extends Service {
 
         api.flame().backbone().connection().orElseThrow().publish(message);
     }
+
+    /**
+     * Tells the proxy to close the server running the command.
+     */
+    public void closeServer() {
+        Tinder api = Tinder.get();
+        ServerInfoService serverInfoService = api.services().serverInfo();
+
+        CloseServerPacket message = (CloseServerPacket) new GenericPacket.Builder()
+                .setType(PacketType.CLOSE_SERVER)
+                .setOrigin(PacketOrigin.SERVER)
+                .setAddress(serverInfoService.address())
+                .setParameter(OpenServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
+                .buildSendable();
+
+        api.flame().backbone().connection().orElseThrow().publish(message);
+    }
+
     @Override
     public void kill() {}
 }
