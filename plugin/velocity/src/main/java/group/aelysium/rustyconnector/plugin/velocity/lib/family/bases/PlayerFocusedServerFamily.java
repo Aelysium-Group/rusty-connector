@@ -28,7 +28,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     protected String whitelist;
     protected boolean weighted;
     
-    protected final List<PlayerServer> closedServers = new ArrayList<>();
+    protected final List<PlayerServer> lockedServers = new ArrayList<>();
 
     protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentName) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name);
@@ -104,9 +104,11 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public List<PlayerServer> registeredServers() {
         List<PlayerServer> servers = new ArrayList<>();
         servers.addAll(this.loadBalancer.dump());
-        servers.addAll(this.closedServers);
+        servers.addAll(this.lockedServers);
         return servers;
     }
+
+    public List<PlayerServer> lockedServers() { return this.lockedServers;}
 
     @Override
     public void addServer(PlayerServer server) {
@@ -116,12 +118,12 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     @Override
     public void removeServer(PlayerServer server) {
         this.loadBalancer.remove(server);
-        this.closedServers.remove(server);
+        this.lockedServers.remove(server);
     }
     
     public void unlockServer(PlayerServer server) {
-        if (!this.closedServers.contains(server)) return;
-        this.closedServers.remove(server);
+        if (!this.lockedServers.contains(server)) return;
+        this.lockedServers.remove(server);
         this.loadBalancer.add(server);
 
         this.loadBalancer.completeSort();
@@ -130,14 +132,14 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     public void lockServer(PlayerServer server) {
         if (!this.loadBalancer.dump().contains(server)) return;
         this.loadBalancer.remove(server);
-        this.closedServers.add(server);
+        this.lockedServers.add(server);
 
         this.loadBalancer.completeSort();
     }
     
     public boolean joinable(PlayerServer server) {
         if (!this.registeredServers().contains(server)) return false;
-        return !this.closedServers.contains(server);
+        return !this.lockedServers.contains(server);
     }
 
     @Override
