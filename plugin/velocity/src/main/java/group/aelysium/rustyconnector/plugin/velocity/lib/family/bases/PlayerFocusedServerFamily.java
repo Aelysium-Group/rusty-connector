@@ -122,6 +122,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         if (!this.closedServers.contains(server)) return;
         this.closedServers.remove(server);
         this.loadBalancer.add(server);
+
+        this.loadBalancer.completeSort();
     }
 
     @Override
@@ -129,6 +131,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         if (!this.loadBalancer.dump().contains(server)) return;
         this.loadBalancer.remove(server);
         this.closedServers.add(server);
+
+        this.loadBalancer.completeSort();
     }
 
     @Override
