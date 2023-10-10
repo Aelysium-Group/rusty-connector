@@ -55,6 +55,22 @@ public class PacketBuilderService extends Service {
         api.flame().backbone().connection().orElseThrow().publish(message);
     }
 
+    /**
+     * Tells the proxy to open the server running the command.
+     */
+    public void openServer() {
+        Tinder api = Tinder.get();
+        ServerInfoService serverInfoService = api.services().serverInfo();
+
+        OpenServerPacket message = (OpenServerPacket) new GenericPacket.Builder()
+                .setType(PacketType.OPEN_SERVER)
+                .setOrigin(PacketOrigin.SERVER)
+                .setAddress(serverInfoService.address())
+                .setParameter(OpenServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
+                .buildSendable();
+
+        api.flame().backbone().connection().orElseThrow().publish(message);
+    }
     @Override
     public void kill() {}
 }

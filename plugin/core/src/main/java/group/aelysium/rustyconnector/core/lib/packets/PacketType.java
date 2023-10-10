@@ -32,12 +32,17 @@ public class PacketType {
      */
     public static Mapping COORDINATE_REQUEST_QUEUE = new Mapping(300, "TPA_QUEUE_PLAYER");
 
+    /**
+     * `Server > Proxy` | Tells the proxy to open a server.
+     */
+    public static Mapping OPEN_SERVER = new Mapping(400, "OPEN_SERVER");
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();
         list.add(PING);
         list.add(PING_RESPONSE);
         list.add(SEND_PLAYER);
         list.add(COORDINATE_REQUEST_QUEUE);
+        list.add(OPEN_SERVER);
 
         return list;
     }
