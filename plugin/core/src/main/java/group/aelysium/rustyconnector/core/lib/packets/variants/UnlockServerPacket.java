@@ -8,33 +8,34 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 
-public class CloseServerPacket extends GenericPacket {
+public class UnlockServerPacket extends GenericPacket {
     private String serverName;
 
     public String serverName() { return this.serverName; }
 
-    public CloseServerPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(PacketType.CLOSE_SERVER, address, origin);
+    public UnlockServerPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(PacketType.UNLOCK_SERVER, address, origin);
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
             JsonPrimitive value = entry.getValue();
 
-            if (key.equals(OpenServerPacket.ValidParameters.SERVER_NAME)) {
+            if (key.equals(ValidParameters.SERVER_NAME)) {
                 this.serverName = value.getAsString();
             }
         });
     }
-    public CloseServerPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, PacketType.CLOSE_SERVER, address, origin);
+    public UnlockServerPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+        super(messageVersion, rawMessage, PacketType.UNLOCK_SERVER, address, origin);
 
         parameters.forEach(entry -> {
             String key = entry.getKey();
             JsonPrimitive value = entry.getValue();
 
-            if (key.equals(OpenServerPacket.ValidParameters.SERVER_NAME)) {
+            if (key.equals(ValidParameters.SERVER_NAME)) {
                 this.serverName = value.getAsString();
             }
         });
@@ -45,10 +46,21 @@ public class CloseServerPacket extends GenericPacket {
         JsonObject object = super.toJSON();
         JsonObject parameters = new JsonObject();
 
-        parameters.add(OpenServerPacket.ValidParameters.SERVER_NAME, new JsonPrimitive(this.serverName));
+        parameters.add(ValidParameters.SERVER_NAME, new JsonPrimitive(this.serverName));
 
         object.add(MasterValidParameters.PARAMETERS, parameters);
 
         return object;
+    }
+
+    public interface ValidParameters {
+        String SERVER_NAME = "s";
+
+        static List<String> toList() {
+            List<String> list = new ArrayList<>();
+            list.add(SERVER_NAME);
+
+            return list;
+        }
     }
 }

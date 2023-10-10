@@ -14,7 +14,6 @@ import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConn
 import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
@@ -48,8 +47,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers.MagicLinkPingHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.CloseServerHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.OpenServerHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.LockServerHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.UnlockServerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.SendPlayerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.config.PartyConfig;
@@ -68,7 +67,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -358,8 +356,8 @@ class Initialize {
                 Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
                 handlers.put(PacketType.PING, new MagicLinkPingHandler());
                 handlers.put(PacketType.SEND_PLAYER, new SendPlayerHandler());
-                handlers.put(PacketType.OPEN_SERVER, new OpenServerHandler());
-                handlers.put(PacketType.CLOSE_SERVER, new CloseServerHandler());
+                handlers.put(PacketType.UNLOCK_SERVER, new UnlockServerHandler());
+                handlers.put(PacketType.LOCK_SERVER, new LockServerHandler());
 
                 connectorsService.messengers().forEach(connector -> {
                     if(connector.connection().isEmpty()) return;

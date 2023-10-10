@@ -119,7 +119,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         this.closedServers.remove(server);
     }
     
-    public void openServer(PlayerServer server) {
+    public void unlockServer(PlayerServer server) {
         if (!this.closedServers.contains(server)) return;
         this.closedServers.remove(server);
         this.loadBalancer.add(server);
@@ -127,7 +127,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         this.loadBalancer.completeSort();
     }
     
-    public void closeServer(PlayerServer server) {
+    public void lockServer(PlayerServer server) {
         if (!this.loadBalancer.dump().contains(server)) return;
         this.loadBalancer.remove(server);
         this.closedServers.add(server);

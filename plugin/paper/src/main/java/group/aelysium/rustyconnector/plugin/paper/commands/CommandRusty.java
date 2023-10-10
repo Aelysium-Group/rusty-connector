@@ -24,8 +24,8 @@ public final class CommandRusty {
         manager.command(messageList(manager));
         manager.command(messageGet(manager));
         manager.command(send(manager));
-        manager.command(open(manager));
-        manager.command(close(manager));
+        manager.command(unlock(manager));
+        manager.command(lock(manager));
     }
 
     private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager) {
@@ -117,18 +117,18 @@ public final class CommandRusty {
                         }).execute());
     }
 
-    private static Command.Builder<CommandSender> open(PaperCommandManager<CommandSender> manager) {
+    private static Command.Builder<CommandSender> unlock(PaperCommandManager<CommandSender> manager) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
-        return builder.literal("open")
+        return builder.literal("unlock")
                 .senderType(ConsoleCommandSender.class)
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                     try {
-                        api.services().packetBuilder().openServer();
+                        api.services().packetBuilder().unlockServer();
                     } catch (NullPointerException e) {
                         PaperLang.RC_SEND_USAGE.send(logger);
                     } catch (Exception e) {
@@ -137,18 +137,18 @@ public final class CommandRusty {
                 }).execute());
     }
 
-    private static Command.Builder<CommandSender> close(PaperCommandManager<CommandSender> manager) {
+    private static Command.Builder<CommandSender> lock(PaperCommandManager<CommandSender> manager) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
-        return builder.literal("close")
+        return builder.literal("lock")
                 .senderType(ConsoleCommandSender.class)
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                             try {
-                                api.services().packetBuilder().closeServer();
+                                api.services().packetBuilder().lockServer();
                             } catch (NullPointerException e) {
                                 PaperLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {

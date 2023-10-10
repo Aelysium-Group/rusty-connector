@@ -3,8 +3,8 @@ package group.aelysium.rustyconnector.plugin.paper.lib.services;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
-import group.aelysium.rustyconnector.core.lib.packets.variants.CloseServerPacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.OpenServerPacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
+import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
@@ -60,15 +60,15 @@ public class PacketBuilderService extends Service {
     /**
      * Tells the proxy to open the server running the command.
      */
-    public void openServer() {
+    public void unlockServer() {
         Tinder api = Tinder.get();
         ServerInfoService serverInfoService = api.services().serverInfo();
 
-        OpenServerPacket message = (OpenServerPacket) new GenericPacket.Builder()
-                .setType(PacketType.OPEN_SERVER)
+        UnlockServerPacket message = (UnlockServerPacket) new GenericPacket.Builder()
+                .setType(PacketType.UNLOCK_SERVER)
                 .setOrigin(PacketOrigin.SERVER)
                 .setAddress(serverInfoService.address())
-                .setParameter(OpenServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
+                .setParameter(UnlockServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
                 .buildSendable();
 
         api.flame().backbone().connection().orElseThrow().publish(message);
@@ -77,15 +77,15 @@ public class PacketBuilderService extends Service {
     /**
      * Tells the proxy to close the server running the command.
      */
-    public void closeServer() {
+    public void lockServer() {
         Tinder api = Tinder.get();
         ServerInfoService serverInfoService = api.services().serverInfo();
 
-        CloseServerPacket message = (CloseServerPacket) new GenericPacket.Builder()
-                .setType(PacketType.CLOSE_SERVER)
+        LockServerPacket message = (LockServerPacket) new GenericPacket.Builder()
+                .setType(PacketType.LOCK_SERVER)
                 .setOrigin(PacketOrigin.SERVER)
                 .setAddress(serverInfoService.address())
-                .setParameter(OpenServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
+                .setParameter(UnlockServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
                 .buildSendable();
 
         api.flame().backbone().connection().orElseThrow().publish(message);
