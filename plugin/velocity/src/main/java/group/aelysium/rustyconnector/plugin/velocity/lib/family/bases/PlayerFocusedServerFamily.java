@@ -27,6 +27,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     protected LoadBalancer loadBalancer = null;
     protected String whitelist;
     protected boolean weighted;
+    
+    protected final List<PlayerServer> closedServers = new ArrayList<>();
 
     protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentName) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name);
@@ -116,8 +118,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         this.loadBalancer.remove(server);
         this.closedServers.remove(server);
     }
-
-    @Override
+    
     public void openServer(PlayerServer server) {
         if (!this.closedServers.contains(server)) return;
         this.closedServers.remove(server);
@@ -125,8 +126,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
         this.loadBalancer.completeSort();
     }
-
-    @Override
+    
     public void closeServer(PlayerServer server) {
         if (!this.loadBalancer.dump().contains(server)) return;
         this.loadBalancer.remove(server);
@@ -134,9 +134,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
         this.loadBalancer.completeSort();
     }
-
-    @Override
-    public boolean isJoinable(PlayerServer server) {
+    
+    public boolean joinable(PlayerServer server) {
         if (!this.registeredServers().contains(server)) return false;
         return !this.closedServers.contains(server);
     }

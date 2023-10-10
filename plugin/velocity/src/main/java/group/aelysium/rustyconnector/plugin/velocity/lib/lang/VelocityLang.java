@@ -207,7 +207,7 @@ public interface VelocityLang extends Lang {
         if(family.registeredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
         else if(family.registeredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
         else for (PlayerServer server : family.registeredServers()) {
-                if (!family.isJoinable(server))
+                if (!family.joinable(server))
                     servers = servers.append(
                         text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
                                         "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
@@ -279,7 +279,7 @@ public interface VelocityLang extends Lang {
         if(family.registeredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
         else if(family.registeredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
         else for (PlayerServer server : family.registeredServers()) {
-                if (!family.isJoinable(server))
+                if (!family.joinable(server))
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
                                             "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +

@@ -13,8 +13,6 @@ import java.util.Objects;
 public abstract class BaseServerFamily<S extends PlayerServer> {
     protected final String name;
 
-    protected final List<S> closedServers = new ArrayList<>();
-
     protected BaseServerFamily(String name) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         this.name = name;
     }
@@ -41,25 +39,6 @@ public abstract class BaseServerFamily<S extends PlayerServer> {
      * @param server The server to remove.
      */
     abstract public void removeServer(S server);
-
-    /**
-     * Opens a server so that players can be sent to it.
-     * @param server The server to open.
-     */
-    abstract public void openServer(S server);
-
-    /**
-     * Closes a server so that players can not be sent to it.
-     * @param server The server to close.
-     */
-    abstract public void closeServer(S server);
-
-    /**
-     * Checks if a server is joinable.
-     * @param server The server to check.
-     * @return `True` if the server is joinable, otherwise `False`;
-     */
-    abstract public boolean isJoinable(S server);
 
     /**
      * Get all players in the family up to approximately `max`.
