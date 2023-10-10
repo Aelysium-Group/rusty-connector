@@ -371,7 +371,7 @@ public class VelocityLang extends Lang {
 
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
-        else for (PlayerServer server : family.registeredServers()) {
+        else for (PlayerServer server : family.loadBalancer().dump()) {
                 if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
@@ -409,6 +409,7 @@ public class VelocityLang extends Lang {
                         "velocity.family.scalar_family.panel.info",
                         LanguageResolver.tagHandler("player_count", family.playerCount()),
                         LanguageResolver.tagHandler("server_count", family.serverCount()),
+                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
                         LanguageResolver.tagHandler("weighted", family.isWeighted()),
@@ -438,7 +439,7 @@ public class VelocityLang extends Lang {
 
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
-        else for (PlayerServer server : family.registeredServers()) {
+        else for (PlayerServer server : family.loadBalancer().dump()) {
                 if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
@@ -480,6 +481,7 @@ public class VelocityLang extends Lang {
                         "velocity.family.static_family.panel.info",
                         LanguageResolver.tagHandler("player_count", family.playerCount()),
                         LanguageResolver.tagHandler("server_count", family.serverCount()),
+                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),

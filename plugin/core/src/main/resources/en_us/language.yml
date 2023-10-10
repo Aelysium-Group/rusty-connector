@@ -101,6 +101,7 @@ velocity:
                 info:
                     - "   ---| Online Players: <player_count>"
                     - "   ---| Registered Servers: <server_count>"
+                    - "   ---| Joinable Servers: <joinable_count>"
                     - "   ---| Parent Family: <parent_family_name>"
                     - "   ---| Load Balancing:"
                     - "      | - Algorithm: <balancing_algorithm>"
@@ -120,6 +121,7 @@ velocity:
                 info:
                     - "   ---| Online Players: <player_count>"
                     - "   ---| Registered Servers: <server_count>"
+                    - "   ---| Joinable Servers: <joinable_count>"
                     - "   ---| Parent Family: <parent_family_name>"
                     - "   ---| Resident Server Expiration: <residence_expiration>"
                     - "   ---| Load Balancing:"
