@@ -19,16 +19,8 @@ public class FriendsConfig extends YAML {
 
     private String storage = "";
 
-    private FriendsConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static FriendsConfig newConfig(File configPointer, String template) {
-        return new FriendsConfig(configPointer, template);
+    public FriendsConfig(File configPointer) {
+        super(configPointer);
     }
 
     public boolean isEnabled() {

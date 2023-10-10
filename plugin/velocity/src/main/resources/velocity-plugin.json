@@ -4,7 +4,7 @@
   "version":"${version}",
   "config-version":"${config_version}",
   "description":"A player and server connection manager for Velocity based Minecraft Networks!",
-  "authors":["sivin"],
+  "authors":["Juice"],
   "main":"group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector",
   "url": "https://aelysium.group/"
 }

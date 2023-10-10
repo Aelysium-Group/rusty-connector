@@ -1,8 +1,9 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.plugin.paper.lib.bstats.Metrics;
+import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,7 +18,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener {
             this.tinder.ignite();
             Tinder.get().logger().log("Initializing RustyConnector...");
 
-            Lang.WORDMARK_RUSTY_CONNECTOR.send(this.tinder.logger(), this.tinder.flame().version());
+            PaperLang.WORDMARK_RUSTY_CONNECTOR.send(this.tinder.logger(), this.tinder.flame().version());
 
             try {
                 new Metrics(this, 17973);

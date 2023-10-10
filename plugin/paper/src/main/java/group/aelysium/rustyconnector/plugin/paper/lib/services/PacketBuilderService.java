@@ -7,9 +7,10 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
@@ -33,7 +34,7 @@ public class PacketBuilderService extends Service {
                     .buildSendable();
             api.flame().backbone().connection().orElseThrow().publish(message);
         } catch (Exception e) {
-            Lang.BOXED_MESSAGE_COLORED.send(Tinder.get().logger(), e.toString(), NamedTextColor.RED);
+            PaperLang.BOXED_MESSAGE_COLORED.send(Tinder.get().logger(), e.toString(), NamedTextColor.RED);
         }
     }
 

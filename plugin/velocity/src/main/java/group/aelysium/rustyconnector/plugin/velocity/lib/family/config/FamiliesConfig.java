@@ -2,9 +2,10 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -18,16 +19,8 @@ public class FamiliesConfig extends YAML {
     private List<String> staticF = new ArrayList<>();
     private String staticFamilyStorage = "";
 
-    private FamiliesConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static FamiliesConfig newConfig(File configPointer, String template) {
-        return new FamiliesConfig(configPointer, template);
+    public FamiliesConfig(File configPointer) {
+        super(configPointer);
     }
 
     public String rootFamilyName() {
@@ -57,7 +50,7 @@ public class FamiliesConfig extends YAML {
             this.rootFamily_name = this.getNode(this.data, "root-family.name", String.class);
             if (this.rootFamily_name.equals("") || this.rootFamily_name.length() < 1) throw new Exception();
         } catch (Exception ignore) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.name] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
+            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.name] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
             this.rootFamily_name = "lobby";
         }
 
@@ -90,7 +83,7 @@ public class FamiliesConfig extends YAML {
             throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of what type the family is!");
 
         if(this.isRootFamilyDuplicated()) {
-            Lang.BOXED_MESSAGE_COLORED.send(logger, this.rootFamily_name + " was found duplicated in your family nodes. This is no longer supported. Instead, ONLY place the name of your root family in [root-family.name]. Ignoring...", NamedTextColor.YELLOW);
+            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, this.rootFamily_name + " was found duplicated in your family nodes. This is no longer supported. Instead, ONLY place the name of your root family in [root-family.name]. Ignoring...", NamedTextColor.YELLOW);
             this.scalar.remove(this.rootFamily_name);
             this.staticF.remove(this.rootFamily_name);
         }

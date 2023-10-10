@@ -8,9 +8,12 @@ import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConn
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
@@ -18,7 +21,6 @@ import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.central.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.paper.central.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
@@ -33,11 +35,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.ConnectException;
+import java.io.*;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -90,32 +89,36 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static Flame fabricateNew(PaperRustyConnector plugin) throws IllegalAccessException {
+    public static Flame fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
         Initialize initialize = new Initialize();
 
-        String version = initialize.version();
-        int configVersion = initialize.configVersion();
-        AESCryptor cryptor = initialize.privateKey();
-        DefaultConfig defaultConfig = initialize.defaultConfig();
+        try {
+            String version = initialize.version();
+            int configVersion = initialize.configVersion();
+            AESCryptor cryptor = initialize.privateKey();
+            DefaultConfig defaultConfig = initialize.defaultConfig(langService);
 
-        MessageCacheService messageCacheService = initialize.messageCache();
-        Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger());
+            MessageCacheService messageCacheService = initialize.messageCache();
+            Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService);
 
-        initialize.serverInfo(defaultConfig);
-        initialize.messageCache();
-        PacketBuilderService packetBuilderService = initialize.packetBuilder();
-        initialize.dynamicTeleport();
-        initialize.magicLink(packetBuilderService);
+            initialize.serverInfo(defaultConfig);
+            initialize.messageCache();
+            PacketBuilderService packetBuilderService = initialize.packetBuilder();
+            initialize.dynamicTeleport();
+            initialize.magicLink(packetBuilderService);
 
-        Runnable connectRemotes = resolveConnectors.execute();
-        connectRemotes.run();
+            Runnable connectRemotes = resolveConnectors.execute();
+            connectRemotes.run();
 
-        initialize.events(plugin);
-        initialize.commands();
+            initialize.events(plugin);
+            initialize.commands();
 
-        Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.getMessenger());
+            Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.getMessenger());
 
-        return flame;
+            return flame;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
@@ -187,8 +190,8 @@ class Initialize {
         }
     }
 
-    public AESCryptor privateKey() {
-        PrivateKeyConfig privateKeyConfig = PrivateKeyConfig.newConfig(new File(api.dataFolder(), "private.key"));
+    public AESCryptor privateKey() throws NoSuchAlgorithmException {
+        PrivateKeyConfig privateKeyConfig = new PrivateKeyConfig(new File(api.dataFolder(), "private.key"));
         if (!privateKeyConfig.generateFilestream(bootOutput))
             throw new IllegalStateException("Unable to load or create private.key!");
 
@@ -199,9 +202,9 @@ class Initialize {
         }
     }
 
-    public DefaultConfig defaultConfig() {
-        DefaultConfig defaultConfig = DefaultConfig.newConfig(new File(api.dataFolder(), "config.yml"), "velocity_config_template.yml");
-        if (!defaultConfig.generate(bootOutput))
+    public DefaultConfig defaultConfig(LangService lang) throws IOException {
+        DefaultConfig defaultConfig = new DefaultConfig(new File(api.dataFolder(), "config.yml"));
+        if (!defaultConfig.generate(bootOutput, lang, LangFileMappings.PAPER_CONFIG_TEMPLATE))
             throw new IllegalStateException("Unable to load or create config.yml!");
         defaultConfig.register(this.configVersion());
 
@@ -219,11 +222,11 @@ class Initialize {
      * a {@link Runnable} - Starts up all connectors and connects them to their remote resources.
      * @return A runnable which will wrap up the connectors' initialization. Should be run after all other initialization logic has run.
      */
-    public Callable<Runnable> connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger) {
+    public Callable<Runnable> connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang) throws IOException {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
-        ConnectorsConfig connectorsConfig = ConnectorsConfig.newConfig(new File(api.dataFolder(), "connectors.yml"), "paper_connectors_template.yml");
-        if (!connectorsConfig.generate(bootOutput))
+        ConnectorsConfig connectorsConfig = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
+        if (!connectorsConfig.generate(bootOutput, lang, LangFileMappings.PAPER_CONNECTORS_TEMPLATE))
             throw new IllegalStateException("Unable to load or create connectorsConfig.yml!");
         ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, false, PacketOrigin.PROXY);
         services.put(ConnectorsService.class, connectorsService);

@@ -1,0 +1,173 @@
+#
+# Language
+# This file contains all non-config text messages that are sent by RC.
+# This obviously excludes Exception and Error messages that are sent to console.
+#
+# Text represented as variables are defined as: <variable_name>
+# These variable names must not be changed, but feel free to move them around so that
+# the injected data appears properly in your translated text!
+#
+# Strings support Lenient MiniMessage formatting. For more info, read here:
+# https://docs.advntr.dev/minimessage/format.html#minimessage-format
+#
+# Nodes with a hashtag after them do not support MiniMessage.
+# These nodes are dynamically colored by the plugin.
+#
+# Targeted Language: en-us
+# Translated by: Juice
+#
+version: "v0.7.0"
+core:
+    single_word:
+        reason: "Reason"
+        status: "Status"
+        id: "ID"
+        timestamp: "Timestamp"
+        contents: "Contents"
+        pages: "Pages"
+        usage: "Usage"
+        leader: "Leader" #
+        party: "Party" #
+        leave: "Leave" #
+        disband: "Disband" #
+        accept: "Accept" #
+        deny: "Deny" #
+        ignore: "Ignore" #
+        date: "Date" #
+    boot_wordmark:
+        developed_by: "Developed by Aelysium | Nathan M." #
+        usage: "Use: `/rc` to get started" #
+    unknown_command: "Unknown command. Type \"/help\" for help." #
+    no_permission: "<red>You do not have permission to do this.</red>"
+velocity:
+    root:
+        usage:
+            description:
+            - "<gray>Blue commands will return information or data to you! They will not cause changes to be made.</gray>"
+            - "<gray>Orange commands will make the plugin do something. Make sure you know what these commands do before using them!</gray>"
+            command_description:
+                family: "<dark_gray>View family related information.</dark_gray>"
+                message: "<dark_gray>Access recently sent RustyConnector messages.</dark_gray>"
+                reload: "<dark_gray>Reload entire plugin.</dark_gray>"
+                send: "<dark_gray>Send players from families and servers to other families or servers.</dark_gray>"
+    message:
+        usage:
+            get: "<dark_gray>Pulls a message out of the message cache. If a message is to old it might not be available anymore!</dark_gray>"
+            list: "<dark_gray>Lists all currently cached messages! As new messages get cached, older ones will be pushed out of the cache.</dark_gray>"
+        get:
+            usage: "<dark_gray>Pulls a message out of the message cache. If a message is to old it might not be available anymore!</dark_gray>"
+    tpa:
+        usage:
+            deny: "<gray>Ignore a tpa request from a user.</gray>"
+            accept: "<gray>Accept a tpa request from a user.</gray>"
+        sender_failure: "<red>Unable to tpa to <username>!</red>"
+        target_failure: "<red>Unable to tpa <username> to you!</red>"
+        self_failure: "<red>You can't teleport to yourself!</red>"
+        not_online: "<red><username> isn't online!</red>"
+        no_requests: "<red><username> hasn't sent you any requests!</red>"
+        pending_request: "<red>You already have a pending tpa request to <username>!</red>"
+        request_confirmation: "<green>You requested to teleport to <username>!</green>"
+        target_query:
+            query: "<gold>Hey! <username> has requested to teleport to you!</gold>"
+            accept_tooltip: "Let <username> teleport to you" #
+            deny_tooltip: "Deny <username>'s teleport request" #
+        sender_accepted:
+            - "<green><username> accepted your request!</green>"
+            - "<gray>Attempting to teleport...</gray>"
+        target_accepted:
+            - "<green><username>'s tpa request has been accepted!</green>"
+            - "<gray>Attempting to teleport...</gray>"
+        sender_deny:
+            - "<red><username> denied your request!</red>"
+        target_deny:
+            - "<red><username>'s tpa request has been denied!</red>"
+            - "<gray>They've been notified...</gray>"
+        expired_request: "<gray>Your tpa request to <username> has expired!</gray>"
+    send:
+        usage:
+            family: "<dark_gray>Sends a player from one family to another!</dark_gray>"
+            server:
+                - "<dark_gray>Forces a player to connect to a specific server on the proxy. This bypasses player caps and family whitelists.</dark_gray>"
+                - "<dark_gray>If you have multiple servers with the same name, this feature may send players to a server other than the one you intended.</dark_gray>"
+        no_player: "<red>There is no online player with the username: <username></red>"
+        no_family: "<red>There is no family with the name: <family_name></red>"
+        no_server: "<red>There is no family with the name: <server_name></red>"
+    family:
+        description: "<gray><gold>Gold families</gold> are Scalar. <green>Green families</green> are Static.</gray>"
+        details_usage: "<gray>See more details about a particular family.</gray>"
+        scalar_family:
+            panel:
+                no_registered_servers: "<dark_gray>There are no registered servers.</dark_gray>"
+                info:
+                    - "   ---| Online Players: <player_count>"
+                    - "   ---| Registered Servers: <server_count>"
+                    - "   ---| Parent Family: <parent_family_name>"
+                    - "   ---| Load Balancing:"
+                    - "      | - Algorithm: <balancing_algorithm>"
+                    - "      | - Weighted Sorting: <weighted>"
+                    - "      | - Persistence: <persistence>"
+                    - "      | - Max Attempts: <persistence_attempts>"
+                registered_servers: "<aqua>Registered Servers</aqua>"
+                commands:
+                    sort: "<dark_gray>Will cause the family to completely resort itself in accordance with it's load balancing algorithm.</dark_gray>"
+                    reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
+        static_family:
+            residence:
+                missing: "<red>The server you were meant to be connected to is unavailable! In the meantime you've been connected to a fallback server!</red>"
+                blocked_join_attempt: "<red>The server you were meant to be connected to is unavailable! Please try again later!</red>"
+            panel:
+                no_registered_servers: "There are no registered servers."
+                info:
+                    - "   ---| Online Players: <player_count>"
+                    - "   ---| Registered Servers: <server_count>"
+                    - "   ---| Parent Family: <parent_family_name>"
+                    - "   ---| Resident Server Expiration: <residence_expiration>"
+                    - "   ---| Load Balancing:"
+                    - "      | - Algorithm: <balancing_algorithm>"
+                    - "      | - Weighted Sorting: <weighted>"
+                    - "      | - Persistence: <persistence>"
+                    - "      | - Max Attempts: <persistence_attempts>"
+                registered_servers: "<aqua>Registered Servers</aqua>"
+                commands:
+                    sort: "<dark_gray>Will cause the family to completely resort itself in accordance with it's load balancing algorithm.</dark_gray>"
+                    reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
+    party:
+        receiver_invite_query:
+            query: "<gray>Hey! <username> wants you to join their party!</gray>"
+            hover:
+                accept: "Accept party invite"
+                ignore: "Ignore party invite"
+        create: "<yellow><u>Click here to create a party.</u></yellow>"
+        disbanded: "<gray>Your party has been disbanded.</gray>"
+        kick: "Kick Player"
+        promote: "Promote to Leader"
+        leave: "Leave Party"
+        invite: "Invite Player"
+    friends:
+        panel:
+            header:
+                main: "<white>Friends (<friend_count>/<max_friends>)</white>"
+                add-friend: "Add Friend"
+            pending: "<gray>Getting friends...</gray>"
+            unfriend: "<red>Unfriend <username></red>"
+            message: "<yellow>Message <username></yellow>"
+            invite_party: "<blue>Invite <username> to your party</blue>"
+            offline: "<gray>Offline</gray>"
+            online: "<white>Online</white>"
+            currently_playing: "<gray>Currently Playing: </gray><aqua><family_name></aqua>"
+            add_friend: "<white>Add Friend</white>"
+            send_friend_request: "<yellow><u>Click here to send a friend request.</u></yellow>"
+        friend_request_query:
+            query: "<gray>Hey! <username> wants to be your friend!</gray>"
+            hover:
+                accept: "Accept friend request"
+                ignore: "Ignore friend request"
+        friend_joined:
+            messaging_allowed: "<gray>Your friend <aqua hover:show_text:'Send a message to <username>' click:suggest_command:'/fm <username>'><u><username></u></aqua> just logged in!</gray>"
+            regular: "<gray>Your friend <username> just logged in!</gray>"
+        friend_leaves: "<gray>Your friend <username> just logged out!</gray>"
+paper:
+    send:
+        usage: "<gray>Send a player from the current server to another family.</gray>"
+    tpa:
+        sender_failed_teleport: "<red>Something prevented you from teleporting to <username>!</red>"

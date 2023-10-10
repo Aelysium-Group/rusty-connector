@@ -6,11 +6,13 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerPlayerCountEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
+    private final String id;
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
     private BaseServerFamily family;
@@ -42,6 +45,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(this.softPlayerCap > this.hardPlayerCap) this.softPlayerCap = this.hardPlayerCap;
 
         this.timeout = new AtomicInteger(timeout);
+        this.id = MD5.hash(serverInfo.getName() + serverInfo.getAddress());
     }
 
     public boolean stale() {
@@ -51,6 +55,10 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     public void setTimeout(int newTimeout) {
         if(newTimeout < 0) throw new IndexOutOfBoundsException("New timeout must be at least 0!");
         this.timeout.set(newTimeout);
+    }
+
+    public String id() {
+        return this.id;
     }
 
     public int decreaseTimeout() {
@@ -147,6 +155,29 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
 
     public void setPlayerCount(int playerCount) {
         this.playerCount = playerCount;
+
+        try {
+            Tinder.get().services().viewportService().orElseThrow().services().api().websocket()
+                    .fire(new ServerPlayerCountEvent(this, this.playerCount));
+        } catch (Exception ignore) {}
+    }
+
+    public void playerLeft() {
+        if(this.playerCount > 0) this.playerCount -= 1;
+
+        try {
+            Tinder.get().services().viewportService().orElseThrow().services().api().websocket()
+                    .fire(new ServerPlayerCountEvent(this, this.playerCount));
+        } catch (Exception ignore) {}
+    }
+
+    public void playerJoined() {
+        this.playerCount += 1;
+
+        try {
+            Tinder.get().services().viewportService().orElseThrow().services().api().websocket()
+                    .fire(new ServerPlayerCountEvent(this, this.playerCount));
+        } catch (Exception ignore) {}
     }
 
     @Override
@@ -234,20 +265,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         } catch(Exception ignore) {
             return false;
         }
-    }
-
-    /**
-     * Reduces the player count on this server by 1.
-     */
-    public void playerLeft() {
-        if(this.playerCount > 0) this.playerCount -= 1;
-    }
-
-    /**
-     * Increases the player count on this server by 1.
-     */
-    public void playerJoined() {
-        this.playerCount += 1;
     }
 
     @Override

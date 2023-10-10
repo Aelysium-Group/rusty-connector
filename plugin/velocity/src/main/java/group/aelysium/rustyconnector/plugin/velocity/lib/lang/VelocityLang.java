@@ -3,8 +3,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.lang;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.ASCIIAlphabet;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.ASCIIAlphabet;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.resolver.LanguageResolver;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -29,44 +30,215 @@ import java.util.Objects;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
-public interface VelocityLang extends Lang {
+public class VelocityLang extends Lang {
+    public static LanguageResolver resolver() {
+        return Tinder.get().lang().resolver();
+    }
 
-    Message WORDMARK_REGISTERED_FAMILIES = () -> // font: ANSI Shadow
+    public final static String REASON = resolver().getRaw("core.single_word.reason");
+
+    public final static String STATUS = resolver().getRaw("core.single_word.status");
+    public final static String ID = resolver().getRaw("core.single_word.id");
+    public final static String TIMESTAMP = resolver().getRaw("core.single_word.timestamp");
+    public final static String CONTENTS = resolver().getRaw("core.single_word.contents");
+    public final static String PAGES = resolver().getRaw("core.single_word.pages");
+    public final static String USAGE = resolver().getRaw("core.single_word.usage");
+    public final static String LEADER = resolver().getRaw("core.single_word.leader");
+    public final static String PARTY = resolver().getRaw("core.single_word.party");
+    public final static String LEAVE = resolver().getRaw("core.single_word.leave");
+    public final static String DISBAND = resolver().getRaw("core.single_word.disband");
+    public final static String ACCEPT = resolver().getRaw("core.single_word.accept");
+    public final static String DENY = resolver().getRaw("core.single_word.deny");
+    public final static String IGNORE = resolver().getRaw("core.single_word.ignore");
+    public final static String DATE = resolver().getRaw("core.single_word.date");
+
+    /*
+     * AQUA - For when data is successfully returned or when we send usage info
+     * RED - For when an error has occurred.
+     * ORANGE/YELLOW - For emphasis or highlighting.
+     */
+    public final static  JoinConfiguration newlines() {
+        return JoinConfiguration.separator(newline());
+    }
+
+    public final static Component BORDER = text("█████████████████████████████████████████████████████████████████████████████████████████████████", DARK_GRAY);
+
+    public final static Component SPACING = text("");
+
+    public final static Component UNKNOWN_COMMAND = text(resolver().getRaw("core.unknown_command"));
+    public final static Component NO_PERMISSION = text(resolver().getRaw("core.no_permission"));
+
+    public final static Message WORDMARK_USAGE = () -> ASCIIAlphabet.generate("usage");
+
+    public final static Message WORDMARK_MESSAGE = () -> ASCIIAlphabet.generate("message");
+
+    public final static ParameterizedMessage1<String> WORDMARK_RUSTY_CONNECTOR = (version) -> {// font: ANSI Shadow
+        Component versionComponent = empty();
+
+        if(version != null && !version.equals(""))
+            versionComponent = versionComponent.append(text("Version "+version, GREEN));
+
+        return join(
+                newlines(),
+                BORDER,
+                SPACING,
+                text(" /███████                        /██", AQUA),
+                text("| ██__  ██                      | ██", AQUA),
+                text("| ██  \\ ██ /██   /██  /███████ /██████   /██   /██", AQUA),
+                text("| ███████/| ██  | ██ /██_____/|_  ██_/  | ██  | ██", AQUA),
+                text("| ██__  ██| ██  | ██|  ██████   | ██    | ██  | ██", AQUA),
+                text("| ██  \\ ██| ██  | ██ \\____  ██  | ██ /██| ██  | ██", AQUA),
+                text("| ██  | ██|  ██████/ /███████/  |  ████/|  ███████", AQUA),
+                text("|__/  |__/ \\______/ |_______/    \\___/   \\____  ██", AQUA),
+                text("                                         /██  | ██  ", AQUA).append(versionComponent),
+                text("                                        |  ██████/", AQUA),
+                text("  /██████                                \\______/             /██", AQUA),
+                text(" /██__  ██                                                    | ██", AQUA),
+                text("| ██  \\__/  /██████  /███████  /███████   /██████   /███████ /██████    /██████   /██████", AQUA),
+                text("| ██       /██__  ██| ██__  ██| ██__  ██ /██__  ██ /██_____/|_  ██_/   /██__  ██ /██__  ██", AQUA),
+                text("| ██      | ██  \\ ██| ██  \\ ██| ██  \\ ██| ████████| ██        | ██    | ██  \\ ██| ██  \\__/", AQUA),
+                text("| ██    ██| ██  | ██| ██  | ██| ██  | ██| ██_____/| ██        | ██ /██| ██  | ██| ██", AQUA),
+                text("|  ██████/|  ██████/| ██  | ██| ██  | ██|  ███████|  ███████  |  ████/|  ██████/| ██", AQUA),
+                text("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/", AQUA),
+                SPACING,
+                BORDER,
+                SPACING,
+                resolver().get("core.boot_wordmark.developed_by"),
+                resolver().get("core.boot_wordmark.usage").color(YELLOW),
+                SPACING,
+                BORDER
+        );
+    };
+
+    public final static ParameterizedMessage1<Component> BOXED_MESSAGE = (message) -> join(
+            newlines(),
+            SPACING,
+            BORDER,
+            SPACING,
+            message,
+            SPACING,
+            BORDER,
+            SPACING
+    );
+    public final static ParameterizedMessage2<String, NamedTextColor> BOXED_MESSAGE_COLORED = (message, color) -> join(
+            newlines(),
+            SPACING,
+            BORDER.color(color),
+            SPACING,
+            text(message).color(color),
+            SPACING,
+            BORDER.color(color),
+            SPACING
+    );
+    public final static ParameterizedMessage2<Component, NamedTextColor> BOXED_COMPONENT_COLORED = (message, color) -> join(
+            newlines(),
+            SPACING,
+            BORDER.color(color),
+            SPACING,
+            message.color(color),
+            SPACING,
+            BORDER.color(color),
+            SPACING
+    );
+
+    public final static ParameterizedMessage1<CacheableMessage> CACHED_MESSAGE = (message) -> join(
+            newlines(),
+            BORDER,
+            text(STATUS+": " + message.getSentence().name(), message.getSentence().color()),
+            text(ID+": ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+            text(TIMESTAMP+": ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+            text( CONTENTS+": ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
+            BORDER
+    );
+
+    public final static ParameterizedMessage3<List<CacheableMessage>,Integer, Integer> RC_MESSAGE_PAGE = (messages, pageNumber, maxPages) -> {
+        Component output = text("");
+        for (CacheableMessage message : messages) {
+            if(!(message.getSentenceReason() == null))
+                output = output.append(join(
+                        newlines(),
+                        BORDER,
+                        SPACING,
+                        text(STATUS+": " + message.getSentence().name(), message.getSentence().color()),
+                        text(REASON+": " + message.getSentenceReason(), message.getSentence().color()),
+                        SPACING,
+                        text(ID+": ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+                        text(TIMESTAMP+": ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+                        text(CONTENTS+": ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
+                        SPACING
+                ));
+            else
+                output = output.append(join(
+                        newlines(),
+                        BORDER,
+                        SPACING,
+                        text(STATUS+": " + message.getSentence().name(), message.getSentence().color()),
+                        SPACING,
+                        text(ID+": ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+                        text(TIMESTAMP+": ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+                        text(CONTENTS+": ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
+                        SPACING
+                ));
+        }
+
+        Component pageNumbers = text("[ ",DARK_GRAY);
+        for (int i = 1; i <= maxPages; i++) {
+            if(i == pageNumber)
+                pageNumbers = pageNumbers.append(text(i+" ",GOLD));
+            else
+                pageNumbers = pageNumbers.append(text(i+" ",GRAY));
+        }
+        pageNumbers = pageNumbers.append(text("]",DARK_GRAY));
+
+        return output.append(
+                join(
+                        newlines(),
+                        SPACING,
+                        BORDER,
+                        SPACING,
+                        text(PAGES+":"),
+                        pageNumbers,
+                        SPACING,
+                        BORDER
+                )
+        );
+    };
+
+    public final static Message WORDMARK_REGISTERED_FAMILIES = () -> // font: ANSI Shadow
             join(
-                    Lang.newlines(),
+                    newlines(),
                     ASCIIAlphabet.generate("registered"),
                     SPACING,
                     ASCIIAlphabet.generate("families")
             );
 
-    Message RC_ROOT_USAGE = () -> join(
-            Lang.newlines(),
+    public final static Message RC_ROOT_USAGE = () -> join(
+            newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build().color(AQUA),
             SPACING,
-            text("Blue commands will return information or data to you! They will not cause changes to be made.",GRAY),
-            text("Orange commands will make the plugin do something. Make sure you know what these commands do before using them!",GRAY),
+            resolver().getArray("velocity.root.usage.description"),
             SPACING,
             BORDER,
             SPACING,
             text("/rc family", AQUA),
-            text("View family related information.", DARK_GRAY),
+            resolver().get("velocity.root.usage.command_description.family"),
             SPACING,
             text("/rc message", AQUA),
-            text("Access recently sent RustyConnector messages.", DARK_GRAY),
+            resolver().get("velocity.root.usage.command_description.message"),
             SPACING,
             text("/rc reload", GOLD),
-            text("Reload entire plugin.", DARK_GRAY),
+            resolver().get("velocity.root.usage.command_description.reload"),
             SPACING,
             text("/rc send", AQUA),
-            text("Send players from families and servers to other families or servers.", DARK_GRAY),
+            resolver().get("velocity.root.usage.command_description.send"),
             SPACING,
             BORDER
     );
 
-    Message RC_MESSAGE_ROOT_USAGE = () -> join(
-            Lang.newlines(),
+    public final static Message RC_MESSAGE_ROOT_USAGE = () -> join(
+            newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build().color(AQUA),
@@ -74,16 +246,16 @@ public interface VelocityLang extends Lang {
             BORDER,
             SPACING,
             text("/rc message get <Message ID>", AQUA),
-            text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!", DARK_GRAY),
+            resolver().get("velocity.message.usage.get"),
             SPACING,
             text("/rc message list <page number>", AQUA),
-            text("Lists all currently cached messages! As new messages get cached, older ones will be pushed out of the cache.", DARK_GRAY),
+            resolver().get("velocity.message.usage.list"),
             SPACING,
             BORDER
     );
 
-    Message RC_SEND_USAGE = () -> join(
-            Lang.newlines(),
+    public final static Message RC_SEND_USAGE = () -> join(
+            newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build().color(AQUA),
@@ -91,30 +263,16 @@ public interface VelocityLang extends Lang {
             BORDER,
             SPACING,
             text("/rc send <username> <family name>", GOLD),
-            text("Sends a player from one family to another!", DARK_GRAY),
-            BORDER,
+            resolver().get("velocity.send.usage.family"),
             SPACING,
             text("/rc send server <username> <server name>", GOLD),
-            text("Force a player to connect to a specific server on the proxy. This bypasses player caps and family whitelists.", DARK_GRAY),
-            text("If you have multiple servers with the same name, this feature may send players to a server other than the one you intended.", DARK_GRAY),
+            resolver().getArray("velocity.send.usage.server"),
             SPACING,
             BORDER
     );
-    ParameterizedMessage1<String> RC_SEND_NO_PLAYER = username -> join(
-            Lang.newlines(),
-            text("There is no online player with the username: "+username+"!", RED)
-    );
-    ParameterizedMessage1<String> RC_SEND_NO_FAMILY = familyName -> join(
-            Lang.newlines(),
-            text("There is no family with the name: "+familyName+"!", RED)
-    );
-    ParameterizedMessage1<String> RC_SEND_NO_SERVER = serverName -> join(
-            Lang.newlines(),
-            text("There is no server with the name: "+serverName+"!", RED)
-    );
 
-    Message RC_MESSAGE_GET_USAGE = () -> join(
-            Lang.newlines(),
+    public final static Message RC_MESSAGE_GET_USAGE = () -> join(
+            newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build().color(AQUA),
@@ -122,30 +280,37 @@ public interface VelocityLang extends Lang {
             BORDER,
             SPACING,
             text("/rc message get <Message ID>",AQUA),
-            text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!", GRAY),
+            resolver().get("velocity.message.usage.get"),
             SPACING,
             BORDER
     );
 
-    ParameterizedMessage1<CacheableMessage> RC_MESSAGE_GET_MESSAGE = (message) -> join(
-            Lang.newlines(),
+    public final static ParameterizedMessage1<String> RC_SEND_NO_PLAYER = username ->
+            resolver().get("velocity.send.no_player", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> RC_SEND_NO_FAMILY = familyName ->
+            resolver().get("velocity.send.no_family", LanguageResolver.tagHandler("family_name", familyName));
+    public final static ParameterizedMessage1<String> RC_SEND_NO_SERVER = serverName ->
+            resolver().get("velocity.send.no_server", LanguageResolver.tagHandler("server_name", serverName));
+
+    public final static ParameterizedMessage1<CacheableMessage> RC_MESSAGE_GET_MESSAGE = (message) -> join(
+            newlines(),
             BORDER,
             SPACING,
             WORDMARK_MESSAGE.build().color(AQUA),
             SPACING,
             BORDER,
             SPACING,
-            text("Status: " + message.getSentence().name(), message.getSentence().color()),
-            text("Reason: " + message.getSentenceReason(), message.getSentence().color()),
+            text(STATUS+": " + message.getSentence().name(), message.getSentence().color()),
+            text(REASON+": " + message.getSentenceReason(), message.getSentence().color()),
             SPACING,
-            text("ID: ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
-            text("Timestamp: ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
-            text("Contents: ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
+            text(ID+": ", message.getSentence().color()).append(text(message.getSnowflake(), GRAY)),
+            text(TIMESTAMP+": ", message.getSentence().color()).append(text(message.getDate().toString(), GRAY)),
+            text(CONTENTS+": ", message.getSentence().color()).append(text(message.getContents(), GRAY)),
             SPACING
     );
 
-    ParameterizedMessage1<String> RC_MESSAGE_ERROR = error -> join(
-            Lang.newlines(),
+    public final static ParameterizedMessage1<String> RC_MESSAGE_ERROR = error -> join(
+            newlines(),
             BORDER,
             SPACING,
             WORDMARK_MESSAGE.build().color(RED),
@@ -157,7 +322,7 @@ public interface VelocityLang extends Lang {
             BORDER
     );
 
-    Message RC_FAMILY = () -> {
+    public final static Message RC_FAMILY = () -> {
         Tinder api = Tinder.get();
         Component families = text("");
         for (BaseServerFamily family : api.services().familyService().dump()) {
@@ -168,27 +333,27 @@ public interface VelocityLang extends Lang {
         }
 
         return join(
-                Lang.newlines(),
+                newlines(),
                 BORDER,
                 SPACING,
                 WORDMARK_REGISTERED_FAMILIES.build().color(AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
-                text("Gold families are Scalar. Green families are Static.", GRAY),
+                resolver().get("velocity.family.description"),
                 families,
                 SPACING,
                 BORDER,
                 SPACING,
-                text("To see more details about a particular family use:", GRAY),
                 text("/rc family <family name>",DARK_AQUA),
+                resolver().get("velocity.family.details_usage"),
                 SPACING,
                 BORDER
         );
     };
 
-    ParameterizedMessage1<String> RC_FAMILY_ERROR = error -> join(
-            Lang.newlines(),
+    public final static ParameterizedMessage1<String> RC_FAMILY_ERROR = error -> join(
+            newlines(),
             BORDER,
             SPACING,
             WORDMARK_REGISTERED_FAMILIES.build().color(RED),
@@ -200,20 +365,14 @@ public interface VelocityLang extends Lang {
             BORDER
     );
 
-    ParameterizedMessage1<ScalarServerFamily> RC_SCALAR_FAMILY_INFO = (family) -> {
+    public final static ParameterizedMessage1<ScalarServerFamily> RC_SCALAR_FAMILY_INFO = (family) -> {
         Component servers = text("");
         int i = 0;
 
-        if(family.registeredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
-        else if(family.registeredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
+        if(family.registeredServers() == null) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
+        else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
         else for (PlayerServer server : family.registeredServers()) {
-                if (!family.joinable(server))
-                    servers = servers.append(
-                        text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                        "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                        "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] XXXXX"
-                                , RED));
-                else if(family.loadBalancer().index() == i)
+                if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
                                             "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
@@ -239,32 +398,33 @@ public interface VelocityLang extends Lang {
         if(family.equals(rootFamily)) parentFamilyName = "none";
 
         return join(
-                Lang.newlines(),
+                newlines(),
                 BORDER,
                 SPACING,
                 ASCIIAlphabet.generate(family.name(), AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
-                text("   ---| Online Players: "+family.playerCount()),
-                text("   ---| Registered Servers: "+family.serverCount()),
-                text("   ---| Joinable Servers: "+family.loadBalancer().size()),
-                text("   ---| Parent Family: "+ parentFamilyName),
-                text("   ---| Load Balancing:"),
-                text("      | - Algorithm: "+family.loadBalancer()),
-                text("      | - Weighted Sorting: "+family.isWeighted()),
-                text("      | - Persistence: "+family.loadBalancer().persistent()),
-                text("      | - Max Attempts: "+family.loadBalancer().attempts()),
+                resolver().getArray(
+                        "velocity.family.scalar_family.panel.info",
+                        LanguageResolver.tagHandler("player_count", family.playerCount()),
+                        LanguageResolver.tagHandler("server_count", family.serverCount()),
+                        LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
+                        LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
+                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
+                        LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
+                ),
                 SPACING,
                 BORDER,
                 SPACING,
-                text("Registered Servers", AQUA),
+                resolver().get("velocity.family.scalar_family.panel.registered_servers"),
                 SPACING,
                 text("/rc family <family name> sort", GOLD),
-                text("Will cause the family to completely resort itself in accordance with it's load balancing algorithm.", DARK_GRAY),
+                resolver().get("velocity.family.scalar_family.panel.commands.sort"),
                 SPACING,
                 text("/rc family <family name> resetIndex", GOLD),
-                text("Will reset the family's input to the first server in the family.", DARK_GRAY),
+                resolver().get("velocity.family.scalar_family.panel.commands.reset_index"),
                 SPACING,
                 servers,
                 SPACING,
@@ -272,20 +432,14 @@ public interface VelocityLang extends Lang {
         );
     };
 
-    ParameterizedMessage1<StaticServerFamily> RC_STATIC_FAMILY_INFO = (family) -> {
+    public final static ParameterizedMessage1<StaticServerFamily> RC_STATIC_FAMILY_INFO = (family) -> {
         Component servers = text("");
         int i = 0;
 
-        if(family.registeredServers() == null) servers = text("There are no registered servers.", DARK_GRAY);
-        else if(family.registeredServers().size() == 0) servers = text("There are no registered servers.", DARK_GRAY);
+        if(family.registeredServers() == null) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
+        else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
         else for (PlayerServer server : family.registeredServers()) {
-                if (!family.joinable(server))
-                    servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] XXXXX"
-                                    , RED));
-                else if(family.loadBalancer().index() == i)
+                if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
                                             "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
@@ -315,33 +469,34 @@ public interface VelocityLang extends Lang {
         if(expiration != null) homeServerExpiration = expiration.toString();
 
         return join(
-                Lang.newlines(),
+                newlines(),
                 BORDER,
                 SPACING,
                 ASCIIAlphabet.generate(family.name(), AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
-                text("   ---| Online Players: "+family.playerCount()),
-                text("   ---| Registered Servers: "+family.serverCount()),
-                text("   ---| Joinable Servers: "+family.loadBalancer().size()),
-                text("   ---| Parent Family: "+ parentFamilyName),
-                text("   ---| Home Server Expiration: "+homeServerExpiration),
-                text("   ---| Load Balancing:"),
-                text("      | - Algorithm: "+family.loadBalancer()),
-                text("      | - Weighted Sorting: "+family.isWeighted()),
-                text("      | - Persistence: "+family.loadBalancer().persistent()),
-                text("      | - Max Attempts: "+family.loadBalancer().attempts()),
+                resolver().getArray(
+                        "velocity.family.static_family.panel.info",
+                        LanguageResolver.tagHandler("player_count", family.playerCount()),
+                        LanguageResolver.tagHandler("server_count", family.serverCount()),
+                        LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
+                        LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
+                        LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
+                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
+                        LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
+                ),
                 SPACING,
                 BORDER,
                 SPACING,
-                text("Registered Servers", AQUA),
+                resolver().get("velocity.family.static_family.panel.registered_servers"),
                 SPACING,
                 text("/rc family <family name> sort", GOLD),
-                text("Will cause the family to completely resort itself in accordance with it's load balancing algorithm.", DARK_GRAY),
+                resolver().get("velocity.family.static_family.panel.commands.sort"),
                 SPACING,
                 text("/rc family <family name> resetIndex", GOLD),
-                text("Will reset the family's input to the first server in the family.", DARK_GRAY),
+                resolver().get("velocity.family.static_family.panel.commands.reset_index"),
                 SPACING,
                 servers,
                 SPACING,
@@ -349,60 +504,45 @@ public interface VelocityLang extends Lang {
         );
     };
 
-    Component MISSING_HOME_SERVER = text("The server you were meant to be connected to is unavailable! In the meantime you've been connected to a fallback server!", RED);
-    Component BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT = text("The server you were meant to be connected to is unavailable! Please try again later!", RED);
+    public final static Component MISSING_HOME_SERVER = resolver().get("velocity.family.static_family.residence.missing");
+    public final static Component BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT = resolver().get("velocity.family.static_family.residence.blocked_join_attempt");
 
-
-    Component COMMAND_NO_PERMISSION = text("You do not have permission to use this command.",RED);
-
-    Message TPA_USAGE = () -> text("Usage: /tpa <<username>, deny, accept>",RED);
-    Message TPA_IGNORE_USAGE = () -> join(
-            Lang.newlines(),
-            text("Usage: /tpa ignore <username>",RED),
-            text("Deny a tpa request from a user.",GRAY)
+    public final static Message TPA_USAGE = () -> text(USAGE+": /tpa <<username>, deny, accept>",RED);
+    public final static Message TPA_DENY_USAGE = () -> join(
+            newlines(),
+            text(USAGE+": /tpa deny <username>",RED),
+            resolver().get("velocity.tpa.usage.deny")
     );
-    Message TPA_ACCEPT_USAGE = () -> join(
-            Lang.newlines(),
-            text("Usage: /tpa accept <username>",RED),
-            text("Accept a tpa request from a user.",GRAY)
+    public final static Message TPA_ACCEPT_USAGE = () -> join(
+            newlines(),
+            text(USAGE+": /tpa accept <username>",RED),
+            resolver().get("velocity.tpa.usage.accept")
     );
 
-    ParameterizedMessage1<String> TPA_FAILURE = username -> text("Unable to tpa to "+username+"!",RED);
-    ParameterizedMessage1<String> TPA_FAILURE_TARGET = username -> text("Unable to tpa "+username+" to you!",RED);
-    Component TPA_FAILURE_SELF_TP = text("You can't teleport to yourself!",RED);
-    ParameterizedMessage1<String> TPA_FAILURE_NO_USERNAME = username -> text(username+" isn't online!",RED);
-    ParameterizedMessage1<String> TPA_FAILURE_NO_REQUEST = username -> text(username+" hasn't sent you any recent tpa requests!",RED);
-    ParameterizedMessage1<String> TPA_REQUEST_DUPLICATE = username -> text("You already have a pending tpa request to "+ username +"!",RED);
+    public final static ParameterizedMessage1<String> TPA_FAILURE = username -> resolver().get("velocity.tpa.sender_failure", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TPA_FAILURE_TARGET = username -> resolver().get("velocity.tpa.target_failure", LanguageResolver.tagHandler("username", username));
+    public final static Component TPA_FAILURE_SELF_TP = resolver().get("velocity.tpa.self_failure");
+    public final static ParameterizedMessage1<String> TPA_FAILURE_NO_USERNAME = username -> resolver().get("velocity.tpa.not_online", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TPA_FAILURE_NO_REQUEST = username -> resolver().get("velocity.tpa.no_requests", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TPA_REQUEST_DUPLICATE = username -> resolver().get("velocity.tpa.pending_request", LanguageResolver.tagHandler("username", username));
 
-    ParameterizedMessage1<Player> TPA_REQUEST_QUERY = (sender) -> join(
-            Lang.newlines(),
-            text("Hey! " + sender.getUsername() + " has requested to teleport to you!",GOLD),
+    public final static ParameterizedMessage1<Player> TPA_REQUEST_QUERY = (sender) -> join(
+            newlines(),
+            resolver().get("velocity.tpa.target_query.query", LanguageResolver.tagHandler("username", sender.getUsername())),
             join(
                     JoinConfiguration.separator(space()),
-                    text("[Accept]", GREEN).hoverEvent(HoverEvent.showText(text("Let "+sender.getUsername()+" teleport to you"))).clickEvent(ClickEvent.runCommand("/tpa accept "+sender.getUsername())),
-                    text("[Ignore]", RED).hoverEvent(HoverEvent.showText(text("Ignore "+sender.getUsername()+"'s request"))).clickEvent(ClickEvent.runCommand("/party ignore "+sender.getUsername()))
+                    text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("velocity.tpa.target_query.accept_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/tpa accept "+sender.getUsername())),
+                    text("["+DENY+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.tpa.target_query.deny_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/party ignore "+sender.getUsername()))
             )
     );
-    ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> text("You requested to teleport to "+ username +"!",GREEN);
-    ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_SENDER = username -> join(
-            Lang.newlines(),
-            text(username +" accepted your request!",GREEN),
-            text("Attempting to teleport...",GRAY)
-    );
-    ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_TARGET = username -> join(
-            Lang.newlines(),
-            text(username +"'s tpa request has been accepted!",GREEN),
-            text("Attempting to teleport...",GRAY)
-    );
-    ParameterizedMessage1<String> TPA_REQUEST_DENIED_SENDER = username -> text(username +" denied your request!",RED);
-    ParameterizedMessage1<String> TPA_REQUEST_DENIED_TARGET = username -> join(
-            Lang.newlines(),
-            text(username +"'s tpa request has been denied!",RED),
-            text("They've been notified...",GRAY)
-    );
-    ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> text("Your tpa request to "+username+" has expired!",RED);
+    public final static ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> resolver().get("velocity.tpa.request_confirmation", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_SENDER = username -> resolver().getArray("velocity.tpa.sender_accepted", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_TARGET = username -> resolver().getArray("velocity.tpa.target_accepted", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TPA_REQUEST_DENIED_SENDER = username -> resolver().getArray("velocity.tpa.sender_deny", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TPA_REQUEST_DENIED_TARGET = username -> resolver().getArray("velocity.tpa.target_deny", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> resolver().getArray("velocity.tpa.expired_request", LanguageResolver.tagHandler("username", username));
 
-    ParameterizedMessage2<Party, Player> PARTY_BOARD = (party, member) -> {
+    public final static ParameterizedMessage2<Party, Player> PARTY_BOARD = (party, member) -> {
         boolean hasParty = party != null;
 
         if(hasParty) {
@@ -425,18 +565,18 @@ public interface VelocityLang extends Lang {
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
-                                        text("[x]", RED).hoverEvent(HoverEvent.showText(text("Leave Party"))).clickEvent(ClickEvent.runCommand("/party leave")),
+                                        text("[x]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.leave"))).clickEvent(ClickEvent.runCommand("/party leave")),
                                         text("[^]", GRAY),
                                         text(partyMember.getUsername(), WHITE),
-                                        text("[Leader]", BLUE)
+                                        text("["+LEADER+"]", BLUE)
                                 )
                         );
                     else
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
-                                        text("[x]", RED).hoverEvent(HoverEvent.showText(text("Kick Player"))).clickEvent(ClickEvent.runCommand("/party kick " + partyMember.getUsername())),
-                                        text("[^]", GREEN).hoverEvent(HoverEvent.showText(text("Promote to Leader"))).clickEvent(ClickEvent.runCommand("/party promote " + partyMember.getUsername())),
+                                        text("[x]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.kick"))).clickEvent(ClickEvent.runCommand("/party kick " + partyMember.getUsername())),
+                                        text("[^]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.promote"))).clickEvent(ClickEvent.runCommand("/party promote " + partyMember.getUsername())),
                                         text(partyMember.getUsername(), WHITE)
                                 )
                         );
@@ -449,7 +589,7 @@ public interface VelocityLang extends Lang {
                                 join(
                                         JoinConfiguration.separator(text(" ")),
                                         text(partyMember.getUsername(), WHITE),
-                                        text("[Leader]", BLUE)
+                                        text("["+LEADER+"]", BLUE)
                                 )
                         );
                     else
@@ -464,67 +604,67 @@ public interface VelocityLang extends Lang {
             Component header;
             if(canInvite)
                 header = text("-------------------", GRAY)
-                 .append(text(" Party ", WHITE))
-                 .append(text("[+]", GREEN)).hoverEvent(HoverEvent.showText(text("Invite Player"))).clickEvent(ClickEvent.suggestCommand("/party invite <username>"))
+                 .append(text(" "+PARTY+" ", WHITE))
+                 .append(text("[+]", GREEN)).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.invite"))).clickEvent(ClickEvent.suggestCommand("/party invite <username>"))
                  .append(text(" ------------------", GRAY));
             else
                 header = text("------------------", GRAY)
-                        .append(text(" Party ", WHITE))
+                        .append(text(" "+PARTY+" ", WHITE))
                         .append(text(" ------------------", GRAY));
 
             if(isLeader)
                 return join(
-                        Lang.newlines(),
+                        newlines(),
                         header,
                         playersList[0],
                         space(),
                         text("----------------", GRAY)
                                 .appendSpace()
-                                .append(text("Disband", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party disband")))
+                                .append(text(DISBAND, RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party disband")))
                                 .appendSpace()
                                 .appendSpace()
-                                .append(text("Leave", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party leave")))
+                                .append(text(LEAVE, RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party leave")))
                                 .appendSpace()
                                 .append(text("----------------", GRAY))
                 );
             else
                 return join(
-                        Lang.newlines(),
+                        newlines(),
                         header,
                         playersList[0],
                         space(),
-                        text("------------------ ", GRAY).append(text("Leave", RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party leave"))).append(text(" ------------------", GRAY))
+                        text("------------------ ", GRAY).append(text(LEAVE, RED, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party leave"))).append(text(" ------------------", GRAY))
                         );
         }
 
-        return text("Click here to create a party.", YELLOW, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/party create"));
+        return resolver().get("velocity.party.create").clickEvent(ClickEvent.runCommand("/party create"));
     };
 
-    ParameterizedMessage1<Player> PARTY_INVITE_RECEIVED = (sender) -> join(
-            Lang.newlines(),
-            text("Hey! "+ sender.getUsername() +" wants you to join their party!", NamedTextColor.GRAY),
+    public final static ParameterizedMessage1<Player> PARTY_INVITE_RECEIVED = (sender) -> join(
+            newlines(),
+            resolver().get("velocity.party.receiver_invite_query.query", LanguageResolver.tagHandler("username", sender.getUsername())),
             join(
                     JoinConfiguration.separator(space()),
-                    text("[Accept]", GREEN).hoverEvent(HoverEvent.showText(text("Accept party invite"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" accept")),
-                    text("[Ignore]", RED).hoverEvent(HoverEvent.showText(text("Ignore party invite"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" ignore"))
+                    text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.receiver_invite_query.accept"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" accept")),
+                    text("["+IGNORE+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.receiver_invite_query.ignore"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" ignore"))
             )
     );
 
-    Message PARTY_USAGE_INVITES = () -> text("Usage: /party invites <username> <accept / ignore>",RED);
+    public final static Message PARTY_USAGE_INVITES = () -> text(USAGE+": /party invites <username> <accept / ignore>",RED);
 
-    Message PARTY_USAGE_INVITE = () -> text("Usage: /party invite <username>",RED);
+    public final static Message PARTY_USAGE_INVITE = () -> text(USAGE+": /party invite <username>",RED);
 
-    Message PARTY_USAGE_KICK = () -> text("Usage: /party kick <username>",RED);
+    public final static Message PARTY_USAGE_KICK = () -> text(USAGE+": /party kick <username>",RED);
 
-    Message PARTY_USAGE_PROMOTE = () -> text("Usage: /party promote <username>",RED);
+    public final static Message PARTY_USAGE_PROMOTE = () -> text(USAGE+": /party promote <username>",RED);
 
-    Message PARTY_DISBANDED = () -> text("Your party has been disbanded.",GRAY);
+    public final static Message PARTY_DISBANDED = () -> resolver().get("velocity.party.disbanded");
 
-    ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
+    public final static ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
         Tinder api = Tinder.get();
         FriendsService friendsService = api.services().friendsService().orElseThrow();
         int maxFriends = friendsService.settings().maxFriends();
-        player.sendMessage(text("Getting friends...", GRAY));
+        player.sendMessage(resolver().get("velocity.friends.panel.pending"));
 
         boolean isPartyEnabled = false;
         try {
@@ -544,44 +684,45 @@ public interface VelocityLang extends Lang {
             friends.forEach(friend -> {
                 playersList[0] = playersList[0].appendNewline();
 
-                playersList[0] = playersList[0].append(text("[x]", RED).hoverEvent(HoverEvent.showText(text("Unfriend "+friend.username()))).clickEvent(ClickEvent.runCommand("/unfriend " + friend.username())));
+                playersList[0] = playersList[0].append(text("[x]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.unfriend", LanguageResolver.tagHandler("username",friend.username())))).clickEvent(ClickEvent.runCommand("/unfriend " + friend.username())));
+
                 playersList[0] = playersList[0].append(space());
 
 
                 if(isFriendMessagingEnabled) {
-                    playersList[0] = playersList[0].append(text("[!]", YELLOW).hoverEvent(HoverEvent.showText(text("Message " + friend.username()))).clickEvent(ClickEvent.suggestCommand("/fm " + friend.username() + " ")));
+                    playersList[0] = playersList[0].append(text("[!]", YELLOW).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.message", LanguageResolver.tagHandler("username",friend.username())))).clickEvent(ClickEvent.suggestCommand("/fm " + friend.username() + " ")));
                     playersList[0] = playersList[0].append(space());
                 }
 
 
                 if(finalIsPartyEnabled) {
-                    playersList[0] = playersList[0].append(text("[p]", BLUE).hoverEvent(HoverEvent.showText(text("Invite " + friend.username() + " to your party"))).clickEvent(ClickEvent.runCommand("/party invite " + friend.username() + " ")));
+                    playersList[0] = playersList[0].append(text("[p]", BLUE).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.invite_party", LanguageResolver.tagHandler("username",friend.username())))).clickEvent(ClickEvent.runCommand("/party invite " + friend.username() + " ")));
                     playersList[0] = playersList[0].append(space());
                 }
 
 
                 Player resolvedFriend = friend.resolve().orElse(null);
                 if(resolvedFriend == null) {
-                    playersList[0] = playersList[0].append(text(friend.username(), GRAY).hoverEvent(HoverEvent.showText(text("Offline", GRAY))));
+                    playersList[0] = playersList[0].append(text(friend.username(), GRAY).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.offline"))));
                     return;
                 }
                 if(resolvedFriend.getCurrentServer().orElse(null) == null) {
-                    playersList[0] = playersList[0].append(text(friend.username(), GRAY).hoverEvent(HoverEvent.showText(text("Offline", GRAY))));
+                    playersList[0] = playersList[0].append(text(friend.username(), GRAY).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.offline"))));
                     return;
                 }
 
                 PlayerServer playerServer = api.services().serverService().search(resolvedFriend.getCurrentServer().get().getServerInfo());
                 if(canSeeFriendFamilies)
-                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(text("Currently Playing: ", GRAY).append(text(playerServer.family().name(), AQUA)))));
+                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.currently_playing", LanguageResolver.tagHandler("family_name", playerServer.family().name())))));
                 else
-                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(text("Online", WHITE))));
+                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.online"))));
             });
 
             return join(
-                    Lang.newlines(),
+                    newlines(),
                     text("--------------", GRAY)
-                            .append(text(" Friends ("+friends.size()+"/"+maxFriends+") ", WHITE))
-                            .append(text("[+]", GREEN).hoverEvent(HoverEvent.showText(text("Add Friend"))).clickEvent(ClickEvent.suggestCommand("/friends add <username>")))
+                            .append(resolver().get("velocity.friends.panel.header.main", LanguageResolver.tagHandler("friend_count", friends.size()), LanguageResolver.tagHandler("max_friends", maxFriends)))
+                            .append(text("[+]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.add_friend"))).clickEvent(ClickEvent.suggestCommand("/friends add <username>")))
                             .append(text(" --------------", GRAY)),
                     playersList[0],
                     space(),
@@ -590,81 +731,77 @@ public interface VelocityLang extends Lang {
         }
 
         return join(
-                Lang.newlines(),
-                text("Click here to send a friend request.", YELLOW, TextDecoration.UNDERLINED).clickEvent(ClickEvent.suggestCommand("/friends add <username>"))
+                newlines(),
+                resolver().get("velocity.friends.panel.send_friend_request").clickEvent(ClickEvent.suggestCommand("/friends add <username>"))
         );
     };
 
-    ParameterizedMessage1<Player> FRIEND_REQUEST = (sender) -> join(
-            Lang.newlines(),
-            text("Hey! "+ sender.getUsername() +" wants to be your friend!", NamedTextColor.GRAY),
+    public final static ParameterizedMessage1<Player> FRIEND_REQUEST = (sender) -> join(
+            newlines(),
+            resolver().get("velocity.friends.friend_request_query.query", LanguageResolver.tagHandler("username", sender.getUsername())),
             join(
                     JoinConfiguration.separator(space()),
-                    text("[Accept]", GREEN).hoverEvent(HoverEvent.showText(text("Accept friend request"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.getUsername()+" accept")),
-                    text("[Ignore]", RED).hoverEvent(HoverEvent.showText(text("Ignore friend request"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.getUsername()+" ignore"))
+                    text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.friend_request_query.hover.accept"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.getUsername()+" accept")),
+                    text("["+IGNORE+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.friend_request_query.hover.ignore"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.getUsername()+" ignore"))
             )
     );
-    ParameterizedMessage1<Player> FRIEND_JOIN = (player) -> {
+    public final static ParameterizedMessage1<Player> FRIEND_JOIN = (player) -> {
         FriendsService friendsService = Tinder.get().services().friendsService().orElseThrow();
 
         if(friendsService.settings().allowMessaging())
-            return join(
-                    JoinConfiguration.separator(space()),
-                    text("Your friend", NamedTextColor.GRAY),
-                    text(player.getUsername(), AQUA, TextDecoration.UNDERLINED).hoverEvent(HoverEvent.showText(text("Send a message to "+player.getUsername()))).clickEvent(ClickEvent.suggestCommand("/fm "+player.getUsername()+" ")),
-                    text("just logged in.", NamedTextColor.GRAY)
-            );
+            return resolver().get("velocity.friends.friend_joined.resolved", LanguageResolver.tagHandler("username", player.getUsername()));
         else
-            return text("Your friend "+ player.getUsername() +" just logged in!", NamedTextColor.GRAY);
+            return resolver().get("velocity.friends.friend_joined.regular", LanguageResolver.tagHandler("username", player.getUsername()));
     };
-    ParameterizedMessage1<Player> FRIEND_LEAVE = (player) -> text("Your friend "+ player.getUsername() +" just logged out!", NamedTextColor.GRAY);;
-    Message FRIEND_REQUEST_USAGE = () -> text("Usage: /friend requests <username> <accept / ignore>",RED);
-    Message UNFRIEND_USAGE = () -> text("Usage: /unfriend <username>",RED);
-    Message FM_USAGE = () -> text("Usage: /fm <username> <message>",RED);
+    public final static ParameterizedMessage1<Player> FRIEND_LEAVE = (player) ->
+            resolver().get("velocity.friends.friend_leaves", LanguageResolver.tagHandler("username", player.getUsername()));
+    public final static Message FRIEND_REQUEST_USAGE = () -> text(USAGE+": /friend requests <username> <accept / ignore>",RED);
+    public final static Message UNFRIEND_USAGE = () -> text(USAGE+": /unfriend <username>",RED);
+    public final static Message FM_USAGE = () -> text(USAGE+": /fm <username> <message>",RED);
 
-    ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(
+    public final static ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(
              LoggerConfig.getConfig().getConsoleIcons_ping() + " " +
                     "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
     );
 
-    ParameterizedMessage2<ServerInfo, String> REGISTRATION_REQUEST = (serverInfo, familyName) -> text(
+    public final static ParameterizedMessage2<ServerInfo, String> REGISTRATION_REQUEST = (serverInfo, familyName) -> text(
             "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_attemptingRegistration() +" "+familyName
     );
 
-    ParameterizedMessage2<ServerInfo, String> REGISTERED = (serverInfo, familyName) -> text(
+    public final static ParameterizedMessage2<ServerInfo, String> REGISTERED = (serverInfo, familyName) -> text(
             "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_registered() +" "+familyName
     );
 
-    ParameterizedMessage2<ServerInfo, String> REGISTRATION_CANCELED = (serverInfo, familyName) -> text(
+    public final static ParameterizedMessage2<ServerInfo, String> REGISTRATION_CANCELED = (serverInfo, familyName) -> text(
             "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_canceledRequest() +" "+familyName
     );
 
-    ParameterizedMessage2<ServerInfo, String> UNREGISTRATION_REQUEST = (serverInfo, familyName) -> text(
+    public final static ParameterizedMessage2<ServerInfo, String> UNREGISTRATION_REQUEST = (serverInfo, familyName) -> text(
             "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_attemptingUnregistration() +" "+familyName
     );
 
-    ParameterizedMessage2<ServerInfo, String> UNREGISTERED = (serverInfo, familyName) -> text(
+    public final static ParameterizedMessage2<ServerInfo, String> UNREGISTERED = (serverInfo, familyName) -> text(
             "["+serverInfo.getName()+"]" +
                     "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_unregistered() +" "+familyName
     );
 
-    ParameterizedMessage2<ServerInfo, String> UNREGISTRATION_CANCELED = (server, familyName) -> text(
+    public final static ParameterizedMessage2<ServerInfo, String> UNREGISTRATION_CANCELED = (server, familyName) -> text(
             "["+server.getName()+"]" +
                     "("+server.getAddress().getHostName()+":"+server.getAddress().getPort()+")" +
                     " "+ LoggerConfig.getConfig().getConsoleIcons_canceledRequest() +" "+familyName
     );
 
-    ParameterizedMessage1<BaseServerFamily> FAMILY_BALANCING = family -> text(
+    public final static ParameterizedMessage1<BaseServerFamily> FAMILY_BALANCING = family -> text(
             family.name() + " " + LoggerConfig.getConfig().getConsoleIcons_familyBalancing()
     );
 }

@@ -8,6 +8,7 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'java-library'
 
 group = project.maven_group
 version = project.plugin_version
@@ -34,6 +35,7 @@ subprojects {
         compileOnly "org.spongepowered:configurate-yaml:${project.configurate_version}"
         compileOnly "mysql:mysql-connector-java:${project.mysql_version}"
         compileOnly "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
+        compileOnly "com.google.guava:guava:${project.guava_version}"
     }
 }
 
@@ -58,4 +60,6 @@ jar {
     }
 
     from(files("LICENSE_rusty-connector"))
+
+    exclude("META-INF/*.RSA", "META-INF/*.DSA", "META-INF/*.SF")
 }

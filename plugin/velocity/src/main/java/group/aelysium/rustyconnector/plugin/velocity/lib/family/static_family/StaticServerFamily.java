@@ -1,11 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.connectors.Connector;
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
-import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
 import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
-import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -23,9 +22,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.rmi.ConnectException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,22 +61,18 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticServerFamily init(String familyName, List<Component> bootOutput, List<String> requestedConnectors, ConnectorsService connectorsService) throws Exception {
+    public static StaticServerFamily init(String familyName, List<Component> bootOutput, List<String> requestedConnectors, ConnectorsService connectorsService, LangService lang) throws Exception {
         Tinder api = Tinder.get();
 
-        StaticFamilyConfig staticFamilyConfig = StaticFamilyConfig.newConfig(
-                familyName,
-                new File(String.valueOf(api.dataFolder()), "families/" + familyName + ".static.yml"),
-                "velocity_static_family_template.yml"
-        );
-        if (!staticFamilyConfig.generate(bootOutput)) {
+        StaticFamilyConfig staticFamilyConfig = new StaticFamilyConfig(new File(String.valueOf(api.dataFolder()), "families/" + familyName + ".static.yml"));
+        if (!staticFamilyConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_STATIC_FAMILY_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create families/" + familyName + ".static.yml!");
         }
         staticFamilyConfig.register();
 
         Whitelist whitelist = null;
         if (staticFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name(), bootOutput);
+            whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name(), bootOutput, lang);
 
             api.services().whitelistService().add(whitelist);
         }

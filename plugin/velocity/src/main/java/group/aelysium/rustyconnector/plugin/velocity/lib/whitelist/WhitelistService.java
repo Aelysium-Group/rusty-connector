@@ -68,6 +68,8 @@ public class WhitelistService extends Service implements NodeManager<Whitelist> 
     @Override
     public void kill() {
         this.registeredWhitelists.clear();
-        this.proxyWhitelist.clear();
+        try {
+            this.proxyWhitelist.clear();
+        } catch (Exception ignore) {}
     }
 }

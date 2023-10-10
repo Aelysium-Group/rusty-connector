@@ -1,12 +1,13 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
-public class LiquidTimestamp {
-    protected String initialValue;
+public class LiquidTimestamp implements Comparable<LiquidTimestamp> {
     protected TimeUnit unit;
     protected int value;
 
@@ -14,8 +15,7 @@ public class LiquidTimestamp {
         this.value = value;
         this.unit = unit;
     }
-    public LiquidTimestamp(String stamp) throws ParseException {
-        this.initialValue = stamp;
+    public static LiquidTimestamp from(String stamp) throws ParseException {
         stamp = stamp.toLowerCase();
         int value;
         try {
@@ -47,8 +47,7 @@ public class LiquidTimestamp {
 
         if(unit == null) throw new ParseException("Unable to parse string. No valid unit to extract!", 0);
 
-        this.value = value;
-        this.unit = unit;
+        return new LiquidTimestamp(value, unit);
     }
 
     public TimeUnit unit() {
@@ -63,6 +62,7 @@ public class LiquidTimestamp {
      * @return The Unix timestamp in seconds.
      */
     public long epochFromNow() {
+        if(this.unit() == null) return 0;
         long time = Instant.now().getEpochSecond();
         switch (this.unit) {
             case DAYS -> time += ((long) this.value * 24 * 60 * 60);
@@ -92,7 +92,12 @@ public class LiquidTimestamp {
 
     @Override
     public String toString() {
-        return this.initialValue;
+        return this.value + " " + this.unit.toString();
+    }
+
+    @Override
+    public int compareTo(@NotNull LiquidTimestamp o) {
+        return Long.compare(this.epochFromNow(), o.epochFromNow());
     }
 
     public static LiquidTimestamp from(int value, TimeUnit unit) {

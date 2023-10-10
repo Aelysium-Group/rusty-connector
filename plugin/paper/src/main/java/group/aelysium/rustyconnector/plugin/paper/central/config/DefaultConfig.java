@@ -1,17 +1,15 @@
 package group.aelysium.rustyconnector.plugin.paper.central.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 
 public class DefaultConfig extends YAML {
-
-    private static DefaultConfig config;
-
     private String messenger;
     private String server_name;
     private String server_address;
@@ -20,8 +18,8 @@ public class DefaultConfig extends YAML {
     private int server_playerCap_soft;
     private int server_playerCap_hard;
 
-    private DefaultConfig(File configPointer, String template) {
-        super(configPointer, template);
+    public DefaultConfig(File configPointer) {
+        super(configPointer);
     }
 
     public String getMessenger() {
@@ -51,30 +49,6 @@ public class DefaultConfig extends YAML {
         return server_playerCap_hard;
     }
 
-    /**
-     * Get the current config.
-     * @return The config.
-     */
-    public static DefaultConfig getConfig() {
-        return config;
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static DefaultConfig newConfig(File configPointer, String template) {
-        config = new DefaultConfig(configPointer, template);
-        return DefaultConfig.getConfig();
-    }
-
-    /**
-     * Delete all configs associated with this class.
-     */
-    public static void empty() {
-        config = null;
-    }
-
     public void register(int configVersion) throws IllegalStateException {
         PluginLogger logger = Tinder.get().logger();
 
@@ -99,7 +73,7 @@ public class DefaultConfig extends YAML {
         this.server_playerCap_soft = this.getNode(this.data,"server.player-cap.soft",Integer.class);
         this.server_playerCap_hard = this.getNode(this.data,"server.player-cap.hard",Integer.class);
         if(this.server_playerCap_soft >= this.server_playerCap_hard)
-            Lang.BOXED_MESSAGE_COLORED.send(logger, "Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode.", NamedTextColor.YELLOW);
+            PaperLang.BOXED_MESSAGE_COLORED.send(logger, "Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode.", NamedTextColor.YELLOW);
 
 
         // Redis

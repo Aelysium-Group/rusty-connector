@@ -163,6 +163,7 @@ public class PlayerDataEnclave extends DataEnclave<PlayerDataEnclave.FakePlayer,
 
             connection.query(REPLACE_INSERT_PLAYER, this.uuid.toString(), this.username);
 
+            this.connector = connector;
             this.synced = true;
         }
 

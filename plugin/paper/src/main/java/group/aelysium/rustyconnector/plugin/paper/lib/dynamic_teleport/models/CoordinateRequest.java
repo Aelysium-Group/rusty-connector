@@ -30,8 +30,8 @@ public class CoordinateRequest {
     /**
      * Attempts to resolve the clientUsername into a Player.
      * This method can only succeed of the player with clientUsername is online on this server.
-     * Otherwise a NullPointerException will be thrown.
-     *
+     * Otherwise, a NullPointerException will be thrown.
+     * <p>
      * If no exception was thrown, the username was successfully resolved.
      * @throws NullPointerException If the player with `clientUsername` is not online.
      */

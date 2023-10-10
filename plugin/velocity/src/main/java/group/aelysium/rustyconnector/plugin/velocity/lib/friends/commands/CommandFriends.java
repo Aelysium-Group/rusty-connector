@@ -44,7 +44,7 @@ public final class CommandFriends {
                     }
 
                     if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                        player.sendMessage(VelocityLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
@@ -76,7 +76,7 @@ public final class CommandFriends {
                                 }
 
                                 if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                    player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                    player.sendMessage(VelocityLang.NO_PERMISSION);
                                     return Command.SINGLE_SUCCESS;
                                 }
 
@@ -108,7 +108,7 @@ public final class CommandFriends {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -144,7 +144,7 @@ public final class CommandFriends {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
@@ -159,7 +159,7 @@ public final class CommandFriends {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
@@ -199,7 +199,7 @@ public final class CommandFriends {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 

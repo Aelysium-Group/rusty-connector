@@ -16,7 +16,6 @@ import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessag
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Flame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -24,10 +23,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
-import net.kyori.adventure.text.Component;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerChatEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.io.File;
 import java.util.List;
 
 public final class CommandRusty {
@@ -304,6 +302,12 @@ public final class CommandRusty {
                                     )
                             )
                     )
+            )
+            .then(LiteralArgumentBuilder.<CommandSource>literal("debug")
+                    .executes(context -> {
+                        flame.bootLog().forEach(logger::send);
+                        return Command.SINGLE_SUCCESS;
+                    })
             )
             .build();
 

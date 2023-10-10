@@ -43,7 +43,7 @@ public final class CommandParty {
                     }
 
                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                        player.sendMessage(VelocityLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
@@ -60,7 +60,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -96,7 +96,7 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
@@ -111,7 +111,7 @@ public final class CommandParty {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
@@ -144,7 +144,7 @@ public final class CommandParty {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
@@ -181,7 +181,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -207,7 +207,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -229,7 +229,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -249,7 +249,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -299,7 +299,7 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
@@ -359,7 +359,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -395,7 +395,7 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
@@ -431,7 +431,7 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                player.sendMessage(VelocityLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -467,7 +467,7 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.COMMAND_NO_PERMISSION);
+                                        player.sendMessage(VelocityLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 

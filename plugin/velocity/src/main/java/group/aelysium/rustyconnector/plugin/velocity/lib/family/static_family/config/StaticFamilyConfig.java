@@ -21,8 +21,8 @@ public class StaticFamilyConfig extends YAML {
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
-    private StaticFamilyConfig(File configPointer, String template) {
-        super(configPointer, template);
+    public StaticFamilyConfig(File configPointer) {
+        super(configPointer);
     }
 
     public String getParent_family() { return parent_family; }
@@ -61,16 +61,6 @@ public class StaticFamilyConfig extends YAML {
         return consecutiveConnections_homeServer_expiration;
     }
 
-    /**
-     * Add a whitelist config to the proxy.
-     * @param name The name of the whitelist family to save.
-     * @param configPointer The config file.
-     * @param template The path to the template config file.
-     */
-    public static StaticFamilyConfig newConfig(String name, File configPointer, String template) {
-        return new StaticFamilyConfig(configPointer, template);
-    }
-
     public void register() throws IllegalStateException {
         try {
             this.parent_family = this.getNode(this.data, "parent-family", String.class);
@@ -101,7 +91,7 @@ public class StaticFamilyConfig extends YAML {
         try {
             String expiration = this.getNode(this.data, "consecutive-connections.home-server.expiration", String.class);
             if(expiration.equals("NEVER")) this.consecutiveConnections_homeServer_expiration = null;
-            else this.consecutiveConnections_homeServer_expiration = new LiquidTimestamp(expiration);
+            else this.consecutiveConnections_homeServer_expiration = LiquidTimestamp.from(expiration);
         } catch (ParseException e) {
             throw new IllegalStateException("You must provide a valid time value for [consecutive-connections.home-server.expiration] in your static family configs!");
         }

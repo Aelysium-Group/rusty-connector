@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.Callable;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config.WhitelistConfig;
@@ -12,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class Whitelist {
@@ -115,17 +118,13 @@ public class Whitelist {
      * Initializes a whitelist based on a config.
      * @return A whitelist.
      */
-    public static Whitelist init(String whitelistName, List<Component> bootOutput) {
+    public static Whitelist init(String whitelistName, List<Component> bootOutput, LangService lang) throws IOException {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         logger.send(Component.text(" | Registering whitelist "+whitelistName+"...", NamedTextColor.DARK_GRAY));
 
-        WhitelistConfig whitelistConfig = WhitelistConfig.newConfig(
-                whitelistName,
-                new File(String.valueOf(api.dataFolder()), "whitelists/"+whitelistName+".yml"),
-                "velocity_whitelist_template.yml"
-        );
-        if(!whitelistConfig.generate(bootOutput)) {
+        WhitelistConfig whitelistConfig = new WhitelistConfig(new File(String.valueOf(api.dataFolder()), "whitelists/"+whitelistName+".yml"));
+        if(!whitelistConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_WHITELIST_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create whitelists/"+whitelistName+".yml!");
         }
         whitelistConfig.register();

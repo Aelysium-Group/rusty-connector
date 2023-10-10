@@ -3,9 +3,8 @@ package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang_messaging.PaperLang;
+import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.CoordinateRequest;
 import org.bukkit.entity.Player;
 

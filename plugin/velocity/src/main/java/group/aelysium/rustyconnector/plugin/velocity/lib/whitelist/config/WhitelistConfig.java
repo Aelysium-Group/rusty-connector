@@ -1,9 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.lang_messaging.Lang;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -22,8 +23,8 @@ public class WhitelistConfig extends YAML {
     private boolean strict = false;
     private boolean inverted = false;
 
-    private WhitelistConfig(File configPointer, String template) {
-        super(configPointer, template);
+    public WhitelistConfig(File configPointer) {
+        super(configPointer);
     }
     public boolean getUse_players() {
         return use_players;
@@ -55,16 +56,6 @@ public class WhitelistConfig extends YAML {
         return inverted;
     }
 
-    /**
-     * Add a whitelist config to the proxy.
-     * @param name The name of the whitelist family to save.
-     * @param configPointer The config file.
-     * @param template The path to the template config file.
-     */
-    public static WhitelistConfig newConfig(String name, File configPointer, String template) {
-        return new WhitelistConfig(configPointer, template);
-    }
-
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException {
         PluginLogger logger = Tinder.get().logger();
@@ -80,7 +71,7 @@ public class WhitelistConfig extends YAML {
 
         this.use_country = this.getNode(this.data,"use-country",Boolean.class);
         if(this.use_country)
-            Lang.BOXED_MESSAGE_COLORED.send(logger, "RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false.", NamedTextColor.YELLOW);
+            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false.", NamedTextColor.YELLOW);
         this.use_country = false;
         this.countries = new ArrayList<>();
 

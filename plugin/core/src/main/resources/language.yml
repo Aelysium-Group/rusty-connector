@@ -1,0 +1,13 @@
+#
+# The language to use for RustyConnector.
+# Language translations are provided by volunteering community members.
+# In order to install a different language you'll need to download the appropriate lang file.
+#
+# Language codes are not case-sensitive, also you can use a dash "-" or underscore "_".
+# A general good practice is to just copy the name, exactly, of the lang package you wanna load.
+#
+# For a list of supported languages, please reference:
+#
+# LINK HERE
+#
+language: "en_us"

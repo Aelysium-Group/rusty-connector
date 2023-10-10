@@ -14,8 +14,8 @@ public class ScalarFamilyConfig extends YAML {
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
-    private ScalarFamilyConfig(File configPointer, String template) {
-        super(configPointer, template);
+    public ScalarFamilyConfig(File configPointer) {
+        super(configPointer);
     }
 
     public String getParent_family() { return parent_family; }
@@ -42,16 +42,6 @@ public class ScalarFamilyConfig extends YAML {
 
     public String getWhitelist_name() {
         return whitelist_name;
-    }
-
-    /**
-     * Add a whitelist config to the proxy.
-     * @param name The name of the whitelist family to save.
-     * @param configPointer The config file.
-     * @param template The path to the template config file.
-     */
-    public static ScalarFamilyConfig newConfig(String name, File configPointer, String template) {
-        return new ScalarFamilyConfig(configPointer, template);
     }
 
     public void register() throws IllegalStateException {

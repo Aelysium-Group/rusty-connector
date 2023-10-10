@@ -16,12 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WebhooksConfig extends YAML {
-    private WebhooksConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    public static WebhooksConfig newConfig(File configPointer, String template) {
-        return new WebhooksConfig(configPointer, template);
+    public WebhooksConfig(File configPointer) {
+        super(configPointer);
     }
 
     @SuppressWarnings("unchecked")

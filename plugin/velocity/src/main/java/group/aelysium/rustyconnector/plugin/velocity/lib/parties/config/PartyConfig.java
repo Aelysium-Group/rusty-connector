@@ -23,16 +23,8 @@ public class PartyConfig extends YAML {
 
     private SwitchPower switchingServers_switchPower = SwitchPower.MODERATE;
 
-    private PartyConfig(File configPointer, String template) {
-        super(configPointer, template);
-    }
-
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static PartyConfig newConfig(File configPointer, String template) {
-        return new PartyConfig(configPointer, template);
+    public PartyConfig(File configPointer) {
+        super(configPointer);
     }
 
     public boolean isEnabled() {
