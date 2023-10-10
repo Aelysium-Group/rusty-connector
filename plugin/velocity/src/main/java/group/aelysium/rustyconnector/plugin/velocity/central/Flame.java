@@ -86,7 +86,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
 
     protected Flame(Version version, int configVersion, Optional<char[]> memberKey, Map<Class<? extends Service>, Service> services, String backboneConnector, List<Component> bootOutput) {
         super(new CoreServiceHandler(services));
-        this.backbone = (MessengerConnector<?>) this.services().connectorsService().get(backboneConnector);
+        this.backbone = (MessengerConnector<?>) this.services().connectorsService().getMessenger(backboneConnector);
         this.version = version;
         this.configVersion = configVersion;
         this.bootOutput = bootOutput;
@@ -262,11 +262,8 @@ class Initialize {
 
     public AESCryptor privateKey() {
         PrivateKeyConfig config = new PrivateKeyConfig(new File(api.dataFolder(), "private.key"));
-        if (!config.generateFilestream(bootOutput))
-            throw new IllegalStateException("Unable to load or create private.key!");
-
         try {
-            return config.get();
+            return config.get(bootOutput);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -321,7 +318,7 @@ class Initialize {
         ConnectorsConfig connectorsConfig = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
         if (!connectorsConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_CONNECTORS_TEMPLATE))
             throw new IllegalStateException("Unable to load or create connectors.yml!");
-        ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, true, PacketOrigin.PROXY);
+        ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, true, PacketOrigin.PROXY, api.dataFolder());
         services.put(ConnectorsService.class, connectorsService);
 
         bootOutput.add(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
@@ -340,7 +337,7 @@ class Initialize {
                 if(!connectorsService.containsKey(name))
                     throw new RuntimeException("No connector with the name '"+name+"' was found!");
 
-                Connector<?> connector = connectorsService.get(name);
+                Connector<?> connector = connectorsService.getMessenger(name);
                 try {
                     connector.connect();
                     bootOutput.add(Component.text(" | Finished building connector ["+name+"].", NamedTextColor.GREEN));
@@ -636,7 +633,7 @@ class Initialize {
             );
 
             bootOutput.add(Component.text(" | Building friends connector...", NamedTextColor.DARK_GRAY));
-            StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(config.storage());
+            StorageConnector<?> connector = api.services().connectorsService().getStorage(config.storage());
             if(connector == null) throw new NullPointerException("You must define a storage method for the friends service!");
             requestedConnectors.add(config.storage());
             bootOutput.add(Component.text(" | Finished building friends connector.", NamedTextColor.GREEN));
@@ -662,7 +659,7 @@ class Initialize {
         if(!config.isEnabled()) return;
 
         bootOutput.add(Component.text(" | Building friends MySQL...", NamedTextColor.DARK_GRAY));
-        StorageConnector<?> connector = (StorageConnector<?>) api.services().connectorsService().get(config.storage());
+        StorageConnector<?> connector = api.services().connectorsService().getStorage(config.storage());
         if(connector == null) throw new NullPointerException("You must define a storage method for the friends service!");
         requestedConnectors.add(config.storage());
         bootOutput.add(Component.text(" | Finished building friends MySQL.", NamedTextColor.GREEN));

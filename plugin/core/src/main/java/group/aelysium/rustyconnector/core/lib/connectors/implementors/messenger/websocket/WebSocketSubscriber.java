@@ -8,23 +8,37 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 
+import java.net.http.WebSocket;
 import java.util.Map;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CountDownLatch;
 
-public class WebSocketSubscriber extends MessengerSubscriber {
-    protected WebSocketListener listener = new WebSocketListener();
+public class WebSocketSubscriber extends MessengerSubscriber implements WebSocket.Listener {
+    private CountDownLatch lock = new CountDownLatch(0);
 
-    public WebSocketSubscriber(AESCryptor cryptor, MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin) {
-        super(cryptor, cache, logger, handlers, origin);
+    public WebSocketSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin) {
+        super(cryptor, messageCache, logger, handlers, origin);
     }
 
-    public MessageHandler handler() {
-        return new MessageHandler();
+    public void awaitClose() throws InterruptedException {
+        this.lock.await();
     }
-    public WebSocketListener listener() { return this.listener; }
+    @Override
+    public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
+        this.onMessage(data.toString());
+        return WebSocket.Listener.super.onText(webSocket, data, last);
+    }
 
-    public class MessageHandler implements javax.websocket.MessageHandler {
-        public void onMessage(String message) {
-            WebSocketSubscriber.this.onMessage(message);
-        }
+    @Override
+    public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
+        this.lock.countDown();
+        return WebSocket.Listener.super.onClose(webSocket, statusCode, reason);
+    }
+
+
+    @Override
+    public void onOpen(WebSocket webSocket) {
+        this.lock = new CountDownLatch(1);
+        WebSocket.Listener.super.onOpen(webSocket);
     }
 }

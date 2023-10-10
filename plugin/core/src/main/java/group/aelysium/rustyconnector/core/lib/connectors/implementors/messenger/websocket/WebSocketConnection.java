@@ -13,9 +13,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 
 import javax.websocket.ClientEndpointConfig;
-import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
 import java.net.URI;
 import java.time.Instant;
 import java.util.*;
@@ -28,12 +26,10 @@ public class WebSocketConnection extends MessengerConnection {
     ExecutorService executorService;
     private Optional<AESCryptor> connectCryptor = Optional.empty();
     private final AESCryptor packetCryptor;
-    private final WebSocketContainer container;
     private final URI uri;
 
     public WebSocketConnection(PacketOrigin origin, URI uri, AESCryptor connectCryptor, AESCryptor packetCryptor) throws IllegalArgumentException {
         super(origin);
-        this.container = ContainerProvider.getWebSocketContainer();
         this.uri = uri;
         if(connectCryptor != null) this.connectCryptor = Optional.of(connectCryptor);
         this.packetCryptor = packetCryptor;
@@ -75,12 +71,11 @@ public class WebSocketConnection extends MessengerConnection {
 
     @Override
     protected void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
+        /*CompletableFuture<WebSocket> websocket = this.clientBuilder.buildAsync(this.uri, new WebSocketSubscriber(this.packetCryptor, cache, logger, handlers, this.origin));
+
         this.executorService.submit(() -> {
             try {
-                WebSocketSubscriber websocket = new WebSocketSubscriber(this.packetCryptor, cache, logger, handlers, this.origin);
-
-                try(Session session = WebSocketConnection.this.container.connectToServer(websocket.listener(), this.config(), uri)) {
-                    session.addMessageHandler(websocket.handler());
+                WebSocket session = websocket.join();
                     this.subscribers.add(session);
 
                     websocket.listener().awaitClose();
@@ -95,7 +90,7 @@ public class WebSocketConnection extends MessengerConnection {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
+        });*/
     }
 
     @Override
@@ -138,10 +133,11 @@ public class WebSocketConnection extends MessengerConnection {
             throw new RuntimeException(e);
         }
 
-        try(Session session = WebSocketConnection.this.container.connectToServer(new WebSocketListener(), uri)) {
+        /*
+        try(Session session = this.clientBuilder.connectToServer(new WebSocketListener(), uri)) {
             session.getBasicRemote().sendText(signedPacket);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

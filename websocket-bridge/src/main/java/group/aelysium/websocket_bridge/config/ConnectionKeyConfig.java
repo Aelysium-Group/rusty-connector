@@ -16,30 +16,7 @@ public class PrivateKeyConfig {
         this.configPointer = configPointer;
     }
 
-    public AESCryptor get() {
-        if (!this.configPointer.exists()) {
-            File parent = this.configPointer.getParentFile();
-            if (!parent.exists())
-                parent.mkdirs();
-
-            try {
-                InputStream stream = new ByteArrayInputStream(AESCryptor.createKey());
-                Files.copy(stream, this.configPointer.toPath());
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to setup "+this.configPointer.getName()+"! No further information.");
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        try {
-            this.data = new FileInputStream(this.configPointer);
-            return AESCryptor.from(this.data.readAllBytes());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public AESCryptor get(List<Component> outputLog) {
+    public boolean generateFilestream(List<Component> outputLog) {
         outputLog.add(Component.text("Building "+this.configPointer.getName()+"...", NamedTextColor.DARK_GRAY));
         if (!this.configPointer.exists()) {
             File parent = this.configPointer.getParentFile();
@@ -59,9 +36,14 @@ public class PrivateKeyConfig {
         try {
             this.data = new FileInputStream(this.configPointer);
             outputLog.add(Component.text("Finished building "+this.configPointer.getName(), NamedTextColor.GREEN));
-            return AESCryptor.from(this.data.readAllBytes());
+            return true;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            outputLog.add(Component.text("Failed to build "+this.configPointer.getName(), NamedTextColor.RED));
+            return false;
         }
+    }
+
+    public AESCryptor get() throws IOException {
+        return AESCryptor.from(this.data.readAllBytes());
     }
 }

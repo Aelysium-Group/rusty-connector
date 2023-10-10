@@ -7,47 +7,47 @@ import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnecti
 import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class ConnectorsService extends Service {
-    protected Map<String, Connector<? extends Connection>> connectors = new HashMap<>();
+    protected Map<String, MessengerConnector<? extends MessengerConnection>> messengers = new HashMap<>();
+    protected Map<String, StorageConnector<? extends StorageConnection>> storage = new HashMap<>();
 
-    public <C extends Connector<? extends Connection>> void add(String name, C connector) throws DuplicateRequestException {
-        if(connectors.containsKey(name)) throw new DuplicateRequestException("You can't set the same name for different connectors!");
-        connectors.put(name, connector);
+    public void add(String name, MessengerConnector<? extends MessengerConnection> connector) throws DuplicateRequestException {
+        if(this.containsKey(name)) throw new DuplicateRequestException("You can't set the same name for different connectors!");
+        messengers.put(name, connector);
+    }
+    public void add(String name, StorageConnector<? extends StorageConnection> connector) throws DuplicateRequestException {
+        if(this.containsKey(name)) throw new DuplicateRequestException("You can't set the same name for different connectors!");
+        storage.put(name, connector);
     }
 
-    public Connector<? extends Connection> get(String name) {
-        return connectors.get(name);
+    public MessengerConnector<? extends MessengerConnection> getMessenger(String name) {
+        return messengers.get(name);
+    }
+    public StorageConnector<? extends StorageConnection> getStorage(String name) {
+        return storage.get(name);
     }
 
     public boolean containsKey(String name) {
-        return connectors.containsKey(name);
-    }
-
-    public void forEach(BiConsumer<String, Connector<? extends Connection>> action) {
-        this.connectors.forEach(action);
+        return messengers.containsKey(name) ||
+               storage.containsKey(name);
     }
 
     public List<MessengerConnector<?>> messengers() {
-        List<MessengerConnector<?>> output = new ArrayList<>();
-        this.connectors.values().stream().filter(connector -> connector instanceof MessengerConnector<?>).toList().forEach(item -> output.add((MessengerConnector<?>) item));
-        return output;
+        return this.messengers.values().stream().toList();
     }
 
     public List<StorageConnector<?>> storage() {
-        List<StorageConnector<?>> output = new ArrayList<>();
-        this.connectors.values().stream().filter(connector -> connector instanceof StorageConnector<?>).toList().forEach(item -> output.add((StorageConnector<?>) item));
-        return output;
+        return this.storage.values().stream().toList();
     }
 
     @Override
     public void kill() {
-        this.connectors.forEach((key, value) -> value.kill());
+        this.messengers.forEach((key, value) -> value.kill());
+        this.storage.forEach((key, value) -> value.kill());
     }
 
     public enum MessengerConnectors {

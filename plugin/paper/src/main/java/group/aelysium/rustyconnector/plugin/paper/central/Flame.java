@@ -57,7 +57,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
         super(new CoreServiceHandler(services));
         this.version = version;
         this.configVersion = configVersion;
-        this.backbone = (MessengerConnector<?>) this.services().connectors().get(backboneConnector);
+        this.backbone = this.services().connectors().getMessenger(backboneConnector);
     }
 
     public String version() { return this.version; }
@@ -192,11 +192,8 @@ class Initialize {
 
     public AESCryptor privateKey() throws NoSuchAlgorithmException {
         PrivateKeyConfig privateKeyConfig = new PrivateKeyConfig(new File(api.dataFolder(), "private.key"));
-        if (!privateKeyConfig.generateFilestream(bootOutput))
-            throw new IllegalStateException("Unable to load or create private.key!");
-
         try {
-            return privateKeyConfig.get();
+            return privateKeyConfig.get(bootOutput);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -228,7 +225,7 @@ class Initialize {
         ConnectorsConfig connectorsConfig = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
         if (!connectorsConfig.generate(bootOutput, lang, LangFileMappings.PAPER_CONNECTORS_TEMPLATE))
             throw new IllegalStateException("Unable to load or create connectorsConfig.yml!");
-        ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, false, PacketOrigin.PROXY);
+        ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, false, PacketOrigin.PROXY, api.dataFolder());
         services.put(ConnectorsService.class, connectorsService);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
@@ -247,7 +244,7 @@ class Initialize {
                 if(!connectorsService.containsKey(name))
                     throw new RuntimeException("No connector with the name '"+name+"' was found!");
 
-                Connector<?> connector = connectorsService.get(name);
+                Connector<?> connector = connectorsService.getMessenger(name);
                 try {
                     connector.connect();
                 } catch (Exception e) {

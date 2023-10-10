@@ -79,7 +79,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
 
         requestedConnectors.add(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
         bootOutput.add(Component.text(" | Building "+familyName+"'s connector...", NamedTextColor.DARK_GRAY));
-        StorageConnector<?> connector = (StorageConnector<?>) connectorsService.get(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
+        StorageConnector<?> connector = connectorsService.getStorage(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
         if(connector == null) throw new NullPointerException("You must define a storage method for your static family:"+familyName);
         requestedConnectors.add(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
         bootOutput.add(Component.text(" | Finished building  "+familyName+"'s connector.", NamedTextColor.GREEN));
