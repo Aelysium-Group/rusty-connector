@@ -52,8 +52,6 @@ public class ConnectorsService extends Service {
 
     public enum MessengerConnectors {
         REDIS,
-        RABBITMQ,
-        WEBSOCKET,
     }
 
     public enum StorageConnectors {
