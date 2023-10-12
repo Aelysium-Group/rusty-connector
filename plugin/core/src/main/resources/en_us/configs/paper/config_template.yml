@@ -49,7 +49,7 @@
 #
 # https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
 #
-version: 5
+version: 6
 
 #
 # The messanger connector to use!
@@ -153,3 +153,26 @@ server:
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Kubernetes                        #
+#                                                          #
+#               ---------------------------                #
+# | If your network is utilizing Kubernetes, the following #
+# | items should be configured.                            #
+#                                                          #
+# | If your network doesn't use Kubernetes at all, you can #
+# | ignore this section of the config.                     #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+#
+# The pod's name, assigned by Kubernetes.
+#
+# You should utilize Kubernetes environment variable to dynamically replace this value.
+#
+# Read how here: https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/
+#
+pod-name: "KUBERNETES_POD_NAME"
