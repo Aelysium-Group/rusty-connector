@@ -41,10 +41,15 @@ public class MySQLConnection extends StorageConnection {
                     i++;
                 }
 
-                try (ResultSet result = statement.executeQuery();) {
+                try (ResultSet result = statement.executeQuery()) {
                     return new MySQLStorageResponse(true, result.getFetchSize(), result);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    try {
+                        statement.execute();
+                        return null;
+                    } catch (Exception e2) {
+                        throw new RuntimeException(e);
+                    }
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
