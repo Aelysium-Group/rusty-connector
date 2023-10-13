@@ -790,8 +790,8 @@ public class VelocityLang extends Lang {
             resolver().get("velocity.party.receiver_invite_query.query", LanguageResolver.tagHandler("username", sender.getUsername())),
             join(
                     JoinConfiguration.separator(space()),
-                    text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.receiver_invite_query.accept"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" accept")),
-                    text("["+IGNORE+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.receiver_invite_query.ignore"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" ignore"))
+                    text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.receiver_invite_query.hover.accept"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" accept")),
+                    text("["+IGNORE+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.party.receiver_invite_query.hover.ignore"))).clickEvent(ClickEvent.runCommand("/party invites "+sender.getUsername()+" ignore"))
             )
     );
 
