@@ -22,11 +22,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 
 public final class CommandFM {
-    public static BrigadierCommand create() {
+    public static BrigadierCommand create(FriendsService friendsService) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        FriendsService friendsService = api.services().friendsService().orElse(null);
         if (friendsService == null) {
             logger.send(Component.text("The Friends service must be enabled to load the /friends command.", NamedTextColor.YELLOW));
             return null;

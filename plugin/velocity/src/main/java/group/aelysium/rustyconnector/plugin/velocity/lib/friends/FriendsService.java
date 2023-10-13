@@ -43,7 +43,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
             try {
                 commandManager.register(
                         commandManager.metaBuilder("friends").build(),
-                        CommandFriends.create()
+                        CommandFriends.create(this)
                 );
 
                 Tinder.get().logger().send(Component.text(" | Registered: /friends", NamedTextColor.YELLOW));
@@ -54,7 +54,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
             try {
                 commandManager.register(
                         commandManager.metaBuilder("unfriend").build(),
-                        CommandUnFriend.create()
+                        CommandUnFriend.create(this)
                 );
 
                 Tinder.get().logger().send(Component.text(" | Registered: /unfriend", NamedTextColor.YELLOW));
@@ -66,7 +66,7 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
                 try {
                     commandManager.register(
                             commandManager.metaBuilder("fm").build(),
-                            CommandFM.create()
+                            CommandFM.create(this)
                     );
 
                     Tinder.get().logger().send(Component.text(" | Registered: /fm", NamedTextColor.YELLOW));

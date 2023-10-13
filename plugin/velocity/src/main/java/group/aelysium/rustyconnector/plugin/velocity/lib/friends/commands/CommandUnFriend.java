@@ -22,11 +22,10 @@ import java.util.List;
 import java.util.Optional;
 
 public final class CommandUnFriend {
-    public static BrigadierCommand create() {
+    public static BrigadierCommand create(FriendsService friendsService) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        FriendsService friendsService = api.services().friendsService().orElse(null);
         if (friendsService == null) {
             logger.send(Component.text("The Friends service must be enabled to load the /friend command.", NamedTextColor.YELLOW));
             return null;
