@@ -10,6 +10,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAHandler;
@@ -50,14 +51,13 @@ public final class CommandTPA {
         return false;
     }
 
-    public static BrigadierCommand create() {
+    public static BrigadierCommand create(DependencyInjector.DI3<FamilyService, ServerService, TPAService> dependencies) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        FamilyService familyService = api.services().familyService();
-        ServerService serverService = api.services().serverService();
-        TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
-                                   .services().tpaService().orElseThrow();
+        FamilyService familyService = dependencies.d1();
+        ServerService serverService = dependencies.d2();
+        TPAService tpaService = dependencies.d3();
 
         LiteralCommandNode<CommandSource> tpa = LiteralArgumentBuilder
                 .<CommandSource>literal("tpa")

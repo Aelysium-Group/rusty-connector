@@ -2,12 +2,15 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.ancho
 
 import com.velocitypowered.api.command.CommandManager;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.commands.CommandAnchor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -21,7 +24,7 @@ public class AnchorService extends Service {
         this.anchors = anchors;
     }
 
-    public void initCommands() {
+    public void initCommands(DependencyInjector.DI2<DynamicTeleportService, ServerService> dependencies) {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
@@ -36,7 +39,7 @@ public class AnchorService extends Service {
             try {
                 commandManager.register(
                         commandManager.metaBuilder(name).build(),
-                        CommandAnchor.create(name)
+                        CommandAnchor.create(DependencyInjector.inject(dependencies.d1(), dependencies.d2(), this), name)
                 );
 
                 Tinder.get().logger().send(Component.text(" | Registered: /"+name, NamedTextColor.YELLOW));

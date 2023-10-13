@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config.WhitelistConfig;
@@ -118,13 +119,14 @@ public class Whitelist {
      * Initializes a whitelist based on a config.
      * @return A whitelist.
      */
-    public static Whitelist init(String whitelistName, List<Component> bootOutput, LangService lang) throws IOException {
+    public static Whitelist init(DependencyInjector.DI2<List<Component>, LangService> dependencies, String whitelistName) throws IOException {
         Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-        logger.send(Component.text(" | Registering whitelist "+whitelistName+"...", NamedTextColor.DARK_GRAY));
+        List<Component> bootOutput = dependencies.d1();
+
+        bootOutput.add(Component.text(" | Registering whitelist "+whitelistName+"...", NamedTextColor.DARK_GRAY));
 
         WhitelistConfig whitelistConfig = new WhitelistConfig(new File(String.valueOf(api.dataFolder()), "whitelists/"+whitelistName+".yml"));
-        if(!whitelistConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_WHITELIST_TEMPLATE)) {
+        if(!whitelistConfig.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_WHITELIST_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create whitelists/"+whitelistName+".yml!");
         }
         whitelistConfig.register();
@@ -148,7 +150,7 @@ public class Whitelist {
             });
         }
 
-        logger.send(Component.text(" | Registered whitelist: "+whitelistName, NamedTextColor.YELLOW));
+        bootOutput.add(Component.text(" | Registered whitelist: "+whitelistName, NamedTextColor.YELLOW));
         return whitelist;
     }
 }

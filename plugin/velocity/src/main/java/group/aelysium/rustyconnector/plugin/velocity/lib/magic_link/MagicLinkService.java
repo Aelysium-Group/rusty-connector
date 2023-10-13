@@ -43,6 +43,6 @@ public class MagicLinkService extends ClockService {
                     return false;
                 });
             } catch (Exception ignore) {}
-        }, 1);
+        }, 1, 5);
     }
 }

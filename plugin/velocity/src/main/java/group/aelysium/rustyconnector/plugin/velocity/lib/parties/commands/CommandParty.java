@@ -26,12 +26,9 @@ import java.util.Collection;
 import java.util.List;
 
 public final class CommandParty {
-    public static BrigadierCommand create() {
+    public static BrigadierCommand create(PartyService partyService) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
-
-        // If this command class loads, then PartyService MUST be set.
-        PartyService partyService = api.services().partyService().orElseThrow();
 
         LiteralCommandNode<CommandSource> partyCommand = LiteralArgumentBuilder
                 .<CommandSource>literal("party")

@@ -2,8 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub;
 
 import com.velocitypowered.api.command.CommandManager;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.commands.CommandHub;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -20,7 +23,7 @@ public class HubService extends Service {
         return this.enabledFamilies.contains(familyName);
     }
 
-    public void initCommand() {
+    public void initCommand(DependencyInjector.DI2<FamilyService, ServerService> dependencies) {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
 
         Tinder.get().logger().send(Component.text("Building hub service commands...", NamedTextColor.DARK_GRAY));
@@ -28,7 +31,7 @@ public class HubService extends Service {
             try {
                 commandManager.register(
                         commandManager.metaBuilder("hub").build(),
-                        CommandHub.create()
+                        CommandHub.create(DependencyInjector.inject(dependencies.d1(), dependencies.d2(), this))
                 );
 
                 Tinder.get().logger().send(Component.text(" | Registered: /hub", NamedTextColor.YELLOW));

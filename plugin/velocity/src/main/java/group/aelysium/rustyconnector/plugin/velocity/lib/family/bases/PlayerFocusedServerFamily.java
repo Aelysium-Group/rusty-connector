@@ -27,7 +27,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     protected LoadBalancer loadBalancer = null;
     protected String whitelist;
     protected boolean weighted;
-    
+
     protected final List<PlayerServer> lockedServers = new ArrayList<>();
 
     protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentName) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -45,9 +45,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         this.parentName = parentName;
     }
 
-    public void resolveParent() {
-        FamilyService familyService = Tinder.get().services().familyService();
-        BaseServerFamily family = familyService.find(parentName);
+    public void resolveParent(FamilyService familyService) {
+        BaseServerFamily<?> family = familyService.find(parentName);
 
         this.parentName = null;
         if(family == null) {

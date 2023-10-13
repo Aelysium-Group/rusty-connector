@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -22,6 +23,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.ConnectException;
 import java.util.List;
+
+import static group.aelysium.rustyconnector.core.lib.util.DependencyInjector.inject;
 
 public class ScalarServerFamily extends PlayerFocusedServerFamily {
     protected ScalarServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -47,19 +50,18 @@ public class ScalarServerFamily extends PlayerFocusedServerFamily {
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static ScalarServerFamily init(String familyName, List<Component> bootOutput, LangService lang) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+    public static ScalarServerFamily init(DependencyInjector.DI2<List<Component>, LangService> dependencies, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
 
         ScalarFamilyConfig scalarFamilyConfig = new ScalarFamilyConfig(new File(String.valueOf(api.dataFolder()), "families/"+familyName+".scalar.yml"));
-        if(!scalarFamilyConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
+        if(!scalarFamilyConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
         }
         scalarFamilyConfig.register();
 
         Whitelist whitelist = null;
         if(scalarFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name(), bootOutput, lang);
+            whitelist = Whitelist.init(dependencies, scalarFamilyConfig.getWhitelist_name());
 
             api.services().whitelistService().add(whitelist);
         }

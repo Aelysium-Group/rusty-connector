@@ -24,6 +24,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.command.CommandRusty;
@@ -70,6 +71,8 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static group.aelysium.rustyconnector.core.lib.util.DependencyInjector.inject;
+
 /**
  * The core RustyConnector kernel.
  * All aspects of the plugin should be accessible from here.
@@ -88,7 +91,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
 
     protected Flame(Version version, int configVersion, Optional<char[]> memberKey, Map<Class<? extends Service>, Service> services, String backboneConnector, List<Component> bootOutput) {
         super(new CoreServiceHandler(services));
-        this.backbone = (MessengerConnector<?>) this.services().connectorsService().getMessenger(backboneConnector);
+        this.backbone = this.services().connectorsService().getMessenger(backboneConnector);
         this.version = version;
         this.configVersion = configVersion;
         this.bootOutput = bootOutput;
@@ -97,6 +100,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
 
     public Version version() { return this.version; }
     public int configVersion() { return this.configVersion; }
+    private Optional<char[]> memberKey() { return this.memberKey; }
     public List<Component> bootLog() { return this.bootOutput; }
 
     public MessengerConnector<? extends MessengerConnection> backbone() {
@@ -143,17 +147,17 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
 
             logger.send(Component.text("Initializing 10%...", NamedTextColor.DARK_GRAY));
             MessageCacheService messageCacheService = initialize.dataTransit(langService);
-            Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService);
+            Callable<Runnable> resolveConnectors = initialize.connectors(inject(cryptor, messageCacheService, Tinder.get().logger(), langService));
 
             logger.send(Component.text("Initializing 20%...", NamedTextColor.DARK_GRAY));
             ConnectorsService connectorsService = (ConnectorsService) initialize.getServices().get(ConnectorsService.class);
             logger.send(Component.text("Initializing 30%...", NamedTextColor.DARK_GRAY));
-            initialize.families(defaultConfig, connectorsService, langService);
+            FamilyService familyService = initialize.families(inject(defaultConfig, connectorsService, langService));
             logger.send(Component.text("Initializing 40%...", NamedTextColor.DARK_GRAY));
             ServerService serverService = initialize.servers(defaultConfig);
             logger.send(Component.text("Initializing 50%...", NamedTextColor.DARK_GRAY));
-            initialize.networkWhitelist(defaultConfig, langService);
-            initialize.magicLink(defaultConfig, serverService);
+            initialize.networkWhitelist(inject(defaultConfig, langService));
+            initialize.magicLink(inject(defaultConfig, serverService));
             initialize.webhooks(langService);
 
             logger.send(Component.text("Initializing 60%...", NamedTextColor.DARK_GRAY));
@@ -161,19 +165,19 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             connectRemotes.run();
             logger.send(Component.text("Initializing 70%...", NamedTextColor.DARK_GRAY));
 
-            initialize.friendsService(langService);
-            initialize.playerService(langService);
+            initialize.friendsService(inject(connectorsService, langService));
+            initialize.playerService(inject(connectorsService, langService));
             initialize.partyService(langService);
-            initialize.dynamicTeleportService(langService);
+            initialize.dynamicTeleportService(inject(familyService, serverService, langService));
             logger.send(Component.text("Initializing 80%...", NamedTextColor.DARK_GRAY));
 
-            Consumer<PluginLogger> printViewportURI = initialize.viewportService(langService, memberKey);
+            Consumer<PluginLogger> printViewportURI = initialize.viewportService(inject(langService, memberKey));
             logger.send(Component.text("Initializing 90%...", NamedTextColor.DARK_GRAY));
 
             Flame flame = new Flame(new Version(version), configVersion, memberKey, initialize.getServices(), defaultConfig.messenger(), initialize.getBootOutput());
 
             initialize.events(plugin);
-            initialize.commands(flame, logger);
+            initialize.commands(inject(flame, logger, messageCacheService));
             logger.send(Component.text("Initializing 100%...", NamedTextColor.DARK_GRAY));
 
             printViewportURI.accept(logger);
@@ -219,14 +223,14 @@ class Initialize {
         eventManager.register(plugin, new OnPlayerDisconnect());
     }
 
-    public void commands(Flame flame, PluginLogger logger) {
+    public void commands(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
         CommandManager commandManager = api.velocityServer().getCommandManager();
 
         commandManager.register(
                 commandManager.metaBuilder("rc")
                         .aliases("/rc", "//") // Add slash variants so that they can be used in console as well
                         .build(),
-                CommandRusty.create(flame, logger)
+                CommandRusty.create(dependencies)
         );
 
         commandManager.unregister("server");
@@ -311,16 +315,15 @@ class Initialize {
      * {@link Callable} - Runs linting to only build the connectors actually being referenced by the configs. Returns:
      * <p>
      * a {@link Runnable} - Starts up all connectors and connects them to their remote resources.
-     * @param cryptor The plugin's cryptor.
      * @return A runnable which will wrap up the connectors' initialization. Should be run after all other initialization logic has run.
      */
-    public Callable<Runnable> connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang) throws IOException {
+    public Callable<Runnable> connectors(DependencyInjector.DI4<AESCryptor, MessageCacheService, PluginLogger, LangService> dependencies) throws IOException {
         bootOutput.add(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
         ConnectorsConfig connectorsConfig = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
-        if (!connectorsConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_CONNECTORS_TEMPLATE))
+        if (!connectorsConfig.generate(bootOutput, dependencies.d4(), LangFileMappings.VELOCITY_CONNECTORS_TEMPLATE))
             throw new IllegalStateException("Unable to load or create connectors.yml!");
-        ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, true, PacketOrigin.PROXY, api.dataFolder());
+        ConnectorsService connectorsService = connectorsConfig.register(dependencies.d1(), true, true, PacketOrigin.PROXY, api.dataFolder());
         services.put(ConnectorsService.class, connectorsService);
 
         bootOutput.add(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
@@ -362,7 +365,7 @@ class Initialize {
                 connectorsService.messengers().forEach(connector -> {
                     if(connector.connection().isEmpty()) return;
                     MessengerConnection connection = connector.connection().orElseThrow();
-                    connection.startListening(cacheService, logger, handlers);
+                    connection.startListening(dependencies.d2(), dependencies.d3(), handlers);
                 });
                 connectorsService.storage().forEach(connector -> {
                     if(connector.connection().isPresent()) return;
@@ -377,11 +380,11 @@ class Initialize {
         };
     }
 
-    public void families(DefaultConfig defaultConfig, ConnectorsService connectorsService, LangService lang) throws Exception {
+    public FamilyService families(DependencyInjector.DI3<DefaultConfig, ConnectorsService, LangService> dependencies) throws Exception {
         bootOutput.add(Component.text("Building families service...", NamedTextColor.DARK_GRAY));
 
         FamiliesConfig familiesConfig = new FamiliesConfig(new File(api.dataFolder(), "families.yml"));
-        if (!familiesConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_FAMILIES_TEMPLATE))
+        if (!familiesConfig.generate(bootOutput, dependencies.d3(), LangFileMappings.VELOCITY_FAMILIES_TEMPLATE))
             throw new IllegalStateException("Unable to load or create families.yml!");
         familiesConfig.register();
 
@@ -393,11 +396,11 @@ class Initialize {
         {
             bootOutput.add(Component.text(" | Building families...", NamedTextColor.DARK_GRAY));
             for (String familyName : familiesConfig.scalarFamilies()) {
-                familyService.add(ScalarServerFamily.init(familyName, bootOutput, lang));
+                familyService.add(ScalarServerFamily.init(inject(bootOutput, dependencies.d3()), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             for (String familyName : familiesConfig.staticFamilies()) {
-                familyService.add(StaticServerFamily.init(familyName, bootOutput, requestedConnectors, connectorsService, lang));
+                familyService.add(StaticServerFamily.init(inject(bootOutput, requestedConnectors, dependencies.d2(), dependencies.d3()), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             bootOutput.add(Component.text(" | Finished building families.", NamedTextColor.GREEN));
@@ -406,7 +409,7 @@ class Initialize {
         {
             bootOutput.add(Component.text(" | Building root family...", NamedTextColor.DARK_GRAY));
 
-            RootServerFamily rootFamily = RootServerFamily.init(familiesConfig.rootFamilyName(), bootOutput, lang);
+            RootServerFamily rootFamily = RootServerFamily.init(inject(bootOutput, dependencies.d3()), familiesConfig.rootFamilyName());
             familyService.setRootFamily(rootFamily);
             bootOutput.add(Component.text(" | Registered root family: "+rootFamily.name(), NamedTextColor.YELLOW));
 
@@ -415,8 +418,8 @@ class Initialize {
 
         {
             bootOutput.add(Component.text(" | Registering load balancing service to the API...", NamedTextColor.DARK_GRAY));
-            if (defaultConfig.services_loadBalancing_enabled())
-                services.put(LoadBalancingService.class, new LoadBalancingService(familyService.size(), defaultConfig.services_loadBalancing_interval()));
+            if (dependencies.d1().services_loadBalancing_enabled())
+                services.put(LoadBalancingService.class, new LoadBalancingService(familyService.size(), dependencies.d1().services_loadBalancing_interval()));
             bootOutput.add(Component.text(" | Finished registering load balancing service to the API.", NamedTextColor.GREEN));
         }
 
@@ -424,7 +427,7 @@ class Initialize {
             bootOutput.add(Component.text(" | Resolving family parents...", NamedTextColor.DARK_GRAY));
             familyService.dump().forEach(baseServerFamily -> {
                 try {
-                    ((PlayerFocusedServerFamily) baseServerFamily).resolveParent();
+                    ((PlayerFocusedServerFamily) baseServerFamily).resolveParent(familyService);
                 } catch (Exception e) {
                     bootOutput.add(Component.text("There was an issue resolving the parent for " + baseServerFamily.name() + ". " + e.getMessage()));
                 }
@@ -433,17 +436,18 @@ class Initialize {
         }
 
         bootOutput.add(Component.text("Finished building families service.", NamedTextColor.GREEN));
+        return familyService;
     }
 
-    public void networkWhitelist(DefaultConfig defaultConfig, LangService lang) throws IOException {
+    public void networkWhitelist(DependencyInjector.DI2<DefaultConfig, LangService> dependencies) throws IOException {
         bootOutput.add(Component.text("Registering whitelist service to the API...", NamedTextColor.DARK_GRAY));
         WhitelistService whitelistService = new WhitelistService();
         services.put(WhitelistService.class, whitelistService);
         bootOutput.add(Component.text("Finished registering whitelist service to the API.", NamedTextColor.GREEN));
 
         bootOutput.add(Component.text("Building proxy whitelist...", NamedTextColor.DARK_GRAY));
-        if (defaultConfig.whitelist_enabled()) {
-            whitelistService.setProxyWhitelist(Whitelist.init(defaultConfig.whitelist_name(), bootOutput, lang));
+        if (dependencies.d1().whitelist_enabled()) {
+            whitelistService.setProxyWhitelist(Whitelist.init(inject(bootOutput, dependencies.d2()), dependencies.d1().whitelist_name()));
             bootOutput.add(Component.text("Finished building proxy whitelist.", NamedTextColor.GREEN));
         } else
             bootOutput.add(Component.text("Finished building proxy whitelist. No whitelist is enabled for the proxy.", NamedTextColor.GREEN));
@@ -497,17 +501,17 @@ class Initialize {
         return messageCacheService;
     }
 
-    public void magicLink(DefaultConfig defaultConfig, ServerService serverService) {
+    public void magicLink(DependencyInjector.DI2<DefaultConfig, ServerService> dependencies) {
         bootOutput.add(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-        MagicLinkService magicLinkService = new MagicLinkService(3, defaultConfig.services_serverLifecycle_serverPingInterval());
+        MagicLinkService magicLinkService = new MagicLinkService(3, dependencies.d1().services_serverLifecycle_serverPingInterval());
         services.put(MagicLinkService.class, magicLinkService);
 
         bootOutput.add(Component.text("Finished building magic link service.", NamedTextColor.GREEN));
 
 
         bootOutput.add(Component.text("Booting magic link service...", NamedTextColor.DARK_GRAY));
-        magicLinkService.startHeartbeat(serverService);
+        magicLinkService.startHeartbeat(dependencies.d2());
         bootOutput.add(Component.text("Finished booting magic link service.", NamedTextColor.GREEN));
     }
 
@@ -568,25 +572,19 @@ class Initialize {
             bootOutput.add(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
         }
     }
-    public Consumer<PluginLogger> viewportService(LangService lang, Optional<char[]> memberKey) {
-        // If there's no membership key they can't even use Viewport so don't even load a config file.
-        if(memberKey.isEmpty()) return (l)->{};
+    public Consumer<PluginLogger> viewportService(DependencyInjector.DI2<LangService, Optional<char[]>> dependencies) {
+        // If there's no membership key they can't even use Viewport so don't even load a config file
+        if(dependencies.d2().isEmpty()) return (l)->{};
 
         try {
             bootOutput.add(Component.text("Building viewport service...", NamedTextColor.DARK_GRAY));
 
             ViewportConfig viewportConfig = new ViewportConfig(new File(api.dataFolder(), "viewport.yml"));
-            if (!viewportConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_VIEWPORT_TEMPLATE))
+            if (!viewportConfig.generate(bootOutput, dependencies.d1(), LangFileMappings.VELOCITY_VIEWPORT_TEMPLATE))
                 throw new IllegalStateException("Unable to load or create viewport.yml!");
             viewportConfig.register();
 
             if(!viewportConfig.isEnabled()) {
-                bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
-                return (l)->{};
-            }
-
-            if(memberKey.isEmpty()) {
-                bootOutput.add(Component.text("You must have an Aelysium Premier membership in order to use Viewport!", NamedTextColor.RED));
                 bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
                 return (l)->{};
             }
@@ -601,9 +599,9 @@ class Initialize {
 
                     String address = viewportConfig.getApi_address().getHostName()+":"+viewportConfig.getApi_address().getPort();
                     if (viewportConfig.isApi_ssl())
-                        logger.send(Component.text(new String(memberKey.orElseThrow())+";t;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
+                        logger.send(Component.text(new String(dependencies.d2().orElseThrow())+";t;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
                     else {
-                        logger.send(Component.text(new String(memberKey.orElseThrow())+";f;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
+                        logger.send(Component.text(new String(dependencies.d2().orElseThrow())+";f;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
                         logger.send(Component.text("Because this connection will be unencrypted, you may be required to enable \"Display Insecure Resources\" on your browser for the Viewport website.", NamedTextColor.YELLOW));
                     }
                 }
@@ -615,12 +613,12 @@ class Initialize {
         return (l)->{};
     }
 
-    public void friendsService(LangService lang) {
+    public void friendsService(DependencyInjector.DI2<ConnectorsService, LangService> dependencies) {
         try {
             bootOutput.add(Component.text("Building friends service...", NamedTextColor.DARK_GRAY));
 
             FriendsConfig config = new FriendsConfig(new File(api.dataFolder(), "friends.yml"));
-            if (!config.generate(bootOutput, lang, LangFileMappings.VELOCITY_FRIENDS_TEMPLATE))
+            if (!config.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_FRIENDS_TEMPLATE))
                 throw new IllegalStateException("Unable to load or create friends.yml!");
             config.register();
 
@@ -637,7 +635,7 @@ class Initialize {
             );
 
             bootOutput.add(Component.text(" | Building friends connector...", NamedTextColor.DARK_GRAY));
-            StorageConnector<?> connector = api.services().connectorsService().getStorage(config.storage());
+            StorageConnector<?> connector = dependencies.d1().getStorage(config.storage());
             if(connector == null) throw new NullPointerException("You must define a storage method for the friends service!");
             requestedConnectors.add(config.storage());
             bootOutput.add(Component.text(" | Finished building friends connector.", NamedTextColor.GREEN));
@@ -654,16 +652,16 @@ class Initialize {
         }
     }
 
-    public void playerService(LangService lang) throws Exception {
+    public void playerService(DependencyInjector.DI2<ConnectorsService, LangService> dependencies) throws Exception {
         FriendsConfig config = new FriendsConfig(new File(api.dataFolder(), "friends.yml"));
-        if (!config.generate(bootOutput, lang, LangFileMappings.VELOCITY_FRIENDS_TEMPLATE))
+        if (!config.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_FRIENDS_TEMPLATE))
             throw new IllegalStateException("Unable to load or create friends.yml!");
         config.register();
 
         if(!config.isEnabled()) return;
 
         bootOutput.add(Component.text(" | Building friends MySQL...", NamedTextColor.DARK_GRAY));
-        StorageConnector<?> connector = api.services().connectorsService().getStorage(config.storage());
+        StorageConnector<?> connector = dependencies.d1().getStorage(config.storage());
         if(connector == null) throw new NullPointerException("You must define a storage method for the friends service!");
         requestedConnectors.add(config.storage());
         bootOutput.add(Component.text(" | Finished building friends MySQL.", NamedTextColor.GREEN));
@@ -671,11 +669,11 @@ class Initialize {
         services.put(PlayerService.class, new PlayerService((MySQLConnector) connector));
     }
 
-    public void dynamicTeleportService(LangService lang) {
+    public void dynamicTeleportService(DependencyInjector.DI3<FamilyService, ServerService, LangService> dependencies) {
         bootOutput.add(Component.text("Building dynamic teleport service...", NamedTextColor.DARK_GRAY));
         try {
             DynamicTeleportConfig config = new DynamicTeleportConfig(new File(api.dataFolder(), "dynamic_teleport.yml"));
-            if (!config.generate(bootOutput, lang, LangFileMappings.VELOCITY_DYNAMIC_TELEPORT_TEMPLATE))
+            if (!config.generate(bootOutput, dependencies.d3(), LangFileMappings.VELOCITY_DYNAMIC_TELEPORT_TEMPLATE))
                 throw new IllegalStateException("Unable to load or create dynamic_teleport.yml!");
             config.register();
 
@@ -689,15 +687,15 @@ class Initialize {
             try {
                 dynamicTeleportService.services().tpaService().orElseThrow()
                         .services().tpaCleaningService().startHeartbeat();
-                dynamicTeleportService.services().tpaService().orElseThrow().initCommand();
+                dynamicTeleportService.services().tpaService().orElseThrow().initCommand(inject(dependencies.d1(), dependencies.d2()));
             } catch (Exception ignore) {}
 
             try {
-                dynamicTeleportService.services().hubService().orElseThrow().initCommand();
+                dynamicTeleportService.services().hubService().orElseThrow().initCommand(inject(dependencies.d1(), dependencies.d2()));
             } catch (Exception ignore) {}
 
             try {
-                dynamicTeleportService.services().anchorService().orElseThrow().initCommands();
+                dynamicTeleportService.services().anchorService().orElseThrow().initCommands(inject(dynamicTeleportService, dependencies.d2()));
             } catch (Exception ignore) {}
 
             services.put(DynamicTeleportService.class, dynamicTeleportService);

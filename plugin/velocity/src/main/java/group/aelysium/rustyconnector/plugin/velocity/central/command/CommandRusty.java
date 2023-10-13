@@ -13,6 +13,7 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Flame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -23,14 +24,15 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerChatEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 
 public final class CommandRusty {
-    public static BrigadierCommand create(Flame flame, PluginLogger logger) {
-        MessageCacheService messageCacheService = flame.services().messageCacheService();
+    public static BrigadierCommand create(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
+        Flame flame = dependencies.d1();
+        PluginLogger logger = dependencies.d2();
+        MessageCacheService messageCacheService = dependencies.d3();
 
         LiteralCommandNode<CommandSource> rusty = LiteralArgumentBuilder
             .<CommandSource>literal("rc")

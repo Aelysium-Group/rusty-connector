@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.UnavailableProtocol;
@@ -25,6 +26,8 @@ import java.io.File;
 import java.rmi.ConnectException;
 import java.util.List;
 import java.util.Optional;
+
+import static group.aelysium.rustyconnector.core.lib.util.DependencyInjector.inject;
 
 public class StaticServerFamily extends PlayerFocusedServerFamily {
     protected LiquidTimestamp homeServerExpiration;
@@ -61,18 +64,22 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticServerFamily init(String familyName, List<Component> bootOutput, List<String> requestedConnectors, ConnectorsService connectorsService, LangService lang) throws Exception {
+    public static StaticServerFamily init(DependencyInjector.DI4<List<Component>, List<String>, ConnectorsService, LangService> dependencies, String familyName) throws Exception {
         Tinder api = Tinder.get();
+        List<Component> bootOutput = dependencies.d1();
+        List<String> requestedConnectors = dependencies.d2();
+        ConnectorsService connectorsService = dependencies.d3();
+        LangService lang = dependencies.d4();
 
         StaticFamilyConfig staticFamilyConfig = new StaticFamilyConfig(new File(String.valueOf(api.dataFolder()), "families/" + familyName + ".static.yml"));
-        if (!staticFamilyConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_STATIC_FAMILY_TEMPLATE)) {
+        if (!staticFamilyConfig.generate(dependencies.d1(), lang, LangFileMappings.VELOCITY_STATIC_FAMILY_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create families/" + familyName + ".static.yml!");
         }
         staticFamilyConfig.register();
 
         Whitelist whitelist = null;
         if (staticFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name(), bootOutput, lang);
+            whitelist = Whitelist.init(inject(bootOutput, lang), staticFamilyConfig.getWhitelist_name());
 
             api.services().whitelistService().add(whitelist);
         }

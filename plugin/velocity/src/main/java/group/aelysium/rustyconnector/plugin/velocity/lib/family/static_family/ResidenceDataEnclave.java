@@ -45,7 +45,7 @@ public class ResidenceDataEnclave extends DataEnclave<ResidenceDataEnclave.Serve
         return this.cache.asMap().keySet().stream().filter(predicate);
     }
 
-    public Optional<ServerResidence> fetch(Player player, StaticServerFamily family) throws Exception {
+    public Optional<ServerResidence> fetch(Player player, StaticServerFamily family) {
         // Check the local cache for a matching residence
         try {
             return this.filter(entry -> entry.player().equals(player) && entry.family().equals(family)).findFirst();

@@ -8,11 +8,14 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -27,7 +30,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         this.services.add(new TPACleaningService(settings.expiration()));
         this.settings = settings;
     }
-    public void initCommand() {
+    public void initCommand(DependencyInjector.DI2<FamilyService, ServerService> dependencies) {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         Tinder.get().logger().send(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
 
@@ -35,7 +38,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
             try {
                 commandManager.register(
                         commandManager.metaBuilder("tpa").build(),
-                        CommandTPA.create()
+                        CommandTPA.create(DependencyInjector.inject(dependencies.d1(), dependencies.d2(), this))
                 );
 
                 Tinder.get().logger().send(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));

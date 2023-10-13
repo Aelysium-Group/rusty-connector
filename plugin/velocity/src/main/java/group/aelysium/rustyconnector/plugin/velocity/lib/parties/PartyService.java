@@ -38,7 +38,7 @@ public class PartyService extends Service {
             try {
                 commandManager.register(
                         commandManager.metaBuilder("party").build(),
-                        CommandParty.create()
+                        CommandParty.create(this)
                 );
 
                 Tinder.get().logger().send(Component.text(" | Registered: /party", NamedTextColor.YELLOW));

@@ -6,11 +6,14 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -21,13 +24,13 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.Objects;
 
 public class CommandAnchor {
-    public static BrigadierCommand create(String anchor) {
+    public static BrigadierCommand create(DependencyInjector.DI3<DynamicTeleportService, ServerService, AnchorService> dependencies, String anchor) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleportService().orElseThrow();
-        AnchorService anchorService = dynamicTeleportService.services().anchorService().orElseThrow();
-        ServerService serverService = api.services().serverService();
+        DynamicTeleportService dynamicTeleportService = dependencies.d1();
+        ServerService serverService = dependencies.d2();
+        AnchorService anchorService = dependencies.d3();
 
 
         LiteralCommandNode<CommandSource> anchorCommand = LiteralArgumentBuilder
