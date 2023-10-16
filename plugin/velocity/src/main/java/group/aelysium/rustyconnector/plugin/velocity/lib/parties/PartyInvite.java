@@ -2,26 +2,28 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
+import java.util.Optional;
 
 public class PartyInvite {
     private final WeakReference<Party> party;
-    private final WeakReference<Player> sender;
-    private Player target;
+    private FakePlayer sender;
+    private FakePlayer target;
     private Boolean isAcknowledged = null;
 
     public PartyInvite(Party party, Player sender, Player target) {
         this.party = new WeakReference<>(party);
-        this.sender = new WeakReference<>(sender);
-        this.target = target;
+        this.sender = FakePlayer.from(sender);
+        this.target = FakePlayer.from(target);
     }
 
-    public Player sender() {
-        return this.sender.get();
+    public FakePlayer sender() {
+        return this.sender;
     }
-    public Player target() {
+    public FakePlayer target() {
         return this.target;
     }
 
@@ -44,19 +46,21 @@ public class PartyInvite {
         } catch (NullPointerException ignore) {
             throw new IllegalStateException("This invite has expired!");
         }
-        if(this.sender.get() == null)
-            throw new IllegalStateException("The sender is no-longer online!");
-        if(!Objects.requireNonNull(this.sender.get()).isActive())
+        if(this.sender.resolve().isEmpty())
             throw new IllegalStateException("The sender is no-longer online!");
 
         if(partyService.settings().onlyLeaderCanInvite())
             if(!Objects.requireNonNull(party.get()).leader().equals(sender()))
                 throw new IllegalStateException("The leader that invited you to their party is either no longer in it or isn't the leader anymore!");
         else
-            if(!Objects.requireNonNull(party.get()).players().contains(sender.get()))
+            if(!Objects.requireNonNull(party.get()).players().contains(sender))
                 throw new IllegalStateException("The member that invited you to their party is no longer in it!");
 
-        Objects.requireNonNull(this.party.get()).join(this.target);
+        Optional<Player> player = this.target.resolve();
+        if(player.isEmpty())
+            throw new IllegalStateException("The target player isn't online!");
+
+        Objects.requireNonNull(this.party.get()).join(player.orElseThrow());
         partyService.closeInvite(this);
         this.isAcknowledged = true;
     }
@@ -76,8 +80,8 @@ public class PartyInvite {
     }
 
     public synchronized void decompose() {
-        this.sender.clear();
         this.party.clear();
         this.target = null;
+        this.sender = null;
     }
 }

@@ -24,10 +24,11 @@ public class FakePlayer {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FakePlayer that = (FakePlayer) o;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+
+        FakePlayer that = (FakePlayer) object;
         return Objects.equals(uuid, that.uuid) && Objects.equals(username, that.username);
     }
 

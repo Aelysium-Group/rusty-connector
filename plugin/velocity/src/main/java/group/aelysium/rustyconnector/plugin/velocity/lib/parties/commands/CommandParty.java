@@ -18,7 +18,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -78,7 +77,7 @@ public final class CommandParty {
                                         }
 
                                         invites.forEach(invite -> {
-                                            builder.suggest(invite.sender().getUsername());
+                                            builder.suggest(invite.sender().username());
                                         });
 
                                         return builder.buildFuture();
