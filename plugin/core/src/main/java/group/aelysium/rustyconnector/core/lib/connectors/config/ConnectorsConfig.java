@@ -57,19 +57,19 @@ public class ConnectorsConfig extends YAML {
             String host = this.getNode(this.data, "redis.host", String.class);
             if (host.equals("")) throw new IllegalStateException("Please configure your connector settings. `host` cannot be empty.");
             int port = this.getNode(this.data, "redis.port", Integer.class);
-            InetSocketAddress address = new InetSocketAddress(host, port);
+            this.redis_address = new InetSocketAddress(host, port);
             String user = this.getNode(this.data, "redis.user", String.class);
             if (user.equals("")) throw new IllegalStateException("Please configure your connector settings. `user` cannot be empty.");
             char[] password = this.getNode(this.data, "redis.password", String.class).toCharArray();
-            UserPass userPass = new UserPass(user, password);
+            this.redis_user = new UserPass(user, password);
 
-            ProtocolVersion protocol = ProtocolVersion.RESP2;
+            this.redis_protocol = ProtocolVersion.RESP2;
             try {
-                protocol = ProtocolVersion.valueOf(this.getNode(this.data, "redis.protocol", String.class));
+                this.redis_protocol = ProtocolVersion.valueOf(this.getNode(this.data, "redis.protocol", String.class));
             } catch (Exception ignore) {}
 
-            String dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
-            if (dataChannel.equals("")) throw new IllegalStateException("Please configure your connector settings. `dataChannel` cannot be empty for Redis connectors.");
+            this.redis_dataChannel = this.getNode(this.data, "redis.data-channel", String.class);
+            if (this.redis_dataChannel.equals("")) throw new IllegalStateException("Please configure your connector settings. `dataChannel` cannot be empty for Redis connectors.");
         }
 
         if(loadStorage) {
