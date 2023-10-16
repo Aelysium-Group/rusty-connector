@@ -40,7 +40,6 @@ public abstract class StorageResponse<R> implements AutoCloseable {
     }
 
     public enum Type {
-        MYSQL,
-        H2
+        MYSQL
     }
 }

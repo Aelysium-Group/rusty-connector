@@ -4,13 +4,15 @@ import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageResponse;
 
 import javax.sql.DataSource;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 
-public class MySQLConnector extends StorageConnector<MySQLConnection> {
+public class MySQLConnector extends StorageConnector<StorageConnection<StorageResponse<?>>> {
     protected final String database;
 
     private MySQLConnector(InetSocketAddress address, UserPass userPass, String database) {
@@ -19,8 +21,8 @@ public class MySQLConnector extends StorageConnector<MySQLConnection> {
     }
 
     @Override
-    public MySQLConnection connect() throws ConnectException {
-        this.connection = new MySQLConnection(this.toDataSource());
+    public StorageConnection<StorageResponse<?>> connect() throws ConnectException {
+        this.connection = (StorageConnection<StorageResponse<?>>) new MySQLConnection(this.toDataSource());
 
         return this.connection;
     }

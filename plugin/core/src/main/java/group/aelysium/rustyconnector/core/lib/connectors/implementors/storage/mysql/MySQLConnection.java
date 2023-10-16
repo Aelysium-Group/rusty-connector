@@ -2,11 +2,13 @@ package group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.m
 
 import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageQuery;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageResponse;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.function.Consumer;
 
-public class MySQLConnection extends StorageConnection {
+public class MySQLConnection extends StorageConnection<StorageResponse<ResultSet>> {
     private DataSource dataSource;
 
     protected MySQLConnection(DataSource dataSource) {
@@ -25,7 +27,7 @@ public class MySQLConnection extends StorageConnection {
     }
 
     @Override
-    public MySQLStorageResponse query(StorageQuery query, Object ...inputs) {
+    public void query(StorageQuery query, Consumer<StorageResponse<ResultSet>> callback, Object ...inputs) {
         try (Connection connection = this.open()) {
             try (PreparedStatement statement = connection.prepareStatement(query.mysql())) {
 
@@ -42,14 +44,39 @@ public class MySQLConnection extends StorageConnection {
                 }
 
                 try (ResultSet result = statement.executeQuery()) {
-                    return new MySQLStorageResponse(true, result.getFetchSize(), result);
+                    callback.accept(new MySQLStorageResponse(true, result.getFetchSize(), result));
                 } catch (Exception e) {
-                    try {
-                        statement.execute();
-                        return null;
-                    } catch (Exception e2) {
-                        throw new RuntimeException(e);
-                    }
+                    throw new RuntimeException(e);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void query(StorageQuery query, Object ...inputs) {
+        try (Connection connection = this.open()) {
+            try (PreparedStatement statement = connection.prepareStatement(query.mysql())) {
+
+                int i = 1;
+                for (Object input : inputs) {
+                    if (input instanceof String) statement.setString(i, (String) input);
+                    else if (input instanceof Boolean) statement.setBoolean(i, (Boolean) input);
+                    else if (input instanceof Integer) statement.setInt(i, (Integer) input);
+                    else if (input instanceof Long) statement.setLong(i, (Long) input);
+                    else if (input instanceof Double) statement.setDouble(i, (Double) input);
+                    else if (input == null) statement.setNull(i, Types.NULL);
+
+                    i++;
+                }
+
+                try {
+                    statement.execute();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

@@ -2,10 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
-import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnection;
-import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
-import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageQuery;
-import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageResponse;
+import group.aelysium.rustyconnector.core.lib.connectors.storage.*;
 import group.aelysium.rustyconnector.core.lib.connectors.storage.synced_resource.Destroyable;
 import group.aelysium.rustyconnector.core.lib.connectors.storage.synced_resource.Destructive;
 import group.aelysium.rustyconnector.core.lib.connectors.storage.synced_resource.SyncedResource;
@@ -25,6 +22,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class FriendsDataEnclave extends DataEnclave<Long, List<FriendsDataEnclave.FriendMapping>> {
     private final Map<PlayerDataEnclave.FakePlayer, Long> players = new HashMap<>();
@@ -325,22 +324,30 @@ public class FriendsDataEnclave extends DataEnclave<Long, List<FriendsDataEnclav
             Tinder api = Tinder.get();
             PlayerService playerService = api.services().playerService().orElseThrow();
 
-            try(StorageResponse<?> result = connection.query(FIND_FRIENDS, player.uuid().toString(), player.uuid().toString())) {
+            try {
                 List<FriendMapping> friends = new ArrayList<>();
 
-                result.forEach(object -> {
-                    ResultSet row = (ResultSet) object;
-
+                Consumer<StorageResponse<?>> consumer = (result) -> {
                     try {
-                        PlayerDataEnclave.FakePlayer player1 = playerService.dataEnclave().get(UUID.fromString(row.getString("player1_uuid"))).orElseThrow();
-                        PlayerDataEnclave.FakePlayer player2 = playerService.dataEnclave().get(UUID.fromString(row.getString("player2_uuid"))).orElseThrow();
+                        result.forEach(object -> {
+                            ResultSet row = (ResultSet) object;
 
-                        if (player1 == null) return;
-                        if (player2 == null) return;
+                            try {
+                                PlayerDataEnclave.FakePlayer player1 = playerService.dataEnclave().get(UUID.fromString(row.getString("player1_uuid"))).orElseThrow();
+                                PlayerDataEnclave.FakePlayer player2 = playerService.dataEnclave().get(UUID.fromString(row.getString("player2_uuid"))).orElseThrow();
 
-                        friends.add(new FriendMapping(connector, player1, player2));
-                    } catch (Exception ignore) {}
-                });
+                                if (player1 == null) return;
+                                if (player2 == null) return;
+
+                                friends.add(new FriendMapping(connector, player1, player2));
+                            } catch (Exception ignore) {}
+                        });
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+
+                connection.query(FIND_FRIENDS, consumer, player.uuid().toString(), player.uuid().toString());
 
                 return Optional.of(friends);
             } catch (Exception e) {
@@ -351,12 +358,19 @@ public class FriendsDataEnclave extends DataEnclave<Long, List<FriendsDataEnclav
         }
 
         protected static boolean areFriends(StorageConnector<?> connector, PlayerDataEnclave.FakePlayer player1, PlayerDataEnclave.FakePlayer player2) {
-            StorageConnection connection = connector.connection().orElseThrow();
+            StorageConnection<StorageResponse<?>> connection = connector.connection().orElseThrow();
             Tinder api = Tinder.get();
             FriendMapping orderedMapping = new FriendMapping(player1, player2);
 
-            try(StorageResponse<?> result = connection.query(FIND_FRIENDS, orderedMapping.player1().uuid().toString(), orderedMapping.player2().uuid().toString())) {
-                return result.rows() > 0;
+            try {
+                AtomicBoolean areFriends = new AtomicBoolean(false);
+
+                Consumer<StorageResponse<?>> consumer = (result) -> {
+                    areFriends.set(result.rows() > 0);
+                };
+
+                connection.query(FIND_FRIENDS, consumer, orderedMapping.player1().uuid().toString(), orderedMapping.player2().uuid().toString());
+                return areFriends.get();
             } catch (Exception e) {
                 api.logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
             }

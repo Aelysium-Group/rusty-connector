@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -178,21 +179,30 @@ public class PlayerDataEnclave extends DataEnclave<PlayerDataEnclave.FakePlayer,
         protected static FakePlayer fetch(StorageConnector<?> connector, UUID uuid) throws Exception {
             StorageConnection connection = connector.connection().orElseThrow();
 
-            try(StorageResponse<?> storageResponse = connection.query(FIND_PLAYER_UUID, uuid.toString())) {
-                ResultConsumer consumer = new ResultConsumer(storageResponse);
-                AtomicReference<String> username = new AtomicReference<>();
+            try {
+                AtomicReference<FakePlayer> player = null;
 
-                consumer.forMySQL((result) -> {
-                    try {
-                        username.set(result.first().getString("username"));
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                Consumer<StorageResponse<?>> consumer = (result) -> {
 
-                consumer.trigger();
+                    ResultConsumer resultConsumer = new ResultConsumer(result);
+                    AtomicReference<String> username = new AtomicReference<>();
 
-                return new FakePlayer(connector, uuid, username.get());
+                    resultConsumer.forMySQL((rows) -> {
+                        try {
+                            username.set(rows.first().getString("username"));
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
+                    resultConsumer.trigger();
+
+                    player.set(new FakePlayer(connector, uuid, username.get()));
+                };
+
+                connection.query(FIND_PLAYER_UUID, consumer, uuid.toString());
+
+                return player.get();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -202,17 +212,21 @@ public class PlayerDataEnclave extends DataEnclave<PlayerDataEnclave.FakePlayer,
             StorageConnection connection = connector.connection().orElseThrow();
             AtomicReference<String> uuid = new AtomicReference<>();
 
-            try(StorageResponse<?> storageResponse = connection.query(FIND_PLAYER_USERNAME, username)) {
-                ResultConsumer consumer = new ResultConsumer(storageResponse);
-                consumer.forMySQL((result) -> {
-                    try {
-                        uuid.set(result.first().getString("uuid"));
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+            try {
+                Consumer<StorageResponse<?>> consumer = (result) -> {
+                    ResultConsumer resultConsumer = result.consumer();
+                    resultConsumer.forMySQL((rows) -> {
+                        try {
+                            uuid.set(rows.first().getString("uuid"));
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
 
-                consumer.trigger();
+                    resultConsumer.trigger();
+                };
+
+                connection.query(FIND_PLAYER_USERNAME, consumer, username);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

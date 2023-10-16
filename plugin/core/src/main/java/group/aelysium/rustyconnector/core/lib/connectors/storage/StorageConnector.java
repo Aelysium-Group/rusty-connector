@@ -7,7 +7,7 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
-public abstract class StorageConnector<C extends StorageConnection> extends Connector<C> {
+public abstract class StorageConnector<C extends StorageConnection<StorageResponse<?>>> extends Connector<C> {
     protected C connection;
     protected StorageConnector(InetSocketAddress address, UserPass userPass) {
         super(address, userPass);

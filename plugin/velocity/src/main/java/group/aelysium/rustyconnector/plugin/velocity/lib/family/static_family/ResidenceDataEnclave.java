@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -164,20 +165,26 @@ public class ResidenceDataEnclave extends DataEnclave<ResidenceDataEnclave.Serve
             StorageConnection connection = connector.connection().orElseThrow();
 
             AtomicReference<Optional<ServerResidence>> homeServerMapping = new AtomicReference<>(Optional.empty());
-            try(StorageResponse<?> storageResponse = connection.query(FIND_HOME_SERVER_IN_FAMILY, player.getUniqueId().toString(), family.name())) {
-                ResultConsumer consumer = storageResponse.consumer();
+            try {
+                Consumer<StorageResponse<?>> consumer = (result) -> {
+                    ResultConsumer resultConsumer = result.consumer();
 
-                consumer.forMySQL((result) -> {
-                    try {
-                        RegisteredServer registeredServer = api.velocityServer().getServer(result.first().getString("server_name")).orElse(null);
-                        if(registeredServer == null) return;
-                        PlayerServer server = api.services().serverService().search(registeredServer.getServerInfo());
+                    resultConsumer.forMySQL((mysqlResult) -> {
+                        try {
+                            RegisteredServer registeredServer = api.velocityServer().getServer(mysqlResult.first().getString("server_name")).orElse(null);
+                            if(registeredServer == null) return;
+                            PlayerServer server = api.services().serverService().search(registeredServer.getServerInfo());
 
-                        homeServerMapping.set(Optional.of(new ServerResidence(player, server, family)));
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                            homeServerMapping.set(Optional.of(new ServerResidence(player, server, family)));
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
+                    resultConsumer.trigger();
+                };
+
+                connection.query(FIND_HOME_SERVER_IN_FAMILY, consumer, player.getUniqueId().toString(), family.name());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -223,7 +230,7 @@ public class ResidenceDataEnclave extends DataEnclave<ResidenceDataEnclave.Serve
         @Override
         @Destructive
         public void delete() throws Exception {
-            StorageConnection connection = connector.connection().orElseThrow();
+            StorageConnection<StorageResponse<?>> connection = connector.connection().orElseThrow();
 
             connection.query(DELETE_PLAYERS_HOME_SERVER, player.getUniqueId().toString(), family.name());
 
