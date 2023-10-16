@@ -36,7 +36,7 @@ public class MySQLStorage extends Service {
         );
 
         final EmbeddedStorageManager storageManager = EmbeddedStorage.start(
-                fileSystem.ensureDirectoryPath("microstream_storage")
+                fileSystem.ensureDirectoryPath("RustyConnector_storage")
         );
 
         if(storageManager.root() == null) {
