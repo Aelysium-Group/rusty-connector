@@ -2,8 +2,9 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.connectors.Connector;
-import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.config.ConnectorsConfig;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnection;
+import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
@@ -53,11 +54,11 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
      */
     private final MessengerConnector<?> backbone;
 
-    public Flame(String version, int configVersion, Map<Class<? extends Service>, Service> services, String backboneConnector) {
+    public Flame(String version, int configVersion, Map<Class<? extends Service>, Service> services, RedisConnector messenger) {
         super(new CoreServiceHandler(services));
         this.version = version;
         this.configVersion = configVersion;
-        this.backbone = this.services().connectors().getMessenger(backboneConnector);
+        this.backbone = messenger;
     }
 
     public String version() { return this.version; }
@@ -99,7 +100,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             DefaultConfig defaultConfig = initialize.defaultConfig(langService);
 
             MessageCacheService messageCacheService = initialize.messageCache();
-            Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService);
+            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService);
 
             initialize.serverInfo(defaultConfig);
             initialize.messageCache();
@@ -107,13 +108,10 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             initialize.dynamicTeleport();
             initialize.magicLink(packetBuilderService);
 
-            Runnable connectRemotes = resolveConnectors.execute();
-            connectRemotes.run();
-
             initialize.events(plugin);
             initialize.commands();
 
-            Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.getMessenger());
+            Flame flame = new Flame(version, configVersion, initialize.getServices(), messenger);
 
             return flame;
         } catch (Exception e) {
@@ -210,65 +208,35 @@ class Initialize {
         return defaultConfig;
     }
 
-    /**
-     * Initializes the connectors service.
-     * First returns a {@link Callable} which once run, will return a {@link Runnable}.
-     * <p>
-     * {@link Callable} - Runs linting to only build the connectors actually being referenced by the configs. Returns:
-     * <p>
-     * a {@link Runnable} - Starts up all connectors and connects them to their remote resources.
-     * @return A runnable which will wrap up the connectors' initialization. Should be run after all other initialization logic has run.
-     */
-    public Callable<Runnable> connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang) throws IOException {
+    public RedisConnector connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang) throws IOException {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
-        ConnectorsConfig connectorsConfig = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
-        if (!connectorsConfig.generate(bootOutput, lang, LangFileMappings.PAPER_CONNECTORS_TEMPLATE))
+        ConnectorsConfig config = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
+        if (!config.generate(bootOutput, lang, LangFileMappings.PAPER_CONNECTORS_TEMPLATE))
             throw new IllegalStateException("Unable to load or create connectorsConfig.yml!");
-        ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, false, PacketOrigin.PROXY, api.dataFolder());
-        services.put(ConnectorsService.class, connectorsService);
+
+        RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
+                PacketOrigin.PROXY,
+                config.getRedis_address(),
+                config.getRedis_user(),
+                config.getRedis_protocol(),
+                config.getRedis_dataChannel()
+        );
+        RedisConnector messenger = RedisConnector.create(cryptor, spec);
+        services.put(RedisConnector.class, messenger);
+
+
+        messenger.connect();
+        RedisConnection connection = messenger.connection().orElseThrow();
+
+        Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
+        handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler());
+        handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler());
+        connection.startListening(cacheService, logger, handlers);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
 
-        // Needs to be run after all other services boot so that we can setup the connectors we actually need.
-        return () -> {
-            logger.send(Component.text("Validating Connector service...", NamedTextColor.DARK_GRAY));
-
-            /*
-             * Make sure that configs aren't trying to access connectors which don't exist.
-             * Also makes sure that, if there are excess connectors defined, we only load and attempt to boot the ones that are actually being called.
-             */
-            for (String name : requestedConnectors) {
-                logger.send(Component.text(" | Checking and building connector ["+name+"]...", NamedTextColor.DARK_GRAY));
-
-                if(!connectorsService.containsKey(name))
-                    throw new RuntimeException("No connector with the name '"+name+"' was found!");
-
-                Connector<?> connector = connectorsService.getMessenger(name);
-                try {
-                    connector.connect();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            logger.send(Component.text("Finished validating Connector service.", NamedTextColor.GREEN));
-
-            // Needs to run even later to actually boot all the connectors and connect them to their remote resources.
-            return () -> {
-                logger.send(Component.text("Booting Connectors service...", NamedTextColor.DARK_GRAY));
-
-                Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
-                handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler());
-                handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler());
-
-                connectorsService.messengers().forEach(connector -> {
-                    if(connector.connection().isEmpty()) return;
-                    MessengerConnection connection = connector.connection().orElseThrow();
-                    connection.startListening(cacheService, logger, handlers);
-                });
-                logger.send(Component.text("Finished booting Connectors service.", NamedTextColor.GREEN));
-            };
-        };
+        return messenger;
     }
 
     public void magicLink(PacketBuilderService packetBuilderService) {

@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
+import java.sql.SQLException;
 
 public abstract class Connector<C extends Connection> extends Service {
     protected final InetSocketAddress address;
@@ -19,5 +20,5 @@ public abstract class Connector<C extends Connection> extends Service {
      * @return A {@link Connection}.
      * @throws ConnectException If there was an issue connecting to the remote resource.
      */
-public abstract C connect() throws ConnectException;
+    public abstract C connect() throws ConnectException, SQLException;
 }

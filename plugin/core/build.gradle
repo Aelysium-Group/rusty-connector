@@ -12,8 +12,6 @@ dependencies {
     implementation "javax.websocket:javax.websocket-api:${project.javax_websocket_version}"
     implementation "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
     implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
-    implementation "one.microstream:microstream-storage-embedded:${project.microstream_version}"
-    implementation "org.mariadb.jdbc:mariadb-java-client:${project.mariadb_version}"
 
     // Dev only
     shadow "net.kyori:adventure-api:${project.adventure_version}"

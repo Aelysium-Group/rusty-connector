@@ -13,13 +13,13 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.SyncFailedException;
 import java.util.List;
-import java.util.Optional;
 
 public final class CommandUnFriend {
     public static BrigadierCommand create(FriendsService friendsService) {
@@ -52,7 +52,7 @@ public final class CommandUnFriend {
                             if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                             try {
-                                List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
+                                List<FakePlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -79,16 +79,16 @@ public final class CommandUnFriend {
 
                             String username = context.getArgument("username", String.class);
                             try {
-                                PlayerDataEnclave.FakePlayer targetPlayer = api.services().playerService().orElseThrow().dataEnclave().get(username).orElseThrow();
+                                FakePlayer targetPlayer = api.services().playerService().orElseThrow().dataEnclave().fetch(username).orElseThrow();
 
-                                if(!friendsService.services().dataEnclave().areFriends(PlayerDataEnclave.FakePlayer.from(player), targetPlayer))
+                                if(!friendsService.areFriends(FakePlayer.from(player), targetPlayer))
                                     return closeMessage(player, Component.text(username + " isn't your friend!", NamedTextColor.RED));
 
                                 if(targetPlayer == null)
                                     return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
 
                                 try {
-                                    friendsService.services().dataEnclave().removeFriend(PlayerDataEnclave.FakePlayer.from(player), targetPlayer);
+                                    friendsService.removeFriends(FakePlayer.from(player), targetPlayer);
 
                                     return closeMessage(player, Component.text("You are no longer friends with " + username, NamedTextColor.GREEN));
                                 } catch (IllegalStateException e) {

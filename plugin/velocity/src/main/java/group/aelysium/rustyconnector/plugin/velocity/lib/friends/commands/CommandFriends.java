@@ -16,6 +16,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -81,9 +82,9 @@ public final class CommandFriends {
 
                                 String username = context.getArgument("username", String.class);
                                 try {
-                                    PlayerDataEnclave.FakePlayer targetPlayer = api.services().playerService().orElseThrow().dataEnclave().get(username).orElseThrow();
+                                    FakePlayer targetPlayer = api.services().playerService().orElseThrow().dataEnclave().fetch(username).orElseThrow();
 
-                                    if(friendsService.services().dataEnclave().areFriends(PlayerDataEnclave.FakePlayer.from(player), targetPlayer))
+                                    if(friendsService.areFriends(FakePlayer.from(player), targetPlayer))
                                         return closeMessage(player, Component.text(username + " is already your friend!", NamedTextColor.RED));
 
                                     if(targetPlayer == null)
@@ -119,7 +120,7 @@ public final class CommandFriends {
                                     if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                                     try {
-                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(PlayerDataEnclave.FakePlayer.from(player));
+                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(FakePlayer.from(player));
 
                                         if(requests.size() == 0) {
                                             builder.suggest("You have no pending friend requests!");
@@ -164,13 +165,13 @@ public final class CommandFriends {
 
                                             String username = context.getArgument("username", String.class);
                                             try {
-                                                PlayerDataEnclave.FakePlayer senderPlayer = api.services().playerService().orElseThrow().dataEnclave().get(username).orElseThrow();
+                                                FakePlayer senderPlayer = api.services().playerService().orElseThrow().dataEnclave().fetch(username).orElseThrow();
 
                                                 if(senderPlayer == null)
                                                     return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
 
                                                 try {
-                                                    FriendRequest invite = friendsService.findRequest(PlayerDataEnclave.FakePlayer.from(player), senderPlayer).orElse(null);
+                                                    FriendRequest invite = friendsService.findRequest(FakePlayer.from(player), senderPlayer).orElse(null);
                                                     if (invite == null) throw new NoOutputException();
 
                                                     try {
@@ -204,12 +205,12 @@ public final class CommandFriends {
 
                                             String username = context.getArgument("username", String.class);
                                             try {
-                                                PlayerDataEnclave.FakePlayer senderPlayer = api.services().playerService().orElseThrow().dataEnclave().get(username).orElseThrow();
+                                                FakePlayer senderPlayer = api.services().playerService().orElseThrow().dataEnclave().fetch(username).orElseThrow();
 
                                                 if (senderPlayer == null)
                                                     return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
 
-                                                FriendRequest invite = friendsService.findRequest(PlayerDataEnclave.FakePlayer.from(player), senderPlayer).orElse(null);
+                                                FriendRequest invite = friendsService.findRequest(FakePlayer.from(player), senderPlayer).orElse(null);
                                                 if (invite == null)
                                                     return closeMessage(player, Component.text("The friend request from " + senderPlayer.username() + " has expired!", NamedTextColor.RED));
 

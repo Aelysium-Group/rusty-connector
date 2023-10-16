@@ -99,7 +99,7 @@ first-connection:
 #             the fewest players currently connected.      #
 #             This mode is best if you want evenly         #
 #             distributed players across all servers.      #
-#  ⚫ MOST_CONNECTION -                                     #
+#  ⚫ MOST_CONNECTION -                                    #
 #             Connects players to the server with the      #
 #             the most players currently connected.        #
 #             This mode is best if you want to fill        #
@@ -161,23 +161,6 @@ first-connection:
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 consecutive-connections:
-    ############################################################
-    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-    #                    Residency Storage                     #
-    #                                                          #
-    #               ---------------------------                #
-    #                                                          #
-    # | Set the name of the storage connector you want         #
-    # | to use for player residency.                           #
-    #                                                          #
-    #  You can configure your connectors in: `connectors.yml`  #
-    #                                                          #
-    #               ---------------------------                #
-    #                                                          #
-    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-    ############################################################
-    residency-storage: "main-mysql"
-
     ############################################################
     #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
     #            If Resident Server is Unavailable             #

@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-
-import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
@@ -14,6 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkSer
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 
@@ -34,8 +34,11 @@ public class CoreServiceHandler extends group.aelysium.rustyconnector.core.lib.s
     public ServerService serverService() {
         return this.find(ServerService.class).orElseThrow();
     }
-    public ConnectorsService connectorsService() {
-        return this.find(ConnectorsService.class).orElseThrow();
+    public MessengerConnector<MessengerConnection> messenger() {
+        return (MessengerConnector<MessengerConnection>) this.find(MessengerConnector.class).orElseThrow();
+    }
+    public MySQLStorage storage() {
+        return this.find(MySQLStorage.class).orElseThrow();
     }
     public DataTransitService dataTransitService() {
         return this.find(DataTransitService.class).orElseThrow();

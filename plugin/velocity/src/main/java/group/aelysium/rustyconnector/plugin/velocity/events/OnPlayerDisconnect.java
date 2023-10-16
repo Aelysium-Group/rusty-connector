@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -61,18 +62,12 @@ public class OnPlayerDisconnect {
                 } catch (Exception e) {}
             } catch (Exception ignore) {}
 
-            // Handle uncaching friends when player leaves
-            try {
-                FriendsService friendsService = api.services().friendsService().orElseThrow();
-                friendsService.services().dataEnclave().uncachePlayer(PlayerDataEnclave.FakePlayer.from(player));
-            } catch (Exception ignore) {}
-
             // Handle sending out friend messages when player leaves
             try {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
                 if(!friendsService.settings().allowMessaging()) throw new NoOutputException();
 
-                List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, true).orElseThrow();
+                List<FakePlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 
@@ -82,12 +77,6 @@ public class OnPlayerDisconnect {
 
                     resolvedPlayer.get().sendMessage(VelocityLang.FRIEND_LEAVE.build(player));
                 });
-            } catch (Exception ignore) {}
-
-            // Handle caching player when they leave
-            try {
-                PlayerDataEnclave dataEnclave = api.services().playerService().orElseThrow().dataEnclave();
-                dataEnclave.cachePlayer(player);
             } catch (Exception ignore) {}
 
             WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));

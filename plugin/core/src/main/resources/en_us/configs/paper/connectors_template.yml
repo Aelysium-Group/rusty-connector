@@ -21,22 +21,13 @@
 #                                                                                                   #
 #                                    ---------------------------                                    #
 #                                                                                                   #
-# | First time working with this file?                                                              #
-# | Check out our setup docs:                                                                       #
-#                                                                                                   #
-#   LINK TO BE ADDED                                                                                #
-#                                                                                                   #
-#                                    ---------------------------                                    #
-#                                                                                                   #
 #####################################################################################################
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #####################################################################################################
 
-messengers:
-    - name: "main-redis"
-      type: REDIS
-      host: "0.0.0.0"
-      port: 3306
-      user: "default"
-      password: "password"
-      data-channel: "rustyConnector-sync"
+redis:
+    host: "0.0.0.0"
+    port: 3306
+    user: "default"
+    password: "password"
+    data-channel: "rustyConnector-sync"
