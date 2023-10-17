@@ -111,9 +111,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             initialize.events(plugin);
             initialize.commands();
 
-            Flame flame = new Flame(version, configVersion, initialize.getServices(), messenger);
-
-            return flame;
+            return new Flame(version, configVersion, initialize.getServices(), messenger);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -214,6 +212,7 @@ class Initialize {
         ConnectorsConfig config = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
         if (!config.generate(bootOutput, lang, LangFileMappings.PAPER_CONNECTORS_TEMPLATE))
             throw new IllegalStateException("Unable to load or create connectorsConfig.yml!");
+        config.register(true, false);
 
         RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
                 PacketOrigin.PROXY,
