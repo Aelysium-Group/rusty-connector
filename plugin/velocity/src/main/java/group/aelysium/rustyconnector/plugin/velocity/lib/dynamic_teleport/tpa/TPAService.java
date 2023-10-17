@@ -30,9 +30,11 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         this.services.add(new TPACleaningService(settings.expiration()));
         this.settings = settings;
     }
-    public void initCommand(DependencyInjector.DI2<FamilyService, ServerService> dependencies) {
+    public void initCommand(DependencyInjector.DI3<FamilyService, ServerService, List<Component>> dependencies) {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
-        Tinder.get().logger().send(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
+        List<Component> bootOutput = dependencies.d3();
+
+        bootOutput.add(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("tpa"))
             try {
@@ -41,12 +43,12 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
                         CommandTPA.create(DependencyInjector.inject(dependencies.d1(), dependencies.d2(), this))
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-        Tinder.get().logger().send(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
     }
 
     public TPASettings settings() {

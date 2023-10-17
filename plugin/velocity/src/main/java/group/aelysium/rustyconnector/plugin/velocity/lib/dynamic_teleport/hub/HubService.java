@@ -23,10 +23,11 @@ public class HubService extends Service {
         return this.enabledFamilies.contains(familyName);
     }
 
-    public void initCommand(DependencyInjector.DI2<FamilyService, ServerService> dependencies) {
+    public void initCommand(DependencyInjector.DI3<FamilyService, ServerService, List<Component>> dependencies) {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+        List<Component> bootOutput = dependencies.d3();
 
-        Tinder.get().logger().send(Component.text("Building hub service commands...", NamedTextColor.DARK_GRAY));
+        bootOutput.add(Component.text("Building hub service commands...", NamedTextColor.DARK_GRAY));
         if(!commandManager.hasCommand("hub"))
             try {
                 commandManager.register(
@@ -34,12 +35,12 @@ public class HubService extends Service {
                         CommandHub.create(DependencyInjector.inject(dependencies.d1(), dependencies.d2(), this))
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /hub", NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /hub", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-        Tinder.get().logger().send(Component.text("Finished building hub service commands.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished building hub service commands.", NamedTextColor.GREEN));
     }
 
     @Override

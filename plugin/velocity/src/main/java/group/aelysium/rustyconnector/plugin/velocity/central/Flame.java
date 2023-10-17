@@ -34,6 +34,7 @@ import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerKicked;
 import group.aelysium.rustyconnector.plugin.velocity.lib.data_transit.config.DataTransitConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.config.FamiliesConfig;
@@ -125,6 +126,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
     public static Flame fabricateNew(VelocityRustyConnector plugin, LangService langService) throws RuntimeException {
         PluginLogger logger = Tinder.get().logger();
         Initialize initialize = new Initialize();
+        logger.send(Component.text("Booting RustyConnector...", NamedTextColor.GREEN));
         logger.send(Component.text("Initializing 0%...", NamedTextColor.DARK_GRAY));
 
         try {
@@ -623,21 +625,36 @@ class Initialize {
                 return;
             }
 
-            DynamicTeleportService dynamicTeleportService = DynamicTeleportService.init(config, bootOutput);
+            DynamicTeleportService dynamicTeleportService = DynamicTeleportService.init(inject(bootOutput, dependencies.d1()), config);
 
             try {
-                dynamicTeleportService.services().tpaService().orElseThrow()
-                        .services().tpaCleaningService().startHeartbeat();
-                dynamicTeleportService.services().tpaService().orElseThrow().initCommand(inject(dependencies.d1(), dependencies.d2()));
-            } catch (Exception ignore) {}
+                TPAService tpaService = dynamicTeleportService.services().tpaService().orElseThrow();
+                tpaService.services().tpaCleaningService().startHeartbeat(tpaService);
+                tpaService.initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
+                bootOutput.add(Component.text(" | The TPA module was started successfully!",NamedTextColor.GREEN));
+            } catch (NoSuchElementException ignore) {
+            } catch (Exception e) {
+                bootOutput.add(Component.text(" | The TPA module couldn't be started.",NamedTextColor.RED));
+                throw new RuntimeException(e);
+            }
 
             try {
-                dynamicTeleportService.services().hubService().orElseThrow().initCommand(inject(dependencies.d1(), dependencies.d2()));
-            } catch (Exception ignore) {}
+                dynamicTeleportService.services().hubService().orElseThrow().initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
+                bootOutput.add(Component.text(" | The HUB module was started successfully!",NamedTextColor.GREEN));
+            } catch (NoSuchElementException ignore) {
+            } catch (Exception e) {
+                bootOutput.add(Component.text(" | The HUB module couldn't be started.",NamedTextColor.RED));
+                throw new RuntimeException(e);
+            }
 
             try {
-                dynamicTeleportService.services().anchorService().orElseThrow().initCommands(inject(dynamicTeleportService, dependencies.d2()));
-            } catch (Exception ignore) {}
+                dynamicTeleportService.services().anchorService().orElseThrow().initCommands(inject(dynamicTeleportService, dependencies.d2(), bootOutput));
+                bootOutput.add(Component.text(" | The Anchor module was started successfully!",NamedTextColor.GREEN));
+            } catch (NoSuchElementException ignore) {
+            } catch (Exception e) {
+                bootOutput.add(Component.text(" | The Anchor module couldn't be started.",NamedTextColor.RED));
+                throw new RuntimeException(e);
+            }
 
             services.put(DynamicTeleportService.class, dynamicTeleportService);
 
