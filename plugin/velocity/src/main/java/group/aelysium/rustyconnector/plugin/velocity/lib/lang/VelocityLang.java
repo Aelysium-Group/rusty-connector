@@ -692,7 +692,7 @@ public class VelocityLang extends Lang {
     public final static ParameterizedMessage1<String> TPA_REQUEST_DENIED_TARGET = username -> resolver().getArray("velocity.tpa.target_deny", LanguageResolver.tagHandler("username", username));
     public final static ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> resolver().getArray("velocity.tpa.expired_request", LanguageResolver.tagHandler("username", username));
 
-    public final static Component HUB_CONNECTION_FAILED = resolver().getArray("velocity.hub.connection_failed");
+    public final static Component HUB_CONNECTION_FAILED = resolver().get("velocity.hub.connection_failed");
 
     public final static ParameterizedMessage2<Party, Player> PARTY_BOARD = (party, member) -> {
         boolean hasParty = party != null;
