@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.connectors;
+package group.aelysium.rustyconnector.core.lib.model;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;

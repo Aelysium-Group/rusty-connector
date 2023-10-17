@@ -1,7 +1,7 @@
-package group.aelysium.rustyconnector.core.lib.connectors.config;
+package group.aelysium.rustyconnector.core.lib.messenger.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
+import group.aelysium.rustyconnector.core.lib.model.UserPass;
 import io.lettuce.core.protocol.ProtocolVersion;
 
 import java.io.File;

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnector;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;

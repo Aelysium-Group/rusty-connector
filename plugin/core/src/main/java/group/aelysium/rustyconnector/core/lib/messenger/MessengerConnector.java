@@ -1,21 +1,24 @@
-package group.aelysium.rustyconnector.core.lib.connectors.messenger;
+package group.aelysium.rustyconnector.core.lib.messenger;
 
-import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
-import group.aelysium.rustyconnector.core.lib.connectors.Connector;
+import group.aelysium.rustyconnector.core.lib.model.UserPass;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
-public abstract class MessengerConnector<C extends MessengerConnection> extends Connector<C> {
+public abstract class MessengerConnector<C extends MessengerConnection> extends Service {
+    protected final InetSocketAddress address;
+    protected final UserPass userPass;
     protected C connection;
-    protected AESCryptor cryptor;
-    protected PacketOrigin origin;
+    protected final AESCryptor cryptor;
+    protected final PacketOrigin origin;
 
     protected MessengerConnector(AESCryptor cryptor, PacketOrigin origin, InetSocketAddress address, UserPass userPass) {
-        super(address, userPass);
+        this.address = address;
+        this.userPass = userPass;
         this.origin = origin;
         this.cryptor = cryptor;
     }

@@ -12,14 +12,11 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Objects;
 
@@ -54,13 +51,13 @@ public class CommandAnchor {
                         try {
                             PlayerServer server = serverService.search(Objects.requireNonNull(player.getCurrentServer().orElse(null)).getServerInfo());
                             if(family.equals(server.family()))
-                                return closeMessage(player, Component.text("You're already connected to this server.", NamedTextColor.RED));
+                                return closeMessage(player, VelocityLang.SERVER_ALREADY_CONNECTED);
                         } catch (Exception ignore) {}
 
                         family.connect(player);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        return closeMessage(player, Component.text("There was a fatal error while trying to complete your request.", NamedTextColor.RED));
+                        return closeMessage(player, VelocityLang.INTERNAL_ERROR);
                     }
                     return Command.SINGLE_SUCCESS;
                 })

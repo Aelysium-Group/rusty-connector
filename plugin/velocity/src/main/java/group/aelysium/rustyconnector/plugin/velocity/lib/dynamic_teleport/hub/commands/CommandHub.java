@@ -59,7 +59,7 @@ public class CommandHub {
                             return Command.SINGLE_SUCCESS;
                         } catch (RuntimeException err) {
                             logger.send(Component.text("Failed to connect player to parent family " + rootFamily.name() + "!",NamedTextColor.RED));
-                            context.getSource().sendMessage(Component.text("Failed to connect you to the hub!"));
+                            context.getSource().sendMessage(VelocityLang.HUB_CONNECTION_FAILED);
                         }
 
                         return Command.SINGLE_SUCCESS;
@@ -76,7 +76,7 @@ public class CommandHub {
                         rootFamily.connect(player);
                     } catch (RuntimeException err) {
                         logger.send(Component.text("Failed to connect player to parent family " + rootFamily.name() + "!",NamedTextColor.RED));
-                        context.getSource().sendMessage(Component.text("Failed to connect you to the hub!", NamedTextColor.RED));
+                        context.getSource().sendMessage(VelocityLang.HUB_CONNECTION_FAILED);
                     }
 
                     return Command.SINGLE_SUCCESS;
@@ -84,10 +84,5 @@ public class CommandHub {
                 .build();
 
         return new BrigadierCommand(hub);
-    }
-
-    public static int closeMessage(Player player, Component message) {
-        player.sendMessage(message);
-        return Command.SINGLE_SUCCESS;
     }
 }

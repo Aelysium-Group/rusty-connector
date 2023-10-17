@@ -11,7 +11,7 @@ import static net.kyori.adventure.text.JoinConfiguration.newlines;
 
 /**
  * Thank you to https://github.com/LuckPerms/LuckPerms for inspiring this implementation.
- *
+ * <p>
  * Some text generated using: https://patorjk.com/software/taag/
  */
 @SuppressWarnings("ConstantConditions")

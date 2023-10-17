@@ -125,7 +125,7 @@ public class ServerService extends Service {
             return registeredServer;
         } catch (Exception error) {
             if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
-                VelocityLang.REGISTRATION_CANCELED.send(logger, server.serverInfo(), family.name());
+                VelocityLang.ERROR.send(logger, server.serverInfo(), family.name());
             throw new Exception(error.getMessage());
         }
     }
@@ -159,11 +159,11 @@ public class ServerService extends Service {
             WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, familyName, DiscordWebhookMessage.FAMILY__SERVER_UNREGISTER.build(server));
         } catch (NullPointerException e) {
             if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                VelocityLang.UNREGISTRATION_CANCELED.send(logger, serverInfo, familyName);
+                VelocityLang.ERROR.send(logger, serverInfo, familyName);
             throw new NullPointerException(e.getMessage());
         } catch (Exception e) {
             if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                VelocityLang.UNREGISTRATION_CANCELED.send(logger, serverInfo, familyName);
+                VelocityLang.ERROR.send(logger, serverInfo, familyName);
             throw new Exception(e);
         }
     }

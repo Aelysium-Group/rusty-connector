@@ -1,7 +1,7 @@
-package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.websocket;
+package group.aelysium.rustyconnector.core.lib.messenger.implementors.websocket;
 
 import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerSubscriber;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerSubscriber;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;

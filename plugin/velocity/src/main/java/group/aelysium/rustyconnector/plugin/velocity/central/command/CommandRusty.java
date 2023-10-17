@@ -38,12 +38,12 @@ public final class CommandRusty {
             .<CommandSource>literal("rc")
             .requires(source -> source instanceof ConsoleCommandSource)
             .executes(context -> {
-                VelocityLang.RC_ROOT_USAGE.send(logger);
+                logger.send(VelocityLang.RC_ROOT_USAGE);
                 return Command.SINGLE_SUCCESS;
             })
             .then(LiteralArgumentBuilder.<CommandSource>literal("message")
                     .executes(context -> {
-                        VelocityLang.RC_MESSAGE_ROOT_USAGE.send(logger);
+                        logger.send(VelocityLang.RC_MESSAGE_ROOT_USAGE);
                         return Command.SINGLE_SUCCESS;
                     })
                     .then(LiteralArgumentBuilder.<CommandSource>literal("list")
@@ -93,7 +93,7 @@ public final class CommandRusty {
                     )
                     .then(LiteralArgumentBuilder.<CommandSource>literal("get")
                             .executes(context -> {
-                                VelocityLang.RC_MESSAGE_GET_USAGE.send(logger);
+                                logger.send(VelocityLang.RC_MESSAGE_GET_USAGE);
 
                                 return Command.SINGLE_SUCCESS;
                             })
@@ -241,12 +241,12 @@ public final class CommandRusty {
             )
             .then(LiteralArgumentBuilder.<CommandSource>literal("send")
                     .executes(context -> {
-                        VelocityLang.RC_SEND_USAGE.send(logger);
+                        logger.send(VelocityLang.RC_SEND_USAGE);
                         return Command.SINGLE_SUCCESS;
                     })
                     .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                             .executes(context -> {
-                                VelocityLang.RC_SEND_USAGE.send(logger);
+                                logger.send(VelocityLang.RC_SEND_USAGE);
                                 return Command.SINGLE_SUCCESS;
                             })
                             .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.greedyString())
@@ -281,12 +281,12 @@ public final class CommandRusty {
                     )
                     .then(LiteralArgumentBuilder.<CommandSource>literal("server")
                             .executes(context -> {
-                                VelocityLang.RC_SEND_USAGE.send(logger);
+                                logger.send(VelocityLang.RC_SEND_USAGE);
                                 return Command.SINGLE_SUCCESS;
                             })
                             .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                                     .executes(context -> {
-                                        VelocityLang.RC_SEND_USAGE.send(logger);
+                                        logger.send(VelocityLang.RC_SEND_USAGE);
                                         return Command.SINGLE_SUCCESS;
                                     })
                                     .then(RequiredArgumentBuilder.<CommandSource, String>argument("serverName", StringArgumentType.greedyString())

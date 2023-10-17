@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -69,8 +70,8 @@ public class Party {
 
         if(this.players.size() > this.maxSize) throw new RuntimeException("The party is already full! Try again later!");
 
-        player.sendMessage(Component.text("You joined the party!", NamedTextColor.GREEN));
-        this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " joined the party.", NamedTextColor.YELLOW)));
+        player.sendMessage(VelocityLang.PARTY_JOINED_SELF);
+        this.players.forEach(partyMember -> partyMember.sendMessage(VelocityLang.PARTY_JOINED.build(partyMember.getUsername())));
         this.players.add(player);
     }
 
@@ -137,7 +138,7 @@ public class Party {
                 }
 
             kickedPlayers.forEach(player -> {
-                player.sendMessage(Component.text("There was an issue following your party! You've been kicked.", NamedTextColor.RED));
+                player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED);
                 this.leave(player);
             });
         });

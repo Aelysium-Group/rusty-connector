@@ -1,6 +1,5 @@
-package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
+package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SocketOptions;

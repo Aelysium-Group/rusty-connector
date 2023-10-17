@@ -1,17 +1,16 @@
-package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
+package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 
 import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.model.FailService;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 

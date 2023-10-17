@@ -1,16 +1,16 @@
-package group.aelysium.rustyconnector.core.lib.connectors.messenger;
+package group.aelysium.rustyconnector.core.lib.messenger;
 
 import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.connectors.Connection;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
 import java.util.Map;
 
-public abstract class MessengerConnection extends Connection {
+public abstract class MessengerConnection extends Service {
     protected PacketOrigin origin;
     public MessengerConnection(PacketOrigin origin) {
         this.origin = origin;

@@ -78,7 +78,7 @@ public final class CommandTPA {
                     }
 
 
-                    context.getSource().sendMessage(VelocityLang.TPA_USAGE.build());
+                    context.getSource().sendMessage(VelocityLang.TPA_USAGE);
                     return Command.SINGLE_SUCCESS;
                 })
                 .then(LiteralArgumentBuilder.<CommandSource>literal("deny")

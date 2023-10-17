@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
-import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
+import group.aelysium.rustyconnector.core.lib.model.UserPass;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import one.microstream.afs.sql.types.SqlConnector;
 import one.microstream.afs.sql.types.SqlFileSystem;

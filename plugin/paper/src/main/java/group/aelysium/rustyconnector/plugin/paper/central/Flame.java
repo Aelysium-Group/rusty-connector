@@ -1,12 +1,10 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.connectors.Connector;
-import group.aelysium.rustyconnector.core.lib.connectors.config.ConnectorsConfig;
-import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnection;
-import group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis.RedisConnector;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
+import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;

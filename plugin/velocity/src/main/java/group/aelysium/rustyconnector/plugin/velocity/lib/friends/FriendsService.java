@@ -122,7 +122,7 @@ public class FriendsService extends Service {
 
     public FriendMapping sendRequest(Player sender, FakePlayer target) {
         if(this.friendCount(FakePlayer.from(sender)).orElseThrow() > this.settings().maxFriends())
-            sender.sendMessage(Component.text("You have reached the max number of friends!", NamedTextColor.RED));
+            sender.sendMessage(VelocityLang.MAX_FRIENDS_REACHED);
 
         FakePlayer fakeSender = FakePlayer.from(sender);
         FriendRequest friendRequest = new FriendRequest(snowflakeGenerator.nextId(), fakeSender, target);
@@ -131,9 +131,9 @@ public class FriendsService extends Service {
 
         try {
             target.resolve().orElseThrow().sendMessage(VelocityLang.FRIEND_REQUEST.build(sender));
-            sender.sendMessage(Component.text("Friend request sent to " + target.username() + "! It will expire in 10 minutes.", NamedTextColor.GREEN));
+            sender.sendMessage(VelocityLang.FRIEND_REQUEST_SENT.build(target.username()));
         } catch (NoSuchElementException ignore) {
-            sender.sendMessage(Component.text(target.username() + " doesn't seem to be online, we'll let them know about your friend request when they log in! Your request will expire in 10 minutes.", NamedTextColor.GREEN));
+            sender.sendMessage(VelocityLang.FRIEND_REQUEST_TARGET_NOT_ONLINE.build(target.username()));
         }
 
         return FriendMapping.from(fakeSender, target);

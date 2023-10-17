@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.websocket;
+package group.aelysium.rustyconnector.core.lib.messenger.implementors.websocket;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheSer
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;

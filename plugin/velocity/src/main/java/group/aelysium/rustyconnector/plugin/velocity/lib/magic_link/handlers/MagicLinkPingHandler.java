@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;

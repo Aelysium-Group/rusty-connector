@@ -14,7 +14,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -45,7 +44,7 @@ public final class CommandUnFriend {
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(player, VelocityLang.UNFRIEND_USAGE.build());
+                    return closeMessage(player, VelocityLang.UNFRIEND_USAGE);
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
@@ -78,28 +77,24 @@ public final class CommandUnFriend {
                             }
 
                             String username = context.getArgument("username", String.class);
+                            FakePlayer targetPlayer = api.services().playerService().fetch(username).orElseThrow();
+
+                            if(!friendsService.areFriends(FakePlayer.from(player), targetPlayer))
+                                return closeMessage(player, VelocityLang.UNFRIEND_NOT_FRIENDS.build(username));
+
+                            if(targetPlayer == null)
+                                return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+
                             try {
-                                FakePlayer targetPlayer = api.services().playerService().orElseThrow().dataEnclave().fetch(username).orElseThrow();
+                                friendsService.removeFriends(FakePlayer.from(player), targetPlayer);
 
-                                if(!friendsService.areFriends(FakePlayer.from(player), targetPlayer))
-                                    return closeMessage(player, Component.text(username + " isn't your friend!", NamedTextColor.RED));
-
-                                if(targetPlayer == null)
-                                    return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
-
-                                try {
-                                    friendsService.removeFriends(FakePlayer.from(player), targetPlayer);
-
-                                    return closeMessage(player, Component.text("You are no longer friends with " + username, NamedTextColor.GREEN));
-                                } catch (IllegalStateException e) {
-                                    return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
-                                } catch (Exception ignore) {}
-                            } catch (SyncFailedException e) {
+                                return closeMessage(player, VelocityLang.UNFRIEND_SUCCESS.build(username));
+                            } catch (IllegalStateException e) {
+                                return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
+                            } catch (Exception e) {
                                 e.printStackTrace();
-                                return closeMessage(player, Component.text("There was an internal error while trying to find "+username+"!", NamedTextColor.RED));
+                                return closeMessage(player, VelocityLang.INTERNAL_ERROR);
                             }
-
-                            return closeMessage(player, Component.text("There was an issue unfriending " + username, NamedTextColor.RED));
                         })
                 )
                 .build();

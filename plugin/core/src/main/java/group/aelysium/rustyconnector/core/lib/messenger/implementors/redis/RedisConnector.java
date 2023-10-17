@@ -1,7 +1,7 @@
-package group.aelysium.rustyconnector.core.lib.connectors.implementors.messenger.redis;
+package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 
-import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
+import group.aelysium.rustyconnector.core.lib.model.UserPass;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import io.lettuce.core.protocol.ProtocolVersion;

@@ -79,7 +79,7 @@ public class PartyService extends Service {
 
     public void disband(Party party) {
         for (Player player : party.players()) {
-            player.sendMessage(VelocityLang.PARTY_DISBANDED.build());
+            player.sendMessage(VelocityLang.PARTY_DISBANDED);
         }
         this.delete(party);
     }
@@ -107,9 +107,9 @@ public class PartyService extends Service {
         PartyInvite invite = new PartyInvite(party, sender, target);
         this.invites.add(invite);
 
-        sender.sendMessage(Component.text("You invited " + target.getUsername() + " to your party!", NamedTextColor.GREEN));
+        sender.sendMessage(VelocityLang.PARTY_INVITE_SENT.build(target.getUsername()));
 
-        target.sendMessage(VelocityLang.PARTY_INVITE_RECEIVED.build(sender));
+        target.sendMessage(VelocityLang.PARTY_INVITE_RECEIVED.build(sender.getUsername()));
         return invite;
     }
 

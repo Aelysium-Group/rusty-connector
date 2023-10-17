@@ -2,8 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -63,11 +63,11 @@ public class FriendRequest {
 
             try {
                 Player resolved = this.target.resolve().orElseThrow();
-                resolved.sendMessage(Component.text("You and " + this.sender().username() + " are now friends!", NamedTextColor.GREEN));
+                resolved.sendMessage(VelocityLang.BECOME_FRIENDS.build(sender.username()));
             } catch (NoSuchElementException ignore) {}
             try {
                 Player resolved = this.sender.resolve().orElseThrow();
-                resolved.sendMessage(Component.text("You and " + this.target().username() + " are now friends!", NamedTextColor.GREEN));
+                resolved.sendMessage(VelocityLang.BECOME_FRIENDS.build(target.username()));
             } catch (NoSuchElementException ignore) {}
 
             friendsService.closeInvite(this);

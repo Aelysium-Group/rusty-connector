@@ -17,7 +17,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -81,20 +80,15 @@ public final class CommandFriends {
                                 }
 
                                 String username = context.getArgument("username", String.class);
-                                try {
-                                    FakePlayer targetPlayer = api.services().playerService().orElseThrow().dataEnclave().fetch(username).orElseThrow();
+                                FakePlayer targetPlayer = api.services().playerService().fetch(username).orElseThrow();
 
-                                    if(friendsService.areFriends(FakePlayer.from(player), targetPlayer))
-                                        return closeMessage(player, Component.text(username + " is already your friend!", NamedTextColor.RED));
+                                if(friendsService.areFriends(FakePlayer.from(player), targetPlayer))
+                                    return closeMessage(player, VelocityLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
 
-                                    if(targetPlayer == null)
-                                        return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
+                                if(targetPlayer == null)
+                                    return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
-                                    friendsService.sendRequest(player, targetPlayer);
-                                } catch (SyncFailedException e) {
-                                    e.printStackTrace();
-                                    return closeMessage(player, Component.text("There was an internal error while trying to find "+username+"!", NamedTextColor.RED));
-                                }
+                                friendsService.sendRequest(player, targetPlayer);
 
                                 return Command.SINGLE_SUCCESS;
                             })
@@ -164,31 +158,28 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            try {
-                                                FakePlayer senderPlayer = api.services().playerService().orElseThrow().dataEnclave().fetch(username).orElseThrow();
+                                            FakePlayer senderPlayer = api.services().playerService().fetch(username).orElseThrow();
 
-                                                if(senderPlayer == null)
-                                                    return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
+                                            if(senderPlayer == null)
+                                                return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+
+                                            try {
+                                                FriendRequest invite = friendsService.findRequest(FakePlayer.from(player), senderPlayer).orElse(null);
+                                                if (invite == null) throw new NoOutputException();
 
                                                 try {
-                                                    FriendRequest invite = friendsService.findRequest(FakePlayer.from(player), senderPlayer).orElse(null);
-                                                    if (invite == null) throw new NoOutputException();
+                                                    invite.ignore();
 
-                                                    try {
-                                                        invite.ignore();
-                                                    } catch (Exception ignore) {
-                                                        friendsService.closeInvite(invite);
-                                                    }
-
-                                                    return closeMessage(player, Component.text("Ignored the friend request from " + username, NamedTextColor.GREEN));
+                                                    return Command.SINGLE_SUCCESS;
                                                 } catch (Exception ignore) {
+                                                    friendsService.closeInvite(invite);
                                                 }
-                                            } catch (SyncFailedException e) {
-                                                e.printStackTrace();
-                                                return closeMessage(player, Component.text("There was an internal error while trying to find "+username+"!", NamedTextColor.RED));
-                                            }
 
-                                            return closeMessage(player, Component.text("There was an issue ignoring the friend request from "+username, NamedTextColor.RED));
+                                                return closeMessage(player, VelocityLang.FRIEND_REQUEST_IGNORE.build(username));
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                                return closeMessage(player, VelocityLang.INTERNAL_ERROR);
+                                            }
                                         })
                                 )
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
@@ -204,29 +195,24 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
+                                            FakePlayer senderPlayer = api.services().playerService().fetch(username).orElseThrow();
+
+                                            if (senderPlayer == null)
+                                                return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+
+                                            FriendRequest invite = friendsService.findRequest(FakePlayer.from(player), senderPlayer).orElse(null);
+                                            if (invite == null)
+                                                return closeMessage(player, VelocityLang.FRIEND_REQUEST_EXPIRED);
+
                                             try {
-                                                FakePlayer senderPlayer = api.services().playerService().orElseThrow().dataEnclave().fetch(username).orElseThrow();
-
-                                                if (senderPlayer == null)
-                                                    return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
-
-                                                FriendRequest invite = friendsService.findRequest(FakePlayer.from(player), senderPlayer).orElse(null);
-                                                if (invite == null)
-                                                    return closeMessage(player, Component.text("The friend request from " + senderPlayer.username() + " has expired!", NamedTextColor.RED));
-
-                                                try {
-                                                    invite.accept();
-                                                } catch (IllegalStateException e) {
-                                                    return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
-                                                } catch (Exception ignore) {
-                                                    return closeMessage(player, Component.text("There was an issue accepting that friend request!", NamedTextColor.RED));
-                                                }
-                                            } catch (SyncFailedException e) {
+                                                invite.accept();
+                                                return Command.SINGLE_SUCCESS;
+                                            } catch (IllegalStateException e) {
+                                                return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
+                                            } catch (Exception e) {
                                                 e.printStackTrace();
-                                                return closeMessage(player, Component.text("There was an internal error while trying to find "+username+"!", NamedTextColor.RED));
+                                                return closeMessage(player, VelocityLang.INTERNAL_ERROR);
                                             }
-
-                                            return Command.SINGLE_SUCCESS;
                                         })
                                 )
                         )

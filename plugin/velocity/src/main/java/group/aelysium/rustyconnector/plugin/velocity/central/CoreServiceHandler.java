@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
@@ -40,6 +40,9 @@ public class CoreServiceHandler extends group.aelysium.rustyconnector.core.lib.s
     public MySQLStorage storage() {
         return this.find(MySQLStorage.class).orElseThrow();
     }
+    public PlayerService playerService() {
+        return this.find(PlayerService.class).orElseThrow();
+    }
     public DataTransitService dataTransitService() {
         return this.find(DataTransitService.class).orElseThrow();
     }
@@ -60,9 +63,6 @@ public class CoreServiceHandler extends group.aelysium.rustyconnector.core.lib.s
     }
     public Optional<FriendsService> friendsService() {
         return this.find(FriendsService.class);
-    }
-    public Optional<PlayerService> playerService() {
-        return this.find(PlayerService.class);
     }
     public Optional<DynamicTeleportService> dynamicTeleportService() {
         return this.find(DynamicTeleportService.class);

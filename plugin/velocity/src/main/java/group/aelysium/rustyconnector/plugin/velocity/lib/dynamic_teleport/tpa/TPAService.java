@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;

@@ -14,7 +14,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -46,7 +45,7 @@ public final class CommandFM {
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(player, VelocityLang.FM_USAGE.build());
+                    return closeMessage(player, VelocityLang.FM_USAGE);
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
@@ -78,7 +77,7 @@ public final class CommandFM {
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            return closeMessage(player, VelocityLang.FM_USAGE.build());
+                            return closeMessage(player, VelocityLang.FM_USAGE);
                         }).then(RequiredArgumentBuilder.<CommandSource, String>argument("message", StringArgumentType.greedyString())
                             .executes(context -> {
                                 if(!(context.getSource() instanceof Player player)) {
@@ -95,19 +94,19 @@ public final class CommandFM {
                                 Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
 
                                 if(targetPlayer == null)
-                                    return closeMessage(player, Component.text(username + " doesn't seem to exist!", NamedTextColor.RED));
+                                    return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
                                 if(player.equals(targetPlayer))
-                                    return closeMessage(player, Component.text("You can't message yourself!", NamedTextColor.RED));
+                                    return closeMessage(player, VelocityLang.FRIEND_MESSAGING_NO_SELF_MESSAGING);
                                 if(!friendsService.areFriends(
                                         FakePlayer.from(player),
                                         FakePlayer.from(targetPlayer)
                                 ))
-                                    return closeMessage(player, Component.text("You can only send messages to your friends!", NamedTextColor.RED));
+                                    return closeMessage(player, VelocityLang.FRIEND_MESSAGING_ONLY_FRIENDS);
 
                                 String message = context.getArgument("message", String.class);
 
                                 player.sendMessage(Component.text("[you -> "+targetPlayer.getUsername()+"]: "+message, NamedTextColor.GRAY));
-                                targetPlayer.sendMessage(Component.text("["+player.getUsername()+" -> you]: "+message, NamedTextColor.GRAY).hoverEvent(HoverEvent.showText(Component.text("Click to reply"))).clickEvent(ClickEvent.suggestCommand("/fm "+player.getUsername()+" ")));
+                                targetPlayer.sendMessage(Component.text("["+player.getUsername()+" -> you]: "+message, NamedTextColor.GRAY).hoverEvent(HoverEvent.showText(VelocityLang.FRIEND_MESSAGING_REPLY)).clickEvent(ClickEvent.suggestCommand("/fm "+player.getUsername()+" ")));
 
                                 return Command.SINGLE_SUCCESS;
                             })
