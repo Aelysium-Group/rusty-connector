@@ -146,6 +146,17 @@ velocity:
                     reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
                     locked: "<dark_gray>Shows all locked servers instead of unlocked.</dark_gray>"
     party:
+        injected_error:
+            # Always the color red
+            only_leader_can_invite: "Only the party leader can invite other players!" #
+            friends_restriction_conflict: "You have parties set to only allow players to invite their friends! But the Friends module is disabled! Ignoring..." #
+            friends_restriction: "You are only allowed to invite friends to join your party!" #
+            acknowledged: "This invite has already been closed!" #
+            expired_invite: "This invite has expired!" #
+            no_sender: "The sender is no longer online!" #
+            no_target: "The invited player is no longer online!" #
+            invalid_leader_invite: "The leader that invited you to their party is either no longer in it or isn't the leader anymore!" #
+            invalid_member_invite: "The member that invited you to their party is no longer in it!" #
         invite:
             sent: "<green>You invited <username> to join your party!</green>"
             no_double_dipping: "<red>You must leave your current party before joining another party.</red>"
@@ -189,6 +200,11 @@ velocity:
         leave: "Leave Party"
         invite_player: "Invite Player"
     friends:
+        injected_error:
+            # Always the color red
+            maxed: "You've already maxed out the number of friends you can have." #
+            acknowledged: "This friend request has already been closed!" #
+            internal_error: "There was an internal error while trying to complete your request." #
         messaging:
             no_self_messaging: "<red>You can't message yourself!</red>"
             only_friends: "<red>You can only send messages to your friends!</red>"
@@ -196,7 +212,7 @@ velocity:
         request:
             already_friends: "<red><username> is already your friend!</red>"
             sent: "<green>Friend request sent to <username>! It will expire in 10 minutes.</green>"
-            expired: "<red>That friend reques seems to have expired!</red>"
+            expired: "<red>That friend request seems to have expired!</red>"
             ignore: "<green>Ignored the friend request from <username>. They can still send you new requests in the future.</green>"
             target_not_online: "<gray><username> doesn't seem to be online, we'll let them know about your friend request when they log in! Your request will expire in 10 minutes.</gray>"
         unfriend:

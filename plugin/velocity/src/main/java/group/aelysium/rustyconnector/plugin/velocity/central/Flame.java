@@ -519,7 +519,7 @@ class Initialize {
 
             PartyService service = new PartyService(settings);
 
-            service.initCommand();
+            service.initCommand(bootOutput);
 
             services.put(PartyService.class, service);
             bootOutput.add(Component.text("Finished building party service.", NamedTextColor.GREEN));

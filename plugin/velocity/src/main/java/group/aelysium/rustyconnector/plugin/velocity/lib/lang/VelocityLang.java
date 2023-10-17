@@ -854,6 +854,17 @@ public class VelocityLang extends Lang {
     public final static Component PARTY_ONLY_LEADER_CAN_KICK = resolver().get("velocity.party.only_leader_can.kick");
     public final static Component PARTY_ONLY_LEADER_CAN_PROMOTE = resolver().get("velocity.party.only_leader_can.promote");
 
+
+    public final static String PARTY_INJECTED_ONLY_LEADER_CAN_INVITE = resolver().getRaw("velocity.party.injected_error.only_leader_can_invite");
+    public final static String PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT = resolver().getRaw("velocity.party.injected_error.friends_restriction_conflict");
+    public final static String PARTY_INJECTED_FRIENDS_RESTRICTION = resolver().getRaw("velocity.party.injected_error.friends_restriction");
+    public final static String PARTY_INJECTED_ACKNOWLEDGED = resolver().getRaw("velocity.party.injected_error.acknowledged");
+    public final static String PARTY_INJECTED_EXPIRED_INVITE = resolver().getRaw("velocity.party.injected_error.expired_invite");
+    public final static String PARTY_INJECTED_NO_SENDER = resolver().getRaw("velocity.party.injected_error.no_sender");
+    public final static String PARTY_INJECTED_NO_TARGET = resolver().getRaw("velocity.party.injected_error.no_target");
+    public final static String PARTY_INJECTED_INVALID_LEADER_INVITE = resolver().getRaw("velocity.party.injected_error.invalid_leader_invite");
+    public final static String PARTY_INJECTED_INVALID_MEMBER_INVITE = resolver().getRaw("velocity.party.injected_error.invalid_member_invite");
+
     public final static ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
         Tinder api = Tinder.get();
         FriendsService friendsService = api.services().friendsService().orElseThrow();
@@ -1000,6 +1011,10 @@ public class VelocityLang extends Lang {
             return FRIENDS_JOIN_MESSAGE_EMPTY.build(requests.size());
         }
     };
+    public final static String FRIEND_INJECTED_MAXED = resolver().getRaw("velocity.friends.injected_error.maxed");
+    public final static String FRIEND_INJECTED_ACKNOWLEDGED = resolver().getRaw("velocity.friends.injected_error.acknowledged");
+    public final static String FRIEND_INJECTED_INTERNAL_ERROR = resolver().getRaw("velocity.friends.injected_error.internal_error");
+
     public final static Component NO_ONLINE_FRIENDS = resolver().get("velocity.friends.no_online_friends");
     public final static Component ONLINE_FRIENDS = resolver().get("velocity.friends.online_friends");
 

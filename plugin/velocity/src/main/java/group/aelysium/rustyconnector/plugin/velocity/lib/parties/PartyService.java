@@ -31,9 +31,9 @@ public class PartyService extends Service {
         this.connector = Executors.newFixedThreadPool(10);
     }
 
-    public void initCommand() {
+    public void initCommand(List<Component> bootOutput) {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
-        Tinder.get().logger().send(Component.text("Building party service commands...", NamedTextColor.DARK_GRAY));
+        bootOutput.add(Component.text("Building party service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("party"))
             try {
@@ -42,12 +42,12 @@ public class PartyService extends Service {
                         CommandParty.create(this)
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /party", NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /party", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-        Tinder.get().logger().send(Component.text("Finished building party service commands.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished building party service commands.", NamedTextColor.GREEN));
     }
 
     public void queueConnector(Runnable runnable) {
@@ -88,23 +88,23 @@ public class PartyService extends Service {
         Tinder api = Tinder.get();
 
         if(party.leader() != sender && this.settings.onlyLeaderCanInvite)
-            throw new IllegalStateException("Hey! Only the party leader can invite other players!");
+            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ONLY_LEADER_CAN_INVITE);
 
         if(this.settings.friendsOnly())
             try {
                 FriendsService friendsService = api.services().friendsService().orElse(null);
                 if(friendsService == null) {
-                    api.logger().send(Component.text("You have parties set to only allow players to invite their friends! But the Friends module is disabled! Ignoring...", NamedTextColor.YELLOW));
+                    api.logger().send(Component.text(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
                     throw new NoOutputException();
                 }
 
                 if(friendsService.findFriends(sender).orElseThrow().contains(target))
-                    throw new IllegalStateException("You are only allowed to invite friends to join your party!");
+                    throw new IllegalStateException(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION);
             } catch (IllegalStateException e) {
                 throw e;
             } catch (Exception ignore) {}
 
-        PartyInvite invite = new PartyInvite(party, sender, target);
+        PartyInvite invite = new PartyInvite(this, party, sender, target);
         this.invites.add(invite);
 
         sender.sendMessage(VelocityLang.PARTY_INVITE_SENT.build(target.getUsername()));

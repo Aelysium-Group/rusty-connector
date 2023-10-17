@@ -125,7 +125,7 @@ public class FriendsService extends Service {
             sender.sendMessage(VelocityLang.MAX_FRIENDS_REACHED);
 
         FakePlayer fakeSender = FakePlayer.from(sender);
-        FriendRequest friendRequest = new FriendRequest(snowflakeGenerator.nextId(), fakeSender, target);
+        FriendRequest friendRequest = new FriendRequest(this, snowflakeGenerator.nextId(), fakeSender, target);
         this.friendRequests.put(friendRequest.id(), friendRequest);
 
 

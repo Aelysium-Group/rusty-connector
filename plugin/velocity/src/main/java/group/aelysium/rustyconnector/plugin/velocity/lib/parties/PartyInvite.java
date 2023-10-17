@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
 
 import java.lang.ref.WeakReference;
@@ -9,12 +9,14 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class PartyInvite {
+    private final PartyService partyService;
     private final WeakReference<Party> party;
     private FakePlayer sender;
     private FakePlayer target;
     private Boolean isAcknowledged = null;
 
-    public PartyInvite(Party party, Player sender, Player target) {
+    public PartyInvite(PartyService partyService, Party party, Player sender, Player target) {
+        this.partyService = partyService;
         this.party = new WeakReference<>(party);
         this.sender = FakePlayer.from(sender);
         this.target = FakePlayer.from(target);
@@ -33,32 +35,27 @@ public class PartyInvite {
      * This will subsequently connect the player to the party's server and then decompose the invite and remove it from the PartyService that it belongs to.
      */
     public synchronized void accept() {
-        Tinder api = Tinder.get();
-        PartyService partyService = api.services().partyService().orElse(null);
-        if(partyService == null)
-            throw new IllegalStateException("The party module is disabled!");
-
         if(this.isAcknowledged != null)
-            throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
+            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ACKNOWLEDGED);
         try {
             if (this.party.get() == null || Objects.requireNonNull(this.party.get()).isEmpty())
-                throw new IllegalStateException("This invite has expired!");
+                throw new IllegalStateException(VelocityLang.PARTY_INJECTED_EXPIRED_INVITE);
         } catch (NullPointerException ignore) {
-            throw new IllegalStateException("This invite has expired!");
+            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_EXPIRED_INVITE);
         }
         if(this.sender.resolve().isEmpty())
-            throw new IllegalStateException("The sender is no-longer online!");
+            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_NO_SENDER);
 
         if(partyService.settings().onlyLeaderCanInvite())
             if(!Objects.requireNonNull(party.get()).leader().equals(sender()))
-                throw new IllegalStateException("The leader that invited you to their party is either no longer in it or isn't the leader anymore!");
+                throw new IllegalStateException(VelocityLang.PARTY_INJECTED_INVALID_LEADER_INVITE);
         else
             if(!Objects.requireNonNull(party.get()).players().contains(sender))
-                throw new IllegalStateException("The member that invited you to their party is no longer in it!");
+                throw new IllegalStateException(VelocityLang.PARTY_INJECTED_INVALID_MEMBER_INVITE);
 
         Optional<Player> player = this.target.resolve();
         if(player.isEmpty())
-            throw new IllegalStateException("The target player isn't online!");
+            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_NO_TARGET);
 
         Objects.requireNonNull(this.party.get()).join(player.orElseThrow());
         partyService.closeInvite(this);
@@ -70,10 +67,7 @@ public class PartyInvite {
      * This will subsequently decompose the invite and remove it from the PartyService that it belongs to.
      */
     public synchronized void ignore() {
-        if(this.isAcknowledged != null) throw new IllegalStateException("This invite has already been acknowledged! You should close it using `PartyService#closeInvite`");
-
-        PartyService partyService = Tinder.get().services().partyService().orElse(null);
-        if(partyService == null) throw new IllegalStateException("The party module is disabled!");
+        if(this.isAcknowledged != null) throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ACKNOWLEDGED);
 
         partyService.closeInvite(this);
         this.isAcknowledged = true;
