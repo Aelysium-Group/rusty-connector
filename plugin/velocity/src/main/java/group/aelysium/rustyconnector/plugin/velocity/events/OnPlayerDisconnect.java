@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -66,7 +66,7 @@ public class OnPlayerDisconnect {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
                 if(!friendsService.settings().allowMessaging()) throw new NoOutputException();
 
-                List<FakePlayer> friends = friendsService.findFriends(player).orElseThrow();
+                List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 

@@ -19,11 +19,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
-    private final String id;
+    private final UUID id = UUID.randomUUID();
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
     private BaseServerFamily family;
@@ -46,7 +47,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(this.softPlayerCap > this.hardPlayerCap) this.softPlayerCap = this.hardPlayerCap;
 
         this.timeout = new AtomicInteger(timeout);
-        this.id = MD5.hash(serverInfo.getName() + serverInfo.getAddress());
     }
 
     public boolean stale() {
@@ -58,7 +58,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         this.timeout.set(newTimeout);
     }
 
-    public String id() {
+    public UUID id() {
         return this.id;
     }
 

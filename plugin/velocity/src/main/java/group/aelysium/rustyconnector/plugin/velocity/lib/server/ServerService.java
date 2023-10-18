@@ -17,6 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventMan
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
+import java.util.UUID;
 import java.util.Vector;
 
 public class ServerService extends Service {
@@ -36,6 +37,16 @@ public class ServerService extends Service {
 
     public int serverInterval() {
         return this.serverInterval;
+    }
+
+    public PlayerServer search(UUID uuid) {
+        for(BaseServerFamily family : Tinder.get().services().familyService().dump()) {
+            PlayerServer server = family.findServer(uuid);
+            if(server == null) continue;
+
+            return server;
+        }
+        return null;
     }
 
     /**

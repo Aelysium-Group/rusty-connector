@@ -29,7 +29,7 @@ public class GetFamilyEndpoint implements Route {
             Tinder.get().services().familyService().find(familyName).registeredServers().forEach(server -> {
                 JsonObject object = new JsonObject();
                 object.add("name", new JsonPrimitive(server.serverInfo().getName()));
-                object.add("id", new JsonPrimitive(server.id()));
+                object.add("id", new JsonPrimitive(server.id().toString()));
                 object.add("player_count", new JsonPrimitive(server.playerCount()));
                 servers.add(object);
             });

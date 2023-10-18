@@ -7,11 +7,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class FakePlayer {
+public class ResolvablePlayer {
     protected UUID uuid;
     protected String username;
 
-    protected FakePlayer(UUID uuid, String username) {
+    protected ResolvablePlayer(UUID uuid, String username) {
         this.uuid = uuid;
         this.username = username;
     }
@@ -28,14 +28,14 @@ public class FakePlayer {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
 
-        FakePlayer that = (FakePlayer) object;
+        ResolvablePlayer that = (ResolvablePlayer) object;
         return Objects.equals(uuid, that.uuid) && Objects.equals(username, that.username);
     }
 
-    public static FakePlayer from(Player player) {
-        return new FakePlayer(player.getUniqueId(), player.getUsername());
+    public static ResolvablePlayer from(Player player) {
+        return new ResolvablePlayer(player.getUniqueId(), player.getUsername());
     }
-    public static FakePlayer from(UUID uuid, String username) {
-        return new FakePlayer(uuid, username);
+    public static ResolvablePlayer from(UUID uuid, String username) {
+        return new ResolvablePlayer(uuid, username);
     }
 }

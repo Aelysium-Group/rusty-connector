@@ -149,6 +149,13 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     @Override
+    public PlayerServer findServer(@NotNull UUID uuid) {
+        return this.registeredServers().stream()
+                .filter(server -> server.id().equals(uuid)
+                ).findFirst().orElse(null);
+    }
+
+    @Override
     public List<Player> allPlayers(int max) {
         List<Player> players = new ArrayList<>();
 

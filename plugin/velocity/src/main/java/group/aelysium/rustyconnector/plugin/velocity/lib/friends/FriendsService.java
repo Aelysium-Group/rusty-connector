@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.Comman
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -82,7 +82,7 @@ public class FriendsService extends Service {
         return this.settings;
     }
 
-    public List<FriendRequest> findRequestsToTarget(FakePlayer target) {
+    public List<FriendRequest> findRequestsToTarget(ResolvablePlayer target) {
         List<Map.Entry<Long, FriendRequest>> entries = this.friendRequests.asMap().entrySet().stream().filter(request -> request.getValue().target().equals(target)).findAny().stream().toList();
 
         List<FriendRequest> requests = new ArrayList<>();
@@ -91,40 +91,40 @@ public class FriendsService extends Service {
 
         return requests;
     }
-    public Optional<FriendRequest> findRequest(FakePlayer target, FakePlayer sender) {
+    public Optional<FriendRequest> findRequest(ResolvablePlayer target, ResolvablePlayer sender) {
         Optional<Map.Entry<Long, FriendRequest>> entry = this.friendRequests.asMap().entrySet().stream().filter(invite -> invite.getValue().target().equals(target) && invite.getValue().sender().equals(sender)).findFirst();
         return entry.map(Map.Entry::getValue);
     }
 
-    public Optional<List<FakePlayer>> findFriends(Player player) {
-        List<FakePlayer> friends = new ArrayList<>();
-        List<FriendMapping> friendMappings = this.dataEnclave.findFriends(FakePlayer.from(player)).orElse(null);
+    public Optional<List<ResolvablePlayer>> findFriends(Player player) {
+        List<ResolvablePlayer> friends = new ArrayList<>();
+        List<FriendMapping> friendMappings = this.dataEnclave.findFriends(ResolvablePlayer.from(player)).orElse(null);
         if(friendMappings == null) return Optional.empty();
 
         friendMappings.forEach(mapping -> {
             try {
-                friends.add(mapping.fetchOther(FakePlayer.from(player)));
+                friends.add(mapping.fetchOther(ResolvablePlayer.from(player)));
             } catch (NullPointerException ignore) {}
         });
 
         return Optional.of(friends);
     }
 
-    public boolean areFriends(FakePlayer player1, FakePlayer player2) {
+    public boolean areFriends(ResolvablePlayer player1, ResolvablePlayer player2) {
         return this.dataEnclave.areFriends(player1, player2);
     }
-    public void addFriends(FakePlayer player1, FakePlayer player2) {
+    public void addFriends(ResolvablePlayer player1, ResolvablePlayer player2) {
         this.dataEnclave.addFriend(player1, player2);
     }
-    public void removeFriends(FakePlayer player1, FakePlayer player2) {
+    public void removeFriends(ResolvablePlayer player1, ResolvablePlayer player2) {
         this.dataEnclave.removeFriend(player1, player2);
     }
 
-    public FriendMapping sendRequest(Player sender, FakePlayer target) {
-        if(this.friendCount(FakePlayer.from(sender)).orElseThrow() > this.settings().maxFriends())
+    public FriendMapping sendRequest(Player sender, ResolvablePlayer target) {
+        if(this.friendCount(ResolvablePlayer.from(sender)).orElseThrow() > this.settings().maxFriends())
             sender.sendMessage(VelocityLang.MAX_FRIENDS_REACHED);
 
-        FakePlayer fakeSender = FakePlayer.from(sender);
+        ResolvablePlayer fakeSender = ResolvablePlayer.from(sender);
         FriendRequest friendRequest = new FriendRequest(this, snowflakeGenerator.nextId(), fakeSender, target);
         this.friendRequests.put(friendRequest.id(), friendRequest);
 
@@ -144,7 +144,7 @@ public class FriendsService extends Service {
         request.decompose();
     }
 
-    public Optional<Long> friendCount(FakePlayer player) {
+    public Optional<Long> friendCount(ResolvablePlayer player) {
         return this.dataEnclave.getFriendCount(player);
     }
 

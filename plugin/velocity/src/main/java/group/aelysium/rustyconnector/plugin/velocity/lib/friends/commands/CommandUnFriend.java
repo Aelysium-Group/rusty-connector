@@ -13,11 +13,10 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.io.SyncFailedException;
 import java.util.List;
 
 public final class CommandUnFriend {
@@ -51,7 +50,7 @@ public final class CommandUnFriend {
                             if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                             try {
-                                List<FakePlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -77,16 +76,16 @@ public final class CommandUnFriend {
                             }
 
                             String username = context.getArgument("username", String.class);
-                            FakePlayer targetPlayer = api.services().playerService().fetch(username).orElseThrow();
+                            ResolvablePlayer targetPlayer = api.services().playerService().fetch(username).orElseThrow();
 
-                            if(!friendsService.areFriends(FakePlayer.from(player), targetPlayer))
+                            if(!friendsService.areFriends(ResolvablePlayer.from(player), targetPlayer))
                                 return closeMessage(player, VelocityLang.UNFRIEND_NOT_FRIENDS.build(username));
 
                             if(targetPlayer == null)
                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
                             try {
-                                friendsService.removeFriends(FakePlayer.from(player), targetPlayer);
+                                friendsService.removeFriends(ResolvablePlayer.from(player), targetPlayer);
 
                                 return closeMessage(player, VelocityLang.UNFRIEND_SUCCESS.build(username));
                             } catch (IllegalStateException e) {

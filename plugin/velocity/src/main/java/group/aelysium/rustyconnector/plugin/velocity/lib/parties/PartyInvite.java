@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -11,21 +11,21 @@ import java.util.Optional;
 public class PartyInvite {
     private final PartyService partyService;
     private final WeakReference<Party> party;
-    private FakePlayer sender;
-    private FakePlayer target;
+    private ResolvablePlayer sender;
+    private ResolvablePlayer target;
     private Boolean isAcknowledged = null;
 
     public PartyInvite(PartyService partyService, Party party, Player sender, Player target) {
         this.partyService = partyService;
         this.party = new WeakReference<>(party);
-        this.sender = FakePlayer.from(sender);
-        this.target = FakePlayer.from(target);
+        this.sender = ResolvablePlayer.from(sender);
+        this.target = ResolvablePlayer.from(target);
     }
 
-    public FakePlayer sender() {
+    public ResolvablePlayer sender() {
         return this.sender;
     }
-    public FakePlayer target() {
+    public ResolvablePlayer target() {
         return this.target;
     }
 

@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -114,7 +114,7 @@ public class PartyService extends Service {
     }
 
     public List<PartyInvite> findInvitesToTarget(Player target) {
-        return this.invites.stream().filter(invite -> invite.target().equals(FakePlayer.from(target))).findAny().stream().toList();
+        return this.invites.stream().filter(invite -> invite.target().equals(ResolvablePlayer.from(target))).findAny().stream().toList();
     }
     public Optional<PartyInvite> findInvite(Player target, Player sender) {
         return this.invites.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();

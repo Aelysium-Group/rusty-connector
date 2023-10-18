@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
 import one.microstream.storage.embedded.types.EmbeddedStorageManager;
@@ -21,7 +21,7 @@ public class FriendsDataEnclave {
      * @return A list of friends.
      * @throws SQLException If there was an issue.
      */
-    public Optional<List<FriendMapping>> findFriends(FakePlayer player) {
+    public Optional<List<FriendMapping>> findFriends(ResolvablePlayer player) {
         try {
             StorageRoot root = (StorageRoot) this.storage.root();
 
@@ -43,7 +43,7 @@ public class FriendsDataEnclave {
      * @param player2 The second player.
      * @return `true` If the two players are friends.
      */
-    public boolean areFriends(FakePlayer player1, FakePlayer player2) throws RuntimeException {
+    public boolean areFriends(ResolvablePlayer player1, ResolvablePlayer player2) throws RuntimeException {
         StorageRoot root = (StorageRoot) this.storage.root();
         return root.friends().contains(new FriendMapping(player1, player2));
     }
@@ -54,7 +54,7 @@ public class FriendsDataEnclave {
      * @return The number of friends a player has.
      * @throws SQLException If there was an issue.
      */
-    public Optional<Long> getFriendCount(FakePlayer player) {
+    public Optional<Long> getFriendCount(ResolvablePlayer player) {
         try {
             StorageRoot root = (StorageRoot) this.storage.root();
             long count = root.friends().stream().filter(friendMapping -> friendMapping.contains(player)).count();
@@ -67,7 +67,7 @@ public class FriendsDataEnclave {
         return Optional.empty();
     }
 
-    public Optional<FriendMapping> addFriend(FakePlayer player1, FakePlayer player2) {
+    public Optional<FriendMapping> addFriend(ResolvablePlayer player1, ResolvablePlayer player2) {
         try {
             StorageRoot root = (StorageRoot) this.storage.root();
 
@@ -86,7 +86,7 @@ public class FriendsDataEnclave {
         return Optional.empty();
     }
 
-    public void removeFriend(FakePlayer player1, FakePlayer player2) {
+    public void removeFriend(ResolvablePlayer player1, ResolvablePlayer player2) {
         try {
             StorageRoot root = (StorageRoot) this.storage.root();
 

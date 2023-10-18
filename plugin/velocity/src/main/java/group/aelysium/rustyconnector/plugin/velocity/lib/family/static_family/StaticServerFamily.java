@@ -146,11 +146,15 @@ class StaticFamilyConnector {
     }
 
     public PlayerServer connect() throws RuntimeException {
+        System.out.println("Attempting to connect player.");
+        System.out.println("Checking for servers.");
         if(this.family.loadBalancer().size() == 0)
             throw new RuntimeException("There are no servers for you to connect to!");
 
+        System.out.println("Validating whitelist.");
         this.validateWhitelist();
 
+        System.out.println("Establishing any connection.");
         PlayerServer server = this.establishAnyConnection();
 
         return server;
@@ -174,8 +178,10 @@ class StaticFamilyConnector {
     public PlayerServer establishAnyConnection() {
         PlayerServer server;
         try {
+            System.out.println("Attempting to connect to home server.");
             server = this.connectHomeServer();
         } catch (Exception ignore) {
+            System.out.println("Unable to connect to home server. Establishing a brand new connection");
             server = establishNewConnection(true);
         }
 
@@ -190,17 +196,21 @@ class StaticFamilyConnector {
      * @return The player server that this player was connected to.
      */
     public PlayerServer establishNewConnection(boolean shouldRegisterNew) {
+        System.out.println("Establishing new wildcard connection using loadbalancer.");
         PlayerServer server;
         if(this.family.loadBalancer().persistent() && this.family.loadBalancer().attempts() > 1)
             server = this.connectPersistent();
         else
             server = this.connectSingleton();
 
+        System.out.println("Sending post connection error message if needed.");
         this.sendPostConnectErrorMessage();
 
+        System.out.println("Checking if the current connection should be saved as a new resident server.");
         if(!shouldRegisterNew) return server;
 
         try {
+            System.out.println("Saving current server as player's new residence.");
             this.family.dataEnclave().save(player, server, this.family);
         } catch (Exception e) {
             Tinder.get().logger().send(Component.text("Unable to save "+ this.player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
@@ -219,22 +229,31 @@ class StaticFamilyConnector {
      */
     public PlayerServer connectHomeServer() throws RuntimeException {
         try {
+            System.out.println("Fetching player's residence.");
             Optional<ServerResidence> residence = this.family.dataEnclave().fetch(player, this.family);
 
+            System.out.println("checking is player's residence exists.");
             if(residence.isPresent()) {
-                residence.orElseThrow().server().connect(this.player);
-                return residence.orElseThrow().server();
+                if(residence.orElseThrow().server().isPresent()) {
+                    System.out.println("Connecting player to their residence");
+                    residence.orElseThrow().server().orElseThrow().connect(this.player);
+                    return residence.orElseThrow().server().orElseThrow();
+                }
             }
+            System.out.println("Unable to fetch player's residence. Running unavailable protocol.");
             switch (this.family.unavailableProtocol()) {
                 case ASSIGN_NEW_HOME -> {
+                    System.out.println("Assigning a new home.");
                     this.family.dataEnclave().delete(player, this.family);
                     return this.establishNewConnection(true);
                 }
                 case CONNECT_WITH_ERROR -> {
+                    System.out.println("sending an error and connecting anyways.");
                     this.postConnectionError = VelocityLang.MISSING_HOME_SERVER;
                     return this.establishNewConnection(false);
                 }
                 case CANCEL_CONNECTION_ATTEMPT -> {
+                    System.out.println("Canceling connection attempt.");
                     player.sendMessage(VelocityLang.BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT);
                     return null;
                 }
@@ -246,14 +265,19 @@ class StaticFamilyConnector {
     }
 
     private PlayerServer connectSingleton() {
+        System.out.println("Connecting singleton.");
+        System.out.println("Fetching server.");
         PlayerServer server = this.family.loadBalancer().current();
         try {
+            System.out.println("Validating player.");
             if(!server.validatePlayer(this.player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
 
+            System.out.println("Connecting player to server.");
             if (!server.connect(this.player))
                 throw new RuntimeException("There was an issue connecting you to the server!");
 
+            System.out.println("Iterating load balancer.");
             this.family.loadBalancer().iterate();
 
             return server;
@@ -263,22 +287,28 @@ class StaticFamilyConnector {
     }
 
     private PlayerServer connectPersistent() {
+        System.out.println("connecting persistently.");
         int attemptsLeft = this.family.loadBalancer().attempts();
 
+        System.out.println("Entering persistence loop.");
         for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
             boolean isFinal = (attempt == attemptsLeft);
+            System.out.println("Fetching the current load balanced server.");
             PlayerServer server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
 
             try {
+                System.out.println("Validating player.");
                 if (!server.validatePlayer(this.player))
                     throw new RuntimeException("The server you're trying to connect to is full!");
 
+                System.out.println("Connecting to server..");
                 if (server.connect(this.player)) {
                     this.family.loadBalancer().forceIterate();
 
                     return server;
                 } else throw new RuntimeException("Unable to connect you to the server in time!");
             } catch (Exception e) {
+                System.out.println("Persistence connection failed! Disconnecting!");
                 if (isFinal)
                     this.player.disconnect(Component.text(e.getMessage()));
             }

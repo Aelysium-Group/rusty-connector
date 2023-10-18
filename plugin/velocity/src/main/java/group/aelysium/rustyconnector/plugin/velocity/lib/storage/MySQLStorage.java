@@ -7,12 +7,14 @@ import one.microstream.afs.sql.types.SqlFileSystem;
 import one.microstream.afs.sql.types.SqlProviderMariaDb;
 import one.microstream.storage.embedded.types.EmbeddedStorage;
 import one.microstream.storage.embedded.types.EmbeddedStorageManager;
+import one.microstream.storage.types.StorageConfiguration;
 import org.mariadb.jdbc.MariaDbDataSource;
 
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 
 public class MySQLStorage extends Service {
+    protected String jdbc;
     protected InetSocketAddress address;
     protected UserPass userPass;
     protected String database;
@@ -34,9 +36,7 @@ public class MySQLStorage extends Service {
                 )
         );
 
-        final EmbeddedStorageManager storageManager = EmbeddedStorage.start(
-                fileSystem.ensureDirectoryPath("RustyConnector_storage")
-        );
+        final EmbeddedStorageManager storageManager = EmbeddedStorage.start();
 
         if(storageManager.root() == null) {
             storageManager.setRoot(new StorageRoot());

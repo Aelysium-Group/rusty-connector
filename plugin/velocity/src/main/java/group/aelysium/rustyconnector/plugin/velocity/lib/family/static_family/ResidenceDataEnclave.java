@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
@@ -24,7 +26,10 @@ public class ResidenceDataEnclave {
             StorageRoot root = (StorageRoot) this.storage.root();
 
             Optional<ServerResidence> serverResidence = root.residence().stream()
-                    .filter(residence -> residence.player().equals(player) && residence.family().equals(family))
+                    .filter(residence ->
+                            residence.rawPlayer().equals(ResolvablePlayer.from(player)) &&
+                            residence.rawFamily().equals(ResolvableFamily.from(family))
+                    )
                     .findAny();
 
             return serverResidence;
@@ -48,7 +53,10 @@ public class ResidenceDataEnclave {
         StorageRoot root = (StorageRoot) this.storage.root();
 
         List<ServerResidence> residences = root.residence();
-        residences.removeIf(residence -> residence.player().equals(player) && residence.family().equals(family));
+        residences.removeIf(residence ->
+                residence.rawPlayer().equals(ResolvablePlayer.from(player)) &&
+                residence.rawFamily().equals(ResolvableFamily.from(family))
+        );
 
         this.storage.store(residences);
     }
@@ -68,7 +76,10 @@ public class ResidenceDataEnclave {
         StorageRoot root = (StorageRoot) this.storage.root();
 
         List<ServerResidence> residenceList = root.residence();
-        residenceList.removeIf(serverResidence -> serverResidence.expiration() < Instant.EPOCH.getEpochSecond() && serverResidence.family().equals(family));
+        residenceList.removeIf(serverResidence ->
+                serverResidence.expiration() < Instant.EPOCH.getEpochSecond() &&
+                serverResidence.rawFamily().equals(ResolvableFamily.from(family))
+        );
 
         this.storage.store(residenceList);
     }
@@ -83,7 +94,7 @@ public class ResidenceDataEnclave {
 
         List<ServerResidence> residenceList = root.residence();
         residenceList.forEach(serverResidence -> {
-            if(!serverResidence.family().equals(family)) return;
+            if(!serverResidence.rawFamily().equals(ResolvableFamily.from(family))) return;
             serverResidence.expiration(null);
         });
 
@@ -100,7 +111,7 @@ public class ResidenceDataEnclave {
 
         List<ServerResidence> residenceList = root.residence();
         residenceList.forEach(serverResidence -> {
-            if(!serverResidence.family().equals(family)) return;
+            if(!serverResidence.rawFamily().equals(ResolvableFamily.from(family))) return;
             serverResidence.expiration(family.homeServerExpiration());
         });
 

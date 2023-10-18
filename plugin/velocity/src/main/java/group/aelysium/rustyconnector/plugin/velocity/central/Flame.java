@@ -323,7 +323,7 @@ class Initialize {
         messenger.connect();
         MessengerConnection connection = messenger.connection().orElseThrow();
         connection.startListening(dependencies.d2(), dependencies.d3(), handlers);
-        bootOutput.add(Component.text("Finished booting CMessenger.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
 
         MySQLStorage storage = MySQLStorage.create(
                 config.getMysql_address(),

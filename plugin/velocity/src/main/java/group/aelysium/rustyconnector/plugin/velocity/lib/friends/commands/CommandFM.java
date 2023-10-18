@@ -13,7 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -52,7 +52,7 @@ public final class CommandFM {
                             if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                             try {
-                                List<FakePlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -98,8 +98,8 @@ public final class CommandFM {
                                 if(player.equals(targetPlayer))
                                     return closeMessage(player, VelocityLang.FRIEND_MESSAGING_NO_SELF_MESSAGING);
                                 if(!friendsService.areFriends(
-                                        FakePlayer.from(player),
-                                        FakePlayer.from(targetPlayer)
+                                        ResolvablePlayer.from(player),
+                                        ResolvablePlayer.from(targetPlayer)
                                 ))
                                     return closeMessage(player, VelocityLang.FRIEND_MESSAGING_ONLY_FRIENDS);
 

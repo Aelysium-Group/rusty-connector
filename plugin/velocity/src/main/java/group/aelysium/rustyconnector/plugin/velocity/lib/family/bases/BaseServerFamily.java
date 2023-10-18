@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public abstract class BaseServerFamily<S extends PlayerServer> {
     protected final String name;
@@ -27,6 +28,7 @@ public abstract class BaseServerFamily<S extends PlayerServer> {
      * @return A found server or `null` if there's no match.
      */
     abstract public S findServer(@NotNull ServerInfo serverInfo);
+    abstract public S findServer(@NotNull UUID uuid);
 
     /**
      * Add a server to the family.

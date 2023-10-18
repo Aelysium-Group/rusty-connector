@@ -24,7 +24,7 @@ public class RedisConnector extends MessengerConnector<RedisConnection> {
     @Override
     public RedisConnection connect() throws ConnectException {
         this.connection = new RedisConnection(
-                origin,
+            origin,
             this.toClientBuilder(),
             this.cryptor
         );

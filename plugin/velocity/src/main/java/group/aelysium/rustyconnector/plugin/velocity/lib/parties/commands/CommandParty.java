@@ -17,7 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.FakePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -271,7 +271,7 @@ public final class CommandParty {
                                         }
 
                                         FriendsService friendsService = api.services().friendsService().orElseThrow();
-                                        List<FakePlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                        List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
                                             return builder.buildFuture();
@@ -317,7 +317,7 @@ public final class CommandParty {
                                             return closeMessage(player, VelocityLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
 
                                     String username = context.getArgument("username", String.class);
-                                    FakePlayer targetPlayerResolvable = api.services().playerService().fetch(username).orElse(null);
+                                    ResolvablePlayer targetPlayerResolvable = api.services().playerService().fetch(username).orElse(null);
                                     if(targetPlayerResolvable == null || targetPlayerResolvable.resolve().isEmpty())
                                         return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
@@ -333,8 +333,8 @@ public final class CommandParty {
                                     try {
                                         if (partyService.settings().friendsOnly())
                                             if (!api.services().friendsService().orElseThrow().areFriends(
-                                                    FakePlayer.from(player),
-                                                    FakePlayer.from(targetPlayer)
+                                                    ResolvablePlayer.from(player),
+                                                    ResolvablePlayer.from(targetPlayer)
                                             ))
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_FRIENDS_ONLY);
                                     } catch (Exception ignore) {}
