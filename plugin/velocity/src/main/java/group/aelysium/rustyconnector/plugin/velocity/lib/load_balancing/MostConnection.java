@@ -13,7 +13,7 @@ public class MostConnection extends LeastConnection { // Extends LeastConnection
         try {
             PlayerServer currentItem = this.items.get(this.index);
 
-            if(currentItem.playerCount() + 1 >= currentItem.hardPlayerCap()) this.index++;
+            if(currentItem.playerCount() + 1 > currentItem.hardPlayerCap()) this.index++;
             if(this.index >= this.items.size()) this.index = 0;
         } catch (IndexOutOfBoundsException ignore) {}
     }
