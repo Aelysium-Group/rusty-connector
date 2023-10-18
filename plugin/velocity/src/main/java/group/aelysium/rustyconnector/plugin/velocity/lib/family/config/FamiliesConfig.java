@@ -20,7 +20,7 @@ public class FamiliesConfig extends YAML {
 
     public FamiliesConfig(File configPointer) {
         super(configPointer);
-    }d .
+    }
 
     public String rootFamilyName() {
         return this.rootFamily_name;
