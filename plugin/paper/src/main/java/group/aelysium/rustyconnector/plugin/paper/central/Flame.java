@@ -129,7 +129,6 @@ class Initialize {
     private final Tinder api = Tinder.get();
     private final PluginLogger logger = Tinder.get().logger();
     private final Map<Class<? extends Service>, Service> services = new HashMap<>();
-    private final List<String> requestedConnectors = new ArrayList<>();
     private final List<Component> bootOutput = new ArrayList<>();
 
     public Map<Class<? extends Service>, Service> getServices() {
@@ -198,8 +197,6 @@ class Initialize {
         if (!defaultConfig.generate(bootOutput, lang, LangFileMappings.PAPER_CONFIG_TEMPLATE))
             throw new IllegalStateException("Unable to load or create config.yml!");
         defaultConfig.register(this.configVersion());
-
-        requestedConnectors.add(defaultConfig.getMessenger());
 
         return defaultConfig;
     }

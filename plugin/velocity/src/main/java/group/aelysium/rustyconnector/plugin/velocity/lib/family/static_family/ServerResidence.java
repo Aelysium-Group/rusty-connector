@@ -56,4 +56,9 @@ public class ServerResidence {
         if(expiration == null) this.expiration = null;
         else this.expiration = expiration.epochFromNow();
     }
+
+    @Override
+    public String toString() {
+        return "<ServerResidence username="+this.player.username()+" family="+this.family.name()+" server="+this.server.serverInfo().getName()+">";
+    }
 }

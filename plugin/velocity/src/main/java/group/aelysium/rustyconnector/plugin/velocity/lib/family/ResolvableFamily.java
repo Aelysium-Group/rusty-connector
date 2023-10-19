@@ -21,6 +21,12 @@ public record ResolvableFamily(String name) {
         ResolvableFamily that = (ResolvableFamily) object;
         return this.name.equals(that.name());
     }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
     public static ResolvableFamily from(BaseServerFamily<?> family) {
         return new ResolvableFamily(family.name());
     }

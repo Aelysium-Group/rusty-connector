@@ -10,7 +10,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.File;
 
 public class DefaultConfig extends YAML {
-    private String messenger;
     private String server_name;
     private String server_address;
     private String server_family;
@@ -20,10 +19,6 @@ public class DefaultConfig extends YAML {
 
     public DefaultConfig(File configPointer) {
         super(configPointer);
-    }
-
-    public String getMessenger() {
-        return messenger;
     }
     public String getServer_name() {
         return server_name;
@@ -74,10 +69,5 @@ public class DefaultConfig extends YAML {
         this.server_playerCap_hard = this.getNode(this.data,"server.player-cap.hard",Integer.class);
         if(this.server_playerCap_soft >= this.server_playerCap_hard)
             PaperLang.BOXED_MESSAGE_COLORED.send(logger, "Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode.", NamedTextColor.YELLOW);
-
-
-        // Redis
-        this.messenger = this.getNode(this.data, "messenger", String.class);
-        if(this.messenger.equals("")) throw new IllegalStateException("Please set an option for `messenger` (otherwise RC-Paper can't communicate with your proxy!)");
     }
 }

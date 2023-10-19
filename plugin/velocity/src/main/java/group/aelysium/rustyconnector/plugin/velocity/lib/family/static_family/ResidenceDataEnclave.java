@@ -15,22 +15,22 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class ResidenceDataEnclave {
-    private final EmbeddedStorageManager storage;
+    private final MySQLStorage storage;
 
     public ResidenceDataEnclave(MySQLStorage storage) {
-        this.storage = storage.storageManager();
+        this.storage = storage;
     }
 
     public Optional<ServerResidence> fetch(Player player, StaticServerFamily family) {
         try {
-            StorageRoot root = (StorageRoot) this.storage.root();
+            StorageRoot root = this.storage.root();
 
             Optional<ServerResidence> serverResidence = root.residence().stream()
-                    .filter(residence ->
-                            residence.rawPlayer().equals(ResolvablePlayer.from(player)) &&
-                            residence.rawFamily().equals(ResolvableFamily.from(family))
-                    )
-                    .findAny();
+                .filter(residence ->
+                    residence.rawPlayer().equals(ResolvablePlayer.from(player)) &&
+                    residence.rawFamily().equals(ResolvableFamily.from(family))
+                )
+                .findAny();
 
             return serverResidence;
         } catch (NoSuchElementException ignore) {}
@@ -41,7 +41,7 @@ public class ResidenceDataEnclave {
         return Optional.empty();
     }
     public void save(Player player, PlayerServer server, StaticServerFamily family)  {
-        StorageRoot root = (StorageRoot) this.storage.root();
+        StorageRoot root = this.storage.root();
 
         ServerResidence serverResidence = new ServerResidence(player, server, family, family.homeServerExpiration());
 
@@ -50,7 +50,7 @@ public class ResidenceDataEnclave {
         this.storage.store(residences);
     }
     public void delete(Player player, StaticServerFamily family) {
-        StorageRoot root = (StorageRoot) this.storage.root();
+        StorageRoot root = this.storage.root();
 
         List<ServerResidence> residences = root.residence();
         residences.removeIf(residence ->
@@ -73,7 +73,7 @@ public class ResidenceDataEnclave {
      * @param family The family to search in.
      */
     protected void purgeExpired(StaticServerFamily family) {
-        StorageRoot root = (StorageRoot) this.storage.root();
+        StorageRoot root = this.storage.root();
 
         List<ServerResidence> residenceList = root.residence();
         residenceList.removeIf(serverResidence ->

@@ -32,6 +32,11 @@ public class ResolvablePlayer {
         return Objects.equals(uuid, that.uuid) && Objects.equals(username, that.username);
     }
 
+    @Override
+    public String toString() {
+        return "<Player uuid="+this.uuid.toString()+" username="+this.username+">";
+    }
+
     public static ResolvablePlayer from(Player player) {
         return new ResolvablePlayer(player.getUniqueId(), player.getUsername());
     }

@@ -51,12 +51,6 @@
 #
 version: 5
 
-#
-# The messanger connector to use!
-# You can configure your connectors in `connectors.yml`
-#
-messenger: "main-redis"
-
 server:
 #
 # This field is required.

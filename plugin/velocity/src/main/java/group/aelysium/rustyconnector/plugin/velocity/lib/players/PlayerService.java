@@ -11,15 +11,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerService extends Service {
-    private final EmbeddedStorageManager storage;
+    private final MySQLStorage storage;
 
     public PlayerService(MySQLStorage storage) {
-        this.storage = storage.storageManager();
+        this.storage = storage;
     }
 
     public Optional<ResolvablePlayer> fetch(UUID uuid) {
         try {
-            StorageRoot root = (StorageRoot) this.storage.root();
+            StorageRoot root = this.storage.root();
 
             return root.players().stream().filter(fakePlayer -> fakePlayer.uuid().equals(uuid)).findAny();
         } catch (Exception e) {
@@ -31,7 +31,7 @@ public class PlayerService extends Service {
 
     public Optional<ResolvablePlayer> fetch(String username) {
         try {
-            StorageRoot root = (StorageRoot) this.storage.root();
+            StorageRoot root = this.storage.root();
 
             return root.players().stream().filter(fakePlayer -> fakePlayer.username().equals(username)).findAny();
         } catch (Exception e) {
@@ -43,7 +43,7 @@ public class PlayerService extends Service {
 
     public void savePlayer(Player player) {
         try {
-            StorageRoot root = (StorageRoot) this.storage.root();
+            StorageRoot root = this.storage.root();
 
             List<ResolvablePlayer> players = root.players();
             players.add(ResolvablePlayer.from(player));

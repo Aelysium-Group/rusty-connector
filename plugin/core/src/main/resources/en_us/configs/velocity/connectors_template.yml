@@ -30,7 +30,7 @@ redis:
     password: "password"
     data-channel: "rustyConnector-sync"
 
-mysql:
+mariadb:
     host: "0.0.0.0"
     port: 3306
     user: "default"

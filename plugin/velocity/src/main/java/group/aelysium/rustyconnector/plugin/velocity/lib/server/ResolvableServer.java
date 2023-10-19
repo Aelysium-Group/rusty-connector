@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public record ResolvableServer(UUID uuid, ServerInfo serverInfo, ResolvableFamily family) {
     public Optional<PlayerServer> resolve() {
-        PlayerServer potentialPlayerServer = Tinder.get().services().serverService().search(this.uuid);
+        PlayerServer potentialPlayerServer = Tinder.get().services().serverService().search(this.serverInfo);
         if(potentialPlayerServer == null) return Optional.empty();
         return Optional.of(potentialPlayerServer);
     }

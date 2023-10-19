@@ -73,16 +73,16 @@ public class ConnectorsConfig extends YAML {
         }
 
         if(loadStorage) {
-            String host = this.getNode(this.data, "mysql.host", String.class);
+            String host = this.getNode(this.data, "mariadb.host", String.class);
             if (host.equals("")) throw new IllegalStateException("Please configure your connector settings. `host` cannot be empty.");
-            int port = this.getNode(this.data, "mysql.port", Integer.class);
+            int port = this.getNode(this.data, "mariadb.port", Integer.class);
             this.mysql_address = new InetSocketAddress(host, port);
 
-            String user = this.getNode(this.data, "mysql.user", String.class);
+            String user = this.getNode(this.data, "mariadb.user", String.class);
             if (user.equals("")) throw new IllegalStateException("Please configure your connector settings. `user` cannot be empty.");
-            char[] password = this.getNode(this.data, "mysql.password", String.class).toCharArray();
+            char[] password = this.getNode(this.data, "mariadb.password", String.class).toCharArray();
             this.mysql_user = new UserPass(user, password);
-            this.mysql_database = this.getNode(this.data, "mysql.database", String.class);
+            this.mysql_database = this.getNode(this.data, "mariadb.database", String.class);
         }
     }
 }

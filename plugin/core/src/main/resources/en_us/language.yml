@@ -237,7 +237,7 @@ velocity:
                 accept: "Accept friend request"
                 ignore: "Ignore friend request"
         friend_joined:
-            messaging_allowed: "<gray>Your friend <aqua hover:show_text:'Send a message to <username>' click:suggest_command:'/fm <username>'><u><username></u></aqua> just logged in!</gray>"
+            resolved: "<gray>Your friend <aqua hover:show_text:'Send a message to <username>' click:suggest_command:'/fm <username>'><u><username></u></aqua> just logged in!</gray>"
             regular: "<gray>Your friend <username> just logged in!</gray>"
         friend_leaves: "<gray>Your friend <username> just logged out!</gray>"
         become_friends: "<green>You and <username> are now friends!</green>"
@@ -247,11 +247,11 @@ velocity:
         join_message_empty:
             - "<gray>You have <friend_count> pending friend requests!</gray>"
             - "<gray>Address them using:</gray>"
-            - "<blue click:suggest_command:'/friends requests <username>'><u>/friends requests <username> accept/deny</u></blue>"
+            - "<aqua click:suggest_command:'/friends requests <username>'><u>/friends requests <username></u></aqua>"
         join_message_countable:
             - "<gray>You have <friend_count> pending friend requests from: <friend_requests></gray>"
             - "<gray>Address them using:</gray>"
-            - "<blue click:suggest_command:'/friends requests <username>'><u>/friends requests <username> accept/deny</u></blue>"
+            - "<aqua click:suggest_command:'/friends requests <username>'><u>/friends requests <username></u></aqua>"
     console_icons:
         attempting_registration: "?>>>?"
         registered: ">>>>>"
