@@ -593,7 +593,7 @@ class Initialize {
 
             FriendsService service = new FriendsService(settings);
 
-            service.initCommand();
+            service.initCommand(inject(bootOutput));
 
             services.put(FriendsService.class, service);
             bootOutput.add(Component.text("Finished building friends service.", NamedTextColor.GREEN));

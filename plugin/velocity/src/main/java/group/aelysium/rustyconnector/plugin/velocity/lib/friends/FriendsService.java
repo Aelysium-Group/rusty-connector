@@ -6,6 +6,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
@@ -36,9 +37,10 @@ public class FriendsService extends Service {
         this.dataEnclave = new FriendsDataEnclave(this.settings.storage());
     }
 
-    public void initCommand() {
+    public void initCommand(DependencyInjector.DI1<List<Component>> dependencies) {
+        List<Component> bootOutput = dependencies.d1();
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
-        Tinder.get().logger().send(Component.text("Building friends service commands...", NamedTextColor.DARK_GRAY));
+        bootOutput.add(Component.text("Building friends service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("friends"))
             try {
@@ -47,7 +49,7 @@ public class FriendsService extends Service {
                         CommandFriends.create(this)
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /friends", NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /friends", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -58,7 +60,7 @@ public class FriendsService extends Service {
                         CommandUnFriend.create(this)
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /unfriend", NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /unfriend", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -70,12 +72,12 @@ public class FriendsService extends Service {
                             CommandFM.create(this)
                     );
 
-                    Tinder.get().logger().send(Component.text(" | Registered: /fm", NamedTextColor.YELLOW));
+                    bootOutput.add(Component.text(" | Registered: /fm", NamedTextColor.YELLOW));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-        Tinder.get().logger().send(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
     }
 
     public FriendsSettings settings() {
