@@ -3,10 +3,19 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 
-import java.util.Objects;
 import java.util.Optional;
 
-public record ResolvableFamily(String name) {
+public class ResolvableFamily {
+    protected String name;
+
+    public ResolvableFamily(String name) {
+        this.name = name;
+    }
+
+    public String name() {
+        return name;
+    }
+
     public Optional<BaseServerFamily<?>> resolve() {
         BaseServerFamily<?> potentialFamily = Tinder.get().services().familyService().find(this.name);
         if(potentialFamily == null) return Optional.empty();
