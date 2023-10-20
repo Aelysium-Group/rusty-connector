@@ -117,7 +117,7 @@ public class PartyService extends Service {
         return this.invites.stream().filter(invite -> invite.target().equals(ResolvablePlayer.from(target))).findAny().stream().toList();
     }
     public Optional<PartyInvite> findInvite(Player target, Player sender) {
-        return this.invites.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();
+        return this.invites.stream().filter(invite -> invite.target().equals(ResolvablePlayer.from(target)) && invite.sender().equals(ResolvablePlayer.from(sender))).findFirst();
     }
 
     public void closeInvite(PartyInvite invite) {
