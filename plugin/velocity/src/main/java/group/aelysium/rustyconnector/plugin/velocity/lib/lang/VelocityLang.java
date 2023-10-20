@@ -608,7 +608,6 @@ public class VelocityLang extends Lang {
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
         } catch (Exception ignore) {}
-        if(family.equals(rootFamily)) parentFamilyName = "none";
 
         LiquidTimestamp expiration = family.homeServerExpiration();
         String homeServerExpiration = "NEVER";

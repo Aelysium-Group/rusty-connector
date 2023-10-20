@@ -47,10 +47,10 @@ public class PartyInvite {
             throw new IllegalStateException(VelocityLang.PARTY_INJECTED_NO_SENDER);
 
         if(partyService.settings().onlyLeaderCanInvite())
-            if(!Objects.requireNonNull(party.get()).leader().equals(sender()))
+            if(!Objects.requireNonNull(party.get()).leader().equals(sender.resolve().orElse(null)))
                 throw new IllegalStateException(VelocityLang.PARTY_INJECTED_INVALID_LEADER_INVITE);
         else
-            if(!Objects.requireNonNull(party.get()).players().contains(sender))
+            if(!Objects.requireNonNull(party.get()).players().contains(sender.resolve().orElse(null)) && sender.resolve().isPresent())
                 throw new IllegalStateException(VelocityLang.PARTY_INJECTED_INVALID_MEMBER_INVITE);
 
         Optional<Player> player = this.target.resolve();

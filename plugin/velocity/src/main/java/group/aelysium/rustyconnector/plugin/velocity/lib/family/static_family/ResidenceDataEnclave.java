@@ -90,7 +90,7 @@ public class ResidenceDataEnclave {
      * @param family The family to search in.
      */
     protected void updateNullExpirations(StaticServerFamily family) {
-        StorageRoot root = (StorageRoot) this.storage.root();
+        StorageRoot root = this.storage.root();
 
         List<ServerResidence> residenceList = root.residence();
         residenceList.forEach(serverResidence -> {
@@ -107,7 +107,7 @@ public class ResidenceDataEnclave {
      * @param family The family to search in.
      */
     protected void updateValidExpirations(StaticServerFamily family) {
-        StorageRoot root = (StorageRoot) this.storage.root();
+        StorageRoot root = this.storage.root();
 
         List<ServerResidence> residenceList = root.residence();
         residenceList.forEach(serverResidence -> {

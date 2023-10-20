@@ -69,7 +69,7 @@ public final class CommandParty {
                                     if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                                     try {
-                                        List<PartyInvite> invites = partyService.findInvitesToTarget(player);
+                                        List<PartyInvite> invites = partyService.findInvitesToTarget(ResolvablePlayer.from(player));
 
                                         if(invites.size() == 0) {
                                             builder.suggest("You have no pending party invites!");
@@ -119,7 +119,7 @@ public final class CommandParty {
                                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
                                             try {
-                                                PartyInvite invite = partyService.findInvite(player, senderPlayer).orElse(null);
+                                                PartyInvite invite = partyService.findInvite(ResolvablePlayer.from(player), ResolvablePlayer.from(senderPlayer)).orElse(null);
                                                 if(invite == null) throw new NoOutputException();
 
                                                 try {
@@ -153,7 +153,7 @@ public final class CommandParty {
                                             if(senderPlayer == null || !senderPlayer.isActive())
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_TARGET_NOT_ONLINE.build(username));
 
-                                            PartyInvite invite = partyService.findInvite(player, senderPlayer).orElse(null);
+                                            PartyInvite invite = partyService.findInvite(ResolvablePlayer.from(player), ResolvablePlayer.from(senderPlayer)).orElse(null);
                                             if(invite == null)
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_EXPIRED);
 
