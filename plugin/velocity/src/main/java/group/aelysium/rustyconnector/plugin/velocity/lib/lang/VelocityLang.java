@@ -681,7 +681,7 @@ public class VelocityLang extends Lang {
             join(
                     JoinConfiguration.separator(space()),
                     text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("velocity.tpa.target_query.accept_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/tpa accept "+sender.getUsername())),
-                    text("["+DENY+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.tpa.target_query.deny_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/party ignore "+sender.getUsername()))
+                    text("["+DENY+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.tpa.target_query.deny_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/tpa accept "+sender.getUsername()))
             )
     );
     public final static ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> resolver().get("velocity.tpa.request_confirmation", LanguageResolver.tagHandler("username", username));
