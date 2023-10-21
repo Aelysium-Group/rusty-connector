@@ -681,7 +681,7 @@ public class VelocityLang extends Lang {
             join(
                     JoinConfiguration.separator(space()),
                     text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("velocity.tpa.target_query.accept_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/tpa accept "+sender.getUsername())),
-                    text("["+DENY+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.tpa.target_query.deny_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/party ignore "+sender.getUsername()))
+                    text("["+DENY+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.tpa.target_query.deny_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/tpa deny "+sender.getUsername()))
             )
     );
     public final static ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> resolver().get("velocity.tpa.request_confirmation", LanguageResolver.tagHandler("username", username));
@@ -689,7 +689,7 @@ public class VelocityLang extends Lang {
     public final static ParameterizedMessage1<String> TPA_REQUEST_ACCEPTED_TARGET = username -> resolver().getArray("velocity.tpa.target_accepted", LanguageResolver.tagHandler("username", username));
     public final static ParameterizedMessage1<String> TPA_REQUEST_DENIED_SENDER = username -> resolver().getArray("velocity.tpa.sender_deny", LanguageResolver.tagHandler("username", username));
     public final static ParameterizedMessage1<String> TPA_REQUEST_DENIED_TARGET = username -> resolver().getArray("velocity.tpa.target_deny", LanguageResolver.tagHandler("username", username));
-    public final static ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> resolver().getArray("velocity.tpa.expired_request", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TPA_REQUEST_EXPIRED = username -> resolver().get("velocity.tpa.expired_request", LanguageResolver.tagHandler("username", username));
 
     public final static Component HUB_CONNECTION_FAILED = resolver().get("velocity.hub.connection_failed");
 

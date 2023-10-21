@@ -22,8 +22,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.*;
 
 public class TPAService extends ServiceableService<TPAServiceHandler> {
-    private TPASettings settings;
-    private Map<BaseServerFamily, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
+    private final TPASettings settings;
+    private final Map<BaseServerFamily<?>, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
 
     public TPAService(TPASettings settings) {
         super(new TPAServiceHandler());
@@ -55,7 +55,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         return this.settings;
     }
 
-    public TPAHandler tpaHandler(BaseServerFamily family) {
+    public TPAHandler tpaHandler(BaseServerFamily<?> family) {
         TPAHandler tpaHandler = this.tpaHandlers.get(family);
         if(tpaHandler == null) {
             TPAHandler newTPAHandler = new TPAHandler();

@@ -39,23 +39,13 @@ public class ServerService extends Service {
         return this.serverInterval;
     }
 
-    public PlayerServer search(UUID uuid) {
-        for(BaseServerFamily family : Tinder.get().services().familyService().dump()) {
-            PlayerServer server = family.findServer(uuid);
-            if(server == null) continue;
-
-            return server;
-        }
-        return null;
-    }
-
     /**
      * Search for a server.
      * @param serverInfo The server info to search for.
      * @return A server or `null`
      */
     public PlayerServer search(ServerInfo serverInfo) {
-        for(BaseServerFamily family : Tinder.get().services().familyService().dump()) {
+        for(BaseServerFamily<?> family : Tinder.get().services().familyService().dump()) {
             PlayerServer server = family.findServer(serverInfo);
             if(server == null) continue;
 

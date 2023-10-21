@@ -23,7 +23,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     @Initializer
     protected String parentName = null;
 
-    protected WeakReference<BaseServerFamily> parent = null;
+    protected WeakReference<BaseServerFamily<?>> parent = null;
     protected LoadBalancer loadBalancer = null;
     protected String whitelist;
     protected boolean weighted;
@@ -57,7 +57,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         this.parent = new WeakReference<>(family);
     }
 
-    public WeakReference<BaseServerFamily> parent() {
+    public WeakReference<BaseServerFamily<?>> parent() {
         FamilyService familyService = Tinder.get().services().familyService();
         if(familyService.rootFamily().equals(this)) return null;
         return this.parent;
@@ -144,14 +144,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     @Override
     public PlayerServer findServer(@NotNull ServerInfo serverInfo) {
         return this.registeredServers().stream()
-                .filter(server -> Objects.equals(server.serverInfo(), serverInfo)
-                ).findFirst().orElse(null);
-    }
-
-    @Override
-    public PlayerServer findServer(@NotNull UUID uuid) {
-        return this.registeredServers().stream()
-                .filter(server -> server.id().equals(uuid)
+                .filter(server -> server.serverInfo().equals(serverInfo)
                 ).findFirst().orElse(null);
     }
 
