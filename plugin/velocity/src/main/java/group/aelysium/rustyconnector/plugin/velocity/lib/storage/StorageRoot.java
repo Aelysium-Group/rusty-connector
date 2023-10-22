@@ -11,20 +11,20 @@ import java.util.List;
 public class StorageRoot{
     private final String name = "RustyConnector-storage";
 
-    private final Lazy<List<ResolvablePlayer>> players = Lazy.Reference(new ArrayList<>());
-    private final Lazy<List<FriendMapping>> friends = Lazy.Reference(new ArrayList<>());
-    private final Lazy<List<ServerResidence>> residence = Lazy.Reference(new ArrayList<>());
+    private final List<ResolvablePlayer> players = new ArrayList<>();
+    private final List<FriendMapping> friends = new ArrayList<>();
+    private final List<ServerResidence> residence = new ArrayList<>();
 
     public List<ResolvablePlayer> players() {
-        return players.get();
+        return players;
     }
 
     public List<FriendMapping> friends() {
-        return friends.get();
+        return friends;
     }
 
     public List<ServerResidence> residence() {
-        return residence.get();
+        return residence;
     }
 
 
