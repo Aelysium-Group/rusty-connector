@@ -71,6 +71,7 @@ velocity:
         no_requests: "<red><username> hasn't sent you any requests!</red>"
         pending_request: "<red>You already have a pending tpa request to <username>!</red>"
         request_confirmation: "<green>You requested to teleport to <username>!</green>"
+        not_friends: "<red>You and <username> aren't friends! You can only /tpa to friends!</red>"
         target_query:
             query: "<gold>Hey! <username> has requested to teleport to you!</gold>"
             accept_tooltip: "Let <username> teleport to you" #
@@ -226,6 +227,7 @@ velocity:
             unfriend: "<red>Unfriend <username></red>"
             message: "<yellow>Message <username></yellow>"
             invite_party: "<blue>Invite <username> to your party</blue>"
+            tpa: "<gold>Request to tpa to <username></gold>"
             offline: "<gray>Offline</gray>"
             online: "<white>Online</white>"
             currently_playing: "<gray>Currently Playing: </gray><aqua><family_name></aqua>"

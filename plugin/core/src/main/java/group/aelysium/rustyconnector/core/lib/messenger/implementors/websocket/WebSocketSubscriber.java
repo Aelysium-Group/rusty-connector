@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 
+import java.net.InetSocketAddress;
 import java.net.http.WebSocket;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
@@ -16,8 +17,8 @@ import java.util.concurrent.CountDownLatch;
 public class WebSocketSubscriber extends MessengerSubscriber implements WebSocket.Listener {
     private CountDownLatch lock = new CountDownLatch(0);
 
-    public WebSocketSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin) {
-        super(cryptor, messageCache, logger, handlers, origin);
+    public WebSocketSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin, InetSocketAddress originAddress) {
+        super(cryptor, messageCache, logger, handlers, origin, originAddress);
     }
 
     public void awaitClose() throws InterruptedException {

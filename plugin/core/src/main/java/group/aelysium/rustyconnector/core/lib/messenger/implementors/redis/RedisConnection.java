@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 
+import java.net.InetSocketAddress;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -38,12 +39,12 @@ public class RedisConnection extends MessengerConnection {
     }
 
     @Override
-    protected void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
+    protected void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, InetSocketAddress originAddress) {
         if(!this.isAlive) return;
 
         this.executorService.submit(() -> {
             try {
-                RedisSubscriber redis = new RedisSubscriber(this.cryptor, RedisConnection.this.clientBuilder.build(), cache, logger, handlers, this.origin);
+                RedisSubscriber redis = new RedisSubscriber(this.cryptor, RedisConnection.this.clientBuilder.build(), cache, logger, handlers, this.origin, originAddress);
                 RedisConnection.this.subscribers.add(redis);
 
                 redis.subscribeToChannel(RedisConnection.this.failService);
@@ -59,18 +60,18 @@ public class RedisConnection extends MessengerConnection {
                 }
             }
 
-            RedisConnection.this.subscribe(cache, logger, handlers);
+            RedisConnection.this.subscribe(cache, logger, handlers, originAddress);
         });
     }
 
     @Override
-    public void startListening(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
+    public void startListening(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, InetSocketAddress originAddress) {
         if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
         this.executorService = Executors.newFixedThreadPool(3);
 
         this.isAlive = true;
 
-        this.subscribe(cache, logger, handlers);
+        this.subscribe(cache, logger, handlers, originAddress);
     }
 
     @Override

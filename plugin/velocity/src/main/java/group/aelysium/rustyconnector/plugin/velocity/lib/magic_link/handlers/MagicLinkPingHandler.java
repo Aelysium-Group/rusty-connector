@@ -60,7 +60,7 @@ public class MagicLinkPingHandler extends PacketHandler {
                     .setAddress(serverInfo.getAddress())
                     .setOrigin(PacketOrigin.PROXY)
                     .setParameter(ServerPingResponsePacket.ValidParameters.STATUS, String.valueOf(ServerPingResponsePacket.PingResponseStatus.ACCEPTED))
-                    .setParameter(ServerPingResponsePacket.ValidParameters.MESSAGE, "Connected to the proxy!")
+                    .setParameter(ServerPingResponsePacket.ValidParameters.MESSAGE, "Connected to the proxy! Registered as `"+server.serverInfo().getName()+"` into the family `"+server.family().name()+"`.")
                     .setParameter(ServerPingResponsePacket.ValidParameters.COLOR, NamedTextColor.GREEN.toString())
                     .setParameter(ServerPingResponsePacket.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.serverInterval()))
                     .buildSendable();

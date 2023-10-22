@@ -14,6 +14,7 @@ import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -21,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 public class RedisSubscriber extends MessengerSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
-    public RedisSubscriber(AESCryptor cryptor, RedisClient client, MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler > handlers, PacketOrigin origin) {
-        super(cryptor, cache, logger, handlers, origin);
+    public RedisSubscriber(AESCryptor cryptor, RedisClient client, MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler > handlers, PacketOrigin origin, InetSocketAddress originAddress) {
+        super(cryptor, cache, logger, handlers, origin, originAddress);
         this.client = client;
         this.client.addListener(new RedisSubscriberListener());
     }

@@ -14,6 +14,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.Session;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.time.Instant;
 import java.util.*;
@@ -70,7 +71,7 @@ public class WebSocketConnection extends MessengerConnection {
     }
 
     @Override
-    protected void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
+    protected void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, InetSocketAddress originAddress) {
         /*CompletableFuture<WebSocket> websocket = this.clientBuilder.buildAsync(this.uri, new WebSocketSubscriber(this.packetCryptor, cache, logger, handlers, this.origin));
 
         this.executorService.submit(() -> {
@@ -94,9 +95,9 @@ public class WebSocketConnection extends MessengerConnection {
     }
 
     @Override
-    public void startListening(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers) {
+    public void startListening(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, InetSocketAddress originAddress) {
         this.executorService = Executors.newFixedThreadPool(3);
-        this.subscribe(cache, logger, handlers);
+        this.subscribe(cache, logger, handlers, originAddress);
     }
 
     @Override

@@ -17,7 +17,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TP
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
@@ -76,7 +78,6 @@ public final class CommandTPA {
                         player.sendMessage(VelocityLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
-
 
                     context.getSource().sendMessage(VelocityLang.TPA_USAGE);
                     return Command.SINGLE_SUCCESS;
@@ -309,6 +310,18 @@ public final class CommandTPA {
                                     player.sendMessage(VelocityLang.TPA_FAILURE_SELF_TP);
                                     return Command.SINGLE_SUCCESS;
                                 }
+
+                                if(tpaService.settings().friendsOnly())
+                                    try {
+                                        FriendsService friendsService = Tinder.get().services().friendsService().orElseThrow();
+                                        boolean areFriends = friendsService.areFriends(ResolvablePlayer.from(player), ResolvablePlayer.from(targetPlayer));
+                                        if(!areFriends) {
+                                            context.getSource().sendMessage(VelocityLang.TPA_NOT_FRIENDS.build(targetPlayer.getUsername()));
+                                            return Command.SINGLE_SUCCESS;
+                                        }
+                                    } catch (NoSuchElementException ignore) {
+                                        logger.warn("TPA is set to only allow teleportation between friends, but the friends module doesn't seem to be enabled! Ignoring this setting...");
+                                    }
 
                                 ServerInfo sendersServerInfo = player.getCurrentServer().orElseThrow().getServerInfo();
                                 PlayerServer sendersServer = serverService.search(sendersServerInfo);

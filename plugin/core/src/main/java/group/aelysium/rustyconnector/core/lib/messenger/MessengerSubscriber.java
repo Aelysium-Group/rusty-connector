@@ -9,6 +9,7 @@ import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.lang.log_gate.GateKey;
 import group.aelysium.rustyconnector.core.lib.packets.*;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
 
 public abstract class MessengerSubscriber {
@@ -17,12 +18,18 @@ public abstract class MessengerSubscriber {
     private MessageCacheService messageCache;
     private Map<PacketType.Mapping, PacketHandler> handlers;
     private PacketOrigin origin;
+    private InetSocketAddress originAddress;
 
-    public MessengerSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin) {
+    public MessengerSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin, InetSocketAddress originAddress) {
         this.cryptor = cryptor;
         this.messageCache = messageCache;
         this.logger = logger;
         this.handlers = handlers;
+        this.origin = origin;
+        if(this.origin == PacketOrigin.PROXY)
+            this.originAddress = null;
+        else
+            this.originAddress = originAddress;
     }
 
     public AESCryptor cryptor() { return this.cryptor; }
@@ -49,6 +56,9 @@ public abstract class MessengerSubscriber {
 
             if(messageCache.ignoredType(message)) messageCache.removeMessage(cachedMessage.getSnowflake());
             if(message.origin() == this.origin) throw new Exception("Message from the "+this.origin.name()+"! Ignoring...");
+            if(this.origin == PacketOrigin.SERVER)
+                if (!this.originAddress.toString().equals(message.address().toString()))
+                    throw new Exception("Message is addressed to another server! Ignoring...");
             try {
                 cachedMessage.sentenceMessage(PacketStatus.ACCEPTED);
 

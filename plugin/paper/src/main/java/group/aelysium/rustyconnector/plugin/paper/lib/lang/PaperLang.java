@@ -176,7 +176,7 @@ public class PaperLang extends Lang {
     };
 
     public final static ParameterizedMessage1<String> TPA_FAILED_TELEPORT = username ->
-            resolver().get("paper.tpa.sender_failed.teleport", LanguageResolver.tagHandler("username", username));
+            resolver().get("paper.tpa.sender_failed_teleport", LanguageResolver.tagHandler("username", username));
 
     public final static ParameterizedMessage1<Boolean> RCNAME_PAPER_FOLIA = isFolia -> {
         if(isFolia) return text("RustyConnector-Folia");

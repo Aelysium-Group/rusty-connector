@@ -35,6 +35,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -96,11 +97,11 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             int configVersion = initialize.configVersion();
             AESCryptor cryptor = initialize.privateKey();
             DefaultConfig defaultConfig = initialize.defaultConfig(langService);
+            ServerInfoService serverInfoService = initialize.serverInfo(defaultConfig);
 
             MessageCacheService messageCacheService = initialize.messageCache();
-            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService);
+            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService, AddressUtil.stringToAddress(serverInfoService.address()));
 
-            initialize.serverInfo(defaultConfig);
             initialize.messageCache();
             PacketBuilderService packetBuilderService = initialize.packetBuilder();
             initialize.dynamicTeleport();
@@ -201,7 +202,7 @@ class Initialize {
         return defaultConfig;
     }
 
-    public RedisConnector connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang) throws IOException {
+    public RedisConnector connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang, InetSocketAddress originAddress) throws IOException {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
         ConnectorsConfig config = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
@@ -210,7 +211,7 @@ class Initialize {
         config.register(true, false);
 
         RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
-                PacketOrigin.PROXY,
+                PacketOrigin.SERVER,
                 config.getRedis_address(),
                 config.getRedis_user(),
                 config.getRedis_protocol(),
@@ -226,7 +227,7 @@ class Initialize {
         Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
         handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler());
         handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler());
-        connection.startListening(cacheService, logger, handlers);
+        connection.startListening(cacheService, logger, handlers, originAddress);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
 
@@ -243,7 +244,7 @@ class Initialize {
         logger.send(Component.text("Finished booting magic link service.", NamedTextColor.GREEN));
     }
 
-    public void serverInfo(DefaultConfig defaultConfig) {
+    public ServerInfoService serverInfo(DefaultConfig defaultConfig) {
         ServerInfoService serverInfoService = new ServerInfoService(
                 defaultConfig.getServer_name(),
                 AddressUtil.parseAddress(defaultConfig.getServer_address()),
@@ -253,6 +254,8 @@ class Initialize {
                 defaultConfig.getServer_weight()
         );
         services.put(ServerInfoService.class, serverInfoService);
+
+        return serverInfoService;
     }
 
     public MessageCacheService messageCache() {

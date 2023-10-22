@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
 
 public abstract class MessengerConnection extends Service {
@@ -20,13 +21,13 @@ public abstract class MessengerConnection extends Service {
      * Used to recursively subscribe to a remote resource.
      * @throws IllegalStateException If the service is already running.
      */
-    protected abstract void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers);
+    protected abstract void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, InetSocketAddress originAddress);
 
     /**
      * Start listening on the messenger connection for messages.
      * @throws IllegalStateException If the service is already running.
      */
-    public abstract void startListening(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers);
+    public abstract void startListening(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, InetSocketAddress originAddress);
 
     /**
      * Publish a new message to the {@link MessengerConnection}.
