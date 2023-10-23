@@ -1,0 +1,49 @@
+plugins {
+    id 'fabric-loom' version '1.3.9'
+}
+
+def targetJavaVersion = 17
+group = project.maven_group
+
+repositories {
+     maven {
+       name = "sonatype-oss-snapshots1"
+       url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+       mavenContent { snapshotsOnly() }
+   }
+   // for releases
+   mavenCentral()
+}
+
+dependencies {
+    shadow project(path: ':core', configuration: 'shadow')
+
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    modImplementation "net.kyori:adventure-platform-fabric:${project.adventure_fabric_version}"
+    implementation "cloud.commandframework:cloud-fabric:${project.cloudpaper_version}"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        it.options.release = targetJavaVersion
+    }
+}
+
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+    archivesBaseName = project.archives_base_name
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}

@@ -1,2 +1,13 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 rootProject.name = 'rusty-connector'
-include 'core', 'paper', ':velocity'
+include ':core', ':paper', ':fabric', ':velocity', ':api'
