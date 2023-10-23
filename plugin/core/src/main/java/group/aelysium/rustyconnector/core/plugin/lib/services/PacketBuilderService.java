@@ -1,5 +1,6 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.services;
+package group.aelysium.rustyconnector.core.plugin.lib.services;
 
+import group.aelysium.rustyconnector.core.central.Tinder;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
@@ -7,16 +8,16 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
-import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
+import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public class PacketBuilderService extends Service {
     public void pingProxy(ServerPingPacket.ConnectionIntent intent) {
-        Tinder api = Tinder.get();
+        Tinder api = Plugin.getAPI();
 
         try {
             ServerInfoService serverInfoService = api.services().serverInfo();
@@ -34,7 +35,7 @@ public class PacketBuilderService extends Service {
                     .buildSendable();
             api.flame().backbone().connection().orElseThrow().publish(message);
         } catch (Exception e) {
-            PaperLang.BOXED_MESSAGE_COLORED.send(Tinder.get().logger(), e.toString(), NamedTextColor.RED);
+            PluginLang.BOXED_MESSAGE_COLORED.send(api.logger(), e.toString(), NamedTextColor.RED);
         }
     }
 
@@ -43,8 +44,8 @@ public class PacketBuilderService extends Service {
      * @param player The player to send.
      * @param familyName The name of the family to send to.
      */
-    public void sendToOtherFamily(Player player, String familyName) {
-        Tinder api = Tinder.get();
+    public void sendToOtherFamily(UUID player, String familyName) {
+        Tinder api = Plugin.getAPI();
         ServerInfoService serverInfoService = api.services().serverInfo();
 
         SendPlayerPacket message = (SendPlayerPacket) new GenericPacket.Builder()
@@ -52,7 +53,7 @@ public class PacketBuilderService extends Service {
                 .setOrigin(PacketOrigin.SERVER)
                 .setAddress(serverInfoService.address())
                 .setParameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
-                .setParameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
+                .setParameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, player.toString())
                 .buildSendable();
 
         api.flame().backbone().connection().orElseThrow().publish(message);
@@ -62,7 +63,7 @@ public class PacketBuilderService extends Service {
      * Tells the proxy to open the server running the command.
      */
     public void unlockServer() {
-        Tinder api = Tinder.get();
+        Tinder api = Plugin.getAPI();
         ServerInfoService serverInfoService = api.services().serverInfo();
 
         UnlockServerPacket message = (UnlockServerPacket) new GenericPacket.Builder()
@@ -79,7 +80,7 @@ public class PacketBuilderService extends Service {
      * Tells the proxy to close the server running the command.
      */
     public void lockServer() {
-        Tinder api = Tinder.get();
+        Tinder api = Plugin.getAPI();
         ServerInfoService serverInfoService = api.services().serverInfo();
 
         LockServerPacket message = (LockServerPacket) new GenericPacket.Builder()

@@ -1,11 +1,12 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.services;
+package group.aelysium.rustyconnector.core.plugin.lib.services;
 
+import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.central.Tinder;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.core.plugin.Plugin;
 
 import java.net.InetSocketAddress;
 
@@ -36,10 +37,10 @@ public class ServerInfoService extends Service implements PlayerServer {
      * @param hardPlayerCap The hard player cap
      */
     private void setPlayerCap(int softPlayerCap, int hardPlayerCap) {
-        Tinder api = Tinder.get();
+        Tinder api = Plugin.getAPI();
         PluginLogger logger = api.logger();
 
-        api.paperServer().setMaxPlayers(hardPlayerCap);
+        api.setMaxPlayers(hardPlayerCap);
 
         if(softPlayerCap >= hardPlayerCap) {
             this.hardPlayerCap = hardPlayerCap;
@@ -63,7 +64,7 @@ public class ServerInfoService extends Service implements PlayerServer {
 
     @Override
     public int playerCount() {
-        return Tinder.get().paperServer().getOnlinePlayers().size();
+        return Plugin.getAPI().onlinePlayerCount();
     }
 
     @Override

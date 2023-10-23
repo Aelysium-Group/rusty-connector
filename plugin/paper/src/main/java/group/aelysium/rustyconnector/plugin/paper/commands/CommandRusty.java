@@ -9,10 +9,10 @@ import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.lang.Lang;
+import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
+import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -29,7 +29,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager) {
-        Tinder api = Tinder.get();
+        Tinder api = (Tinder) Plugin.getAPI();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
@@ -46,7 +46,7 @@ public final class CommandRusty {
 
                                 CacheableMessage message = messageCacheService.findMessage(snowflake);
 
-                                PaperLang.RC_MESSAGE_GET_MESSAGE.send(logger, message.getSnowflake(), message.getDate(), message.getContents());
+                                PluginLang.RC_MESSAGE_GET_MESSAGE.send(logger, message.getSnowflake(), message.getDate(), message.getContents());
                             } catch (NullPointerException e) {
                                 logger.log("That message either doesn't exist or is no-longer available in the cache!");
                             } catch (Exception e) {
@@ -56,7 +56,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> messageList(PaperCommandManager<CommandSender> manager) {
-        Tinder api = Tinder.get();
+        Tinder api = (Tinder) Plugin.getAPI();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
@@ -73,14 +73,14 @@ public final class CommandRusty {
 
                                         List<CacheableMessage> messagesPage = messageCacheService.fetchMessagesPage(1);
 
-                                        PaperLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
+                                        PluginLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
                                         return;
                                     }
 
                                     List<CacheableMessage> messages = messageCacheService.messages();
 
-                                    PaperLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
+                                    PluginLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
                                 } catch (Exception e) {
                                     logger.log("There was an issue getting those messages!\n"+e.getMessage());
@@ -94,7 +94,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> send(PaperCommandManager<CommandSender> manager) {
-        Tinder api = Tinder.get();
+        Tinder api = (Tinder) Plugin.getAPI();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
@@ -108,9 +108,9 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                api.services().packetBuilder().sendToOtherFamily(player,familyName);
+                                api.services().packetBuilder().sendToOtherFamily(player.getUniqueId(), familyName);
                             } catch (NullPointerException e) {
-                                PaperLang.RC_SEND_USAGE.send(logger);
+                                PluginLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from processing the request!", e);
                             }
@@ -118,7 +118,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> unlock(PaperCommandManager<CommandSender> manager) {
-        Tinder api = Tinder.get();
+        Tinder api = (Tinder) Plugin.getAPI();
         PluginLogger logger = api.logger();
 
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
@@ -131,7 +131,7 @@ public final class CommandRusty {
                         api.services().packetBuilder().unlockServer();
                         logger.log("Unlocking server.");
                     } catch (NullPointerException e) {
-                        PaperLang.RC_SEND_USAGE.send(logger);
+                        PluginLang.RC_SEND_USAGE.send(logger);
                     } catch (Exception e) {
                         logger.log("An error stopped us from processing the request!", e);
                     }
@@ -139,7 +139,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> lock(PaperCommandManager<CommandSender> manager) {
-        Tinder api = Tinder.get();
+        Tinder api = (Tinder) Plugin.getAPI();
         PluginLogger logger = api.logger();
 
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
@@ -152,7 +152,7 @@ public final class CommandRusty {
                                 api.services().packetBuilder().lockServer();
                                 logger.log("Locking server.");
                             } catch (NullPointerException e) {
-                                PaperLang.RC_SEND_USAGE.send(logger);
+                                PluginLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from processing the request!", e);
                             }

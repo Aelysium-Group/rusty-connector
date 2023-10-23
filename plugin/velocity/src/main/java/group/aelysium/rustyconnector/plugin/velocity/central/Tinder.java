@@ -4,20 +4,21 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import com.velocitypowered.api.scheduler.Scheduler;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
+import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.File;
 import java.nio.file.Path;
+import java.util.UUID;
 
 /**
  * The root api endpoint for the entire RustyConnector api.
  */
-public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Scheduler> {
+public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder {
     private static Tinder instance;
     public static Tinder get() {
         return instance;
@@ -42,21 +43,9 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
 
     /**
      * Ignites a {@link Flame} which effectively starts the RustyConnector kernel.
-     * @return A {@link Flame}.
      */
-    public Flame ignite() throws RuntimeException {
+    public void ignite() throws RuntimeException {
         this.flame = Flame.fabricateNew(this.plugin, this.lang);
-        return flame;
-    }
-
-    @Override
-    public InputStream resourceAsStream(String filename)  {
-        return getClass().getClassLoader().getResourceAsStream(filename);
-    }
-
-    @Override
-    public Scheduler scheduler() {
-        return velocityServer().getScheduler();
     }
 
     @Override
@@ -72,6 +61,41 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
     @Override
     public LangService lang() {
         return this.lang;
+    }
+
+    @Override
+    public void setMaxPlayers(int max) {
+
+    }
+
+    @Override
+    public int onlinePlayerCount() {
+        return 0;
+    }
+
+    @Override
+    public UUID getPlayerUUID(String name) {
+        return null;
+    }
+
+    @Override
+    public String getPlayerName(UUID uuid) {
+        return null;
+    }
+
+    @Override
+    public boolean isOnline(UUID uuid) {
+        return false;
+    }
+
+    @Override
+    public void teleportPlayer(UUID uuid, UUID target) {
+
+    }
+
+    @Override
+    public void sendMessage(UUID uuid, Component component) {
+
     }
 
     /**

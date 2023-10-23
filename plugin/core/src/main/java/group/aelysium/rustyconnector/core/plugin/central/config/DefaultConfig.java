@@ -1,10 +1,9 @@
-package group.aelysium.rustyconnector.plugin.paper.central.config;
+package group.aelysium.rustyconnector.core.plugin.central.config;
 
+import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.lang.Lang;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
+import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -50,7 +49,7 @@ public class DefaultConfig extends YAML {
     }
 
     public void register(int configVersion) throws IllegalStateException {
-        PluginLogger logger = Tinder.get().logger();
+        PluginLogger logger = Plugin.getAPI().logger();
 
         try {
             this.processVersion(configVersion);
@@ -73,7 +72,7 @@ public class DefaultConfig extends YAML {
         this.server_playerCap_soft = this.getNode(this.data,"server.player-cap.soft",Integer.class);
         this.server_playerCap_hard = this.getNode(this.data,"server.player-cap.hard",Integer.class);
         if(this.server_playerCap_soft >= this.server_playerCap_hard)
-            PaperLang.BOXED_MESSAGE_COLORED.send(logger, "Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode.", NamedTextColor.YELLOW);
+            PluginLang.BOXED_MESSAGE_COLORED.send(logger, "Server's soft-cap is either the same as or larger than the server's hard-cap. Running server in player-limit mode.", NamedTextColor.YELLOW);
 
 
         // Redis

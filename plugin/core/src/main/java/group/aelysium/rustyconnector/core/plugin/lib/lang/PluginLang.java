@@ -1,10 +1,10 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.lang;
+package group.aelysium.rustyconnector.core.plugin.lib.lang;
 
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.lang.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.lang.resolver.LanguageResolver;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.core.plugin.Plugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,9 +15,9 @@ import java.util.List;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
-public class PaperLang extends Lang {
+public class PluginLang extends Lang {
     public static LanguageResolver resolver() {
-        return Tinder.get().lang().resolver();
+        return Plugin.getAPI().lang().resolver();
     }
 
     public final static String ID = resolver().getRaw("core.single_word.id");
