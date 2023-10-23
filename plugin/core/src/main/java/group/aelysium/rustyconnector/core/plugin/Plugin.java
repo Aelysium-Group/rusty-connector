@@ -1,18 +1,20 @@
 package group.aelysium.rustyconnector.core.plugin;
 
 import group.aelysium.rustyconnector.core.central.Tinder;
+import group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 
 public class Plugin {
 
     private static Tinder tinder;
 
-    public static void init(Tinder t) {
+    public static <S extends ServiceHandler> void init(Tinder t) {
         tinder = t;
         tinder.ignite();
 
         tinder.logger().log("Initializing RustyConnector...");
-        PluginLang.WORDMARK_RUSTY_CONNECTOR.send(tinder.logger(), tinder.flame().version());
+        PluginLang.WORDMARK_RUSTY_CONNECTOR.send(tinder.logger(), tinder.flame().versionAsString());
     }
 
     public static void disable() {

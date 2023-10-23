@@ -23,7 +23,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerChatEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;

@@ -8,17 +8,16 @@ import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.UUID;
 
 /**
  * The root api endpoint for the entire RustyConnector api.
  */
-public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder {
+public class Tinder {
     private static Tinder instance;
     public static Tinder get() {
         return instance;
@@ -48,54 +47,16 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder {
         this.flame = Flame.fabricateNew(this.plugin, this.lang);
     }
 
-    @Override
     public PluginLogger logger() {
         return this.pluginLogger;
     }
 
-    @Override
     public String dataFolder() {
         return String.valueOf(this.dataFolder);
     }
 
-    @Override
     public LangService lang() {
         return this.lang;
-    }
-
-    @Override
-    public void setMaxPlayers(int max) {
-
-    }
-
-    @Override
-    public int onlinePlayerCount() {
-        return 0;
-    }
-
-    @Override
-    public UUID getPlayerUUID(String name) {
-        return null;
-    }
-
-    @Override
-    public String getPlayerName(UUID uuid) {
-        return null;
-    }
-
-    @Override
-    public boolean isOnline(UUID uuid) {
-        return false;
-    }
-
-    @Override
-    public void teleportPlayer(UUID uuid, UUID target) {
-
-    }
-
-    @Override
-    public void sendMessage(UUID uuid, Component component) {
-
     }
 
     /**
@@ -122,6 +83,15 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder {
      */
     public Flame flame() {
         return this.flame;
+    }
+
+    /**
+     * Gets a resource by name and returns it as a stream.
+     * @param filename The name of the resource to get.
+     * @return The resource as a stream.
+     */
+    public static InputStream resourceAsStream(String filename)  {
+        return group.aelysium.rustyconnector.core.central.Tinder.class.getClassLoader().getResourceAsStream(filename);
     }
 
     /**

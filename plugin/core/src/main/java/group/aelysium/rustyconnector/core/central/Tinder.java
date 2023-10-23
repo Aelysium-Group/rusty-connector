@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.core.central;
 
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import net.kyori.adventure.text.Component;
 
@@ -21,7 +22,7 @@ public abstract class Tinder {
 
     abstract public void ignite();
 
-    abstract public Flame flame();
+    abstract public Flame<CoreServiceHandler> flame();
 
     abstract public PluginLogger logger();
 

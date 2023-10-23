@@ -12,7 +12,7 @@
  *
  * Violations will result in a ban of your plugin and account from bStats.
  */
-package group.aelysium.rustyconnector.plugin.paper.lib.bstats;
+package group.aelysium.rustyconnector.plugin.paper.bstats;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;

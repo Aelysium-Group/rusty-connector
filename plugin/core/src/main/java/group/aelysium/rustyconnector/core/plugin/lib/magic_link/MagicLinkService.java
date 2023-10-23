@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.core.plugin.lib.magic_link;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.services.PacketBuilderService;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,7 +51,7 @@ public class MagicLinkService extends ClockService {
     }
 
     public void disconnect() {
-        PacketBuilderService service = Plugin.getAPI().services().packetBuilder();
+        PacketBuilderService service = ((CoreServiceHandler) Plugin.getAPI().services()).packetBuilder();
         service.pingProxy(ServerPingPacket.ConnectionIntent.DISCONNECT);
     }
 

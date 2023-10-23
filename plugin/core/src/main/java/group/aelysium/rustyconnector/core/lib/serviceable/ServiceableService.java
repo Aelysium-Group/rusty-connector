@@ -1,8 +1,5 @@
 package group.aelysium.rustyconnector.core.lib.serviceable;
 
-import java.util.Map;
-import java.util.Optional;
-
 public abstract class ServiceableService<H extends ServiceHandler> extends Service {
     protected H services;
 

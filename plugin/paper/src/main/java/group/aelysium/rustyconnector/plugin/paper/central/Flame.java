@@ -47,7 +47,7 @@ import java.util.*;
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link Tinder}.
  */
-public class Flame extends ServiceableService<CoreServiceHandler> implements group.aelysium.rustyconnector.core.central.Flame {
+public class Flame extends group.aelysium.rustyconnector.core.central.Flame<CoreServiceHandler> {
     private final int configVersion;
     private final String version;
 
@@ -92,7 +92,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> implements gro
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static group.aelysium.rustyconnector.core.central.Flame fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
+    public static group.aelysium.rustyconnector.core.central.Flame<CoreServiceHandler> fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
         Initialize initialize = new Initialize();
 
         try {

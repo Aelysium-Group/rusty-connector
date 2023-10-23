@@ -34,7 +34,7 @@ public class PluginLang extends Lang {
      * RED - For when an error has occurred.
      * ORANGE/YELLOW - For emphasis or highlighting.
      */
-    public final static JoinConfiguration newlines() {
+    public static JoinConfiguration newlines() {
         return JoinConfiguration.separator(newline());
     }
 

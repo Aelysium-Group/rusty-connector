@@ -75,7 +75,7 @@ import java.util.function.Consumer;
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link Tinder}.
  */
-public class Flame extends ServiceableService<CoreServiceHandler> implements group.aelysium.rustyconnector.core.central.Flame {
+public class Flame extends ServiceableService<CoreServiceHandler> {
 
     private final int configVersion;
     private final Version version;
@@ -89,7 +89,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> implements gro
 
     protected Flame(Version version, int configVersion, Optional<char[]> memberKey, Map<Class<? extends Service>, Service> services, String backboneConnector, List<Component> bootOutput) {
         super(new CoreServiceHandler(services));
-        this.backbone = (MessengerConnector<?>) this.services().connectorsService().getMessenger(backboneConnector);
+        this.backbone = this.services().connectorsService().getMessenger(backboneConnector);
         this.version = version;
         this.configVersion = configVersion;
         this.bootOutput = bootOutput;
@@ -98,16 +98,6 @@ public class Flame extends ServiceableService<CoreServiceHandler> implements gro
 
     public Version version() {
         return this.version;
-    }
-
-    @Override
-    public String versionAsString() {
-        return this.version.toString();
-    }
-
-    @Override
-    public void exhaust() {
-
     }
 
 
@@ -249,7 +239,7 @@ class Initialize {
 
     public String version() {
         try {
-            InputStream stream = Tinder.get().resourceAsStream("velocity-plugin.json");
+            InputStream stream = Tinder.resourceAsStream("velocity-plugin.json");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             JsonObject json = new Gson().fromJson(reader, JsonObject.class);
 
@@ -264,7 +254,7 @@ class Initialize {
 
     public int configVersion() {
         try {
-            InputStream stream = Tinder.get().resourceAsStream("velocity-plugin.json");
+            InputStream stream = Tinder.resourceAsStream("velocity-plugin.json");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             JsonObject json = new Gson().fromJson(reader, JsonObject.class);
 

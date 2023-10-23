@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.models.CoordinateRequest;
 

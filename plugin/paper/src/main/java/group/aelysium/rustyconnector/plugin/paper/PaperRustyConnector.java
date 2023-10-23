@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper;
 
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.plugin.paper.lib.bstats.Metrics;
+import group.aelysium.rustyconnector.plugin.paper.bstats.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;

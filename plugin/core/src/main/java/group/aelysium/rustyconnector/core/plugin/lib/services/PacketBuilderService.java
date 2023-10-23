@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 

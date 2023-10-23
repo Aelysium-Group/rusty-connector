@@ -24,7 +24,7 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder {
 
     private final PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
-    private Flame flame;
+    private Flame<CoreServiceHandler> flame;
     private final PluginLogger pluginLogger;
     private final LangService lang;
 
