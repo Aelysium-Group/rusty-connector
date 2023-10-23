@@ -1,0 +1,18 @@
+compileJava {
+    options.encoding = "UTF-8"
+}
+
+dependencies {
+
+}
+
+// If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
+shadowJar {
+    archiveClassifier.set('')
+    archiveVersion.set('')
+
+    mergeServiceFiles()
+    minimize()
+}
+
+jar.finalizedBy('shadowJar')
