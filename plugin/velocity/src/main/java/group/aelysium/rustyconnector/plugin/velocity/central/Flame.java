@@ -75,7 +75,8 @@ import java.util.function.Consumer;
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link Tinder}.
  */
-public class Flame extends ServiceableService<CoreServiceHandler> {
+public class Flame extends ServiceableService<CoreServiceHandler> implements group.aelysium.rustyconnector.core.central.Flame {
+
     private final int configVersion;
     private final Version version;
     private final List<Component> bootOutput;
@@ -95,7 +96,21 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
         this.memberKey = memberKey;
     }
 
-    public Version version() { return this.version; }
+    public Version version() {
+        return this.version;
+    }
+
+    @Override
+    public String versionAsString() {
+        return this.version.toString();
+    }
+
+    @Override
+    public void exhaust() {
+
+    }
+
+
     public int configVersion() { return this.configVersion; }
     public List<Component> bootLog() { return this.bootOutput; }
 

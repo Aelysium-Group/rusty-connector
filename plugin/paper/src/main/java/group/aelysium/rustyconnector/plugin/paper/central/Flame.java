@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
+import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.core.central.Tinder;
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.connectors.Connector;
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
@@ -17,19 +19,20 @@ import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
+import group.aelysium.rustyconnector.core.plugin.central.config.DefaultConfig;
+import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.DynamicTeleportService;
+import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
+import group.aelysium.rustyconnector.core.plugin.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.core.plugin.lib.magic_link.handlers.MagicLink_PingResponseHandler;
+import group.aelysium.rustyconnector.core.plugin.lib.services.PacketBuilderService;
+import group.aelysium.rustyconnector.core.plugin.lib.services.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.paper.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
-import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;
-import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers.MagicLink_PingResponseHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.PacketBuilderService;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -44,8 +47,8 @@ import java.util.*;
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link Tinder}.
  */
-public class Flame extends ServiceableService<CoreServiceHandler> {
-    private int configVersion;
+public class Flame extends ServiceableService<CoreServiceHandler> implements group.aelysium.rustyconnector.core.central.Flame {
+    private final int configVersion;
     private final String version;
 
     /**
@@ -60,7 +63,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
         this.backbone = this.services().connectors().getMessenger(backboneConnector);
     }
 
-    public String version() { return this.version; }
+    public String versionAsString() { return this.version; }
     public int configVersion() { return this.configVersion; }
 
     public MessengerConnector<? extends MessengerConnection> backbone() {
@@ -69,18 +72,18 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
 
     /**
      * Returns the currently active RustyConnector kernel.
-     * This is exactly identical to calling {@link Tinder#get()}{@link Tinder#flame() .flame()}.
+     *
      * @return A {@link Flame}.
      */
-    public static Flame get() {
-        return Tinder.get().flame();
+    public static group.aelysium.rustyconnector.core.central.Flame get() {
+        return Plugin.getAPI().flame();
     }
 
     /**
      * Kill the {@link Flame}.
      * Typically good for if you want to ignite a new one.
      */
-    public void exhaust(PaperRustyConnector plugin) {
+    public void exhaust() {
         this.kill();
     }
 
@@ -89,7 +92,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static Flame fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
+    public static group.aelysium.rustyconnector.core.central.Flame fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
         Initialize initialize = new Initialize();
 
         try {
@@ -99,7 +102,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             DefaultConfig defaultConfig = initialize.defaultConfig(langService);
 
             MessageCacheService messageCacheService = initialize.messageCache();
-            Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService);
+            Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Plugin.getAPI().logger(), langService);
 
             initialize.serverInfo(defaultConfig);
             initialize.messageCache();
@@ -113,9 +116,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             initialize.events(plugin);
             initialize.commands();
 
-            Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.getMessenger());
-
-            return flame;
+            return new Flame(version, configVersion, initialize.getServices(), defaultConfig.getMessenger());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -132,8 +133,8 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
  * This class will mutate the provided services and requestedConnectors lists that are provided to it.
  */
 class Initialize {
-    private final Tinder api = Tinder.get();
-    private final PluginLogger logger = Tinder.get().logger();
+    private final Tinder api = Plugin.getAPI();
+    private final PluginLogger logger = api.logger();
     private final Map<Class<? extends Service>, Service> services = new HashMap<>();
     private final List<String> requestedConnectors = new ArrayList<>();
     private final List<Component> bootOutput = new ArrayList<>();
@@ -143,18 +144,18 @@ class Initialize {
     }
 
     public void events(PaperRustyConnector plugin) {
-        api.paperServer().getPluginManager().registerEvents(new OnPlayerJoin(), plugin);
-        api.paperServer().getPluginManager().registerEvents(new OnPlayerLeave(), plugin);
-        api.paperServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), plugin);
+        ((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).paperServer().getPluginManager().registerEvents(new OnPlayerJoin(), plugin);
+        ((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).paperServer().getPluginManager().registerEvents(new OnPlayerLeave(), plugin);
+        ((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).paperServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), plugin);
     }
 
     public void commands() {
-        CommandRusty.create(api.commandManager());
+        CommandRusty.create(((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).commandManager());
     }
 
     public String version() {
         try {
-            InputStream stream = Tinder.get().resourceAsStream("plugin.yml");
+            InputStream stream = Tinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()
@@ -173,7 +174,7 @@ class Initialize {
 
     public int configVersion() {
         try {
-            InputStream stream = Tinder.get().resourceAsStream("plugin.yml");
+            InputStream stream = Tinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()

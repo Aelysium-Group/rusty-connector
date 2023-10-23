@@ -1,22 +1,24 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers;
+package group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.handlers;
 
+import group.aelysium.rustyconnector.core.central.Tinder;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
-import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.CoordinateRequest;
-import org.bukkit.entity.Player;
+import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.models.CoordinateRequest;
+
+import java.util.UUID;
 
 public class CoordinateRequestHandler extends PacketHandler {
     @Override
     public void execute(GenericPacket genericPacket) throws Exception {
         CoordinateRequestQueuePacket packet = (CoordinateRequestQueuePacket) genericPacket;
-        Tinder api = Tinder.get();
+        Tinder api = Plugin.getAPI();
 
-        Player target = api.paperServer().getPlayer(packet.targetUsername());
+        UUID target = api.getPlayerUUID(packet.targetUsername());
         if(target == null) return;
-        if(!target.isOnline()) return;
+        if(!api.isOnline(target)) return;
 
         CoordinateRequest coordinateRequest = api.services().dynamicTeleport().newRequest(packet.sourceUsername(), target);
 
@@ -28,7 +30,7 @@ public class CoordinateRequestHandler extends PacketHandler {
                 coordinateRequest.teleport();
             } catch (Exception e) {
                 e.printStackTrace();
-                coordinateRequest.client().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(coordinateRequest.target().getPlayerProfile().getName()));
+                api.sendMessage(coordinateRequest.client(), PluginLang.TPA_FAILED_TELEPORT.build(Plugin.getAPI().getPlayerName(coordinateRequest.target())));
             }
         } catch (NullPointerException e) {
             e.printStackTrace();

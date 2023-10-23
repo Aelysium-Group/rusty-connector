@@ -1,9 +1,9 @@
-package group.aelysium.rustyconnector.plugin.paper.lib.magic_link;
+package group.aelysium.rustyconnector.core.plugin.lib.magic_link;
 
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.PacketBuilderService;
+import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.plugin.lib.services.PacketBuilderService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,7 +50,7 @@ public class MagicLinkService extends ClockService {
     }
 
     public void disconnect() {
-        PacketBuilderService service = Tinder.get().services().packetBuilder();
+        PacketBuilderService service = Plugin.getAPI().services().packetBuilder();
         service.pingProxy(ServerPingPacket.ConnectionIntent.DISCONNECT);
     }
 
