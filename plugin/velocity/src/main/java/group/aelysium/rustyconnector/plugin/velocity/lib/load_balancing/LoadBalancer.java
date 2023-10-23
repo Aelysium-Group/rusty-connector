@@ -1,11 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
+import group.aelysium.rustyconnector.api.velocity.lib.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoadBalancer implements group.aelysium.rustyconnector.core.lib.LoadBalancer<PlayerServer> {
+public class LoadBalancer implements ILoadBalancer<PlayerServer> {
     private boolean weighted = false;
     private boolean persistence = false;
     private int attempts = 5;

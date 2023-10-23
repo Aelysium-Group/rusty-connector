@@ -1,10 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
+import group.aelysium.rustyconnector.api.velocity.lib.central.VelocityCoreServiceHandler;
+import group.aelysium.rustyconnector.api.velocity.lib.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
@@ -20,7 +22,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistServ
 import java.util.Map;
 import java.util.Optional;
 
-public class CoreServiceHandler extends group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler {
+public class CoreServiceHandler extends ServiceHandler implements VelocityCoreServiceHandler {
     public CoreServiceHandler(Map<Class<? extends Service>, Service> services) {
         super(services);
     }

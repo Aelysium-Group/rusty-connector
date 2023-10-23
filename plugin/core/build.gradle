@@ -14,7 +14,7 @@ dependencies {
     implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
 
     // Dev only
-    shadow "net.kyori:adventure-api:${project.adventure_version}"
+    shadow project(path: ':api', configuration: 'shadow')
     shadow "com.google.code.gson:gson:${project.gson_version}"
     shadow "org.yaml:snakeyaml:${project.snakeyaml_version}"
 }

@@ -15,7 +15,6 @@ dependencies {
 
     // Dev Only
     shadow project(path: ':core', configuration: 'shadow')
-    shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
 }
 
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/

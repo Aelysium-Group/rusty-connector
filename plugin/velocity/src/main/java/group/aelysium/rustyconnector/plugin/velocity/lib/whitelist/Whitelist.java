@@ -2,13 +2,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
 import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.api.velocity.lib.whitelist.IWhitelist;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
-import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.managers.WhitelistPlayerManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config.WhitelistConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import net.kyori.adventure.text.Component;
@@ -18,11 +17,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class Whitelist {
+public class Whitelist implements IWhitelist {
     private final String message;
     private final String name;
     private final String permission;
-    private final WhitelistPlayerManager whitelistPlayerManager;
+    private final List<WhitelistPlayerFilter> playerFilters = new ArrayList<>();
 
     private final boolean usePlayers;
     private final boolean usePermission;
@@ -37,8 +36,6 @@ public class Whitelist {
         this.strict = strict;
         this.inverted = inverted;
         this.permission = Permission.constructNode("rustyconnector.whitelist.<whitelist name>",this.name);
-
-        this.whitelistPlayerManager = new WhitelistPlayerManager();
     }
 
     public boolean usesPlayers() {
@@ -57,8 +54,8 @@ public class Whitelist {
         return this.inverted;
     }
 
-    public WhitelistPlayerManager playerManager() {
-        return this.whitelistPlayerManager;
+    public List<WhitelistPlayerFilter> playerFilters() {
+        return this.playerFilters;
     }
 
     /**
@@ -87,7 +84,7 @@ public class Whitelist {
 
 
         if (this.usesPlayers())
-            if (!WhitelistPlayer.validate(this, player))
+            if (!WhitelistPlayerFilter.validate(this, player))
                 playersValid = false;
 
 
@@ -104,7 +101,7 @@ public class Whitelist {
 
     private boolean validateSoft(Player player) {
         if (this.usesPlayers())
-            if (WhitelistPlayer.validate(this, player))
+            if (WhitelistPlayerFilter.validate(this, player))
                 return true;
 
         // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
@@ -144,9 +141,9 @@ public class Whitelist {
             Gson gson = new Gson();
             players.forEach(entry -> {
                 String json = gson.toJson(entry);
-                WhitelistPlayer player = gson.fromJson(json, WhitelistPlayer.class);
+                WhitelistPlayerFilter player = gson.fromJson(json, WhitelistPlayerFilter.class);
 
-                whitelist.playerManager().add(player);
+                whitelist.playerFilters().add(player);
             });
         }
 

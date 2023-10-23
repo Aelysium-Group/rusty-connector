@@ -1,16 +1,16 @@
 package group.aelysium.rustyconnector.core.plugin.lib.services;
 
-import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.api.velocity.lib.PluginLogger;
 import group.aelysium.rustyconnector.core.central.Tinder;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.core.lib.model.PlayerServer;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.api.velocity.lib.server.IPlayerServer;
+import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.velocity.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 
 import java.net.InetSocketAddress;
 
-public class ServerInfoService extends Service implements PlayerServer {
+public class ServerInfoService extends Service implements IPlayerServer {
     private String name;
     private InetSocketAddress address;
     private String family;

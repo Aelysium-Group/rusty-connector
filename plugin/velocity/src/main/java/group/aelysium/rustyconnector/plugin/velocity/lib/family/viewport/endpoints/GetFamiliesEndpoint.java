@@ -5,9 +5,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.APIResponse;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.APIService;
 import spark.Request;
@@ -30,8 +30,8 @@ public class GetFamiliesEndpoint implements Route {
             JsonArray families = new JsonArray();
             for (BaseServerFamily family : Tinder.get().services().familyService().dump()) {
                 String type = "unknown";
-                if(family instanceof ScalarServerFamily) type = "scalar";
-                if(family instanceof StaticServerFamily) type = "scalar";
+                if(family instanceof ScalarFamily) type = "scalar";
+                if(family instanceof StaticFamily) type = "scalar";
 
                 JsonArray health = new JsonArray(); // To be expanded upon in the future
                 health.add(new JsonPrimitive(0));
@@ -42,7 +42,7 @@ public class GetFamiliesEndpoint implements Route {
                 JsonObject object = new JsonObject();
 
                 object.add("name",         new JsonPrimitive(family.name()));
-                object.add("root",         new JsonPrimitive(family instanceof RootServerFamily));
+                object.add("root",         new JsonPrimitive(family instanceof RootFamily));
                 object.add("type",         new JsonPrimitive(type));
                 object.add("health",       health);
                 object.add("player_count", new JsonPrimitive(family.playerCount()));

@@ -3,9 +3,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.lang.log_gate.GateKey;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.api.velocity.lib.log_gate.GateKey;
+import group.aelysium.rustyconnector.api.velocity.lib.server.IServerService;
+import group.aelysium.rustyconnector.api.velocity.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
@@ -17,10 +17,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventMan
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
-import java.util.UUID;
 import java.util.Vector;
 
-public class ServerService extends Service {
+public class ServerService implements IServerService {
     private final Vector<WeakReference<PlayerServer>> servers =  new Vector<>();
 
     private final int serverTimeout;
@@ -45,7 +44,7 @@ public class ServerService extends Service {
      * @return A server or `null`
      */
     public PlayerServer search(ServerInfo serverInfo) {
-        for(BaseServerFamily<?> family : Tinder.get().services().familyService().dump()) {
+        for(BaseServerFamily family : Tinder.get().services().familyService().dump()) {
             PlayerServer server = family.findServer(serverInfo);
             if(server == null) continue;
 

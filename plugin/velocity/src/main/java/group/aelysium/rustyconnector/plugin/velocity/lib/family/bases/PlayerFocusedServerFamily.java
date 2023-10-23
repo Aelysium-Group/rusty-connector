@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.api.velocity.lib.family.bases.IPlayerFocusedFamilyBase;
 import group.aelysium.rustyconnector.core.lib.annotations.Initializer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
@@ -19,11 +20,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * This class should never be used directly.
  * Player-focused families offer features such as /tpa, whitelists, load-balancing, and direct connection.
  */
-public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerServer> {
+public abstract class PlayerFocusedServerFamily extends BaseServerFamily implements IPlayerFocusedFamilyBase<PlayerServer> {
     @Initializer
     protected String parentName = null;
 
-    protected WeakReference<BaseServerFamily<?>> parent = null;
+    protected WeakReference<BaseServerFamily> parent = null;
     protected LoadBalancer loadBalancer = null;
     protected String whitelist;
     protected boolean weighted;
@@ -46,7 +47,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     public void resolveParent(FamilyService familyService) {
-        BaseServerFamily<?> family = familyService.find(parentName);
+        BaseServerFamily family = familyService.find(parentName);
 
         this.parentName = null;
         if(family == null) {
@@ -57,7 +58,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         this.parent = new WeakReference<>(family);
     }
 
-    public WeakReference<BaseServerFamily<?>> parent() {
+    public WeakReference<BaseServerFamily> parent() {
         FamilyService familyService = Tinder.get().services().familyService();
         if(familyService.rootFamily().equals(this)) return null;
         return this.parent;
@@ -70,10 +71,6 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
      * @throws RuntimeException If the connection cannot be made.
      */
     public abstract PlayerServer connect(Player player);
-
-    public boolean isWeighted() {
-        return weighted;
-    }
 
     public LoadBalancer loadBalancer() {
         return this.loadBalancer;
@@ -99,7 +96,6 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
         return newPlayerCount.get();
     }
 
-    @Override
     public List<PlayerServer> registeredServers() {
         List<PlayerServer> servers = new ArrayList<>();
         servers.addAll(this.loadBalancer.dump());
@@ -109,12 +105,10 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
 
     public List<PlayerServer> lockedServers() { return this.lockedServers;}
 
-    @Override
     public void addServer(PlayerServer server) {
         this.loadBalancer.add(server);
     }
 
-    @Override
     public void removeServer(PlayerServer server) {
         this.loadBalancer.remove(server);
         this.lockedServers.remove(server);
@@ -149,7 +143,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily<PlayerS
     }
 
     @Override
-    public List<Player> allPlayers(int max) {
+    public List<Player> players(int max) {
         List<Player> players = new ArrayList<>();
 
         for (PlayerServer server : this.registeredServers()) {

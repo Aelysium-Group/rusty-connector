@@ -3,13 +3,13 @@ package group.aelysium.rustyconnector.core.lib.messenger;
 import group.aelysium.rustyconnector.core.lib.model.UserPass;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
-public abstract class MessengerConnector<C extends MessengerConnection> extends Service {
+public abstract class MessengerConnector<C extends MessengerConnection> implements Service {
     protected final InetSocketAddress address;
     protected final UserPass userPass;
     protected C connection;

@@ -4,7 +4,8 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
-import group.aelysium.rustyconnector.core.lib.Version;
+import group.aelysium.rustyconnector.api.velocity.lib.central.VelocityFlame;
+import group.aelysium.rustyconnector.api.velocity.lib.Version;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
@@ -13,14 +14,13 @@ import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.MemberKeyConfig;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.command.CommandRusty;
@@ -38,9 +38,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TP
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.config.FamiliesConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -69,15 +69,14 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static group.aelysium.rustyconnector.core.lib.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector.inject;
 
 /**
  * The core RustyConnector kernel.
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link Tinder}.
  */
-public class Flame extends ServiceableService<CoreServiceHandler> {
-
+public class Flame extends VelocityFlame {
     private final int configVersion;
     private final Version version;
     private final List<Component> bootOutput;
@@ -112,15 +111,6 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
         Tinder.get().velocityServer().getEventManager().unregisterListeners(plugin);
         this.bootOutput.clear();
         this.kill();
-    }
-
-    /**
-     * Returns the currently active RustyConnector kernel.
-     * This is exactly identical to calling {@link Tinder#get()}{@link Tinder#flame() .flame()}.
-     * @return A {@link Flame}.
-     */
-    public static Flame get() {
-        return Tinder.get().flame();
     }
 
     /**
@@ -357,11 +347,11 @@ class Initialize {
         {
             bootOutput.add(Component.text(" | Building families...", NamedTextColor.DARK_GRAY));
             for (String familyName : familiesConfig.scalarFamilies()) {
-                familyService.add(ScalarServerFamily.init(inject(bootOutput, dependencies.d2()), familyName));
+                familyService.add(ScalarFamily.init(inject(bootOutput, dependencies.d2()), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             for (String familyName : familiesConfig.staticFamilies()) {
-                familyService.add(StaticServerFamily.init(inject(bootOutput, dependencies.d2(), dependencies.d3()), familyName));
+                familyService.add(StaticFamily.init(inject(bootOutput, dependencies.d2(), dependencies.d3()), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             bootOutput.add(Component.text(" | Finished building families.", NamedTextColor.GREEN));
@@ -370,7 +360,7 @@ class Initialize {
         {
             bootOutput.add(Component.text(" | Building root family...", NamedTextColor.DARK_GRAY));
 
-            RootServerFamily rootFamily = RootServerFamily.init(inject(bootOutput, dependencies.d2()), familiesConfig.rootFamilyName());
+            RootFamily rootFamily = RootFamily.init(inject(bootOutput, dependencies.d2()), familiesConfig.rootFamilyName());
             familyService.setRootFamily(rootFamily);
             bootOutput.add(Component.text(" | Registered root family: "+rootFamily.name(), NamedTextColor.YELLOW));
 

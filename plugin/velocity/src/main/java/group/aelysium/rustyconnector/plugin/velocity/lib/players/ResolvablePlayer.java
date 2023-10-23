@@ -1,13 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.api.velocity.lib.players.IResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ResolvablePlayer {
+public class ResolvablePlayer implements IResolvablePlayer {
     protected UUID uuid;
     protected String username;
 

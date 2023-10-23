@@ -1,27 +1,27 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.api.velocity.lib.family.static_family.IResidenceDataEnclave;
+import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
-import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class ResidenceDataEnclave {
+public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer, StaticFamily> {
     private final MySQLStorage storage;
 
     public ResidenceDataEnclave(MySQLStorage storage) {
         this.storage = storage;
     }
 
-    public Optional<ServerResidence> fetch(Player player, StaticServerFamily family) {
+    public Optional<ServerResidence> fetch(Player player, StaticFamily family) {
         try {
             StorageRoot root = this.storage.root();
 
@@ -40,7 +40,7 @@ public class ResidenceDataEnclave {
 
         return Optional.empty();
     }
-    public void save(Player player, PlayerServer server, StaticServerFamily family)  {
+    public void save(Player player, PlayerServer server, StaticFamily family)  {
         StorageRoot root = this.storage.root();
 
         ServerResidence serverResidence = new ServerResidence(player, server, family, family.homeServerExpiration());
@@ -49,7 +49,7 @@ public class ResidenceDataEnclave {
         residences.add(serverResidence);
         this.storage.store(residences);
     }
-    public void delete(Player player, StaticServerFamily family) {
+    public void delete(Player player, StaticFamily family) {
         StorageRoot root = this.storage.root();
 
         List<ServerResidence> residences = root.residence();
@@ -61,7 +61,7 @@ public class ResidenceDataEnclave {
         this.storage.store(residences);
     }
 
-    public void updateExpirations(LiquidTimestamp expiration, StaticServerFamily family) throws Exception {
+    public void updateExpirations(LiquidTimestamp expiration, StaticFamily family) throws Exception {
         if(expiration == null)
             updateValidExpirations(family);
         else
@@ -72,7 +72,7 @@ public class ResidenceDataEnclave {
      * Deletes all mappings that are expired.
      * @param family The family to search in.
      */
-    protected void purgeExpired(StaticServerFamily family) {
+    public void purgeExpired(StaticFamily family) {
         StorageRoot root = this.storage.root();
 
         List<ServerResidence> residenceList = root.residence();
@@ -89,7 +89,7 @@ public class ResidenceDataEnclave {
      * This will update all null expirations to now expire at delay + NOW();
      * @param family The family to search in.
      */
-    protected void updateNullExpirations(StaticServerFamily family) {
+    protected void updateNullExpirations(StaticFamily family) {
         StorageRoot root = this.storage.root();
 
         List<ServerResidence> residenceList = root.residence();
@@ -106,7 +106,7 @@ public class ResidenceDataEnclave {
      * This will update all expirations to now never expire;
      * @param family The family to search in.
      */
-    protected void updateValidExpirations(StaticServerFamily family) {
+    protected void updateValidExpirations(StaticFamily family) {
         StorageRoot root = this.storage.root();
 
         List<ServerResidence> residenceList = root.residence();

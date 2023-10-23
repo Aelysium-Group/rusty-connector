@@ -4,8 +4,9 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
-import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.api.velocity.lib.VelocityTinder;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ import java.nio.file.Path;
 /**
  * The root api endpoint for the entire RustyConnector api.
  */
-public class Tinder {
+public class Tinder implements VelocityTinder {
     private static Tinder instance;
     public static Tinder get() {
         return instance;

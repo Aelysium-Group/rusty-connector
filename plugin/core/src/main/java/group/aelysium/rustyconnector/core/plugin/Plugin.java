@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.plugin;
 
 import group.aelysium.rustyconnector.core.central.Tinder;
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.api.velocity.lib.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 
 public class Plugin {

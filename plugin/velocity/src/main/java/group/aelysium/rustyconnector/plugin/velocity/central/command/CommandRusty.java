@@ -14,12 +14,12 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Flame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -155,10 +155,10 @@ class Family {
                                 BaseServerFamily family = flame.services().familyService().find(familyName);
                                 if(family == null) throw new NullPointerException();
 
-                                if(family instanceof ScalarServerFamily)
-                                    VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
-                                if(family instanceof StaticServerFamily)
-                                    VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticServerFamily) family);
+                                if(family instanceof ScalarFamily)
+                                    VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
+                                if(family instanceof StaticFamily)
+                                    VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
                             } catch (NullPointerException e) {
                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                             } catch (Exception e) {
@@ -186,10 +186,10 @@ class Family {
 
                         ((PlayerFocusedServerFamily) family).loadBalancer().resetIndex();
 
-                        if(family instanceof ScalarServerFamily)
-                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
-                        if(family instanceof StaticServerFamily)
-                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticServerFamily) family);
+                        if(family instanceof ScalarFamily)
+                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
+                        if(family instanceof StaticFamily)
+                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
                     } catch (NullPointerException e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                     } catch (Exception e) {
@@ -213,10 +213,10 @@ class Family {
 
                         ((PlayerFocusedServerFamily) family).loadBalancer().completeSort();
 
-                        if(family instanceof ScalarServerFamily)
-                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarServerFamily) family);
-                        if(family instanceof StaticServerFamily)
-                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticServerFamily) family);
+                        if(family instanceof ScalarFamily)
+                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
+                        if(family instanceof StaticFamily)
+                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
                     } catch (NullPointerException e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                     } catch (Exception e) {
@@ -234,10 +234,10 @@ class Family {
                         BaseServerFamily family = flame.services().familyService().find(familyName);
                         if(family == null) throw new NullPointerException();
 
-                        if(family instanceof ScalarServerFamily)
-                            VelocityLang.RC_SCALAR_FAMILY_INFO_LOCKED.send(logger, (ScalarServerFamily) family);
-                        if(family instanceof StaticServerFamily)
-                            VelocityLang.RC_STATIC_FAMILY_INFO_LOCKED.send(logger, (StaticServerFamily) family);
+                        if(family instanceof ScalarFamily)
+                            VelocityLang.RC_SCALAR_FAMILY_INFO_LOCKED.send(logger, (ScalarFamily) family);
+                        if(family instanceof StaticFamily)
+                            VelocityLang.RC_STATIC_FAMILY_INFO_LOCKED.send(logger, (StaticFamily) family);
                     } catch (NullPointerException e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                     } catch (Exception e) {

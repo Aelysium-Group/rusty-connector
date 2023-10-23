@@ -1,19 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.lang;
 
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ServerConnection;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.lang.ASCIIAlphabet;
-import group.aelysium.rustyconnector.core.lib.lang.Lang;
-import group.aelysium.rustyconnector.core.lib.lang.resolver.LanguageResolver;
-import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.ASCIIAlphabet;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.Lang;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.resolver.LanguageResolver;
+import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.api.velocity.lib.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -29,7 +27,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.kyori.adventure.text.Component.*;
@@ -334,9 +331,9 @@ public class VelocityLang extends Lang {
         Tinder api = Tinder.get();
         Component families = text("");
         for (BaseServerFamily family : api.services().familyService().dump()) {
-            if(family instanceof ScalarServerFamily)
+            if(family instanceof ScalarFamily)
                 families = families.append(text("[ "+family.name()+" ] ").color(GOLD));
-            if(family instanceof StaticServerFamily)
+            if(family instanceof StaticFamily)
                 families = families.append(text("[ "+family.name()+" ] ").color(DARK_GREEN));
         }
 
@@ -373,7 +370,7 @@ public class VelocityLang extends Lang {
             BORDER
     );
 
-    public final static ParameterizedMessage1<ScalarServerFamily> RC_SCALAR_FAMILY_INFO = (family) -> {
+    public final static ParameterizedMessage1<ScalarFamily> RC_SCALAR_FAMILY_INFO = (family) -> {
         Component servers = text("");
         int i = 0;
 
@@ -399,7 +396,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().familyService().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -421,7 +418,7 @@ public class VelocityLang extends Lang {
                         LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
                         LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
                         LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
                 ),
@@ -445,7 +442,7 @@ public class VelocityLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<ScalarServerFamily> RC_SCALAR_FAMILY_INFO_LOCKED = (family) -> {
+    public final static ParameterizedMessage1<ScalarFamily> RC_SCALAR_FAMILY_INFO_LOCKED = (family) -> {
         Component servers = text("");
         int i = 0;
 
@@ -464,7 +461,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().familyService().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -486,7 +483,7 @@ public class VelocityLang extends Lang {
                         LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
                         LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
                         LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
                 ),
@@ -510,7 +507,7 @@ public class VelocityLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<StaticServerFamily> RC_STATIC_FAMILY_INFO = (family) -> {
+    public final static ParameterizedMessage1<StaticFamily> RC_STATIC_FAMILY_INFO = (family) -> {
         Component servers = text("");
         int i = 0;
 
@@ -536,7 +533,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().familyService().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -563,7 +560,7 @@ public class VelocityLang extends Lang {
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
                         LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
                         LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
                 ),
@@ -587,7 +584,7 @@ public class VelocityLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<StaticServerFamily> RC_STATIC_FAMILY_INFO_LOCKED = (family) -> {
+    public final static ParameterizedMessage1<StaticFamily> RC_STATIC_FAMILY_INFO_LOCKED = (family) -> {
         Component servers = text("");
         int i = 0;
 
@@ -606,7 +603,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().familyService().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -632,7 +629,7 @@ public class VelocityLang extends Lang {
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
                         LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
                         LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
                 ),

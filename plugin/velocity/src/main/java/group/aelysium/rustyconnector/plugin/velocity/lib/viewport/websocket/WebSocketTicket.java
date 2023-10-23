@@ -1,22 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.websocket;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.core.lib.Version;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.PacketType;
-import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import io.lettuce.core.KeyValue;
-
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
+import group.aelysium.rustyconnector.api.velocity.lib.Version;
 
 public class WebSocketTicket {
 

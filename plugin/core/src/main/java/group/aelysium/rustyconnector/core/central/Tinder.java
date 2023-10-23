@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.central;
 
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.api.velocity.lib.PluginLogger;
+import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import net.kyori.adventure.text.Component;
 

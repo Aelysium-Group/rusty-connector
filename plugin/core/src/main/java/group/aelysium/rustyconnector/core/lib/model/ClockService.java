@@ -1,13 +1,14 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class ClockService extends Service {
+public class ClockService implements Service {
     protected final ScheduledExecutorService executorService;
 
     public ClockService(int threads) {

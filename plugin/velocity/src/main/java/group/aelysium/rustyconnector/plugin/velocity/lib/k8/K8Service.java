@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.k8;
 
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.K8PlayerServer;
 import io.kubernetes.client.openapi.ApiClient;

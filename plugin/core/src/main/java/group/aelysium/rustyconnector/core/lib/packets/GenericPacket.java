@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacke
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.api.velocity.lib.util.AddressUtil;
 import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;

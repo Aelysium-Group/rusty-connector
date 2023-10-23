@@ -6,7 +6,7 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.hash.MD5;
+import group.aelysium.rustyconnector.api.velocity.lib.server.IPlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
@@ -14,8 +14,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerPlayerCountEvent;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
@@ -23,7 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
+public class PlayerServer implements IPlayerServer {
     private final UUID id = UUID.randomUUID();
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
@@ -181,7 +179,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         } catch (Exception ignore) {}
     }
 
-    @Override
     public int sortIndex() {
         return this.playerCount;
     }
@@ -259,7 +256,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
      * @param event The connection to set.
      * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
      */
-    public boolean connect(PlayerChooseInitialServerEvent event) {
+    public boolean directConnect(PlayerChooseInitialServerEvent event) {
         try {
             event.setInitialServer(this.registeredServer());
             return true;

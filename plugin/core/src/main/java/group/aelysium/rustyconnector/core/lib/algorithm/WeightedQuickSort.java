@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.algorithm;
 
-import group.aelysium.rustyconnector.core.lib.model.Sortable;
+import group.aelysium.rustyconnector.api.velocity.lib.load_balancing.ISortable;
 
 import java.util.*;
 
@@ -11,7 +11,7 @@ public class WeightedQuickSort {
      * Assumes that start is 0 and the final index is equal to size.
      * @param array The array to sort.
      */
-    public static <I extends Sortable> void sort(List<I> array) {
+    public static <I extends ISortable> void sort(List<I> array) {
         QuickSort.sort(array); // Put array in order of index.
 
         // Pull out different weight levels and put them into their own lists.

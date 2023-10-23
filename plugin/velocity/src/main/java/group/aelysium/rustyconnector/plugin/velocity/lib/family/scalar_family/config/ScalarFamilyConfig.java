@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.api.velocity.lib.load_balancing.AlgorithmType;
 
 import java.io.File;
 

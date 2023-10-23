@@ -2,8 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest;
 
 import group.aelysium.rustyconnector.core.lib.model.UserPass;
 import group.aelysium.rustyconnector.core.lib.hash.Token;
-import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.viewport.endpoints.GetFamiliesEndpoint;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.viewport.endpoints.GetFamilyEndpoint;
