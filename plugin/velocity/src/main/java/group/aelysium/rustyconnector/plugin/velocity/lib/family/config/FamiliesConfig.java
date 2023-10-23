@@ -17,7 +17,6 @@ public class FamiliesConfig extends YAML {
     private Boolean rootFamily_catchDisconnectingPlayers = false;
     private List<String> scalar = new ArrayList<>();
     private List<String> staticF = new ArrayList<>();
-    private String staticFamilyStorage = "";
 
     public FamiliesConfig(File configPointer) {
         super(configPointer);
@@ -35,10 +34,6 @@ public class FamiliesConfig extends YAML {
     }
     public List<String> staticFamilies() {
         return this.staticF;
-    }
-
-    public String staticFamilyStorage() {
-        return this.staticFamilyStorage;
     }
 
     @SuppressWarnings("unchecked")
@@ -86,12 +81,6 @@ public class FamiliesConfig extends YAML {
             VelocityLang.BOXED_MESSAGE_COLORED.send(logger, this.rootFamily_name + " was found duplicated in your family nodes. This is no longer supported. Instead, ONLY place the name of your root family in [root-family.name]. Ignoring...", NamedTextColor.YELLOW);
             this.scalar.remove(this.rootFamily_name);
             this.staticF.remove(this.rootFamily_name);
-        }
-
-
-        // MySQL
-        if(this.staticF.size() > 0) {
-            this.staticFamilyStorage = this.getNode(this.data, "static-family-storage", String.class);
         }
     }
 

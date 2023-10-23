@@ -2,12 +2,15 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.ancho
 
 import com.velocitypowered.api.command.CommandManager;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.commands.CommandAnchor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -21,31 +24,30 @@ public class AnchorService extends Service {
         this.anchors = anchors;
     }
 
-    public void initCommands() {
+    public void initCommands(DependencyInjector.DI3<DynamicTeleportService, ServerService, List<Component>> dependencies) {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
+        List<Component> bootOutput = dependencies.d3();
 
-        Tinder.get().logger().send(Component.text("Building anchor service commands...", NamedTextColor.DARK_GRAY));
+        bootOutput.add(Component.text("Building anchor service commands...", NamedTextColor.DARK_GRAY));
         this.anchors.forEach((name, family) -> {
             if(commandManager.hasCommand(name)) {
-                logger.send(Component.text("Issue initializing Family Anchors! A command called /"+name+" already exists! Please find another name for this anchor!", NamedTextColor.RED));
+                bootOutput.add(Component.text("Issue initializing Family Anchors! A command called /"+name+" already exists! Please find another name for this anchor!", NamedTextColor.RED));
                 return;
             }
 
             try {
                 commandManager.register(
                         commandManager.metaBuilder(name).build(),
-                        CommandAnchor.create(name)
+                        CommandAnchor.create(DependencyInjector.inject(dependencies.d1(), dependencies.d2(), this), name)
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /"+name, NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /"+name, NamedTextColor.YELLOW));
             } catch (Exception e) {
-                logger.send(Component.text("Issue initializing Family Anchors! "+ e.getMessage(), NamedTextColor.RED));
+                bootOutput.add(Component.text("Issue initializing Family Anchors! "+ e.getMessage(), NamedTextColor.RED));
             }
         });
 
-        Tinder.get().logger().send(Component.text("Finished building anchor service commands.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished building anchor service commands.", NamedTextColor.GREEN));
     }
 
     public Optional<BaseServerFamily> family(String anchor) {
@@ -59,10 +61,10 @@ public class AnchorService extends Service {
         return Optional.empty();
     }
 
-    public static Optional<AnchorService> init(DynamicTeleportConfig config) {
+    public static Optional<AnchorService> init(DependencyInjector.DI2<List<Component>, FamilyService> dependencies, DynamicTeleportConfig config) {
         Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-        FamilyService familyService = api.services().familyService();
+        List<Component> bootOutput = dependencies.d1();
+        FamilyService familyService = dependencies.d2();
 
         try {
             if(!config.isFamilyAnchor_enabled()) return Optional.empty();
@@ -71,7 +73,7 @@ public class AnchorService extends Service {
             for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
                 BaseServerFamily family = familyService.find(entry.getValue());
                 if(family == null){
-                    logger.send(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
+                    bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
                     continue;
                 }
 
@@ -80,7 +82,7 @@ public class AnchorService extends Service {
 
             return Optional.of(new AnchorService(anchors));
         } catch (Exception e) {
-            logger.send(Component.text("Issue initializing Family Anchors! "+ e.getMessage(), NamedTextColor.RED));
+            bootOutput.add(Component.text("Issue initializing Family Anchors! "+ e.getMessage(), NamedTextColor.RED));
         }
 
         return Optional.empty();

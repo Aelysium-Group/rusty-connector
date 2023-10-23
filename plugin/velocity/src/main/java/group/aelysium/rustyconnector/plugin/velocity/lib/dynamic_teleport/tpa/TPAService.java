@@ -2,55 +2,60 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 
 public class TPAService extends ServiceableService<TPAServiceHandler> {
-    private TPASettings settings;
-    private Map<BaseServerFamily, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
+    private final TPASettings settings;
+    private final Map<BaseServerFamily<?>, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
 
     public TPAService(TPASettings settings) {
         super(new TPAServiceHandler());
         this.services.add(new TPACleaningService(settings.expiration()));
         this.settings = settings;
     }
-    public void initCommand() {
+    public void initCommand(DependencyInjector.DI3<FamilyService, ServerService, List<Component>> dependencies) {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
-        Tinder.get().logger().send(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
+        List<Component> bootOutput = dependencies.d3();
+
+        bootOutput.add(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("tpa"))
             try {
                 commandManager.register(
                         commandManager.metaBuilder("tpa").build(),
-                        CommandTPA.create()
+                        CommandTPA.create(DependencyInjector.inject(dependencies.d1(), dependencies.d2(), this))
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-        Tinder.get().logger().send(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
     }
 
     public TPASettings settings() {
         return this.settings;
     }
 
-    public TPAHandler tpaHandler(BaseServerFamily family) {
+    public TPAHandler tpaHandler(BaseServerFamily<?> family) {
         TPAHandler tpaHandler = this.tpaHandlers.get(family);
         if(tpaHandler == null) {
             TPAHandler newTPAHandler = new TPAHandler();

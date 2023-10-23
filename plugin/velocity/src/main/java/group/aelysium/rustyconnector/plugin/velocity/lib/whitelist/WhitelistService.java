@@ -11,11 +11,11 @@ import java.util.Optional;
 
 public class WhitelistService extends Service implements NodeManager<Whitelist> {
     private final Map<String, Whitelist> registeredWhitelists = new HashMap<>();
-    private WeakReference<Whitelist> proxyWhitelist;
+    private Whitelist proxyWhitelist;
 
     public Optional<Whitelist> proxyWhitelist() {
         try {
-            Whitelist whitelist = this.proxyWhitelist.get();
+            Whitelist whitelist = this.proxyWhitelist;
             if(whitelist != null) return Optional.of(whitelist);
         } catch (Exception ignore) {}
 
@@ -23,7 +23,7 @@ public class WhitelistService extends Service implements NodeManager<Whitelist> 
     }
 
     public void setProxyWhitelist(Whitelist whitelist) {
-        this.proxyWhitelist = new WeakReference<>(whitelist);
+        this.proxyWhitelist = whitelist;
     }
 
     /**
@@ -68,8 +68,5 @@ public class WhitelistService extends Service implements NodeManager<Whitelist> 
     @Override
     public void kill() {
         this.registeredWhitelists.clear();
-        try {
-            this.proxyWhitelist.clear();
-        } catch (Exception ignore) {}
     }
 }

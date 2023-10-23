@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -30,23 +31,23 @@ public class PartyService extends Service {
         this.connector = Executors.newFixedThreadPool(10);
     }
 
-    public void initCommand() {
+    public void initCommand(List<Component> bootOutput) {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
-        Tinder.get().logger().send(Component.text("Building party service commands...", NamedTextColor.DARK_GRAY));
+        bootOutput.add(Component.text("Building party service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("party"))
             try {
                 commandManager.register(
                         commandManager.metaBuilder("party").build(),
-                        CommandParty.create()
+                        CommandParty.create(this)
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /party", NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /party", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-        Tinder.get().logger().send(Component.text("Finished building party service commands.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished building party service commands.", NamedTextColor.GREEN));
     }
 
     public void queueConnector(Runnable runnable) {
@@ -78,7 +79,7 @@ public class PartyService extends Service {
 
     public void disband(Party party) {
         for (Player player : party.players()) {
-            player.sendMessage(VelocityLang.PARTY_DISBANDED.build());
+            player.sendMessage(VelocityLang.PARTY_DISBANDED);
         }
         this.delete(party);
     }
@@ -87,35 +88,35 @@ public class PartyService extends Service {
         Tinder api = Tinder.get();
 
         if(party.leader() != sender && this.settings.onlyLeaderCanInvite)
-            throw new IllegalStateException("Hey! Only the party leader can invite other players!");
+            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ONLY_LEADER_CAN_INVITE);
 
         if(this.settings.friendsOnly())
             try {
                 FriendsService friendsService = api.services().friendsService().orElse(null);
                 if(friendsService == null) {
-                    api.logger().send(Component.text("You have parties set to only allow players to invite their friends! But the Friends module is disabled! Ignoring...", NamedTextColor.YELLOW));
+                    api.logger().send(Component.text(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
                     throw new NoOutputException();
                 }
 
-                if(friendsService.findFriends(sender, false).orElseThrow().contains(target))
-                    throw new IllegalStateException("You are only allowed to invite friends to join your party!");
+                if(friendsService.findFriends(sender).orElseThrow().contains(target))
+                    throw new IllegalStateException(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION);
             } catch (IllegalStateException e) {
                 throw e;
             } catch (Exception ignore) {}
 
-        PartyInvite invite = new PartyInvite(party, sender, target);
+        PartyInvite invite = new PartyInvite(this, party, sender, target);
         this.invites.add(invite);
 
-        sender.sendMessage(Component.text("You invited " + target.getUsername() + " to your party!", NamedTextColor.GREEN));
+        sender.sendMessage(VelocityLang.PARTY_INVITE_SENT.build(target.getUsername()));
 
-        target.sendMessage(VelocityLang.PARTY_INVITE_RECEIVED.build(sender));
+        target.sendMessage(VelocityLang.PARTY_INVITE_RECEIVED.build(sender.getUsername()));
         return invite;
     }
 
-    public List<PartyInvite> findInvitesToTarget(Player target) {
-        return this.invites.stream().filter(invite -> invite.target() == target).findAny().stream().toList();
+    public List<PartyInvite> findInvitesToTarget(ResolvablePlayer target) {
+        return this.invites.stream().filter(invite -> invite.target().equals(target)).findAny().stream().toList();
     }
-    public Optional<PartyInvite> findInvite(Player target, Player sender) {
+    public Optional<PartyInvite> findInvite(ResolvablePlayer target, ResolvablePlayer sender) {
         return this.invites.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();
     }
 

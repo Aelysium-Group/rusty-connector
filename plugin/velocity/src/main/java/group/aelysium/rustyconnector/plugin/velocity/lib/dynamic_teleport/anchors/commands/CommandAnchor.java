@@ -6,6 +6,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
@@ -16,18 +17,17 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Objects;
 
 public class CommandAnchor {
-    public static BrigadierCommand create(String anchor) {
+    public static BrigadierCommand create(DependencyInjector.DI3<DynamicTeleportService, ServerService, AnchorService> dependencies, String anchor) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleportService().orElseThrow();
-        AnchorService anchorService = dynamicTeleportService.services().anchorService().orElseThrow();
-        ServerService serverService = api.services().serverService();
+        DynamicTeleportService dynamicTeleportService = dependencies.d1();
+        ServerService serverService = dependencies.d2();
+        AnchorService anchorService = dependencies.d3();
 
 
         LiteralCommandNode<CommandSource> anchorCommand = LiteralArgumentBuilder
@@ -51,13 +51,13 @@ public class CommandAnchor {
                         try {
                             PlayerServer server = serverService.search(Objects.requireNonNull(player.getCurrentServer().orElse(null)).getServerInfo());
                             if(family.equals(server.family()))
-                                return closeMessage(player, Component.text("You're already connected to this server.", NamedTextColor.RED));
+                                return closeMessage(player, VelocityLang.SERVER_ALREADY_CONNECTED);
                         } catch (Exception ignore) {}
 
                         family.connect(player);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        return closeMessage(player, Component.text("There was a fatal error while trying to complete your request.", NamedTextColor.RED));
+                        return closeMessage(player, VelocityLang.INTERNAL_ERROR);
                     }
                     return Command.SINGLE_SUCCESS;
                 })

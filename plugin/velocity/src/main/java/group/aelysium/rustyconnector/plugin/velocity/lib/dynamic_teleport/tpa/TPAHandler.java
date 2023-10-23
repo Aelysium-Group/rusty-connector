@@ -6,9 +6,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class TPAHandler {
-    private final List<TPARequest> requests = new ArrayList<>();
+    private final Vector<TPARequest> requests = new Vector<>();
 
     public TPARequest findRequest(Player sender, Player target) {
         return this.requests.stream()

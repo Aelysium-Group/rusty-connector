@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -25,19 +26,19 @@ public class RootServerFamily extends ScalarServerFamily {
         super(name, whitelist, clazz, weighted, persistence, attempts, null);
     }
 
-    public static RootServerFamily init(String familyName, List<Component> bootOutput, LangService lang) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+    public static RootServerFamily init(DependencyInjector.DI2<List<Component>, LangService> dependencies, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         ScalarFamilyConfig scalarFamilyConfig = new ScalarFamilyConfig(new File(String.valueOf(api.dataFolder()), "families/"+familyName+".scalar.yml"));
-        if(!scalarFamilyConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
+        if(!scalarFamilyConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
         }
         scalarFamilyConfig.register();
 
         Whitelist whitelist = null;
         if(scalarFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(scalarFamilyConfig.getWhitelist_name(), bootOutput, lang);
+            whitelist = Whitelist.init(dependencies, scalarFamilyConfig.getWhitelist_name());
 
             api.services().whitelistService().add(whitelist);
         }

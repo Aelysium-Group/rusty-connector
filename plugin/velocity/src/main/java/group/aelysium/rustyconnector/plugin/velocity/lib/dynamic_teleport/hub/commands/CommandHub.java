@@ -8,9 +8,11 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
@@ -22,14 +24,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 public class CommandHub {
-    public static BrigadierCommand create() {
+    public static BrigadierCommand create(DependencyInjector.DI3<FamilyService, ServerService, HubService> dependencies) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        FamilyService familyService = api.services().familyService();
-        HubService hubService = api.services().dynamicTeleportService().orElseThrow()
-                                   .services().hubService().orElseThrow();
-        ServerService serverService = api.services().serverService();
+        FamilyService familyService = dependencies.d1();
+        ServerService serverService = dependencies.d2();
+        HubService hubService = dependencies.d3();
 
         LiteralCommandNode<CommandSource> hub = LiteralArgumentBuilder
                 .<CommandSource>literal("hub")
@@ -58,7 +59,7 @@ public class CommandHub {
                             return Command.SINGLE_SUCCESS;
                         } catch (RuntimeException err) {
                             logger.send(Component.text("Failed to connect player to parent family " + rootFamily.name() + "!",NamedTextColor.RED));
-                            context.getSource().sendMessage(Component.text("Failed to connect you to the hub!"));
+                            context.getSource().sendMessage(VelocityLang.HUB_CONNECTION_FAILED);
                         }
 
                         return Command.SINGLE_SUCCESS;
@@ -75,7 +76,7 @@ public class CommandHub {
                         rootFamily.connect(player);
                     } catch (RuntimeException err) {
                         logger.send(Component.text("Failed to connect player to parent family " + rootFamily.name() + "!",NamedTextColor.RED));
-                        context.getSource().sendMessage(Component.text("Failed to connect you to the hub!", NamedTextColor.RED));
+                        context.getSource().sendMessage(VelocityLang.HUB_CONNECTION_FAILED);
                     }
 
                     return Command.SINGLE_SUCCESS;
@@ -83,10 +84,5 @@ public class CommandHub {
                 .build();
 
         return new BrigadierCommand(hub);
-    }
-
-    public static int closeMessage(Player player, Component message) {
-        player.sendMessage(message);
-        return Command.SINGLE_SUCCESS;
     }
 }

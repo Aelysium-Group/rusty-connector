@@ -1,12 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
-import group.aelysium.rustyconnector.core.lib.connectors.storage.StorageConnector;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.UnavailableProtocol;
@@ -17,6 +16,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBala
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,16 +26,18 @@ import java.rmi.ConnectException;
 import java.util.List;
 import java.util.Optional;
 
+import static group.aelysium.rustyconnector.core.lib.util.DependencyInjector.inject;
+
 public class StaticServerFamily extends PlayerFocusedServerFamily {
     protected LiquidTimestamp homeServerExpiration;
     protected UnavailableProtocol unavailableProtocol;
     protected ResidenceDataEnclave dataEnclave;
 
-    private StaticServerFamily(String name, StorageConnector<?> connector, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration, String parentFamily) throws Exception {
+    private StaticServerFamily(String name, MySQLStorage mySQLStorage, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration, String parentFamily) throws Exception {
         super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
         this.unavailableProtocol = unavailableProtocol;
         this.homeServerExpiration = homeServerExpiration;
-        this.dataEnclave = new ResidenceDataEnclave(connector);
+        this.dataEnclave = new ResidenceDataEnclave(mySQLStorage);
     }
 
     public UnavailableProtocol unavailableProtocol() {
@@ -61,34 +63,30 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticServerFamily init(String familyName, List<Component> bootOutput, List<String> requestedConnectors, ConnectorsService connectorsService, LangService lang) throws Exception {
+    public static StaticServerFamily init(DependencyInjector.DI3<List<Component>, LangService, MySQLStorage> dependencies, String familyName) throws Exception {
         Tinder api = Tinder.get();
+        List<Component> bootOutput = dependencies.d1();
+        LangService lang = dependencies.d2();
+        MySQLStorage storage = dependencies.d3();
 
         StaticFamilyConfig staticFamilyConfig = new StaticFamilyConfig(new File(String.valueOf(api.dataFolder()), "families/" + familyName + ".static.yml"));
-        if (!staticFamilyConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_STATIC_FAMILY_TEMPLATE)) {
+        if (!staticFamilyConfig.generate(dependencies.d1(), lang, LangFileMappings.VELOCITY_STATIC_FAMILY_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create families/" + familyName + ".static.yml!");
         }
         staticFamilyConfig.register();
 
         Whitelist whitelist = null;
         if (staticFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(staticFamilyConfig.getWhitelist_name(), bootOutput, lang);
+            whitelist = Whitelist.init(inject(bootOutput, lang), staticFamilyConfig.getWhitelist_name());
 
             api.services().whitelistService().add(whitelist);
         }
-
-        requestedConnectors.add(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
-        bootOutput.add(Component.text(" | Building "+familyName+"'s connector...", NamedTextColor.DARK_GRAY));
-        StorageConnector<?> connector = connectorsService.getStorage(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
-        if(connector == null) throw new NullPointerException("You must define a storage method for your static family:"+familyName);
-        requestedConnectors.add(staticFamilyConfig.getConsecutiveConnections_residencyStorage());
-        bootOutput.add(Component.text(" | Finished building  "+familyName+"'s connector.", NamedTextColor.GREEN));
 
         StaticServerFamily family = null;
         switch (Enum.valueOf(AlgorithmType.class, staticFamilyConfig.getFirstConnection_loadBalancing_algorithm())) {
             case ROUND_ROBIN -> family = new StaticServerFamily(
                     familyName,
-                    connector,
+                    storage,
                     whitelist,
                     RoundRobin.class,
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
@@ -100,7 +98,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
             );
             case LEAST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
-                    connector,
+                    storage,
                     whitelist,
                     LeastConnection.class,
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
@@ -112,7 +110,7 @@ public class StaticServerFamily extends PlayerFocusedServerFamily {
             );
             case MOST_CONNECTION -> family = new StaticServerFamily(
                     familyName,
-                    connector,
+                    storage,
                     whitelist,
                     MostConnection.class,
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
@@ -221,11 +219,13 @@ class StaticFamilyConnector {
      */
     public PlayerServer connectHomeServer() throws RuntimeException {
         try {
-            Optional<ResidenceDataEnclave.ServerResidence> residence = this.family.dataEnclave().fetch(player, this.family);
+            Optional<ServerResidence> residence = this.family.dataEnclave().fetch(player, this.family);
 
             if(residence.isPresent()) {
-                residence.orElseThrow().server().connect(this.player);
-                return residence.orElseThrow().server();
+                if(residence.orElseThrow().server().isPresent()) {
+                    residence.orElseThrow().server().orElseThrow().connect(this.player);
+                    return residence.orElseThrow().server().orElseThrow();
+                }
             }
             switch (this.family.unavailableProtocol()) {
                 case ASSIGN_NEW_HOME -> {

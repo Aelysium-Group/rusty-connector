@@ -13,20 +13,17 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.io.SyncFailedException;
 import java.util.List;
-import java.util.Optional;
 
 public final class CommandUnFriend {
-    public static BrigadierCommand create() {
+    public static BrigadierCommand create(FriendsService friendsService) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        FriendsService friendsService = api.services().friendsService().orElse(null);
         if (friendsService == null) {
             logger.send(Component.text("The Friends service must be enabled to load the /friend command.", NamedTextColor.YELLOW));
             return null;
@@ -46,14 +43,14 @@ public final class CommandUnFriend {
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(player, VelocityLang.UNFRIEND_USAGE.build());
+                    return closeMessage(player, VelocityLang.UNFRIEND_USAGE);
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                             try {
-                                List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
+                                List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -79,28 +76,24 @@ public final class CommandUnFriend {
                             }
 
                             String username = context.getArgument("username", String.class);
+                            ResolvablePlayer targetPlayer = api.services().playerService().fetch(username).orElseThrow();
+
+                            if(!friendsService.areFriends(ResolvablePlayer.from(player), targetPlayer))
+                                return closeMessage(player, VelocityLang.UNFRIEND_NOT_FRIENDS.build(username));
+
+                            if(targetPlayer == null)
+                                return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+
                             try {
-                                PlayerDataEnclave.FakePlayer targetPlayer = api.services().playerService().orElseThrow().dataEnclave().get(username).orElseThrow();
+                                friendsService.removeFriends(ResolvablePlayer.from(player), targetPlayer);
 
-                                if(!friendsService.services().dataEnclave().areFriends(PlayerDataEnclave.FakePlayer.from(player), targetPlayer))
-                                    return closeMessage(player, Component.text(username + " isn't your friend!", NamedTextColor.RED));
-
-                                if(targetPlayer == null)
-                                    return closeMessage(player, Component.text(username + " has never joined this network!", NamedTextColor.RED));
-
-                                try {
-                                    friendsService.services().dataEnclave().removeFriend(PlayerDataEnclave.FakePlayer.from(player), targetPlayer);
-
-                                    return closeMessage(player, Component.text("You are no longer friends with " + username, NamedTextColor.GREEN));
-                                } catch (IllegalStateException e) {
-                                    return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
-                                } catch (Exception ignore) {}
-                            } catch (SyncFailedException e) {
+                                return closeMessage(player, VelocityLang.UNFRIEND_SUCCESS.build(username));
+                            } catch (IllegalStateException e) {
+                                return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
+                            } catch (Exception e) {
                                 e.printStackTrace();
-                                return closeMessage(player, Component.text("There was an internal error while trying to find "+username+"!", NamedTextColor.RED));
+                                return closeMessage(player, VelocityLang.INTERNAL_ERROR);
                             }
-
-                            return closeMessage(player, Component.text("There was an issue unfriending " + username, NamedTextColor.RED));
                         })
                 )
                 .build();

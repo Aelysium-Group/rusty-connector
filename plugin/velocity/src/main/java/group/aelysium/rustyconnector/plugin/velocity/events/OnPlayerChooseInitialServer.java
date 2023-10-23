@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.Ro
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -20,13 +20,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventMan
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class OnPlayerChooseInitialServer {
     /**
@@ -63,41 +60,23 @@ public class OnPlayerChooseInitialServer {
 
             // Save player if they haven't joined before
             try {
-                PlayerDataEnclave dataEnclave = api.services().playerService().orElseThrow().dataEnclave();
-                dataEnclave.savePlayer(player);
+                api.services().playerService().savePlayer(player);
             } catch (Exception ignore) {}
 
             // Check for active friend requests
             try {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
-                List<FriendRequest> requests = friendsService.findRequestsToTarget(PlayerDataEnclave.FakePlayer.from(player));
+                List<FriendRequest> requests = friendsService.findRequestsToTarget(ResolvablePlayer.from(player));
 
                 if(requests.size() == 0) throw new NoOutputException();
 
-                if(requests.size() > 10) {
-                    player.sendMessage(Component.text("You have " + requests.size() + " pending friend requests!", NamedTextColor.GRAY));
-                    player.sendMessage(Component.text("Address them using: ", NamedTextColor.GRAY)
-                            .append(Component.text("/friends requests <username> accept/deny", NamedTextColor.BLUE, TextDecoration.UNDERLINED)
-                                    .clickEvent(ClickEvent.suggestCommand("/friends requests "))));
-                } else {
-                    AtomicReference<String> from = new AtomicReference<>("");
-                    requests.forEach(request -> {
-                        try {
-                            from.set(from + ", " + request.sender().username());
-                        } catch (Exception ignore) {}
-                    });
-
-                    player.sendMessage(Component.text("You have " + requests.size() + " pending friend requests from: " + from + ".", NamedTextColor.GRAY));
-                    player.sendMessage(Component.text("Address them using: ", NamedTextColor.GRAY)
-                            .append(Component.text("/friends requests <username> accept/deny", NamedTextColor.BLUE, TextDecoration.UNDERLINED)
-                                    .clickEvent(ClickEvent.suggestCommand("/friends requests "))));
-                }
+                player.sendMessage(VelocityLang.FRIENDS_JOIN_MESSAGE.build(requests));
             } catch (Exception ignore) {}
 
             // Check for online friends
             try {
                 FriendsService friendsService = api.services().friendsService().orElseThrow();
-                List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, true).orElseThrow();
+                List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 
@@ -111,11 +90,11 @@ public class OnPlayerChooseInitialServer {
                 });
 
                 if(friends.size() == 0 || onlineFriends.size() == 0) {
-                    player.sendMessage(Component.text("None of your friends are online right now.", NamedTextColor.GRAY));
+                    player.sendMessage(VelocityLang.NO_ONLINE_FRIENDS);
                     throw new NoOutputException();
                 }
 
-                player.sendMessage(Component.text("You have friends online!", NamedTextColor.GRAY));
+                player.sendMessage(VelocityLang.ONLINE_FRIENDS);
                 final Component[] friendsList = {Component.text("", NamedTextColor.WHITE)};
                 onlineFriends.forEach(friend -> friendsList[0] = friendsList[0].append(Component.text(friend.getUsername())));
                 player.sendMessage(Component.join(JoinConfiguration.commas(true), friendsList));

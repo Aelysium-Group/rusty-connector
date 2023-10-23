@@ -17,8 +17,6 @@ public class FriendsConfig extends YAML {
 
     private boolean allowMessaging;
 
-    private String storage = "";
-
     public FriendsConfig(File configPointer) {
         super(configPointer);
     }
@@ -43,10 +41,6 @@ public class FriendsConfig extends YAML {
         return allowMessaging;
     }
 
-    public String storage() {
-        return this.storage;
-    }
-
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
         PluginLogger logger = Tinder.get().logger();
@@ -63,8 +57,5 @@ public class FriendsConfig extends YAML {
         this.sendNotifications = this.getNode(this.data, "send-notifications", Boolean.class);
         this.showFamilies = this.getNode(this.data, "show-families", Boolean.class);
         this.allowMessaging = this.getNode(this.data, "allow-messaging", Boolean.class);
-
-        this.storage = this.getNode(this.data, "storage", String.class);
-        if (this.storage.equals("")) throw new IllegalStateException("Please assign a storage method.");
     }
 }

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest;
 
-import group.aelysium.rustyconnector.core.lib.connectors.UserPass;
+import group.aelysium.rustyconnector.core.lib.model.UserPass;
 import group.aelysium.rustyconnector.core.lib.hash.Token;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
@@ -11,7 +11,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.endpoints
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.endpoints.LogoutEndpoint;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.endpoints.SubscribeChannelEndpoint;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.websocket.WebSocketService;
-import org.eclipse.jetty.websocket.api.Session;
 import spark.Route;
 
 import javax.naming.AuthenticationException;

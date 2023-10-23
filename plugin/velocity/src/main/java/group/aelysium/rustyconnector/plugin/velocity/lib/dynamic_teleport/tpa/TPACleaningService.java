@@ -12,10 +12,7 @@ public class TPACleaningService extends ClockService {
         this.heartbeat = heartbeat;
     }
 
-    public void startHeartbeat() {
-        Tinder api = Tinder.get();
-        TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
-                                   .services().tpaService().orElseThrow();
+    public void startHeartbeat(TPAService tpaService) {
         this.scheduleRecurring(() -> {
             for(TPAHandler handler : tpaService.allTPAHandlers()) {
                 try {

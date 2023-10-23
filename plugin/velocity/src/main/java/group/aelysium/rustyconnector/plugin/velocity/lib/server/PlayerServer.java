@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerPlayerCountEvent;
@@ -18,11 +19,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlayerServer implements group.aelysium.rustyconnector.core.lib.model.PlayerServer {
-    private final String id;
+    private final UUID id = UUID.randomUUID();
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
     private BaseServerFamily family;
@@ -45,7 +47,6 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         if(this.softPlayerCap > this.hardPlayerCap) this.softPlayerCap = this.hardPlayerCap;
 
         this.timeout = new AtomicInteger(timeout);
-        this.id = MD5.hash(serverInfo.getName() + serverInfo.getAddress());
     }
 
     public boolean stale() {
@@ -57,7 +58,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
         this.timeout.set(newTimeout);
     }
 
-    public String id() {
+    public UUID id() {
         return this.id;
     }
 
@@ -224,7 +225,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
             try {
                 if(partyService.settings().onlyLeaderCanSwitchServers())
                     if(!party.leader().equals(player)) {
-                        player.sendMessage(Component.text("Only the party leader can switch servers!", NamedTextColor.RED));
+                        player.sendMessage(VelocityLang.PARTY_ONLY_LEADER_CAN_SWITCH);
                         return false;
                     }
 

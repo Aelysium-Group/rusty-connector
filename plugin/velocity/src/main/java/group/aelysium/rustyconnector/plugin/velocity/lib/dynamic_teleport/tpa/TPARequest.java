@@ -70,7 +70,7 @@ public class TPARequest {
 
             ServerInfo serverInfo = this.target().getCurrentServer().orElseThrow().getServerInfo();
             PlayerServer server = api.services().serverService().search(serverInfo);
-            BaseServerFamily family = server.family();
+            BaseServerFamily<?> family = server.family();
             if(family == null) throw new NullPointerException();
 
             tpaService.tpaSendPlayer(this.sender(), this.target(), server);

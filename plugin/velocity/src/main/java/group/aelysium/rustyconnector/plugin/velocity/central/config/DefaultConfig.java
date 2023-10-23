@@ -13,8 +13,6 @@ import java.io.File;
 public class DefaultConfig extends YAML {
     private boolean debug = false;
 
-    private String messenger = "";
-
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
@@ -25,10 +23,6 @@ public class DefaultConfig extends YAML {
 
     public DefaultConfig(File configPointer) {
         super(configPointer);
-    }
-
-    public String messenger() {
-        return this.messenger;
     }
 
     public boolean whitelist_enabled() {
@@ -70,10 +64,6 @@ public class DefaultConfig extends YAML {
         } catch (Exception e) {
             this.debug = false;
         }
-
-        // Connector
-
-        this.messenger = this.getNode(this.data, "messenger", String.class);
 
         // Whitelist
 

@@ -25,7 +25,7 @@ public class ServerPlayerCountEvent extends ViewportEvent {
     public String toJsonPacket() {
         JsonObject object = new JsonObject();
 
-        object.add("id", new JsonPrimitive(server.id()));
+        object.add("id", new JsonPrimitive(server.id().toString()));
         object.add("name", new JsonPrimitive(server.serverInfo().getName()));
         object.add("player_count", new JsonPrimitive(playerCount));
 
