@@ -1,7 +1,8 @@
 package group.aelysium.rustyconnector.core.plugin.lib.magic_link.handlers;
 
-import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.api.mc_loader.magic_link.MagicLinkStatus;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
@@ -17,7 +18,7 @@ public class MagicLink_PingResponseHandler extends PacketHandler {
 
         MCLoaderTinder api = Plugin.getAPI();
         PluginLogger logger = api.logger();
-        MagicLinkService service = api.services().magicLink();
+        MagicLinkService service = (MagicLinkService) api.services().magicLink();
 
         if(packet.status() == ServerPingResponsePacket.PingResponseStatus.ACCEPTED) {
             logger.send(Component.text(packet.message(), packet.color()));
@@ -29,14 +30,14 @@ public class MagicLink_PingResponseHandler extends PacketHandler {
                 service.setUpcomingPingDelay(15);
             }
 
-            service.setStatus(MagicLinkService.Status.CONNECTED);
+            service.setStatus(MagicLinkStatus.CONNECTED);
         }
 
         if(packet.status() == ServerPingResponsePacket.PingResponseStatus.DENIED) {
             logger.send(Component.text(packet.message(), packet.color()));
             logger.send(Component.text("Waiting 1 minute before trying again...", NamedTextColor.GRAY));
             service.setUpcomingPingDelay(60);
-            service.setStatus(MagicLinkService.Status.SEARCHING);
+            service.setStatus(MagicLinkStatus.SEARCHING);
         }
     }
 }

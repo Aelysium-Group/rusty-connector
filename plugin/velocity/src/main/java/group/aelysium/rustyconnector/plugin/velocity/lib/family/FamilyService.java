@@ -3,13 +3,14 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 import group.aelysium.rustyconnector.api.velocity.family.IFamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FamilyService implements IFamilyService {
+public class FamilyService implements IFamilyService<PlayerServer, RootFamily> {
     private final Map<String, BaseFamily> registeredFamilies = new HashMap<>();
     private WeakReference<RootFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
@@ -42,8 +43,7 @@ public class FamilyService implements IFamilyService {
      * @param name The name of the family to get.
      * @return A family or `null` if there is no family with the defined name.
      */
-    @Override
-    public BaseFamily<?> find(String name) {
+    public BaseFamily find(String name) {
         return this.registeredFamilies.get(name);
     }
 
@@ -51,8 +51,7 @@ public class FamilyService implements IFamilyService {
      * Add a family to this manager.
      * @param family The family to add to this manager.
      */
-    @Override
-    public void add(BaseFamily<?> family) {
+    public void add(BaseFamily family) {
         this.registeredFamilies.put(family.name(),family);
     }
 
@@ -60,17 +59,14 @@ public class FamilyService implements IFamilyService {
      * Remove a family from this manager.
      * @param family The family to remove from this manager.
      */
-    @Override
-    public void remove(BaseFamily<?> family) {
+    public void remove(BaseFamily family) {
         this.registeredFamilies.remove(family.name());
     }
 
-    @Override
-    public List<BaseFamily<?>> dump() {
+    public List<BaseFamily> dump() {
         return this.registeredFamilies.values().stream().toList();
     }
 
-    @Override
     public void clear() {
         this.registeredFamilies.clear();
     }

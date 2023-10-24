@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * This class should never be used directly.
  * Player-focused families offer features such as /tpa, whitelists, load-balancing, and direct connection.
  */
-public abstract class PlayerFocusedServerFamily extends BaseFamily implements IPlayerFocusedFamilyBase<PlayerServer> {
+public abstract class PlayerFocusedFamily extends BaseFamily implements IPlayerFocusedFamilyBase<PlayerServer> {
     @Initializer
     protected String parentName = null;
 
@@ -31,7 +31,7 @@ public abstract class PlayerFocusedServerFamily extends BaseFamily implements IP
 
     protected final List<PlayerServer> lockedServers = new ArrayList<>();
 
-    protected PlayerFocusedServerFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentName) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    protected PlayerFocusedFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentName) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name);
         if(whitelist == null) this.whitelist = null;
         else this.whitelist = whitelist.name();

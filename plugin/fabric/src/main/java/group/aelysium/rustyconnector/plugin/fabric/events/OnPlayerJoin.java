@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.fabric.events;
 
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
-import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.models.CoordinateRequest;
+import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.CoordinateRequest;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.network.ServerPlayerEntity;

@@ -1,7 +1,7 @@
-package group.aelysium.rustyconnector.api.velocity.lang.resolver;
+package group.aelysium.rustyconnector.api.core.lang.resolver;
 
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.core.lang.config.LangService;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import net.kyori.adventure.text.Component;

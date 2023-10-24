@@ -1,15 +1,16 @@
 package group.aelysium.rustyconnector.api.core.serviceable;
 
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.ServiceHandler;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.IServiceHandler;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.IServiceableService;
 
-public abstract class ServiceableService<H extends ServiceHandler> {
-    protected H services;
+public abstract class ServiceableService<TServiceHandler extends IServiceHandler> implements IServiceableService<TServiceHandler> {
+    protected TServiceHandler services;
 
-    public ServiceableService(H services) {
+    public ServiceableService(TServiceHandler services) {
         this.services = services;
     }
 
-    public H services() {
+    public TServiceHandler services() {
         return this.services;
     }
 

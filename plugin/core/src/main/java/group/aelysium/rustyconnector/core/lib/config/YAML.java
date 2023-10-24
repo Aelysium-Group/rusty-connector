@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.config;
 
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.core.lang.config.LangService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;

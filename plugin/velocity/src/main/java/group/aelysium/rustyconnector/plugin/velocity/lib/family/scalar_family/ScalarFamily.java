@@ -3,13 +3,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.api.velocity.family.scalar_family.IScalarFamily;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.core.lang.config.LangService;
 import group.aelysium.rustyconnector.api.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
@@ -26,7 +26,7 @@ import java.util.List;
 
 import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
 
-public class ScalarFamily extends PlayerFocusedServerFamily implements IScalarFamily<PlayerServer> {
+public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<PlayerServer> {
     protected ScalarFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
     }

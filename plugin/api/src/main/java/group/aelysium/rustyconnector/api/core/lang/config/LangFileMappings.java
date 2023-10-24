@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.api.velocity.lang.config;
+package group.aelysium.rustyconnector.api.core.lang.config;
 
 import java.util.ArrayList;
 import java.util.List;

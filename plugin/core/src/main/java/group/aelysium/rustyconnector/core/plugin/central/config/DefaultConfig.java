@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.plugin.central.config;
 
-import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;

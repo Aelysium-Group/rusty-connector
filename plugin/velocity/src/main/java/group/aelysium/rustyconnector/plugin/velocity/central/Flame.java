@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
 import group.aelysium.rustyconnector.api.velocity.central.VelocityFlame;
+import group.aelysium.rustyconnector.api.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.api.velocity.util.Version;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
@@ -14,8 +15,8 @@ import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.MemberKeyConfig;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.core.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
@@ -36,7 +37,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.Dynami
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.config.FamiliesConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -77,7 +78,7 @@ import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link Tinder}.
  */
-public class Flame extends VelocityFlame {
+public class Flame extends VelocityFlame<CoreServiceHandler> {
     private final int configVersion;
     private final Version version;
     private final List<Component> bootOutput;
@@ -379,7 +380,7 @@ class Initialize {
             bootOutput.add(Component.text(" | Resolving family parents...", NamedTextColor.DARK_GRAY));
             familyService.dump().forEach(baseServerFamily -> {
                 try {
-                    ((PlayerFocusedServerFamily) baseServerFamily).resolveParent(familyService);
+                    ((PlayerFocusedFamily) baseServerFamily).resolveParent(familyService);
                 } catch (Exception e) {
                     bootOutput.add(Component.text("There was an issue resolving the parent for " + baseServerFamily.name() + ". " + e.getMessage()));
                 }
@@ -579,7 +580,7 @@ class Initialize {
                 return;
             }
 
-            FriendsService.FriendsSettings settings = new FriendsService.FriendsSettings(
+            FriendsServiceSettings settings = new FriendsServiceSettings(
                     dependencies.d1(),
                     config.getMaxFriends(),
                     config.isSendNotifications(),
@@ -624,7 +625,7 @@ class Initialize {
 
             try {
                 TPAService tpaService = dynamicTeleportService.services().tpaService().orElseThrow();
-                tpaService.services().tpaCleaningService().startHeartbeat(tpaService);
+                tpaService.cleaner().startHeartbeat(tpaService);
                 tpaService.initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
                 bootOutput.add(Component.text(" | The TPA module was started successfully!",NamedTextColor.GREEN));
             } catch (NoSuchElementException ignore) {

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.messenger;
 
-import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;

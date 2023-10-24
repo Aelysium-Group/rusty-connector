@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
@@ -33,9 +34,9 @@ public class MagicLinkPingHandler extends PacketHandler {
         if(api.logger().loggerGate().check(GateKey.PING))
             api.logger().send(VelocityLang.PING.build(serverInfo));
 
-        if(packet.intent() == ServerPingPacket.ConnectionIntent.CONNECT)
+        if(packet.intent() == ConnectionIntent.CONNECT)
             reviveOrConnectServer(serverInfo, packet);
-        if(packet.intent() == ServerPingPacket.ConnectionIntent.DISCONNECT)
+        if(packet.intent() == ConnectionIntent.DISCONNECT)
             disconnectServer(serverInfo, packet);
     }
 

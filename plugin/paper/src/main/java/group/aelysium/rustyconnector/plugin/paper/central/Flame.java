@@ -6,12 +6,12 @@ import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.Redis
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
-import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.core.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
@@ -25,8 +25,8 @@ import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.DynamicTel
 import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.core.plugin.lib.magic_link.handlers.MagicLink_PingResponseHandler;
-import group.aelysium.rustyconnector.core.plugin.lib.services.PacketBuilderService;
-import group.aelysium.rustyconnector.core.plugin.lib.services.ServerInfoService;
+import group.aelysium.rustyconnector.core.plugin.lib.packet_builder.PacketBuilderService;
+import group.aelysium.rustyconnector.core.plugin.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
@@ -68,15 +68,6 @@ public class Flame extends MCLoaderFlame<CoreServiceHandler> {
 
     public MessengerConnector<? extends MessengerConnection> backbone() {
         return this.backbone;
-    }
-
-    /**
-     * Returns the currently active RustyConnector kernel.
-     *
-     * @return A {@link Flame}.
-     */
-    public static MCLoaderFlame get() {
-        return Plugin.getAPI().flame();
     }
 
     /**

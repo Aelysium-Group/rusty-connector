@@ -1,19 +1,19 @@
 package group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport;
 
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.api.mc_loader.dynamic_teleport.IDynamicTeleportService;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
-import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.models.CoordinateRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class DynamicTeleportService extends Service {
+public class DynamicTeleportService implements IDynamicTeleportService<CoordinateRequest> {
     private final List<CoordinateRequest> requests = new ArrayList<>();
 
-    public CoordinateRequest newRequest(String client_username, UUID target) {
-        CoordinateRequest request = new CoordinateRequest(client_username, target);
+    public CoordinateRequest newRequest(String clientUsername, UUID target) {
+        CoordinateRequest request = new CoordinateRequest(clientUsername, target);
         requests.add(request);
 
         return request;

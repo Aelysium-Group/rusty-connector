@@ -1,29 +1,28 @@
 package group.aelysium.rustyconnector.core.plugin.lib.magic_link;
 
+import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
+import group.aelysium.rustyconnector.api.mc_loader.magic_link.IMagicLinkService;
+import group.aelysium.rustyconnector.api.mc_loader.magic_link.MagicLinkStatus;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.api.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
-import group.aelysium.rustyconnector.core.plugin.lib.services.PacketBuilderService;
+import group.aelysium.rustyconnector.core.plugin.lib.packet_builder.PacketBuilderService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MagicLinkService extends ClockService {
+public class MagicLinkService extends ClockService implements IMagicLinkService<PacketBuilderService> {
     private AtomicInteger upcomingPingDelay = new AtomicInteger(5);
-    private Status status = Status.SEARCHING;
+    private MagicLinkStatus status = MagicLinkStatus.SEARCHING;
 
     public MagicLinkService(int threads) {
         super(threads);
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(MagicLinkStatus status) {
         this.status = status;
     }
 
-    /**
-     * Set the ping delay for this upcoming ping.
-     * @param delay The delay to set.
-     */
     public void setUpcomingPingDelay(int delay) {
         upcomingPingDelay.set(delay);
     }
@@ -31,7 +30,7 @@ public class MagicLinkService extends ClockService {
     private void scheduleNextPing(PacketBuilderService packetBuilderService) {
         this.scheduleDelayed(() -> {
             try {
-                packetBuilderService.pingProxy(ServerPingPacket.ConnectionIntent.CONNECT);
+                packetBuilderService.pingProxy(ConnectionIntent.CONNECT);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -44,15 +43,9 @@ public class MagicLinkService extends ClockService {
         this.scheduleNextPing(packetBuilderService);
     }
 
-    public enum Status {
-        CONNECTED,
-        SEARCHING,
-        DENIED
-    }
-
     public void disconnect() {
         PacketBuilderService service = ((CoreServiceHandler) Plugin.getAPI().services()).packetBuilder();
-        service.pingProxy(ServerPingPacket.ConnectionIntent.DISCONNECT);
+        service.pingProxy(ConnectionIntent.DISCONNECT);
     }
 
     @Override

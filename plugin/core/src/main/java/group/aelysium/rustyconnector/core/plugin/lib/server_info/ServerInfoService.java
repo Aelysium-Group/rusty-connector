@@ -1,7 +1,8 @@
-package group.aelysium.rustyconnector.core.plugin.lib.services;
+package group.aelysium.rustyconnector.core.plugin.lib.server_info;
 
-import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.api.mc_loader.server_info.IServerInfoService;
 import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.api.velocity.server.IPlayerServer;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
@@ -10,7 +11,7 @@ import group.aelysium.rustyconnector.core.plugin.Plugin;
 
 import java.net.InetSocketAddress;
 
-public class ServerInfoService extends Service implements IPlayerServer {
+public class ServerInfoService implements IServerInfoService {
     private String name;
     private InetSocketAddress address;
     private String family;
@@ -62,32 +63,22 @@ public class ServerInfoService extends Service implements IPlayerServer {
 
     public String family() { return this.family; }
 
-    @Override
     public int playerCount() {
         return Plugin.getAPI().onlinePlayerCount();
     }
 
-    @Override
-    public int sortIndex() {
-        return 0;
-    }
-
-    @Override
     public int weight() {
         return this.weight;
     }
 
-    @Override
     public int softPlayerCap() {
         return this.softPlayerCap;
     }
 
-    @Override
     public int hardPlayerCap() {
         return this.hardPlayerCap;
     }
 
-    @Override
     public void kill() {
         name = null;
         address = null;

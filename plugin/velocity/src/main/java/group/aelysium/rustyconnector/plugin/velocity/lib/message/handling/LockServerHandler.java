@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 public class LockServerHandler extends PacketHandler {
@@ -18,7 +18,7 @@ public class LockServerHandler extends PacketHandler {
         PlayerServer server = api.services().server().search(serverInfo);
 
         if (server != null) {
-            PlayerFocusedServerFamily family = (PlayerFocusedServerFamily) server.family();
+            PlayerFocusedFamily family = (PlayerFocusedFamily) server.family();
             family.lockServer(server);
         }
     }

@@ -1,17 +1,18 @@
 package group.aelysium.rustyconnector.core.plugin.central;
 
 import group.aelysium.rustyconnector.api.core.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.api.mc_loader.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.core.plugin.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.core.plugin.lib.services.PacketBuilderService;
-import group.aelysium.rustyconnector.core.plugin.lib.services.ServerInfoService;
+import group.aelysium.rustyconnector.core.plugin.lib.packet_builder.PacketBuilderService;
+import group.aelysium.rustyconnector.core.plugin.lib.server_info.ServerInfoService;
 
 import java.util.Map;
 
-public class CoreServiceHandler extends ServiceHandler {
+public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHandler {
     public CoreServiceHandler(Map<Class<? extends Service>, Service> services) {
         super(services);
     }

@@ -1,6 +1,8 @@
-package group.aelysium.rustyconnector.core.plugin.lib.services;
+package group.aelysium.rustyconnector.core.plugin.lib.packet_builder;
 
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
+import group.aelysium.rustyconnector.api.mc_loader.packet_builder.IPacketBuilderService;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
@@ -11,16 +13,17 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.plugin.lib.server_info.ServerInfoService;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.UUID;
 
-public class PacketBuilderService extends Service {
-    public void pingProxy(ServerPingPacket.ConnectionIntent intent) {
+public class PacketBuilderService implements IPacketBuilderService {
+    public void pingProxy(ConnectionIntent intent) {
         MCLoaderTinder api = Plugin.getAPI();
 
         try {
-            ServerInfoService serverInfoService = api.services().serverInfo();
+            ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
             ServerPingPacket message = (ServerPingPacket) new GenericPacket.Builder()
                     .setType(PacketType.PING)
                     .setOrigin(PacketOrigin.SERVER)
@@ -46,7 +49,7 @@ public class PacketBuilderService extends Service {
      */
     public void sendToOtherFamily(UUID player, String familyName) {
         MCLoaderTinder api = Plugin.getAPI();
-        ServerInfoService serverInfoService = api.services().serverInfo();
+        ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
 
         SendPlayerPacket message = (SendPlayerPacket) new GenericPacket.Builder()
                 .setType(PacketType.SEND_PLAYER)
@@ -64,7 +67,7 @@ public class PacketBuilderService extends Service {
      */
     public void unlockServer() {
         MCLoaderTinder api = Plugin.getAPI();
-        ServerInfoService serverInfoService = api.services().serverInfo();
+        ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
 
         UnlockServerPacket message = (UnlockServerPacket) new GenericPacket.Builder()
                 .setType(PacketType.UNLOCK_SERVER)
@@ -81,7 +84,7 @@ public class PacketBuilderService extends Service {
      */
     public void lockServer() {
         MCLoaderTinder api = Plugin.getAPI();
-        ServerInfoService serverInfoService = api.services().serverInfo();
+        ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
 
         LockServerPacket message = (LockServerPacket) new GenericPacket.Builder()
                 .setType(PacketType.LOCK_SERVER)

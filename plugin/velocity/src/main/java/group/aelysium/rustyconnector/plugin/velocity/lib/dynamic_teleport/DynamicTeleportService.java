@@ -1,13 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport;
 
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.api.core.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.TPAServiceSettings;
 import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPASettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -32,7 +32,7 @@ public class DynamicTeleportService extends ServiceableService<DynamicTeleportSe
             DynamicTeleportService.Builder builder = new DynamicTeleportService.Builder();
 
             if(config.isTpa_enabled()) {
-                TPASettings tpaSettings = new TPASettings(
+                TPAServiceSettings tpaSettings = new TPAServiceSettings(
                         config.isTpa_friendsOnly(),
                         config.isTpa_ignorePlayerCap(),
                         config.getTpa_expiration(),

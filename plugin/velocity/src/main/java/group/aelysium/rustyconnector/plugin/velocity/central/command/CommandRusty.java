@@ -20,7 +20,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Flame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
@@ -179,12 +179,12 @@ class Family {
                         String familyName = context.getArgument("familyName", String.class);
                         BaseFamily family = flame.services().family().find(familyName);
                         if(family == null) throw new NullPointerException();
-                        if(!(family instanceof PlayerFocusedServerFamily)) {
+                        if(!(family instanceof PlayerFocusedFamily)) {
                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on scalar and static families!");
                             return Command.SINGLE_SUCCESS;
                         }
 
-                        ((PlayerFocusedServerFamily) family).loadBalancer().resetIndex();
+                        ((PlayerFocusedFamily) family).loadBalancer().resetIndex();
 
                         if(family instanceof ScalarFamily)
                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
@@ -206,12 +206,12 @@ class Family {
                         String familyName = context.getArgument("familyName", String.class);
                         BaseFamily family = flame.services().family().find(familyName);
                         if(family == null) throw new NullPointerException();
-                        if(!(family instanceof PlayerFocusedServerFamily)) {
+                        if(!(family instanceof PlayerFocusedFamily)) {
                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only use sort on scalar and static families!");
                             return Command.SINGLE_SUCCESS;
                         }
 
-                        ((PlayerFocusedServerFamily) family).loadBalancer().completeSort();
+                        ((PlayerFocusedFamily) family).loadBalancer().completeSort();
 
                         if(family instanceof ScalarFamily)
                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
@@ -281,12 +281,12 @@ class Send {
                                     logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                                     return Command.SINGLE_SUCCESS;
                                 }
-                                if(!(family instanceof PlayerFocusedServerFamily)) {
+                                if(!(family instanceof PlayerFocusedFamily)) {
                                     VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
                                     return Command.SINGLE_SUCCESS;
                                 }
 
-                                ((PlayerFocusedServerFamily) family).connect(player);
+                                ((PlayerFocusedFamily) family).connect(player);
                             } catch (Exception e) {
                                 logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                             }

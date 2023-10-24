@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.fabric.central;
 
-import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderFlame;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.lib.Callable;
@@ -12,8 +12,8 @@ import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConn
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.core.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
@@ -26,8 +26,8 @@ import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.DynamicTel
 import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.core.plugin.lib.magic_link.handlers.MagicLink_PingResponseHandler;
-import group.aelysium.rustyconnector.core.plugin.lib.services.PacketBuilderService;
-import group.aelysium.rustyconnector.core.plugin.lib.services.ServerInfoService;
+import group.aelysium.rustyconnector.core.plugin.lib.packet_builder.PacketBuilderService;
+import group.aelysium.rustyconnector.core.plugin.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.fabric.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.fabric.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.fabric.events.OnPlayerLeave;

@@ -13,7 +13,7 @@ import io.kubernetes.client.util.Config;
 import java.io.IOException;
 import java.util.List;
 
-public class K8Service extends Service {
+public class K8Service implements Service {
     private ApiClient client;
     private final CoreV1Api api;
     private K8AutoScalerService autoScalerService;
@@ -29,7 +29,7 @@ public class K8Service extends Service {
         return this.autoScalerService;
     }
 
-    public void createServer(BaseFamily<?> family, String containerName, int containerPort) throws ApiException {
+    public void createServer(BaseFamily family, String containerName, int containerPort) throws ApiException {
         String podName = familyNameToPodPrefix(family.name());
         String namespace = familyNameToNamespace(family.name());
 

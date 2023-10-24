@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
-import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.models.CoordinateRequest;
+import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.CoordinateRequest;
 
 import java.util.UUID;
 
@@ -30,7 +30,7 @@ public class CoordinateRequestHandler extends PacketHandler {
                 coordinateRequest.teleport();
             } catch (Exception e) {
                 e.printStackTrace();
-                api.sendMessage(coordinateRequest.client(), PluginLang.TPA_FAILED_TELEPORT.build(Plugin.getAPI().getPlayerName(coordinateRequest.target())));
+                api.sendMessage(coordinateRequest.client().orElseThrow(), PluginLang.TPA_FAILED_TELEPORT.build(Plugin.getAPI().getPlayerName(coordinateRequest.target())));
             }
         } catch (NullPointerException e) {
             e.printStackTrace();

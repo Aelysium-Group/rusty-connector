@@ -14,7 +14,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.Hu
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
@@ -50,7 +50,7 @@ public class CommandHub {
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    if (!(family instanceof PlayerFocusedServerFamily)) {
+                    if (!(family instanceof PlayerFocusedFamily)) {
                         // Attempt to connect to root family if we're not in a PlayerFocusedServerFamily
                         try {
                             rootFamily.connect(player);
@@ -64,7 +64,7 @@ public class CommandHub {
                     }
 
                     try {
-                        PlayerFocusedServerFamily parent = (PlayerFocusedServerFamily) ((PlayerFocusedServerFamily) family).parent().get();
+                        PlayerFocusedFamily parent = (PlayerFocusedFamily) ((PlayerFocusedFamily) family).parent().get();
 
                         if(parent != null) {
                             parent.connect(player);

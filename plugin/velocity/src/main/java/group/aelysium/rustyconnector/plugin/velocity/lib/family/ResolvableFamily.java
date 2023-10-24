@@ -37,7 +37,7 @@ public class ResolvableFamily implements IResolvableFamily {
         return this.name;
     }
 
-    public static ResolvableFamily from(BaseFamily<?> family) {
+    public static ResolvableFamily from(BaseFamily family) {
         return new ResolvableFamily(family.name());
     }
 }

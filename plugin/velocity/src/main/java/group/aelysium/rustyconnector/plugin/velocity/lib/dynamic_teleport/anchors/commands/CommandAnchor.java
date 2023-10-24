@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
@@ -44,7 +44,7 @@ public class CommandAnchor {
                     }
 
                     try {
-                        PlayerFocusedServerFamily family = ((PlayerFocusedServerFamily) anchorService.family(anchor).orElseThrow());
+                        PlayerFocusedFamily family = ((PlayerFocusedFamily) anchorService.familyOf(anchor).orElseThrow());
 
                         // If the attempt to check player's family fails, just ignore it and try to connect.
                         // If there's actually an issue it'll be caught further down.

@@ -1,13 +1,14 @@
 package group.aelysium.rustyconnector.api.core.serviceable;
 
 
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.IServiceHandler;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class ServiceHandler implements group.aelysium.rustyconnector.api.core.serviceable.interfaces.ServiceHandler {
+public abstract class ServiceHandler implements IServiceHandler {
     protected final Map<Class<? extends Service>, Service> map;
 
     public ServiceHandler(Map<Class<? extends Service>, Service> services) {

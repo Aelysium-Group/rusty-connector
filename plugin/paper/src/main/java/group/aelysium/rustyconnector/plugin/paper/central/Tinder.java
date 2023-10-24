@@ -2,9 +2,10 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
+import group.aelysium.rustyconnector.api.mc_loader.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderFlame;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
-import group.aelysium.rustyconnector.api.velocity.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.api.core.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
@@ -47,7 +48,7 @@ public class Tinder extends MCLoaderTinder {
      * Ignites a {@link MCLoaderFlame} which effectively starts the RustyConnector kernel.
      */
     public void ignite() throws RuntimeException {
-        this.flame = group.aelysium.rustyconnector.plugin.paper.central.Flame.fabricateNew(this.plugin, this.lang);
+        this.flame = Flame.fabricateNew(this.plugin, this.lang);
     }
 
     /**
@@ -137,7 +138,7 @@ public class Tinder extends MCLoaderTinder {
      * Returns the currently active RustyConnector kernel.
      * @return A {@link MCLoaderFlame}.
      */
-    public MCLoaderFlame flame() {
+    public MCLoaderFlame<CoreServiceHandler> flame() {
         return this.flame;
     }
 

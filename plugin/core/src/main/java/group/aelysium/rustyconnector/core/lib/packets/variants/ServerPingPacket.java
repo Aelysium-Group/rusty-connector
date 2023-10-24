@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.core.lib.packets.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
@@ -129,10 +130,5 @@ public class ServerPingPacket extends GenericPacket {
 
             return list;
         }
-    }
-
-    public enum ConnectionIntent {
-        CONNECT,
-        DISCONNECT
     }
 }

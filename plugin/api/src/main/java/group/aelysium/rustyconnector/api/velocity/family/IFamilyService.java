@@ -2,11 +2,12 @@ package group.aelysium.rustyconnector.api.velocity.family;
 
 import group.aelysium.rustyconnector.api.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.api.velocity.server.IPlayerServer;
 
-public interface IFamilyService extends Service {
+public interface IFamilyService<TPlayerServer extends IPlayerServer, TRootFamily extends IRootFamily<TPlayerServer>> extends Service {
     boolean shouldCatchDisconnectingPlayers();
 
-    void setRootFamily(IRootFamily family);
+    void setRootFamily(TRootFamily family);
 
     /**
      * Get the root family of this FamilyService.
@@ -14,7 +15,7 @@ public interface IFamilyService extends Service {
      * this will return `null`.
      * @return A {@link IRootFamily} or `null`
      */
-    IRootFamily rootFamily();
+    TRootFamily rootFamily();
 
     /**
      * Get the number of families in this {@link IFamilyService}.

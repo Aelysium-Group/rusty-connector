@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.api.mc_loader.central;
 
-import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
-import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
+import group.aelysium.rustyconnector.api.core.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import net.kyori.adventure.text.Component;
 
 import java.io.InputStream;
@@ -22,11 +21,11 @@ public abstract class MCLoaderTinder {
 
     abstract public void ignite();
 
-    abstract public MCLoaderFlame<CoreServiceHandler> flame();
+    //abstract public MCLoaderFlame<ICoreServiceHandler> flame();
 
     abstract public PluginLogger logger();
 
-    abstract public CoreServiceHandler services();
+    abstract public ICoreServiceHandler services();
 
     abstract public String dataFolder();
 
@@ -45,4 +44,5 @@ public abstract class MCLoaderTinder {
     abstract public void teleportPlayer(UUID uuid, UUID target);
 
     abstract public void sendMessage(UUID uuid, Component component);
+    abstract public MCLoaderFlame<? extends ICoreServiceHandler> flame();
 }

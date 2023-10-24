@@ -1,13 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.ITPAHandler;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 
 import java.util.List;
 import java.util.Vector;
 
-public class TPAHandler {
+public class TPAHandler implements ITPAHandler<TPARequest> {
     private final Vector<TPARequest> requests = new Vector<>();
 
     public TPARequest findRequest(Player sender, Player target) {

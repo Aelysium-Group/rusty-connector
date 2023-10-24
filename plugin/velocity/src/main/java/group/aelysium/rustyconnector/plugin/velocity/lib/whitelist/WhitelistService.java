@@ -1,14 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.core.lib.model.NodeManager;
+import group.aelysium.rustyconnector.api.velocity.whitelist.IWhitelistService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class WhitelistService extends Service implements NodeManager<Whitelist> {
+public class WhitelistService implements IWhitelistService<Whitelist> {
     private final Map<String, Whitelist> registeredWhitelists = new HashMap<>();
     private Whitelist proxyWhitelist;
 

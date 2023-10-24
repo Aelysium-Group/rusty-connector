@@ -1,6 +1,6 @@
-package group.aelysium.rustyconnector.api.velocity.lang;
+package group.aelysium.rustyconnector.api.core.lang;
 
-import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 

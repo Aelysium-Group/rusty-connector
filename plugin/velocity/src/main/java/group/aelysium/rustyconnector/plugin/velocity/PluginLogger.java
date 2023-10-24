@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
+import group.aelysium.rustyconnector.api.velocity.central.VelocityPluginLogger;
 import group.aelysium.rustyconnector.api.velocity.log_gate.GateKey;
 import group.aelysium.rustyconnector.api.velocity.log_gate.LoggerGate;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -7,7 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.config.LoggerConfig
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
-public class PluginLogger implements group.aelysium.rustyconnector.api.velocity.central.PluginLogger {
+public class PluginLogger implements VelocityPluginLogger {
     private final LoggerGate gate = new LoggerGate();
     private final Logger logger;
 

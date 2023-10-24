@@ -11,8 +11,8 @@ import java.util.*;
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link VelocityTinder}.
  */
-public abstract class VelocityFlame extends ServiceableService<ICoreServiceHandler> {
-    public VelocityFlame(ICoreServiceHandler services) {
+public abstract class VelocityFlame<TCoreServiceHandler extends ICoreServiceHandler> extends ServiceableService<TCoreServiceHandler> {
+    public VelocityFlame(TCoreServiceHandler services) {
         super(services);
     }
 

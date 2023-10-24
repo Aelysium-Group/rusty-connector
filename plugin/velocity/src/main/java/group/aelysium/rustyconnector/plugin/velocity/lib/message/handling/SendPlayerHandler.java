@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import net.kyori.adventure.text.Component;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -23,7 +23,7 @@ public class SendPlayerHandler extends PacketHandler {
 
         try {
             FamilyService familyService = api.services().family();
-            PlayerFocusedServerFamily family = (PlayerFocusedServerFamily) familyService.find(packet.targetFamilyName());
+            PlayerFocusedFamily family = (PlayerFocusedFamily) familyService.find(packet.targetFamilyName());
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+packet.targetFamilyName()+"` doesn't exist!");
 
             family.connect(player);

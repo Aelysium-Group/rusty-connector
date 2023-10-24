@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
-public class PluginLogger implements group.aelysium.rustyconnector.api.velocity.central.PluginLogger {
+public class PluginLogger implements group.aelysium.rustyconnector.api.core.logger.PluginLogger {
     private final LoggerGate gate = new LoggerGate();
     private final Logger logger;
 

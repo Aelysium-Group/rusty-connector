@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.ITPARequest;
 import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
@@ -11,7 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.util.Date;
 
-public class TPARequest {
+public class TPARequest implements ITPARequest {
     private final Player sender;
     private final Player target;
     private final Date expiration;
@@ -50,7 +51,7 @@ public class TPARequest {
         this.updateStatus(TPARequestStatus.REQUESTED);
     }
 
-    public void ignore() {
+    public void deny() {
         this.sender().sendMessage(VelocityLang.TPA_REQUEST_DENIED_SENDER.build(this.target().getUsername()));
         this.target().sendMessage(VelocityLang.TPA_REQUEST_DENIED_TARGET.build(this.sender().getUsername()));
 
@@ -70,7 +71,7 @@ public class TPARequest {
 
             ServerInfo serverInfo = this.target().getCurrentServer().orElseThrow().getServerInfo();
             PlayerServer server = api.services().server().search(serverInfo);
-            BaseFamily<?> family = server.family();
+            BaseFamily family = server.family();
             if(family == null) throw new NullPointerException();
 
             tpaService.tpaSendPlayer(this.sender(), this.target(), server);

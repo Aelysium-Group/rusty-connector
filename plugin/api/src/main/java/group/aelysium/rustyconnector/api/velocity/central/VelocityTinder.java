@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.api.velocity.central;
 
-import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.api.core.lang.config.LangService;
 
 import java.io.InputStream;
 

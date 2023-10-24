@@ -1,6 +1,6 @@
-package group.aelysium.rustyconnector.api.velocity.lang.config;
+package group.aelysium.rustyconnector.api.core.lang.config;
 
-import group.aelysium.rustyconnector.api.velocity.lang.resolver.LanguageResolver;
+import group.aelysium.rustyconnector.api.core.lang.resolver.LanguageResolver;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 
 import java.io.*;

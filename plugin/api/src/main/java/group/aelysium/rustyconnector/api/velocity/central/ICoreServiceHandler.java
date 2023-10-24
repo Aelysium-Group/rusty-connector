@@ -1,7 +1,10 @@
 package group.aelysium.rustyconnector.api.velocity.central;
 
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.IServiceableService;
+import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.IDynamicTeleportServiceHandler;
 import group.aelysium.rustyconnector.api.velocity.family.IFamilyService;
 import group.aelysium.rustyconnector.api.velocity.family.bases.IBaseFamily;
+import group.aelysium.rustyconnector.api.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.api.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.api.velocity.friends.IFriendsService;
 import group.aelysium.rustyconnector.api.velocity.parties.IParty;
@@ -11,18 +14,20 @@ import group.aelysium.rustyconnector.api.velocity.players.IPlayerService;
 import group.aelysium.rustyconnector.api.velocity.players.IResolvablePlayer;
 import group.aelysium.rustyconnector.api.velocity.server.IPlayerServer;
 import group.aelysium.rustyconnector.api.velocity.server.IServerService;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.ServiceHandler;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.IServiceHandler;
 import group.aelysium.rustyconnector.api.velocity.storage.IMySQLStorageService;
+import group.aelysium.rustyconnector.api.velocity.whitelist.IWhitelist;
 import group.aelysium.rustyconnector.api.velocity.whitelist.IWhitelistService;
 
 import java.util.Optional;
 
-public interface ICoreServiceHandler extends ServiceHandler {
+public interface ICoreServiceHandler extends IServiceHandler {
     /**
      * Gets the {@link IFamilyService family service} which allows access to server families and other family related logic.
      * @return {@link IFamilyService}
      */
-    IFamilyService family();
+    <TPlayerServer extends IPlayerServer, TRootFamily extends IRootFamily<TPlayerServer>>
+        IFamilyService<TPlayerServer, TRootFamily> family();
 
     /**
      * Gets the {@link IServerService server service} which allows access to server registration, unregistration, connection, and other server related logic.
@@ -47,7 +52,8 @@ public interface ICoreServiceHandler extends ServiceHandler {
      * Gets the {@link IWhitelistService whitelist service} which allows access to the proxy's configured whitelists.
      * @return {@link IWhitelistService}
      */
-    IWhitelistService whitelist();
+    <TWhitelist extends IWhitelist>
+        IWhitelistService<TWhitelist> whitelist();
 
     /**
      * Gets the {@link IPartyService party service}.
@@ -66,9 +72,9 @@ public interface ICoreServiceHandler extends ServiceHandler {
         Optional<? extends IFriendsService<TResolvablePlayer, TFriendRequest>> friends();
 
     /**
-     * Gets the {@link IDynamicTeleportService dynamic teleport service}.
-     * The dynamic teleport module may not always be enabled, hence this returns an {@link Optional<IDynamicTeleportService>}
-     * @return {@link Optional<IDynamicTeleportService>}
+     * Gets the {@link IServiceableService<IDynamicTeleportServiceHandler> dynamic teleport service}.
+     * The dynamic teleport module may not always be enabled, hence this returns an {@link Optional<IServiceableService<IDynamicTeleportServiceHandler>>}
+     * @return {@link Optional<IServiceableService>}
      */
-    Optional<IDynamicTeleportService> dynamicTeleport();
+    Optional<? extends IServiceableService<?>> dynamicTeleport();
 }

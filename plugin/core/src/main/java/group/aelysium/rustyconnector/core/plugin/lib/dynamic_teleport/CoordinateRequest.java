@@ -1,14 +1,16 @@
-package group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.models;
+package group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport;
 
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.api.mc_loader.dynamic_teleport.ICoordinateRequest;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 
+import java.util.Optional;
 import java.util.UUID;
 
-public class CoordinateRequest {
+public class CoordinateRequest implements ICoordinateRequest {
 
     private final String clientUsername;
-    private UUID client;
+    private Optional<UUID> client = Optional.empty();
     private final UUID target;
 
     public CoordinateRequest(String clientUsername, UUID target) {
@@ -21,7 +23,7 @@ public class CoordinateRequest {
         return clientUsername;
     }
 
-    public UUID client() {
+    public Optional<UUID> client() {
         return client;
     }
 
@@ -43,15 +45,15 @@ public class CoordinateRequest {
         if(client == null) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");
         if(!api.isOnline(client)) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");
 
-        this.client = client;
+        this.client = Optional.of(client);
     }
 
     public void teleport() throws RuntimeException {
         MCLoaderTinder api = Plugin.getAPI();
-        if(this.client == null) throw new NullPointerException("Attempted to resolve a tpa request while the client isn't online!");
-        if(!api.isOnline(this.client)) throw new NullPointerException("Attempted to resolve a tpa request while the client isn't online!");
+        if(this.client.isEmpty()) throw new NullPointerException("Attempted to resolve a tpa request while the client isn't online!");
+        if(!api.isOnline(this.client.get())) throw new NullPointerException("Attempted to resolve a tpa request while the client isn't online!");
         if(!api.isOnline(this.target)) throw new NullPointerException("Attempted to resolve a tpa request while the target isn't online!");
 
-        api.teleportPlayer(client, target);
+        api.teleportPlayer(client.get(), target);
     }
 }
