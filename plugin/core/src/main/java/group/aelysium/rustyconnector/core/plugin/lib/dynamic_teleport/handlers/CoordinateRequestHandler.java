@@ -20,7 +20,7 @@ public class CoordinateRequestHandler extends PacketHandler {
         if(target == null) return;
         if(!api.isOnline(target)) return;
 
-        CoordinateRequest coordinateRequest = api.services().dynamicTeleport().newRequest(packet.sourceUsername(), target);
+        CoordinateRequest coordinateRequest = (CoordinateRequest) api.services().dynamicTeleport().newRequest(packet.sourceUsername(), target);
 
         // Attempt to resolve the tpa right away! If the player isn't on the server, this should fail silently.
         try {
