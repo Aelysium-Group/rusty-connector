@@ -4,29 +4,29 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.api.velocity.friends.FriendsServiceSettings;
+import group.aelysium.rustyconnector.api.velocity.friends.IFriendsService;
 import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
-import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class FriendsService extends Service {
+public class FriendsService implements IFriendsService<ResolvablePlayer, FriendRequest> {
     private final Cache<Long, FriendRequest> friendRequests;
-    private final FriendsSettings settings;
+    private final FriendsServiceSettings settings;
     private final Snowflake snowflakeGenerator = new Snowflake();
     private final FriendsDataEnclave dataEnclave;
 
-    public FriendsService(FriendsSettings settings) throws Exception {
+    public FriendsService(FriendsServiceSettings settings) throws Exception {
         this.settings = settings;
 
         this.friendRequests = CacheBuilder.newBuilder()
@@ -80,7 +80,7 @@ public class FriendsService extends Service {
         bootOutput.add(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
     }
 
-    public FriendsSettings settings() {
+    public FriendsServiceSettings settings() {
         return this.settings;
     }
 
@@ -160,12 +160,4 @@ public class FriendsService extends Service {
         commandManager.unregister("unfriend");
         commandManager.unregister("fm");
     }
-
-    public record FriendsSettings(
-            MySQLStorage storage,
-            int maxFriends,
-            boolean sendNotifications,
-            boolean showFamilies,
-            boolean allowMessaging
-    ) {}
 }

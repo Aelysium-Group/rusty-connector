@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
-import group.aelysium.rustyconnector.api.velocity.lib.load_balancing.ILoadBalancer;
+import group.aelysium.rustyconnector.api.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.util.ArrayList;

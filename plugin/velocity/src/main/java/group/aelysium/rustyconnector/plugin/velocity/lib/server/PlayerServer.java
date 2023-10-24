@@ -6,9 +6,9 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.lib.server.IPlayerServer;
+import group.aelysium.rustyconnector.api.velocity.server.IPlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -25,7 +25,7 @@ public class PlayerServer implements IPlayerServer {
     private final UUID id = UUID.randomUUID();
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
-    private BaseServerFamily family;
+    private BaseFamily family;
     private int playerCount = 0;
     private int weight;
     private int softPlayerCap;
@@ -97,10 +97,10 @@ public class PlayerServer implements IPlayerServer {
     public void register(String familyName) throws Exception {
         Tinder api = Tinder.get();
 
-        BaseServerFamily family = api.services().familyService().find(familyName);
+        BaseFamily family = api.services().family().find(familyName);
         if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
 
-        this.registeredServer = api.services().serverService().registerServer(this, family);
+        this.registeredServer = api.services().server().registerServer(this, family);
 
         this.family = family;
     }
@@ -204,11 +204,11 @@ public class PlayerServer implements IPlayerServer {
      * @throws IllegalStateException If the server hasn't been registered yet.
      * @throws NullPointerException If the family associated with this server doesn't exist.
      */
-    public BaseServerFamily family() throws IllegalStateException, NullPointerException {
+    public BaseFamily family() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
         Tinder api = Tinder.get();
 
-        BaseServerFamily family = api.services().familyService().find(this.family.name());
+        BaseFamily family = api.services().family().find(this.family.name());
         if(family == null) throw new NullPointerException("There is no family with that name!");
 
         return family;
@@ -216,7 +216,7 @@ public class PlayerServer implements IPlayerServer {
 
     public boolean connect(Player player) throws ConnectException {
         try {
-            PartyService partyService = Tinder.get().services().partyService().orElseThrow();
+            PartyService partyService = Tinder.get().services().party().orElseThrow();
             Party party = partyService.find(player).orElseThrow();
 
             try {

@@ -15,7 +15,7 @@ public class LockServerHandler extends PacketHandler {
         Tinder api = Tinder.get();
 
         ServerInfo serverInfo = new ServerInfo(packet.serverName(), packet.address());
-        PlayerServer server = api.services().serverService().search(serverInfo);
+        PlayerServer server = api.services().server().search(serverInfo);
 
         if (server != null) {
             PlayerFocusedServerFamily family = (PlayerFocusedServerFamily) server.family();

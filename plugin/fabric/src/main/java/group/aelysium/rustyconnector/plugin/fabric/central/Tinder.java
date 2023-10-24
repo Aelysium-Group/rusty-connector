@@ -2,10 +2,11 @@ package group.aelysium.rustyconnector.plugin.fabric.central;
 
 import cloud.commandframework.fabric.FabricServerCommandManager;
 import com.mojang.authlib.GameProfile;
-import group.aelysium.rustyconnector.core.central.Flame;
-import group.aelysium.rustyconnector.api.velocity.lib.PluginLogger;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderFlame;
+import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.velocity.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.plugin.fabric.FabricRustyConnector;
 import net.fabricmc.loader.api.FabricLoader;
@@ -21,11 +22,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder {
+public class Tinder extends MCLoaderTinder {
 
     private final FabricServerCommandManager<CommandSource> commandManager;
     private final FabricRustyConnector plugin;
-    private Flame<CoreServiceHandler> flame;
+    private MCLoaderFlame<CoreServiceHandler> flame;
     private final PluginLogger pluginLogger;
     private final LangService lang;
 
@@ -39,14 +40,14 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder {
     }
 
     /**
-     * Ignites a {@link Flame} which effectively starts the RustyConnector kernel.
+     * Ignites a {@link MCLoaderFlame} which effectively starts the RustyConnector kernel.
      */
     public void ignite() throws RuntimeException {
         this.flame = group.aelysium.rustyconnector.plugin.fabric.central.Flame.fabricateNew(this.lang);
     }
 
     /**
-     * Restarts the entire RustyConnector kernel by exhausting the current {@link Flame} and igniting a new one.
+     * Restarts the entire RustyConnector kernel by exhausting the current {@link MCLoaderFlame} and igniting a new one.
      */
     public void rekindle() {
         this.flame.exhaust();
@@ -126,9 +127,9 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder {
 
     /**
      * Returns the currently active RustyConnector kernel.
-     * @return A {@link Flame}.
+     * @return A {@link MCLoaderFlame}.
      */
-    public Flame flame() {
+    public MCLoaderFlame flame() {
         return this.flame;
     }
 

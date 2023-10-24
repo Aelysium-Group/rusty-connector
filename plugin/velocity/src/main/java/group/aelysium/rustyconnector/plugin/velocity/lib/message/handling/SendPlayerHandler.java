@@ -4,8 +4,6 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -24,7 +22,7 @@ public class SendPlayerHandler extends PacketHandler {
         if(player == null) return;
 
         try {
-            FamilyService familyService = api.services().familyService();
+            FamilyService familyService = api.services().family();
             PlayerFocusedServerFamily family = (PlayerFocusedServerFamily) familyService.find(packet.targetFamilyName());
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+packet.targetFamilyName()+"` doesn't exist!");
 

@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.lib.family.static_family.IResidenceDataEnclave;
-import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.api.velocity.family.static_family.IResidenceDataEnclave;
+import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;

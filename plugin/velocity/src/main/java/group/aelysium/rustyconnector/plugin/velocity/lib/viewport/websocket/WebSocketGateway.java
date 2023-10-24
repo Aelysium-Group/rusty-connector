@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.websocket;
 
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.util.ArrayList;

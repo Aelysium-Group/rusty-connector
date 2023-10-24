@@ -29,7 +29,7 @@ public class OnPlayerKicked {
             try {
                 if (player.getCurrentServer().isEmpty()) throw new NoOutputException();
 
-                PlayerServer oldServer = api.services().serverService().search(player.getCurrentServer().orElseThrow().getServerInfo());
+                PlayerServer oldServer = api.services().server().search(player.getCurrentServer().orElseThrow().getServerInfo());
                 if (oldServer == null) throw new NoOutputException();
 
                 oldServer.playerLeft();
@@ -37,13 +37,13 @@ public class OnPlayerKicked {
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.family().name(), DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, oldServer.family().name(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
 
-                isFromRootFamily = oldServer.family() == api.services().familyService().rootFamily();
+                isFromRootFamily = oldServer.family() == api.services().family().rootFamily();
             } catch (Exception ignore) {}
 
             try {
-                if (!api.services().familyService().shouldCatchDisconnectingPlayers()) throw new NoOutputException();
+                if (!api.services().family().shouldCatchDisconnectingPlayers()) throw new NoOutputException();
 
-                RootFamily rootFamily = api.services().familyService().rootFamily();
+                RootFamily rootFamily = api.services().family().rootFamily();
                 if(rootFamily.registeredServers().isEmpty()) throw new RuntimeException("There are no available servers for you to connect to!");
                 if(isFromRootFamily) throw new NoOutputException();
 
@@ -58,9 +58,9 @@ public class OnPlayerKicked {
 
                 newServer.playerJoined();
 
-                WebhookEventManager.fire(WebhookAlertFlag.DISCONNECT_CATCH, api.services().familyService().rootFamily().name(), DiscordWebhookMessage.PROXY__DISCONNECT_CATCH.build(player, newServer));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, api.services().familyService().rootFamily().name(), DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, newServer));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, api.services().familyService().rootFamily().name(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
+                WebhookEventManager.fire(WebhookAlertFlag.DISCONNECT_CATCH, api.services().family().rootFamily().name(), DiscordWebhookMessage.PROXY__DISCONNECT_CATCH.build(player, newServer));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, api.services().family().rootFamily().name(), DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, newServer));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, api.services().family().rootFamily().name(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
 
                 return;
             }

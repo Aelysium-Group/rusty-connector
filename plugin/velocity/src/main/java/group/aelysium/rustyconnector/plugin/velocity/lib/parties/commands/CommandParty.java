@@ -188,7 +188,7 @@ public final class CommandParty {
                             if(player.getCurrentServer().orElse(null) == null)
                                 return closeMessage(player, VelocityLang.PARTY_CREATE_NO_SERVER);
 
-                            PlayerServer server = api.services().serverService().search(player.getCurrentServer().orElse(null).getServerInfo());
+                            PlayerServer server = api.services().server().search(player.getCurrentServer().orElse(null).getServerInfo());
                             Party party = partyService.create(player, server);
 
                             context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
@@ -259,7 +259,7 @@ public final class CommandParty {
 
                                     try {
                                         if(!partyService.settings().friendsOnly()) {
-                                            PlayerServer server = api.services().serverService().search(player.getCurrentServer().orElseThrow().getServerInfo());
+                                            PlayerServer server = api.services().server().search(player.getCurrentServer().orElseThrow().getServerInfo());
 
                                             server.registeredServer().getPlayersConnected().forEach(nearbyPlayer -> {
                                                 if(nearbyPlayer.equals(player)) return;
@@ -270,7 +270,7 @@ public final class CommandParty {
                                             return builder.buildFuture();
                                         }
 
-                                        FriendsService friendsService = api.services().friendsService().orElseThrow();
+                                        FriendsService friendsService = api.services().friends().orElseThrow();
                                         List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
@@ -305,7 +305,7 @@ public final class CommandParty {
                                         if(player.getCurrentServer().orElse(null) == null)
                                             return closeMessage(player, VelocityLang.PARTY_CREATE_NO_SERVER);
 
-                                        PlayerServer server = api.services().serverService().search(player.getCurrentServer().orElse(null).getServerInfo());
+                                        PlayerServer server = api.services().server().search(player.getCurrentServer().orElse(null).getServerInfo());
                                         Party newParty = partyService.create(player, server);
                                         player.sendMessage(VelocityLang.PARTY_CREATED);
 
@@ -317,7 +317,7 @@ public final class CommandParty {
                                             return closeMessage(player, VelocityLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
 
                                     String username = context.getArgument("username", String.class);
-                                    ResolvablePlayer targetPlayerResolvable = api.services().playerService().fetch(username).orElse(null);
+                                    ResolvablePlayer targetPlayerResolvable = api.services().player().fetch(username).orElse(null);
                                     if(targetPlayerResolvable == null || targetPlayerResolvable.resolve().isEmpty())
                                         return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
@@ -332,7 +332,7 @@ public final class CommandParty {
                                     } catch (Exception ignore) {}
                                     try {
                                         if (partyService.settings().friendsOnly())
-                                            if (!api.services().friendsService().orElseThrow().areFriends(
+                                            if (!api.services().friends().orElseThrow().areFriends(
                                                     ResolvablePlayer.from(player),
                                                     ResolvablePlayer.from(targetPlayer)
                                             ))

@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
-import group.aelysium.rustyconnector.api.velocity.lib.family.IResolvableFamily;
+import group.aelysium.rustyconnector.api.velocity.family.IResolvableFamily;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 
 import java.util.Optional;
 
@@ -18,8 +17,8 @@ public class ResolvableFamily implements IResolvableFamily {
         return name;
     }
 
-    public Optional<BaseServerFamily> resolve() {
-        BaseServerFamily potentialFamily = Tinder.get().services().familyService().find(this.name);
+    public Optional<BaseFamily> resolve() {
+        BaseFamily potentialFamily = Tinder.get().services().family().find(this.name);
         if(potentialFamily == null) return Optional.empty();
         return Optional.of(potentialFamily);
     }
@@ -38,7 +37,7 @@ public class ResolvableFamily implements IResolvableFamily {
         return this.name;
     }
 
-    public static ResolvableFamily from(BaseServerFamily<?> family) {
+    public static ResolvableFamily from(BaseFamily<?> family) {
         return new ResolvableFamily(family.name());
     }
 }

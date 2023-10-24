@@ -1,25 +1,20 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
+import group.aelysium.rustyconnector.api.velocity.friends.IFriendsDataEnclave;
+import group.aelysium.rustyconnector.api.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
 
-import java.sql.SQLException;
 import java.util.*;
 
-public class FriendsDataEnclave {
+public class FriendsDataEnclave implements IFriendsDataEnclave<ResolvablePlayer, FriendMapping> {
     private final MySQLStorage storage;
 
-    public FriendsDataEnclave(MySQLStorage storage) {
-        this.storage = storage;
+    public FriendsDataEnclave(IMySQLStorageService storage) {
+        this.storage = (MySQLStorage) storage;
     }
 
-    /**
-     * Find all friends of a player.
-     * @param player The player to find friends of.
-     * @return A list of friends.
-     * @throws SQLException If there was an issue.
-     */
     public Optional<List<FriendMapping>> findFriends(ResolvablePlayer player) {
         try {
             StorageRoot root = this.storage.root();
@@ -36,23 +31,11 @@ public class FriendsDataEnclave {
         return Optional.empty();
     }
 
-    /**
-     * Check if two players are friends.
-     * @param player1 The first player.
-     * @param player2 The second player.
-     * @return `true` If the two players are friends.
-     */
     public boolean areFriends(ResolvablePlayer player1, ResolvablePlayer player2) throws RuntimeException {
         StorageRoot root = this.storage.root();
         return root.friends().contains(new FriendMapping(player1, player2));
     }
 
-    /**
-     * Get number of friends of a player.
-     * @param player The player to get the friend count of.
-     * @return The number of friends a player has.
-     * @throws SQLException If there was an issue.
-     */
     public Optional<Long> getFriendCount(ResolvablePlayer player) {
         try {
             StorageRoot root = this.storage.root();

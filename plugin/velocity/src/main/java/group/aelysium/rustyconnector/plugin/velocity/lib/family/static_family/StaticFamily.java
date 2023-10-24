@@ -1,13 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.lib.family.UnavailableProtocol;
-import group.aelysium.rustyconnector.api.velocity.lib.family.static_family.IStaticFamily;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
-import group.aelysium.rustyconnector.api.velocity.lib.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
-import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.velocity.family.UnavailableProtocol;
+import group.aelysium.rustyconnector.api.velocity.family.static_family.IStaticFamily;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.velocity.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config.StaticFamilyConfig;
@@ -27,7 +27,7 @@ import java.rmi.ConnectException;
 import java.util.List;
 import java.util.Optional;
 
-import static group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
 
 public class StaticFamily extends PlayerFocusedServerFamily implements IStaticFamily<PlayerServer> {
     protected LiquidTimestamp homeServerExpiration;
@@ -80,7 +80,7 @@ public class StaticFamily extends PlayerFocusedServerFamily implements IStaticFa
         if (staticFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(inject(bootOutput, lang), staticFamilyConfig.getWhitelist_name());
 
-            api.services().whitelistService().add(whitelist);
+            api.services().whitelist().add(whitelist);
         }
 
         StaticFamily family = null;

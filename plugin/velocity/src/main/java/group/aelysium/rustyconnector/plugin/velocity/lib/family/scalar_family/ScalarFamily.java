@@ -2,11 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.lib.family.scalar_family.IScalarFamily;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
-import group.aelysium.rustyconnector.api.velocity.lib.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.velocity.family.scalar_family.IScalarFamily;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.velocity.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
@@ -24,7 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.ConnectException;
 import java.util.List;
 
-import static group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
 
 public class ScalarFamily extends PlayerFocusedServerFamily implements IScalarFamily<PlayerServer> {
     protected ScalarFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -63,7 +63,7 @@ public class ScalarFamily extends PlayerFocusedServerFamily implements IScalarFa
         if(scalarFamilyConfig.isWhitelist_enabled()) {
             whitelist = Whitelist.init(dependencies, scalarFamilyConfig.getWhitelist_name());
 
-            api.services().whitelistService().add(whitelist);
+            api.services().whitelist().add(whitelist);
         }
 
         switch (Enum.valueOf(AlgorithmType.class, scalarFamilyConfig.getLoadBalancing_algorithm())) {

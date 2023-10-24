@@ -79,7 +79,7 @@ public final class CommandFriends {
                                 }
 
                                 String username = context.getArgument("username", String.class);
-                                ResolvablePlayer targetPlayer = api.services().playerService().fetch(username).orElseThrow();
+                                ResolvablePlayer targetPlayer = api.services().player().fetch(username).orElseThrow();
 
                                 if(friendsService.areFriends(ResolvablePlayer.from(player), targetPlayer))
                                     return closeMessage(player, VelocityLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
@@ -157,7 +157,7 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            ResolvablePlayer senderPlayer = api.services().playerService().fetch(username).orElseThrow();
+                                            ResolvablePlayer senderPlayer = api.services().player().fetch(username).orElseThrow();
 
                                             if(senderPlayer == null)
                                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
@@ -194,7 +194,7 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            ResolvablePlayer senderPlayer = api.services().playerService().fetch(username).orElseThrow();
+                                            ResolvablePlayer senderPlayer = api.services().player().fetch(username).orElseThrow();
 
                                             if (senderPlayer == null)
                                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));

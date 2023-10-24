@@ -36,7 +36,7 @@ public class OnPlayerDisconnect {
             // Handle servers when player leaves
             try {
                 if(player.getCurrentServer().isPresent()) {
-                    PlayerServer server = api.services().serverService().search(player.getCurrentServer().get().getServerInfo());
+                    PlayerServer server = api.services().server().search(player.getCurrentServer().get().getServerInfo());
                     server.playerLeft();
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.family().name(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
@@ -48,7 +48,7 @@ public class OnPlayerDisconnect {
 
             // Handle party when player leaves
             try {
-                PartyService partyService = api.services().partyService().orElseThrow();
+                PartyService partyService = api.services().party().orElseThrow();
                 Party party = partyService.find(player).orElseThrow();
                 try {
                     boolean wasPartyLeader = party.leader().equals(player);
@@ -63,7 +63,7 @@ public class OnPlayerDisconnect {
 
             // Handle sending out friend messages when player leaves
             try {
-                FriendsService friendsService = api.services().friendsService().orElseThrow();
+                FriendsService friendsService = api.services().friends().orElseThrow();
                 if(!friendsService.settings().allowMessaging()) throw new NoOutputException();
 
                 List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();

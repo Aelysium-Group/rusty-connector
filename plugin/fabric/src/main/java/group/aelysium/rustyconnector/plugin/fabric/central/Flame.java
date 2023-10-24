@@ -1,23 +1,24 @@
 package group.aelysium.rustyconnector.plugin.fabric.central;
 
-import group.aelysium.rustyconnector.api.velocity.lib.PluginLogger;
-import group.aelysium.rustyconnector.core.central.Tinder;
+import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderFlame;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.connectors.Connector;
 import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
 import group.aelysium.rustyconnector.core.lib.connectors.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
-import group.aelysium.rustyconnector.api.velocity.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.api.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.central.config.DefaultConfig;
@@ -46,9 +47,9 @@ import java.util.Map;
 /**
  * The core module of RustyConnector.
  * All aspects of the plugin should be accessible from here.
- * If not, check {@link Tinder}.
+ * If not, check {@link MCLoaderTinder}.
  */
-public class Flame extends group.aelysium.rustyconnector.core.central.Flame<CoreServiceHandler> {
+public class Flame extends MCLoaderFlame<CoreServiceHandler> {
     private final int configVersion;
     private final String version;
 
@@ -76,7 +77,7 @@ public class Flame extends group.aelysium.rustyconnector.core.central.Flame<Core
      *
      * @return A {@link Flame}.
      */
-    public static group.aelysium.rustyconnector.core.central.Flame get() {
+    public static MCLoaderFlame get() {
         return Plugin.getAPI().flame();
     }
 
@@ -93,7 +94,7 @@ public class Flame extends group.aelysium.rustyconnector.core.central.Flame<Core
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static group.aelysium.rustyconnector.core.central.Flame<CoreServiceHandler> fabricateNew(LangService langService) throws RuntimeException {
+    public static MCLoaderFlame<CoreServiceHandler> fabricateNew(LangService langService) throws RuntimeException {
         Initialize initialize = new Initialize();
 
         try {
@@ -134,7 +135,7 @@ public class Flame extends group.aelysium.rustyconnector.core.central.Flame<Core
  * This class will mutate the provided services and requestedConnectors lists that are provided to it.
  */
 class Initialize {
-    private final Tinder api = Plugin.getAPI();
+    private final MCLoaderTinder api = Plugin.getAPI();
     private final PluginLogger logger = api.logger();
     private final Map<Class<? extends Service>, Service> services = new HashMap<>();
     private final List<String> requestedConnectors = new ArrayList<>();
@@ -156,7 +157,7 @@ class Initialize {
 
     public String version() {
         try {
-            InputStream stream = Tinder.resourceAsStream("plugin.yml");
+            InputStream stream = MCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()
@@ -175,7 +176,7 @@ class Initialize {
 
     public int configVersion() {
         try {
-            InputStream stream = Tinder.resourceAsStream("plugin.yml");
+            InputStream stream = MCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()

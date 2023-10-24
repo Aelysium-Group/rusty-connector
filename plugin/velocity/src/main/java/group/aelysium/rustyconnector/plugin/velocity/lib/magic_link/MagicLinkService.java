@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link;
 
-import group.aelysium.rustyconnector.core.lib.model.ClockService;
+import group.aelysium.rustyconnector.api.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 

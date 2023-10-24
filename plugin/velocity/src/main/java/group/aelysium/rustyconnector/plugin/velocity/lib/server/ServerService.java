@@ -3,12 +3,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.lib.log_gate.GateKey;
-import group.aelysium.rustyconnector.api.velocity.lib.server.IServerService;
-import group.aelysium.rustyconnector.api.velocity.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.api.velocity.log_gate.GateKey;
+import group.aelysium.rustyconnector.api.velocity.server.IServerService;
+import group.aelysium.rustyconnector.api.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -19,7 +19,7 @@ import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.util.Vector;
 
-public class ServerService implements IServerService {
+public class ServerService implements IServerService<PlayerServer, BaseFamily> {
     private final Vector<WeakReference<PlayerServer>> servers =  new Vector<>();
 
     private final int serverTimeout;
@@ -44,7 +44,7 @@ public class ServerService implements IServerService {
      * @return A server or `null`
      */
     public PlayerServer search(ServerInfo serverInfo) {
-        for(BaseServerFamily family : Tinder.get().services().familyService().dump()) {
+        for(BaseFamily family : Tinder.get().services().family().dump()) {
             PlayerServer server = family.findServer(serverInfo);
             if(server == null) continue;
 
@@ -58,7 +58,7 @@ public class ServerService implements IServerService {
     }
 
     public boolean contains(ServerInfo serverInfo) {
-        for(BaseServerFamily family : Tinder.get().services().familyService().dump()) {
+        for(BaseFamily family : Tinder.get().services().family().dump()) {
             if(family.containsServer(serverInfo)) return true;
         }
         return false;
@@ -71,7 +71,7 @@ public class ServerService implements IServerService {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        for (BaseServerFamily family : api.services().familyService().dump()) {
+        for (BaseFamily family : api.services().family().dump()) {
             logger.log("---| Starting on: " + family.name());
             // Register 1000 servers into each family
             for (int i = 0; i < 1000; i++) {
@@ -100,7 +100,7 @@ public class ServerService implements IServerService {
      * @param family The family to register the server into.
      * @return A RegisteredServer node.
      */
-    public RegisteredServer registerServer(PlayerServer server, BaseServerFamily family) throws Exception {
+    public RegisteredServer registerServer(PlayerServer server, BaseFamily family) throws Exception {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
@@ -146,7 +146,7 @@ public class ServerService implements IServerService {
             if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
                 VelocityLang.UNREGISTRATION_REQUEST.send(logger, serverInfo, familyName);
 
-            BaseServerFamily family = server.family();
+            BaseFamily family = server.family();
 
             api.unregisterServer(server.serverInfo());
             if(removeFromFamily)
@@ -241,7 +241,7 @@ public class ServerService implements IServerService {
         }
 
         public PlayerServer build() {
-            this.initialTimeout = Tinder.get().services().serverService().serverTimeout();
+            this.initialTimeout = Tinder.get().services().server().serverTimeout();
 
             return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
         }

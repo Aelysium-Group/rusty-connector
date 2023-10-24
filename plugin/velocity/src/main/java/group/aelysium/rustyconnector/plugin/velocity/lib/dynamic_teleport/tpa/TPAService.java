@@ -7,12 +7,12 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.core.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
@@ -23,7 +23,7 @@ import java.util.*;
 
 public class TPAService extends ServiceableService<TPAServiceHandler> {
     private final TPASettings settings;
-    private final Map<BaseServerFamily<?>, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<BaseFamily<?>, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
 
     public TPAService(TPASettings settings) {
         super(new TPAServiceHandler());
@@ -55,7 +55,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         return this.settings;
     }
 
-    public TPAHandler tpaHandler(BaseServerFamily<?> family) {
+    public TPAHandler tpaHandler(BaseFamily<?> family) {
         TPAHandler tpaHandler = this.tpaHandlers.get(family);
         if(tpaHandler == null) {
             TPAHandler newTPAHandler = new TPAHandler();
@@ -92,7 +92,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         backboneMessenger.publish(message);
 
         try {
-            PlayerServer senderServer = api.services().serverService().search(source.getCurrentServer().orElseThrow().getServerInfo());
+            PlayerServer senderServer = api.services().server().search(source.getCurrentServer().orElseThrow().getServerInfo());
 
             if (senderServer.equals(targetServer)) return;
         } catch (Exception ignore) {}

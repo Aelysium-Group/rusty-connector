@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * These families don't have load balancers, whitelists
  */
-public abstract class SystemFocusedServerFamily<S extends PlayerServer> extends BaseServerFamily<S> {
+public abstract class SystemFocusedServerFamily<S extends PlayerServer> extends BaseFamily<S> {
     protected SystemFocusedServerFamily(String name) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name);
     }

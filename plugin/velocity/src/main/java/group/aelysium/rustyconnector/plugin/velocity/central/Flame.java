@@ -4,23 +4,23 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
-import group.aelysium.rustyconnector.api.velocity.lib.central.VelocityFlame;
-import group.aelysium.rustyconnector.api.velocity.lib.Version;
+import group.aelysium.rustyconnector.api.velocity.central.VelocityFlame;
+import group.aelysium.rustyconnector.api.velocity.util.Version;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.MemberKeyConfig;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangFileMappings;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
-import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.command.CommandRusty;
@@ -51,6 +51,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.LockSe
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.SendPlayerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.UnlockServerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.api.velocity.parties.PartyServiceSettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.config.PartyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
@@ -69,7 +70,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
 
 /**
  * The core RustyConnector kernel.
@@ -501,7 +502,7 @@ class Initialize {
                 return;
             }
 
-            PartyService.PartySettings settings = new PartyService.PartySettings(
+            PartyServiceSettings settings = new PartyServiceSettings(
                     config.getMaxMembers(),
                     config.isFriendsOnly(),
                     config.isLocalOnly(),

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.fabric.events;
 
-import group.aelysium.rustyconnector.core.central.Tinder;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.models.CoordinateRequest;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
@@ -12,7 +12,7 @@ public class OnPlayerJoin {
     public static void register() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
-            Tinder api = Plugin.getAPI();
+            MCLoaderTinder api = Plugin.getAPI();
 
             CoordinateRequest tpaRequest = api.services().dynamicTeleport().findClient(player.getName().getString());
             if(tpaRequest == null) return;

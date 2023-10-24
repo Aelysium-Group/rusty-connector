@@ -1,11 +1,10 @@
 package group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.handlers;
 
-import group.aelysium.rustyconnector.core.central.Tinder;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
-import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.models.CoordinateRequest;
 
@@ -15,7 +14,7 @@ public class CoordinateRequestHandler extends PacketHandler {
     @Override
     public void execute(GenericPacket genericPacket) throws Exception {
         CoordinateRequestQueuePacket packet = (CoordinateRequestQueuePacket) genericPacket;
-        Tinder api = Plugin.getAPI();
+        MCLoaderTinder api = Plugin.getAPI();
 
         UUID target = api.getPlayerUUID(packet.targetUsername());
         if(target == null) return;

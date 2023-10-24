@@ -4,9 +4,10 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.lib.VelocityTinder;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.LangService;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.api.velocity.central.VelocityTinder;
+import group.aelysium.rustyconnector.api.velocity.lang.config.LangService;
+import group.aelysium.rustyconnector.api.velocity.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class Tinder implements VelocityTinder {
      * @return The resource as a stream.
      */
     public static InputStream resourceAsStream(String filename)  {
-        return group.aelysium.rustyconnector.core.central.Tinder.class.getClassLoader().getResourceAsStream(filename);
+        return MCLoaderTinder.class.getClassLoader().getResourceAsStream(filename);
     }
 
     /**

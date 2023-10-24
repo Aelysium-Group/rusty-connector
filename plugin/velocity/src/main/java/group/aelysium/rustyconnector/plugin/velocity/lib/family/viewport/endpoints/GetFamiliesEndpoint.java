@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
@@ -28,7 +28,7 @@ public class GetFamiliesEndpoint implements Route {
             api.login(requestToken, request.ip());
 
             JsonArray families = new JsonArray();
-            for (BaseServerFamily family : Tinder.get().services().familyService().dump()) {
+            for (BaseFamily family : Tinder.get().services().family().dump()) {
                 String type = "unknown";
                 if(family instanceof ScalarFamily) type = "scalar";
                 if(family instanceof StaticFamily) type = "scalar";

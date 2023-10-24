@@ -1,14 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
+import group.aelysium.rustyconnector.api.velocity.storage.IStorageRoot;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.ServerResidence;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
-import one.microstream.reference.Lazy;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class StorageRoot{
+public class StorageRoot implements IStorageRoot<ResolvablePlayer, FriendMapping, ServerResidence> {
     private final String name = "RustyConnector-storage";
 
     private final List<ResolvablePlayer> players = new ArrayList<>();
@@ -26,6 +26,4 @@ public class StorageRoot{
     public List<ServerResidence> residence() {
         return residence;
     }
-
-
 }

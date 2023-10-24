@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.lib.whitelist.IWhitelistPlayerFilter;
+import group.aelysium.rustyconnector.api.velocity.whitelist.IWhitelistPlayerFilter;
 
 import java.util.Objects;
 import java.util.UUID;

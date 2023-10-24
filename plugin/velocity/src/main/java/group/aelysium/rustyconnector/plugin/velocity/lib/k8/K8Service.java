@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.k8;
 
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.K8PlayerServer;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
@@ -29,7 +29,7 @@ public class K8Service extends Service {
         return this.autoScalerService;
     }
 
-    public void createServer(BaseServerFamily<?> family, String containerName, int containerPort) throws ApiException {
+    public void createServer(BaseFamily<?> family, String containerName, int containerPort) throws ApiException {
         String podName = familyNameToPodPrefix(family.name());
         String namespace = familyNameToNamespace(family.name());
 

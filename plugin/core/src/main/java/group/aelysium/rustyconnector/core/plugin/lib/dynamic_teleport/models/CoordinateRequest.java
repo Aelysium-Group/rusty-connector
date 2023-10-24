@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.models;
 
-import group.aelysium.rustyconnector.core.central.Tinder;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 
 import java.util.UUID;
@@ -38,7 +38,7 @@ public class CoordinateRequest {
      * @throws NullPointerException If the player with `clientUsername` is not online.
      */
     public void resolveClient() {
-        Tinder api = Plugin.getAPI();
+        MCLoaderTinder api = Plugin.getAPI();
         UUID client = api.getPlayerUUID(this.clientUsername);
         if(client == null) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");
         if(!api.isOnline(client)) throw new NullPointerException("Attempted to resolve clientUsername `"+this.clientUsername+"` while player wasn't online.");
@@ -47,7 +47,7 @@ public class CoordinateRequest {
     }
 
     public void teleport() throws RuntimeException {
-        Tinder api = Plugin.getAPI();
+        MCLoaderTinder api = Plugin.getAPI();
         if(this.client == null) throw new NullPointerException("Attempted to resolve a tpa request while the client isn't online!");
         if(!api.isOnline(this.client)) throw new NullPointerException("Attempted to resolve a tpa request while the client isn't online!");
         if(!api.isOnline(this.target)) throw new NullPointerException("Attempted to resolve a tpa request while the target isn't online!");

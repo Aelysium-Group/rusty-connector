@@ -7,10 +7,10 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.fabric.FabricServerCommandManager;
-import group.aelysium.rustyconnector.api.velocity.lib.PluginLogger;
-import group.aelysium.rustyconnector.core.central.Tinder;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import net.minecraft.command.CommandSource;
@@ -27,7 +27,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSource> messageGet(FabricServerCommandManager<CommandSource> manager) {
-        Tinder api = Plugin.getAPI();
+        MCLoaderTinder api = Plugin.getAPI();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSource> builder = ((group.aelysium.rustyconnector.plugin.fabric.central.Tinder) api).commandManager().commandBuilder("rc", "/rc");
 
@@ -54,7 +54,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSource> messageList(FabricServerCommandManager<CommandSource> manager) {
-        Tinder api = Plugin.getAPI();
+        MCLoaderTinder api = Plugin.getAPI();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSource> builder = ((group.aelysium.rustyconnector.plugin.fabric.central.Tinder) api).commandManager().commandBuilder("rc", "/rc");
 
@@ -92,7 +92,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSource> send(FabricServerCommandManager<CommandSource> manager) {
-        Tinder api = Plugin.getAPI();
+        MCLoaderTinder api = Plugin.getAPI();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSource> builder = ((group.aelysium.rustyconnector.plugin.fabric.central.Tinder) api).commandManager().commandBuilder("rc", "/rc");
 
@@ -116,7 +116,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSource> unlock(FabricServerCommandManager<CommandSource> manager) {
-        Tinder api = Plugin.getAPI();
+        MCLoaderTinder api = Plugin.getAPI();
         PluginLogger logger = api.logger();
 
         final Command.Builder<CommandSource> builder = ((group.aelysium.rustyconnector.plugin.fabric.central.Tinder) api).commandManager().commandBuilder("rc", "/rc");
@@ -137,7 +137,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSource> lock(FabricServerCommandManager<CommandSource> manager) {
-        Tinder api = Plugin.getAPI();
+        MCLoaderTinder api = Plugin.getAPI();
         PluginLogger logger = api.logger();
 
         final Command.Builder<CommandSource> builder = ((group.aelysium.rustyconnector.plugin.fabric.central.Tinder) api).commandManager().commandBuilder("rc", "/rc");

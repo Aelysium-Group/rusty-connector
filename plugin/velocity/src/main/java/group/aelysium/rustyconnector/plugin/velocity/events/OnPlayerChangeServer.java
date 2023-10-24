@@ -29,10 +29,10 @@ public class OnPlayerChangeServer {
                     RegisteredServer newRawServer = event.getServer();
                     RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
 
-                    PlayerServer newServer = api.services().serverService().search(newRawServer.getServerInfo());
+                    PlayerServer newServer = api.services().server().search(newRawServer.getServerInfo());
 
                     if(oldRawServer == null) return; // Player just connected to proxy. This isn't a server switch.
-                    PlayerServer oldServer = api.services().serverService().search(oldRawServer.getServerInfo());
+                    PlayerServer oldServer = api.services().server().search(oldRawServer.getServerInfo());
 
                     boolean isTheSameFamily = newServer.family().equals(oldServer.family());
 

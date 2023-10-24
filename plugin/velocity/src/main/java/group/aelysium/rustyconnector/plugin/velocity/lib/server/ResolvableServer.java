@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.lib.server.IResolvableServer;
+import group.aelysium.rustyconnector.api.velocity.server.IResolvableServer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
 
@@ -32,7 +32,7 @@ public class ResolvableServer implements IResolvableServer {
     }
 
     public Optional<PlayerServer> resolve() {
-        PlayerServer potentialPlayerServer = Tinder.get().services().serverService().search(this.serverInfo);
+        PlayerServer potentialPlayerServer = Tinder.get().services().server().search(this.serverInfo);
         if(potentialPlayerServer == null) return Optional.empty();
         return Optional.of(potentialPlayerServer);
     }

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport;
 
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.ServiceHandler;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.core.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;

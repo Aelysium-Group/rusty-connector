@@ -2,8 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.api.velocity.parties.IPartyService;
+import group.aelysium.rustyconnector.api.velocity.parties.PartyServiceSettings;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -19,13 +20,13 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PartyService extends Service {
+public class PartyService implements IPartyService<ResolvablePlayer, PlayerServer, Party, PartyInvite> {
     private final Vector<Party> parties = new Vector<>();
     private final Vector<PartyInvite> invites = new Vector<>();
-    private final PartySettings settings;
+    private final PartyServiceSettings settings;
     private final ExecutorService connector;
 
-    public PartyService(PartySettings settings) {
+    public PartyService(PartyServiceSettings settings) {
         this.settings = settings;
 
         this.connector = Executors.newFixedThreadPool(10);
@@ -54,12 +55,12 @@ public class PartyService extends Service {
         this.connector.submit(runnable);
     }
 
-    public PartySettings settings() {
+    public PartyServiceSettings settings() {
         return this.settings;
     }
 
     public Party create(Player host, PlayerServer server) {
-        Party party = new Party(this.settings.maxMembers, host, server);
+        Party party = new Party(this.settings.maxMembers(), host, server);
         this.parties.add(party);
         return party;
     }
@@ -69,10 +70,6 @@ public class PartyService extends Service {
         this.parties.remove(party);
     }
 
-    /**
-     * Find a party based on its member.
-     * @return A party.
-     */
     public Optional<Party> find(Player member) {
         return this.parties.stream().filter(party -> party.contains(member)).findFirst();
     }
@@ -87,12 +84,12 @@ public class PartyService extends Service {
     public PartyInvite invitePlayer(Party party, Player sender, Player target) {
         Tinder api = Tinder.get();
 
-        if(party.leader() != sender && this.settings.onlyLeaderCanInvite)
+        if(party.leader() != sender && this.settings.onlyLeaderCanInvite())
             throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ONLY_LEADER_CAN_INVITE);
 
         if(this.settings.friendsOnly())
             try {
-                FriendsService friendsService = api.services().friendsService().orElse(null);
+                FriendsService friendsService = api.services().friends().orElse(null);
                 if(friendsService == null) {
                     api.logger().send(Component.text(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
                     throw new NoOutputException();
@@ -138,15 +135,4 @@ public class PartyService extends Service {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         commandManager.unregister("party");
     }
-
-    public record PartySettings(
-                                int maxMembers,
-                                boolean friendsOnly,
-                                boolean localOnly,
-                                boolean onlyLeaderCanInvite,
-                                boolean onlyLeaderCanKick,
-                                boolean onlyLeaderCanSwitchServers,
-                                boolean disbandOnLeaderQuit,
-                                SwitchPower switchPower
-                                ) {}
 }

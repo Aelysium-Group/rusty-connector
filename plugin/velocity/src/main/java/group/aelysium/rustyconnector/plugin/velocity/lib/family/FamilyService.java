@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
-import group.aelysium.rustyconnector.api.velocity.lib.family.IFamilyService;
-import group.aelysium.rustyconnector.core.lib.model.NodeManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.api.velocity.family.IFamilyService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 
 import java.lang.ref.WeakReference;
@@ -11,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FamilyService implements IFamilyService {
-    private final Map<String, BaseServerFamily> registeredFamilies = new HashMap<>();
+    private final Map<String, BaseFamily> registeredFamilies = new HashMap<>();
     private WeakReference<RootFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
 
@@ -44,7 +43,7 @@ public class FamilyService implements IFamilyService {
      * @return A family or `null` if there is no family with the defined name.
      */
     @Override
-    public BaseServerFamily<?> find(String name) {
+    public BaseFamily<?> find(String name) {
         return this.registeredFamilies.get(name);
     }
 
@@ -53,7 +52,7 @@ public class FamilyService implements IFamilyService {
      * @param family The family to add to this manager.
      */
     @Override
-    public void add(BaseServerFamily<?> family) {
+    public void add(BaseFamily<?> family) {
         this.registeredFamilies.put(family.name(),family);
     }
 
@@ -62,12 +61,12 @@ public class FamilyService implements IFamilyService {
      * @param family The family to remove from this manager.
      */
     @Override
-    public void remove(BaseServerFamily<?> family) {
+    public void remove(BaseFamily<?> family) {
         this.registeredFamilies.remove(family.name());
     }
 
     @Override
-    public List<BaseServerFamily<?>> dump() {
+    public List<BaseFamily<?>> dump() {
         return this.registeredFamilies.values().stream().toList();
     }
 

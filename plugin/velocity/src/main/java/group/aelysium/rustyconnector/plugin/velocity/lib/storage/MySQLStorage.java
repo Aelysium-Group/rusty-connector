@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
+import group.aelysium.rustyconnector.api.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.core.lib.model.UserPass;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
 import one.microstream.afs.sql.types.SqlConnector;
 import one.microstream.afs.sql.types.SqlFileSystem;
 import one.microstream.afs.sql.types.SqlProviderMariaDb;
@@ -13,7 +13,7 @@ import org.mariadb.jdbc.MariaDbDataSource;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 
-public class MySQLStorage extends Service {
+public class MySQLStorage implements IMySQLStorageService {
     protected InetSocketAddress address;
     protected UserPass userPass;
     protected String database;

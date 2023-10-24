@@ -26,7 +26,7 @@ public class GetFamilyEndpoint implements Route {
             if(familyName == null) throw new NullPointerException();
 
             JsonArray servers = new JsonArray();
-            Tinder.get().services().familyService().find(familyName).registeredServers().forEach(server -> {
+            Tinder.get().services().family().find(familyName).registeredServers().forEach(server -> {
                 JsonObject object = new JsonObject();
                 object.add("name", new JsonPrimitive(server.serverInfo().getName()));
                 object.add("id", new JsonPrimitive(server.id().toString()));

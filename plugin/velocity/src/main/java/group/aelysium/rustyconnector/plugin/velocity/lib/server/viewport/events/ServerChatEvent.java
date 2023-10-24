@@ -33,7 +33,7 @@ public class ServerChatEvent extends ViewportEvent {
     }
 
     public Optional<PlayerServer> server() {
-        ServerService serverService = Tinder.get().services().serverService();
+        ServerService serverService = Tinder.get().services().server();
         try {
             return Optional.of(serverService.search(this.player.getCurrentServer().orElseThrow().getServerInfo()));
         } catch (Exception ignore) {

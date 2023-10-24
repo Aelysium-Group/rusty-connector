@@ -1,11 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.lib.family.static_family.IServerResidence;
-import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.api.velocity.family.static_family.IServerResidence;
+import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ResolvableServer;
@@ -42,7 +42,7 @@ public class ServerResidence implements IServerResidence {
         return this.server;
     }
 
-    public Optional<BaseServerFamily> family() {
+    public Optional<BaseFamily> family() {
         return this.family.resolve();
     }
     public ResolvableFamily rawFamily() {

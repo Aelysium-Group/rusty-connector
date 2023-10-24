@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
-import group.aelysium.rustyconnector.api.velocity.lib.log_gate.GateKey;
-import group.aelysium.rustyconnector.core.lib.model.ClockService;
+import group.aelysium.rustyconnector.api.velocity.log_gate.GateKey;
+import group.aelysium.rustyconnector.api.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 
@@ -17,7 +17,7 @@ public class LoadBalancingService extends ClockService {
 
     public void init() {
         Tinder api = Tinder.get();
-        for (BaseServerFamily family : api.services().familyService().dump()) {
+        for (BaseFamily family : api.services().family().dump()) {
             if (!(family instanceof PlayerFocusedServerFamily)) continue;
 
             this.scheduleRecurring(() -> {

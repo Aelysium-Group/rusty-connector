@@ -1,12 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.api.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 
 import java.util.NoSuchElementException;
 
-public class FriendRequest {
+public class FriendRequest implements IFriendRequest {
     private final FriendsService friendsService;
     private long id;
     private ResolvablePlayer sender;
@@ -30,11 +31,6 @@ public class FriendRequest {
         return this.target;
     }
 
-
-    /**
-     * Accept the party invite.
-     * This will subsequently connect the player to the party's server and then decompose the invite and remove it from the PartyService that it belongs to.
-     */
     public synchronized void accept() {
         try {
             if (friendsService.friendCount(this.target).orElseThrow() > friendsService.settings().maxFriends())
@@ -69,10 +65,6 @@ public class FriendRequest {
         }
     }
 
-    /**
-     * Deny the party invite.
-     * This will subsequently decompose the invite and remove it from the PartyService that it belongs to.
-     */
     public synchronized void ignore() {
         try {
             friendsService.closeInvite(this);

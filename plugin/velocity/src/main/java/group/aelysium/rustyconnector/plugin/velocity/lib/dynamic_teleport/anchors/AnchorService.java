@@ -1,14 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors;
 
 import com.velocitypowered.api.command.CommandManager;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
-import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.commands.CommandAnchor;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -17,9 +17,9 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 
 public class AnchorService extends Service {
-    private Map<String, WeakReference<BaseServerFamily>> anchors;
+    private Map<String, WeakReference<BaseFamily>> anchors;
 
-    private AnchorService(Map<String, WeakReference<BaseServerFamily>> anchors) {
+    private AnchorService(Map<String, WeakReference<BaseFamily>> anchors) {
         this.anchors = anchors;
     }
 
@@ -49,9 +49,9 @@ public class AnchorService extends Service {
         bootOutput.add(Component.text("Finished building anchor service commands.", NamedTextColor.GREEN));
     }
 
-    public Optional<BaseServerFamily> family(String anchor) {
+    public Optional<BaseFamily> family(String anchor) {
         try {
-            BaseServerFamily family = this.anchors.get(anchor).get();
+            BaseFamily family = this.anchors.get(anchor).get();
             if(family == null) return Optional.empty();
 
             return Optional.of(family);
@@ -68,9 +68,9 @@ public class AnchorService extends Service {
         try {
             if(!config.isFamilyAnchor_enabled()) return Optional.empty();
 
-            Map<String, WeakReference<BaseServerFamily>> anchors = new HashMap<>();
+            Map<String, WeakReference<BaseFamily>> anchors = new HashMap<>();
             for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
-                BaseServerFamily family = familyService.find(entry.getValue());
+                BaseFamily family = familyService.find(entry.getValue());
                 if(family == null){
                     bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
                     continue;

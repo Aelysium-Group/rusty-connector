@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-import group.aelysium.rustyconnector.api.velocity.lib.central.VelocityCoreServiceHandler;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.api.velocity.central.ICoreServiceHandler;
+import group.aelysium.rustyconnector.api.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
@@ -22,18 +22,15 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistServ
 import java.util.Map;
 import java.util.Optional;
 
-public class CoreServiceHandler extends ServiceHandler implements VelocityCoreServiceHandler {
+public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHandler {
     public CoreServiceHandler(Map<Class<? extends Service>, Service> services) {
         super(services);
     }
-    public CoreServiceHandler() {
-        super();
-    }
 
-    public FamilyService familyService() {
+    public FamilyService family() {
         return this.find(FamilyService.class).orElseThrow();
     }
-    public ServerService serverService() {
+    public ServerService server() {
         return this.find(ServerService.class).orElseThrow();
     }
     public MessengerConnector<MessengerConnection> messenger() {
@@ -42,16 +39,16 @@ public class CoreServiceHandler extends ServiceHandler implements VelocityCoreSe
     public MySQLStorage storage() {
         return this.find(MySQLStorage.class).orElseThrow();
     }
-    public PlayerService playerService() {
+    public PlayerService player() {
         return this.find(PlayerService.class).orElseThrow();
     }
     public DataTransitService dataTransitService() {
         return this.find(DataTransitService.class).orElseThrow();
     }
-    public MessageCacheService messageCacheService() {
+    public MessageCacheService messageCache() {
         return this.find(MessageCacheService.class).orElseThrow();
     }
-    public WhitelistService whitelistService() {
+    public WhitelistService whitelist() {
         return this.find(WhitelistService.class).orElseThrow();
     }
     public LoadBalancingService loadBalancingService() {
@@ -60,13 +57,13 @@ public class CoreServiceHandler extends ServiceHandler implements VelocityCoreSe
     public MagicLinkService magicLinkService() {
         return this.find(MagicLinkService.class).orElseThrow();
     }
-    public Optional<PartyService> partyService() {
+    public Optional<PartyService> party() {
         return this.find(PartyService.class);
     }
-    public Optional<FriendsService> friendsService() {
+    public Optional<FriendsService> friends() {
         return this.find(FriendsService.class);
     }
-    public Optional<DynamicTeleportService> dynamicTeleportService() {
+    public Optional<DynamicTeleportService> dynamicTeleport() {
         return this.find(DynamicTeleportService.class);
     }
     public Optional<ViewportService> viewportService() {

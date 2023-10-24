@@ -5,7 +5,7 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.lib.PluginLogger;
+import group.aelysium.rustyconnector.api.velocity.central.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
@@ -38,7 +38,7 @@ public class OnPlayerChooseInitialServer {
         return EventTask.async(() -> {
             try {
                 try {
-                    Whitelist whitelist = api.services().whitelistService().proxyWhitelist().orElseThrow();
+                    Whitelist whitelist = api.services().whitelist().proxyWhitelist().orElseThrow();
                     if (!whitelist.validate(player)) {
                         logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
                         player.disconnect(Component.text(whitelist.message()));
@@ -46,7 +46,7 @@ public class OnPlayerChooseInitialServer {
                     }
                 } catch (Exception ignore) {}
 
-                RootFamily rootFamily = api.services().familyService().rootFamily();
+                RootFamily rootFamily = api.services().family().rootFamily();
 
                 PlayerServer server = rootFamily.connect(event);
 
@@ -60,12 +60,12 @@ public class OnPlayerChooseInitialServer {
 
             // Save player if they haven't joined before
             try {
-                api.services().playerService().savePlayer(player);
+                api.services().player().savePlayer(player);
             } catch (Exception ignore) {}
 
             // Check for active friend requests
             try {
-                FriendsService friendsService = api.services().friendsService().orElseThrow();
+                FriendsService friendsService = api.services().friends().orElseThrow();
                 List<FriendRequest> requests = friendsService.findRequestsToTarget(ResolvablePlayer.from(player));
 
                 if(requests.size() == 0) throw new NoOutputException();
@@ -75,7 +75,7 @@ public class OnPlayerChooseInitialServer {
 
             // Check for online friends
             try {
-                FriendsService friendsService = api.services().friendsService().orElseThrow();
+                FriendsService friendsService = api.services().friends().orElseThrow();
                 List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();

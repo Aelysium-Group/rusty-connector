@@ -2,12 +2,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.lang;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.ASCIIAlphabet;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.Lang;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.resolver.LanguageResolver;
-import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
-import group.aelysium.rustyconnector.api.velocity.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
+import group.aelysium.rustyconnector.api.velocity.lang.ASCIIAlphabet;
+import group.aelysium.rustyconnector.api.velocity.lang.Lang;
+import group.aelysium.rustyconnector.api.velocity.lang.resolver.LanguageResolver;
+import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.api.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -17,7 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -330,7 +330,7 @@ public class VelocityLang extends Lang {
     public final static Message RC_FAMILY = () -> {
         Tinder api = Tinder.get();
         Component families = text("");
-        for (BaseServerFamily family : api.services().familyService().dump()) {
+        for (BaseFamily family : api.services().family().dump()) {
             if(family instanceof ScalarFamily)
                 families = families.append(text("[ "+family.name()+" ] ").color(GOLD));
             if(family instanceof StaticFamily)
@@ -396,7 +396,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -461,7 +461,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -533,7 +533,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -603,7 +603,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootFamily rootFamily = Tinder.get().services().familyService().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
@@ -701,7 +701,7 @@ public class VelocityLang extends Lang {
             boolean isLeader = party.leader().equals(member);
             boolean canInvite;
             try {
-                boolean onlyLeaderCanInvite = Tinder.get().services().partyService().orElseThrow().settings().onlyLeaderCanInvite();
+                boolean onlyLeaderCanInvite = Tinder.get().services().party().orElseThrow().settings().onlyLeaderCanInvite();
                 canInvite = !onlyLeaderCanInvite || isLeader;
             } catch (Exception ignore) {
                 canInvite = isLeader;
@@ -867,13 +867,13 @@ public class VelocityLang extends Lang {
 
     public final static ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
         Tinder api = Tinder.get();
-        FriendsService friendsService = api.services().friendsService().orElseThrow();
+        FriendsService friendsService = api.services().friends().orElseThrow();
         int maxFriends = friendsService.settings().maxFriends();
         player.sendMessage(resolver().get("velocity.friends.panel.pending"));
 
         boolean isPartyEnabled = false;
         try {
-            api.services().partyService().orElseThrow();
+            api.services().party().orElseThrow();
             isPartyEnabled = true;
         } catch (Exception ignore) {}
         boolean finalIsPartyEnabled = isPartyEnabled;
@@ -915,7 +915,7 @@ public class VelocityLang extends Lang {
                     return;
                 }
 
-                PlayerServer playerServer = api.services().serverService().search(resolvedFriend.getCurrentServer().get().getServerInfo());
+                PlayerServer playerServer = api.services().server().search(resolvedFriend.getCurrentServer().get().getServerInfo());
                 if(canSeeFriendFamilies)
                     playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.currently_playing", LanguageResolver.tagHandler("family_name", playerServer.family().name())))));
                 else
@@ -950,7 +950,7 @@ public class VelocityLang extends Lang {
             )
     );
     public final static ParameterizedMessage1<Player> FRIEND_JOIN = (player) -> {
-        FriendsService friendsService = Tinder.get().services().friendsService().orElseThrow();
+        FriendsService friendsService = Tinder.get().services().friends().orElseThrow();
 
         if(friendsService.settings().allowMessaging())
             return resolver().get("velocity.friends.friend_joined.resolved", LanguageResolver.tagHandler("username", player.getUsername()));
@@ -1056,7 +1056,7 @@ public class VelocityLang extends Lang {
                     " "+ resolver().get("velocity.console_icons.unregistered") +" "+familyName
     );
 
-    public final static ParameterizedMessage1<BaseServerFamily> FAMILY_BALANCING = family -> text(
+    public final static ParameterizedMessage1<BaseFamily> FAMILY_BALANCING = family -> text(
             family.name() + " " + resolver().get("velocity.console_icons.family_balancing")
     );
 }

@@ -76,7 +76,7 @@ public final class CommandUnFriend {
                             }
 
                             String username = context.getArgument("username", String.class);
-                            ResolvablePlayer targetPlayer = api.services().playerService().fetch(username).orElseThrow();
+                            ResolvablePlayer targetPlayer = api.services().player().fetch(username).orElseThrow();
 
                             if(!friendsService.areFriends(ResolvablePlayer.from(player), targetPlayer))
                                 return closeMessage(player, VelocityLang.UNFRIEND_NOT_FRIENDS.build(username));

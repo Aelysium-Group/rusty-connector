@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.core.plugin.lib.lang;
 
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.ASCIIAlphabet;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.Lang;
-import group.aelysium.rustyconnector.api.velocity.lib.lang.resolver.LanguageResolver;
+import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
+import group.aelysium.rustyconnector.api.velocity.lang.ASCIIAlphabet;
+import group.aelysium.rustyconnector.api.velocity.lang.Lang;
+import group.aelysium.rustyconnector.api.velocity.lang.resolver.LanguageResolver;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;

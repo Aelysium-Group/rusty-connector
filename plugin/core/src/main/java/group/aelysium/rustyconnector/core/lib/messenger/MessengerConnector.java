@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.core.lib.messenger;
 import group.aelysium.rustyconnector.core.lib.model.UserPass;
 import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;

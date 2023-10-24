@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.api.velocity.parties.IPartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 
@@ -8,7 +9,7 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 
-public class PartyInvite {
+public class PartyInvite implements IPartyInvite<ResolvablePlayer> {
     private final PartyService partyService;
     private final WeakReference<Party> party;
     private ResolvablePlayer sender;

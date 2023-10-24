@@ -2,11 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.util.Date;
@@ -60,7 +60,7 @@ public class TPARequest {
     public void accept() {
         Tinder api = Tinder.get();
 
-        DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleportService().orElse(null);
+        DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleport().orElse(null);
         if(dynamicTeleportService == null) throw new NullPointerException("Dynamic Teleport must be enabled to use tpa functions!");
         TPAService tpaService = dynamicTeleportService.services().tpaService().orElse(null);
         if(tpaService == null) throw new NullPointerException("TPA in Dynamic Teleport must be enabled to use tpa functions!");
@@ -69,8 +69,8 @@ public class TPARequest {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.target().getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer server = api.services().serverService().search(serverInfo);
-            BaseServerFamily<?> family = server.family();
+            PlayerServer server = api.services().server().search(serverInfo);
+            BaseFamily<?> family = server.family();
             if(family == null) throw new NullPointerException();
 
             tpaService.tpaSendPlayer(this.sender(), this.target(), server);

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.plugin.lib.magic_link;
 
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
-import group.aelysium.rustyconnector.core.lib.model.ClockService;
+import group.aelysium.rustyconnector.api.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.services.PacketBuilderService;

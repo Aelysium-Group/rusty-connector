@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport;
 
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.api.core.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.config.ViewportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.APIService;
 

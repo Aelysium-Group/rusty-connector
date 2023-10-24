@@ -9,7 +9,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAHandler;
@@ -21,7 +21,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPARequest;
 import net.kyori.adventure.text.Component;
@@ -40,11 +40,11 @@ public final class CommandTPA {
     public static boolean tpaEnabled(Player sender) {
         Tinder api = Tinder.get();
         try {
-            TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
+            TPAService tpaService = api.services().dynamicTeleport().orElseThrow()
                                        .services().tpaService().orElseThrow();
 
             ServerInfo serverInfo = sender.getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer targetServer = api.services().serverService().search(serverInfo);
+            PlayerServer targetServer = api.services().server().search(serverInfo);
             String familyName = targetServer.family().name();
 
             return tpaService.settings().enabledFamilies().contains(familyName);
@@ -105,7 +105,7 @@ public final class CommandTPA {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                         String familyName = serverService.search(sendingServer).family().name();
-                                        BaseServerFamily<?> family = familyService.find(familyName);
+                                        BaseFamily<?> family = familyService.find(familyName);
                                         if(!(family instanceof PlayerFocusedServerFamily)) return builder.buildFuture();
 
                                         TPAHandler tpaHandler = tpaService.tpaHandler(family);
@@ -148,7 +148,7 @@ public final class CommandTPA {
                                         PlayerServer targetServer = serverService.search(targetServerInfo);
                                         String familyName = targetServer.family().name();
                                         try {
-                                            BaseServerFamily<?> family = familyService.find(familyName);
+                                            BaseFamily<?> family = familyService.find(familyName);
                                             if(family == null) throw new NullPointerException();
                                             if(!(family instanceof PlayerFocusedServerFamily)) throw new NullPointerException();
 
@@ -204,7 +204,7 @@ public final class CommandTPA {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                         String familyName = serverService.search(sendingServer).family().name();
-                                        BaseServerFamily<?> family = familyService.find(familyName);
+                                        BaseFamily<?> family = familyService.find(familyName);
                                         if(!(family instanceof PlayerFocusedServerFamily)) return builder.buildFuture();
                                         TPAHandler tpaHandler = tpaService.tpaHandler(family);
                                         List<TPARequest> requests = tpaHandler.findRequestsForTarget(player);
@@ -236,7 +236,7 @@ public final class CommandTPA {
 
                                         PlayerServer targetServer = serverService.search(targetServerInfo);
                                         try {
-                                            BaseServerFamily<?> family = targetServer.family();
+                                            BaseFamily<?> family = targetServer.family();
                                             if(family == null) throw new NullPointerException();
 
                                             TPAHandler tpaHandler = tpaService.tpaHandler(family);
@@ -271,7 +271,7 @@ public final class CommandTPA {
                                 ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                 String familyName = serverService.search(sendingServer).family().name();
-                                BaseServerFamily<?> family = familyService.find(familyName);
+                                BaseFamily<?> family = familyService.find(familyName);
 
                                 family.players(50).forEach(nearbyPlayer -> {
                                     if(nearbyPlayer.equals(player)) return;
@@ -312,7 +312,7 @@ public final class CommandTPA {
 
                                 if(tpaService.settings().friendsOnly())
                                     try {
-                                        FriendsService friendsService = Tinder.get().services().friendsService().orElseThrow();
+                                        FriendsService friendsService = Tinder.get().services().friends().orElseThrow();
                                         boolean areFriends = friendsService.areFriends(ResolvablePlayer.from(player), ResolvablePlayer.from(targetPlayer));
                                         if(!areFriends) {
                                             context.getSource().sendMessage(VelocityLang.TPA_NOT_FRIENDS.build(targetPlayer.getUsername()));
@@ -325,7 +325,7 @@ public final class CommandTPA {
                                 ServerInfo sendersServerInfo = player.getCurrentServer().orElseThrow().getServerInfo();
                                 PlayerServer sendersServer = serverService.search(sendersServerInfo);
                                 try {
-                                    BaseServerFamily<?> family = sendersServer.family();
+                                    BaseFamily<?> family = sendersServer.family();
                                     if(family == null) throw new NullPointerException();
                                     if(!(family instanceof PlayerFocusedServerFamily)) throw new NullPointerException();
                                     TPAHandler tpaHandler = tpaService.tpaHandler(family);

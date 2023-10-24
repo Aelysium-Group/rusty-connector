@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.api.velocity.parties.IParty;
+import group.aelysium.rustyconnector.api.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -9,10 +11,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
 import java.rmi.ConnectException;
-import java.util.Objects;
+import java.util.Random;
 import java.util.Vector;
 
-public class Party {
+public class Party implements IParty<PlayerServer> {
     private final Vector<Player> players;
     private final int maxSize;
     private Player leader;
@@ -37,7 +39,7 @@ public class Party {
 
     public synchronized Player leader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
-        if(!this.players.contains(this.leader)) {
+        if(!this.players.contains(this.leader) || !this.leader.isActive()) {
             this.newRandomLeader();
             this.broadcast(Component.text("The old party leader is no-longer available! "+this.leader.getUsername()+" is the new leader!", NamedTextColor.YELLOW));
         }
@@ -53,8 +55,11 @@ public class Party {
 
     public void newRandomLeader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
-
-        this.leader = this.players.firstElement();
+        try {
+            this.leader = this.players.get(new Random().nextInt(this.players.size()));
+        } catch (Exception ignore) {
+            this.leader = this.players.firstElement();
+        }
     }
 
     public boolean isEmpty() {
@@ -76,11 +81,11 @@ public class Party {
     }
 
     public synchronized void leave(Player player) {
-        if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
+        if(this.isEmpty()) return;
         this.players.remove(player);
 
         if(this.isEmpty()) { // This was the last member of the party
-            Tinder.get().services().partyService().orElseThrow().disband(this);
+            Tinder.get().services().party().orElseThrow().disband(this);
             return;
         }
 
@@ -92,7 +97,7 @@ public class Party {
         }
 
         if(this.isEmpty())
-            Tinder.get().services().partyService().orElseThrow().disband(this);
+            Tinder.get().services().party().orElseThrow().disband(this);
     }
 
     public void broadcast(Component message) {
@@ -109,11 +114,11 @@ public class Party {
     }
 
     public synchronized void connect(PlayerServer server) {
-        SwitchPower switchPower = Tinder.get().services().partyService().orElseThrow().settings().switchPower();
+        SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
         this.setServer(server);
         Vector<Player> kickedPlayers = new Vector<>();
 
-        Tinder.get().services().partyService().orElseThrow().queueConnector(() -> {
+        Tinder.get().services().party().orElseThrow().queueConnector(() -> {
             for (Player player : this.players)
                 try {
                     switch (switchPower) {

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.Service;
+import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.core.lib.model.NodeManager;
 
 import java.util.HashMap;

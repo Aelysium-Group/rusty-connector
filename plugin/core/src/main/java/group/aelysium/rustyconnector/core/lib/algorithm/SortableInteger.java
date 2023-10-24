@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.algorithm;
 
-import group.aelysium.rustyconnector.api.velocity.lib.load_balancing.ISortable;
+import group.aelysium.rustyconnector.api.velocity.load_balancing.ISortable;
 
 public class SortableInteger implements ISortable {
     int value;

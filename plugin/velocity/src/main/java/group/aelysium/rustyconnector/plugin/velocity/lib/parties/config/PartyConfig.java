@@ -72,7 +72,7 @@ public class PartyConfig extends YAML {
         try {
             this.friendsOnly = this.getNode(this.data, "friends-only", Boolean.class);
             if(this.friendsOnly)
-                Tinder.get().services().friendsService().orElseThrow();
+                Tinder.get().services().friends().orElseThrow();
         } catch (Exception ignore) {
             Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("[friends-only] in `party.yml` is set to true. But the friends module isn't enabled! Ignoring...", NamedTextColor.YELLOW));
             this.friendsOnly = false;

@@ -13,8 +13,8 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
-import group.aelysium.rustyconnector.api.velocity.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
+import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Flame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -23,8 +23,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.St
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
@@ -152,7 +152,7 @@ class Family {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                BaseServerFamily family = flame.services().familyService().find(familyName);
+                                BaseFamily family = flame.services().family().find(familyName);
                                 if(family == null) throw new NullPointerException();
 
                                 if(family instanceof ScalarFamily)
@@ -177,7 +177,7 @@ class Family {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        BaseServerFamily family = flame.services().familyService().find(familyName);
+                        BaseFamily family = flame.services().family().find(familyName);
                         if(family == null) throw new NullPointerException();
                         if(!(family instanceof PlayerFocusedServerFamily)) {
                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on scalar and static families!");
@@ -204,7 +204,7 @@ class Family {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        BaseServerFamily family = flame.services().familyService().find(familyName);
+                        BaseFamily family = flame.services().family().find(familyName);
                         if(family == null) throw new NullPointerException();
                         if(!(family instanceof PlayerFocusedServerFamily)) {
                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only use sort on scalar and static families!");
@@ -231,7 +231,7 @@ class Family {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        BaseServerFamily family = flame.services().familyService().find(familyName);
+                        BaseFamily family = flame.services().family().find(familyName);
                         if(family == null) throw new NullPointerException();
 
                         if(family instanceof ScalarFamily)
@@ -276,7 +276,7 @@ class Send {
                                     return Command.SINGLE_SUCCESS;
                                 }
 
-                                BaseServerFamily family = flame.services().familyService().find(familyName);
+                                BaseFamily family = flame.services().family().find(familyName);
                                 if(family == null) {
                                     logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                                     return Command.SINGLE_SUCCESS;
@@ -324,7 +324,7 @@ class Send {
                                             return Command.SINGLE_SUCCESS;
                                         }
 
-                                        PlayerServer server = flame.services().serverService().search(registeredServer.getServerInfo());
+                                        PlayerServer server = flame.services().server().search(registeredServer.getServerInfo());
                                         if (server == null) {
                                             logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
                                             return Command.SINGLE_SUCCESS;

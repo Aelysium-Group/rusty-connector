@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
-import group.aelysium.rustyconnector.api.velocity.lib.log_gate.GateKey;
+import group.aelysium.rustyconnector.api.velocity.log_gate.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
@@ -41,7 +41,7 @@ public class MagicLinkPingHandler extends PacketHandler {
 
     private static void connectServer(ServerInfo serverInfo, ServerPingPacket packet) {
         Tinder api = Tinder.get();
-        ServerService serverService = api.services().serverService();
+        ServerService serverService = api.services().server();
         MessengerConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
 
         try {
@@ -81,13 +81,13 @@ public class MagicLinkPingHandler extends PacketHandler {
 
     private static void disconnectServer(ServerInfo serverInfo, ServerPingPacket packet) throws Exception {
         Tinder api = Tinder.get();
-        api.services().serverService().unregisterServer(serverInfo, packet.familyName(), true);
+        api.services().server().unregisterServer(serverInfo, packet.familyName(), true);
 
     }
 
     private static void reviveOrConnectServer(ServerInfo serverInfo, ServerPingPacket packet) {
         Tinder api = Tinder.get();
-        ServerService serverService = api.services().serverService();
+        ServerService serverService = api.services().server();
 
         PlayerServer server = serverService.search(serverInfo);
         if (server == null) {

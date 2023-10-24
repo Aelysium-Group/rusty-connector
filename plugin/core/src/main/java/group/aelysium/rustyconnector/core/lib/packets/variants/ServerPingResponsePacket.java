@@ -5,7 +5,7 @@ import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
 import group.aelysium.rustyconnector.core.lib.packets.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.api.velocity.lib.util.ColorMapper;
+import group.aelysium.rustyconnector.api.velocity.util.ColorMapper;
 import io.lettuce.core.KeyValue;
 import net.kyori.adventure.text.format.NamedTextColor;
 

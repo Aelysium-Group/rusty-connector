@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.lib.family.bases.IPlayerFocusedFamilyBase;
+import group.aelysium.rustyconnector.api.velocity.family.bases.IPlayerFocusedFamilyBase;
 import group.aelysium.rustyconnector.core.lib.annotations.Initializer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
@@ -20,11 +20,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * This class should never be used directly.
  * Player-focused families offer features such as /tpa, whitelists, load-balancing, and direct connection.
  */
-public abstract class PlayerFocusedServerFamily extends BaseServerFamily implements IPlayerFocusedFamilyBase<PlayerServer> {
+public abstract class PlayerFocusedServerFamily extends BaseFamily implements IPlayerFocusedFamilyBase<PlayerServer> {
     @Initializer
     protected String parentName = null;
 
-    protected WeakReference<BaseServerFamily> parent = null;
+    protected WeakReference<BaseFamily> parent = null;
     protected LoadBalancer loadBalancer = null;
     protected String whitelist;
     protected boolean weighted;
@@ -47,7 +47,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily impleme
     }
 
     public void resolveParent(FamilyService familyService) {
-        BaseServerFamily family = familyService.find(parentName);
+        BaseFamily family = familyService.find(parentName);
 
         this.parentName = null;
         if(family == null) {
@@ -58,8 +58,8 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily impleme
         this.parent = new WeakReference<>(family);
     }
 
-    public WeakReference<BaseServerFamily> parent() {
-        FamilyService familyService = Tinder.get().services().familyService();
+    public WeakReference<BaseFamily> parent() {
+        FamilyService familyService = Tinder.get().services().family();
         if(familyService.rootFamily().equals(this)) return null;
         return this.parent;
     }
@@ -83,7 +83,7 @@ public abstract class PlayerFocusedServerFamily extends BaseServerFamily impleme
     public Whitelist whitelist() {
         Tinder api = Tinder.get();
         if(this.name == null) return null;
-        return api.services().whitelistService().find(this.whitelist);
+        return api.services().whitelist().find(this.whitelist);
     }
 
     public long serverCount() { return this.registeredServers().size(); }

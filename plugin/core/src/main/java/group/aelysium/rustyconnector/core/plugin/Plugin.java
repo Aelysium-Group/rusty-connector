@@ -1,14 +1,14 @@
 package group.aelysium.rustyconnector.core.plugin;
 
-import group.aelysium.rustyconnector.core.central.Tinder;
-import group.aelysium.rustyconnector.api.velocity.lib.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.api.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 
 public class Plugin {
 
-    private static Tinder tinder;
+    private static MCLoaderTinder tinder;
 
-    public static <S extends ServiceHandler> void init(Tinder t) {
+    public static <S extends ServiceHandler> void init(MCLoaderTinder t) {
         tinder = t;
         tinder.ignite();
 
@@ -20,7 +20,7 @@ public class Plugin {
         tinder.flame().exhaust();
     }
 
-    public static Tinder getAPI() {
+    public static MCLoaderTinder getAPI() {
         return tinder;
     }
 }

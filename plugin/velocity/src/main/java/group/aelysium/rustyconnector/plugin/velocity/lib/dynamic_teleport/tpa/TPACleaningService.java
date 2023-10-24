@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
-import group.aelysium.rustyconnector.core.lib.model.ClockService;
-import group.aelysium.rustyconnector.api.velocity.lib.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.api.core.serviceable.ClockService;
+import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
 
 public class TPACleaningService extends ClockService {
     protected final LiquidTimestamp heartbeat;
