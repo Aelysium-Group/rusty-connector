@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.core.plugin.central.config;
 
 import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -44,7 +44,7 @@ public class DefaultConfig extends YAML {
     }
 
     public void register(int configVersion) throws IllegalStateException {
-        PluginLogger logger = Plugin.getAPI().logger();
+        PluginLogger logger = TinderAdapterForCore.getTinder().logger();
 
         try {
             this.processVersion(configVersion);

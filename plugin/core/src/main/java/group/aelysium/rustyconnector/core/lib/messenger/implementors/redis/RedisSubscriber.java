@@ -3,11 +3,12 @@ package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerSubscriber;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
+import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.model.FailService;
-import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.api.core.packet.PacketType;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisSubscriber extends MessengerSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
-    public RedisSubscriber(AESCryptor cryptor, RedisClient client, MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler > handlers, PacketOrigin origin, InetSocketAddress originAddress) {
+    public RedisSubscriber(AESCryptor cryptor, RedisClient client, MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler<GenericPacket>> handlers, PacketOrigin origin, InetSocketAddress originAddress) {
         super(cryptor, cache, logger, handlers, origin, originAddress);
         this.client = client;
         this.client.addListener(new RedisSubscriberListener());

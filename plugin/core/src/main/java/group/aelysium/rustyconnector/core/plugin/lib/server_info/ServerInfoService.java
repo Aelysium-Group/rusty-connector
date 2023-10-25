@@ -3,11 +3,9 @@ package group.aelysium.rustyconnector.core.plugin.lib.server_info;
 import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.api.mc_loader.server_info.IServerInfoService;
-import group.aelysium.rustyconnector.core.lib.hash.MD5;
-import group.aelysium.rustyconnector.api.velocity.server.IPlayerServer;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.core.lib.crypt.MD5;
 import group.aelysium.rustyconnector.api.velocity.util.AddressUtil;
-import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 
 import java.net.InetSocketAddress;
 
@@ -38,7 +36,7 @@ public class ServerInfoService implements IServerInfoService {
      * @param hardPlayerCap The hard player cap
      */
     private void setPlayerCap(int softPlayerCap, int hardPlayerCap) {
-        MCLoaderTinder api = Plugin.getAPI();
+        MCLoaderTinder api = TinderAdapterForCore.getTinder();
         PluginLogger logger = api.logger();
 
         api.setMaxPlayers(hardPlayerCap);
@@ -64,7 +62,7 @@ public class ServerInfoService implements IServerInfoService {
     public String family() { return this.family; }
 
     public int playerCount() {
-        return Plugin.getAPI().onlinePlayerCount();
+        return TinderAdapterForCore.getTinder().onlinePlayerCount();
     }
 
     public int weight() {

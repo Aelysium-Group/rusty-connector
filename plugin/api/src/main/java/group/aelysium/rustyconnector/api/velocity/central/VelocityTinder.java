@@ -1,7 +1,8 @@
 package group.aelysium.rustyconnector.api.velocity.central;
 
+import group.aelysium.rustyconnector.api.core.lang.ILangService;
+import group.aelysium.rustyconnector.api.core.lang.ILanguageResolver;
 import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.api.core.lang.config.LangService;
 
 import java.io.InputStream;
 
@@ -26,7 +27,7 @@ public interface VelocityTinder {
      */
     String dataFolder();
 
-    LangService lang();
+    ILangService<? extends ILanguageResolver> lang();
 
     /**
      * Restarts the entire RustyConnector kernel by exhausting the current {@link VelocityFlame} and igniting a new one.

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest;
 
-import group.aelysium.rustyconnector.core.lib.model.UserPass;
-import group.aelysium.rustyconnector.core.lib.hash.Token;
+import group.aelysium.rustyconnector.api.core.UserPass;
+import group.aelysium.rustyconnector.core.lib.crypt.Token;
 import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;

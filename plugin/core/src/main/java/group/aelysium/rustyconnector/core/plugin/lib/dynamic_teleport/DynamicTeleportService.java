@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport;
 
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.api.mc_loader.dynamic_teleport.IDynamicTeleportService;
-import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +33,7 @@ public class DynamicTeleportService implements IDynamicTeleportService<Coordinat
     public void removeAllPlayersRequests(UUID player) {
         this.requests.removeIf(request ->
                 Objects.equals(request.target(),         player)
-             || Objects.equals(request.clientUsername(), Plugin.getAPI().getPlayerName(player))
+             || Objects.equals(request.clientUsername(), TinderAdapterForCore.getTinder().getPlayerName(player))
         );
     }
 

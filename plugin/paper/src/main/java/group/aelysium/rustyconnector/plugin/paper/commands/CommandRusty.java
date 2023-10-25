@@ -9,7 +9,6 @@ import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.plugin.Plugin;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
@@ -29,7 +28,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager) {
-        Tinder api = (Tinder) Plugin.getAPI();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
@@ -56,7 +55,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> messageList(PaperCommandManager<CommandSender> manager) {
-        Tinder api = (Tinder) Plugin.getAPI();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
@@ -94,7 +93,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> send(PaperCommandManager<CommandSender> manager) {
-        Tinder api = (Tinder) Plugin.getAPI();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
 
@@ -118,7 +117,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> unlock(PaperCommandManager<CommandSender> manager) {
-        Tinder api = (Tinder) Plugin.getAPI();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
@@ -139,7 +138,7 @@ public final class CommandRusty {
     }
 
     private static Command.Builder<CommandSender> lock(PaperCommandManager<CommandSender> manager) {
-        Tinder api = (Tinder) Plugin.getAPI();
+        Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");

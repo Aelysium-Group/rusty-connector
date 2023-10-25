@@ -4,9 +4,11 @@ import cloud.commandframework.fabric.FabricServerCommandManager;
 import com.mojang.authlib.GameProfile;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderFlame;
 import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.api.core.lang.config.LangService;
-import group.aelysium.rustyconnector.api.core.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.plugin.fabric.FabricRustyConnector;
 import net.fabricmc.loader.api.FabricLoader;
@@ -23,10 +25,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class Tinder extends MCLoaderTinder {
+    private static Tinder instance;
 
     private final FabricServerCommandManager<CommandSource> commandManager;
     private final FabricRustyConnector plugin;
-    private MCLoaderFlame<CoreServiceHandler> flame;
+    private MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> flame;
     private final PluginLogger pluginLogger;
     private final LangService lang;
 
@@ -36,7 +39,13 @@ public class Tinder extends MCLoaderTinder {
         this.pluginLogger = logger;
         this.lang = lang;
 
-        this.commandManager = s;
+        this.commandManager = null;
+
+        instance = this;
+    }
+
+    public static Tinder get() {
+        return instance;
     }
 
     /**
@@ -139,14 +148,6 @@ public class Tinder extends MCLoaderTinder {
 
     public FabricServerCommandManager<CommandSource> commandManager() {
         return commandManager;
-    }
-
-    public boolean isFolia() {
-        try {
-            Class.forName("io.papermc.paper.threadedregions.RegionisedServer");
-            return true;
-        } catch (ClassNotFoundException ignore) {}
-        return false;
     }
 
     /**

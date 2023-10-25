@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.model.UserPass;
+import group.aelysium.rustyconnector.api.core.UserPass;
 import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.api.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;

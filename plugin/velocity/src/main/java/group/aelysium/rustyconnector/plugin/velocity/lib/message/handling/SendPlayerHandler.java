@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
+import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -12,7 +12,7 @@ import net.kyori.adventure.text.Component;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
-public class SendPlayerHandler extends PacketHandler {
+public class SendPlayerHandler implements PacketHandler<GenericPacket> {
     @Override
     public void execute(GenericPacket genericPacket) throws Exception {
         SendPlayerPacket packet = (SendPlayerPacket) genericPacket;

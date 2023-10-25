@@ -2,8 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.api.velocity.family.scalar_family.IRootFamily;
-import group.aelysium.rustyconnector.api.core.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.core.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.api.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;

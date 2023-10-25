@@ -4,21 +4,20 @@ import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderFlame;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.api.core.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.api.core.lang.config.LangService;
-import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
+import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.api.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.api.velocity.util.AddressUtil;
-import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.DynamicTeleportService;
@@ -47,7 +46,7 @@ import java.util.*;
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link MCLoaderTinder}.
  */
-public class Flame extends MCLoaderFlame<CoreServiceHandler> {
+public class Flame extends MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> {
     private final int configVersion;
     private final String version;
 
@@ -66,8 +65,8 @@ public class Flame extends MCLoaderFlame<CoreServiceHandler> {
     public String versionAsString() { return this.version; }
     public int configVersion() { return this.configVersion; }
 
-    public MessengerConnector<? extends MessengerConnection> backbone() {
-        return this.backbone;
+    public RedisConnector backbone() {
+        return (RedisConnector) this.backbone;
     }
 
     /**
@@ -83,7 +82,7 @@ public class Flame extends MCLoaderFlame<CoreServiceHandler> {
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static MCLoaderFlame<CoreServiceHandler> fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
+    public static MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
         Initialize initialize = new Initialize();
 
         try {
@@ -94,7 +93,7 @@ public class Flame extends MCLoaderFlame<CoreServiceHandler> {
             ServerInfoService serverInfoService = initialize.serverInfo(defaultConfig);
 
             MessageCacheService messageCacheService = initialize.messageCache();
-            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, Plugin.getAPI().logger(), langService, AddressUtil.stringToAddress(serverInfoService.address()));
+            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService, AddressUtil.stringToAddress(serverInfoService.address()));
 
             initialize.messageCache();
             PacketBuilderService packetBuilderService = initialize.packetBuilder();
@@ -121,7 +120,7 @@ public class Flame extends MCLoaderFlame<CoreServiceHandler> {
  * This class will mutate the provided services and requestedConnectors lists that are provided to it.
  */
 class Initialize {
-    private final MCLoaderTinder api = Plugin.getAPI();
+    private final Tinder api = Tinder.get();
     private final PluginLogger logger = api.logger();
     private final Map<Class<? extends Service>, Service> services = new HashMap<>();
     private final List<Component> bootOutput = new ArrayList<>();
@@ -131,13 +130,13 @@ class Initialize {
     }
 
     public void events(PaperRustyConnector plugin) {
-        ((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).paperServer().getPluginManager().registerEvents(new OnPlayerJoin(), plugin);
-        ((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).paperServer().getPluginManager().registerEvents(new OnPlayerLeave(), plugin);
-        ((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).paperServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), plugin);
+        api.paperServer().getPluginManager().registerEvents(new OnPlayerJoin(), plugin);
+        api.paperServer().getPluginManager().registerEvents(new OnPlayerLeave(), plugin);
+        api.paperServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), plugin);
     }
 
     public void commands() {
-        CommandRusty.create(((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).commandManager());
+        CommandRusty.create(api.commandManager());
     }
 
     public String version() {
@@ -218,7 +217,7 @@ class Initialize {
         messenger.connect();
         RedisConnection connection = messenger.connection().orElseThrow();
 
-        Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
+        Map<PacketType.Mapping, PacketHandler<GenericPacket>> handlers = new HashMap<>();
         handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler());
         handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler());
         connection.startListening(cacheService, logger, handlers, originAddress);

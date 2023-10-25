@@ -2,11 +2,12 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.api.mc_loader.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderFlame;
-import group.aelysium.rustyconnector.api.core.lang.config.LangService;
-import group.aelysium.rustyconnector.api.core.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
 import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
@@ -23,15 +24,17 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public class Tinder extends MCLoaderTinder {
+    private static Tinder instance;
 
     private final PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
-    private MCLoaderFlame<CoreServiceHandler> flame;
+    private MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> flame;
     private final PluginLogger pluginLogger;
     private final LangService lang;
 
 
     private Tinder(PaperRustyConnector plugin, PluginLogger logger, LangService lang) throws Exception {
+
         this.plugin = plugin;
         this.pluginLogger = logger;
         this.lang = lang;
@@ -42,6 +45,12 @@ public class Tinder extends MCLoaderTinder {
                 Function.identity(),
                 Function.identity()
         );
+
+        instance = this;
+    }
+
+    public static Tinder get() {
+        return instance;
     }
 
     /**
@@ -138,7 +147,7 @@ public class Tinder extends MCLoaderTinder {
      * Returns the currently active RustyConnector kernel.
      * @return A {@link MCLoaderFlame}.
      */
-    public MCLoaderFlame<CoreServiceHandler> flame() {
+    public MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> flame() {
         return this.flame;
     }
 

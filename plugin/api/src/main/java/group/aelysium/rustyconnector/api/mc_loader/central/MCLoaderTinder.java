@@ -1,7 +1,10 @@
 package group.aelysium.rustyconnector.api.mc_loader.central;
 
-import group.aelysium.rustyconnector.api.core.lang.config.LangService;
+import group.aelysium.rustyconnector.api.core.lang.ILangService;
+import group.aelysium.rustyconnector.api.core.lang.ILanguageResolver;
 import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.api.core.messenger.IMessengerConnection;
+import group.aelysium.rustyconnector.api.core.messenger.IMessengerConnector;
 import net.kyori.adventure.text.Component;
 
 import java.io.InputStream;
@@ -29,7 +32,7 @@ public abstract class MCLoaderTinder {
 
     abstract public String dataFolder();
 
-    abstract public LangService lang();
+    abstract public ILangService<? extends ILanguageResolver> lang();
 
     abstract public void setMaxPlayers(int max);
 
@@ -44,5 +47,5 @@ public abstract class MCLoaderTinder {
     abstract public void teleportPlayer(UUID uuid, UUID target);
 
     abstract public void sendMessage(UUID uuid, Component component);
-    abstract public MCLoaderFlame<? extends ICoreServiceHandler> flame();
+    abstract public MCLoaderFlame<? extends ICoreServiceHandler, ? extends IMessengerConnection<?, ?, ?>, ? extends IMessengerConnector<?, ?, ?>> flame();
 }

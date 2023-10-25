@@ -3,10 +3,10 @@ package group.aelysium.rustyconnector.core.lib.model;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
-import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
+import group.aelysium.rustyconnector.core.lib.crypt.Snowflake;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 
-public class FailService extends Service {
+public class FailService implements Service {
     protected Cache<Long, Boolean> fails;
     protected int numberOfFails;
     protected LiquidTimestamp period;

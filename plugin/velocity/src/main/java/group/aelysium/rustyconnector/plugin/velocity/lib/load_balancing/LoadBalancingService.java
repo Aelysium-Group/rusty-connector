@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
-import group.aelysium.rustyconnector.api.velocity.log_gate.GateKey;
+import group.aelysium.rustyconnector.api.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.api.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;

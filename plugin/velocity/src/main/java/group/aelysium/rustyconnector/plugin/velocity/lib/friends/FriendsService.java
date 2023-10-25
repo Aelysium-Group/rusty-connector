@@ -6,7 +6,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.api.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.api.velocity.friends.IFriendsService;
-import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
+import group.aelysium.rustyconnector.core.lib.crypt.Snowflake;
 import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;

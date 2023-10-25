@@ -4,14 +4,13 @@ import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.api.mc_loader.packet_builder.IPacketBuilderService;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.api.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.core.plugin.Plugin;
+import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import group.aelysium.rustyconnector.core.plugin.lib.server_info.ServerInfoService;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,7 +19,7 @@ import java.util.UUID;
 
 public class PacketBuilderService implements IPacketBuilderService {
     public void pingProxy(ConnectionIntent intent) {
-        MCLoaderTinder api = Plugin.getAPI();
+        MCLoaderTinder api = TinderAdapterForCore.getTinder();
 
         try {
             ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
@@ -48,7 +47,7 @@ public class PacketBuilderService implements IPacketBuilderService {
      * @param familyName The name of the family to send to.
      */
     public void sendToOtherFamily(UUID player, String familyName) {
-        MCLoaderTinder api = Plugin.getAPI();
+        MCLoaderTinder api = TinderAdapterForCore.getTinder();
         ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
 
         SendPlayerPacket message = (SendPlayerPacket) new GenericPacket.Builder()
@@ -66,7 +65,7 @@ public class PacketBuilderService implements IPacketBuilderService {
      * Tells the proxy to open the server running the command.
      */
     public void unlockServer() {
-        MCLoaderTinder api = Plugin.getAPI();
+        MCLoaderTinder api = TinderAdapterForCore.getTinder();
         ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
 
         UnlockServerPacket message = (UnlockServerPacket) new GenericPacket.Builder()
@@ -83,7 +82,7 @@ public class PacketBuilderService implements IPacketBuilderService {
      * Tells the proxy to close the server running the command.
      */
     public void lockServer() {
-        MCLoaderTinder api = Plugin.getAPI();
+        MCLoaderTinder api = TinderAdapterForCore.getTinder();
         ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
 
         LockServerPacket message = (LockServerPacket) new GenericPacket.Builder()

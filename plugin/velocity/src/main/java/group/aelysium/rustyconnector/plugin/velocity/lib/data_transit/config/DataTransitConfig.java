@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.data_transit.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.packets.PacketStatus;
-import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.api.core.packet.PacketStatus;
+import group.aelysium.rustyconnector.api.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;

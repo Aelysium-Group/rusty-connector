@@ -1,6 +1,9 @@
 package group.aelysium.rustyconnector.core.lib.packets;
 
 import com.google.gson.*;
+import group.aelysium.rustyconnector.api.core.packet.IPacket;
+import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.api.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
@@ -14,7 +17,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GenericPacket {
+public class GenericPacket implements IPacket {
     private static final int protocolVersion = 2;
 
     public static int protocolVersion() {

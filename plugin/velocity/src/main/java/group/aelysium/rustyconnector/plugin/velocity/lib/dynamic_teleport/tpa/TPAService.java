@@ -6,8 +6,8 @@ import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.ITPAServi
 import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.TPAServiceSettings;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.api.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
