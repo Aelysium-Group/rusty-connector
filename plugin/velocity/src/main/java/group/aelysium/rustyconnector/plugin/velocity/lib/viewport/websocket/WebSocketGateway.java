@@ -6,7 +6,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WebSocketGateway extends Service {
+public class WebSocketGateway implements Service {
     private List<Session> hangingSessions = new ArrayList<>();
 
     public void hang(Session session) {

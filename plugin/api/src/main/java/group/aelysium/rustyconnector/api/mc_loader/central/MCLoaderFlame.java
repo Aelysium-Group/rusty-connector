@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.api.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.api.core.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.api.velocity.util.Version;
 
-public abstract class MCLoaderFlame<TCoreServiceHandler extends ICoreServiceHandler, TMessengerConnection extends IMessengerConnection<?, ?, ?>, TMessengerConnector extends IMessengerConnector<?, ?, ?>> extends ServiceableService<TCoreServiceHandler> {
+public abstract class MCLoaderFlame<TCoreServiceHandler extends ICoreServiceHandler, TMessengerConnection extends IMessengerConnection<?>, TMessengerConnector extends IMessengerConnector<?>> extends ServiceableService<TCoreServiceHandler> {
 
     public MCLoaderFlame(TCoreServiceHandler services) {
         super(services);

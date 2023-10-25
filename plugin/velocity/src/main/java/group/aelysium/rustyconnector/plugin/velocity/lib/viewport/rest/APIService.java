@@ -19,7 +19,7 @@ import java.util.*;
 
 import static spark.Service.ignite;
 
-public class APIService extends Service {
+public class APIService implements Service {
     private final Map<String, Session> sessions = new HashMap<>();
     private final WebSocketService websocket;
     private final spark.Service spark;

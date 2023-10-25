@@ -9,7 +9,7 @@ import org.eclipse.jetty.websocket.api.Session;
 
 import java.util.*;
 
-public class WebSocketService extends Service {
+public class WebSocketService implements Service {
     private final spark.Service spark;
     private final String listenerEndpoint;
     private final WebSocketGateway gateway = new WebSocketGateway();

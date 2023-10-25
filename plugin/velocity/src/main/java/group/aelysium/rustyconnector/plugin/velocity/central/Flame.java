@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.api.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.api.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.api.velocity.util.Version;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
@@ -102,7 +103,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
     private Optional<char[]> memberKey() { return this.memberKey; }
     public List<Component> bootLog() { return this.bootOutput; }
 
-    public MessengerConnector<? extends MessengerConnection> backbone() {
+    public RedisConnector backbone() {
         return this.services().messenger();
     }
 
@@ -309,17 +310,17 @@ class Initialize {
                 config.getRedis_dataChannel()
         );
         RedisConnector messenger = RedisConnector.create(dependencies.d1(), spec);
-        services.put(MessengerConnector.class, messenger);
+        services.put(RedisConnector.class, messenger);
         bootOutput.add(Component.text("Booting Messenger...", NamedTextColor.DARK_GRAY));
 
-        Map<PacketType.Mapping, PacketHandler<GenericPacket>> handlers = new HashMap<>();
+        Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
         handlers.put(PacketType.PING, new MagicLinkPingHandler());
         handlers.put(PacketType.SEND_PLAYER, new SendPlayerHandler());
         handlers.put(PacketType.LOCK_SERVER, new LockServerHandler());
         handlers.put(PacketType.UNLOCK_SERVER, new UnlockServerHandler());
 
         messenger.connect();
-        MessengerConnection connection = messenger.connection().orElseThrow();
+        RedisConnection connection = messenger.connection().orElseThrow();
         connection.startListening(dependencies.d2(), dependencies.d3(), handlers, null);
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
 

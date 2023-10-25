@@ -16,14 +16,14 @@ import net.minecraft.command.CommandSource;
 
 import java.util.List;
 
-public final class CommandRusty {/*
+public final class CommandRusty {
     public static void create(FabricServerCommandManager<CommandSource> manager) {
-        manager.command(messageList(manager));
+        /*manager.command(messageList(manager));
         manager.command(messageGet(manager));
         manager.command(send(manager));
         manager.command(unlock(manager));
-        manager.command(lock(manager));
-    }
+        manager.command(lock(manager));*/
+    }/*
     private static Command.Builder<CommandSource> messageGet(FabricServerCommandManager<CommandSource> manager) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();

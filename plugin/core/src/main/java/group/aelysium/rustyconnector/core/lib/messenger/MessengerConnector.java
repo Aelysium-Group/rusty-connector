@@ -1,22 +1,16 @@
 package group.aelysium.rustyconnector.core.lib.messenger;
 
 import group.aelysium.rustyconnector.api.core.UserPass;
-import group.aelysium.rustyconnector.api.core.message_cache.ICacheableMessage;
-import group.aelysium.rustyconnector.api.core.message_cache.IMessageCacheService;
 import group.aelysium.rustyconnector.api.core.messenger.IMessengerConnection;
-import group.aelysium.rustyconnector.api.core.messenger.IMessengerConnector;
-import group.aelysium.rustyconnector.api.core.packet.IPacket;
-import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
-public abstract class MessengerConnector<TMessengerConnection extends IMessengerConnection<GenericPacket, CacheableMessage, IMessageCacheService<GenericPacket, CacheableMessage>>> {
+public abstract class MessengerConnector<TMessengerConnection extends IMessengerConnection<MessageCacheService>> {
     protected final InetSocketAddress address;
     protected final UserPass userPass;
     protected TMessengerConnection connection;

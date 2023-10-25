@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.api.core.packet.IPacket;
 import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
@@ -12,9 +13,9 @@ import net.kyori.adventure.text.Component;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
-public class SendPlayerHandler implements PacketHandler<GenericPacket> {
+public class SendPlayerHandler implements PacketHandler {
     @Override
-    public void execute(GenericPacket genericPacket) throws Exception {
+    public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {
         SendPlayerPacket packet = (SendPlayerPacket) genericPacket;
         Tinder api = Tinder.get();
 

@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
@@ -33,8 +34,8 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
     public ServerService server() {
         return this.find(ServerService.class).orElseThrow();
     }
-    public MessengerConnector<MessengerConnection> messenger() {
-        return (MessengerConnector<MessengerConnection>) this.find(MessengerConnector.class).orElseThrow();
+    public RedisConnector messenger() {
+        return this.find(RedisConnector.class).orElseThrow();
     }
     public MySQLStorage storage() {
         return this.find(MySQLStorage.class).orElseThrow();

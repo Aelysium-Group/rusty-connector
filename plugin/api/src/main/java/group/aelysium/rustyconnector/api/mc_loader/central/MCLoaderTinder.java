@@ -47,5 +47,5 @@ public abstract class MCLoaderTinder {
     abstract public void teleportPlayer(UUID uuid, UUID target);
 
     abstract public void sendMessage(UUID uuid, Component component);
-    abstract public MCLoaderFlame<? extends ICoreServiceHandler, ? extends IMessengerConnection<?, ?, ?>, ? extends IMessengerConnector<?, ?, ?>> flame();
+    abstract public MCLoaderFlame<? extends ICoreServiceHandler, ? extends IMessengerConnection<?>, ? extends IMessengerConnector<?>> flame();
 }

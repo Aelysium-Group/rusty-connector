@@ -20,11 +20,11 @@ public abstract class MessengerSubscriber {
     private final AESCryptor cryptor;
     private final PluginLogger logger;
     private MessageCacheService messageCache;
-    private final Map<PacketType.Mapping, PacketHandler<GenericPacket>> handlers;
+    private final Map<PacketType.Mapping, PacketHandler> handlers;
     private final PacketOrigin origin;
     private final InetSocketAddress originAddress;
 
-    public MessengerSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler<GenericPacket>> handlers, PacketOrigin origin, InetSocketAddress originAddress) {
+    public MessengerSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin, InetSocketAddress originAddress) {
         this.cryptor = cryptor;
         this.messageCache = messageCache;
         this.logger = logger;
@@ -66,7 +66,7 @@ public abstract class MessengerSubscriber {
             try {
                 cachedMessage.sentenceMessage(PacketStatus.ACCEPTED);
 
-                PacketHandler<GenericPacket> handler = this.handlers.get(message.type());
+                PacketHandler handler = this.handlers.get(message.type());
                 if(handler == null) throw new NullPointerException("No packet handler with the type "+message.type().name()+" exists!");
 
                 handler.execute(message);

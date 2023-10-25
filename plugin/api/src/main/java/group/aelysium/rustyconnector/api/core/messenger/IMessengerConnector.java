@@ -1,15 +1,13 @@
 package group.aelysium.rustyconnector.api.core.messenger;
 
-import group.aelysium.rustyconnector.api.core.crypt.IAESCryptor;
 import group.aelysium.rustyconnector.api.core.message_cache.ICacheableMessage;
 import group.aelysium.rustyconnector.api.core.message_cache.IMessageCacheService;
-import group.aelysium.rustyconnector.api.core.packet.IPacket;
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 
 import java.net.ConnectException;
 import java.util.Optional;
 
-public interface IMessengerConnector<TPacket extends IPacket, TCacheableMessage extends ICacheableMessage, TMessengerConnection extends IMessengerConnection<TPacket, TCacheableMessage, IMessageCacheService<TPacket, TCacheableMessage>>> extends Service {
+public interface IMessengerConnector<TMessengerConnection extends IMessengerConnection<? extends IMessageCacheService<? extends ICacheableMessage>>> extends Service {
     /**
      * Gets the connection to the remote resource.
      * @return {@link IMessengerConnection}

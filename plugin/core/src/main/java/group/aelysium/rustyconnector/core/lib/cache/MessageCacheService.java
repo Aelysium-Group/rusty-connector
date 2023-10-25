@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.cache;
 
 import group.aelysium.rustyconnector.api.core.message_cache.IMessageCacheService;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
+import group.aelysium.rustyconnector.api.core.packet.IPacket;
 import group.aelysium.rustyconnector.api.core.packet.PacketStatus;
 import group.aelysium.rustyconnector.api.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.crypt.Snowflake;
@@ -12,7 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MessageCacheService implements IMessageCacheService<GenericPacket, CacheableMessage> {
+public class MessageCacheService implements IMessageCacheService<CacheableMessage> {
     private final Snowflake snowflakeGenerator = new Snowflake();
     private final List<PacketStatus> ignoredStatuses;
     private final List<PacketType.Mapping> ignoredTypes;
@@ -59,7 +58,7 @@ public class MessageCacheService implements IMessageCacheService<GenericPacket, 
         return cacheableMessage;
     }
 
-    public boolean ignoredType(GenericPacket message) {
+    public <TPacket extends IPacket> boolean ignoredType(TPacket message) {
         return this.ignoredTypes.contains(message.type());
     }
 

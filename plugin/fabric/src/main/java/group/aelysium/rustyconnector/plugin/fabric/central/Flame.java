@@ -228,7 +228,7 @@ class Initialize {
         messenger.connect();
         RedisConnection connection = messenger.connection().orElseThrow();
 
-        Map<PacketType.Mapping, PacketHandler<GenericPacket>> handlers = new HashMap<>();
+        Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
         handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler());
         handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler());
         connection.startListening(cacheService, logger, handlers, originAddress);

@@ -1,9 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.api.core.packet.IPacket;
 import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.api.core.packet.PacketType;
@@ -18,9 +21,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.net.InetSocketAddress;
 
-public class MagicLinkPingHandler implements PacketHandler<GenericPacket> {
+public class MagicLinkPingHandler implements PacketHandler {
     @Override
-    public void execute(GenericPacket genericPacket) throws Exception {
+    public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {
         ServerPingPacket packet = (ServerPingPacket) genericPacket;
 
         InetSocketAddress address = packet.address();
@@ -43,7 +46,7 @@ public class MagicLinkPingHandler implements PacketHandler<GenericPacket> {
     private static void connectServer(ServerInfo serverInfo, ServerPingPacket packet) {
         Tinder api = Tinder.get();
         ServerService serverService = api.services().server();
-        MessengerConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
+        RedisConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
 
         try {
             PlayerServer server = new ServerService.ServerBuilder()

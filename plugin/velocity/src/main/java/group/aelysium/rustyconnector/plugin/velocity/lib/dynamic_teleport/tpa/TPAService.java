@@ -5,6 +5,8 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.ITPAService;
 import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.TPAServiceSettings;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.api.core.packet.PacketType;
@@ -93,7 +95,7 @@ public class TPAService implements ITPAService<TPACleaningService, PlayerServer,
                 .setParameter(CoordinateRequestQueuePacket.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        MessengerConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
+        RedisConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
         backboneMessenger.publish(message);
 
         try {

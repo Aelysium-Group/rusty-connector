@@ -1,9 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 
 import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.api.core.message_cache.IMessageCacheService;
 import group.aelysium.rustyconnector.api.core.messenger.IMessengerConnection;
-import group.aelysium.rustyconnector.api.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.api.core.packet.IPacket;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -25,7 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class RedisConnection extends MessengerConnection implements IMessengerConnection<GenericPacket, CacheableMessage, MessageCacheService> {
+public class RedisConnection extends MessengerConnection implements IMessengerConnection<MessageCacheService> {
     private final Vector<RedisSubscriber> subscribers = new Vector<>();
     private final RedisPublisher publisher;
     private final RedisClient.Builder clientBuilder;
@@ -43,7 +41,7 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
         this.cryptor = cryptor;
     }
 
-    protected void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler<GenericPacket>> handlers, InetSocketAddress originAddress) {
+    protected void subscribe(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, InetSocketAddress originAddress) {
         if(!this.isAlive) return;
 
         this.executorService.submit(() -> {
@@ -68,7 +66,7 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
         });
     }
 
-    public void startListening(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler<GenericPacket>> handlers, InetSocketAddress originAddress) {
+    public void startListening(MessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, InetSocketAddress originAddress) {
         if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
         this.executorService = Executors.newFixedThreadPool(3);
 

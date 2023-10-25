@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
 
 import java.util.List;
 
-public interface IMessageCacheService<TPacket extends IPacket, TCacheableMessage extends ICacheableMessage> extends Service {
+public interface IMessageCacheService<TCacheableMessage extends ICacheableMessage> extends Service {
     /**
      * Caches a message.
      * @param message The message to cache.
@@ -15,10 +15,10 @@ public interface IMessageCacheService<TPacket extends IPacket, TCacheableMessage
      */
     TCacheableMessage cacheMessage(String message, PacketStatus status);
 
-    boolean ignoredType(TPacket message);
+    <TPacket extends IPacket> boolean ignoredType(TPacket message);
 
     /**
-     * Find a cached message based on it's snowflake.
+     * Find a cached message based on its snowflake.
      * @param messageSnowflake The snowflake.
      * @return {@link ICacheableMessage}
      * @throws NullPointerException If no message exists with that snowflake.
@@ -26,7 +26,7 @@ public interface IMessageCacheService<TPacket extends IPacket, TCacheableMessage
     TCacheableMessage findMessage(Long messageSnowflake) throws NullPointerException;
 
     /**
-     * Remove a message from the cache based on it's snowflake.
+     * Remove a message from the cache based on its snowflake.
      * @param messageSnowflake The snowflake.
      */
     void removeMessage(Long messageSnowflake);
