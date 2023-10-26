@@ -29,9 +29,9 @@ public class K8Service implements Service {
         return this.autoScalerService;
     }
 
-    public void createServer(BaseFamily family, String containerName, int containerPort) throws ApiException {
-        String podName = familyNameToPodPrefix(family.name());
-        String namespace = familyNameToNamespace(family.name());
+    public void createServer(String familyName, String containerName, int containerPort) throws ApiException {
+        String podName = familyNameToPodPrefix(familyName);
+        String namespace = familyNameToNamespace(familyName);
 
         V1ObjectMeta meta = new V1ObjectMeta();
         meta.name(podName);
@@ -54,9 +54,9 @@ public class K8Service implements Service {
         api.createNamespacedPod(namespace, pod, null, null, null, null);
     }
 
-    public void deleteServer(K8PlayerServer server) throws ApiException {
-        String namespace = familyNameToNamespace(server.family().name());
-        api.deleteNamespacedPod(server.podName(), namespace, null, null, null, null, null, null);
+    public void deleteServer(String familyName, String podName) throws ApiException {
+        String namespace = familyNameToNamespace(familyName);
+        api.deleteNamespacedPod(podName, namespace, null, null, null, null, null, null);
     }
 
     private String familyNameToNamespace(String name) {

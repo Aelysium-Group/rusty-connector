@@ -21,7 +21,9 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.k8.K8Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.K8PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -47,6 +49,7 @@ public final class CommandRusty {
             .then(Send.build(flame, logger, messageCacheService))
             .then(Debug.build(flame, logger, messageCacheService))
             .then(Reload.build(flame, logger, messageCacheService))
+            .then(K8.build(flame, logger, messageCacheService))
             .build();
 
         // BrigadierCommand implements Command
@@ -364,5 +367,49 @@ class Reload {
                     }
                     return 0;
                 });
+    }
+}
+class K8 {
+    public static ArgumentBuilder<CommandSource, ?> build(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
+        return LiteralArgumentBuilder.<CommandSource>literal("k8") // k8 createPod <familyName> <containerName> <containerPort>
+                .then(LiteralArgumentBuilder.<CommandSource>literal("createPod")
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
+                                .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerName", StringArgumentType.string())
+                                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerPort", StringArgumentType.string())
+                                                .executes(context -> {
+                                                    try {
+                                                        String familyName = context.getArgument("familyName", String.class);
+                                                        String containerName = context.getArgument("containerName", String.class);
+                                                        String containerPort = context.getArgument("containerPort", String.class);
+
+                                                        K8Service k8 = new K8Service();
+                                                        k8.createServer(familyName, containerName, Integer.parseInt(containerPort));
+                                                    } catch (Exception e) {
+                                                        e.printStackTrace();
+                                                    }
+
+                                                    return Command.SINGLE_SUCCESS;
+                                                })
+                                        )
+                                )
+                        ))
+                .then(LiteralArgumentBuilder.<CommandSource>literal("deletePod") // k8 deletePod <podName> <familyName>
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("podName", StringArgumentType.string())
+                                .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
+                                        .executes(context -> {
+                                            try {
+                                                String serverName = context.getArgument("podName", String.class);
+                                                String familyName = context.getArgument("familyName", String.class);
+
+                                                K8Service k8 = new K8Service();
+                                                k8.deleteServer(serverName, familyName);
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+
+                                            return Command.SINGLE_SUCCESS;
+                                        })
+                                )
+                        ));
     }
 }

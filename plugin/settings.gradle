@@ -10,4 +10,4 @@ pluginManagement {
 }
 
 rootProject.name = 'rusty-connector'
-include ':core', ':paper', ':fabric', ':velocity', ':api'
+include ':api', ':core', ':paper', ':fabric', ':velocity'

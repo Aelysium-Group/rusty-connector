@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
+import group.aelysium.rustyconnector.api.RustyConnectorAPI;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
@@ -14,13 +15,13 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener {
         Tinder api = Tinder.gather(this, this.getSLF4JLogger());
 
         try {
-
             TinderAdapterForCore.init(api);
 
             api.logger().log("Initializing RustyConnector...");
             api.ignite();
             PluginLang.WORDMARK_RUSTY_CONNECTOR.send(api.logger(), api.flame().versionAsString());
 
+            RustyConnectorAPI.register(api);
             try {
                 new Metrics(this, 17973);
                 api.logger().log("Registered to bstats!");
@@ -35,6 +36,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        RustyConnectorAPI.unregister();
         Tinder.get().flame().exhaust();
     }
 }
