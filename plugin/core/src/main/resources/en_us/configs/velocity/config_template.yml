@@ -1,0 +1,132 @@
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#                                                                                                         #
+#   /███████                           /██                                                                #
+#  | ██__  ██                         | ██                                                                #
+#  | ██  \ ██  /██   /██   /███████  /██████    /██   /██                                                 #
+#  | ███████/ | ██  | ██  /██_____/ |_  ██_/   | ██  | ██                                                 #
+#  | ██__  ██ | ██  | ██ |  ██████    | ██     | ██  | ██                                                 #
+#  | ██  \ ██ | ██  | ██  \____  ██   | ██ /██ | ██  | ██                                                 #
+#  | ██  | ██ |  ██████/  /███████/   |  ████/ |  ███████                                                 #
+#  |__/  |__/  \______/  |_______/     \___/    \____  ██                                                 #
+#                                               /██  | ██                                                 #
+#                                              |  ██████/                                                 #
+#    /██████                                    \______/                /██                               #
+#   /██__  ██                                                          | ██                               #
+#  | ██  \__/   /██████   /███████   /███████    /██████    /███████  /██████     /██████    /██████      #
+#  | ██        /██__  ██ | ██__  ██ | ██__  ██  /██__  ██  /██_____/ |_  ██_/    /██__  ██  /██__  ██     #
+#  | ██       | ██  \ ██ | ██  \ ██ | ██  \ ██ | ████████ | ██         | ██     | ██  \ ██ | ██  \__/     #
+#  | ██    ██ | ██  | ██ | ██  | ██ | ██  | ██ | ██_____/ | ██         | ██ /██ | ██  | ██ | ██           #
+#  |  ██████/ |  ██████/ | ██  | ██ | ██  | ██ |  ███████ |  ███████   |  ████/ |  ██████/ | ██           #
+#   \______/   \______/  |__/  |__/ |__/  |__/  \_______/  \_______/    \___/    \______/  |__/           #
+#                                                                                                         #
+#                                                                                                         #
+#                                        Welcome to RustyConnector!                                       #
+#                            https://github.com/Aelysium-Group/rusty-connector                            #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+# | RustyConnector is your go-to load-balancer and     | Built for usage on high-traffic networks;        #
+# | player manager for Minecraft networks!             | RustyConnector is meant to be scalable and easy  #
+#                                                      | to maintain!                                     #
+#                                                                                                         #
+#                               | If you ever need assistance setting up your                             #
+#                               | plugin come join us in our discord server:                              #
+#                               | https://join.aelysium.group/                                            #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+#                                     Produced by: Aelysium | Nathan M.                                   #
+#                                                                                                         #
+#                            -------------------------------------------------                            #
+#                                                                                                         #
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#
+# If you need help updating your configs from an older version;
+# take a look at our config migration docs:
+#
+# https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
+#
+version: 5
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Whitelist                         #
+#                                                          #
+#               ---------------------------                #
+# | RustyConnector attempts to be as flexible as possible  #
+# | when configuring whitelists!                           #
+# | To setup a whitelist, you'll need to navigate to the   #
+# | "whitelists" folder and follow the directions in the   #
+# | provided whitelist-template.                           #
+#                                                          #
+# | More often than not, you will have multiple whitelist  #
+# | configurations that you may want to switch between     #
+# | during various points in your network's lifetime.      #
+# | This system allows you to set up as many pre-defined   #
+# | whitelists as you'd like, and enable or switch between #
+# | then whenever you want!                                #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+whitelist:
+#
+# If you set this to be on. You will be turning on a whitelist which will **effect your entire proxy**!
+# If you only want to effect certain families or individual servers. Look into the appropriate configuration locations!
+#
+    enabled: false
+
+#
+# The name of the whitelist configuration file in your "whitelists" folder.
+# You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
+#
+    name: "whitelist-template"
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Services                          #
+#                                                          #
+#               ---------------------------                #
+# | Services are small, in-built applications that         #
+# | carry out specific duties within RustyConnector        #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+services:
+#
+# Manages the lifecycles of servers.
+#
+# Also manages the lifecycle of a player's home server if you are using Static Families.
+#
+    server-lifecycle:
+#
+# Amount of time, in seconds, that a server can go without pinging the proxy.
+# If a server doesn't ping the proxy in this time, it will be declared stale
+# and be unregistered from the proxy.
+#
+        server-timeout: 15
+
+#
+# Amount of time, in seconds, that a server should wait to ping the proxy.
+# This setting cannot be higher than "server-timeout".
+#
+        server-ping-interval: 10
+
+#
+# Manages the load balancing of the proxy's families.
+#
+    load-balancing:
+        enabled: true
+#
+# Time, in seconds, between when the families sort their servers. This interval will cause your proxy to sort ALL of the servers registered to it!
+# The higher this value the higher accuracy your load balancing will operate at.
+# If you have larger sets of servers on a family, setting the interval to be larger can help save resources.
+#
+# If you disable this heart, you are effectively setting load balancing for your entire network to be ROUND_ROBIN
+#
+        interval: 20

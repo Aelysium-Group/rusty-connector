@@ -1,0 +1,58 @@
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                         Logger                           #
+#                                                          #
+#               ---------------------------                #
+# | In order to operate, RustyConnector passes lots of     #
+# | data around. In this file, you can control what does   #
+# | and does not appear in your console when               #
+# | something happens!                                     #
+#                                                          #
+# | Everything in this config is off by default            #
+# | except for certain important messages.                 #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+#
+# Generally speaking trashed messages are thrown away because they have an
+# invalid private key or because they were sent by the proxy.
+#
+# You can usually set this to `false` so that only messages that are from other servers are saved.
+#
+save-trashed-messages: true
+
+messaging:
+# Should we log when a server attempts to be registered?
+# NOTE: This option can spam your proxy console if your proxy sends out a call-for-registration
+#       which requires all listening servers to submit a registration request
+    registration: false
+
+# Should we log when a server attempts to be unregistered?
+    unregistration: false
+
+# Should we log when the proxy calls for all servers to register themselves?
+    call-for-registration: false
+
+# Should we log when a server pings the proxy?
+    ping: false
+
+# Should we log anytime the message parser throws away a message? (Can generate lots of console spam on busy servers!)
+    message-parser-trash: false
+
+security:
+# Should we log when a message fails message tunnel validation?
+    message-tunnel-failed-message: true
+
+log:
+# Log what we do when a player joins the server
+    player-join: false
+
+# Log what happens when a player leaves the server
+    player-leave: false
+
+    # Log what happens when a player moves between servers
+    player-move: false
+
+    # Log anytime a family re-balances it's server priorities
+    family-balancing: false

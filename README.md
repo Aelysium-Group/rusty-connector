@@ -8,7 +8,7 @@
 [![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
 [![License](https://flat.badgen.net/badge/License/MIT/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE)
 
-[RustyConnector] is a load-balancing plugin that can run on [Velocity]/[Paper]/[Folia] networks, which allows your proxy to automatically register or unregister sub-servers while is running.
+[RustyConnector] is a load-balancing plugin that can run on [Velocity]/[Paper]/[Folia] networks, which allows your proxy to automatically register or unregister sub-servers while it's running.
 
 <!-- Table-1 -->
 <table>
@@ -112,12 +112,11 @@
 - ### ✅ Automatically unregister frozen servers from the proxy
 - ### ✅ Set soft and hard player limits for servers
 - ### ✅ Built for stateful Minecraft servers!
-- ### ✅ Whitelist players based on permission, Username, UUID, or IP Address
-- ### ✅ Allow players to /tpa between servers
+- ### ✅ End-to-end packet encryption
 - ### ✅ Works with LuckPerms-Velocity
 - ### ✅ Works with Kubernetes
 - ### ✅ Works with Folia
-- ### ❌ Can't give you a hug
+- ### ❌ Can give you a hug
 ---
 # 🎨 Statistics
 
