@@ -325,12 +325,14 @@ class Initialize {
         connection.startListening(dependencies.d2(), dependencies.d3(), handlers, null);
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
 
+        bootOutput.add(Component.text("Booting MicroStream MariaDB driver...", NamedTextColor.DARK_GRAY));
         MySQLStorage storage = MySQLStorage.create(
                 config.getMysql_address(),
                 config.getMysql_user(),
                 config.getMysql_database()
         );
         services.put(MySQLStorage.class, storage);
+        bootOutput.add(Component.text("Finished booting MariaDB driver.", NamedTextColor.GREEN));
 
         bootOutput.add(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
         return DependencyInjector.inject(messenger, storage);
