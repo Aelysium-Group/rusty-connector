@@ -179,7 +179,7 @@ public class PlayerServer implements IPlayerServer {
         } catch (Exception ignore) {}
     }
 
-    public int sortIndex() {
+    public double sortIndex() {
         return this.playerCount;
     }
 

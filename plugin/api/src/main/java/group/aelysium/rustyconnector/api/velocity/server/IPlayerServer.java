@@ -126,7 +126,7 @@ public interface IPlayerServer extends ISortable {
      * This method is used by the {@link ILoadBalancer} to sort this and other servers in a family.
      * @return {@link Integer}
      */
-    int sortIndex();
+    double sortIndex();
 
     /**
      * Gets the weight of this server.

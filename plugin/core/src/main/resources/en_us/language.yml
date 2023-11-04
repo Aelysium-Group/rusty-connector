@@ -16,7 +16,7 @@
 # Targeted Language: en-us
 # Translated by: Juice
 #
-version: "v0.7.0"
+version: "v0.8.0"
 core:
     single_word:
         reason: "Reason" #

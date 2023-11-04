@@ -27,8 +27,8 @@ import java.util.List;
 import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
 
 public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<PlayerServer> {
-    protected ScalarFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
+    protected ScalarFamily(String name, LoadBalancer loadBalancer, String parentFamily, Whitelist whitelist) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, loadBalancer, parentFamily, whitelist);
     }
 
     public PlayerServer connect(Player player) throws RuntimeException {
@@ -66,42 +66,32 @@ public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<P
             api.services().whitelist().add(whitelist);
         }
 
+        LoadBalancer loadBalancer;
         switch (Enum.valueOf(AlgorithmType.class, scalarFamilyConfig.getLoadBalancing_algorithm())) {
-            case ROUND_ROBIN -> {
-                return new ScalarFamily(
-                        familyName,
-                        whitelist,
-                        RoundRobin.class,
-                        scalarFamilyConfig.isLoadBalancing_weighted(),
-                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        scalarFamilyConfig.getParent_family()
-                );
-            }
-            case LEAST_CONNECTION -> {
-                return new ScalarFamily(
-                        familyName,
-                        whitelist,
-                        LeastConnection.class,
-                        scalarFamilyConfig.isLoadBalancing_weighted(),
-                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        scalarFamilyConfig.getParent_family()
-                );
-            }
-            case MOST_CONNECTION -> {
-                return new ScalarFamily(
-                        familyName,
-                        whitelist,
-                        MostConnection.class,
-                        scalarFamilyConfig.isLoadBalancing_weighted(),
-                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        scalarFamilyConfig.getParent_family()
-                );
-            }
+            case ROUND_ROBIN -> loadBalancer = new RoundRobin(
+                    scalarFamilyConfig.isLoadBalancing_weighted(),
+                    scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
+                    scalarFamilyConfig.getLoadBalancing_persistence_attempts()
+                    );
+            case LEAST_CONNECTION -> loadBalancer = new LeastConnection(
+                    scalarFamilyConfig.isLoadBalancing_weighted(),
+                    scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
+                    scalarFamilyConfig.getLoadBalancing_persistence_attempts()
+            );
+            case MOST_CONNECTION -> loadBalancer = new MostConnection(
+                    scalarFamilyConfig.isLoadBalancing_weighted(),
+                    scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
+                    scalarFamilyConfig.getLoadBalancing_persistence_attempts()
+            );
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
+
+        return new ScalarFamily(
+                familyName,
+                loadBalancer,
+                scalarFamilyConfig.getParent_family(),
+                whitelist
+        );
     }
 }
 

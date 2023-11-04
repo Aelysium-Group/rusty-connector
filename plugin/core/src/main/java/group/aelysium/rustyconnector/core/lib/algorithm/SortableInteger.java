@@ -10,7 +10,7 @@ public class SortableInteger implements ISortable {
     }
 
     @Override
-    public int sortIndex() {
+    public double sortIndex() {
         return this.value;
     }
 

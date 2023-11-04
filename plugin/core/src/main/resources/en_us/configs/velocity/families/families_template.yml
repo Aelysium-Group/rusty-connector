@@ -1,0 +1,96 @@
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Families                          #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Families are a collection of servers. To register      #
+# | new servers into a family, you need to configure       #
+# | your sub-servers appropriately.                        #
+#                                                          #
+# | If your sub-servers use family names that don't match  #
+# | what you define here, they will not be registered.     #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+#
+# The root family. Once a player connects and is validated.
+# This is the family that they will automatically be routed to.
+#
+# The root family will ALWAYS be defined as a `scalar` family.
+#
+root-family:
+    name: "lobby"
+
+    #
+    # If a player is kicked or disconnected from a family in this proxy.
+    # Should the root family catch them? If not, they will disconnect from the whole network.
+    # This setting is great if you want a player to join back into the lobby if they get kicked from
+    # a gamemode or sub-family.
+    #
+    catch-disconnecting-players: false
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Scalar Family                       #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Scalar families are optimized for stateless            #
+# | minecraft gamemodes.                                   #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+scalar: []
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Static Family                       #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Families defined here are optimized for stateful       #
+# | minecraft gamemodes.                                   #
+#                                                          #
+# | When players join a static family, their initial       #
+# | server will be memorized, and they'll be connected     #
+# | back into that server on future family connections     #
+# | as well.                                               #
+#                                                          #
+# | This initial server is called the player's residence.  #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+static: []
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Ranked Family                       #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Ranked families implement matchmaking algorithms to    #
+# | pair players together into "player stacks" which then  #
+# | load into a specific server.                           #
+# | When a player attempts to connect to a ranked family   #
+# | they will remain in their current family until         #
+# | matchmaking is finished and the entire player stack    #
+# | is then connected to a server in the family.           #
+#                                                          #
+# | Once a server is in-session it will automatically      #
+# | be locked and new sessions won't be able to join       #
+# | until the server is unlocked.                          #
+#                                                          #
+# | Ranked families can't be used as parent families.      #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+ranked: []

@@ -1,0 +1,276 @@
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Ranked Family                       #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Ranked families implement matchmaking algorithms to    #
+# | pair players together into "teams" which then          #
+# | load into a specific server.                           #
+# | When a player attempts to connect to a ranked family   #
+# | they will remain in their current family until         #
+# | matchmaking is finished and the entire player team     #
+# | is then connected to a server in the family.           #
+#                                                          #
+# | Once a server is in-session it will automatically      #
+# | be locked and new sessions won't be able to join       #
+# | until the server is unlocked.                          #
+#                                                          #
+# | Ranked families can't be used as parent families.      #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+#                                                                                                         #
+#                                            ~~ Powered By ~~                                             #
+#                        ______     ______                ______     ______   __                          #
+#                       /\  == \   /\  ___\      _____   /\  __ \   /\  == \ /\ \                         #
+#                       \ \  __<   \ \ \____    /\____\  \ \  __ \  \ \  _-/ \ \ \                        #
+#                        \ \_\ \_\  \ \_____\   \/____/   \ \_\ \_\  \ \_\    \ \_\                       #
+#                         \/_/ /_/   \/_____/              \/_/\/_/   \/_/     \/_/                       #
+#                                                                                                         #
+#                                       ---------------------------                                       #
+#                                                                                                         #
+#       In order to use Ranked Families you must utilize the RustyConnector API on a custom plugin.       #
+#                                                                                                         #
+#                  We do the heavy lifting, but you still have to tell us who is winning,                 #
+#                               loosing, and when we need to end the game.                                #
+#                                                                                                         #
+#                                       ---------------------------                                       #
+#                                                                                                         #
+###########################################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+###########################################################################################################
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                         Ranking                          #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Ranking is a system that allows your players to play   #
+# | against others that have a similar skill level as them #
+#                                                          #
+# | Ranking uses a version of the ELO algorithm that's     #
+# | expanded to work better with multiplayer.              #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+ranking:
+    #
+    # The name of your gamemode.
+    # When players start playing this game and earning rank points, their rank will be bound directly to this name.
+    # If you change this name, all players will lose their rank on this gamemode.
+    #
+    # `default` will cause the name of this gamemode to be the same as this family's name.
+    #
+    gamemode-name: "default"
+
+    ############################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                         Scoring                          #
+    #                                                          #
+    #               ---------------------------                #
+    # | Defines the scoring system used by this gamemode.      #
+    #                                                          #
+    # | Your options are:                                      #
+    #  ⚫ PLACEMENT - Based off of racing: 1st, 2nd, 3rd, etc. #
+    #  ⚫ POINTS - Players that collect the most points win.   #
+    #               ---------------------------                #
+    #                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################
+    scoring: PLACEMENT
+
+    #
+    # Define the matchmaking that this family will operate with.
+    #
+    matchmaking:
+        ############################################################
+        #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+        #                      Configuration                       #
+        #                                                          #
+        #               ---------------------------                #
+        # | Configuration controls how players should be split     #
+        # | into teams.                                            #
+        #                                                          #
+        # | The matchmaker will always intentionally randomize     #
+        # | what players are placed into what teams.               #
+        #                                                          #
+        # | Your options are:                                      #
+        #  ⚫ SOLO                                                 #
+        #  ⚫ CO_OP                                                #
+        #               ---------------------------                #
+        #                                                          #
+        #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+        ############################################################
+        configuration: SOLO
+
+        #
+        # Solo
+        # This team configuration can be loaded by setting `configuration` to "SOLO"
+        # This configuration will put every player against each-other and is often referred to as "every man for himself" or "last man standing"
+        #
+        # A player's rank is solely effected by their own performance in this mode.
+        #
+        # If a player is in a party. They won't be able to join ranked families that have solo matchmaking.
+        #
+        solo:
+            max-players: 10
+
+            #
+            # The matchmaker will always attempt to reach `max-players`.
+            # However, if it's not able to, what is the lowest, acceptable number of players allowed?
+            #
+            min-players: 6
+
+        #
+        # CO_OP
+        # This team configuration can be loaded by setting `configuration` to "CO_OP"
+        # This configuration allows you to set up a custom number of teams all with custom player counts.
+        #
+        # A player's rank is effected by their teams performance against other teams.
+        #
+        # Duplicate team names are not allowed.
+        #
+        co_op:
+            #
+            # The matchmaker will always attempt to reach the max players allowed by the teams defined.
+            # However, if it's not able to, what is the lowest, acceptable number of players needed for a game to start?
+            # Players will be equally distributed between the teams using a round-robin balancing algorithm.
+            #
+            min-players: 6
+
+            #
+            # The teams to use for this gamemode.
+            # `max-players` is calculated by adding up all the `players` listed below.
+            # Teams are not allowed to have the same name.
+            #
+            # If a player is in a party, the number of members in the party cannot be more than the
+            # team with the least number of players listed.
+            #
+            teams:
+                - name: "red_team"
+                  players: 10
+                - name: "blue_team"
+                  players: 10
+
+
+        #
+        # A decimal representing the percentage that player's ranks are allowed to deviate from one-another.
+        # This setting prevents noob players from being paired with veteran players.
+        #
+        # Cannot be set to 0.
+        # 0.1 means that other players in the round must have a rank within 10% of each-other.
+        # If set to 1.0, any players are allowed to be in a match together; regardless of rank.
+        #
+        variance: 0.2
+
+        #
+        # Controls the criteria by which the matchmaker is allowed to expand its search.
+        #
+        expansion:
+            #
+            # If the matchmaker is unable to find enough players to start a game with the currently set `variance`
+            # Should it be allowed to increase the `variance` temporarily to find more players?
+            #
+            allowed: true
+
+            #
+            # The amount to add to `variance` during an expansion.
+            # When expansion occurs, literally it's calculated as: `newVariance = oldVariance + interval`
+            # If `variance` is 0.2 and `interval` is 0.1; the new variance will be 0.3.
+            #
+            # Once a match is found and a game is able to be started, variance will reset to it's original value.
+            #
+            interval: 0.1
+
+            #
+            # The amount of time (represented as a Liquid Timestamp) that the matchmaker has to wait before it's allowed to expand.
+            # Must be greater than `10 SECONDS`.
+            #
+            delay: 30 SECONDS
+
+            #
+            # The maximum variance that the matchmaker is allowed to expand to.
+            # Must be a number greater than `variance`.
+            #
+            max-variance: 0.5
+
+            #
+            # If `max-variance` is reached; next time the matchmaker attempts to expand,
+            # should it kick all players from the matchmaking queue?
+            # If enabled; it will inform them that it couldn't find enough players in time to start a game.
+            #
+            kick-players: false
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Parent Family                       #
+#                                                          #
+#               ---------------------------                #
+# | The parent family is the family that players will      #
+# | be sent to when they run /hub, or when a fallback      #
+# | occurs. If the parent family is unavailable, the       #
+# | root family is used instead.                           #
+#                                                          #
+# | In ranked families, the parent family can be           #
+# | considered the "gamemode lobby".                       #
+# | When a match is finished, players will be returned to  #
+# | this family.                                           #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+parent-family: ""
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Load Balancing                      #
+#                                                          #
+#               ---------------------------                #
+# | Load balancing is the system through which networks    #
+# | manage player influxes by spreading out players        #
+# | across various server nodes.                           #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+load-balancer: "default"
+
+whitelist:
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Whitelist                         #
+#                                                          #
+#               ---------------------------                #
+# | RustyConnector attempts to be as flexible as possible  #
+# | when configuring whitelists!                           #
+# | To setup a whitelist, you'll need to navigate to the   #
+# | "whitelists" folder and follow the directions in the   #
+# | provided whitelist-template.                           #
+#                                                          #
+# | More often than not, you will have multiple whitelist  #
+# | configurations that you may want to switch between     #
+# | during various points in your network's lifetime.      #
+# | This system allows you to set up as many pre-defined   #
+# | whitelists as you'd like, and enable or switch between #
+# | then whenever you want!                                #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+    enabled: false
+
+#
+# The name of the whitelist configuration file in your "whitelists" folder.
+# You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
+#
+    name: "whitelist-template"

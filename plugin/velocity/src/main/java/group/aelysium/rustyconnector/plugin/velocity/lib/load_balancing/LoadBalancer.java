@@ -13,6 +13,12 @@ public class LoadBalancer implements ILoadBalancer<PlayerServer> {
     protected int index = 0;
     protected List<PlayerServer> items = new ArrayList<>();
 
+    public LoadBalancer(boolean weighted, boolean persistence, int attempts) {
+        this.weighted = weighted;
+        this.persistence = persistence;
+        this.attempts = attempts;
+    }
+
     @Override
     public boolean persistent() {
         return this.persistence;

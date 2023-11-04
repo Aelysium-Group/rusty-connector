@@ -6,7 +6,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.util.Collections;
 
-public class MostConnection extends LeastConnection { // Extends LeastConnection to fill in some gaps that LoadBalancer leaves open
+public class MostConnection extends LeastConnection {
+    public MostConnection(boolean weighted, boolean persistence, int attempts) {
+        super(weighted, persistence, attempts);
+    } // Extends LeastConnection to fill in some gaps that LoadBalancer leaves open
 
     @Override
     public void iterate() {

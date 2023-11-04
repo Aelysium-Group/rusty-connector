@@ -5,7 +5,7 @@ public interface ISortable {
      * Get the sort index.
      * @return The index by which sorting must occur.
      */
-    int sortIndex();
+    double sortIndex();
 
     /**
      * Get the weight value.

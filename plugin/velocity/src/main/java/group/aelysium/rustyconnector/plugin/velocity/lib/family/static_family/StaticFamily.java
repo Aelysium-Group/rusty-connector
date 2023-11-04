@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
@@ -34,8 +35,8 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
     protected UnavailableProtocol unavailableProtocol;
     protected ResidenceDataEnclave dataEnclave;
 
-    private StaticFamily(String name, MySQLStorage mySQLStorage, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration, String parentFamily) throws Exception {
-        super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
+    private StaticFamily(String name, LoadBalancer loadBalancer, String parentFamily, Whitelist whitelist, MySQLStorage mySQLStorage, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws Exception {
+        super(name, loadBalancer, parentFamily, whitelist);
         this.unavailableProtocol = unavailableProtocol;
         this.homeServerExpiration = homeServerExpiration;
         this.dataEnclave = new ResidenceDataEnclave(mySQLStorage);
@@ -83,45 +84,35 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
             api.services().whitelist().add(whitelist);
         }
 
-        StaticFamily family = null;
+        LoadBalancer loadBalancer;
         switch (Enum.valueOf(AlgorithmType.class, staticFamilyConfig.getFirstConnection_loadBalancing_algorithm())) {
-            case ROUND_ROBIN -> family = new StaticFamily(
-                    familyName,
-                    storage,
-                    whitelist,
-                    RoundRobin.class,
+            case ROUND_ROBIN -> loadBalancer = new RoundRobin(
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
-                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
-                    staticFamilyConfig.getParent_family()
+                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts()
             );
-            case LEAST_CONNECTION -> family = new StaticFamily(
-                    familyName,
-                    storage,
-                    whitelist,
-                    LeastConnection.class,
+            case LEAST_CONNECTION -> loadBalancer = new LeastConnection(
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
-                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
-                    staticFamilyConfig.getParent_family()
+                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts()
             );
-            case MOST_CONNECTION -> family = new StaticFamily(
-                    familyName,
-                    storage,
-                    whitelist,
-                    MostConnection.class,
+            case MOST_CONNECTION -> loadBalancer = new MostConnection(
                     staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
                     staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
-                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                    staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(),
-                    staticFamilyConfig.getParent_family()
+                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts()
             );
+            default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
+
+        StaticFamily family = new StaticFamily(
+                familyName,
+                loadBalancer,
+                staticFamilyConfig.getParent_family(),
+                whitelist,
+                storage,
+                staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
+                staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+        );
 
         if(family == null) throw new RuntimeException("The name used for " + familyName + "'s load balancer is invalid!");
 

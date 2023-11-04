@@ -140,6 +140,32 @@ family-anchor:
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                     Family Injection                     #
+#                                                          #
+#               ----------------------------               #
+#                                                          #
+# | Family injection is similar to Velocity's forced hosts #
+# | system.                                                #
+#                                                          #
+# | It lets players connect to your network from certain   #
+# | hosts, and it will connect them directly to a          #
+# | specific family.                                       #
+#               -----------------------------              #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+family-injection:
+    enabled: false
+
+    #
+    # List as many injectors as you'd like!
+    #
+    injectors:
+        - host: "join.aelysium.group"
+          family: "lobby"
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                           Hub                            #
 #                                                          #
 #               ---------------------------                #

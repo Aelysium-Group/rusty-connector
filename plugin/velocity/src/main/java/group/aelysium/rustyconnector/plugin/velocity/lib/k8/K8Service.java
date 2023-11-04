@@ -1,8 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.k8;
 
 import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.K8PlayerServer;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.Configuration;
@@ -20,9 +18,9 @@ public class K8Service implements Service {
 
     public K8Service() throws IOException {
         this.client = Config.defaultClient();
-        Configuration.setDefaultApiClient(this.client);
+        this.client.setApiKey();
 
-        this.api = new CoreV1Api();
+        this.api = new CoreV1Api(this.client);
     }
 
     public K8AutoScalerService autoscalers() {

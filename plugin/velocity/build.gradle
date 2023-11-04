@@ -11,6 +11,7 @@ dependencies {
     implementation "one.microstream:microstream-afs-sql:${project.microstream_sql_version}"
     implementation "org.mariadb.jdbc:mariadb-java-client:${project.mariadb_version}"
     implementation "io.kubernetes:client-java:${project.kubernetes_version}"
+    implementation "de.gesundkrank.jskills:jskills:${project.jskills_version}"
 
     // Dev Only
     shadow project(path: ':core', configuration: 'shadow')
