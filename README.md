@@ -19,12 +19,12 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://github.com/Aelysium-Group/rusty-connector/wiki"><img src="./blob/images/logo/rc-logo.webp"></a>
+    <a href="https://wiki.aelysium.group/rusty-connector/"><img src="./blob/images/logo/rc-logo.webp"></a>
   </td>
   <td valign="top">
     <h3>Wiki</h3>
     <p>
-      Wanna learn how to get started? <a href="https://wiki.aelysium.group/">Look here</a>!
+      Wanna learn how to get started? <a href="https://wiki.aelysium.group/rusty-connector/">Look here</a>!
     </p>
   </td>
 </tr>
