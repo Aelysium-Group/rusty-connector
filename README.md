@@ -24,7 +24,7 @@
   <td valign="top">
     <h3>Wiki</h3>
     <p>
-      Wanna learn how to get started? <a href="https://github.com/Aelysium-Group/rusty-connector/wiki">Look here</a>!
+      Wanna learn how to get started? <a href="https://wiki.aelysium.group/">Look here</a>!
     </p>
   </td>
 </tr>
@@ -122,24 +122,6 @@
 
 ## 🌌 Networks Served ([Click to view](https://bstats.org/plugin/velocity/RustyConnector/17972)):
 [![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)](https://bstats.org/signatures/velocity/RustyConnector.svg)
-
----
-
-# 📖 Wiki
-### [Home](https://github.com/Aelysium-Group/rusty-connector/wiki)
-### [FAQ](https://github.com/Aelysium-Group/rusty-connector/wiki#faq)
-### [Getting Started](https://github.com/Aelysium-Group/rusty-connector/wiki/Getting-Started-(First-Time))
-  - [Installation](https://github.com/Aelysium-Group/rusty-connector/wiki/Getting-Started-(First-Time))
-  - [How it works](https://github.com/Aelysium-Group/rusty-connector/wiki/Getting-Started-(First-Time)#how-it-works)
-  - [Families](https://github.com/Aelysium-Group/rusty-connector/wiki/Family)
-  - [Whitelists](https://github.com/Aelysium-Group/rusty-connector/wiki/Whitelist)
-  - [Load Balancing](https://github.com/Aelysium-Group/rusty-connector/wiki/Family#load-balancing)
-### [Commands](https://github.com/Aelysium-Group/rusty-connector/wiki/Commands)
-### [Permissions](https://github.com/Aelysium-Group/rusty-connector/wiki/Permissions)
-### [Configs](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration)
-  - [RC-Velocity](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-v2#rc-velocity)
-  - [RC-Paper](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-v2#rc-paper)
-### [Config Migration](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration)
 
 ## 🌐 Language Switch
 
