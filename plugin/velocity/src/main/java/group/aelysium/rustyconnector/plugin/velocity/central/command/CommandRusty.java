@@ -27,6 +27,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.K8PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
@@ -50,6 +51,11 @@ public final class CommandRusty {
             .then(Debug.build(flame, logger, messageCacheService))
             .then(Reload.build(flame, logger, messageCacheService))
             .then(K8.build(flame, logger, messageCacheService))
+            .then(LiteralArgumentBuilder.<CommandSource>literal("hug")
+                    .executes(context -> {
+                        logger.send(Component.text("Awwwwww! Hug <3", NamedTextColor.LIGHT_PURPLE));
+                        return Command.SINGLE_SUCCESS;
+                    }))
             .build();
 
         // BrigadierCommand implements Command
