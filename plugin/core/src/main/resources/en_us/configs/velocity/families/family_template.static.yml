@@ -124,32 +124,32 @@ consecutive-connections:
     home-server:
         if-unavailable: CANCEL_CONNECTION_ATTEMPT
 
-############################################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                                Expiration                                #
-#                                                                          #
-#                       ---------------------------                        #
-#                                                                          #
-# | Set whether a player's home server should expire                       #
-# | after a certain amount of time.                                        #
-#                                                                          #
-# | Set to "NEVER" if you don't want a player's home                       #
-# | server to ever expire.                                                 #
-#                                                                          #
-# | This data value is a Liquid Timestamp. Read more here:                 #
-# https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
-#                                                                          #
-#                       ---------------------------                        #
-#                                   NOTE                                   #
-#               If you activate expiration (changing it from               #
-#               `NEVER` to an actual value.)                               #
-#               Any already existing home servers which were               #
-#               originally set as `NEVER` will be updated to               #
-#               expire at `expiration` amount of time from now.            #
-#                       ---------------------------                        #
-#                                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################################
+#################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                                Expiration                                     #
+#                                                                               #
+#                       ---------------------------                             #
+#                                                                               #
+# | Set whether a player's home server should expire                            #
+# | after a certain amount of time.                                             #
+#                                                                               #
+# | Set to "NEVER" if you don't want a player's home                            #
+# | server to ever expire.                                                      #
+#                                                                               #
+# | This data value is a Liquid Timestamp. Read more here:                      #
+#  https://wiki.aelysium.group/rusty-connector/docs/concepts/liquid_timestamps  #
+#                                                                               #
+#                       ---------------------------                             #
+#                                   NOTE                                        #
+#               If you activate expiration (changing it from                    #
+#               `NEVER` to an actual value.)                                    #
+#               Any already existing home servers which were                    #
+#               originally set as `NEVER` will be updated to                    #
+#               expire at `expiration` amount of time from now.                 #
+#                       ---------------------------                             #
+#                                                                               #
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#################################################################################
         expiration: NEVER
 
 whitelist:

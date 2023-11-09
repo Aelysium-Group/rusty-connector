@@ -90,7 +90,7 @@ allow-messaging: true
 #              rustyconnector.command.friends              #              rustyconnector.command.unfriend             #
 #               ----------------------------               #               ----------------------------               #
 #                          Usage:                          #                          Usage:                          #
-#                        /friends                          #                   /unfriend <username>                   #
+#                         /friends                         #                   /unfriend <username>                   #
 #               ----------------------------               #               ----------------------------               #
 #                                                          #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

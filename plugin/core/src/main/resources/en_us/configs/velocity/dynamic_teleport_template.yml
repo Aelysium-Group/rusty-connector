@@ -82,29 +82,29 @@ tpa:
     #
     ignore-player-cap: false
 
-    ############################################################################
-    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-    #                                Expiration                                #
-    #                                                                          #
-    #                       ---------------------------                        #
-    # | How long a pending tpa request can exist for before                    #
-    # | it expires. Players are not allowed to issue new tpa requests if       #
-    # | they already have one pending.                                         #
-    #                                                                          #
-    # | If a player's tpa request is accepted or denied before it expires,     #
-    # | they will be able to issue a new tpa request immediately.              #
-    # | Otherwise, they must wait for their current request to expire          #
-    # | before issuing a new one.                                              #
-    #                                                                          #
-    # | Players will receive a notification in-chat if their request expires.  #
-    #                                                                          #
-    # | This data value is a Liquid Timestamp. Read more here:                 #
-    # https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
-    #                                                                          #
-    #   NOTE: The Liquid Timestamp "NEVER" is not allowed here!                #
-    #                                                                          #
-    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-    ############################################################################
+    #################################################################################
+    #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                                Expiration                                     #
+    #                                                                               #
+    #                       ---------------------------                             #
+    # | How long a pending tpa request can exist for before                         #
+    # | it expires. Players are not allowed to issue new tpa requests if            #
+    # | they already have one pending.                                              #
+    #                                                                               #
+    # | If a player's tpa request is accepted or denied before it expires,          #
+    # | they will be able to issue a new tpa request immediately.                   #
+    # | Otherwise, they must wait for their current request to expire               #
+    # | before issuing a new one.                                                   #
+    #                                                                               #
+    # | Players will receive a notification in-chat if their request expires.       #
+    #                                                                               #
+    # | This data value is a Liquid Timestamp. Read more here:                      #
+    #  https://wiki.aelysium.group/rusty-connector/docs/concepts/liquid_timestamps  #
+    #                                                                               #
+    #   NOTE: The Liquid Timestamp "NEVER" is not allowed here!                     #
+    #                                                                               #
+    #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #################################################################################
     expiration: 5 Minutes
 
 ############################################################

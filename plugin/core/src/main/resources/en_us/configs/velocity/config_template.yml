@@ -48,7 +48,7 @@
 # If you need help updating your configs from an older version;
 # take a look at our config migration docs:
 #
-# https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
+# https://wiki.aelysium.group/rusty-connector/docs/updating/
 #
 version: 6
 
@@ -59,7 +59,7 @@ version: 6
 #               ---------------------------                #
 # | RustyConnector attempts to be as flexible as possible  #
 # | when configuring whitelists!                           #
-# | To setup a whitelist, you'll need to navigate to the   #
+# | To set up a whitelist, you'll need to navigate to the  #
 # | "whitelists" folder and follow the directions in the   #
 # | provided whitelist-template.                           #
 #                                                          #
@@ -75,8 +75,8 @@ version: 6
 ############################################################
 whitelist:
 #
-# If you set this to be on. You will be turning on a whitelist which will **effect your entire proxy**!
-# If you only want to effect certain families or individual servers. Look into the appropriate configuration locations!
+# If you set this to be on. You will be turning on a whitelist which will affect your entire proxy!
+# If you only want to affect certain families or individual servers. Look into the appropriate configuration locations!
 #
     enabled: false
 
@@ -86,17 +86,6 @@ whitelist:
 #
     name: "whitelist-template"
 
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                        Services                          #
-#                                                          #
-#               ---------------------------                #
-# | Services are small, in-built applications that         #
-# | carry out specific duties within RustyConnector        #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
 services:
 #
 # Manages the lifecycles of servers.
