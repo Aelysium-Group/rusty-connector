@@ -6,16 +6,6 @@
 # | Load balancing is the system through which networks    #
 # | manage player influxes by spreading out players        #
 # | across various server nodes.                           #
-#                                                          #
-# | In static families, load balancing only effects the    #
-# | first time a player connects to the family.            #
-# | Once the player connects for the first time, the       #
-# | server they connected to will be remembered and        #
-# | they'll be joined to that server on                    #
-# | consecutive connections in the future too.             #
-#                                                          #
-# | The server that get's linked to a player is called     #
-# | that player's "Home Server".                           #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -28,8 +18,8 @@
 #               ---------------------------                #
 # | Depending on your needs, you might want to balance     #
 # | player influxes in various ways.                       #
-# | RustyConnector currently supports the following.       #
-# | balancing algorithms if there are other algorithms     #
+# | RustyConnector currently supports the following        #
+# | balancing algorithms, if there are other algorithms    #
 # | you'd like to see in the future, let us know!          #
 #                                                          #
 #  ⚫ LEAST_CONNECTION -                                   #
@@ -66,7 +56,7 @@ algorithm: ROUND_ROBIN
 #                                                          #
 # | `weight` is defined in your individual server configs. #
 #                                                          #
-# | If multiple server are set to be the same weight       #
+# | If multiple servers are set to be the same weight      #
 # | level, the load balancer will use `algorithm` on those #
 # | servers until they have been filled. It will then step #
 # | to the next, lower, weight level and continue.         #

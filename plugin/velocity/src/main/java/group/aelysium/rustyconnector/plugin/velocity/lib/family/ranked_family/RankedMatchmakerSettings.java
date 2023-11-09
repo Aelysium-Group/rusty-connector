@@ -12,6 +12,5 @@ public record RankedMatchmakerSettings(
         RankedTeamGame.Settings teamSettings,
         RankedGameScoringType scoringType,
         double variance,
-        MatchmakerExpansionSettings expansionSetting,
         LiquidTimestamp interval
 ) {}

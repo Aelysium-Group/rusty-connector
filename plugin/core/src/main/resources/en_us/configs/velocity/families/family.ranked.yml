@@ -180,46 +180,6 @@ ranking:
         #
         matchmaking-interval: 10 SECONDS
 
-        #
-        # Controls the criteria by which the matchmaker is allowed to expand its search.
-        # If the matchmaker fails to create a new match, it will wait for the amount of time listed in `matchmaking-interval`
-        # and then expand `variance` by the `interval` listed below.
-        # It will keep expanding until `max-variance` is reached or until a match is made.
-        # If `max-variance` is reached but no match is made, the matchmaker will stay at `max-variance` until a match is made.
-        #
-        # If the matchmaker doesn't have any players in it, or not enough players to create even 1 match, it won't expand.
-        # The matchmaker only expands if it has enough players to create at least 1 match, but for some reason it's not able to.
-        #
-        expansion:
-            #
-            # If the matchmaker is unable to find enough players to start a game with the currently set `variance`
-            # Should it be allowed to increase the `variance` temporarily to find more players?
-            #
-            enabled: true
-
-            #
-            # The amount to add to `variance` during an expansion.
-            # When expansion occurs, literally it's calculated as: `newVariance = oldVariance + interval`
-            # If `variance` is 0.2 and `interval` is 0.1; the new variance will be 0.3.
-            #
-            # Once a match is found and a game is able to be started, variance will reset to it's original value.
-            #
-            interval: 0.1
-
-            #
-            # The maximum variance that the matchmaker is allowed to expand to.
-            # Must be a number greater than `variance`.
-            # The maximum number is 1 meaning that all players can be included in a match regardless of rank.
-            #
-            max-variance: 1.0
-
-            #
-            # If `max-variance` is reached; next time the matchmaker attempts to expand,
-            # should it kick all players from the matchmaking queue?
-            # If enabled; it will inform them that it couldn't find enough players in time to start a game.
-            #
-            kick-players: false
-
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                      Parent Family                       #

@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
@@ -24,62 +25,60 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class RootFamily extends ScalarFamily implements IRootFamily<PlayerServer> {
-    private RootFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts, null);
+    private RootFamily(String name, Whitelist whitelist, LoadBalancer loadBalancer) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        super(name, loadBalancer, null, whitelist);
     }
 
     public static RootFamily init(DependencyInjector.DI2<List<Component>, LangService> dependencies, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        ScalarFamilyConfig scalarFamilyConfig = new ScalarFamilyConfig(new File(String.valueOf(api.dataFolder()), "families/"+familyName+".scalar.yml"));
-        if(!scalarFamilyConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
+        ScalarFamilyConfig config = new ScalarFamilyConfig(api.dataFolder(), familyName);
+        if(!config.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
         }
-        scalarFamilyConfig.register();
+        config.register();
+
+        LoadBalancerConfig loadBalancerConfig = new LoadBalancerConfig(api.dataFolder(), config.loadBalancer());
+        if(!loadBalancerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_LOAD_BALANCER_TEMPLATE)) {
+            throw new IllegalStateException("Unable to load or create load_balancer/"+config.loadBalancer()+".yml!");
+        }
+        loadBalancerConfig.register();
 
         Whitelist whitelist = null;
-        if(scalarFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(dependencies, scalarFamilyConfig.getWhitelist_name());
+        if(config.isWhitelist_enabled()) {
+            whitelist = Whitelist.init(dependencies, config.getWhitelist_name());
 
             api.services().whitelist().add(whitelist);
         }
 
-        if(!scalarFamilyConfig.getParent_family().equals(""))
+        if(!config.getParent_family().equals(""))
             logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("The root family isn't allowed to have a parent family defined! Ignoring...", NamedTextColor.YELLOW));
 
-        switch (Enum.valueOf(AlgorithmType.class, scalarFamilyConfig.getLoadBalancing_algorithm())) {
-            case ROUND_ROBIN -> {
-                return new RootFamily(
-                        familyName,
-                        whitelist,
-                        RoundRobin.class,
-                        scalarFamilyConfig.isLoadBalancing_weighted(),
-                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts()
-                );
-            }
-            case LEAST_CONNECTION -> {
-                return new RootFamily(
-                        familyName,
-                        whitelist,
-                        LeastConnection.class,
-                        scalarFamilyConfig.isLoadBalancing_weighted(),
-                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts()
-                );
-            }
-            case MOST_CONNECTION -> {
-                return new RootFamily(
-                        familyName,
-                        whitelist,
-                        MostConnection.class,
-                        scalarFamilyConfig.isLoadBalancing_weighted(),
-                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts()
-                );
-            }
+        LoadBalancer loadBalancer;
+        switch (loadBalancerConfig.getAlgorithm()) {
+            case ROUND_ROBIN -> loadBalancer = new RoundRobin(
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
+            );
+            case LEAST_CONNECTION -> loadBalancer = new LeastConnection(
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
+            );
+            case MOST_CONNECTION -> loadBalancer = new MostConnection(
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
+            );
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
+
+        return new RootFamily(
+                familyName,
+                whitelist,
+                loadBalancer
+        );
     }
 }

@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
@@ -70,35 +71,41 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
         LangService lang = dependencies.d2();
         MySQLStorage storage = dependencies.d3();
 
-        StaticFamilyConfig staticFamilyConfig = new StaticFamilyConfig(new File(String.valueOf(api.dataFolder()), "families/" + familyName + ".static.yml"));
-        if (!staticFamilyConfig.generate(dependencies.d1(), lang, LangFileMappings.VELOCITY_STATIC_FAMILY_TEMPLATE)) {
+        StaticFamilyConfig config = new StaticFamilyConfig(api.dataFolder(), familyName);
+        if (!config.generate(dependencies.d1(), lang, LangFileMappings.VELOCITY_STATIC_FAMILY_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create families/" + familyName + ".static.yml!");
         }
-        staticFamilyConfig.register();
+        config.register();
+
+        LoadBalancerConfig loadBalancerConfig = new LoadBalancerConfig(api.dataFolder(), config.getFirstConnection_loadBalancer());
+        if(!loadBalancerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_LOAD_BALANCER_TEMPLATE)) {
+            throw new IllegalStateException("Unable to load or create load_balancer/"+config.getFirstConnection_loadBalancer()+".yml!");
+        }
+        loadBalancerConfig.register();
 
         Whitelist whitelist = null;
-        if (staticFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(inject(bootOutput, lang), staticFamilyConfig.getWhitelist_name());
+        if (config.isWhitelist_enabled()) {
+            whitelist = Whitelist.init(inject(bootOutput, lang), config.getWhitelist_name());
 
             api.services().whitelist().add(whitelist);
         }
 
         LoadBalancer loadBalancer;
-        switch (Enum.valueOf(AlgorithmType.class, staticFamilyConfig.getFirstConnection_loadBalancing_algorithm())) {
+        switch (loadBalancerConfig.getAlgorithm()) {
             case ROUND_ROBIN -> loadBalancer = new RoundRobin(
-                    staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
-                    staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
-                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts()
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
             );
             case LEAST_CONNECTION -> loadBalancer = new LeastConnection(
-                    staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
-                    staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
-                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts()
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
             );
             case MOST_CONNECTION -> loadBalancer = new MostConnection(
-                    staticFamilyConfig.isFirstConnection_loadBalancing_weighted(),
-                    staticFamilyConfig.isFirstConnection_loadBalancing_persistence_enabled(),
-                    staticFamilyConfig.getFirstConnection_loadBalancing_persistence_attempts()
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
             );
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
@@ -106,17 +113,17 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
         StaticFamily family = new StaticFamily(
                 familyName,
                 loadBalancer,
-                staticFamilyConfig.getParent_family(),
+                config.getParent_family(),
                 whitelist,
                 storage,
-                staticFamilyConfig.getConsecutiveConnections_homeServer_ifUnavailable(),
-                staticFamilyConfig.getConsecutiveConnections_homeServer_expiration()
+                config.getConsecutiveConnections_homeServer_ifUnavailable(),
+                config.getConsecutiveConnections_homeServer_expiration()
         );
 
         if(family == null) throw new RuntimeException("The name used for " + familyName + "'s load balancer is invalid!");
 
         try {
-            family.dataEnclave().updateExpirations(staticFamilyConfig.getConsecutiveConnections_homeServer_expiration(), family);
+            family.dataEnclave().updateExpirations(config.getConsecutiveConnections_homeServer_expiration(), family);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("There was an issue with MySQL! " + e.getMessage());

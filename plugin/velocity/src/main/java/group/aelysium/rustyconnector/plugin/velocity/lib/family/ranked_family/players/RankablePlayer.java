@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players;
 
+import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -62,5 +63,10 @@ public class RankablePlayer implements ISortable {
     @Override
     public int hashCode() {
         return Objects.hash(player);
+    }
+
+
+    public static RankablePlayer from(ResolvablePlayer player, String game) {
+        return new RankablePlayer(player, player.scorecard(game));
     }
 }

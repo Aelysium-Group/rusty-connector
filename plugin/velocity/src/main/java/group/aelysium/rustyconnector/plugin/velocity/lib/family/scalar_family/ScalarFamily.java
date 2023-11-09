@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IScalarFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
@@ -53,35 +54,41 @@ public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<P
     public static ScalarFamily init(DependencyInjector.DI2<List<Component>, LangService> dependencies, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Tinder api = Tinder.get();
 
-        ScalarFamilyConfig scalarFamilyConfig = new ScalarFamilyConfig(new File(String.valueOf(api.dataFolder()), "families/"+familyName+".scalar.yml"));
-        if(!scalarFamilyConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
+        ScalarFamilyConfig config = new ScalarFamilyConfig(api.dataFolder(), familyName);
+        if(!config.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
         }
-        scalarFamilyConfig.register();
+        config.register();
+
+        LoadBalancerConfig loadBalancerConfig = new LoadBalancerConfig(api.dataFolder(), config.loadBalancer());
+        if(!loadBalancerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_LOAD_BALANCER_TEMPLATE)) {
+            throw new IllegalStateException("Unable to load or create load_balancer/"+config.loadBalancer()+".yml!");
+        }
+        loadBalancerConfig.register();
 
         Whitelist whitelist = null;
-        if(scalarFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(dependencies, scalarFamilyConfig.getWhitelist_name());
+        if(config.isWhitelist_enabled()) {
+            whitelist = Whitelist.init(dependencies, config.getWhitelist_name());
 
             api.services().whitelist().add(whitelist);
         }
 
         LoadBalancer loadBalancer;
-        switch (Enum.valueOf(AlgorithmType.class, scalarFamilyConfig.getLoadBalancing_algorithm())) {
+        switch (loadBalancerConfig.getAlgorithm()) {
             case ROUND_ROBIN -> loadBalancer = new RoundRobin(
-                    scalarFamilyConfig.isLoadBalancing_weighted(),
-                    scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                    scalarFamilyConfig.getLoadBalancing_persistence_attempts()
-                    );
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
+            );
             case LEAST_CONNECTION -> loadBalancer = new LeastConnection(
-                    scalarFamilyConfig.isLoadBalancing_weighted(),
-                    scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                    scalarFamilyConfig.getLoadBalancing_persistence_attempts()
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
             );
             case MOST_CONNECTION -> loadBalancer = new MostConnection(
-                    scalarFamilyConfig.isLoadBalancing_weighted(),
-                    scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                    scalarFamilyConfig.getLoadBalancing_persistence_attempts()
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
             );
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
@@ -89,7 +96,7 @@ public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<P
         return new ScalarFamily(
                 familyName,
                 loadBalancer,
-                scalarFamilyConfig.getParent_family(),
+                config.getParent_family(),
                 whitelist
         );
     }

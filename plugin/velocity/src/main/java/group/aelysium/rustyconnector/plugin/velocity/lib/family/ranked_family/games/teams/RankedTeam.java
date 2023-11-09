@@ -65,5 +65,5 @@ public class RankedTeam implements IRanker, ISortable {
         return 0;
     }
 
-    public record Settings(String teamName, int maxPlayers, String game) {}
+    public record Settings(String teamName, int maxPlayers) {}
 }

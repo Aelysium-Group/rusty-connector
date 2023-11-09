@@ -12,17 +12,22 @@ import java.util.List;
 import java.util.Vector;
 
 public class RankedGameManager implements Service {
+    protected String name;
     protected Vector<IRankedGame> games = new Vector<>();
     protected final PlayerRankLadder waitingPlayers;
     protected RankedMatchmakerSettings settings;
 
-    public RankedGameManager(RankedMatchmakerSettings settings, PlayerRankLadder waitingPlayers) {
+    public RankedGameManager(String name, RankedMatchmakerSettings settings, PlayerRankLadder waitingPlayers) {
+        this.name = name;
         this.settings = settings;
         this.waitingPlayers = waitingPlayers;
     }
 
     public RankedGameRankerType type() {
         return settings.type();
+    }
+    public String name() {
+        return this.name;
     }
 
     public IRankedGame start(List<RankablePlayer> players) {

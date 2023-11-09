@@ -11,14 +11,13 @@ import java.util.List;
 public class RankedMatchmakingSupervisor extends ClockService {
     private static int MAX_RANK = 50;
     private static int MIN_RANK = 0;
-
-    protected List<RankedFamily> families;
+    protected RankedFamily family;
     protected RankedMatchmakerSettings settings;
 
-    public RankedMatchmakingSupervisor(RankedMatchmakerSettings settings, List<RankedFamily> families) {
-        super(4);
+    public RankedMatchmakingSupervisor(RankedMatchmakerSettings settings, RankedFamily family) {
+        super(2);
         this.settings = settings;
-        this.families = families;
+        this.family = family;
     }
 
     /**
@@ -28,7 +27,7 @@ public class RankedMatchmakingSupervisor extends ClockService {
      * @param variance The variance that's allowed for the players to be a part of this game.
      * @throws IndexOutOfBoundsException When a player's rank is outside the variance allowed.
      */
-    public void handlePartition(RankedFamily family, List<RankablePlayer> players, double variance) {
+    protected void handlePartition(RankedFamily family, List<RankablePlayer> players, double variance) {
         int middle = (int) Math.round(players.size() * 0.5);
         double pivot = players.get(middle).scorecard().rating().getConservativeRating();
         double bottom = players.get(0).scorecard().rating().getConservativeRating();
@@ -41,11 +40,10 @@ public class RankedMatchmakingSupervisor extends ClockService {
     }
 
     /**
-     * Run a partition. If conditions are correct, expand the search and run another partition.
-     * Method is recursive and will keep expanding and partitioning until {@link MatchmakerExpansionSettings#maxVariance()} is met.
+     * Make as many partitions as possible and handle them.
      * @param query The query to start with.
      */
-    protected void dynamicPartition(RankedFamily family, PlayerRankLadder.PartitionQuery query) {
+    protected void handleMultiplePartitions(RankedFamily family, PlayerRankLadder.PartitionQuery query) {
         try {
             List<List<RankablePlayer>> partitions = family.playerQueue().partition(query);
 
@@ -57,37 +55,33 @@ public class RankedMatchmakingSupervisor extends ClockService {
                 } catch (Exception ignore) {
                 }
             }
-        } catch (IndexOutOfBoundsException ignore) {
-            this.dynamicPartition(family, query.expand(settings.expansionSetting()));
         } catch (Exception ignore) {}
     }
 
     public void startSupervising() {
         this.scheduleDelayed(() -> {
-            for (RankedFamily family : this.families) {
-                try {
-                    int max = family.gameManager().maxAllowedPlayers();
-                    int min = family.gameManager().minAllowedPlayers();
-                    double variance = settings.variance();
+            try {
+                int max = family.gameManager().maxAllowedPlayers();
+                int min = family.gameManager().minAllowedPlayers();
+                double variance = settings.variance();
 
-                    if(family.playerQueue().size() < min) continue;
-
-
-                    family.playerQueue().sort();
-                    List<RankablePlayer> players = family.playerQueue().players();
-
-                    if (players.size() <= max) {
-                        this.handlePartition(family, family.playerQueue().players(), variance);
-                        continue;
-                    } // FIX RECURSSION ITS ALL BULLSHIT RN
+                if(family.playerQueue().size() < min) return;
 
 
-                    PlayerRankLadder.PartitionQuery query = new PlayerRankLadder.PartitionQuery(settings.variance(), min, max);
-                    this.dynamicPartition(family, query);
-                } catch (Exception e) {
-                    Tinder.get().logger().send(Component.text("There was a fatal error while matchmaking the family: "+family.name()));
-                    e.printStackTrace();
+                family.playerQueue().sort();
+                List<RankablePlayer> players = family.playerQueue().players();
+
+                if (players.size() <= max) {
+                    this.handlePartition(family, family.playerQueue().players(), variance);
+                    return;
                 }
+
+
+                PlayerRankLadder.PartitionQuery query = new PlayerRankLadder.PartitionQuery(settings.variance(), min, max);
+                this.handleMultiplePartitions(family, query);
+            } catch (Exception e) {
+                Tinder.get().logger().send(Component.text("There was a fatal error while matchmaking the family: "+family.name()));
+                e.printStackTrace();
             }
 
             this.startSupervising();

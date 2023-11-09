@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.toolkit.velocity.load_balancing;
 public enum AlgorithmType {
     /**
      * Used when the proxy should fill servers, in order.
-     * Round robin iterates over the entire server queue, in order, placing players into the servers one by one.
+     * Round-robin iterates over the entire server queue, in order, placing players into the servers one by one.
      */
     ROUND_ROBIN,
 
