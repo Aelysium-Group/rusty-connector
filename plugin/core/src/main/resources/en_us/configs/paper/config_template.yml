@@ -47,7 +47,7 @@
 # If you need help updating your configs from an older version;
 # take a look at our config migration docs:
 #
-# https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration
+# https://wiki.aelysium.group/rusty-connector/docs/updating/
 #
 version: 5
 

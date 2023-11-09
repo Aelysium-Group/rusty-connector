@@ -5,9 +5,6 @@ import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
-/**
- * Thank you to <a href="https://github.com/LuckPerms/LuckPerms">...</a> for inspiring this implementation.
- */
 public interface DiscordWebhookMessage {
     String IMAGE_PROXY__REGISTER_ALL = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480087037591653/PROXY__REGISTER_ALL.png";
     String IMAGE_PROXY__SERVER_REGISTER = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480087289237537/PROXY__SERVER_REGISTER.png";
