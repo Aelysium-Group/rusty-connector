@@ -26,7 +26,7 @@ root-family:
     # If a player is kicked or disconnected from a family in this proxy.
     # Should the root family catch them? If not, they will disconnect from the whole network.
     # This setting is great if you want a player to join back into the lobby if they get kicked from
-    # a gamemode or sub-family.
+    # a gamemode or subfamily.
     #
     catch-disconnecting-players: false
 

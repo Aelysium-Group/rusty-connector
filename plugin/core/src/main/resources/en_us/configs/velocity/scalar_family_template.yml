@@ -132,7 +132,7 @@ whitelist:
 #               ---------------------------                #
 # | RustyConnector attempts to be as flexible as possible  #
 # | when configuring whitelists!                           #
-# | To setup a whitelist, you'll need to navigate to the   #
+# | To set up a whitelist, you'll need to navigate to the  #
 # | "whitelists" folder and follow the directions in the   #
 # | provided whitelist-template.                           #
 #                                                          #

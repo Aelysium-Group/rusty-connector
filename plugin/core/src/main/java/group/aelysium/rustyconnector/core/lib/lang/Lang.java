@@ -4,16 +4,9 @@ import group.aelysium.rustyconnector.core.central.PluginLogger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 
-import java.util.List;
-
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.JoinConfiguration.newlines;
 
-/**
- * Thank you to https://github.com/LuckPerms/LuckPerms for inspiring this implementation.
- * <p>
- * Some text generated using: https://patorjk.com/software/taag/
- */
 @SuppressWarnings("ConstantConditions")
 public class Lang {
     public final static String attachedWordmark = "RustyConnector:";

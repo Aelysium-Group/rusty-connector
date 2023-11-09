@@ -44,26 +44,26 @@ enabled: false
 #
 send-uri: true
 
-############################################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                             Session Duration                             #
-#                                                                          #
-#                       ---------------------------                        #
-# | The amount of time a user is allowed to remain logged into             #
-# | the dashboard while being afk.                                         #
-#                                                                          #
-# | Once a user's session expires, they will automatically be logged out.  #
-#                                                                          #
-# | Sessions will remain active as long as the user is active or until     #
-# | the session is forcefully terminated.                                  #
-#                                                                          #
-# | This data value is a Liquid Timestamp. Read more here:                 #
-# https://github.com/Aelysium-Group/rusty-connector/wiki/Liquid-Timestamps #
-#                                                                          #
-#   NOTE: The Liquid Timestamp must be at least 30 minutes.
-#                                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################################
+#################################################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                             Session Duration                                  #
+#                                                                               #
+#                       ---------------------------                             #
+# | The amount of time a user is allowed to remain logged into                  #
+# | the dashboard while being afk.                                              #
+#                                                                               #
+# | Once a user's session expires, they will automatically be logged out.       #
+#                                                                               #
+# | Sessions will remain active as long as the user is active or until          #
+# | the session is forcefully terminated.                                       #
+#                                                                               #
+# | This data value is a Liquid Timestamp. Read more here:                      #
+#  https://wiki.aelysium.group/rusty-connector/docs/concepts/liquid_timestamps  #
+#                                                                               #
+#   NOTE: The Liquid Timestamp must be at least 30 minutes.                     #
+#                                                                               #
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#################################################################################
 afk-expiration: 1 HOUR
 
 #
