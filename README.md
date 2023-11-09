@@ -116,7 +116,7 @@
 - ### ✅ Works with LuckPerms-Velocity
 - ### ✅ Works with Kubernetes
 - ### ✅ Works with Folia
-- ### ❌ Can give you a hug
+- ### ✅ Can give you a hug
 ---
 # 🎨 Statistics
 

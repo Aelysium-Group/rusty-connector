@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.config;
 
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

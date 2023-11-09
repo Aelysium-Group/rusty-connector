@@ -19,9 +19,13 @@
 # The root family. Once a player connects and is validated.
 # This is the family that they will automatically be routed to.
 #
-# The root family will ALWAYS be defined as a `scalar` family.
+# The root family MUST point to a scalar family!
 #
 root-family:
+    #
+    # The scalar family, or versioned family, to use as the root.
+    # The root family is not allowed to have a parent family.
+    #
     name: "lobby"
 
     #
@@ -45,7 +49,8 @@ root-family:
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-scalar: []
+scalar:
+    - "lobby" # the default lobby family
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -53,7 +58,7 @@ scalar: []
 #                                                          #
 #               ---------------------------                #
 #                                                          #
-# | Families defined here are optimized for stateful       #
+# | Static families are optimized for stateful             #
 # | minecraft gamemodes.                                   #
 #                                                          #
 # | When players join a static family, their initial       #
@@ -94,3 +99,45 @@ static: []
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 ranked: []
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                     Versioned Family                     #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Versioned families are fake families.                  #
+# | They don't actually exist.                             #
+#                                                          #
+# | A versioned family does not allow servers to be        #
+# | registered to it.                                      #
+# | Instead, you register other families to it. Then,      #
+# | when players connect to the versioned family, they     #
+# | will be connected to one of the sub families based     #
+# | on the version of Minecraft they are using.            #
+#                                                          #
+# | Versioned families are not allowed to have the same    #
+# | name as a regular family.                              #
+#                                                          #
+# | All target families used by a versioned families       #
+# | must be of the same type.                              #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+versioned-families: []
+## This is an example versioned family.
+## Versioned families are not allowed to use other versioned families as a target.
+## `target-family` must point to an already existing family.
+## You can also use sub versions such as 1.20.2.
+##
+##    - name: "lobby"
+##      mappings:
+##          - versions: 1.8, 1.9, 1.10, 1.11, 1.12
+##            target-family: "lobby-legacy"
+##          - versions: 1.13, 1.14, 1.15, 1.16, 1.17
+##            target-family: "lobby-old"
+##          - versions: 1.18, 1.19, 1.20
+##            target-family: "lobby-modern"

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players;
 
-import group.aelysium.rustyconnector.api.velocity.load_balancing.ISortable;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;

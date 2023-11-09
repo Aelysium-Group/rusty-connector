@@ -174,14 +174,28 @@ ranking:
         variance: 0.2
 
         #
+        # A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to build a match.
+        # This should be set relatively low depending on what you expect player influxes to be.
+        # Can't be set lower than `3 SECONDS`.
+        #
+        matchmaking-interval: 10 SECONDS
+
+        #
         # Controls the criteria by which the matchmaker is allowed to expand its search.
+        # If the matchmaker fails to create a new match, it will wait for the amount of time listed in `matchmaking-interval`
+        # and then expand `variance` by the `interval` listed below.
+        # It will keep expanding until `max-variance` is reached or until a match is made.
+        # If `max-variance` is reached but no match is made, the matchmaker will stay at `max-variance` until a match is made.
+        #
+        # If the matchmaker doesn't have any players in it, or not enough players to create even 1 match, it won't expand.
+        # The matchmaker only expands if it has enough players to create at least 1 match, but for some reason it's not able to.
         #
         expansion:
             #
             # If the matchmaker is unable to find enough players to start a game with the currently set `variance`
             # Should it be allowed to increase the `variance` temporarily to find more players?
             #
-            allowed: true
+            enabled: true
 
             #
             # The amount to add to `variance` during an expansion.
@@ -193,16 +207,11 @@ ranking:
             interval: 0.1
 
             #
-            # The amount of time (represented as a Liquid Timestamp) that the matchmaker has to wait before it's allowed to expand.
-            # Must be greater than `10 SECONDS`.
-            #
-            delay: 30 SECONDS
-
-            #
             # The maximum variance that the matchmaker is allowed to expand to.
             # Must be a number greater than `variance`.
+            # The maximum number is 1 meaning that all players can be included in a match regardless of rank.
             #
-            max-variance: 0.5
+            max-variance: 1.0
 
             #
             # If `max-variance` is reached; next time the matchmaker attempts to expand,

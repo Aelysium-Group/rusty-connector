@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.players.IPlayerService;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
 

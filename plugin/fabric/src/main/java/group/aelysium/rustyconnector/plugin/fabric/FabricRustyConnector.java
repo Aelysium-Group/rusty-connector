@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.fabric;
 
-import group.aelysium.rustyconnector.api.RustyConnectorAPI;
+import group.aelysium.rustyconnector.toolkit.RustyConnectorToolkit;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
@@ -23,11 +23,11 @@ public final class FabricRustyConnector implements ModInitializer {
         api.ignite();
         PluginLang.WORDMARK_RUSTY_CONNECTOR.send(api.logger(), api.flame().versionAsString());
 
-        RustyConnectorAPI.register(api);
+        RustyConnectorToolkit.register(api);
 
         ServerLifecycleEvents.SERVER_STARTING.register(server1 -> server = server1);
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            RustyConnectorAPI.unregister();
+            RustyConnectorToolkit.unregister();
             Tinder.get().flame().exhaust();
         });
     }

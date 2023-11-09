@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.parties.IParty;
-import group.aelysium.rustyconnector.api.velocity.parties.SwitchPower;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;

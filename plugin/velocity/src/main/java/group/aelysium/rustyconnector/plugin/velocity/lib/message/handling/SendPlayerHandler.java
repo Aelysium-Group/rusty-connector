@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.core.packet.IPacket;
-import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;

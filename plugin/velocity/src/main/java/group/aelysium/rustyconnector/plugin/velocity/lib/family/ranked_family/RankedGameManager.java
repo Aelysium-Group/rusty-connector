@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGameRankerType;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.solo.RankedSoloGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.teams.RankedTeam;

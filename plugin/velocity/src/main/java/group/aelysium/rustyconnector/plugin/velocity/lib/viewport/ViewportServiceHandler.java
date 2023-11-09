@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport;
 
 
-import group.aelysium.rustyconnector.api.core.serviceable.ServiceHandler;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.APIService;
 
 import java.util.Map;

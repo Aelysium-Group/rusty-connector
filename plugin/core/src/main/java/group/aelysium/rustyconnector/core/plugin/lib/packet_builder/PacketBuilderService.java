@@ -1,11 +1,11 @@
 package group.aelysium.rustyconnector.core.plugin.lib.packet_builder;
 
-import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
-import group.aelysium.rustyconnector.api.mc_loader.packet_builder.IPacketBuilderService;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
+import group.aelysium.rustyconnector.toolkit.mc_loader.packet_builder.IPacketBuilderService;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.api.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport;
 
-import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.api.mc_loader.dynamic_teleport.ICoordinateRequest;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.dynamic_teleport.ICoordinateRequest;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 
 import java.util.Optional;

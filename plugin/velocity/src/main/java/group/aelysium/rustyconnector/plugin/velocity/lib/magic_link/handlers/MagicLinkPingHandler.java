@@ -1,18 +1,16 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.core.packet.IPacket;
-import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
-import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
+import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
-import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.api.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
-import group.aelysium.rustyconnector.api.core.log_gate.GateKey;
+import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;

@@ -3,8 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.endpoint
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.api.velocity.util.Version;
-import group.aelysium.rustyconnector.api.core.UserPass;
+import group.aelysium.rustyconnector.toolkit.velocity.util.Version;
+import group.aelysium.rustyconnector.toolkit.core.UserPass;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.APIService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.APIResponse;

@@ -1,13 +1,15 @@
 package group.aelysium.rustyconnector.core.plugin.lib.magic_link;
 
-import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
-import group.aelysium.rustyconnector.api.mc_loader.magic_link.IMagicLinkService;
-import group.aelysium.rustyconnector.api.mc_loader.magic_link.MagicLinkStatus;
-import group.aelysium.rustyconnector.api.core.serviceable.ClockService;
+import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
+import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.IMagicLinkService;
+import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatus;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.plugin.lib.packet_builder.PacketBuilderService;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MagicLinkService extends ClockService implements IMagicLinkService<PacketBuilderService> {
@@ -35,7 +37,7 @@ public class MagicLinkService extends ClockService implements IMagicLinkService<
             }
 
             MagicLinkService.this.scheduleNextPing(packetBuilderService);
-        }, this.upcomingPingDelay.get());
+        }, LiquidTimestamp.from(this.upcomingPingDelay.get(), TimeUnit.SECONDS));
     }
 
     public void startHeartbeat(PacketBuilderService packetBuilderService) {

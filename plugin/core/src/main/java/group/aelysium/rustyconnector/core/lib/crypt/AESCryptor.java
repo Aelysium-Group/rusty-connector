@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.crypt;
 
-import group.aelysium.rustyconnector.api.core.crypt.IAESCryptor;
+import group.aelysium.rustyconnector.toolkit.core.crypt.IAESCryptor;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;

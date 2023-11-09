@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
 import de.gesundkrank.jskills.IPlayer;
-import group.aelysium.rustyconnector.api.velocity.players.IResolvablePlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.ScoreCard;

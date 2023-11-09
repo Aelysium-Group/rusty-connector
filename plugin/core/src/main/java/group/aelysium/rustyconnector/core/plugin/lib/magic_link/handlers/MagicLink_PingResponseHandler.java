@@ -1,11 +1,10 @@
 package group.aelysium.rustyconnector.core.plugin.lib.magic_link.handlers;
 
-import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.api.core.packet.IPacket;
-import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.api.mc_loader.magic_link.MagicLinkStatus;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatus;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.plugin.lib.magic_link.MagicLinkService;

@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors;
 
 import com.velocitypowered.api.command.CommandManager;
-import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.anchors.IAnchorService;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.anchors.IAnchorService;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
@@ -15,7 +15,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.lang.ref.WeakReference;
 import java.util.*;
 
 public class AnchorService implements IAnchorService<PlayerServer, PlayerFocusedFamily> {

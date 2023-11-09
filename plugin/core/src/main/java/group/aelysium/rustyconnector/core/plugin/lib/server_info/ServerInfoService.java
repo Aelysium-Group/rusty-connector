@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.core.plugin.lib.server_info;
 
-import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.api.mc_loader.server_info.IServerInfoService;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.server_info.IServerInfoService;
 import group.aelysium.rustyconnector.core.lib.crypt.MD5;
-import group.aelysium.rustyconnector.api.velocity.util.AddressUtil;
+import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 
 import java.net.InetSocketAddress;

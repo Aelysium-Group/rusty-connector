@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.family.static_family.IServerResidence;
-import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;

@@ -2,10 +2,10 @@ package group.aelysium.rustyconnector.core.lib.packets.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.api.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.api.velocity.util.ColorMapper;
+import group.aelysium.rustyconnector.toolkit.velocity.util.ColorMapper;
 import io.lettuce.core.KeyValue;
 import net.kyori.adventure.text.format.NamedTextColor;
 

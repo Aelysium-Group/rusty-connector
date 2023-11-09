@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.lang;
 
-import group.aelysium.rustyconnector.api.core.lang.ILangService;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.core.lang.ILangService;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 
 import java.io.*;
 import java.net.URL;

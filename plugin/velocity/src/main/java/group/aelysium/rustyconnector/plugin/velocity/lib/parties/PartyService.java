@@ -2,8 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.parties.IPartyService;
-import group.aelysium.rustyconnector.api.velocity.parties.PartyServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.PartyServiceSettings;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;

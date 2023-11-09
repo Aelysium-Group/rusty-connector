@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.k8;
 
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.*;
 import io.kubernetes.client.util.Config;

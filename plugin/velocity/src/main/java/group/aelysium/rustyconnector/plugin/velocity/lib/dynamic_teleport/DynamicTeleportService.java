@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport;
 
-import group.aelysium.rustyconnector.api.core.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.TPAServiceSettings;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.TPAServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
 public class DynamicTeleportService extends ServiceableService<DynamicTeleportServiceHandler> {
     protected DynamicTeleportService(Map<Class<? extends Service>, Service> services) {

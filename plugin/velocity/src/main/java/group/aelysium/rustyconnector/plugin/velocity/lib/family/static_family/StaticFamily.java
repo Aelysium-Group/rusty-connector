@@ -1,16 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.family.UnavailableProtocol;
-import group.aelysium.rustyconnector.api.velocity.family.static_family.IStaticFamily;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
+import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.api.velocity.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
@@ -28,7 +27,7 @@ import java.rmi.ConnectException;
 import java.util.List;
 import java.util.Optional;
 
-import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
 public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<PlayerServer> {
     protected LiquidTimestamp homeServerExpiration;

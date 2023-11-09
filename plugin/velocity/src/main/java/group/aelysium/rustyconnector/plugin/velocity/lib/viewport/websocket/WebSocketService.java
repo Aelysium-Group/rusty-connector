@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.websocket;
 
 import group.aelysium.rustyconnector.core.lib.crypt.MD5;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.rest.APIService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerChatEvent;

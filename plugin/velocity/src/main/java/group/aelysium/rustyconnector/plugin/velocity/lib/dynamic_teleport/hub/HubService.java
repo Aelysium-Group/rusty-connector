@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub;
 
 import com.velocitypowered.api.command.CommandManager;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.hub.IHubService;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.hub.IHubService;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.commands.CommandHub;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.events;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.Vector;
 

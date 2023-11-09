@@ -2,11 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
 import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.whitelist.IWhitelist;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config.WhitelistConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;

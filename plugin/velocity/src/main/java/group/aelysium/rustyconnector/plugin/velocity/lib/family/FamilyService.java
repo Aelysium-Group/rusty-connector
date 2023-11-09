@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
-import group.aelysium.rustyconnector.api.velocity.family.IFamilyService;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;

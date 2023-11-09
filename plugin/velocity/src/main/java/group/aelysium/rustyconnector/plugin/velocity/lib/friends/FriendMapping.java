@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
-import group.aelysium.rustyconnector.api.velocity.friends.IFriendMapping;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 
 import java.util.Objects;

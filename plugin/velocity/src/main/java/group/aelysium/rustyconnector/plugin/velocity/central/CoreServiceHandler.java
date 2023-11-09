@@ -1,12 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-import group.aelysium.rustyconnector.api.velocity.central.ICoreServiceHandler;
-import group.aelysium.rustyconnector.api.core.serviceable.ServiceHandler;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
+import group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;

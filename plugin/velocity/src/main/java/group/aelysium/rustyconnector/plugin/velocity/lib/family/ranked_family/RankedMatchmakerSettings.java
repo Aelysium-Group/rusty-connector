@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGameRankerType;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGameScoringType;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.solo.RankedSoloGame;
@@ -11,5 +12,6 @@ public record RankedMatchmakerSettings(
         RankedTeamGame.Settings teamSettings,
         RankedGameScoringType scoringType,
         double variance,
-        MatchmakerExpansionSettings expansionSetting
+        MatchmakerExpansionSettings expansionSetting,
+        LiquidTimestamp interval
 ) {}

@@ -14,7 +14,7 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Flame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -23,7 +23,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.St
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.k8.K8Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.K8PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;

@@ -2,11 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.family.scalar_family.IScalarFamily;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IScalarFamily;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.api.velocity.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
@@ -24,7 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.ConnectException;
 import java.util.List;
 
-import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
 public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<PlayerServer> {
     protected ScalarFamily(String name, LoadBalancer loadBalancer, String parentFamily, Whitelist whitelist) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {

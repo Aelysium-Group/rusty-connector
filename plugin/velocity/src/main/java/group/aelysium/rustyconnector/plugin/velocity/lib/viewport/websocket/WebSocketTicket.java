@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.viewport.websocket;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import group.aelysium.rustyconnector.api.velocity.util.Version;
+import group.aelysium.rustyconnector.toolkit.velocity.util.Version;
 
 public class WebSocketTicket {
 

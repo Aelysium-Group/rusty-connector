@@ -6,7 +6,7 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.server.IPlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;

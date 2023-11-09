@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.g
 
 import de.gesundkrank.jskills.IPlayer;
 import de.gesundkrank.jskills.Team;
-import group.aelysium.rustyconnector.api.velocity.load_balancing.ISortable;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.IRanker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
 

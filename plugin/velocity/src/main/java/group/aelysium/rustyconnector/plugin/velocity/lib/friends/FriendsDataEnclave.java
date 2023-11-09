@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
-import group.aelysium.rustyconnector.api.velocity.friends.IFriendsDataEnclave;
-import group.aelysium.rustyconnector.api.velocity.storage.IMySQLStorageService;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsDataEnclave;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;

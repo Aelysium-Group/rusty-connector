@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config;
 
-import group.aelysium.rustyconnector.api.velocity.family.UnavailableProtocol;
+import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.api.velocity.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.io.File;
 import java.text.ParseException;

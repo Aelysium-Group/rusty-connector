@@ -2,9 +2,9 @@ package group.aelysium.rustyconnector.core.lib.packets.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.api.mc_loader.connection_intent.ConnectionIntent;
-import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.api.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import io.lettuce.core.KeyValue;
 

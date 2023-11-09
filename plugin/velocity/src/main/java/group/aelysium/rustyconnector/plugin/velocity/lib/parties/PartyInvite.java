@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.parties.IPartyInvite;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 

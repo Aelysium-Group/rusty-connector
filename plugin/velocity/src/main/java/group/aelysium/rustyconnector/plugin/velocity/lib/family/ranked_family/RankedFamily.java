@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
-import group.aelysium.rustyconnector.api.velocity.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
-import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.SystemFocusedServerFamily;

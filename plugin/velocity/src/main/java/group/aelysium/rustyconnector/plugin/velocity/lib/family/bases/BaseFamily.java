@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.family.bases.IBaseFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
 import group.aelysium.rustyconnector.core.lib.annotations.Initializer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;

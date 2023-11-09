@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.handlers;
 
-import group.aelysium.rustyconnector.api.core.packet.IPacket;
-import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;

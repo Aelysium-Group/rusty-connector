@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
-import group.aelysium.rustyconnector.api.velocity.storage.IMySQLStorageService;
-import group.aelysium.rustyconnector.api.core.UserPass;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
+import group.aelysium.rustyconnector.toolkit.core.UserPass;
 import one.microstream.afs.sql.types.SqlConnector;
 import one.microstream.afs.sql.types.SqlFileSystem;
 import one.microstream.afs.sql.types.SqlProviderMariaDb;

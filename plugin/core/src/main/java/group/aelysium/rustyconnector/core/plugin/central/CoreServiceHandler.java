@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.core.plugin.central;
 
-import group.aelysium.rustyconnector.api.core.serviceable.ServiceHandler;
-import group.aelysium.rustyconnector.api.mc_loader.central.ICoreServiceHandler;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.core.plugin.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.core.plugin.lib.packet_builder.PacketBuilderService;
