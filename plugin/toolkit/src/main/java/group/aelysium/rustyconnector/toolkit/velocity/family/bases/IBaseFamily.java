@@ -45,8 +45,8 @@ public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePla
 
     /**
      * Method added for convenience.
-     * Any implementation of this interface should perform some form of opperation when connect is called.
-     * @param player The player to ultimatly connect to the family
+     * Any implementation of this interface should perform some form of operation when connect is called.
+     * @param player The player to ultimately connect to the family
      */
     void connect(TResolvablePlayer player);
 
