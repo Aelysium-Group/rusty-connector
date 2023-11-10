@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
 import group.aelysium.rustyconnector.core.lib.annotations.Initializer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class BaseFamily implements IBaseFamily<PlayerServer> {
+public abstract class BaseFamily implements IBaseFamily<PlayerServer, ResolvablePlayer> {
     @Initializer
     protected String parentName = null;
     protected WeakReference<BaseFamily> parent = null;
@@ -84,7 +85,7 @@ public abstract class BaseFamily implements IBaseFamily<PlayerServer> {
     }
 
     public void lockServer(PlayerServer server) {
-        if (!this.loadBalancer.dump().contains(server)) return;
+        if (!this.loadBalancer.contains(server)) return;
         this.loadBalancer.remove(server);
         this.lockedServers.add(server);
 

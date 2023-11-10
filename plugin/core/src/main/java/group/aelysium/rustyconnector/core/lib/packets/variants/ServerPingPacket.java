@@ -27,23 +27,18 @@ public class ServerPingPacket extends GenericPacket {
     public String familyName() {
         return familyName;
     }
-
     public String serverName() {
         return serverName;
     }
-
     public Integer softCap() {
         return softCap;
     }
-
     public Integer hardCap() {
         return hardCap;
     }
-
     public Integer weight() {
         return weight;
     }
-
     public Integer playerCount() {
         return playerCount;
     }

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.plugin.lib.server_info;
+package group.aelysium.rustyconnector.core.mcloader.lib.server_info;
 
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;

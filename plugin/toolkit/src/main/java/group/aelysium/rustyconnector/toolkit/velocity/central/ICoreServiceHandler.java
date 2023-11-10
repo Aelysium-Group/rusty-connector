@@ -26,8 +26,8 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * Gets the {@link IFamilyService family service} which allows access to server families and other family related logic.
      * @return {@link IFamilyService}
      */
-    <TPlayerServer extends IPlayerServer, TRootFamily extends IRootFamily<TPlayerServer>>
-        IFamilyService<TPlayerServer, TRootFamily> family();
+    <TPlayerServer extends IPlayerServer, TRootFamily extends IRootFamily<TPlayerServer>, TBaseFamily extends IBaseFamily<TPlayerServer>>
+        IFamilyService<TPlayerServer, TRootFamily, TBaseFamily> family();
 
     /**
      * Gets the {@link IServerService server service} which allows access to server registration, unregistration, connection, and other server related logic.

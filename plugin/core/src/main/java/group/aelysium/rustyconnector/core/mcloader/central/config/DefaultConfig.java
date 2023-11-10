@@ -1,9 +1,9 @@
-package group.aelysium.rustyconnector.core.plugin.central.config;
+package group.aelysium.rustyconnector.core.mcloader.central.config;
 
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;

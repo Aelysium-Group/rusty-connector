@@ -4,6 +4,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.handlers.RankedGameEndHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.Version;
@@ -311,10 +312,14 @@ class Initialize {
         bootOutput.add(Component.text("Booting Messenger...", NamedTextColor.DARK_GRAY));
 
         Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
-        handlers.put(PacketType.PING, new MagicLinkPingHandler());
-        handlers.put(PacketType.SEND_PLAYER, new SendPlayerHandler());
-        handlers.put(PacketType.LOCK_SERVER, new LockServerHandler());
-        handlers.put(PacketType.UNLOCK_SERVER, new UnlockServerHandler());
+        {
+            handlers.put(PacketType.PING, new MagicLinkPingHandler(this.api));
+            handlers.put(PacketType.SEND_PLAYER, new SendPlayerHandler(this.api));
+            handlers.put(PacketType.LOCK_SERVER, new LockServerHandler(this.api));
+            handlers.put(PacketType.UNLOCK_SERVER, new UnlockServerHandler(this.api));
+
+            handlers.put(PacketType.END_RANKED_GAME, new RankedGameEndHandler(this.api));
+        }
 
         messenger.connect();
         RedisConnection connection = messenger.connection().orElseThrow();

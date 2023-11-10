@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.fabric;
 
 import group.aelysium.rustyconnector.toolkit.RustyConnectorToolkit;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;

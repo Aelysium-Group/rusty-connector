@@ -114,7 +114,7 @@ ranked: []
 # | registered to it.                                      #
 # | Instead, you register other families to it. Then,      #
 # | when players connect to the versioned family, they     #
-# | will be connected to one of the sub families based     #
+# | will be connected to one of the subfamilies based      #
 # | on the version of Minecraft they are using.            #
 #                                                          #
 # | Versioned families are not allowed to have the same    #

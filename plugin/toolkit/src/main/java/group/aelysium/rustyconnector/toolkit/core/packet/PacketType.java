@@ -23,24 +23,33 @@ public class PacketType {
     public static Mapping PING_RESPONSE = new Mapping(101, "PING_RESPONSE");
 
     /**
-     * `Server > Proxy` | Request to send a player to a family
+     * `MCLoader > Proxy` | Request to send a player to a family
      */
     public static Mapping SEND_PLAYER = new Mapping(200, "SEND_PLAYER");
 
     /**
-     * `Proxy > Server` | Add a player's teleportation to the TPA queue on a specific server.
+     * `Proxy > MCLoader` | Add a player's teleportation to the TPA queue on a specific server.
      */
     public static Mapping COORDINATE_REQUEST_QUEUE = new Mapping(300, "TPA_QUEUE_PLAYER");
 
     /**
-     * `Server > Proxy` | Tells the proxy to open a server.
+     * `Server > MCLoader` | Tells the proxy to open a server.
      */
     public static Mapping UNLOCK_SERVER = new Mapping(400, "UNLOCK_SERVER");
 
     /**
-     * `Server > Proxy` | Tells the proxy to close a server.
+     * `MCLoader > Proxy` | Tells the proxy to close a server.
      */
     public static Mapping LOCK_SERVER = new Mapping(401, "LOCK_SERVER");
+
+    /**
+     * `MCLoader > Proxy` | Tells the proxy to end a game with the currently saved UUID.
+     */
+    public static Mapping END_RANKED_GAME = new Mapping(500, "END_RANKED_GAME");
+    /**
+     * `Proxy > MCLoader` | Tells the MCLoader to save the UUID of a game.
+     */
+    public static Mapping ASSOCIATE_RANKED_GAME = new Mapping(501, "ASSOCIATE_RANKED_GAME");
 
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();

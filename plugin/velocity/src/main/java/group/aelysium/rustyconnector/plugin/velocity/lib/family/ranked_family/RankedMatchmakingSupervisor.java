@@ -1,33 +1,58 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.solo.RankedSoloGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.teams.RankedTeamGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.PlayerRankLadder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
 import net.kyori.adventure.text.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class RankedMatchmakingSupervisor extends ClockService {
     private static int MAX_RANK = 50;
     private static int MIN_RANK = 0;
-    protected RankedFamily family;
     protected RankedMatchmakerSettings settings;
+    protected RankedFamily owner;
+    protected PlayerRankLadder waitingPlayers;
+    protected Vector<RankedGame> waitingGames = new Vector<>();
 
-    public RankedMatchmakingSupervisor(RankedMatchmakerSettings settings, RankedFamily family) {
-        super(2);
+    public RankedMatchmakingSupervisor(RankedMatchmakerSettings settings, RankedFamily owner, PlayerRankLadder waitingPlayers) {
+        super(4);
         this.settings = settings;
-        this.family = family;
+        this.owner = owner;
+        this.waitingPlayers = waitingPlayers;
+    }
+
+    /**
+     * Queues a game to be connected to an MCLoader once one is available.
+     * @throws IllegalStateException If the game is already over or already has a server.
+     */
+    public void queueGame(RankedGame game) {
+        if(game.server() != null) throw new IllegalStateException("This game already has a server!");
+        if(game.ended()) throw new IllegalStateException("This game has already ended!");
+    }
+
+    public void startSupervising() {
+        this.matchmakingProcess();
+        this.serverAssignmentProcess();
     }
 
     /**
      * Take a group of players, validate their ranks, and create a game.
-     * @param family The family to create the game in.
+     * The game will then be queued to be loaded into an MCLoader.
      * @param players The player to create a game with.
      * @param variance The variance that's allowed for the players to be a part of this game.
      * @throws IndexOutOfBoundsException When a player's rank is outside the variance allowed.
      */
-    protected void handlePartition(RankedFamily family, List<RankablePlayer> players, double variance) {
+    protected void createGame(List<RankablePlayer> players, double variance) {
         int middle = (int) Math.round(players.size() * 0.5);
         double pivot = players.get(middle).scorecard().rating().getConservativeRating();
         double bottom = players.get(0).scorecard().rating().getConservativeRating();
@@ -36,55 +61,96 @@ public class RankedMatchmakingSupervisor extends ClockService {
         if(bottom < pivot - (variance * MAX_RANK)) throw new IndexOutOfBoundsException();
         if(top > pivot + (variance * MAX_RANK)) throw new IndexOutOfBoundsException();
 
-        family.gameManager().start(players);
+        {
+            RankedGame game = null;
+            if (settings.soloSettings() != null) {
+                game = RankedSoloGame.startNew(settings.soloSettings(), players);
+                this.waitingPlayers.remove(((RankedSoloGame) game).players());
+            }
+            if (settings.teamSettings() != null) {
+                game = RankedTeamGame.startNew(settings.teamSettings(), players);
+                this.waitingPlayers.remove(((RankedTeamGame) game).players());
+            }
+
+            if (game == null) throw new NullPointerException("Unable to create a new game!");
+
+            this.waitingGames.add(game);
+        }
+
     }
 
     /**
      * Make as many partitions as possible and handle them.
      * @param query The query to start with.
      */
-    protected void handleMultiplePartitions(RankedFamily family, PlayerRankLadder.PartitionQuery query) {
+    protected void handleMultiplePartitions(PlayerRankLadder.PartitionQuery query) {
         try {
-            List<List<RankablePlayer>> partitions = family.playerQueue().partition(query);
+            List<List<RankablePlayer>> partitions = owner.gameManager().playerQueue().partition(query);
 
             for (List<RankablePlayer> partition : partitions) {
                 if (partition.size() < query.min()) continue;
 
                 try {
-                    this.handlePartition(family, partition, settings.variance());
+                    this.createGame(partition, settings.variance());
                 } catch (Exception ignore) {
                 }
             }
         } catch (Exception ignore) {}
     }
 
-    public void startSupervising() {
+    protected void matchmakingProcess() {
         this.scheduleDelayed(() -> {
             try {
-                int max = family.gameManager().maxAllowedPlayers();
-                int min = family.gameManager().minAllowedPlayers();
+                int max = RankedGameManager.maxAllowedPlayers(this.settings);
+                int min = RankedGameManager.minAllowedPlayers(this.settings);
                 double variance = settings.variance();
 
-                if(family.playerQueue().size() < min) return;
+                if(this.waitingPlayers.size() < min) return;
 
 
-                family.playerQueue().sort();
-                List<RankablePlayer> players = family.playerQueue().players();
+                this.waitingPlayers.sort();
+                List<RankablePlayer> players = this.waitingPlayers.players();
 
                 if (players.size() <= max) {
-                    this.handlePartition(family, family.playerQueue().players(), variance);
+                    this.createGame(this.waitingPlayers.players(), variance);
                     return;
                 }
 
 
                 PlayerRankLadder.PartitionQuery query = new PlayerRankLadder.PartitionQuery(settings.variance(), min, max);
-                this.handleMultiplePartitions(family, query);
+                this.handleMultiplePartitions(query);
             } catch (Exception e) {
-                Tinder.get().logger().send(Component.text("There was a fatal error while matchmaking the family: "+family.name()));
+                Tinder.get().logger().send(Component.text("There was a fatal error while matchmaking the family: "+owner.name()));
                 e.printStackTrace();
             }
 
-            this.startSupervising();
+            this.matchmakingProcess();
+        }, settings.interval());
+    }
+
+    protected void serverAssignmentProcess() {
+        this.scheduleDelayed(() -> {
+            try {
+                LoadBalancer loadBalancer = this.owner.loadBalancer();
+                if(loadBalancer.size() == 0) return;
+                if(this.waitingGames.size() == 0) return;
+
+                List<RankedGame> successfullyStartedGames = new ArrayList<>();
+                for (RankedGame game : this.waitingGames) {
+                    PlayerServer server = loadBalancer.current();
+                    game.connectServer(server);
+
+                    owner.lockServer(server);
+                    successfullyStartedGames.add(game);
+                }
+
+                this.waitingGames.removeAll(successfullyStartedGames);
+            } catch (Exception e) {
+                Tinder.get().logger().send(Component.text("There was a fatal error while matchmaking the family: "+owner.name()));
+                e.printStackTrace();
+            }
+
+            this.serverAssignmentProcess();
         }, settings.interval());
     }
 }

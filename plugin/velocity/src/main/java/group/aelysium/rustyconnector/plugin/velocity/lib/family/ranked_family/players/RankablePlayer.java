@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players;
 
 import com.velocitypowered.api.proxy.Player;
+import de.gesundkrank.jskills.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -10,7 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlaye
 import java.util.Objects;
 import java.util.Optional;
 
-public class RankablePlayer implements ISortable {
+public class RankablePlayer implements ISortable, IPlayer {
     protected ResolvablePlayer player;
     protected ScoreCard scorecard;
 

@@ -1,18 +1,16 @@
-package group.aelysium.rustyconnector.core.plugin.lib.packet_builder;
+package group.aelysium.rustyconnector.core.mcloader.lib.packet_builder;
 
+import group.aelysium.rustyconnector.core.lib.packets.variants.*;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.RankedGameInterfaceService;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.packet_builder.IPacketBuilderService;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import group.aelysium.rustyconnector.core.lib.packets.variants.LockServerPacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
-import group.aelysium.rustyconnector.core.plugin.lib.server_info.ServerInfoService;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.UUID;
@@ -90,6 +88,26 @@ public class PacketBuilderService implements IPacketBuilderService {
                 .setOrigin(PacketOrigin.SERVER)
                 .setAddress(serverInfoService.address())
                 .setParameter(UnlockServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
+                .buildSendable();
+
+        api.flame().backbone().connection().orElseThrow().publish(message);
+    }
+
+    /**
+     * Tells the proxy to end the game currently active on this server.
+     */
+    public void endRankedGame(UUID uuid) {
+        if(uuid == null) return;
+
+        MCLoaderTinder api = TinderAdapterForCore.getTinder();
+        ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
+
+        RankedGameEndPacket message = (RankedGameEndPacket) new GenericPacket.Builder()
+                .setType(PacketType.END_RANKED_GAME)
+                .setOrigin(PacketOrigin.SERVER)
+                .setAddress(serverInfoService.address())
+                .setParameter(RankedGameEndPacket.ValidParameters.FAMILY_NAME, serverInfoService.family())
+                .setParameter(RankedGameEndPacket.ValidParameters.GAME_UUID, String.valueOf(uuid))
                 .buildSendable();
 
         api.flame().backbone().connection().orElseThrow().publish(message);

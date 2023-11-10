@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 public class RankedFamilyConfig extends YAML {
 
     private RankedMatchmakerSettings matchmakingSettings;
-    private String loadBalancer = "default";
     private String parent_family = "";
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
@@ -31,7 +30,6 @@ public class RankedFamilyConfig extends YAML {
         return matchmakingSettings;
     }
     public String getParent_family() { return parent_family; }
-    public String loadBalancer() { return loadBalancer; }
 
     public boolean isWhitelist_enabled() {
         return whitelist_enabled;
@@ -88,7 +86,7 @@ public class RankedFamilyConfig extends YAML {
                 interval = LiquidTimestamp.from(10, TimeUnit.SECONDS);
             }
 
-            this.matchmakingSettings = new RankedMatchmakerSettings(matchmakingConfiguration, soloSettings, coopSettings, scoring, variance, interval);
+            this.matchmakingSettings = new RankedMatchmakerSettings(gamemodeName, matchmakingConfiguration, soloSettings, coopSettings, scoring, variance, interval);
         }
 
         try {
@@ -96,13 +94,6 @@ public class RankedFamilyConfig extends YAML {
         } catch (Exception ignore) {
             this.parent_family = "";
         }
-
-        try {
-            this.loadBalancer = this.getNode(this.data, "load-balancer", String.class);
-        } catch (Exception ignore) {
-            this.loadBalancer = "default";
-        }
-        this.loadBalancer = this.loadBalancer.replaceFirst("\\.yml$|\\.yaml$","");
 
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
         this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);

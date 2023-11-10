@@ -3,13 +3,14 @@ package group.aelysium.rustyconnector.toolkit.velocity.family.bases;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IResolvablePlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public interface IBaseFamily<S extends IPlayerServer> {
+public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePlayer extends IResolvablePlayer> {
     String name();
 
     /**
@@ -17,19 +18,19 @@ public interface IBaseFamily<S extends IPlayerServer> {
      * @param serverInfo The info matching the server to get.
      * @return A found server or `null` if there's no match.
      */
-    S findServer(@NotNull ServerInfo serverInfo);
+    TPlayerServer findServer(@NotNull ServerInfo serverInfo);
 
     /**
      * Add a server to the family.
      * @param server The server to add.
      */
-    void addServer(S server);
+    void addServer(TPlayerServer server);
 
     /**
      * Remove a server from this family.
      * @param server The server to remove.
      */
-    void removeServer(S server);
+    void removeServer(TPlayerServer server);
 
     /**
      * Get all players in the family up to approximately `max`.
@@ -38,9 +39,16 @@ public interface IBaseFamily<S extends IPlayerServer> {
      */
     List<Player> players(int max);
 
-    List<S> registeredServers();
+    List<TPlayerServer> registeredServers();
 
     boolean containsServer(ServerInfo serverInfo);
+
+    /**
+     * Method added for convenience.
+     * Any implementation of this interface should perform some form of opperation when connect is called.
+     * @param player The player to ultimatly connect to the family
+     */
+    void connect(TResolvablePlayer player);
 
     /**
      * Gets the aggregate player count across all servers in this family
@@ -53,14 +61,14 @@ public interface IBaseFamily<S extends IPlayerServer> {
      * For a list of unlocked {@link IPlayerServer PlayerServers}, use {@link IPlayerFocusedFamilyBase#loadBalancer()}.{@link ILoadBalancer#dump() dump()}.
      * @return {@link List<IPlayerServer>}
      */
-    List<S> lockedServers();
+    List<TPlayerServer> lockedServers();
 
     /**
      * Unlock a {@link IPlayerServer}, allowing players to connect to it via the load balancer.
      * If the requested server isn't registered to this family, nothing will happen.
      * @param server The {@link IPlayerServer} to unlock.
      */
-    void unlockServer(S server);
+    void unlockServer(TPlayerServer server);
 
     /**
      * Lock a {@link IPlayerServer}, preventing players from connect to it via the load balancer.
@@ -69,14 +77,14 @@ public interface IBaseFamily<S extends IPlayerServer> {
      * Event though a locked server can't be joined via the load balancer, you can still send players to it by using the RC send command.
      * @param server The {@link IPlayerServer} to lock.
      */
-    void lockServer(S server);
+    void lockServer(TPlayerServer server);
 
     /**
      * Checks if the requested {@link IPlayerServer} is joinable.
      * @param server The {@link IPlayerServer} to check.
      * @return `true` if the {@link IPlayerServer} can be joined via the family's load balancer. `false` otherwise.
      */
-    boolean joinable(S server);
+    boolean joinable(TPlayerServer server);
 
     /**
      * Gets the number of {@link IPlayerServer PlayerServers} that are registered to this family.
@@ -90,11 +98,13 @@ public interface IBaseFamily<S extends IPlayerServer> {
      * Returns this family's {@link ILoadBalancer}.
      * @return {@link ILoadBalancer}
      */
-    ILoadBalancer<S> loadBalancer();
+    ILoadBalancer<TPlayerServer> loadBalancer();
 
     /**
-     * Fetch a reference to the parent of this family.
+     * Fetches a reference to the parent of this family.
+     * The parent of this family will always be either another family, or the root family.
+     * If this family is the root family, this method will always return `null`.
      * @return {@link WeakReference <IBaseFamily>}
      */
-    <F extends IBaseFamily<S>> WeakReference<F> parent();
+    <F extends IBaseFamily<TPlayerServer, TResolvablePlayer>> WeakReference<F> parent();
 }

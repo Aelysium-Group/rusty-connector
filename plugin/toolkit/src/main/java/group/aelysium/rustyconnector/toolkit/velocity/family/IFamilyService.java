@@ -1,10 +1,13 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family;
 
+import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 
-public interface IFamilyService<TPlayerServer extends IPlayerServer, TRootFamily extends IRootFamily<TPlayerServer>> extends Service {
+import java.util.List;
+
+public interface IFamilyService<TPlayerServer extends IPlayerServer, TRootFamily extends IRootFamily<TPlayerServer>, TBaseFamily extends IBaseFamily<TPlayerServer>> extends Service {
     boolean shouldCatchDisconnectingPlayers();
 
     void setRootFamily(TRootFamily family);
@@ -22,4 +25,29 @@ public interface IFamilyService<TPlayerServer extends IPlayerServer, TRootFamily
      * @return {@link Integer}
      */
     int size();
+
+    /**
+     * Get a family via its name.
+     * @param name The name of the family to get.
+     * @return A family or `null` if there is no family with the defined name.
+     */
+    TBaseFamily find(String name);
+
+    /**
+     * Add a family to this manager.
+     * @param family The family to add to this manager.
+     */
+    void add(TBaseFamily family);
+
+    /**
+     * Remove a family from this manager.
+     * @param family The family to remove from this manager.
+     */
+    void remove(TBaseFamily family);
+
+    /**
+     * Gets a list of all families in this service.
+     * @return {@link List<TBaseFamily>}
+     */
+    List<TBaseFamily> dump();
 }

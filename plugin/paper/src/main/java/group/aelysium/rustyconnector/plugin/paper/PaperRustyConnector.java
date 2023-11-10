@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper;
 
 import group.aelysium.rustyconnector.toolkit.RustyConnectorToolkit;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.plugin.paper.bstats.Metrics;
 import org.bukkit.Bukkit;

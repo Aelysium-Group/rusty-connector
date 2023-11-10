@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper.events;
 
-import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
-import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.CoordinateRequest;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.CoordinateRequest;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

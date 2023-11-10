@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.plugin.lib.lang;
+package group.aelysium.rustyconnector.core.mcloader.lib.lang;
 
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.lang.ASCIIAlphabet;

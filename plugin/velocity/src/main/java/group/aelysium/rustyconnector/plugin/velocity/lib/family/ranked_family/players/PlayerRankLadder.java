@@ -3,7 +3,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.p
 import com.mysql.cj.exceptions.NumberOutOfRange;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.core.lib.algorithm.QuickSort;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.MatchmakerExpansionSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +10,6 @@ import java.util.NoSuchElementException;
 import java.util.Vector;
 
 public class PlayerRankLadder implements Service {
-    private static int MAX_RANK = 50;
-    private static int MIN_RANK = 0;
-
     protected boolean changed = false;
     protected final Vector<RankablePlayer> players = new Vector<>();
 
@@ -164,17 +160,6 @@ public class PlayerRankLadder implements Service {
 
         public int max() {
             return max;
-        }
-
-        public PartitionQuery expand(MatchmakerExpansionSettings settings) {
-            if(!settings.enabled()) return this;
-
-            if(this.variance >= settings.maxVariance()) return this;
-
-            double adjustedVariance = this.variance + settings.interval();
-            if(adjustedVariance >= settings.maxVariance()) adjustedVariance = settings.maxVariance();
-
-            return new PartitionQuery(adjustedVariance, this.min, this.max);
         }
     }
 }

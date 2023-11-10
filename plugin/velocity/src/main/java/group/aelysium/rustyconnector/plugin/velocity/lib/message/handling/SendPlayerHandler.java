@@ -13,10 +13,14 @@ import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
 public class SendPlayerHandler implements PacketHandler {
+    protected Tinder api;
+
+    public SendPlayerHandler(Tinder api) {
+        this.api = api;
+    }
     @Override
     public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {
         SendPlayerPacket packet = (SendPlayerPacket) genericPacket;
-        Tinder api = Tinder.get();
 
         Player player = api.velocityServer().getPlayer(UUID.fromString(packet.uuid())).stream().findFirst().orElse(null);
         if(player == null) return;

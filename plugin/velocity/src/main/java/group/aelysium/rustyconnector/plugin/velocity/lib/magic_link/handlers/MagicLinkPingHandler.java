@@ -20,12 +20,17 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.net.InetSocketAddress;
 
 public class MagicLinkPingHandler implements PacketHandler {
+    protected Tinder api;
+
+    public MagicLinkPingHandler(Tinder api) {
+        this.api = api;
+    }
+
     @Override
     public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {
         ServerPingPacket packet = (ServerPingPacket) genericPacket;
 
         InetSocketAddress address = packet.address();
-        Tinder api = Tinder.get();
 
         ServerInfo serverInfo = new ServerInfo(
                 packet.serverName(),
@@ -36,13 +41,12 @@ public class MagicLinkPingHandler implements PacketHandler {
             api.logger().send(VelocityLang.PING.build(serverInfo));
 
         if(packet.intent() == ConnectionIntent.CONNECT)
-            reviveOrConnectServer(serverInfo, packet);
+            reviveOrConnectServer(api, serverInfo, packet);
         if(packet.intent() == ConnectionIntent.DISCONNECT)
-            disconnectServer(serverInfo, packet);
+            disconnectServer(api, serverInfo, packet);
     }
 
-    private static void connectServer(ServerInfo serverInfo, ServerPingPacket packet) {
-        Tinder api = Tinder.get();
+    private static void connectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) {
         ServerService serverService = api.services().server();
         RedisConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
 
@@ -81,19 +85,17 @@ public class MagicLinkPingHandler implements PacketHandler {
         }
     }
 
-    private static void disconnectServer(ServerInfo serverInfo, ServerPingPacket packet) throws Exception {
-        Tinder api = Tinder.get();
+    private static void disconnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) throws Exception {
         api.services().server().unregisterServer(serverInfo, packet.familyName(), true);
 
     }
 
-    private static void reviveOrConnectServer(ServerInfo serverInfo, ServerPingPacket packet) {
-        Tinder api = Tinder.get();
+    private static void reviveOrConnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) {
         ServerService serverService = api.services().server();
 
         PlayerServer server = serverService.search(serverInfo);
         if (server == null) {
-            connectServer(serverInfo, packet);
+            connectServer(api, serverInfo, packet);
             return;
         }
 

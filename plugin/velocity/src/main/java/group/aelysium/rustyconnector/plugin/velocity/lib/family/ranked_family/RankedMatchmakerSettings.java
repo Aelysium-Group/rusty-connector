@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.ga
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.teams.RankedTeamGame;
 
 public record RankedMatchmakerSettings(
+        String name,
         RankedGameRankerType type,
         RankedSoloGame.Settings soloSettings,
         RankedTeamGame.Settings teamSettings,

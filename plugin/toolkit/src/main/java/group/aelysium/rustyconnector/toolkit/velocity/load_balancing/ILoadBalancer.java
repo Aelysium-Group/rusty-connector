@@ -82,6 +82,12 @@ public interface ILoadBalancer<I> {
     List<I> dump();
 
     /**
+     * Checks if the load balancer contains the specified item.
+     * @return `true` if the item exists. `false` otherwise.
+     */
+    boolean contains(I items);
+
+    /**
      * The load balancer as a string.
      * @return The load balancer as a string.
      */

@@ -28,4 +28,10 @@ public interface IPacketBuilderService extends Service {
      * Issues a request to lock this server.
      */
     void lockServer();
+
+    /**
+     * Issues a request for the proxy to end a ranked game associated with this server, if it exists.
+     * @param uuid The uuid of the game.
+     */
+    void endRankedGame(UUID uuid);
 }

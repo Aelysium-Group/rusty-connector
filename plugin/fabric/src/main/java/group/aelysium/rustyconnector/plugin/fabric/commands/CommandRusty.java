@@ -10,7 +10,7 @@ import cloud.commandframework.fabric.FabricServerCommandManager;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;

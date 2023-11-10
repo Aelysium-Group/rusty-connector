@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.plugin.lib.magic_link;
+package group.aelysium.rustyconnector.core.mcloader.lib.magic_link;
 
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.IMagicLinkService;
@@ -6,8 +6,8 @@ import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatu
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
-import group.aelysium.rustyconnector.core.plugin.lib.packet_builder.PacketBuilderService;
+import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.packet_builder.PacketBuilderService;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;

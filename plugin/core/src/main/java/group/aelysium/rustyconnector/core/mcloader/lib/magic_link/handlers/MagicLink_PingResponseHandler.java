@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.plugin.lib.magic_link.handlers;
+package group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers;
 
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
@@ -7,16 +7,21 @@ import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatu
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.plugin.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 public class MagicLink_PingResponseHandler implements PacketHandler {
+    protected MCLoaderTinder api;
+
+    public MagicLink_PingResponseHandler(MCLoaderTinder api) {
+        this.api = api;
+    }
+
     @Override
     public <TPacket extends IPacket> void execute(TPacket genericPacket) {
         ServerPingResponsePacket packet = (ServerPingResponsePacket) genericPacket;
 
-        MCLoaderTinder api = TinderAdapterForCore.getTinder();
         PluginLogger logger = api.logger();
         MagicLinkService service = (MagicLinkService) api.services().magicLink();
 

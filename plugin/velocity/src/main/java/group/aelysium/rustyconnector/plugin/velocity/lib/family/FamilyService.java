@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FamilyService implements IFamilyService<PlayerServer, RootFamily> {
+public class FamilyService implements IFamilyService<PlayerServer, RootFamily, BaseFamily> {
     private final Map<String, BaseFamily> registeredFamilies = new HashMap<>();
     private WeakReference<RootFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
@@ -28,37 +28,18 @@ public class FamilyService implements IFamilyService<PlayerServer, RootFamily> {
         this.rootFamily = new WeakReference<>(family);
     }
 
-    /**
-     * Get the root family of this FamilyService.
-     * If root family hasn't been set, or the family it references has been garbage collected,
-     * this will return `null`.
-     * @return A {@link RootFamily} or `null`
-     */
     public RootFamily rootFamily() {
         return this.rootFamily.get();
     }
 
-    /**
-     * Get a family via its name.
-     * @param name The name of the family to get.
-     * @return A family or `null` if there is no family with the defined name.
-     */
     public BaseFamily find(String name) {
         return this.registeredFamilies.get(name);
     }
 
-    /**
-     * Add a family to this manager.
-     * @param family The family to add to this manager.
-     */
     public void add(BaseFamily family) {
         this.registeredFamilies.put(family.name(),family);
     }
 
-    /**
-     * Remove a family from this manager.
-     * @param family The family to remove from this manager.
-     */
     public void remove(BaseFamily family) {
         this.registeredFamilies.remove(family.name());
     }

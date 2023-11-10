@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -25,6 +25,7 @@ public final class CommandRusty {
         manager.command(send(manager));
         manager.command(unlock(manager));
         manager.command(lock(manager));
+        manager.command(game(manager));
     }
 
     private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager) {
@@ -154,6 +155,25 @@ public final class CommandRusty {
                                 PluginLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from processing the request!", e);
+                            }
+                        }).execute());
+    }
+
+    private static Command.Builder<CommandSender> game(PaperCommandManager<CommandSender> manager) {
+        Tinder api = Tinder.get();
+        PluginLogger logger = api.logger();
+
+        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
+
+        return builder.literal("game")
+                .senderType(ConsoleCommandSender.class)
+                .argument(StaticArgument.of("end"))
+                .handler(context -> manager.taskRecipe().begin(context)
+                        .asynchronous(commandContext -> {
+                            try {
+                                api.services().rankedGameInterface().endGame();
+                            } catch (Exception e) {
+                                logger.log("An error stopped us from processing that request!", e);
                             }
                         }).execute());
     }
