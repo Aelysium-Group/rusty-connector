@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players;
 
 import de.gesundkrank.jskills.Rating;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+
 
 public class ScoreCard {
     protected String game;
@@ -17,6 +19,11 @@ public class ScoreCard {
 
     public Rating rating() {
         return rating;
+    }
+
+    public void setRating(Rating rating) {
+        this.rating = rating;
+        Tinder.get().services().storage().store(this);
     }
 
     public static ScoreCard create(String gameName, Rating rating) {

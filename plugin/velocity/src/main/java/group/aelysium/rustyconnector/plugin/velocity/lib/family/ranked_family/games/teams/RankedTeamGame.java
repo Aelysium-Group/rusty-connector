@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.teams;
 
 import com.velocitypowered.api.proxy.Player;
+import de.gesundkrank.jskills.ITeam;
+import de.gesundkrank.jskills.Team;
 import group.aelysium.rustyconnector.core.lib.algorithm.WeightedQuickSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.IRankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGame;
@@ -13,10 +15,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.nio.file.AccessDeniedException;
 import java.rmi.ConnectException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Vector;
+import java.util.*;
 
 public class RankedTeamGame extends RankedGame {
     protected List<RankedTeam> teams;
@@ -41,6 +40,12 @@ public class RankedTeamGame extends RankedGame {
         List<RankablePlayer> players = new ArrayList<>();
         this.teams.forEach(team -> players.add((RankablePlayer) team.players()));
         return players;
+    }
+
+    protected <TTeam extends ITeam> Collection<TTeam> teams() {
+        Collection<TTeam> teams = new ArrayList<>();
+        this.teams.forEach(team -> teams.add((TTeam) team.team()));
+        return teams;
     }
 
     @Override

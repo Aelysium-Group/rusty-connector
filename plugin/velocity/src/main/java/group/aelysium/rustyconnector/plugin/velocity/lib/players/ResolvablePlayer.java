@@ -38,7 +38,7 @@ public class ResolvablePlayer implements IResolvablePlayer, IPlayer {
         Optional<ScoreCard> scorecard = ranks.stream().filter(rank -> rank.game().equals(game)).findAny();
         if(scorecard.isEmpty()) {
             scorecard = Optional.of(ScoreCard.create(game));
-            ranks.add(scorecard.orElseThrow());
+            ranks.add(scorecard.get());
 
             // Store the new scorecard
             this.ranks = Lazy.Reference(ranks);

@@ -69,7 +69,6 @@ public class RankedGameManager implements Service {
         games.forEach(game -> {
             if(game.server() == null) return;
             if(game.ended()) return;
-
             game.end();
             owner.unlockServer(game.server());
             game.players().forEach(player -> {
