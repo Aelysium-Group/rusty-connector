@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.central.config.MagicDefaultConfig;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
@@ -49,17 +50,19 @@ public class MagicLinkPingHandler implements PacketHandler {
     private static void connectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) {
         ServerService serverService = api.services().server();
         RedisConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
+        MagicDefaultConfig magicDefaultConfig = new MagicDefaultConfig(api.dataFolder(), packet.magicConfigName());
+        magicDefaultConfig.register();
 
         try {
             PlayerServer server = new ServerService.ServerBuilder()
                     .setServerInfo(serverInfo)
-                    .setFamilyName(packet.familyName())
-                    .setSoftPlayerCap(packet.softCap())
-                    .setHardPlayerCap(packet.hardCap())
-                    .setWeight(packet.weight())
+                    .setFamilyName(magicDefaultConfig.family())
+                    .setSoftPlayerCap(magicDefaultConfig.playerCap_soft())
+                    .setHardPlayerCap(magicDefaultConfig.playerCap_hard())
+                    .setWeight(magicDefaultConfig.weight())
                     .build();
 
-            server.register(packet.familyName());
+            server.register(magicDefaultConfig.family());
 
             ServerPingResponsePacket message = (ServerPingResponsePacket) new GenericPacket.Builder()
                     .setType(PacketType.PING_RESPONSE)
@@ -86,7 +89,10 @@ public class MagicLinkPingHandler implements PacketHandler {
     }
 
     private static void disconnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) throws Exception {
-        api.services().server().unregisterServer(serverInfo, packet.familyName(), true);
+        MagicDefaultConfig magicDefaultConfig = new MagicDefaultConfig(api.dataFolder(), packet.magicConfigName());
+        magicDefaultConfig.register();
+
+        api.services().server().unregisterServer(serverInfo, magicDefaultConfig.family(), true);
 
     }
 

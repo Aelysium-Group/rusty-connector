@@ -4,6 +4,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.plugin.velocity.central.config.MagicDefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.handlers.RankedGameEndHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
@@ -142,6 +143,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
 
             logger.send(Component.text("Initializing 30%...", NamedTextColor.DARK_GRAY));
             FamilyService familyService = initialize.families(inject(defaultConfig, langService, connectors.d2()));
+            initialize.magicConfigs(inject(familyService));
             logger.send(Component.text("Initializing 40%...", NamedTextColor.DARK_GRAY));
             ServerService serverService = initialize.servers(defaultConfig);
             logger.send(Component.text("Initializing 50%...", NamedTextColor.DARK_GRAY));
@@ -396,6 +398,23 @@ class Initialize {
 
         bootOutput.add(Component.text("Finished building families service.", NamedTextColor.GREEN));
         return familyService;
+    }
+
+    public void magicConfigs(DependencyInjector.DI1<FamilyService> dependencies) throws Exception {
+        bootOutput.add(Component.text("Validating Magic Configs...", NamedTextColor.DARK_GRAY));
+
+        File folder = new File(api.dataFolder(), "/magic_configs");
+        if (!folder.exists() && !folder.isDirectory()) return;
+        File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
+
+        if (files == null) return;
+        for (File file : files) {
+            MagicDefaultConfig magicDefaultConfig = new MagicDefaultConfig(api.dataFolder(), file.getName());
+            if(dependencies.d1().find(magicDefaultConfig.family()) == null)
+                throw new NullPointerException("The magic config `"+file.getName()+"` is pointing to a family: `"+magicDefaultConfig.family()+"`, which doesn't exist!");
+        }
+
+        bootOutput.add(Component.text("Magic Configs have been validated!", NamedTextColor.GREEN));
     }
 
     public void networkWhitelist(DependencyInjector.DI2<DefaultConfig, LangService> dependencies) throws IOException {
