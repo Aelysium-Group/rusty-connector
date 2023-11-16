@@ -18,7 +18,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
@@ -314,7 +314,7 @@ public final class CommandTPA {
                                 if(tpaService.settings().friendsOnly())
                                     try {
                                         FriendsService friendsService = Tinder.get().services().friends().orElseThrow();
-                                        boolean areFriends = friendsService.areFriends(ResolvablePlayer.from(player), ResolvablePlayer.from(targetPlayer));
+                                        boolean areFriends = friendsService.areFriends(RustyPlayer.from(player), RustyPlayer.from(targetPlayer));
                                         if(!areFriends) {
                                             context.getSource().sendMessage(VelocityLang.TPA_NOT_FRIENDS.build(targetPlayer.getUsername()));
                                             return Command.SINGLE_SUCCESS;

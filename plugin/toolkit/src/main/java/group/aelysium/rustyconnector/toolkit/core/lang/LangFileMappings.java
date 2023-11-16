@@ -12,17 +12,19 @@ public class LangFileMappings {
     public static Mapping VELOCITY_CONNECTORS_TEMPLATE = new LangFileMappings.Mapping("velocity_connectors_template", "configs/velocity/connectors.yml");
     public static Mapping VELOCITY_DATA_TRANSIT_TEMPLATE = new LangFileMappings.Mapping("velocity_data_transit_template", "configs/velocity/data_transit.yml");
     public static Mapping VELOCITY_DYNAMIC_TELEPORT_TEMPLATE = new LangFileMappings.Mapping("velocity_dynamic_teleport_template", "configs/velocity/dynamic_teleport.yml");
-    public static Mapping VELOCITY_FAMILIES_TEMPLATE = new LangFileMappings.Mapping("velocity_families_template", "configs/velocity/families.yml");
-    public static Mapping VELOCITY_LOAD_BALANCER_TEMPLATE = new LangFileMappings.Mapping("velocity_load_balancer_template", "configs/velocity/load_balancer.yml");
     public static Mapping VELOCITY_FRIENDS_TEMPLATE = new LangFileMappings.Mapping("velocity_friends_template", "configs/velocity/friends.yml");
     public static Mapping VELOCITY_LOGGER_TEMPLATE = new LangFileMappings.Mapping("velocity_logger_template", "configs/velocity/logger.yml");
     public static Mapping VELOCITY_PARTY_TEMPLATE = new LangFileMappings.Mapping("velocity_party_template", "configs/velocity/party.yml");
-    public static Mapping VELOCITY_SCALAR_FAMILY_TEMPLATE = new LangFileMappings.Mapping("velocity_scalar_family_template", "configs/velocity/scalar_family.yml");
-    public static Mapping VELOCITY_STATIC_FAMILY_TEMPLATE = new LangFileMappings.Mapping("velocity_static_family_template", "configs/velocity/static_family.yml");
-    public static Mapping VELOCITY_RANKED_FAMILY_TEMPLATE = new LangFileMappings.Mapping("velocity_ranked_family_template", "configs/velocity/ranked_family.yml");
     public static Mapping VELOCITY_VIEWPORT_TEMPLATE = new LangFileMappings.Mapping("velocity_viewport_template", "configs/velocity/viewport.yml");
     public static Mapping VELOCITY_WEBHOOKS_TEMPLATE = new LangFileMappings.Mapping("velocity_webhooks_template", "configs/velocity/webhooks.yml");
     public static Mapping VELOCITY_WHITELIST_TEMPLATE = new LangFileMappings.Mapping("velocity_whitelist_template", "configs/velocity/whitelist.yml");
+    public static Mapping VELOCITY_MAGIC_CONFIG_TEMPLATE = new LangFileMappings.Mapping("velocity_whitelist_template", "configs/velocity/magic_configs/magic_config.yml");
+
+    public static Mapping VELOCITY_FAMILIES_TEMPLATE = new LangFileMappings.Mapping("velocity_families_template", "configs/velocity/families/families.yml");
+    public static Mapping VELOCITY_SCALAR_FAMILY_TEMPLATE = new LangFileMappings.Mapping("velocity_scalar_family_template", "configs/velocity/families/family.scalar.yml");
+    public static Mapping VELOCITY_STATIC_FAMILY_TEMPLATE = new LangFileMappings.Mapping("velocity_static_family_template", "configs/velocity/families/family.static.yml");
+    public static Mapping VELOCITY_RANKED_FAMILY_TEMPLATE = new LangFileMappings.Mapping("velocity_ranked_family_template", "configs/velocity/families/family.ranked.yml");
+    public static Mapping VELOCITY_LOAD_BALANCER_TEMPLATE = new LangFileMappings.Mapping("velocity_load_balancer_template", "configs/velocity/families/load_balancer.yml");
 
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();

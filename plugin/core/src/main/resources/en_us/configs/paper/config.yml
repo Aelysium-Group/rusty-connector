@@ -1,48 +1,3 @@
-###########################################################################################################
-#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-###########################################################################################################
-#                                                                                                         #
-#   /███████                           /██                                                                #
-#  | ██__  ██                         | ██                                                                #
-#  | ██  \ ██  /██   /██   /███████  /██████    /██   /██                                                 #
-#  | ███████/ | ██  | ██  /██_____/ |_  ██_/   | ██  | ██                                                 #
-#  | ██__  ██ | ██  | ██ |  ██████    | ██     | ██  | ██                                                 #
-#  | ██  \ ██ | ██  | ██  \____  ██   | ██ /██ | ██  | ██                                                 #
-#  | ██  | ██ |  ██████/  /███████/   |  ████/ |  ███████                                                 #
-#  |__/  |__/  \______/  |_______/     \___/    \____  ██                                                 #
-#                                               /██  | ██                                                 #
-#                                              |  ██████/                                                 #
-#    /██████                                    \______/                /██                               #
-#   /██__  ██                                                          | ██                               #
-#  | ██  \__/   /██████   /███████   /███████    /██████    /███████  /██████     /██████    /██████      #
-#  | ██        /██__  ██ | ██__  ██ | ██__  ██  /██__  ██  /██_____/ |_  ██_/    /██__  ██  /██__  ██     #
-#  | ██       | ██  \ ██ | ██  \ ██ | ██  \ ██ | ████████ | ██         | ██     | ██  \ ██ | ██  \__/     #
-#  | ██    ██ | ██  | ██ | ██  | ██ | ██  | ██ | ██_____/ | ██         | ██ /██ | ██  | ██ | ██           #
-#  |  ██████/ |  ██████/ | ██  | ██ | ██  | ██ |  ███████ |  ███████   |  ████/ |  ██████/ | ██           #
-#   \______/   \______/  |__/  |__/ |__/  |__/  \_______/  \_______/    \___/    \______/  |__/           #
-#                                                                                                         #
-#                                                                                                         #
-#                                        Welcome to RustyConnector!                                       #
-#                            https://github.com/Aelysium-Group/rusty-connector                            #
-#                                                                                                         #
-#                            -------------------------------------------------                            #
-#                                                                                                         #
-# | RustyConnector is your go-to load-balancer and     | Built for usage on high-traffic networks;        #
-# | player manager for Minecraft networks!             | RustyConnector is meant to be scalable and easy  #
-#                                                      | to maintain!                                     #
-#                                                                                                         #
-#                               | If you ever need assistance setting up your                             #
-#                               | plugin come join us in our discord server:                              #
-#                               | https://join.aelysium.group/                                            #
-#                            -------------------------------------------------                            #
-#                                                                                                         #
-#                                     Produced by: Aelysium | Nathan M.                                   #
-#                                                                                                         #
-#                            -------------------------------------------------                            #
-#                                                                                                         #
-###########################################################################################################
-#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-###########################################################################################################
 #
 # If you need help updating your configs from an older version;
 # take a look at our config migration docs:
@@ -58,24 +13,22 @@ version: 6
 #
 magic-config: "default"
 
-server:
 #
-# This field is required.
-# The name of this server.
-# This is mostly used to help you identify this server when reading your proxy logs.
-#
-# Names between multiple servers are allowed to be duplicate, though this is not suggested.
-#
-    name: ""
-
-#
-# This field is required.
+# This field is required if you don't enable Magic Interface Resolver.
 # Enter the address of this server! This address should match what a player would enter if they were trying to
 # connect directly to this server. Make sure you also include the port number!
 #
 # Example: 127.0.0.1:25565
 #
-    address: ""
+address: ""
+
+#
+# Magic interface resolver will attempt to find the address that your server is currently running and forward it to RustyConnector.
+# This option will override `address`. Make sure you test it before implementing it!
+# This option's ability to work heavily relies on your MCLoader's operating environment.
+#
+magic-interface-resolver: false
+
 
 
 
@@ -98,7 +51,7 @@ server:
 #
 # The pod's name, assigned by Kubernetes.
 #
-# You should utilize Kubernetes environment variable to dynamically replace this value.
+# You should utilize a Kubernetes environment variable to dynamically replace this value.
 #
 # Read how here: https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/
 #

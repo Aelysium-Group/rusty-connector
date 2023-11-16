@@ -3,10 +3,10 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IScalarFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
@@ -19,7 +19,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.ConnectException;
@@ -27,12 +26,14 @@ import java.util.List;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<PlayerServer> {
+public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<PlayerServer, RustyPlayer> {
     protected ScalarFamily(String name, LoadBalancer loadBalancer, String parentFamily, Whitelist whitelist) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name, loadBalancer, parentFamily, whitelist);
     }
 
-    public PlayerServer connect(Player player) throws RuntimeException {
+    public PlayerServer connect(RustyPlayer rustyPlayer) throws RuntimeException {
+        Player player = rustyPlayer.resolve().orElseThrow();
+
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
         return connector.connect();
     }
@@ -41,7 +42,9 @@ public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<P
         return connector.connect();
     }
 
-    public PlayerServer fetchAny(Player player) throws RuntimeException {
+    public PlayerServer fetchAny(RustyPlayer rustyPlayer) throws RuntimeException {
+        Player player = rustyPlayer.resolve().orElseThrow();
+
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
         return connector.fetchAny();
     }

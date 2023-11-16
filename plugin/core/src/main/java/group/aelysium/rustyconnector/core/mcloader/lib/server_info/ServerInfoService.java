@@ -1,88 +1,72 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.server_info;
 
-import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.mc_loader.server_info.IServerInfoService;
-import group.aelysium.rustyconnector.core.lib.crypt.MD5;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.nio.channels.SocketChannel;
+import java.util.Enumeration;
+import java.util.UUID;
 
 public class ServerInfoService implements IServerInfoService {
-    private String name;
-    private InetSocketAddress address;
-    private String family;
-    private Integer softPlayerCap;
-    private Integer hardPlayerCap;
-    private Integer weight;
+    private final UUID sessionUUID = UUID.randomUUID();
+    private final InetSocketAddress address;
+    private final String magicConfigPointer;
+    public ServerInfoService(InetSocketAddress address, String magicConfigPointer, boolean magicInterfaceResolver, int port) {
+        this.magicConfigPointer = magicConfigPointer;
 
-    public ServerInfoService(String name, InetSocketAddress address, String family, int softPlayerCap, int hardPlayerCap, int weight) {
-        if(name.equals(""))
-            name = family + "-" + MD5.generateMD5(); // Generate a custom string to be the server's name
-        this.name = name;
-
-        this.address = address;
-        this.family = family;
-
-        this.setPlayerCap(softPlayerCap, hardPlayerCap);
-
-        this.weight = weight;
+        if(magicInterfaceResolver)
+            this.address = convertPortToAddress(port);
+        else if(address == null)
+            this.address = convertPortToAddress(port);
+        else
+            this.address = address;
+    }
+    public ServerInfo serverInfo() {
+        return new ServerInfo(this.sessionUUID.toString(), address);
     }
 
-    /**
-     * Set the player cap for this server. If soft cap is larger than hard cap. Set soft cap to be the same value as hard cap.
-     * @param softPlayerCap The soft player cap
-     * @param hardPlayerCap The hard player cap
-     */
-    private void setPlayerCap(int softPlayerCap, int hardPlayerCap) {
-        MCLoaderTinder api = TinderAdapterForCore.getTinder();
-        PluginLogger logger = api.logger();
-
-        api.setMaxPlayers(hardPlayerCap);
-
-        if(softPlayerCap >= hardPlayerCap) {
-            this.hardPlayerCap = hardPlayerCap;
-            this.softPlayerCap = hardPlayerCap;
-            logger.log("soft-player-cap was set to be larger than hard-player-cap. Running in `player-limit` mode.");
-            return;
-        }
-        this.hardPlayerCap = hardPlayerCap;
-        this.softPlayerCap = softPlayerCap;
+    public UUID sessionUUID() {
+        return this.sessionUUID;
     }
-
     public String address() {
         return AddressUtil.addressToString(this.address);
     }
-
-    public String name() {
-        return this.name;
-    }
-
-    public String family() { return this.family; }
 
     public int playerCount() {
         return TinderAdapterForCore.getTinder().onlinePlayerCount();
     }
 
-    public int weight() {
-        return this.weight;
+    public String magicConfig() {
+        return magicConfigPointer;
     }
 
-    public int softPlayerCap() {
-        return this.softPlayerCap;
-    }
+    public void kill() {}
 
-    public int hardPlayerCap() {
-        return this.hardPlayerCap;
-    }
-
-    public void kill() {
-        name = null;
-        address = null;
-        family = null;
-        softPlayerCap = null;
-        hardPlayerCap = null;
-        weight = null;
+    private static InetSocketAddress convertPortToAddress(int port) {
+        try {
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface netInterface = networkInterfaces.nextElement();
+                Enumeration<InetAddress> inetAddresses = netInterface.getInetAddresses();
+                while (inetAddresses.hasMoreElements()) {
+                    InetAddress address = inetAddresses.nextElement();
+                    try (SocketChannel socket = SocketChannel.open()) {
+                        socket.bind(new InetSocketAddress(address, 0));
+                        socket.connect(new InetSocketAddress("localhost", port));
+                        System.out.println("Network Interface: " + netInterface.getDisplayName());
+                        System.out.println("IP Address: " + address.getHostAddress());
+                        return new InetSocketAddress(address, port);
+                    } catch (IOException ignore) {}
+                }
+            }
+        } catch (SocketException ignored) {}
+        return null;
     }
 }

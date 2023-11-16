@@ -6,6 +6,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -44,7 +45,7 @@ public class CommandAnchor {
                     }
 
                     try {
-                        PlayerFocusedFamily family = ((PlayerFocusedFamily) anchorService.familyOf(anchor).orElseThrow());
+                        PlayerFocusedFamily family = anchorService.familyOf(anchor).orElseThrow();
 
                         // If the attempt to check player's family fails, just ignore it and try to connect.
                         // If there's actually an issue it'll be caught further down.
@@ -54,7 +55,7 @@ public class CommandAnchor {
                                 return closeMessage(player, VelocityLang.SERVER_ALREADY_CONNECTED);
                         } catch (Exception ignore) {}
 
-                        family.connect(player);
+                        family.connect(RustyPlayer.from(player));
                     } catch (Exception e) {
                         e.printStackTrace();
                         return closeMessage(player, VelocityLang.INTERNAL_ERROR);

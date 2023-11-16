@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family_categories;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 
 /**
  * A family category is a collection of other families.
@@ -14,5 +14,5 @@ public interface FamilyCategory<TFamily extends BaseFamily> {
      * The method by which a family is chosen is strictly reliant on the type of category used.
      * @param player The player to connect.
      */
-    void connect(ResolvablePlayer player) throws Exception;
+    void connect(RustyPlayer player) throws Exception;
 }

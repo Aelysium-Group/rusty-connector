@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors;
 
 import com.velocitypowered.api.command.CommandManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.anchors.IAnchorService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -17,7 +18,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 
-public class AnchorService implements IAnchorService<PlayerServer, PlayerFocusedFamily> {
+public class AnchorService implements IAnchorService<PlayerServer, RustyPlayer, PlayerFocusedFamily> {
     private final Map<String, PlayerFocusedFamily> anchors;
 
     private AnchorService(Map<String, PlayerFocusedFamily> anchors) {
@@ -106,7 +107,6 @@ public class AnchorService implements IAnchorService<PlayerServer, PlayerFocused
         return Optional.empty();
     }
 
-    @Override
     public void kill() {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         this.anchors.forEach((name, family) -> commandManager.unregister(name));

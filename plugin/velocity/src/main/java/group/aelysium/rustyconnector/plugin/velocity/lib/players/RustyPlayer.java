@@ -2,20 +2,22 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import com.velocitypowered.api.proxy.Player;
 import de.gesundkrank.jskills.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.ScoreCard;
+import net.kyori.adventure.text.Component;
 import one.microstream.reference.Lazy;
 
 import java.util.*;
 
-public class ResolvablePlayer implements IResolvablePlayer, IPlayer {
+public class RustyPlayer implements IRustyPlayer, IPlayer {
     protected UUID uuid;
     protected String username;
     protected Lazy<List<ScoreCard>> ranks = Lazy.Reference(null);
 
-    protected ResolvablePlayer(UUID uuid, String username) {
+    protected RustyPlayer(UUID uuid, String username) {
         this.uuid = uuid;
         this.username = username;
     }
@@ -48,6 +50,18 @@ public class ResolvablePlayer implements IResolvablePlayer, IPlayer {
         return scorecard.get();
     }
 
+    public void sendMessage(Component message) {
+        try {
+            this.resolve().orElseThrow().sendMessage(message);
+        } catch (Exception ignore) {}
+    }
+
+    public void disconnect(Component reason) {
+        try {
+            this.resolve().orElseThrow().disconnect(reason);
+        } catch (Exception ignore) {}
+    }
+
     /**
      * Fetches the ranked profile of this player.
      * @param game The game to fetch the rank for.
@@ -67,7 +81,7 @@ public class ResolvablePlayer implements IResolvablePlayer, IPlayer {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
 
-        ResolvablePlayer that = (ResolvablePlayer) object;
+        RustyPlayer that = (RustyPlayer) object;
         return Objects.equals(uuid, that.uuid) && Objects.equals(username, that.username);
     }
 
@@ -76,10 +90,26 @@ public class ResolvablePlayer implements IResolvablePlayer, IPlayer {
         return "<Player uuid="+this.uuid.toString()+" username="+this.username+">";
     }
 
-    public static ResolvablePlayer from(Player player) {
-        return new ResolvablePlayer(player.getUniqueId(), player.getUsername());
+    /**
+     * Get a resolvable player from the provided player.
+     * If no player is stored in storage, the player will be stored.
+     * If a player was already stored in the storage, that player will be returned.
+     * @param player The player to convert.
+     * @return {@link RustyPlayer}
+     */
+    public static RustyPlayer from(Player player) {
+        MySQLStorage mySQLStorage = Tinder.get().services().storage();
+        RustyPlayer tempRustyPlayer = new RustyPlayer(player.getUniqueId(), player.getUsername());
+
+        Set<RustyPlayer> players = mySQLStorage.root().players();
+        if(players.add(tempRustyPlayer)) {
+            mySQLStorage.store(players);
+            return tempRustyPlayer;
+        }
+
+        return players.stream().filter(player1 -> player1.equals(tempRustyPlayer)).findAny().orElseThrow();
     }
-    public static ResolvablePlayer from(UUID uuid, String username) {
-        return new ResolvablePlayer(uuid, username);
+    public static RustyPlayer from(UUID uuid, String username) {
+        return new RustyPlayer(uuid, username);
     }
 }

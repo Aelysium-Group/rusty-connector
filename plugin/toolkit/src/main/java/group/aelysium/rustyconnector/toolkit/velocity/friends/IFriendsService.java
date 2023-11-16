@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.toolkit.velocity.friends;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IResolvablePlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.*;
 
-public interface IFriendsService<TResolvablePlayer extends IResolvablePlayer, TFriendRequest extends IFriendRequest> extends Service {
+public interface IFriendsService<TRustyPlayer extends IRustyPlayer, TFriendRequest extends IFriendRequest> extends Service {
     /**
      * Gets the settings that this {@link IFriendsService} abides by.
      * @return {@link IFriendsService}
@@ -18,24 +18,24 @@ public interface IFriendsService<TResolvablePlayer extends IResolvablePlayer, TF
      * @param target The target to search for.
      * @return {@link List<IFriendRequest>}
      */
-    List<TFriendRequest> findRequestsToTarget(TResolvablePlayer target);
+    List<TFriendRequest> findRequestsToTarget(TRustyPlayer target);
 
     /**
      * Searches for a list of {@link IFriendRequest friend requests} that are addressed to a target.
      * @param target The target to search for.
      * @return {@link List<IFriendRequest>}
      */
-    Optional<TFriendRequest> findRequest(TResolvablePlayer target, TResolvablePlayer sender);
+    Optional<TFriendRequest> findRequest(TRustyPlayer target, TRustyPlayer sender);
 
-    Optional<List<TResolvablePlayer>> findFriends(Player player);
+    Optional<List<TRustyPlayer>> findFriends(TRustyPlayer player);
 
-    boolean areFriends(TResolvablePlayer player1, TResolvablePlayer player2);
-    void addFriends(TResolvablePlayer player1, TResolvablePlayer player2);
-    void removeFriends(TResolvablePlayer player1, TResolvablePlayer player2);
+    boolean areFriends(TRustyPlayer player1, TRustyPlayer player2);
+    void addFriends(TRustyPlayer player1, TRustyPlayer player2);
+    void removeFriends(TRustyPlayer player1, TRustyPlayer player2);
 
-    IFriendMapping<TResolvablePlayer> sendRequest(Player sender, TResolvablePlayer target);
+    IFriendMapping<TRustyPlayer> sendRequest(Player sender, TRustyPlayer target);
 
     void closeInvite(TFriendRequest request);
 
-    Optional<Long> friendCount(TResolvablePlayer player);
+    Optional<Long> friendCount(TRustyPlayer player);
 }

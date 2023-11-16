@@ -2,7 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.config.RankedFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
@@ -33,11 +34,13 @@ public class RankedFamily extends SystemFocusedServerFamily {
      * Queues a player into this family's matchmaking.
      * The player will be connected once a match has been made.
      * The player's queue to this matchmaker will not timeout.
-     * You must manually call {@link #dequeueConnect(ResolvablePlayer)} to remove a player from this queue.
+     * You must manually call {@link #dequeueConnect(RustyPlayer)} to remove a player from this queue.
      * @param player The player to connect.
+     * @return null. Always.
      */
-    public void connect(ResolvablePlayer player) {
+    public PlayerServer connect(RustyPlayer player) {
         this.gameManager.playerQueue().add(player.ranked(this.gameManager().name()));
+        return null;
     }
 
     /**
@@ -45,7 +48,7 @@ public class RankedFamily extends SystemFocusedServerFamily {
      * If the player is already connected to this family, nothing will happen.
      * @param player The player to dequeue.
      */
-    public void dequeueConnect(ResolvablePlayer player) {
+    public void dequeueConnect(RustyPlayer player) {
         this.gameManager.playerQueue().remove(player.ranked(this.gameManager().name()));
     }
 

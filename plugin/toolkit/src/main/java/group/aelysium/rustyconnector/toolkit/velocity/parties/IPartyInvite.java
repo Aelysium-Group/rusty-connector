@@ -1,17 +1,17 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
-import group.aelysium.rustyconnector.toolkit.velocity.players.IResolvablePlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 
-public interface IPartyInvite<TResolvablePlayer extends IResolvablePlayer> {
+public interface IPartyInvite<TResolvablePlayer extends IRustyPlayer> {
     /**
-     * Gets the {@link IResolvablePlayer} that sent this invite.
-     * @return {@link IResolvablePlayer}
+     * Gets the {@link IRustyPlayer} that sent this invite.
+     * @return {@link IRustyPlayer}
      */
     TResolvablePlayer sender();
 
     /**
-     * Gets the {@link IResolvablePlayer} that was targeted by this invite.
-     * @return {@link IResolvablePlayer}
+     * Gets the {@link IRustyPlayer} that was targeted by this invite.
+     * @return {@link IRustyPlayer}
      */
     TResolvablePlayer target();
 

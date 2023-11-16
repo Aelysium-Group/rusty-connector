@@ -8,14 +8,15 @@ import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAH
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPARequest;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAService;
 import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IPlayerFocusedFamilyBase;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 
 import java.util.Optional;
 
 public interface IDynamicTeleportServiceHandler extends IServiceHandler {
-    <TPlayerServer extends IPlayerServer, TPlayerFocusedFamilyBase extends IPlayerFocusedFamilyBase<TPlayerServer>>
-        Optional<IAnchorService<TPlayerServer, TPlayerFocusedFamilyBase>> anchorService();
+    <TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer, TPlayerFocusedFamilyBase extends IPlayerFocusedFamilyBase<TPlayerServer, TResolvablePlayer>>
+        Optional<IAnchorService<TPlayerServer, TResolvablePlayer, TPlayerFocusedFamilyBase>> anchorService();
     Optional<IHubService> hubService();
-    <TTPACleaningService extends ITPACleaningService<?>, TPlayerServer extends IPlayerServer, TPlayerFocusedFamilyBase extends IPlayerFocusedFamilyBase<TPlayerServer>, TTPARequest extends ITPARequest, TTPAHandler extends ITPAHandler<TTPARequest>>
-        Optional<ITPAService<TTPACleaningService, TPlayerServer, TPlayerFocusedFamilyBase, TTPARequest, TTPAHandler>> tpaService();
+    <TTPACleaningService extends ITPACleaningService<?>, TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer, TPlayerFocusedFamilyBase extends IPlayerFocusedFamilyBase<TPlayerServer, TResolvablePlayer>, TTPARequest extends ITPARequest, TTPAHandler extends ITPAHandler<TTPARequest>>
+        Optional<ITPAService<TTPACleaningService, TPlayerServer, TResolvablePlayer, TPlayerFocusedFamilyBase, TTPARequest, TTPAHandler>> tpaService();
 }

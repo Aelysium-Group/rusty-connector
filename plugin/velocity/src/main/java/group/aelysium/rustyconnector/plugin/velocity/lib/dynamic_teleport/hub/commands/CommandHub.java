@@ -7,6 +7,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -34,10 +35,11 @@ public class CommandHub {
                 .<CommandSource>literal("hub")
                 .requires(source -> source instanceof Player)
                 .executes(context -> {
-                    if(!(context.getSource() instanceof Player player)) {
+                    if(!(context.getSource() instanceof Player eventPlayer)) {
                         logger.log("/hub must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
+                    RustyPlayer player = RustyPlayer.from(eventPlayer);
 
                     ServerInfo serverInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
@@ -64,7 +66,7 @@ public class CommandHub {
                     }
 
                     try {
-                        PlayerFocusedFamily parent = (PlayerFocusedFamily) ((PlayerFocusedFamily) family).parent().get();
+                        PlayerFocusedFamily parent = (PlayerFocusedFamily) family.parent().get();
 
                         if(parent != null) {
                             parent.connect(player);

@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Flame;
@@ -278,11 +279,12 @@ class Send {
                                 String familyName = context.getArgument("familyName", String.class);
                                 String username = context.getArgument("username", String.class);
 
-                                Player player = Tinder.get().velocityServer().getPlayer(username).orElse(null);
-                                if(player == null) {
+                                Player fetchedPlayer = Tinder.get().velocityServer().getPlayer(username).orElse(null);
+                                if(fetchedPlayer == null) {
                                     logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
                                     return Command.SINGLE_SUCCESS;
                                 }
+                                RustyPlayer player = RustyPlayer.from(fetchedPlayer);
 
                                 BaseFamily family = flame.services().family().find(familyName);
                                 if(family == null) {
@@ -294,7 +296,7 @@ class Send {
                                     return Command.SINGLE_SUCCESS;
                                 }
 
-                                ((PlayerFocusedFamily) family).connect(player);
+                                family.connect(player);
                             } catch (Exception e) {
                                 logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                             }

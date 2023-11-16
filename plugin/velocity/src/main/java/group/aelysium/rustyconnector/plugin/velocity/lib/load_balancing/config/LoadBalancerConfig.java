@@ -38,8 +38,8 @@ public class LoadBalancerConfig extends YAML {
         this.weighted = this.getNode(this.data,"weighted",Boolean.class);
         this.algorithm = AlgorithmType.valueOf(this.getNode(this.data,"algorithm",String.class));
 
-        this.persistence_enabled = this.getNode(this.data,"first-connection.load-balancing.persistence.enabled",Boolean.class);
-        this.persistence_attempts = this.getNode(this.data,"first-connection.load-balancing.persistence.attempts",Integer.class);
+        this.persistence_enabled = this.getNode(this.data,"persistence.enabled",Boolean.class);
+        this.persistence_attempts = this.getNode(this.data,"persistence.attempts",Integer.class);
         if(this.persistence_enabled && this.persistence_attempts <= 0)
             throw new IllegalStateException("Load balancing persistence must allow at least 1 attempt.");
     }

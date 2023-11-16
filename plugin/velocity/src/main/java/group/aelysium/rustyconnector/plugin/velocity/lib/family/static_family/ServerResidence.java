@@ -6,20 +6,20 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ResolvableServer;
 
 import java.util.Optional;
 
 public class ServerResidence implements IServerResidence {
-    protected ResolvablePlayer player;
+    protected RustyPlayer player;
     protected ResolvableServer server;
     protected ResolvableFamily family;
     protected Long expiration;
 
     public ServerResidence(Player player, PlayerServer server, StaticFamily family, LiquidTimestamp expiration) {
-        this.player = ResolvablePlayer.from(player);
+        this.player = RustyPlayer.from(player);
         this.server = ResolvableServer.from(server);
         this.family = ResolvableFamily.from(family);
 
@@ -30,7 +30,7 @@ public class ServerResidence implements IServerResidence {
     public Optional<Player> player() {
         return Tinder.get().velocityServer().getPlayer(this.player.uuid());
     }
-    public ResolvablePlayer rawPlayer() {
+    public RustyPlayer rawPlayer() {
         return this.player;
     }
 

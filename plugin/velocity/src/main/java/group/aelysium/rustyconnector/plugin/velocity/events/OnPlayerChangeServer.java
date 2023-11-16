@@ -4,10 +4,10 @@ import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -22,10 +22,9 @@ public class OnPlayerChangeServer {
             return EventTask.async(() -> {
                 Tinder api = Tinder.get();
                 PluginLogger logger = api.logger();
+                RustyPlayer player = RustyPlayer.from(event.getPlayer());
 
                 try {
-                    Player player = event.getPlayer();
-
                     RegisteredServer newRawServer = event.getServer();
                     RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
 

@@ -3,14 +3,14 @@ package group.aelysium.rustyconnector.toolkit.velocity.family.bases;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IResolvablePlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePlayer extends IResolvablePlayer> {
+public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer> {
     String name();
 
     /**
@@ -47,8 +47,9 @@ public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePla
      * Method added for convenience.
      * Any implementation of this interface should perform some form of operation when connect is called.
      * @param player The player to ultimately connect to the family
+     * @return The server that the player was connected to.
      */
-    void connect(TResolvablePlayer player);
+    TPlayerServer connect(TResolvablePlayer player);
 
     /**
      * Gets the aggregate player count across all servers in this family
@@ -106,5 +107,5 @@ public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePla
      * If this family is the root family, this method will always return `null`.
      * @return {@link WeakReference <IBaseFamily>}
      */
-    <F extends IBaseFamily<TPlayerServer, TResolvablePlayer>> WeakReference<F> parent();
+    <TBaseFamily extends IBaseFamily<TPlayerServer, TResolvablePlayer>> WeakReference<TBaseFamily> parent();
 }

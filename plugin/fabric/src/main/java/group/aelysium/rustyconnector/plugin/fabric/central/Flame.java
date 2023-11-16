@@ -38,10 +38,7 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The core module of RustyConnector.
@@ -252,12 +249,10 @@ class Initialize {
 
     public ServerInfoService serverInfo(DefaultConfig defaultConfig) {
         ServerInfoService serverInfoService = new ServerInfoService(
-                defaultConfig.getServer_name(),
-                AddressUtil.parseAddress(defaultConfig.getServer_address()),
-                defaultConfig.getServer_family(),
-                defaultConfig.getServer_playerCap_soft(),
-                defaultConfig.getServer_playerCap_hard(),
-                defaultConfig.getServer_weight()
+                AddressUtil.parseAddress(defaultConfig.address()),
+                defaultConfig.magicConfig(),
+                defaultConfig.magicInterfaceResolver(),
+                api.fabricServer().getServerPort()
         );
         services.put(ServerInfoService.class, serverInfoService);
 
@@ -281,5 +276,4 @@ class Initialize {
     public void dynamicTeleport() {
         services.put(DynamicTeleportService.class, new DynamicTeleportService());
     }
-
 }

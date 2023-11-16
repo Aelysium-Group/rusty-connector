@@ -13,19 +13,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServerPingPacket extends GenericPacket {
+    private String serverName;
     private ConnectionIntent intent;
     private String magicConfigName;
-    private String serverName;
     private Integer playerCount;
 
+    public String serverName() {
+        return serverName;
+    }
     public ConnectionIntent intent() {
         return intent;
     }
     public String magicConfigName() {
         return magicConfigName;
-    }
-    public String serverName() {
-        return serverName;
     }
     public Integer playerCount() {
         return playerCount;
@@ -42,9 +42,9 @@ public class ServerPingPacket extends GenericPacket {
             JsonPrimitive value = entry.getValue();
 
             switch (key) {
+                case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
                 case ValidParameters.INTENT -> this.intent = ConnectionIntent.valueOf(value.getAsString());
                 case ValidParameters.MAGIC_CONFIG_NAME -> this.magicConfigName = value.getAsString();
-                case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
                 case ValidParameters.PLAYER_COUNT -> this.playerCount = value.getAsInt();
             }
         });
@@ -60,9 +60,9 @@ public class ServerPingPacket extends GenericPacket {
             JsonPrimitive value = entry.getValue();
 
             switch (key) {
+                case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
                 case ValidParameters.INTENT -> this.intent = ConnectionIntent.valueOf(value.getAsString());
                 case ValidParameters.MAGIC_CONFIG_NAME -> this.magicConfigName = value.getAsString();
-                case ValidParameters.SERVER_NAME -> this.serverName = value.getAsString();
                 case ValidParameters.PLAYER_COUNT -> this.playerCount = value.getAsInt();
             }
         });
@@ -73,9 +73,9 @@ public class ServerPingPacket extends GenericPacket {
         JsonObject object = super.toJSON();
         JsonObject parameters = new JsonObject();
 
+        parameters.add(ValidParameters.SERVER_NAME, new JsonPrimitive(this.serverName));
         parameters.add(ValidParameters.INTENT, new JsonPrimitive(this.intent.toString()));
         parameters.add(ValidParameters.MAGIC_CONFIG_NAME, new JsonPrimitive(this.magicConfigName));
-        parameters.add(ValidParameters.SERVER_NAME, new JsonPrimitive(this.serverName));
         parameters.add(ValidParameters.PLAYER_COUNT, new JsonPrimitive(this.playerCount));
 
         object.add(MasterValidParameters.PARAMETERS, parameters);
@@ -84,15 +84,14 @@ public class ServerPingPacket extends GenericPacket {
     }
 
     public interface ValidParameters {
+        String SERVER_NAME = "s";
         String MAGIC_CONFIG_NAME = "c";
-        String SERVER_NAME = "n";
         String INTENT = "i";
         String PLAYER_COUNT = "pc";
 
         static List<String> toList() {
             List<String> list = new ArrayList<>();
             list.add(MAGIC_CONFIG_NAME);
-            list.add(SERVER_NAME);
             list.add(INTENT);
             list.add(PLAYER_COUNT);
 

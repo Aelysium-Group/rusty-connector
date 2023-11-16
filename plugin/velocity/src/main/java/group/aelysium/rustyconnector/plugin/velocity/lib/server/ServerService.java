@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
@@ -19,7 +20,7 @@ import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.util.Vector;
 
-public class ServerService implements IServerService<PlayerServer, BaseFamily> {
+public class ServerService implements IServerService<PlayerServer, RustyPlayer, BaseFamily> {
     private final Vector<WeakReference<PlayerServer>> servers =  new Vector<>();
 
     private final int serverTimeout;
@@ -168,7 +169,6 @@ public class ServerService implements IServerService<PlayerServer, BaseFamily> {
         }
     }
 
-    @Override
     public void kill() {
         this.servers.forEach(Reference::clear);
         this.servers.clear();

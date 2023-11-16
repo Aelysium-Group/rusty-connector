@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family_categories;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,16 +24,16 @@ public class VersionedFamily<TFamily extends BaseFamily> implements FamilyCatego
 
     /**
      * Attempts to connect the player to a family based on version.
-     * @param resolvablePlayer The player to connect.
+     * @param rustyPlayer The player to connect.
      * @throws IllegalAccessException If no family exists for the version the player is using.
      */
     @Override
-    public void connect(ResolvablePlayer resolvablePlayer) throws IllegalAccessException {
-        Player player = resolvablePlayer.resolve().orElseThrow();
+    public void connect(RustyPlayer rustyPlayer) throws IllegalAccessException {
+        Player player = rustyPlayer.resolve().orElseThrow();
 
         TFamily family = this.families.get(player.getProtocolVersion());
         if(family == null) throw new IllegalAccessException();
 
-        family.connect(resolvablePlayer);
+        family.connect(rustyPlayer);
     }
 }

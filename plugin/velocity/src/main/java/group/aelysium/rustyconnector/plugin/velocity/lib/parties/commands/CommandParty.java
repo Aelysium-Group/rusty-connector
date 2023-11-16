@@ -17,7 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -69,7 +69,7 @@ public final class CommandParty {
                                     if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                                     try {
-                                        List<PartyInvite> invites = partyService.findInvitesToTarget(ResolvablePlayer.from(player));
+                                        List<PartyInvite> invites = partyService.findInvitesToTarget(RustyPlayer.from(player));
 
                                         if(invites.size() == 0) {
                                             builder.suggest("You have no pending party invites!");
@@ -119,7 +119,7 @@ public final class CommandParty {
                                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
                                             try {
-                                                PartyInvite invite = partyService.findInvite(ResolvablePlayer.from(player), ResolvablePlayer.from(senderPlayer)).orElse(null);
+                                                PartyInvite invite = partyService.findInvite(RustyPlayer.from(player), RustyPlayer.from(senderPlayer)).orElse(null);
                                                 if(invite == null) throw new NoOutputException();
 
                                                 try {
@@ -153,7 +153,7 @@ public final class CommandParty {
                                             if(senderPlayer == null || !senderPlayer.isActive())
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_TARGET_NOT_ONLINE.build(username));
 
-                                            PartyInvite invite = partyService.findInvite(ResolvablePlayer.from(player), ResolvablePlayer.from(senderPlayer)).orElse(null);
+                                            PartyInvite invite = partyService.findInvite(RustyPlayer.from(player), RustyPlayer.from(senderPlayer)).orElse(null);
                                             if(invite == null)
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_EXPIRED);
 
@@ -271,7 +271,7 @@ public final class CommandParty {
                                         }
 
                                         FriendsService friendsService = api.services().friends().orElseThrow();
-                                        List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                        List<RustyPlayer> friends = friendsService.findFriends(RustyPlayer.from(player)).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
                                             return builder.buildFuture();
@@ -317,7 +317,7 @@ public final class CommandParty {
                                             return closeMessage(player, VelocityLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
 
                                     String username = context.getArgument("username", String.class);
-                                    ResolvablePlayer targetPlayerResolvable = api.services().player().fetch(username).orElse(null);
+                                    RustyPlayer targetPlayerResolvable = api.services().player().fetch(username).orElse(null);
                                     if(targetPlayerResolvable == null || targetPlayerResolvable.resolve().isEmpty())
                                         return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
@@ -333,8 +333,8 @@ public final class CommandParty {
                                     try {
                                         if (partyService.settings().friendsOnly())
                                             if (!api.services().friends().orElseThrow().areFriends(
-                                                    ResolvablePlayer.from(player),
-                                                    ResolvablePlayer.from(targetPlayer)
+                                                    RustyPlayer.from(player),
+                                                    RustyPlayer.from(targetPlayer)
                                             ))
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_FRIENDS_ONLY);
                                     } catch (Exception ignore) {}

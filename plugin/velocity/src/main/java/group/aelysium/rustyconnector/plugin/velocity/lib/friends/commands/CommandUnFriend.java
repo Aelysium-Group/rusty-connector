@@ -13,7 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -47,10 +47,11 @@ public final class CommandUnFriend {
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
-                            if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                            if(!(context.getSource() instanceof Player eventPlayer)) return builder.buildFuture();
+                            RustyPlayer player = RustyPlayer.from(eventPlayer);
 
                             try {
-                                List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                List<RustyPlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -76,16 +77,16 @@ public final class CommandUnFriend {
                             }
 
                             String username = context.getArgument("username", String.class);
-                            ResolvablePlayer targetPlayer = api.services().player().fetch(username).orElseThrow();
+                            RustyPlayer targetPlayer = api.services().player().fetch(username).orElseThrow();
 
-                            if(!friendsService.areFriends(ResolvablePlayer.from(player), targetPlayer))
+                            if(!friendsService.areFriends(RustyPlayer.from(player), targetPlayer))
                                 return closeMessage(player, VelocityLang.UNFRIEND_NOT_FRIENDS.build(username));
 
                             if(targetPlayer == null)
                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
                             try {
-                                friendsService.removeFriends(ResolvablePlayer.from(player), targetPlayer);
+                                friendsService.removeFriends(RustyPlayer.from(player), targetPlayer);
 
                                 return closeMessage(player, VelocityLang.UNFRIEND_SUCCESS.build(username));
                             } catch (IllegalStateException e) {

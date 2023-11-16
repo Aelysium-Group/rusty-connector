@@ -4,17 +4,17 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IResidenceDataEnclave;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
-public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer, StaticFamily> {
+public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer, RustyPlayer, StaticFamily> {
     private final MySQLStorage storage;
 
     public ResidenceDataEnclave(MySQLStorage storage) {
@@ -27,7 +27,7 @@ public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer,
 
             Optional<ServerResidence> serverResidence = root.residence().stream()
                 .filter(residence ->
-                    residence.rawPlayer().equals(ResolvablePlayer.from(player)) &&
+                    residence.rawPlayer().equals(RustyPlayer.from(player)) &&
                     residence.rawFamily().equals(ResolvableFamily.from(family))
                 )
                 .findAny();
@@ -45,16 +45,16 @@ public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer,
 
         ServerResidence serverResidence = new ServerResidence(player, server, family, family.homeServerExpiration());
 
-        List<ServerResidence> residences = root.residence();
+        Set<ServerResidence> residences = root.residence();
         residences.add(serverResidence);
         this.storage.store(residences);
     }
     public void delete(Player player, StaticFamily family) {
         StorageRoot root = this.storage.root();
 
-        List<ServerResidence> residences = root.residence();
+        Set<ServerResidence> residences = root.residence();
         residences.removeIf(residence ->
-                residence.rawPlayer().equals(ResolvablePlayer.from(player)) &&
+                residence.rawPlayer().equals(RustyPlayer.from(player)) &&
                 residence.rawFamily().equals(ResolvableFamily.from(family))
         );
 
@@ -75,7 +75,7 @@ public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer,
     public void purgeExpired(StaticFamily family) {
         StorageRoot root = this.storage.root();
 
-        List<ServerResidence> residenceList = root.residence();
+        Set<ServerResidence> residenceList = root.residence();
         residenceList.removeIf(serverResidence ->
                 serverResidence.expiration() < Instant.EPOCH.getEpochSecond() &&
                 serverResidence.rawFamily().equals(ResolvableFamily.from(family))
@@ -92,7 +92,7 @@ public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer,
     protected void updateNullExpirations(StaticFamily family) {
         StorageRoot root = this.storage.root();
 
-        List<ServerResidence> residenceList = root.residence();
+        Set<ServerResidence> residenceList = root.residence();
         residenceList.forEach(serverResidence -> {
             if(!serverResidence.rawFamily().equals(ResolvableFamily.from(family))) return;
             serverResidence.expiration(null);
@@ -109,7 +109,7 @@ public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer,
     protected void updateValidExpirations(StaticFamily family) {
         StorageRoot root = this.storage.root();
 
-        List<ServerResidence> residenceList = root.residence();
+        Set<ServerResidence> residenceList = root.residence();
         residenceList.forEach(serverResidence -> {
             if(!serverResidence.rawFamily().equals(ResolvableFamily.from(family))) return;
             serverResidence.expiration(family.homeServerExpiration());

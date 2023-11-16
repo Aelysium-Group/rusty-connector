@@ -35,6 +35,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.bukkit.Bukkit;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -240,13 +241,16 @@ class Initialize {
     }
 
     public ServerInfoService serverInfo(DefaultConfig defaultConfig) {
+        InetSocketAddress address = null;
+        try {
+            address = AddressUtil.parseAddress(defaultConfig.address());
+        } catch (Exception ignore) {}
+
         ServerInfoService serverInfoService = new ServerInfoService(
-                defaultConfig.getServer_name(),
-                AddressUtil.parseAddress(defaultConfig.getServer_address()),
-                defaultConfig.getServer_family(),
-                defaultConfig.getServer_playerCap_soft(),
-                defaultConfig.getServer_playerCap_hard(),
-                defaultConfig.getServer_weight()
+                address,
+                defaultConfig.magicConfig(),
+                defaultConfig.magicInterfaceResolver(),
+                Bukkit.getPort()
         );
         services.put(ServerInfoService.class, serverInfoService);
 

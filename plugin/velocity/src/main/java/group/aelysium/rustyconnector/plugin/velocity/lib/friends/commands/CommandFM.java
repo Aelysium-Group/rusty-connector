@@ -13,7 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -49,10 +49,11 @@ public final class CommandFM {
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
-                            if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                            if(!(context.getSource() instanceof Player eventPlayer)) return builder.buildFuture();
+                            RustyPlayer player = RustyPlayer.from(eventPlayer);
 
                             try {
-                                List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                List<RustyPlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -98,8 +99,8 @@ public final class CommandFM {
                                 if(player.equals(targetPlayer))
                                     return closeMessage(player, VelocityLang.FRIEND_MESSAGING_NO_SELF_MESSAGING);
                                 if(!friendsService.areFriends(
-                                        ResolvablePlayer.from(player),
-                                        ResolvablePlayer.from(targetPlayer)
+                                        RustyPlayer.from(player),
+                                        RustyPlayer.from(targetPlayer)
                                 ))
                                     return closeMessage(player, VelocityLang.FRIEND_MESSAGING_ONLY_FRIENDS);
 

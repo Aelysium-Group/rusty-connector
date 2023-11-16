@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
@@ -10,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FamilyService implements IFamilyService<PlayerServer, RootFamily, BaseFamily> {
+public class FamilyService implements IFamilyService<PlayerServer, RustyPlayer, RootFamily, BaseFamily> {
     private final Map<String, BaseFamily> registeredFamilies = new HashMap<>();
     private WeakReference<RootFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
@@ -56,7 +57,6 @@ public class FamilyService implements IFamilyService<PlayerServer, RootFamily, B
         return this.registeredFamilies.size();
     }
 
-    @Override
     public void kill() {
         this.registeredFamilies.clear();
         this.rootFamily.clear();

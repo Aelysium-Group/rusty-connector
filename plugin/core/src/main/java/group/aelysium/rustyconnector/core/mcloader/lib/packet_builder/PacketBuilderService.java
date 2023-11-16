@@ -26,11 +26,8 @@ public class PacketBuilderService implements IPacketBuilderService {
                     .setOrigin(PacketOrigin.SERVER)
                     .setAddress(serverInfoService.address())
                     .setParameter(ServerPingPacket.ValidParameters.INTENT, intent.toString())
-                    .setParameter(ServerPingPacket.ValidParameters.FAMILY_NAME, serverInfoService.family())
-                    .setParameter(ServerPingPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
-                    .setParameter(ServerPingPacket.ValidParameters.SOFT_CAP, String.valueOf(serverInfoService.softPlayerCap()))
-                    .setParameter(ServerPingPacket.ValidParameters.HARD_CAP, String.valueOf(serverInfoService.hardPlayerCap()))
-                    .setParameter(ServerPingPacket.ValidParameters.WEIGHT, String.valueOf(serverInfoService.weight()))
+                    .setParameter(ServerPingPacket.ValidParameters.MAGIC_CONFIG_NAME, serverInfoService.magicConfig())
+                    .setParameter(ServerPingPacket.ValidParameters.SERVER_NAME, serverInfoService.sessionUUID().toString())
                     .setParameter(ServerPingPacket.ValidParameters.PLAYER_COUNT, String.valueOf(serverInfoService.playerCount()))
                     .buildSendable();
             api.flame().backbone().connection().orElseThrow().publish(message);
@@ -70,7 +67,7 @@ public class PacketBuilderService implements IPacketBuilderService {
                 .setType(PacketType.UNLOCK_SERVER)
                 .setOrigin(PacketOrigin.SERVER)
                 .setAddress(serverInfoService.address())
-                .setParameter(UnlockServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
+                .setParameter(UnlockServerPacket.ValidParameters.SERVER_NAME, serverInfoService.sessionUUID().toString())
                 .buildSendable();
 
         api.flame().backbone().connection().orElseThrow().publish(message);
@@ -87,7 +84,7 @@ public class PacketBuilderService implements IPacketBuilderService {
                 .setType(PacketType.LOCK_SERVER)
                 .setOrigin(PacketOrigin.SERVER)
                 .setAddress(serverInfoService.address())
-                .setParameter(UnlockServerPacket.ValidParameters.SERVER_NAME, serverInfoService.name())
+                .setParameter(UnlockServerPacket.ValidParameters.SERVER_NAME, serverInfoService.sessionUUID().toString())
                 .buildSendable();
 
         api.flame().backbone().connection().orElseThrow().publish(message);
@@ -106,7 +103,7 @@ public class PacketBuilderService implements IPacketBuilderService {
                 .setType(PacketType.END_RANKED_GAME)
                 .setOrigin(PacketOrigin.SERVER)
                 .setAddress(serverInfoService.address())
-                .setParameter(RankedGameEndPacket.ValidParameters.FAMILY_NAME, serverInfoService.family())
+                .setParameter(RankedGameEndPacket.ValidParameters.FAMILY_NAME, serverInfoService.sessionUUID().toString())
                 .setParameter(RankedGameEndPacket.ValidParameters.GAME_UUID, String.valueOf(uuid))
                 .buildSendable();
 

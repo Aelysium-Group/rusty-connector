@@ -2,11 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -23,14 +23,13 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.io.File;
 import java.rmi.ConnectException;
 import java.util.List;
 import java.util.Optional;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<PlayerServer> {
+public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<PlayerServer, RustyPlayer> {
     protected LiquidTimestamp homeServerExpiration;
     protected UnavailableProtocol unavailableProtocol;
     protected ResidenceDataEnclave dataEnclave;
@@ -53,9 +52,8 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
         return this.dataEnclave;
     }
 
-    @Override
-    public PlayerServer connect(Player player) throws RuntimeException {
-        StaticFamilyConnector connector = new StaticFamilyConnector(this, player);
+    public PlayerServer connect(RustyPlayer player) throws RuntimeException {
+        StaticFamilyConnector connector = new StaticFamilyConnector(this, player.resolve().orElseThrow());
         return connector.connect();
     }
 

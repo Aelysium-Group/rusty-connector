@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayerService;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IResolvablePlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.IServiceHandler;
@@ -26,15 +26,15 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * Gets the {@link IFamilyService family service} which allows access to server families and other family related logic.
      * @return {@link IFamilyService}
      */
-    <TPlayerServer extends IPlayerServer, TRootFamily extends IRootFamily<TPlayerServer>, TBaseFamily extends IBaseFamily<TPlayerServer>>
-        IFamilyService<TPlayerServer, TRootFamily, TBaseFamily> family();
+    <TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer, TRootFamily extends IRootFamily<TPlayerServer, TResolvablePlayer>, TBaseFamily extends IBaseFamily<TPlayerServer, TResolvablePlayer>>
+        IFamilyService<TPlayerServer, TResolvablePlayer, TRootFamily, TBaseFamily> family();
 
     /**
      * Gets the {@link IServerService server service} which allows access to server registration, unregistration, connection, and other server related logic.
      * @return {@link IServerService}
      */
-    <TPlayerServer extends IPlayerServer, TBaseFamily extends IBaseFamily<TPlayerServer>>
-        IServerService<TPlayerServer, TBaseFamily> server();
+    <TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer, TBaseFamily extends IBaseFamily<TPlayerServer, TResolvablePlayer>>
+        IServerService<TPlayerServer, TResolvablePlayer, TBaseFamily> server();
 
     /**
      * Gets RustyConnector's {@link IMySQLStorageService remote storage connector service} which allows direct access to database storage.
@@ -60,7 +60,7 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * The party module may not always be enabled, hence this returns an {@link Optional<IPartyService>}
      * @return {@link Optional<IPartyService>}
      */
-    <TResolvablePlayer extends IResolvablePlayer, TPlayerServer extends IPlayerServer, TParty extends IParty<TPlayerServer>, TPartyInvite extends IPartyInvite<TResolvablePlayer>>
+    <TResolvablePlayer extends IRustyPlayer, TPlayerServer extends IPlayerServer, TParty extends IParty<TPlayerServer>, TPartyInvite extends IPartyInvite<TResolvablePlayer>>
         Optional<IPartyService<TResolvablePlayer, TPlayerServer, TParty, TPartyInvite>> party();
 
     /**
@@ -68,7 +68,7 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * The friends module may not always be enabled, hence this returns an {@link Optional<IFriendsService>}
      * @return {@link Optional<IFriendsService>}
      */
-    <TResolvablePlayer extends IResolvablePlayer, TFriendRequest extends IFriendRequest>
+    <TResolvablePlayer extends IRustyPlayer, TFriendRequest extends IFriendRequest>
         Optional<? extends IFriendsService<TResolvablePlayer, TFriendRequest>> friends();
 
     /**

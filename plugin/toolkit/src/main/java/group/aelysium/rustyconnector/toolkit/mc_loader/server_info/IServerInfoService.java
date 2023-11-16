@@ -1,8 +1,17 @@
 package group.aelysium.rustyconnector.toolkit.mc_loader.server_info;
 
+import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
+import java.util.UUID;
+
 public interface IServerInfoService extends Service {
+    /**
+     * Gets the info of this server.
+     * @return {@link ServerInfo}
+     */
+    ServerInfo serverInfo();
+
     /**
      * Gets the address of this server.
      * The address, assuming the user entered it properly, should be formatted in the same format as you format a joinable address in Velocity's velocity.toml.
@@ -11,17 +20,10 @@ public interface IServerInfoService extends Service {
     String address();
 
     /**
-     * Gets the name of this server.
+     * Gets the name of the magic config this server is going to use.
      * @return {@link String}
      */
-    String name();
-
-    /**
-     * Gets the name of the family that this server should be in.
-     * Whether a family with this name actually exists on the proxy is unknown to the server.
-     * @return {@link String}
-     */
-    String family();
+    String magicConfig();
 
     /**
      * The number of players on this server.
@@ -30,20 +32,9 @@ public interface IServerInfoService extends Service {
     int playerCount();
 
     /**
-     * The weight value that this server has while being processed in the load balancer.
-     * @return {@link Integer}
+     * Gets the session uuid of this server.
+     * The server's uuid won't change while it's alive, but once it's restarted or reloaded, the session uuid will change.
+     * @return {@link UUID}
      */
-    int weight();
-
-    /**
-     * The soft player cap of this server.
-     * @return {@link Integer}
-     */
-    int softPlayerCap();
-
-    /**
-     * The hard player cap of this server.
-     * @return {@link Integer}
-     */
-    int hardPlayerCap();
+    UUID sessionUUID();
 }

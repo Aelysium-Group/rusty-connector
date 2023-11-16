@@ -16,7 +16,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -36,17 +36,18 @@ public final class CommandFriends {
                 .<CommandSource>literal("friends")
                 .requires(source -> source instanceof Player)
                 .executes(context -> {
-                    if(!(context.getSource() instanceof Player player)) {
+                    if(!(context.getSource() instanceof Player eventPlayer)) {
                         logger.log("/friends must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
+                    RustyPlayer player = RustyPlayer.from(eventPlayer);
 
-                    if(!Permission.validate(player, "rustyconnector.command.friends")) {
+                    if(!Permission.validate(eventPlayer, "rustyconnector.command.friends")) {
                         player.sendMessage(VelocityLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(player, VelocityLang.FRIENDS_BOARD.build(player));
+                    return closeMessage(eventPlayer, VelocityLang.FRIENDS_BOARD.build(player));
                 })
                 .then(LiteralArgumentBuilder.<CommandSource>literal("add")
                     .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
@@ -79,9 +80,9 @@ public final class CommandFriends {
                                 }
 
                                 String username = context.getArgument("username", String.class);
-                                ResolvablePlayer targetPlayer = api.services().player().fetch(username).orElseThrow();
+                                RustyPlayer targetPlayer = api.services().player().fetch(username).orElseThrow();
 
-                                if(friendsService.areFriends(ResolvablePlayer.from(player), targetPlayer))
+                                if(friendsService.areFriends(RustyPlayer.from(player), targetPlayer))
                                     return closeMessage(player, VelocityLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
 
                                 if(targetPlayer == null)
@@ -113,7 +114,7 @@ public final class CommandFriends {
                                     if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
 
                                     try {
-                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(ResolvablePlayer.from(player));
+                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(RustyPlayer.from(player));
 
                                         if(requests.size() == 0) {
                                             builder.suggest("You have no pending friend requests!");
@@ -157,13 +158,13 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            ResolvablePlayer senderPlayer = api.services().player().fetch(username).orElseThrow();
+                                            RustyPlayer senderPlayer = api.services().player().fetch(username).orElseThrow();
 
                                             if(senderPlayer == null)
                                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
                                             try {
-                                                FriendRequest invite = friendsService.findRequest(ResolvablePlayer.from(player), senderPlayer).orElse(null);
+                                                FriendRequest invite = friendsService.findRequest(RustyPlayer.from(player), senderPlayer).orElse(null);
                                                 if (invite == null) throw new NoOutputException();
 
                                                 try {
@@ -194,12 +195,12 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            ResolvablePlayer senderPlayer = api.services().player().fetch(username).orElseThrow();
+                                            RustyPlayer senderPlayer = api.services().player().fetch(username).orElseThrow();
 
                                             if (senderPlayer == null)
                                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
-                                            FriendRequest invite = friendsService.findRequest(ResolvablePlayer.from(player), senderPlayer).orElse(null);
+                                            FriendRequest invite = friendsService.findRequest(RustyPlayer.from(player), senderPlayer).orElse(null);
                                             if (invite == null)
                                                 return closeMessage(player, VelocityLang.FRIEND_REQUEST_EXPIRED);
 

@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -21,15 +22,17 @@ public class OnPlayerKicked {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerKicked(KickedFromServerEvent event) {
         Tinder api = Tinder.get();
-        Player player = event.getPlayer();
+        RustyPlayer player = RustyPlayer.from(event.getPlayer());
 
         return EventTask.async(() -> {
             boolean isFromRootFamily = false;
 
             try {
-                if (player.getCurrentServer().isEmpty()) throw new NoOutputException();
+                Player resolvedPlayer = player.resolve().get();
 
-                PlayerServer oldServer = api.services().server().search(player.getCurrentServer().orElseThrow().getServerInfo());
+                if (resolvedPlayer.getCurrentServer().isEmpty()) throw new NoOutputException();
+
+                PlayerServer oldServer = api.services().server().search(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo());
                 if (oldServer == null) throw new NoOutputException();
 
                 oldServer.playerLeft();

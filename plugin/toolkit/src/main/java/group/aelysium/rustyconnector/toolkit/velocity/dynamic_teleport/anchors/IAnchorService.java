@@ -3,12 +3,13 @@ package group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.anchors;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IPlayerFocusedFamilyBase;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IAnchorService<TPlayerServer extends IPlayerServer, TPlayerFocusedFamilyBase extends IPlayerFocusedFamilyBase<TPlayerServer>> extends Service {
+public interface IAnchorService<TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer, TPlayerFocusedFamilyBase extends IPlayerFocusedFamilyBase<TPlayerServer, TResolvablePlayer>> extends Service {
     /**
      * Gets a family which has the anchor which is provided.
      * @param anchor The anchor to find the family of.

@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -28,15 +28,14 @@ public class OnPlayerDisconnect {
     @Subscribe(order = PostOrder.LAST)
     public EventTask onPlayerDisconnect(DisconnectEvent event) {
         Tinder api = Tinder.get();
+        RustyPlayer player = RustyPlayer.from(event.getPlayer());
 
         return EventTask.async(() -> {
-            Player player = event.getPlayer();
-            if(player == null) return;
-
             // Handle servers when player leaves
             try {
-                if(player.getCurrentServer().isPresent()) {
-                    PlayerServer server = api.services().server().search(player.getCurrentServer().get().getServerInfo());
+                Player resolvedPlayer = player.resolve().get();
+                if(resolvedPlayer.getCurrentServer().isPresent()) {
+                    PlayerServer server = api.services().server().search(resolvedPlayer.getCurrentServer().get().getServerInfo());
                     server.playerLeft();
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.family().name(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
@@ -48,8 +47,10 @@ public class OnPlayerDisconnect {
 
             // Handle party when player leaves
             try {
+                Player resolvedPlayer = player.resolve().get();
+
                 PartyService partyService = api.services().party().orElseThrow();
-                Party party = partyService.find(player).orElseThrow();
+                Party party = partyService.find(resolvedPlayer).orElseThrow();
                 try {
                     boolean wasPartyLeader = party.leader().equals(player);
 
@@ -57,7 +58,7 @@ public class OnPlayerDisconnect {
                         if(partyService.settings().disbandOnLeaderQuit())
                             partyService.disband(party);
 
-                    party.leave(player);
+                    party.leave(resolvedPlayer);
                 } catch (Exception e) {}
             } catch (Exception ignore) {}
 
@@ -66,7 +67,7 @@ public class OnPlayerDisconnect {
                 FriendsService friendsService = api.services().friends().orElseThrow();
                 if(!friendsService.settings().allowMessaging()) throw new NoOutputException();
 
-                List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
+                List<RustyPlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 

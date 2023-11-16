@@ -2,15 +2,10 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.g
 
 import com.velocitypowered.api.proxy.Player;
 import de.gesundkrank.jskills.ITeam;
-import de.gesundkrank.jskills.Team;
 import group.aelysium.rustyconnector.core.lib.algorithm.WeightedQuickSort;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.IRankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGame;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.solo.RankedSoloGame;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.PlayerRankLadder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 import java.nio.file.AccessDeniedException;
@@ -65,7 +60,7 @@ public class RankedTeamGame extends RankedGame {
         }
 
         kickedPlayers.forEach(player -> {
-            player.sendMessage(VelocityLang.GAME_FOLLOW_KICKED);
+           // player.sendMessage(VelocityLang.GAME_FOLLOW_KICKED);
         });
 
         super.connectServer(server);
@@ -94,7 +89,7 @@ public class RankedTeamGame extends RankedGame {
      * Removes a player from this game if they're in it.
      * @param player The player to remove.
      */
-    public void leave(ResolvablePlayer player) {
+    public void leave(RustyPlayer player) {
         this.teams.forEach(team -> team.players().removeIf(iPlayer -> iPlayer.equals(player)));
     }
 

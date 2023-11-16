@@ -17,7 +17,7 @@ public class K8Service implements Service {
 
     public K8Service() throws IOException {
         this.client = Config.defaultClient();
-        this.client.setApiKey();
+       // this.client.setApiKey();
 
         this.api = new CoreV1Api(this.client);
     }

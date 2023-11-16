@@ -1,11 +1,11 @@
 package group.aelysium.rustyconnector.toolkit.velocity.friends;
 
-import group.aelysium.rustyconnector.toolkit.velocity.players.IResolvablePlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IFriendsDataEnclave<TResolvablePlayer extends IResolvablePlayer, TFriendMapping extends IFriendMapping<TResolvablePlayer>> {
+public interface IFriendsDataEnclave<TResolvablePlayer extends IRustyPlayer, TFriendMapping extends IFriendMapping<TResolvablePlayer>> {
     /**
      * Find all friends of a player.
      * @param player The player to find friends of.
@@ -32,8 +32,8 @@ public interface IFriendsDataEnclave<TResolvablePlayer extends IResolvablePlayer
 
     /**
      * Delete two players friend mapping.
-     * @param player1 {@link IResolvablePlayer}
-     * @param player2 {@link IResolvablePlayer}
+     * @param player1 {@link IRustyPlayer}
+     * @param player2 {@link IRustyPlayer}
      */
     void removeFriend(TResolvablePlayer player1, TResolvablePlayer player2);
 }

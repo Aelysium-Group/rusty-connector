@@ -5,9 +5,8 @@
 
 #
 # The name of the family that this MCLoader should be registered into.
-# If this name does not match one of the names listed on your proxy; this server will not get registered.
 #
-family: ""
+family: "lobby"
 
 #
 # If the family that this server is associated with has load balancing which involves "weight" you can set this server's weight level here.

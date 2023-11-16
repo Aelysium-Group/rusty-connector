@@ -1,11 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
@@ -19,12 +19,11 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-public class RootFamily extends ScalarFamily implements IRootFamily<PlayerServer> {
+public class RootFamily extends ScalarFamily implements IRootFamily<PlayerServer, RustyPlayer> {
     private RootFamily(String name, Whitelist whitelist, LoadBalancer loadBalancer) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(name, loadBalancer, null, whitelist);
     }

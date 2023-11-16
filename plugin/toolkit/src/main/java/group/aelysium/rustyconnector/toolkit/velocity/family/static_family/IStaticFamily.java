@@ -4,10 +4,11 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IPlayerFocusedFamilyBase;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
-public interface IStaticFamily<S extends IPlayerServer> extends IPlayerFocusedFamilyBase<S> {
+public interface IStaticFamily<TPlayerServer extends IPlayerServer, TRustyPlayer extends IRustyPlayer> extends IPlayerFocusedFamilyBase<TPlayerServer, TRustyPlayer> {
     /**
      * Gets the {@link UnavailableProtocol} for this family. {@link UnavailableProtocol} governs what happens when a player's resident server is unavailable.
      * @return {@link UnavailableProtocol}
@@ -29,12 +30,4 @@ public interface IStaticFamily<S extends IPlayerServer> extends IPlayerFocusedFa
      * @return {@link IResidenceDataEnclave}
      */
     IResidenceDataEnclave dataEnclave();
-
-    /**
-     * Connects a {@link Player} to this {@link IStaticFamily} in accordance with it's {@link ILoadBalancer}.
-     * @param player The {@link Player} to connect.
-     * @return The {@link IPlayerServer} that the {@link Player} was connected to.
-     * @throws RuntimeException If there was an issue connecting the player to this family.
-     */
-    S connect(Player player) throws RuntimeException;
 }

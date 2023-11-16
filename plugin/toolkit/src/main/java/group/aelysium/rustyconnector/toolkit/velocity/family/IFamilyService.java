@@ -3,11 +3,12 @@ package group.aelysium.rustyconnector.toolkit.velocity.family;
 import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 
 import java.util.List;
 
-public interface IFamilyService<TPlayerServer extends IPlayerServer, TRootFamily extends IRootFamily<TPlayerServer>, TBaseFamily extends IBaseFamily<TPlayerServer>> extends Service {
+public interface IFamilyService<TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer, TRootFamily extends IRootFamily<TPlayerServer, TResolvablePlayer>, TBaseFamily extends IBaseFamily<TPlayerServer, TResolvablePlayer>> extends Service {
     boolean shouldCatchDisconnectingPlayers();
 
     void setRootFamily(TRootFamily family);

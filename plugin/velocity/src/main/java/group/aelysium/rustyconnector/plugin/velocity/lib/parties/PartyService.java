@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,7 +20,7 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PartyService implements IPartyService<ResolvablePlayer, PlayerServer, Party, PartyInvite> {
+public class PartyService implements IPartyService<RustyPlayer, PlayerServer, Party, PartyInvite> {
     private final Vector<Party> parties = new Vector<>();
     private final Vector<PartyInvite> invites = new Vector<>();
     private final PartyServiceSettings settings;
@@ -95,7 +95,7 @@ public class PartyService implements IPartyService<ResolvablePlayer, PlayerServe
                     throw new NoOutputException();
                 }
 
-                if(friendsService.findFriends(sender).orElseThrow().contains(target))
+                if(friendsService.findFriends(RustyPlayer.from(sender)).orElseThrow().contains(target))
                     throw new IllegalStateException(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION);
             } catch (IllegalStateException e) {
                 throw e;
@@ -110,10 +110,10 @@ public class PartyService implements IPartyService<ResolvablePlayer, PlayerServe
         return invite;
     }
 
-    public List<PartyInvite> findInvitesToTarget(ResolvablePlayer target) {
+    public List<PartyInvite> findInvitesToTarget(RustyPlayer target) {
         return this.invites.stream().filter(invite -> invite.target().equals(target)).findAny().stream().toList();
     }
-    public Optional<PartyInvite> findInvite(ResolvablePlayer target, ResolvablePlayer sender) {
+    public Optional<PartyInvite> findInvite(RustyPlayer target, RustyPlayer sender) {
         return this.invites.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();
     }
 

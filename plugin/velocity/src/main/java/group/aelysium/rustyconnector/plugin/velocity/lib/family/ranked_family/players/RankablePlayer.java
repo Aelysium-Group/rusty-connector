@@ -1,21 +1,20 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players;
 
-import com.velocitypowered.api.proxy.Player;
 import de.gesundkrank.jskills.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 
 import java.util.Objects;
 import java.util.Optional;
 
 public class RankablePlayer implements ISortable, IPlayer {
-    protected ResolvablePlayer player;
+    protected RustyPlayer player;
     protected ScoreCard scorecard;
 
-    public RankablePlayer(ResolvablePlayer player, ScoreCard scorecard) {
+    public RankablePlayer(RustyPlayer player, ScoreCard scorecard) {
         this.player = player;
         this.scorecard = scorecard;
     }
@@ -29,7 +28,7 @@ public class RankablePlayer implements ISortable, IPlayer {
         return Optional.empty();
     }
 
-    public ResolvablePlayer player() {
+    public RustyPlayer player() {
         return player;
     }
 
@@ -67,7 +66,7 @@ public class RankablePlayer implements ISortable, IPlayer {
     }
 
 
-    public static RankablePlayer from(ResolvablePlayer player, String game) {
+    public static RankablePlayer from(RustyPlayer player, String game) {
         return new RankablePlayer(player, player.scorecard(game));
     }
 }

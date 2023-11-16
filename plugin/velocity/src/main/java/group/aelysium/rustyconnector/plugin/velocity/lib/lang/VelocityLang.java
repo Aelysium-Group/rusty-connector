@@ -15,7 +15,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.St
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import net.kyori.adventure.text.Component;
@@ -865,7 +865,7 @@ public class VelocityLang extends Lang {
     public final static String PARTY_INJECTED_INVALID_LEADER_INVITE = resolver().getRaw("velocity.party.injected_error.invalid_leader_invite");
     public final static String PARTY_INJECTED_INVALID_MEMBER_INVITE = resolver().getRaw("velocity.party.injected_error.invalid_member_invite");
 
-    public final static ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
+    public final static ParameterizedMessage1<RustyPlayer> FRIENDS_BOARD = (player) -> {
         Tinder api = Tinder.get();
         FriendsService friendsService = api.services().friends().orElseThrow();
         int maxFriends = friendsService.settings().maxFriends();
@@ -881,7 +881,7 @@ public class VelocityLang extends Lang {
         boolean isFriendMessagingEnabled = friendsService.settings().allowMessaging();
         boolean canSeeFriendFamilies = friendsService.settings().showFamilies();
 
-        List<ResolvablePlayer> friends = friendsService.findFriends(player).orElse(null);
+        List<RustyPlayer> friends = friendsService.findFriends(player).orElse(null);
 
         if(friends != null && friends.size() != 0) {
             final Component[] playersList = {text("")};
@@ -949,16 +949,16 @@ public class VelocityLang extends Lang {
                     text("["+IGNORE+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.friend_request_query.hover.ignore"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.getUsername()+" ignore"))
             )
     );
-    public final static ParameterizedMessage1<Player> FRIEND_JOIN = (player) -> {
+    public final static ParameterizedMessage1<RustyPlayer> FRIEND_JOIN = (player) -> {
         FriendsService friendsService = Tinder.get().services().friends().orElseThrow();
 
         if(friendsService.settings().allowMessaging())
-            return resolver().get("velocity.friends.friend_joined.resolved", LanguageResolver.tagHandler("username", player.getUsername()));
+            return resolver().get("velocity.friends.friend_joined.resolved", LanguageResolver.tagHandler("username", player.username()));
         else
-            return resolver().get("velocity.friends.friend_joined.regular", LanguageResolver.tagHandler("username", player.getUsername()));
+            return resolver().get("velocity.friends.friend_joined.regular", LanguageResolver.tagHandler("username", player.username()));
     };
-    public final static ParameterizedMessage1<Player> FRIEND_LEAVE = (player) ->
-            resolver().get("velocity.friends.friend_leaves", LanguageResolver.tagHandler("username", player.getUsername()));
+    public final static ParameterizedMessage1<RustyPlayer> FRIEND_LEAVE = (player) ->
+            resolver().get("velocity.friends.friend_leaves", LanguageResolver.tagHandler("username", player.username()));
     public final static Message FRIEND_REQUEST_USAGE = () -> text(USAGE+": /friend requests <username> <accept / ignore>",RED);
     public final static ParameterizedMessage1<String> BECOME_FRIENDS = (username) ->
             resolver().get("velocity.friends.become_friends", LanguageResolver.tagHandler("username", username));

@@ -56,7 +56,7 @@ public class RankedSoloGame extends RankedGame {
         }
 
         kickedPlayers.forEach(player -> {
-            player.sendMessage(VelocityLang.GAME_FOLLOW_KICKED);
+            //player.sendMessage(VelocityLang.GAME_FOLLOW_KICKED);
         });
 
         super.connectServer(server);

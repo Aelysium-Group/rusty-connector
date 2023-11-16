@@ -1,14 +1,14 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IResolvablePlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IPartyService<TResolvablePlayer extends IResolvablePlayer, TPlayerServer extends IPlayerServer, TParty extends IParty<TPlayerServer>, TPartyInvite extends IPartyInvite<TResolvablePlayer>> extends Service {
+public interface IPartyService<TResolvablePlayer extends IRustyPlayer, TPlayerServer extends IPlayerServer, TParty extends IParty<TPlayerServer>, TPartyInvite extends IPartyInvite<TResolvablePlayer>> extends Service {
     /**
      * Gets the settings that this {@link IPartyService} abides by.
      * @return {@link PartyServiceSettings}
