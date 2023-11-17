@@ -43,7 +43,6 @@ public class LangFileMappings {
         list.add(VELOCITY_FRIENDS_TEMPLATE);
         list.add(VELOCITY_LOGGER_TEMPLATE);
         list.add(VELOCITY_PARTY_TEMPLATE);
-        list.add(VELOCITY_VIEWPORT_TEMPLATE);
         list.add(VELOCITY_WEBHOOKS_TEMPLATE);
 
         list.add(VELOCITY_WHITELIST_TEMPLATE);

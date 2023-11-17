@@ -1,4 +1,0 @@
-CREATE TABLE IF NOT EXISTS players (
-    uuid VARCHAR(36) NOT NULL PRIMARY KEY,
-    username VARCHAR(16) NOT NULL
-);
