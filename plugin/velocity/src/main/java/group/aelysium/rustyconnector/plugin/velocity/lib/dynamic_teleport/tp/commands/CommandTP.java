@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -13,7 +13,7 @@ import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp.TPService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -22,13 +22,13 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 
 public final class CommandTP {
-    public static BrigadierCommand create(DependencyInjector.DI3<FamilyService, ServerService, TPAService> dependencies) {
+    public static BrigadierCommand create(DependencyInjector.DI3<FamilyService, ServerService, TPService> dependencies) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         FamilyService familyService = dependencies.d1();
         ServerService serverService = dependencies.d2();
-        TPAService tpaService = dependencies.d3();
+        TPService tpService = dependencies.d3();
 
         LiteralCommandNode<CommandSource> tp = LiteralArgumentBuilder
                 .<CommandSource>literal("tp")
@@ -93,7 +93,7 @@ public final class CommandTP {
                                 ServerInfo recieverServerInfo = targetPlayer.getCurrentServer().orElseThrow().getServerInfo();
                                 PlayerServer targetServer = serverService.search(recieverServerInfo);
 
-                                tpaService.tpaSendPlayer(player, targetPlayer, targetServer);
+                                tpService.tpaSendPlayer(player, targetPlayer, targetServer);
 
                                 return Command.SINGLE_SUCCESS;
                             } catch (Exception ignored) {}

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
@@ -62,8 +62,8 @@ public class TPARequest {
 
         DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleportService().orElse(null);
         if(dynamicTeleportService == null) throw new NullPointerException("Dynamic Teleport must be enabled to use tpa functions!");
-        TPAService tpaService = dynamicTeleportService.services().tpaService().orElse(null);
-        if(tpaService == null) throw new NullPointerException("TPA in Dynamic Teleport must be enabled to use tpa functions!");
+        TPService tpService = dynamicTeleportService.services().tpService().orElse(null);
+        if(tpService == null) throw new NullPointerException("TPA in Dynamic Teleport must be enabled to use tpa functions!");
 
         try {
             this.updateStatus(TPARequestStatus.ACCEPTED);
@@ -73,7 +73,7 @@ public class TPARequest {
             BaseServerFamily<?> family = server.family();
             if(family == null) throw new NullPointerException();
 
-            tpaService.tpaSendPlayer(this.sender(), this.target(), server);
+            tpService.tpaSendPlayer(this.sender(), this.target(), server);
 
             this.sender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.target().getUsername()));
             this.target().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.sender().getUsername()));
