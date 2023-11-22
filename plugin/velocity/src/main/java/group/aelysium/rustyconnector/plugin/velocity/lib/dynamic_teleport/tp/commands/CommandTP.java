@@ -21,6 +21,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 
+import java.util.NoSuchElementException;
+
 public final class CommandTP {
     public static BrigadierCommand create(DependencyInjector.DI3<FamilyService, ServerService, TPService> dependencies) {
         Tinder api = Tinder.get();
@@ -86,7 +88,7 @@ public final class CommandTP {
                                 Player targetPlayer = api.velocityServer().getPlayer(username).orElseThrow();
 
                                 if (player.equals(targetPlayer)) {
-                                    player.sendMessage(VelocityLang.TPA_FAILURE_SELF_TP);
+                                    player.sendMessage(VelocityLang.TP_FAILURE_SELF_TP);
                                     return Command.SINGLE_SUCCESS;
                                 }
 
@@ -96,7 +98,11 @@ public final class CommandTP {
                                 tpService.tpaSendPlayer(player, targetPlayer, targetServer);
 
                                 return Command.SINGLE_SUCCESS;
-                            } catch (Exception ignored) {}
+                            } catch (NoSuchElementException e) {
+                                context.getSource().sendMessage(VelocityLang.TP_FAILURE_NO_USERNAME.build(username));
+                            } catch (Exception e) {
+                                context.getSource().sendMessage(VelocityLang.TP_FAILURE.build(username));
+                            }
 
                             return Command.SINGLE_SUCCESS;
                         })
