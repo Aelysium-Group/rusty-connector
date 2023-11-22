@@ -1,8 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.lang;
 
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ServerConnection;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.lang.ASCIIAlphabet;
@@ -29,7 +27,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.kyori.adventure.text.Component.*;
@@ -658,7 +655,9 @@ public class VelocityLang extends Lang {
 
     public final static Component MISSING_HOME_SERVER = resolver().get("velocity.family.static_family.residence.missing");
     public final static Component BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT = resolver().get("velocity.family.static_family.residence.blocked_join_attempt");
-
+    public final static Component TP_FAILURE_SELF_TP = resolver().get("velocity.tp.self_failure");
+    public final static ParameterizedMessage1<String> TP_FAILURE_NO_USERNAME = username -> resolver().get("velocity.tp.not_online", LanguageResolver.tagHandler("username", username));
+    public final static ParameterizedMessage1<String> TP_FAILURE = username -> resolver().get("velocity.tp.sender_failure");
     public final static Component TPA_USAGE = text(USAGE+": /tpa <<username>, deny, accept>",RED);
     public final static Message TPA_DENY_USAGE = () -> join(
             newlines(),
@@ -674,8 +673,6 @@ public class VelocityLang extends Lang {
     public final static ParameterizedMessage1<String> TPA_FAILURE = username -> resolver().get("velocity.tpa.sender_failure", LanguageResolver.tagHandler("username", username));
     public final static ParameterizedMessage1<String> TPA_FAILURE_TARGET = username -> resolver().get("velocity.tpa.target_failure", LanguageResolver.tagHandler("username", username));
     public final static ParameterizedMessage1<String> TPA_NOT_FRIENDS = username -> resolver().get("velocity.tpa.not_friends", LanguageResolver.tagHandler("username", username));
-    public final static Component TPA_FAILURE_SELF_TP = resolver().get("velocity.tpa.self_failure");
-    public final static ParameterizedMessage1<String> TPA_FAILURE_NO_USERNAME = username -> resolver().get("velocity.tpa.not_online", LanguageResolver.tagHandler("username", username));
     public final static ParameterizedMessage1<String> TPA_FAILURE_NO_REQUEST = username -> resolver().get("velocity.tpa.no_requests", LanguageResolver.tagHandler("username", username));
     public final static ParameterizedMessage1<String> TPA_REQUEST_DUPLICATE = username -> resolver().get("velocity.tpa.pending_request", LanguageResolver.tagHandler("username", username));
 
