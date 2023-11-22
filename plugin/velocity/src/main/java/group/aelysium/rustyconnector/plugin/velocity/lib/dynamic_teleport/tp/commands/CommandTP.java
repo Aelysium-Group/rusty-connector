@@ -95,7 +95,7 @@ public final class CommandTP {
                                 ServerInfo recieverServerInfo = targetPlayer.getCurrentServer().orElseThrow().getServerInfo();
                                 PlayerServer targetServer = serverService.search(recieverServerInfo);
 
-                                tpService.tpaSendPlayer(player, targetPlayer, targetServer);
+                                tpService.tpSendPlayer(player, targetPlayer, targetServer);
 
                                 return Command.SINGLE_SUCCESS;
                             } catch (NoSuchElementException e) {
