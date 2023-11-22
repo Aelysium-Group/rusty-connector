@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhook;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -52,9 +53,11 @@ public class WebhooksConfig extends YAML {
                         case FAMILY -> {
                             String familyName = this.getNode(node, "target-family", String.class);
 
-                            BaseFamily family = api.services().family().find(familyName);
-                            if (family == null)
+                            try {
+                                new FamilyReference(familyName).get();
+                            } catch (Exception ignore) {
                                 logger.warn("webhooks.yml is pointing a webhook at a family with the name: " + familyName + ". No family with this name exists!");
+                            }
 
                             WebhookEventManager.on(flag, familyName, webhook);
                         }

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.teams;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games;
 
 import de.gesundkrank.jskills.IPlayer;
 import de.gesundkrank.jskills.Team;
@@ -14,7 +14,7 @@ public class RankedTeam implements IRanker, ISortable {
     protected Team team = new Team();
     protected int rank = 1;
 
-    protected RankedTeam(Settings settings) {
+    public RankedTeam(Settings settings) {
         this.settings = settings;
     }
 
@@ -31,7 +31,7 @@ public class RankedTeam implements IRanker, ISortable {
         return this.settings;
     }
 
-    public Team team() {
+    public Team innerTeam() {
         return team;
     }
 

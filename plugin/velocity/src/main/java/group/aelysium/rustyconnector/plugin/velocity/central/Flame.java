@@ -4,6 +4,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicLinkConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.handlers.RankedGameEndHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
@@ -38,7 +39,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.Dynami
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.config.FamiliesConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -58,8 +58,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.parties.config.PartyCon
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.config.ViewportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config.WebhooksConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
@@ -70,7 +68,6 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.function.Consumer;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
@@ -155,11 +152,10 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
             logger.send(Component.text("Initializing 70%...", NamedTextColor.DARK_GRAY));
             initialize.friendsService(inject(connectors.d2(), langService));
             initialize.playerService(inject(connectors.d2(), langService));
+            logger.send(Component.text("Initializing 80%...", NamedTextColor.DARK_GRAY));
             initialize.partyService(langService);
             initialize.dynamicTeleportService(inject(familyService, serverService, langService));
-            logger.send(Component.text("Initializing 80%...", NamedTextColor.DARK_GRAY));
 
-            Consumer<PluginLogger> printViewportURI = initialize.viewportService(inject(langService, memberKey));
             logger.send(Component.text("Initializing 90%...", NamedTextColor.DARK_GRAY));
 
             Flame flame = new Flame(new Version(version), configVersion, memberKey, initialize.getServices(), initialize.getBootOutput());
@@ -167,8 +163,6 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
             initialize.events(plugin);
             initialize.commands(inject(flame, logger, messageCacheService));
             logger.send(Component.text("Initializing 100%...", NamedTextColor.DARK_GRAY));
-
-            printViewportURI.accept(logger);
 
             return flame;
         } catch (Exception e) {
@@ -384,18 +378,6 @@ class Initialize {
             bootOutput.add(Component.text(" | Finished registering load balancing service to the API.", NamedTextColor.GREEN));
         }
 
-        {
-            bootOutput.add(Component.text(" | Resolving family parents...", NamedTextColor.DARK_GRAY));
-            familyService.dump().forEach(baseServerFamily -> {
-                try {
-                    ((PlayerFocusedFamily) baseServerFamily).resolveParent(familyService);
-                } catch (Exception e) {
-                    bootOutput.add(Component.text("There was an issue resolving the parent for " + baseServerFamily.name() + ". " + e.getMessage()));
-                }
-            });
-            bootOutput.add(Component.text(" | Finished resolving family parents.", NamedTextColor.GREEN));
-        }
-
         bootOutput.add(Component.text("Finished building families service.", NamedTextColor.GREEN));
         return familyService;
     }
@@ -421,8 +403,11 @@ class Initialize {
                 throw new IllegalStateException("Unable to load or create families.yml!");
             magicLinkConfig.register();
 
-            if(dependencies.d1().find(magicLinkConfig.family()) == null)
-                throw new NullPointerException("The magic config `"+file.getName()+"` is pointing to a family: `"+ magicLinkConfig.family()+"`, which doesn't exist!");
+            try {
+                new FamilyReference(magicLinkConfig.family()).get();
+            } catch (Exception ignore) {
+                throw new NullPointerException("The magic config `" + file.getName() + "` is pointing to a family: `" + magicLinkConfig.family() + "`, which doesn't exist!");
+            }
         }
 
         bootOutput.add(Component.text("Magic Configs have been validated!", NamedTextColor.GREEN));
@@ -560,46 +545,6 @@ class Initialize {
             bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
             bootOutput.add(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
         }
-    }
-    public Consumer<PluginLogger> viewportService(DependencyInjector.DI2<LangService, Optional<char[]>> dependencies) {
-        // If there's no membership key they can't even use Viewport so don't even load a config file
-        if(dependencies.d2().isEmpty()) return (l)->{};
-
-        try {
-            bootOutput.add(Component.text("Building viewport service...", NamedTextColor.DARK_GRAY));
-
-            ViewportConfig viewportConfig = new ViewportConfig(new File(api.dataFolder(), "viewport.yml"));
-            if (!viewportConfig.generate(bootOutput, dependencies.d1(), LangFileMappings.VELOCITY_VIEWPORT_TEMPLATE))
-                throw new IllegalStateException("Unable to load or create viewport.yml!");
-            viewportConfig.register();
-
-            if(!viewportConfig.isEnabled()) {
-                bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
-                return (l)->{};
-            }
-
-            ViewportService service = ViewportService.create(viewportConfig);
-
-            services.put(ViewportService.class, service);
-
-            return (logger) -> {
-                if(viewportConfig.isSendURI()) {
-                    logger.send(Component.text("You can sign into Viewport with the token:", NamedTextColor.GREEN));
-
-                    String address = viewportConfig.getApi_address().getHostName()+":"+viewportConfig.getApi_address().getPort();
-                    if (viewportConfig.isApi_ssl())
-                        logger.send(Component.text(new String(dependencies.d2().orElseThrow())+";t;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
-                    else {
-                        logger.send(Component.text(new String(dependencies.d2().orElseThrow())+";f;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
-                        logger.send(Component.text("Because this connection will be unencrypted, you may be required to enable \"Display Insecure Resources\" on your browser for the Viewport website.", NamedTextColor.YELLOW));
-                    }
-                }
-            };
-        } catch (Exception e) {
-            bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
-            bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
-        }
-        return (l)->{};
     }
 
     public void friendsService(DependencyInjector.DI2<MySQLStorage, LangService> dependencies) {

@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface IResolvableFamily {
     String name();
-    Optional<? extends IBaseFamily> resolve();
+    <TBaseFamily extends IBaseFamily> TBaseFamily resolve();
 }

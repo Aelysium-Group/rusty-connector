@@ -1,24 +1,24 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games;
 
-import de.gesundkrank.jskills.GameInfo;
-import de.gesundkrank.jskills.IPlayer;
-import de.gesundkrank.jskills.ITeam;
-import de.gesundkrank.jskills.TrueSkillCalculator;
+import com.velocitypowered.api.proxy.Player;
+import de.gesundkrank.jskills.*;
+import group.aelysium.rustyconnector.core.lib.algorithm.QuickSort;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameAssociatePacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.IRankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.rmi.ConnectException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class RankedGame implements IRankedGame {
+    protected List<RankedTeam> teams = new ArrayList<>();
     protected final GameInfo gameInfo = GameInfo.getDefaultGameInfo();
     protected UUID uuid = UUID.randomUUID();
     protected PlayerServer server = null;
@@ -37,13 +37,29 @@ public abstract class RankedGame implements IRankedGame {
     }
 
     public List<RankablePlayer> players() {
-        return null;
+        List<RankablePlayer> players = new ArrayList<>();
+        this.teams.forEach(team -> players.add((RankablePlayer) team.players()));
+        return players;
     }
 
-    protected abstract <TTeam extends ITeam> Collection<TTeam> teams();
-
     public void connectServer(PlayerServer server) {
-        Tinder api = Tinder.get();
+        Vector<com.velocitypowered.api.proxy.Player> kickedPlayers = new Vector<>();
+
+        for (RankablePlayer rankablePlayer : this.players()) {
+            try {
+                Player player = rankablePlayer.player().resolve().orElseThrow();
+                try {
+                    server.directConnect(player);
+                } catch (ConnectException e) {
+                    kickedPlayers.add(player);
+                }
+            } catch (NoSuchElementException ignore) {
+            } // Player isn't online, so it's not like we could message them anyway.
+        }
+
+        kickedPlayers.forEach(player -> {
+            // player.sendMessage(VelocityLang.GAME_FOLLOW_KICKED);
+        });
 
         RankedGameAssociatePacket message = (RankedGameAssociatePacket) new GenericPacket.Builder()
                 .setType(PacketType.ASSOCIATE_RANKED_GAME)
@@ -51,7 +67,7 @@ public abstract class RankedGame implements IRankedGame {
                 .setOrigin(PacketOrigin.PROXY)
                 .setParameter(RankedGameAssociatePacket.ValidParameters.GAME_UUID, this.uuid().toString())
                 .buildSendable();
-        api.services().messenger().connection().orElseThrow().publish(message);
+        Tinder.get().services().messenger().connection().orElseThrow().publish(message);
 
         this.server = server;
     }
@@ -67,10 +83,41 @@ public abstract class RankedGame implements IRankedGame {
                 .buildSendable();
         api.services().messenger().connection().orElseThrow().publish(message);
 
+        QuickSort.sort(this.teams);
 
+        Collection<ITeam> teams = new ArrayList<>();
+        int[] scores = new int[this.teams.size()];
+        AtomicInteger i = new AtomicInteger(0);
+        this.teams.forEach(team -> {
+            teams.add(team.innerTeam());
+            scores[i.getAndIncrement()] = team.rank();
+        });
 
-        TrueSkillCalculator.calculateNewRatings(this.gameInfo, this.teams());
+        TrueSkillCalculator.calculateNewRatings(this.gameInfo, teams, scores);
 
         this.ended = true;
+    }
+
+    public enum RankerType {
+        /**
+         * Represents 1v1 teams where every player is for themselves.
+         */
+        SOLO,
+
+        /**
+         * Represents NvN teams where teams compete against eachother.
+         */
+        CO_OP
+    }
+
+    public enum ScoringType {
+        /**
+         * Based off of racing: 1st, 2nd, 3rd, etc.
+         */
+        PLACEMENT,
+        /**
+         * Players that collect the most points win.
+         */
+        POINTS,
     }
 }

@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
 import group.aelysium.rustyconnector.core.lib.annotations.Initializer;
@@ -19,17 +20,15 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class BaseFamily implements IBaseFamily<PlayerServer, RustyPlayer> {
-    @Initializer
-    protected String parentName = null;
-    protected WeakReference<BaseFamily> parent = null;
+    protected FamilyReference parent;
     protected final List<PlayerServer> lockedServers = new ArrayList<>();
     protected LoadBalancer loadBalancer;
     protected final String name;
 
-    protected BaseFamily(String name, LoadBalancer loadBalancer, String parentName) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    protected BaseFamily(String name, LoadBalancer loadBalancer, FamilyReference parent) {
         this.name = name;
         this.loadBalancer = loadBalancer;
-        this.parentName = parentName;
+        this.parent = parent;
     }
 
     public long playerCount() {
@@ -45,22 +44,8 @@ public abstract class BaseFamily implements IBaseFamily<PlayerServer, RustyPlaye
         return this.loadBalancer;
     }
 
-    public void resolveParent(FamilyService familyService) {
-        BaseFamily family = familyService.find(parentName);
-
-        this.parentName = null;
-        if(family == null) {
-            this.parent = new WeakReference<>(familyService.rootFamily());
-            return;
-        }
-
-        this.parent = new WeakReference<>(family);
-    }
-
-    public WeakReference<BaseFamily> parent() {
-        FamilyService familyService = Tinder.get().services().family();
-        if(familyService.rootFamily().equals(this)) return null;
-        return this.parent;
+    public BaseFamily parent() {
+        return this.parent.get(true);
     }
 
     public String name() {

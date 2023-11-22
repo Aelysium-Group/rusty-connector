@@ -2,8 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGame;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGameRankerType;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.teams.RankedTeam;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedTeam;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.PlayerRankLadder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
 
@@ -15,18 +14,18 @@ import java.util.Vector;
 public class RankedGameManager implements Service {
     protected Vector<RankedGame> games = new Vector<>();
     protected final PlayerRankLadder waitingPlayers;
-    protected final RankedMatchmakingSupervisor supervisor;
+    protected final RankedMatchmaker supervisor;
     protected final RankedFamily owner;
-    protected final RankedMatchmakerSettings settings;
+    protected final RankedMatchmaker.Settings settings;
 
-    public RankedGameManager(RankedMatchmakerSettings settings, RankedFamily owner) {
+    public RankedGameManager(RankedMatchmaker.Settings settings, RankedFamily owner) {
         this.settings = settings;
         this.waitingPlayers = new PlayerRankLadder();
-        this.supervisor = new RankedMatchmakingSupervisor(settings, owner, this.waitingPlayers);
+        this.supervisor = new RankedMatchmaker(settings, owner, this.waitingPlayers);
         this.owner = owner;
     }
 
-    public RankedGameRankerType type() {
+    public RankedGame.RankerType type() {
         return settings.type();
     }
 
@@ -73,14 +72,14 @@ public class RankedGameManager implements Service {
             owner.unlockServer(game.server());
             game.players().forEach(player -> {
                 try {
-                    Objects.requireNonNull(owner.parent().get()).connect(player.player());
+                    Objects.requireNonNull(owner.parent()).connect(player.player());
                 }catch (Exception ignore){}
             });
         });
         this.games.removeAll(games);
     }
 
-    public static int maxAllowedPlayers(RankedMatchmakerSettings settings) {
+    public static int maxAllowedPlayers(RankedMatchmaker.Settings settings) {
         if(settings.teamSettings() != null) {
             int maxPlayers = 0;
             for (RankedTeam.Settings teamSettings : settings.teamSettings().teams())
@@ -93,7 +92,7 @@ public class RankedGameManager implements Service {
 
         throw new NullPointerException("No settings were defined for the game manager!");
     }
-    public static int minAllowedPlayers(RankedMatchmakerSettings settings) {
+    public static int minAllowedPlayers(RankedMatchmaker.Settings settings) {
         if(settings.teamSettings() != null) return settings.teamSettings().minPlayers();
         if(settings.soloSettings() != null) return settings.soloSettings().minPlayers();
 

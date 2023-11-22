@@ -1,7 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -17,7 +15,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 
 import java.util.Map;
@@ -66,8 +63,5 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
     }
     public Optional<DynamicTeleportService> dynamicTeleport() {
         return this.find(DynamicTeleportService.class);
-    }
-    public Optional<ViewportService> viewportService() {
-        return this.find(ViewportService.class);
     }
 }

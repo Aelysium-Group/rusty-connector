@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.config.RankedFamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
@@ -21,9 +21,9 @@ public class RankedFamily extends SystemFocusedServerFamily {
     protected RankedFamilyEventFactory eventManager = new RankedFamilyEventFactory();
     protected RankedGameManager gameManager;
 
-    protected RankedFamily(String name, String parentFamily, RankedMatchmakerSettings matchmakerSettings) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, new RoundRobin(false, false, 1), parentFamily);
-        this.gameManager = new RankedGameManager(matchmakerSettings, this);
+    protected RankedFamily(Settings settings) {
+        super(settings.name(), null, settings.parentFamily());
+        this.gameManager = new RankedGameManager(settings.matchmakerSettings(), this);
     }
 
     public RankedGameManager gameManager() {
@@ -73,10 +73,9 @@ public class RankedFamily extends SystemFocusedServerFamily {
             api.services().whitelist().add(whitelist);
         }
 
-        return new RankedFamily(
-                familyName,
-                config.getParent_family(),
-                config.getMatchmakingSettings()
-        );
+        Settings settings = new Settings(familyName, config.getParent_family(), config.getMatchmakingSettings());
+        return new RankedFamily(settings);
     }
+
+    public record Settings(String name, FamilyReference parentFamily, RankedMatchmaker.Settings matchmakerSettings) {}
 }

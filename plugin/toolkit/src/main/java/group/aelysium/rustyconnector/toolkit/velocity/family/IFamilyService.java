@@ -28,13 +28,6 @@ public interface IFamilyService<TPlayerServer extends IPlayerServer, TResolvable
     int size();
 
     /**
-     * Get a family via its name.
-     * @param name The name of the family to get.
-     * @return A family or `null` if there is no family with the defined name.
-     */
-    TBaseFamily find(String name);
-
-    /**
      * Add a family to this manager.
      * @param family The family to add to this manager.
      */

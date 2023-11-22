@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
@@ -97,8 +98,12 @@ public class PlayerServer implements IPlayerServer {
     public void register(String familyName) throws Exception {
         Tinder api = Tinder.get();
 
-        BaseFamily family = api.services().family().find(familyName);
-        if(family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
+        BaseFamily family;
+        try {
+            family = new FamilyReference(familyName).get();
+        } catch (Exception ignore) {
+            throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
+        }
 
         this.registeredServer = api.services().server().registerServer(this, family);
 
@@ -154,29 +159,14 @@ public class PlayerServer implements IPlayerServer {
 
     public void setPlayerCount(int playerCount) {
         this.playerCount = playerCount;
-
-        try {
-            Tinder.get().services().viewportService().orElseThrow().services().api().websocket()
-                    .fire(new ServerPlayerCountEvent(this, this.playerCount));
-        } catch (Exception ignore) {}
     }
 
     public void playerLeft() {
         if(this.playerCount > 0) this.playerCount -= 1;
-
-        try {
-            Tinder.get().services().viewportService().orElseThrow().services().api().websocket()
-                    .fire(new ServerPlayerCountEvent(this, this.playerCount));
-        } catch (Exception ignore) {}
     }
 
     public void playerJoined() {
         this.playerCount += 1;
-
-        try {
-            Tinder.get().services().viewportService().orElseThrow().services().api().websocket()
-                    .fire(new ServerPlayerCountEvent(this, this.playerCount));
-        } catch (Exception ignore) {}
     }
 
     public double sortIndex() {
@@ -206,10 +196,13 @@ public class PlayerServer implements IPlayerServer {
      */
     public BaseFamily family() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
-        Tinder api = Tinder.get();
 
-        BaseFamily family = api.services().family().find(this.family.name());
-        if(family == null) throw new NullPointerException("There is no family with that name!");
+        BaseFamily family;
+        try {
+            family = new FamilyReference(this.family.name()).get();
+        } catch (Exception ignore) {
+            throw new NullPointerException("A family with the name `"+this.family.name()+"` doesn't exist!");
+        }
 
         return family;
     }

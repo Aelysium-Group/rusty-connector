@@ -3,8 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 import group.aelysium.rustyconnector.core.lib.algorithm.WeightOnlyQuickSort;
 
 public class RoundRobin extends LoadBalancer {
-    public RoundRobin(boolean weighted, boolean persistence, int attempts) {
-        super(weighted, persistence, attempts);
+    public RoundRobin(Settings settings) {
+        super(settings);
     }
 
     @Override

@@ -7,8 +7,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
 public class LeastConnection extends LoadBalancer {
 
-    public LeastConnection(boolean weighted, boolean persistence, int attempts) {
-        super(weighted, persistence, attempts);
+    public LeastConnection(Settings settings) {
+        super(settings);
     }
 
     @Override

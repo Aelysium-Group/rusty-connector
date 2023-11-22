@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -15,13 +16,13 @@ import java.util.Optional;
 public class ServerResidence implements IServerResidence {
     protected RustyPlayer player;
     protected ResolvableServer server;
-    protected ResolvableFamily family;
+    protected FamilyReference family;
     protected Long expiration;
 
     public ServerResidence(Player player, PlayerServer server, StaticFamily family, LiquidTimestamp expiration) {
         this.player = RustyPlayer.from(player);
         this.server = ResolvableServer.from(server);
-        this.family = ResolvableFamily.from(family);
+        this.family = new FamilyReference(family.name());
 
         if(expiration == null) this.expiration = null;
         else this.expiration = expiration.epochFromNow();
@@ -42,11 +43,8 @@ public class ServerResidence implements IServerResidence {
         return this.server;
     }
 
-    public Optional<BaseFamily> family() {
-        return this.family.resolve();
-    }
-    public ResolvableFamily rawFamily() {
-        return this.family;
+    public BaseFamily family() {
+        return this.family.get();
     }
 
     public Long expiration() {
@@ -60,6 +58,6 @@ public class ServerResidence implements IServerResidence {
 
     @Override
     public String toString() {
-        return "<ServerResidence username="+this.player.username()+" family="+this.family.name()+" server="+this.server.serverInfo().getName()+">";
+        return "<ServerResidence username="+this.player.username()+" family="+this.family.get().name()+" server="+this.server.serverInfo().getName()+">";
     }
 }

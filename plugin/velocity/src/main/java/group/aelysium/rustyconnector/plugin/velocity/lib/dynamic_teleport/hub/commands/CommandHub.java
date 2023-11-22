@@ -66,7 +66,7 @@ public class CommandHub {
                     }
 
                     try {
-                        PlayerFocusedFamily parent = (PlayerFocusedFamily) family.parent().get();
+                        PlayerFocusedFamily parent = (PlayerFocusedFamily) family.parent();
 
                         if(parent != null) {
                             parent.connect(player);

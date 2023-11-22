@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
@@ -9,7 +10,7 @@ import java.io.File;
 import java.text.ParseException;
 
 public class StaticFamilyConfig extends YAML {
-    private String parent_family = "";
+    private FamilyReference parent_family = FamilyReference.rootFamily();
     private String firstConnection_loadBalancer = "default";
 
     private UnavailableProtocol consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.ASSIGN_NEW_HOME;
@@ -21,7 +22,7 @@ public class StaticFamilyConfig extends YAML {
         super(new File(dataFolder, "families/"+familyName+".static.yml"));
     }
 
-    public String getParent_family() { return parent_family; }
+    public FamilyReference getParent_family() { return parent_family; }
     public String getFirstConnection_loadBalancer() { return firstConnection_loadBalancer; }
 
     public boolean isWhitelist_enabled() {
@@ -41,10 +42,8 @@ public class StaticFamilyConfig extends YAML {
 
     public void register() throws IllegalStateException {
         try {
-            this.parent_family = this.getNode(this.data, "parent-family", String.class);
-        } catch (Exception ignore) {
-            this.parent_family = "";
-        }
+            this.parent_family = new FamilyReference(this.getNode(this.data, "parent-family", String.class));
+        } catch (Exception ignore) {}
 
         try {
             this.firstConnection_loadBalancer = this.getNode(this.data, "first-connection.load-balancer", String.class);

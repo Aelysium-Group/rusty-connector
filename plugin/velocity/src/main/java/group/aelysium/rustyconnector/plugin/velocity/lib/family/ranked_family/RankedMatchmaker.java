@@ -1,30 +1,30 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGame;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.solo.RankedSoloGame;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.teams.RankedTeamGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedSoloGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedTeamGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.PlayerRankLadder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-public class RankedMatchmakingSupervisor extends ClockService {
+public class RankedMatchmaker extends ClockService {
     private static int MAX_RANK = 50;
     private static int MIN_RANK = 0;
-    protected RankedMatchmakerSettings settings;
+    protected Settings settings;
     protected RankedFamily owner;
     protected PlayerRankLadder waitingPlayers;
     protected Vector<RankedGame> waitingGames = new Vector<>();
 
-    public RankedMatchmakingSupervisor(RankedMatchmakerSettings settings, RankedFamily owner, PlayerRankLadder waitingPlayers) {
+    public RankedMatchmaker(Settings settings, RankedFamily owner, PlayerRankLadder waitingPlayers) {
         super(4);
         this.settings = settings;
         this.owner = owner;
@@ -65,11 +65,11 @@ public class RankedMatchmakingSupervisor extends ClockService {
             RankedGame game = null;
             if (settings.soloSettings() != null) {
                 game = RankedSoloGame.startNew(settings.soloSettings(), players);
-                this.waitingPlayers.remove(((RankedSoloGame) game).players());
+                this.waitingPlayers.remove(game.players());
             }
             if (settings.teamSettings() != null) {
                 game = RankedTeamGame.startNew(settings.teamSettings(), players);
-                this.waitingPlayers.remove(((RankedTeamGame) game).players());
+                this.waitingPlayers.remove(game.players());
             }
 
             if (game == null) throw new NullPointerException("Unable to create a new game!");
@@ -153,4 +153,14 @@ public class RankedMatchmakingSupervisor extends ClockService {
             this.serverAssignmentProcess();
         }, settings.interval());
     }
+
+    public record Settings (
+            String name,
+            RankedGame.RankerType type,
+            RankedSoloGame.Settings soloSettings,
+            RankedTeamGame.Settings teamSettings,
+            RankedGame.ScoringType scoringType,
+            double variance,
+            LiquidTimestamp interval
+    ) {}
 }

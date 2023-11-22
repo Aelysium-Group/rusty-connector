@@ -10,6 +10,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class FamilyService implements IFamilyService<PlayerServer, RustyPlayer, RootFamily, BaseFamily> {
     private final Map<String, BaseFamily> registeredFamilies = new HashMap<>();
@@ -33,8 +34,10 @@ public class FamilyService implements IFamilyService<PlayerServer, RustyPlayer, 
         return this.rootFamily.get();
     }
 
-    public BaseFamily find(String name) {
-        return this.registeredFamilies.get(name);
+    protected Optional<BaseFamily> find(String name) {
+        BaseFamily family = this.registeredFamilies.get(name);
+        if(family == null) return Optional.empty();
+        return Optional.of(family);
     }
 
     public void add(BaseFamily family) {

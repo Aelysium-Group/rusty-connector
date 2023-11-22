@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IPlayerFocusedFamilyBase;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -16,7 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 public abstract class PlayerFocusedFamily extends BaseFamily implements IPlayerFocusedFamilyBase<PlayerServer, RustyPlayer> {
     protected String whitelist;
 
-    protected PlayerFocusedFamily(String name, LoadBalancer loadBalancer, String parentName, Whitelist whitelist) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    protected PlayerFocusedFamily(String name, LoadBalancer loadBalancer, FamilyReference parentName, Whitelist whitelist) {
         super(name, loadBalancer, parentName);
 
         if(whitelist == null) this.whitelist = null;

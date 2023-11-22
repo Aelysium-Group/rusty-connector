@@ -17,8 +17,7 @@ public interface IServerResidence {
     Optional<? extends IPlayerServer> server();
     IResolvableServer rawServer();
 
-    Optional<? extends IBaseFamily> family();
-    IResolvableFamily rawFamily();
+    IBaseFamily family();
 
     Long expiration();
 

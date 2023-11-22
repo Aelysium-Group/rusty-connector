@@ -13,10 +13,10 @@ public abstract class LoadBalancer implements ILoadBalancer<PlayerServer> {
     protected int index = 0;
     protected List<PlayerServer> items = new ArrayList<>();
 
-    public LoadBalancer(boolean weighted, boolean persistence, int attempts) {
-        this.weighted = weighted;
-        this.persistence = persistence;
-        this.attempts = attempts;
+    public LoadBalancer(Settings settings) {
+        this.weighted = settings.weighted();
+        this.persistence = settings.persistence();
+        this.attempts = settings.attempts();
     }
 
     public boolean persistent() {
@@ -98,4 +98,6 @@ public abstract class LoadBalancer implements ILoadBalancer<PlayerServer> {
     public boolean contains(PlayerServer item) {
         return this.items.contains(item);
     }
+
+    public record Settings(boolean weighted, boolean persistence, int attempts) {}
 }

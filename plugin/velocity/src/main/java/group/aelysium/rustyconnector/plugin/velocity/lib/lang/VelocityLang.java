@@ -399,7 +399,7 @@ public class VelocityLang extends Lang {
         RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
-            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+            parentFamilyName = Objects.requireNonNull(family.parent()).name();
         } catch (Exception ignore) {}
         if(family.equals(rootFamily)) parentFamilyName = "none";
 
@@ -464,7 +464,7 @@ public class VelocityLang extends Lang {
         RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
-            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+            parentFamilyName = Objects.requireNonNull(family.parent()).name();
         } catch (Exception ignore) {}
         if(family.equals(rootFamily)) parentFamilyName = "none";
 
@@ -536,7 +536,7 @@ public class VelocityLang extends Lang {
         RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
-            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+            parentFamilyName = Objects.requireNonNull(family.parent()).name();
         } catch (Exception ignore) {}
         if(family.equals(rootFamily)) parentFamilyName = "none";
 
@@ -606,7 +606,7 @@ public class VelocityLang extends Lang {
         RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.name();
         try {
-            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+            parentFamilyName = Objects.requireNonNull(family.parent()).name();
         } catch (Exception ignore) {}
 
         LiquidTimestamp expiration = family.homeServerExpiration();

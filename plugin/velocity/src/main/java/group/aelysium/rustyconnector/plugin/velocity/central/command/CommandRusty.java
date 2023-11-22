@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -31,6 +32,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public final class CommandRusty {
     public static BrigadierCommand create(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
@@ -161,14 +163,13 @@ class Family {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                BaseFamily family = flame.services().family().find(familyName);
-                                if(family == null) throw new NullPointerException();
+                                BaseFamily family = new FamilyReference(familyName).get();
 
                                 if(family instanceof ScalarFamily)
                                     VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
                                 if(family instanceof StaticFamily)
                                     VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
-                            } catch (NullPointerException e) {
+                            } catch (NoSuchElementException e) {
                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                             } catch (Exception e) {
                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting that family!\n"+e.getMessage());
@@ -186,8 +187,7 @@ class Family {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        BaseFamily family = flame.services().family().find(familyName);
-                        if(family == null) throw new NullPointerException();
+                        BaseFamily family = new FamilyReference(familyName).get();
                         if(!(family instanceof PlayerFocusedFamily)) {
                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on scalar and static families!");
                             return Command.SINGLE_SUCCESS;
@@ -199,7 +199,7 @@ class Family {
                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
                         if(family instanceof StaticFamily)
                             VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
-                    } catch (NullPointerException e) {
+                    } catch (NoSuchElementException e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                     } catch (Exception e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
@@ -213,8 +213,8 @@ class Family {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        BaseFamily family = flame.services().family().find(familyName);
-                        if(family == null) throw new NullPointerException();
+                        BaseFamily family = new FamilyReference(familyName).get();
+
                         if(!(family instanceof PlayerFocusedFamily)) {
                             VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only use sort on scalar and static families!");
                             return Command.SINGLE_SUCCESS;
@@ -226,7 +226,7 @@ class Family {
                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
                         if(family instanceof StaticFamily)
                             VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
-                    } catch (NullPointerException e) {
+                    } catch (NoSuchElementException e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                     } catch (Exception e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
@@ -240,14 +240,13 @@ class Family {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        BaseFamily family = flame.services().family().find(familyName);
-                        if(family == null) throw new NullPointerException();
+                        BaseFamily family = new FamilyReference(familyName).get();
 
                         if(family instanceof ScalarFamily)
                             VelocityLang.RC_SCALAR_FAMILY_INFO_LOCKED.send(logger, (ScalarFamily) family);
                         if(family instanceof StaticFamily)
                             VelocityLang.RC_STATIC_FAMILY_INFO_LOCKED.send(logger, (StaticFamily) family);
-                    } catch (NullPointerException e) {
+                    } catch (NoSuchElementException e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
                     } catch (Exception e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
@@ -275,10 +274,10 @@ class Send {
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.greedyString())
                         .executes(context -> {
-                            try {
-                                String familyName = context.getArgument("familyName", String.class);
-                                String username = context.getArgument("username", String.class);
+                            String familyName = context.getArgument("familyName", String.class);
+                            String username = context.getArgument("username", String.class);
 
+                            try {
                                 Player fetchedPlayer = Tinder.get().velocityServer().getPlayer(username).orElse(null);
                                 if(fetchedPlayer == null) {
                                     logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
@@ -286,17 +285,15 @@ class Send {
                                 }
                                 RustyPlayer player = RustyPlayer.from(fetchedPlayer);
 
-                                BaseFamily family = flame.services().family().find(familyName);
-                                if(family == null) {
-                                    logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
-                                    return Command.SINGLE_SUCCESS;
-                                }
+                                BaseFamily family = new FamilyReference(familyName).get();
                                 if(!(family instanceof PlayerFocusedFamily)) {
                                     VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
                                     return Command.SINGLE_SUCCESS;
                                 }
 
                                 family.connect(player);
+                            } catch (NoSuchElementException e) {
+                                logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
                             } catch (Exception e) {
                                 logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                             }

@@ -1,12 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -34,11 +36,11 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
     protected UnavailableProtocol unavailableProtocol;
     protected ResidenceDataEnclave dataEnclave;
 
-    private StaticFamily(String name, LoadBalancer loadBalancer, String parentFamily, Whitelist whitelist, MySQLStorage mySQLStorage, UnavailableProtocol unavailableProtocol, LiquidTimestamp homeServerExpiration) throws Exception {
-        super(name, loadBalancer, parentFamily, whitelist);
-        this.unavailableProtocol = unavailableProtocol;
-        this.homeServerExpiration = homeServerExpiration;
-        this.dataEnclave = new ResidenceDataEnclave(mySQLStorage);
+    private StaticFamily(DependencyInjector.DI1<MySQLStorage> deps, Settings settings) throws Exception {
+        super(settings.name(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist());
+        this.unavailableProtocol = settings.unavailableProtocol();
+        this.homeServerExpiration = settings.homeServerExpiration();
+        this.dataEnclave = new ResidenceDataEnclave(deps.d1());
     }
 
     public UnavailableProtocol unavailableProtocol() {
@@ -75,11 +77,23 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
         }
         config.register();
 
-        LoadBalancerConfig loadBalancerConfig = new LoadBalancerConfig(api.dataFolder(), config.getFirstConnection_loadBalancer());
-        if(!loadBalancerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_LOAD_BALANCER_TEMPLATE)) {
-            throw new IllegalStateException("Unable to load or create load_balancer/"+config.getFirstConnection_loadBalancer()+".yml!");
+        AlgorithmType loadBalancerAlgorithm;
+        LoadBalancer.Settings loadBalancerSettings;
+        {
+            LoadBalancerConfig loadBalancerConfig = new LoadBalancerConfig(api.dataFolder(), config.getFirstConnection_loadBalancer());
+            if (!loadBalancerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_LOAD_BALANCER_TEMPLATE)) {
+                throw new IllegalStateException("Unable to load or create load_balancer/" + config.getFirstConnection_loadBalancer() + ".yml!");
+            }
+            loadBalancerConfig.register();
+
+            loadBalancerAlgorithm = loadBalancerConfig.getAlgorithm();
+
+            loadBalancerSettings = new LoadBalancer.Settings(
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
+            );
         }
-        loadBalancerConfig.register();
 
         Whitelist whitelist = null;
         if (config.isWhitelist_enabled()) {
@@ -89,26 +103,14 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
         }
 
         LoadBalancer loadBalancer;
-        switch (loadBalancerConfig.getAlgorithm()) {
-            case ROUND_ROBIN -> loadBalancer = new RoundRobin(
-                    loadBalancerConfig.isWeighted(),
-                    loadBalancerConfig.isPersistence_enabled(),
-                    loadBalancerConfig.getPersistence_attempts()
-            );
-            case LEAST_CONNECTION -> loadBalancer = new LeastConnection(
-                    loadBalancerConfig.isWeighted(),
-                    loadBalancerConfig.isPersistence_enabled(),
-                    loadBalancerConfig.getPersistence_attempts()
-            );
-            case MOST_CONNECTION -> loadBalancer = new MostConnection(
-                    loadBalancerConfig.isWeighted(),
-                    loadBalancerConfig.isPersistence_enabled(),
-                    loadBalancerConfig.getPersistence_attempts()
-            );
+        switch (loadBalancerAlgorithm) {
+            case ROUND_ROBIN -> loadBalancer = new RoundRobin(loadBalancerSettings);
+            case LEAST_CONNECTION -> loadBalancer = new LeastConnection(loadBalancerSettings);
+            case MOST_CONNECTION -> loadBalancer = new MostConnection(loadBalancerSettings);
             default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
         }
 
-        StaticFamily family = new StaticFamily(
+        Settings settings = new Settings(
                 familyName,
                 loadBalancer,
                 config.getParent_family(),
@@ -117,8 +119,7 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
                 config.getConsecutiveConnections_homeServer_ifUnavailable(),
                 config.getConsecutiveConnections_homeServer_expiration()
         );
-
-        if(family == null) throw new RuntimeException("The name used for " + familyName + "'s load balancer is invalid!");
+        StaticFamily family = new StaticFamily(inject(dependencies.d3()), settings);
 
         try {
             family.dataEnclave().updateExpirations(config.getConsecutiveConnections_homeServer_expiration(), family);
@@ -129,6 +130,16 @@ public class StaticFamily extends PlayerFocusedFamily implements IStaticFamily<P
 
         return family;
     }
+
+    public record Settings(
+            String name,
+            LoadBalancer loadBalancer,
+            FamilyReference parentFamily,
+            Whitelist whitelist,
+            MySQLStorage mySQLStorage,
+            UnavailableProtocol unavailableProtocol,
+            LiquidTimestamp homeServerExpiration
+    ) {}
 }
 
 class StaticFamilyConnector {

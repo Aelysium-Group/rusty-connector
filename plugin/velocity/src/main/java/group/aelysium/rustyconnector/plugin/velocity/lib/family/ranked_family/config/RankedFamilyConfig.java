@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedMatchmakerSettings;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGameRankerType;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGameScoringType;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.solo.RankedSoloGame;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.teams.RankedTeam;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.teams.RankedTeamGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedMatchmaker;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedSoloGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedTeam;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedTeamGame;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import ninja.leaping.configurate.ConfigurationNode;
 
@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 public class RankedFamilyConfig extends YAML {
 
-    private RankedMatchmakerSettings matchmakingSettings;
-    private String parent_family = "";
+    private RankedMatchmaker.Settings matchmakingSettings;
+    private FamilyReference parent_family = FamilyReference.rootFamily();
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
@@ -26,10 +26,10 @@ public class RankedFamilyConfig extends YAML {
         super(new File(dataFolder, "families/"+familyName+".ranked.yml"));
     }
 
-    public RankedMatchmakerSettings getMatchmakingSettings() {
+    public RankedMatchmaker.Settings getMatchmakingSettings() {
         return matchmakingSettings;
     }
-    public String getParent_family() { return parent_family; }
+    public FamilyReference getParent_family() { return parent_family; }
 
     public boolean isWhitelist_enabled() {
         return whitelist_enabled;
@@ -43,9 +43,9 @@ public class RankedFamilyConfig extends YAML {
         {
             String gamemodeName = this.getNode(this.data, "ranking.gamemode-name", String.class);
             if (gamemodeName.equals("default")) gamemodeName = familyName;
-            RankedGameScoringType scoring = RankedGameScoringType.valueOf(this.getNode(this.data, "ranking.scoring", String.class));
+            RankedGame.ScoringType scoring = RankedGame.ScoringType.valueOf(this.getNode(this.data, "ranking.scoring", String.class));
 
-            RankedGameRankerType matchmakingConfiguration = RankedGameRankerType.valueOf(this.getNode(this.data, "ranking.matchmaking.configuration", String.class));
+            RankedGame.RankerType matchmakingConfiguration = RankedGame.RankerType.valueOf(this.getNode(this.data, "ranking.matchmaking.configuration", String.class));
 
             RankedSoloGame.Settings soloSettings = null;
             RankedTeamGame.Settings coopSettings = null;
@@ -86,14 +86,12 @@ public class RankedFamilyConfig extends YAML {
                 interval = LiquidTimestamp.from(10, TimeUnit.SECONDS);
             }
 
-            this.matchmakingSettings = new RankedMatchmakerSettings(gamemodeName, matchmakingConfiguration, soloSettings, coopSettings, scoring, variance, interval);
+            this.matchmakingSettings = new RankedMatchmaker.Settings(gamemodeName, matchmakingConfiguration, soloSettings, coopSettings, scoring, variance, interval);
         }
 
         try {
-            this.parent_family = this.getNode(this.data, "parent-family", String.class);
-        } catch (Exception ignore) {
-            this.parent_family = "";
-        }
+            this.parent_family = new FamilyReference(this.getNode(this.data, "parent-family", String.class));
+        } catch (Exception ignore) {}
 
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
         this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);

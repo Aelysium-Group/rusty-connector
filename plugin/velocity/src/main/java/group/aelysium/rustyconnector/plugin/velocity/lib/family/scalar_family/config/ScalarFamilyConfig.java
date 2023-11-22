@@ -1,12 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 
 import java.io.File;
 
 public class ScalarFamilyConfig extends YAML {
-    private String parent_family = "";
+    private FamilyReference parent_family = FamilyReference.rootFamily();
     private String loadBalancer = "default";
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
@@ -14,7 +16,7 @@ public class ScalarFamilyConfig extends YAML {
     public ScalarFamilyConfig(String dataFolder, String familyName) {
         super(new File(dataFolder, "families/"+familyName+".scalar.yml"));
     }
-    public String getParent_family() { return parent_family; }
+    public FamilyReference getParent_family() { return parent_family; }
     public String loadBalancer() { return loadBalancer; }
 
     public boolean isWhitelist_enabled() {
@@ -27,10 +29,8 @@ public class ScalarFamilyConfig extends YAML {
 
     public void register() throws IllegalStateException {
         try {
-            this.parent_family = this.getNode(this.data, "parent-family", String.class);
-        } catch (Exception ignore) {
-            this.parent_family = "";
-        }
+            this.parent_family = new FamilyReference(this.getNode(this.data, "parent-family", String.class));
+        } catch (Exception ignore) {}
 
         try {
             this.loadBalancer = this.getNode(this.data, "load-balancer", String.class);

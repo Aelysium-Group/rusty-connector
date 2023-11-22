@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.bases;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
@@ -11,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
  * Instead, the player must invoke some other system feature which will then allow connection to this family via a side-effect.
  */
 public abstract class SystemFocusedServerFamily extends BaseFamily {
-    protected SystemFocusedServerFamily(String name, LoadBalancer loadBalancer, String parentName) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    protected SystemFocusedServerFamily(String name, LoadBalancer loadBalancer, FamilyReference parentName) {
         super(name, loadBalancer, parentName);
     }
 }
