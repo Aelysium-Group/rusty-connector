@@ -23,11 +23,11 @@
 # Is this auto-scaler enabled?
 # If false, the family will not scale at all.
 #
-enabled: true
+enabled: false
 
 #
 # The minimum number of servers that are allowed to be active.
-# Even if no players are online, there will never be fewer servers than this number.
+# Even if no players are online, there should never be fewer servers than this number.
 #
 minimum-capacity: 1
 
@@ -59,7 +59,7 @@ shaving:
     # If the total of your server's soft-cap capacity is 100 players and you have only 20 players online,
     # it's a ratio of 0.2.
     #
-    # The server with the least number of players will be deleted first.
+    # Servers which are at or below this number will be deleted.
     #
     player-ratio: 0.0
 

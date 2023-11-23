@@ -14,7 +14,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerPlayerCountEvent;
 
 import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;

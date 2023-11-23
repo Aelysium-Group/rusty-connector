@@ -17,30 +17,23 @@ public class ClockService implements Service {
 
     /**
      * Schedule a new task to run every `heartbeat`
+     *
      * @param runnable The runnable task to run.
-     * @param period The intervals in seconds to wait before executing the runnable again.
+     * @param period   The intervals in seconds to wait before executing the runnable again.
      */
-    public ScheduledFuture<?> scheduleRecurring(Runnable runnable, long period) {
-        return this.executorService.scheduleAtFixedRate(runnable, 0, period, TimeUnit.SECONDS);
+    public void scheduleRecurring(Runnable runnable, LiquidTimestamp period) {
+        this.executorService.scheduleAtFixedRate(runnable, 0, period.value(), period.unit());
     }
 
     /**
      * Schedule a new task to run every `heartbeat`
+     *
      * @param runnable The runnable task to run.
-     * @param period The intervals in seconds to wait before executing the runnable again.
+     * @param period   The intervals in seconds to wait before executing the runnable again.
+     * @param delay    The intervals in seconds to wait before executing the runnable for the first time.
      */
-    public ScheduledFuture<?> scheduleRecurring(Runnable runnable, LiquidTimestamp period) {
-        return this.executorService.scheduleAtFixedRate(runnable, 0, period.value(), period.unit());
-    }
-
-    /**
-     * Schedule a new task to run every `heartbeat`
-     * @param runnable The runnable task to run.
-     * @param period The intervals in seconds to wait before executing the runnable again.
-     * @param delay The intervals in seconds to wait before executing the runnable for the first time.
-     */
-    public ScheduledFuture<?> scheduleRecurring(Runnable runnable, long period, long delay) {
-        return this.executorService.scheduleAtFixedRate(runnable, delay, period, TimeUnit.SECONDS);
+    public void scheduleRecurring(Runnable runnable, long period, long delay) {
+        this.executorService.scheduleAtFixedRate(runnable, delay, period, TimeUnit.SECONDS);
     }
 
     /**

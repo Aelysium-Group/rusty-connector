@@ -80,13 +80,11 @@ static: []
 #                                                          #
 #               ---------------------------                #
 #                                                          #
-# | Ranked families implement matchmaking algorithms to    #
-# | pair players together into "player stacks" which then  #
-# | load into a specific server.                           #
+# | Ranked families implement matchmaking algorithms.      #
 # | When a player attempts to connect to a ranked family   #
 # | they will remain in their current family until         #
-# | matchmaking is finished and the entire player stack    #
-# | is then connected to a server in the family.           #
+# | matchmaking is finished and a game can be started      #
+# | the player is then connected to the family.            #
 #                                                          #
 # | Once a server is in-session it will automatically      #
 # | be locked and new sessions won't be able to join       #

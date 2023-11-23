@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.central.command;
+package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -18,8 +18,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.Flame;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
@@ -380,20 +378,23 @@ class K8 {
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
                                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerName", StringArgumentType.string())
                                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerPort", StringArgumentType.string())
+                                                .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerImage", StringArgumentType.greedyString())
                                                 .executes(context -> {
                                                     try {
                                                         String familyName = context.getArgument("familyName", String.class);
                                                         String containerName = context.getArgument("containerName", String.class);
                                                         String containerPort = context.getArgument("containerPort", String.class);
+                                                        String containerImage = context.getArgument("containerImage", String.class);
 
                                                         K8Service k8 = new K8Service();
-                                                        k8.createServer(familyName, containerName, Integer.parseInt(containerPort));
+                                                        k8.createServer(familyName, containerName, Integer.parseInt(containerPort), containerImage);
                                                     } catch (Exception e) {
                                                         e.printStackTrace();
                                                     }
 
                                                     return Command.SINGLE_SUCCESS;
                                                 })
+                                                )
                                         )
                                 )
                         ))
@@ -402,11 +403,11 @@ class K8 {
                                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
                                         .executes(context -> {
                                             try {
-                                                String serverName = context.getArgument("podName", String.class);
+                                                String podName = context.getArgument("podName", String.class);
                                                 String familyName = context.getArgument("familyName", String.class);
 
                                                 K8Service k8 = new K8Service();
-                                                k8.deleteServer(serverName, familyName);
+                                                k8.deleteServer(podName, familyName);
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }

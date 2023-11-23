@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors;
 
 import com.velocitypowered.api.command.CommandManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.anchors.IAnchorService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
@@ -86,11 +87,14 @@ public class AnchorService implements IAnchorService<PlayerServer, RustyPlayer, 
 
             Map<String, PlayerFocusedFamily> anchors = new HashMap<>();
             for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
-                BaseFamily family = familyService.find(entry.getValue());
-                if(family == null){
+                BaseFamily family;
+                try {
+                    family = new FamilyReference(entry.getValue()).get();
+                } catch (Exception ignore) {
                     bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
                     continue;
                 }
+                
                 if(!(family instanceof PlayerFocusedFamily)){
                     bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't respect players! Ignoring...", NamedTextColor.RED));
                     continue;

@@ -31,9 +31,9 @@
 # | player manager for Minecraft networks!             | RustyConnector is meant to be scalable and easy  #
 #                                                      | to maintain!                                     #
 #                                                                                                         #
-#                               | If you ever need assistance setting up your                             #
-#                               | plugin come join us in our discord server:                              #
-#                               | https://join.aelysium.group/                                            #
+#                              | If you ever need assistance setting up your                              #
+#                              | plugin come join us in our discord server:                               #
+#                              | https://join.aelysium.group/                                             #
 #                                                                                                         #
 #                            -------------------------------------------------                            #
 #                                                                                                         #
@@ -82,58 +82,19 @@ whitelist:
 
 #
 # The name of the whitelist configuration file in your "whitelists" folder.
-# You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
 #
     name: "whitelist-template"
 
-services:
-#
-# Manages the lifecycles of servers.
-#
-# Also manages the lifecycle of a player's home server if you are using Static Families.
-#
-    server-lifecycle:
+magic-link:
 #
 # Amount of time, in seconds, that a server can go without pinging the proxy.
 # If a server doesn't ping the proxy in this time, it will be declared stale
 # and be unregistered from the proxy.
 #
-        server-timeout: 15
+    server-timeout: 15
 
 #
 # Amount of time, in seconds, that a server should wait to ping the proxy.
 # This setting cannot be higher than "server-timeout".
 #
-        server-ping-interval: 10
-
-#
-# Manages the load balancing of the proxy's families.
-#
-    load-balancing:
-        enabled: true
-#
-# Time, in seconds, between when the families sort their servers. This interval will cause your proxy to sort ALL of the servers registered to it!
-# The higher this value the higher accuracy your load balancing will operate at.
-# If you have larger sets of servers on a family, setting the interval to be larger can help save resources.
-#
-# If you disable this heart, you are effectively setting load balancing for your entire network to be ROUND_ROBIN
-#
-        interval: 20
-
-
-###########################################################################################################
-#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-###########################################################################################################
-#                                                                                                         #
-#                                            ~~ Powered By ~~                                             #
-#        __  __   __  __   ______   ______   ______   __   __   ______  ______  ______   ______           #
-#       /\ \/ /  /\ \/\ \ /\  == \ /\  ___\ /\  == \ /\ "-.\ \ /\  ___\/\__  _\/\  ___\ /\  ___\          #
-#       \ \  _"-.\ \ \_\ \\ \  __< \ \  __\ \ \  __< \ \ \-.  \\ \  __\\/_/\ \/\ \  __\ \ \___  \         #
-#        \ \_\ \_\\ \_____\\ \_____\\ \_____\\ \_\ \_\\ \_\\"\_\\ \_____\ \ \_\ \ \_____\\/\_____\        #
-#         \/_/\/_/ \/_____/ \/_____/ \/_____/ \/_/ /_/ \/_/ \/_/ \/_____/  \/_/  \/_____/ \/_____/        #
-#                                                                                                         #
-#                                                                                                         #
-###########################################################################################################
-#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-###########################################################################################################
-enabled: false
+    server-ping-interval: 10

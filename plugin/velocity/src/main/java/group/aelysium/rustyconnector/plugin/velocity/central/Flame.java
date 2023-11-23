@@ -4,11 +4,11 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicLinkConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.handlers.RankedGameEndHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.Version;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
@@ -26,7 +26,6 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.central.command.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.central.config.LoggerConfig;
@@ -46,7 +45,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.St
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingClock;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers.MagicLinkPingHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.LockServerHandler;
@@ -68,6 +67,7 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
@@ -373,8 +373,9 @@ class Initialize {
 
         {
             bootOutput.add(Component.text(" | Registering load balancing service to the API...", NamedTextColor.DARK_GRAY));
-            if (dependencies.d1().services_loadBalancing_enabled())
-                services.put(LoadBalancingService.class, new LoadBalancingService(familyService.size(), dependencies.d1().services_loadBalancing_interval()));
+            LoadBalancingClock clock = new LoadBalancingClock(familyService.size(), LiquidTimestamp.from(20, TimeUnit.SECONDS));
+            services.put(LoadBalancingClock.class, clock);
+            clock.init(inject(familyService, this.api.logger()));
             bootOutput.add(Component.text(" | Finished registering load balancing service to the API.", NamedTextColor.GREEN));
         }
 
@@ -400,14 +401,11 @@ class Initialize {
         for (File file : files) {
             MagicLinkConfig magicLinkConfig = new MagicLinkConfig(api.dataFolder(), file.getName());
             if (!magicLinkConfig.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_MAGIC_CONFIG_TEMPLATE))
-                throw new IllegalStateException("Unable to load or create families.yml!");
+                throw new IllegalStateException("Unable to load or create magic_config.yml!");
             magicLinkConfig.register();
 
-            try {
-                new FamilyReference(magicLinkConfig.family()).get();
-            } catch (Exception ignore) {
+            if(dependencies.d1().dump().stream().noneMatch(family -> family.name().equals(magicLinkConfig.family())))
                 throw new NullPointerException("The magic config `" + file.getName() + "` is pointing to a family: `" + magicLinkConfig.family() + "`, which doesn't exist!");
-            }
         }
 
         bootOutput.add(Component.text("Magic Configs have been validated!", NamedTextColor.GREEN));
@@ -478,7 +476,7 @@ class Initialize {
     public void magicLink(DependencyInjector.DI2<DefaultConfig, ServerService> dependencies) {
         bootOutput.add(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-        MagicLinkService magicLinkService = new MagicLinkService(3, dependencies.d1().services_serverLifecycle_serverPingInterval());
+        MagicLinkService magicLinkService = new MagicLinkService(3, dependencies.d1().magicLink_serverPingInterval());
         services.put(MagicLinkService.class, magicLinkService);
 
         bootOutput.add(Component.text("Finished building magic link service.", NamedTextColor.GREEN));
@@ -493,8 +491,8 @@ class Initialize {
         bootOutput.add(Component.text("Building server service...", NamedTextColor.DARK_GRAY));
 
         ServerService.Builder serverServiceBuilder = new ServerService.Builder()
-                .setServerTimeout(defaultConfig.services_serverLifecycle_serverTimeout())
-                .setServerInterval(defaultConfig.services_serverLifecycle_serverPingInterval());
+                .setServerTimeout(defaultConfig.magicLink_serverTimeout())
+                .setServerInterval(defaultConfig.magicLink_serverPingInterval());
 
         ServerService serverService = serverServiceBuilder.build();
         services.put(ServerService.class, serverService);

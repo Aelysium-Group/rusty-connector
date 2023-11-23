@@ -76,21 +76,12 @@ public class FamiliesConfig extends YAML {
         if(this.doDuplicatesExist())
             throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of what type the family is!");
 
-        if(this.isRootFamilyDuplicated()) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, this.rootFamily_name + " was found duplicated in your family nodes. This is no longer supported. Instead, ONLY place the name of your root family in [root-family.name]. Ignoring...", NamedTextColor.YELLOW);
-            this.scalar.remove(this.rootFamily_name);
-            this.staticF.remove(this.rootFamily_name);
-        }
     }
 
     private boolean doDuplicatesExist() {
         return this.scalar.stream().filter(this.staticF::contains).toList().size() > 0;
     }
 
-    private boolean isRootFamilyDuplicated() {
-        return this.scalar.contains(this.rootFamily_name) ||
-               this.staticF.contains(this.rootFamily_name);
-    }
 
     private boolean checkForAll() {
         return this.rootFamily_name.equalsIgnoreCase("all") ||

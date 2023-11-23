@@ -1,59 +1,60 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.k8;
 
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import io.kubernetes.client.openapi.ApiClient;
-import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.apis.CoreV1Api;
-import io.kubernetes.client.openapi.models.*;
-import io.kubernetes.client.util.Config;
+import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.client.*;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.ConfigBuilder;
 
 import java.io.IOException;
 import java.util.List;
 
 public class K8Service implements Service {
-    private ApiClient client;
-    private final CoreV1Api api;
     private K8AutoScalerService autoScalerService;
 
     public K8Service() throws IOException {
-        this.client = Config.defaultClient();
-       // this.client.setApiKey();
-
-        this.api = new CoreV1Api(this.client);
     }
 
     public K8AutoScalerService autoscalers() {
         return this.autoScalerService;
     }
 
-    public void createServer(String familyName, String containerName, int containerPort) throws ApiException {
+    public void createServer(String familyName, String containerName, int containerPort, String containerImage) {
         String podName = familyNameToPodPrefix(familyName);
         String namespace = familyNameToNamespace(familyName);
+        String serviceAccountName = "rustyconnector";
+        String image = "your-image-name";
 
-        V1ObjectMeta meta = new V1ObjectMeta();
-        meta.name(podName);
-
-        V1ContainerPort port = new V1ContainerPort();
-        port.setContainerPort(containerPort);
-
-        V1Container container = new V1Container();
-        container.setName(containerName);
-        container.setImage("nginx:latest");
-        container.setPorts(List.of(port));
-
-        V1PodSpec spec = new V1PodSpec();
-        spec.setContainers(List.of(container));
-
-        V1Pod pod = new V1Pod();
-        pod.setMetadata(meta);
-        pod.setSpec(spec);
-
-        api.createNamespacedPod(namespace, pod, null, null, null, null);
+        try (KubernetesClient client = new KubernetesClientBuilder().build()) {
+            Pod pod = new PodBuilder()
+                    .withNewMetadata()
+                    .withName(podName)
+                    .endMetadata()
+                    .withNewSpec()
+                    .addNewContainer()
+                    .withName(containerName)
+                    .withImage(containerImage)
+                    .endContainer()
+                    .endSpec()
+                    .build();
+            client.pods().inNamespace(namespace).resource(pod).create();
+        }
     }
 
-    public void deleteServer(String familyName, String podName) throws ApiException {
+    public void deleteServer(String familyName, String podName) {
         String namespace = familyNameToNamespace(familyName);
-        api.deleteNamespacedPod(podName, namespace, null, null, null, null, null, null);
+
+        try (KubernetesClient client = new KubernetesClientBuilder().build()) {
+            client.pods().inNamespace(namespace).withName(podName).delete();
+        }
+    }
+
+    public List<Pod> getPods(String familyName) {
+        String namespace = familyNameToNamespace(familyName);
+
+        try (KubernetesClient client = new KubernetesClientBuilder().build()) {
+            return client.pods().inNamespace(namespace).list().getItems();
+        }
     }
 
     private String familyNameToNamespace(String name) {
@@ -61,7 +62,7 @@ public class K8Service implements Service {
     }
 
     private String familyNameToPodPrefix(String name) {
-        return "rc-minecraft-pod-"+name+"-";
+        return "rc-minecraft-pod-"+name;
     }
 
     @Override

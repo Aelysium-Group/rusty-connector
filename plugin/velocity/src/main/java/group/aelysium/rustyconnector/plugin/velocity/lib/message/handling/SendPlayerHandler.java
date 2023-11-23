@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
@@ -27,8 +28,7 @@ public class SendPlayerHandler implements PacketHandler {
         if(player == null) return;
 
         try {
-            FamilyService familyService = api.services().family();
-            PlayerFocusedFamily family = (PlayerFocusedFamily) familyService.find(packet.targetFamilyName());
+            PlayerFocusedFamily family = (PlayerFocusedFamily) new FamilyReference(packet.targetFamilyName()).get();
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the name `"+packet.targetFamilyName()+"` doesn't exist!");
 
             family.connect(RustyPlayer.from(player));

@@ -9,6 +9,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -104,8 +105,8 @@ public final class CommandTPA {
                                     try {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        String familyName = serverService.search(sendingServer).family().name();
-                                        BaseFamily family = familyService.find(familyName);
+                                        BaseFamily family = serverService.search(sendingServer).family();
+
                                         if(!(family instanceof PlayerFocusedFamily)) return builder.buildFuture();
 
                                         TPAHandler tpaHandler = tpaService.tpaHandler((PlayerFocusedFamily) family);
@@ -146,10 +147,9 @@ public final class CommandTPA {
                                         ServerInfo targetServerInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                         PlayerServer targetServer = serverService.search(targetServerInfo);
-                                        String familyName = targetServer.family().name();
                                         try {
-                                            BaseFamily family = familyService.find(familyName);
-                                            if(family == null) throw new NullPointerException();
+                                            BaseFamily family = targetServer.family();
+
                                             if(!(family instanceof PlayerFocusedFamily)) throw new NullPointerException();
 
                                             TPAHandler tpaHandler = tpaService.tpaHandler((PlayerFocusedFamily) family);
@@ -203,8 +203,8 @@ public final class CommandTPA {
                                     try {
                                         ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        String familyName = serverService.search(sendingServer).family().name();
-                                        BaseFamily family = familyService.find(familyName);
+                                        BaseFamily family = serverService.search(sendingServer).family();
+
                                         if(!(family instanceof PlayerFocusedFamily)) return builder.buildFuture();
                                         TPAHandler tpaHandler = tpaService.tpaHandler((PlayerFocusedFamily) family);
                                         List<TPARequest> requests = tpaHandler.findRequestsForTarget(player);
@@ -271,8 +271,7 @@ public final class CommandTPA {
                             try {
                                 ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                String familyName = serverService.search(sendingServer).family().name();
-                                BaseFamily family = familyService.find(familyName);
+                                BaseFamily family = serverService.search(sendingServer).family();
 
                                 family.players(50).forEach(nearbyPlayer -> {
                                     if(nearbyPlayer.equals(player)) return;
