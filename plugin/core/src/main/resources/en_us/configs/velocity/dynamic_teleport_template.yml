@@ -167,3 +167,34 @@ hub:
     # List the families that you'd like players to be able to use /hub in.
     #
     enabled-families: []
+
+#
+# Additional Commands.
+# These commands are enabled when you enable this module.
+#
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                           TP                             #
+#                                                          #
+#               ---------------------------                #
+# | Lets a player teleport directly to another player.     #
+#                                                          #
+# | If player1 is in one server and player2 is in another  #
+# | server; player1 will connect to the new server and     #
+# | then teleport to player2's coordinates.                #
+#                                                          #
+# | If both players are in the same server, player1 will   #
+# | just automatically teleport to player1.                #
+#                                                          #
+#   NOTE: This command is player only!                     #
+#                                                          #
+#               ----------------------------               #
+#                        Permission:                       #
+#                rustyconnector.command.tp                 #
+#               ----------------------------               #
+#                          Usage:                          #
+#              /tp <target players username>               #
+#               ----------------------------               #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
