@@ -193,6 +193,7 @@ velocity:
         already_leader: "<red>You're already the leader!</red>"
         demoted: "<yellow>You are no longer party leader.</yellow>"
         following_kicked: "<red>There was an issue following your party! You've been kicked.</red>"
+        following_failed: "<red>There was an issue following your party!</red>"
         created: "<green>You created a new party!</green>"
         left_self: "<green>You left the party.</green>"
         self_kick: "</red>You can't kick yourself! Use <blue>/party leave</blue> instead!</red>"

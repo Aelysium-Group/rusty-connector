@@ -822,6 +822,7 @@ public class VelocityLang extends Lang {
     public final static ParameterizedMessage1<String> PARTY_JOINED = (username) ->
             resolver().get("velocity.party.party_joined", LanguageResolver.tagHandler("username", username));
     public final static Component PARTY_FOLLOWING_KICKED = resolver().get("velocity.party.following_kicked");
+    public final static Component PARTY_FOLLOWING_FAILED = resolver().get("velocity.party.following_failed");
     public final static ParameterizedMessage1<String> PARTY_INVITE_SENT = (username) -> resolver().get(
             "velocity.party.invite.sent",
             LanguageResolver.tagHandler("username", username)

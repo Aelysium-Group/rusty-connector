@@ -147,6 +147,7 @@ public class PartyService extends Service {
                                 boolean onlyLeaderCanKick,
                                 boolean onlyLeaderCanSwitchServers,
                                 boolean disbandOnLeaderQuit,
-                                SwitchPower switchPower
+                                SwitchPower switchPower,
+                                boolean kickOnSendFailure
                                 ) {}
 }

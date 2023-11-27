@@ -23,6 +23,8 @@ public class PartyConfig extends YAML {
 
     private SwitchPower switchingServers_switchPower = SwitchPower.MODERATE;
 
+    private boolean switchingServers_kickOnFailedSend = true;
+
     public PartyConfig(File configPointer) {
         super(configPointer);
     }
@@ -62,6 +64,10 @@ public class PartyConfig extends YAML {
         return switchingServers_switchPower;
     }
 
+    public boolean getSwitchingServers_kickOnSendFailure() {
+        return switchingServers_kickOnFailedSend;
+    }
+
     @SuppressWarnings("unchecked")
     public void register() throws IllegalStateException, NoOutputException {
         this.enabled = this.getNode(this.data, "enabled", Boolean.class);
@@ -89,5 +95,7 @@ public class PartyConfig extends YAML {
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Switch power: "+this.switchingServers_switchPower+" isn't valid! Please review `party.yml` again!");
         }
+
+        this.switchingServers_kickOnFailedSend = this.getNode(this.data, "switching-servers.kick-on-failure", Boolean.class);
     }
 }

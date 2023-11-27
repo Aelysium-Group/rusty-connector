@@ -110,8 +110,10 @@ public class Party {
 
     public synchronized void connect(PlayerServer server) {
         SwitchPower switchPower = Tinder.get().services().partyService().orElseThrow().settings().switchPower();
+        boolean kickOnSendFailure = Tinder.get().services().partyService().orElseThrow().settings().kickOnSendFailure();
+
         this.setServer(server);
-        Vector<Player> kickedPlayers = new Vector<>();
+        Vector<Player> unsentPlayers = new Vector<>();
 
         Tinder.get().services().partyService().orElseThrow().queueConnector(() -> {
             for (Player player : this.players)
@@ -119,14 +121,14 @@ public class Party {
                     switch (switchPower) {
                         case MINIMAL -> {
                             if(server.full()) {
-                                kickedPlayers.add(player);
+                                unsentPlayers.add(player);
                                 return;
                             }
                             server.directConnect(player);
                         }
                         case MODERATE -> {
                             if(server.maxed()) {
-                                kickedPlayers.add(player);
+                                unsentPlayers.add(player);
                                 return;
                             }
                             server.directConnect(player);
@@ -134,12 +136,14 @@ public class Party {
                         case AGGRESSIVE -> server.directConnect(player);
                     }
                 } catch (ConnectException e) {
-                    kickedPlayers.add(player);
+                    unsentPlayers.add(player);
                 }
 
-            kickedPlayers.forEach(player -> {
-                player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED);
-                this.leave(player);
+            unsentPlayers.forEach(player -> {
+                if (kickOnSendFailure) {
+                    player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED);
+                    this.leave(player);
+                } else player.sendMessage(VelocityLang.PARTY_FOLLOWING_FAILED);
             });
         });
     }

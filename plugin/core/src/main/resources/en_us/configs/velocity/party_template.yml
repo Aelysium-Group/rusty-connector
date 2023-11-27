@@ -92,6 +92,14 @@ switching-servers:
     ############################################################
     switch-power: MODERATE
 
+    #
+    # Should a party members be kicked if they're unable to follow the party?
+    # If enabled, party members will be removed from the party if they cannot be sent to the target server.
+    # This setting does not affect how effective parties are at actually getting players into a server;
+    # For that check out Switch Power.
+    #
+    kick-on-failure: true
+
 
 #
 # Additional Commands.
