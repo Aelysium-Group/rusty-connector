@@ -1,14 +1,13 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family;
 
-import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.List;
 
-public interface IFamilyService<TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer, TRootFamily extends IRootFamily<TPlayerServer, TResolvablePlayer>, TBaseFamily extends IBaseFamily<TPlayerServer, TResolvablePlayer>> extends Service {
+public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TRootFamily extends IRootFamily<TMCLoader, TPlayer>, TBaseFamily extends IFamily<TMCLoader, TPlayer>> extends Service {
     boolean shouldCatchDisconnectingPlayers();
 
     void setRootFamily(TRootFamily family);

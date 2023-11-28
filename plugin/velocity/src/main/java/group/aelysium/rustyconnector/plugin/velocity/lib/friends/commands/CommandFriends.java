@@ -7,7 +7,6 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -16,7 +15,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -34,13 +33,13 @@ public final class CommandFriends {
 
         LiteralCommandNode<CommandSource> friends = LiteralArgumentBuilder
                 .<CommandSource>literal("friends")
-                .requires(source -> source instanceof Player)
+                .requires(source -> source instanceof com.velocitypowered.api.proxy.Player)
                 .executes(context -> {
-                    if(!(context.getSource() instanceof Player eventPlayer)) {
+                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player eventPlayer)) {
                         logger.log("/friends must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
-                    RustyPlayer player = RustyPlayer.from(eventPlayer);
+                    Player player = Player.from(eventPlayer);
 
                     if(!Permission.validate(eventPlayer, "rustyconnector.command.friends")) {
                         player.sendMessage(VelocityLang.NO_PERMISSION);
@@ -52,7 +51,7 @@ public final class CommandFriends {
                 .then(LiteralArgumentBuilder.<CommandSource>literal("add")
                     .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                             .suggests((context, builder) -> {
-                                if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                                if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                                 try {
                                     RegisteredServer server = player.getCurrentServer().orElseThrow().getServer();
@@ -69,7 +68,7 @@ public final class CommandFriends {
                                 return builder.buildFuture();
                             })
                             .executes(context -> {
-                                if(!(context.getSource() instanceof Player player)) {
+                                if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                     logger.log("/friends must be sent as a player!");
                                     return Command.SINGLE_SUCCESS;
                                 }
@@ -80,9 +79,9 @@ public final class CommandFriends {
                                 }
 
                                 String username = context.getArgument("username", String.class);
-                                RustyPlayer targetPlayer = api.services().player().fetch(username).orElseThrow();
+                                Player targetPlayer = new Player.UsernameReference(username).get();
 
-                                if(friendsService.areFriends(RustyPlayer.from(player), targetPlayer))
+                                if(friendsService.areFriends(Player.from(player), targetPlayer))
                                     return closeMessage(player, VelocityLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
 
                                 if(targetPlayer == null)
@@ -96,7 +95,7 @@ public final class CommandFriends {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("requests")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/friends must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -111,10 +110,10 @@ public final class CommandFriends {
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                                 .suggests((context, builder) -> {
-                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                                     try {
-                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(RustyPlayer.from(player));
+                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(Player.from(player));
 
                                         if(requests.size() == 0) {
                                             builder.suggest("You have no pending friend requests!");
@@ -132,7 +131,7 @@ public final class CommandFriends {
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                         logger.log("/friends must be sent as a player!");
                                         return Command.SINGLE_SUCCESS;
                                     }
@@ -147,7 +146,7 @@ public final class CommandFriends {
                                 })
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("ignore")
                                         .executes(context -> {
-                                            if(!(context.getSource() instanceof Player player)) {
+                                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                                 logger.log("/friends must be sent as a player!");
                                                 return Command.SINGLE_SUCCESS;
                                             }
@@ -158,13 +157,13 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            RustyPlayer senderPlayer = api.services().player().fetch(username).orElseThrow();
+                                            Player senderPlayer = new Player.UsernameReference(username).get();
 
                                             if(senderPlayer == null)
                                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
                                             try {
-                                                FriendRequest invite = friendsService.findRequest(RustyPlayer.from(player), senderPlayer).orElse(null);
+                                                FriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
                                                 if (invite == null) throw new NoOutputException();
 
                                                 try {
@@ -184,7 +183,7 @@ public final class CommandFriends {
                                 )
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
                                         .executes(context -> {
-                                            if(!(context.getSource() instanceof Player player)) {
+                                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                                 logger.log("/friends must be sent as a player!");
                                                 return Command.SINGLE_SUCCESS;
                                             }
@@ -195,12 +194,12 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            RustyPlayer senderPlayer = api.services().player().fetch(username).orElseThrow();
+                                            Player senderPlayer = new Player.UsernameReference(username).get();
 
                                             if (senderPlayer == null)
                                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
-                                            FriendRequest invite = friendsService.findRequest(RustyPlayer.from(player), senderPlayer).orElse(null);
+                                            FriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
                                             if (invite == null)
                                                 return closeMessage(player, VelocityLang.FRIEND_REQUEST_EXPIRED);
 
@@ -223,7 +222,7 @@ public final class CommandFriends {
         return new BrigadierCommand(friends);
     }
 
-    public static int closeMessage(Player player, Component message) {
+    public static int closeMessage(com.velocitypowered.api.proxy.Player player, Component message) {
         player.sendMessage(message);
         return Command.SINGLE_SUCCESS;
     }

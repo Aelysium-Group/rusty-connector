@@ -1,10 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -12,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class FamilyService implements IFamilyService<PlayerServer, RustyPlayer, RootFamily, BaseFamily> {
-    private final Map<String, BaseFamily> registeredFamilies = new HashMap<>();
+public class FamilyService implements IFamilyService<MCLoader, Player, RootFamily, Family> {
+    private final Map<String, Family> registeredFamilies = new HashMap<>();
     private WeakReference<RootFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
 
@@ -26,7 +25,7 @@ public class FamilyService implements IFamilyService<PlayerServer, RustyPlayer, 
     }
 
     public void setRootFamily(RootFamily family) {
-        this.registeredFamilies.put(family.name(), family);
+        this.registeredFamilies.put(family.id(), family);
         this.rootFamily = new WeakReference<>(family);
     }
 
@@ -34,21 +33,21 @@ public class FamilyService implements IFamilyService<PlayerServer, RustyPlayer, 
         return this.rootFamily.get();
     }
 
-    protected Optional<BaseFamily> find(String name) {
-        BaseFamily family = this.registeredFamilies.get(name);
+    protected Optional<Family> find(String name) {
+        Family family = this.registeredFamilies.get(name);
         if(family == null) return Optional.empty();
         return Optional.of(family);
     }
 
-    public void add(BaseFamily family) {
-        this.registeredFamilies.put(family.name(),family);
+    public void add(Family family) {
+        this.registeredFamilies.put(family.id(),family);
     }
 
-    public void remove(BaseFamily family) {
-        this.registeredFamilies.remove(family.name());
+    public void remove(Family family) {
+        this.registeredFamilies.remove(family.id());
     }
 
-    public List<BaseFamily> dump() {
+    public List<Family> dump() {
         return this.registeredFamilies.values().stream().toList();
     }
 

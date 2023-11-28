@@ -50,9 +50,9 @@ public class DefaultConfig extends YAML {
         // Whitelist
 
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
-        this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
+        this.whitelist_name = this.getNode(this.data,"whitelist.id",String.class);
         if(this.whitelist_enabled && this.whitelist_name.equals(""))
-            throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist on the proxy!");
+            throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist on the proxy!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
 

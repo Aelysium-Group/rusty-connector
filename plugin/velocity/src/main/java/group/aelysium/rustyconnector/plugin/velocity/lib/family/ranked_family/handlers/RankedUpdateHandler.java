@@ -3,8 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.h
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameEndPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
@@ -20,7 +19,7 @@ public class RankedUpdateHandler implements PacketHandler {
     public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {
         RankedGameEndPacket packet = (RankedGameEndPacket) genericPacket;
 
-        BaseFamily family = new FamilyReference(packet.familyName()).get();
+        Family family = new Family.Reference(packet.familyName()).get();
         if(!(family instanceof RankedFamily)) return;
 
         ServerInfo serverInfo = new ServerInfo(

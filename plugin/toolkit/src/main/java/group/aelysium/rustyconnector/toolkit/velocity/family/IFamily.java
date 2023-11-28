@@ -1,36 +1,46 @@
-package group.aelysium.rustyconnector.toolkit.velocity.family.bases;
+package group.aelysium.rustyconnector.toolkit.velocity.family;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer> {
-    String name();
+public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> {
+    String id();
+    Component displayName();
 
     /**
      * Get a server that is a part of the family.
      * @param serverInfo The info matching the server to get.
      * @return A found server or `null` if there's no match.
      */
-    TPlayerServer findServer(@NotNull ServerInfo serverInfo);
+    TMCLoader findServer(@NotNull ServerInfo serverInfo);
 
     /**
      * Add a server to the family.
      * @param server The server to add.
      */
-    void addServer(TPlayerServer server);
+    void addServer(TMCLoader server);
 
     /**
      * Remove a server from this family.
      * @param server The server to remove.
      */
-    void removeServer(TPlayerServer server);
+    void removeServer(TMCLoader server);
+
+    /**
+     * Get the whitelist for this family.
+     * @return {@link IWhitelist}
+     * @throws java.util.NoSuchElementException If no whitelist exists for this fmaily.
+     */
+    IWhitelist whitelist();
 
     /**
      * Get all players in the family up to approximately `max`.
@@ -39,7 +49,7 @@ public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePla
      */
     List<Player> players(int max);
 
-    List<TPlayerServer> registeredServers();
+    List<TMCLoader> registeredServers();
 
     boolean containsServer(ServerInfo serverInfo);
 
@@ -49,7 +59,7 @@ public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePla
      * @param player The player to ultimately connect to the family
      * @return The server that the player was connected to.
      */
-    TPlayerServer connect(TResolvablePlayer player);
+    TMCLoader connect(TPlayer player);
 
     /**
      * Gets the aggregate player count across all servers in this family
@@ -58,39 +68,39 @@ public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePla
     long playerCount();
 
     /**
-     * Gets all {@link IPlayerServer PlayerServers} that are locked on this family.
-     * For a list of unlocked {@link IPlayerServer PlayerServers}, use {@link IPlayerFocusedFamilyBase#loadBalancer()}.{@link ILoadBalancer#dump() dump()}.
-     * @return {@link List<IPlayerServer>}
+     * Gets all {@link IMCLoader PlayerServers} that are locked on this family.
+     * For a list of unlocked {@link IMCLoader PlayerServers}, use {@link IFamily#loadBalancer()}.{@link ILoadBalancer#dump() dump()}.
+     * @return {@link List< IMCLoader >}
      */
-    List<TPlayerServer> lockedServers();
+    List<TMCLoader> lockedServers();
 
     /**
-     * Unlock a {@link IPlayerServer}, allowing players to connect to it via the load balancer.
+     * Unlock a {@link IMCLoader}, allowing players to connect to it via the load balancer.
      * If the requested server isn't registered to this family, nothing will happen.
-     * @param server The {@link IPlayerServer} to unlock.
+     * @param server The {@link IMCLoader} to unlock.
      */
-    void unlockServer(TPlayerServer server);
+    void unlockServer(TMCLoader server);
 
     /**
-     * Lock a {@link IPlayerServer}, preventing players from connect to it via the load balancer.
+     * Lock a {@link IMCLoader}, preventing players from connect to it via the load balancer.
      * If the requested server isn't registered to this family, nothing will happen.
      * </p>
      * Event though a locked server can't be joined via the load balancer, you can still send players to it by using the RC send command.
-     * @param server The {@link IPlayerServer} to lock.
+     * @param server The {@link IMCLoader} to lock.
      */
-    void lockServer(TPlayerServer server);
+    void lockServer(TMCLoader server);
 
     /**
-     * Checks if the requested {@link IPlayerServer} is joinable.
-     * @param server The {@link IPlayerServer} to check.
-     * @return `true` if the {@link IPlayerServer} can be joined via the family's load balancer. `false` otherwise.
+     * Checks if the requested {@link IMCLoader} is joinable.
+     * @param server The {@link IMCLoader} to check.
+     * @return `true` if the {@link IMCLoader} can be joined via the family's load balancer. `false` otherwise.
      */
-    boolean joinable(TPlayerServer server);
+    boolean joinable(TMCLoader server);
 
     /**
-     * Gets the number of {@link IPlayerServer PlayerServers} that are registered to this family.
+     * Gets the number of {@link IMCLoader PlayerServers} that are registered to this family.
      * This method counts both locked and unlocked servers.
-     * To get the count of either locked or unlocked use: {@link IPlayerFocusedFamilyBase#lockedServers()}.{@link List#size() size()} or {@link IPlayerFocusedFamilyBase#loadBalancer()}.{@link ILoadBalancer#size() size()}
+     * To get the count of either locked or unlocked use: {@link IFamily#lockedServers()}.{@link List#size() size()} or {@link IFamily#loadBalancer()}.{@link ILoadBalancer#size() size()}
      * @return {@link Long}
      */
     long serverCount();
@@ -99,7 +109,7 @@ public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePla
      * Returns this family's {@link ILoadBalancer}.
      * @return {@link ILoadBalancer}
      */
-    ILoadBalancer<TPlayerServer> loadBalancer();
+    ILoadBalancer<TMCLoader> loadBalancer();
 
     /**
      * Fetches a reference to the parent of this family.
@@ -107,5 +117,11 @@ public interface IBaseFamily<TPlayerServer extends IPlayerServer, TResolvablePla
      * If this family is the root family, this method will always return `null`.
      * @return {@link WeakReference <IBaseFamily>}
      */
-    IBaseFamily<TPlayerServer, TResolvablePlayer> parent();
+    IFamily<TMCLoader, TPlayer> parent();
+
+    /**
+     * Returns the metadata for this family.
+     * @return
+     */
+    Metadata metadata();
 }

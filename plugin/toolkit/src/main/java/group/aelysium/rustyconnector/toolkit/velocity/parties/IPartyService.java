@@ -1,14 +1,14 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IPartyService<TResolvablePlayer extends IRustyPlayer, TPlayerServer extends IPlayerServer, TParty extends IParty<TPlayerServer>, TPartyInvite extends IPartyInvite<TResolvablePlayer>> extends Service {
+public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoader, TParty extends IParty<TMCLoader>, TPartyInvite extends IPartyInvite<TPlayer>> extends Service {
     /**
      * Gets the settings that this {@link IPartyService} abides by.
      * @return {@link PartyServiceSettings}
@@ -21,7 +21,7 @@ public interface IPartyService<TResolvablePlayer extends IRustyPlayer, TPlayerSe
      * @param server The server that the party is currently residing in.
      * @return {@link IParty}
      */
-    TParty create(Player host, TPlayerServer server);
+    TParty create(Player host, TMCLoader server);
 
     /**
      * Deletes an existing {@link IParty}.
@@ -59,7 +59,7 @@ public interface IPartyService<TResolvablePlayer extends IRustyPlayer, TPlayerSe
      * @param target The player who has received the invites.
      * @return {@link List<IPartyInvite>}
      */
-    List<TPartyInvite> findInvitesToTarget(TResolvablePlayer target);
+    List<TPartyInvite> findInvitesToTarget(TPlayer target);
 
     /**
      * Fetches a specific party invite based on the two players involved in it.
@@ -67,7 +67,7 @@ public interface IPartyService<TResolvablePlayer extends IRustyPlayer, TPlayerSe
      * @param sender The player who sent the invite.
      * @return {@link Optional<IPartyInvite>}
      */
-    Optional<TPartyInvite> findInvite(TResolvablePlayer target, TResolvablePlayer sender);
+    Optional<TPartyInvite> findInvite(TPlayer target, TPlayer sender);
 
     /**
      * Closes an invitation.

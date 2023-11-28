@@ -41,10 +41,10 @@ public class FamiliesConfig extends YAML {
 
         // Families
         try {
-            this.rootFamily_name = this.getNode(this.data, "root-family.name", String.class);
+            this.rootFamily_name = this.getNode(this.data, "root-family.id", String.class);
             if (this.rootFamily_name.equals("") || this.rootFamily_name.length() < 1) throw new Exception();
         } catch (Exception ignore) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.name] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
+            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.id] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
             this.rootFamily_name = "lobby";
         }
 
@@ -61,20 +61,20 @@ public class FamiliesConfig extends YAML {
         }
 
         this.scalar.forEach(familyName -> {
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
+            if(familyName.length() > 16)
+                throw new IllegalStateException("All family names must be under 16 characters long! `" + familyName + "` was " + familyName.length());
         });
 
         this.staticF.forEach(familyName -> {
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
+            if(familyName.length() > 16)
+                throw new IllegalStateException("All family names must be under 16 characters long! `" + familyName + "` was " + familyName.length());
         });
 
         if(this.checkForAll())
-            throw new IllegalStateException("You can't name a family: `all`");
+            throw new IllegalStateException("You can't id a family: `all`");
 
         if(this.doDuplicatesExist())
-            throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of what type the family is!");
+            throw new IllegalStateException("You can't have two families with the same id! This rule is regardless of what type the family is!");
 
     }
 

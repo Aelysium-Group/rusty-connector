@@ -4,15 +4,14 @@ import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -28,17 +27,17 @@ public class OnPlayerDisconnect {
     @Subscribe(order = PostOrder.LAST)
     public EventTask onPlayerDisconnect(DisconnectEvent event) {
         Tinder api = Tinder.get();
-        RustyPlayer player = RustyPlayer.from(event.getPlayer());
+        Player player = Player.from(event.getPlayer());
 
         return EventTask.async(() -> {
             // Handle servers when player leaves
             try {
-                Player resolvedPlayer = player.resolve().get();
+                com.velocitypowered.api.proxy.Player resolvedPlayer = player.resolve().get();
                 if(resolvedPlayer.getCurrentServer().isPresent()) {
-                    PlayerServer server = api.services().server().search(resolvedPlayer.getCurrentServer().get().getServerInfo());
+                    MCLoader server = new MCLoader.Reference(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo()).get();
                     server.playerLeft();
 
-                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.family().name(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
+                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.family().id(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, server));
                 }
             } catch (Exception e) {
@@ -47,7 +46,7 @@ public class OnPlayerDisconnect {
 
             // Handle party when player leaves
             try {
-                Player resolvedPlayer = player.resolve().get();
+                com.velocitypowered.api.proxy.Player resolvedPlayer = player.resolve().get();
 
                 PartyService partyService = api.services().party().orElseThrow();
                 Party party = partyService.find(resolvedPlayer).orElseThrow();
@@ -67,12 +66,12 @@ public class OnPlayerDisconnect {
                 FriendsService friendsService = api.services().friends().orElseThrow();
                 if(!friendsService.settings().allowMessaging()) throw new NoOutputException();
 
-                List<RustyPlayer> friends = friendsService.findFriends(player).orElseThrow();
+                List<Player> friends = friendsService.findFriends(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 
                 friends.forEach(friend -> {
-                    Optional<Player> resolvedPlayer = friend.resolve();
+                    Optional<com.velocitypowered.api.proxy.Player> resolvedPlayer = friend.resolve();
                     if(!resolvedPlayer.isPresent()) return;
 
                     resolvedPlayer.get().sendMessage(VelocityLang.FRIEND_LEAVE.build(player));

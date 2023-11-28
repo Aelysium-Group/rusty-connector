@@ -8,8 +8,7 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameAssocia
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.IRankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 
@@ -21,14 +20,14 @@ public abstract class RankedGame implements IRankedGame {
     protected List<RankedTeam> teams = new ArrayList<>();
     protected final GameInfo gameInfo = GameInfo.getDefaultGameInfo();
     protected UUID uuid = UUID.randomUUID();
-    protected PlayerServer server = null;
+    protected MCLoader server = null;
     protected boolean ended = false;
 
     public UUID uuid() {
         return this.uuid;
     }
 
-    public PlayerServer server() {
+    public MCLoader server() {
         return this.server;
     }
 
@@ -42,7 +41,7 @@ public abstract class RankedGame implements IRankedGame {
         return players;
     }
 
-    public void connectServer(PlayerServer server) {
+    public void connectServer(MCLoader server) {
         Vector<com.velocitypowered.api.proxy.Player> kickedPlayers = new Vector<>();
 
         for (RankablePlayer rankablePlayer : this.players()) {

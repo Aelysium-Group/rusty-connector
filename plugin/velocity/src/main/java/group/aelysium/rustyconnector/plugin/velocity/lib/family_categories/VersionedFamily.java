@@ -1,14 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family_categories;
 
 import com.velocitypowered.api.network.ProtocolVersion;
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class VersionedFamily<TFamily extends BaseFamily> implements FamilyCategory<TFamily> {
+public class VersionedFamily<TFamily extends Family> implements FamilyCategory<TFamily> {
     protected Map<ProtocolVersion, TFamily> families = new HashMap<>();
 
     /**
@@ -28,8 +27,8 @@ public class VersionedFamily<TFamily extends BaseFamily> implements FamilyCatego
      * @throws IllegalAccessException If no family exists for the version the player is using.
      */
     @Override
-    public void connect(RustyPlayer rustyPlayer) throws IllegalAccessException {
-        Player player = rustyPlayer.resolve().orElseThrow();
+    public void connect(Player rustyPlayer) throws IllegalAccessException {
+        com.velocitypowered.api.proxy.Player player = rustyPlayer.resolve().orElseThrow();
 
         TFamily family = this.families.get(player.getProtocolVersion());
         if(family == null) throw new IllegalAccessException();

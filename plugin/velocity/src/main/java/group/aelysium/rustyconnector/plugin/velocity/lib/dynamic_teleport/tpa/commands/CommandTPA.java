@@ -7,22 +7,19 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPARequest;
 import net.kyori.adventure.text.Component;
@@ -38,17 +35,19 @@ public final class CommandTPA {
      * @param sender The player to check.
      * @return `true` is /tpa is allowed. `false` otherwise.
      */
-    public static boolean tpaEnabled(Player sender) {
+    public static boolean tpaEnabled(com.velocitypowered.api.proxy.Player sender) {
         Tinder api = Tinder.get();
         try {
             TPAService tpaService = api.services().dynamicTeleport().orElseThrow()
                                        .services().tpaService().orElseThrow();
 
             ServerInfo serverInfo = sender.getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer targetServer = api.services().server().search(serverInfo);
-            String familyName = targetServer.family().name();
+            MCLoader targetServer = new MCLoader.Reference(serverInfo).get();
+            Family family = targetServer.family();
 
-            return tpaService.settings().enabledFamilies().contains(familyName);
+            if(!family.metadata().tpaAllowed()) return false;
+
+            return tpaService.settings().enabledFamilies().contains(family.id());
         } catch (Exception ignore) {}
         return false;
     }
@@ -63,9 +62,9 @@ public final class CommandTPA {
 
         LiteralCommandNode<CommandSource> tpa = LiteralArgumentBuilder
                 .<CommandSource>literal("tpa")
-                .requires(source -> source instanceof Player)
+                .requires(source -> source instanceof com.velocitypowered.api.proxy.Player)
                 .executes(context -> {
-                    if(!(context.getSource() instanceof Player player)) {
+                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                         logger.log("/tpa must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
@@ -84,12 +83,12 @@ public final class CommandTPA {
                 })
                 .then(LiteralArgumentBuilder.<CommandSource>literal("deny")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player)) {
                                 logger.log("/tpa must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            if(!CommandTPA.tpaEnabled((Player) context.getSource())) {
+                            if(!CommandTPA.tpaEnabled((com.velocitypowered.api.proxy.Player) context.getSource())) {
                                 context.getSource().sendMessage(VelocityLang.UNKNOWN_COMMAND);
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -100,16 +99,17 @@ public final class CommandTPA {
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                                 .suggests((context, builder) -> {
-                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                                     try {
-                                        ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
+                                        ServerInfo sendingServer = player.getCurrentServer().orElseThrow().getServerInfo();
+                                        MCLoader server = new MCLoader.Reference(sendingServer).get();
 
-                                        BaseFamily family = serverService.search(sendingServer).family();
+                                        Family family = server.family();
 
-                                        if(!(family instanceof PlayerFocusedFamily)) return builder.buildFuture();
+                                        if(!family.metadata().tpaAllowed()) return builder.buildFuture();
 
-                                        TPAHandler tpaHandler = tpaService.tpaHandler((PlayerFocusedFamily) family);
+                                        TPAHandler tpaHandler = tpaService.tpaHandler(family);
                                         List<TPARequest> requests = tpaHandler.findRequestsForTarget(player);
 
                                         if(requests.size() == 0) {
@@ -126,7 +126,7 @@ public final class CommandTPA {
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                         logger.log("/tpa must be sent as a player!");
                                         return Command.SINGLE_SUCCESS;
                                     }
@@ -143,16 +143,15 @@ public final class CommandTPA {
                                     String username = context.getArgument("username", String.class);
 
                                     try {
-                                        Player senderPlayer = api.velocityServer().getPlayer(username).orElseThrow();
-                                        ServerInfo targetServerInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
+                                        com.velocitypowered.api.proxy.Player senderPlayer = api.velocityServer().getPlayer(username).orElseThrow();
+                                        ServerInfo targetServerInfo = player.getCurrentServer().orElseThrow().getServerInfo();
 
-                                        PlayerServer targetServer = serverService.search(targetServerInfo);
                                         try {
-                                            BaseFamily family = targetServer.family();
+                                            MCLoader targetServer = new MCLoader.Reference(targetServerInfo).get();
+                                            Family family = targetServer.family();
+                                            if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
-                                            if(!(family instanceof PlayerFocusedFamily)) throw new NullPointerException();
-
-                                            TPAHandler tpaHandler = tpaService.tpaHandler((PlayerFocusedFamily) family);
+                                            TPAHandler tpaHandler = tpaService.tpaHandler(family);
                                             TPARequest request = tpaHandler.findRequest(senderPlayer, player);
                                             if(request == null) {
                                                 context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_REQUEST.build(username));
@@ -178,7 +177,7 @@ public final class CommandTPA {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/tpa must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -198,15 +197,16 @@ public final class CommandTPA {
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                                 .suggests((context, builder) -> {
-                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                                     try {
-                                        ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
+                                        ServerInfo serverInfo = ((com.velocitypowered.api.proxy.Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        BaseFamily family = serverService.search(sendingServer).family();
+                                        MCLoader targetServer = new MCLoader.Reference(serverInfo).get();
+                                        Family family = targetServer.family();
+                                        if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
-                                        if(!(family instanceof PlayerFocusedFamily)) return builder.buildFuture();
-                                        TPAHandler tpaHandler = tpaService.tpaHandler((PlayerFocusedFamily) family);
+                                        TPAHandler tpaHandler = tpaService.tpaHandler(family);
                                         List<TPARequest> requests = tpaHandler.findRequestsForTarget(player);
 
                                         if(requests.size() == 0) {
@@ -223,7 +223,7 @@ public final class CommandTPA {
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                         logger.log("/tpa must be sent as a player!");
                                         return Command.SINGLE_SUCCESS;
                                     }
@@ -231,16 +231,15 @@ public final class CommandTPA {
                                     String username = context.getArgument("username", String.class);
 
                                     try {
-                                        Player senderPlayer = api.velocityServer().getPlayer(username).orElseThrow();
-                                        ServerInfo targetServerInfo = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
+                                        com.velocitypowered.api.proxy.Player senderPlayer = api.velocityServer().getPlayer(username).orElseThrow();
+                                        ServerInfo targetServerInfo = ((com.velocitypowered.api.proxy.Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        PlayerServer targetServer = serverService.search(targetServerInfo);
                                         try {
-                                            BaseFamily family = targetServer.family();
-                                            if(family == null) throw new NullPointerException();
-                                            if(!(family instanceof PlayerFocusedFamily)) throw new NullPointerException();
+                                            MCLoader targetServer = new MCLoader.Reference(targetServerInfo).get();
+                                            Family family = targetServer.family();
+                                            if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
-                                            TPAHandler tpaHandler = tpaService.tpaHandler((PlayerFocusedFamily) family);
+                                            TPAHandler tpaHandler = tpaService.tpaHandler(family);
                                             TPARequest request = tpaHandler.findRequest(senderPlayer, player);
                                             if(request == null) {
                                                 context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_REQUEST.build(username));
@@ -266,12 +265,14 @@ public final class CommandTPA {
                 )
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
-                            if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                             try {
-                                ServerInfo sendingServer = ((Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
+                                ServerInfo sendingServer = ((com.velocitypowered.api.proxy.Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                BaseFamily family = serverService.search(sendingServer).family();
+                                MCLoader server = new MCLoader.Reference(sendingServer).get();
+                                Family family = server.family();
+                                if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
                                 family.players(50).forEach(nearbyPlayer -> {
                                     if(nearbyPlayer.equals(player)) return;
@@ -286,7 +287,7 @@ public final class CommandTPA {
                             return builder.buildFuture();
                         })
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/tpa must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -303,7 +304,7 @@ public final class CommandTPA {
                             String username = context.getArgument("username", String.class);
 
                             try {
-                                Player targetPlayer = api.velocityServer().getPlayer(username).orElseThrow();
+                                com.velocitypowered.api.proxy.Player targetPlayer = api.velocityServer().getPlayer(username).orElseThrow();
 
                                 if(player.equals(targetPlayer)) {
                                     player.sendMessage(VelocityLang.TPA_FAILURE_SELF_TP);
@@ -313,7 +314,7 @@ public final class CommandTPA {
                                 if(tpaService.settings().friendsOnly())
                                     try {
                                         FriendsService friendsService = Tinder.get().services().friends().orElseThrow();
-                                        boolean areFriends = friendsService.areFriends(RustyPlayer.from(player), RustyPlayer.from(targetPlayer));
+                                        boolean areFriends = friendsService.areFriends(Player.from(player), Player.from(targetPlayer));
                                         if(!areFriends) {
                                             context.getSource().sendMessage(VelocityLang.TPA_NOT_FRIENDS.build(targetPlayer.getUsername()));
                                             return Command.SINGLE_SUCCESS;
@@ -323,12 +324,11 @@ public final class CommandTPA {
                                     }
 
                                 ServerInfo sendersServerInfo = player.getCurrentServer().orElseThrow().getServerInfo();
-                                PlayerServer sendersServer = serverService.search(sendersServerInfo);
                                 try {
-                                    BaseFamily family = sendersServer.family();
-                                    if(family == null) throw new NullPointerException();
-                                    if(!(family instanceof PlayerFocusedFamily)) throw new NullPointerException();
-                                    TPAHandler tpaHandler = tpaService.tpaHandler((PlayerFocusedFamily) family);
+                                    MCLoader sendersServer = new MCLoader.Reference(sendersServerInfo).get();
+                                    Family family = sendersServer.family();
+                                    if(!family.metadata().tpaAllowed()) throw new NullPointerException();
+                                    TPAHandler tpaHandler = tpaService.tpaHandler(family);
 
                                     if(tpaHandler.findRequestSender(player) != null) {
                                         context.getSource().sendMessage(VelocityLang.TPA_REQUEST_DUPLICATE.build(targetPlayer.getUsername()));

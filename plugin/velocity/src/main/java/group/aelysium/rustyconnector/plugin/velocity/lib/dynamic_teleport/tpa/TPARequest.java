@@ -7,8 +7,8 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 import java.util.Date;
 
@@ -70,8 +70,8 @@ public class TPARequest implements ITPARequest {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.target().getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer server = api.services().server().search(serverInfo);
-            BaseFamily family = server.family();
+            MCLoader server = new MCLoader.Reference(serverInfo).get();
+            Family family = server.family();
             if(family == null) throw new NullPointerException();
 
             tpaService.tpaSendPlayer(this.sender(), this.target(), server);

@@ -15,7 +15,7 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingRespons
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -60,7 +60,7 @@ public class MagicLinkPingHandler implements PacketHandler {
         magicLinkConfig.register();
 
         try {
-            PlayerServer server = new ServerService.ServerBuilder()
+            MCLoader server = new ServerService.ServerBuilder()
                     .setServerInfo(serverInfo)
                     .setFamilyName(magicLinkConfig.family())
                     .setSoftPlayerCap(magicLinkConfig.playerCap_soft())
@@ -75,7 +75,7 @@ public class MagicLinkPingHandler implements PacketHandler {
                     .setAddress(serverInfo.getAddress())
                     .setOrigin(PacketOrigin.PROXY)
                     .setParameter(ServerPingResponsePacket.ValidParameters.STATUS, String.valueOf(ServerPingResponsePacket.PingResponseStatus.ACCEPTED))
-                    .setParameter(ServerPingResponsePacket.ValidParameters.MESSAGE, "Connected to the proxy! Registered as `"+server.serverInfo().getName()+"` into the family `"+server.family().name()+"`. Loaded using the magic config `"+packet.magicConfigName()+"`.")
+                    .setParameter(ServerPingResponsePacket.ValidParameters.MESSAGE, "Connected to the proxy! Registered as `"+server.serverInfo().getName()+"` into the family `"+server.family().id()+"`. Loaded using the magic config `"+packet.magicConfigName()+"`.")
                     .setParameter(ServerPingResponsePacket.ValidParameters.COLOR, NamedTextColor.GREEN.toString())
                     .setParameter(ServerPingResponsePacket.ValidParameters.INTERVAL_OPTIONAL, String.valueOf(serverService.serverInterval()))
                     .buildSendable();
@@ -106,7 +106,7 @@ public class MagicLinkPingHandler implements PacketHandler {
     private static void reviveOrConnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) throws IOException {
         ServerService serverService = api.services().server();
 
-        PlayerServer server = serverService.search(serverInfo);
+        MCLoader server = new MCLoader.Reference(serverInfo).get();
         if (server == null) {
             connectServer(api, serverInfo, packet);
             return;

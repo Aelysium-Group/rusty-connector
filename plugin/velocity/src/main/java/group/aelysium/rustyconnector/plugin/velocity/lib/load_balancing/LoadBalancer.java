@@ -1,17 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class LoadBalancer implements ILoadBalancer<PlayerServer> {
+public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
     private boolean weighted = false;
     private boolean persistence = false;
     private int attempts = 5;
     protected int index = 0;
-    protected List<PlayerServer> items = new ArrayList<>();
+    protected List<MCLoader> items = new ArrayList<>();
 
     public LoadBalancer(Settings settings) {
         this.weighted = settings.weighted();
@@ -32,8 +32,8 @@ public abstract class LoadBalancer implements ILoadBalancer<PlayerServer> {
         return this.weighted;
     }
 
-    public PlayerServer current() {
-        PlayerServer item;
+    public MCLoader current() {
+        MCLoader item;
         if(this.index >= this.size()) {
             this.index = 0;
             item = this.items.get(this.index);
@@ -62,11 +62,11 @@ public abstract class LoadBalancer implements ILoadBalancer<PlayerServer> {
 
     public abstract void singleSort();
 
-    public void add(PlayerServer item) {
+    public void add(MCLoader item) {
         this.items.add(item);
     }
 
-    public void remove(PlayerServer item) {
+    public void remove(MCLoader item) {
         this.items.remove(item);
     }
 
@@ -74,7 +74,7 @@ public abstract class LoadBalancer implements ILoadBalancer<PlayerServer> {
         return this.items.size();
     }
 
-    public List<PlayerServer> dump() {
+    public List<MCLoader> dump() {
         return this.items;
     }
 
@@ -95,7 +95,7 @@ public abstract class LoadBalancer implements ILoadBalancer<PlayerServer> {
         this.index = 0;
     }
 
-    public boolean contains(PlayerServer item) {
+    public boolean contains(MCLoader item) {
         return this.items.contains(item);
     }
 

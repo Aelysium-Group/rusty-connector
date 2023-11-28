@@ -32,7 +32,7 @@ public class MagicLinkConfig extends YAML {
 
     public void register() throws IllegalStateException {
         this.server_family = this.getNode(this.data,"family",String.class);
-        if(this.server_family.equals("")) throw new IllegalStateException("You must provide a family name in order for RustyConnector to work! The family name must also exist on your Velocity configuration.");
+        if(this.server_family.equals("")) throw new IllegalStateException("You must provide a family id in order for RustyConnector to work! The family id must also exist on your Velocity configuration.");
 
         this.server_weight = this.getNode(this.data,"weight",Integer.class);
         if(this.server_weight < 0) throw new IllegalStateException("Server weight cannot be a negative number.");

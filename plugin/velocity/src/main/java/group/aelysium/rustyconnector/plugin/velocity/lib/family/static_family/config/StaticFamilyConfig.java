@@ -1,16 +1,18 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
 import java.text.ParseException;
 
 public class StaticFamilyConfig extends YAML {
-    private FamilyReference parent_family = FamilyReference.rootFamily();
+    private Component displayName;
+    private Family.Reference parent_family = Family.Reference.rootFamily();
     private String firstConnection_loadBalancer = "default";
 
     private UnavailableProtocol consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.ASSIGN_NEW_HOME;
@@ -22,7 +24,8 @@ public class StaticFamilyConfig extends YAML {
         super(new File(dataFolder, "families/"+familyName+".static.yml"));
     }
 
-    public FamilyReference getParent_family() { return parent_family; }
+    public Component displayName() { return displayName; }
+    public Family.Reference getParent_family() { return parent_family; }
     public String getFirstConnection_loadBalancer() { return firstConnection_loadBalancer; }
 
     public boolean isWhitelist_enabled() {
@@ -42,7 +45,12 @@ public class StaticFamilyConfig extends YAML {
 
     public void register() throws IllegalStateException {
         try {
-            this.parent_family = new FamilyReference(this.getNode(this.data, "parent-family", String.class));
+            String name = this.getNode(this.data, "display-id", String.class);
+            this.displayName = MiniMessage.miniMessage().deserialize(name);
+        } catch (Exception ignore) {}
+
+        try {
+            this.parent_family = new Family.Reference(this.getNode(this.data, "parent-family", String.class));
         } catch (Exception ignore) {}
 
         try {
@@ -66,9 +74,9 @@ public class StaticFamilyConfig extends YAML {
         }
 
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
-        this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
+        this.whitelist_name = this.getNode(this.data,"whitelist.id",String.class);
         if(this.whitelist_enabled && this.whitelist_name.equals(""))
-            throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist in a family!");
+            throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
     }

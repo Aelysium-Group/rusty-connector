@@ -4,9 +4,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -19,8 +17,8 @@ public class LoadBalancingClock extends ClockService {
     }
 
     public void init(DependencyInjector.DI2<FamilyService, PluginLogger> deps) {
-        for (BaseFamily family : deps.d1().dump()) {
-            if (!(family instanceof PlayerFocusedFamily)) continue;
+        for (Family family : deps.d1().dump()) {
+            if (!family.metadata().hasLoadBalancer()) continue;
 
             this.scheduleRecurring(() -> {
                 try {

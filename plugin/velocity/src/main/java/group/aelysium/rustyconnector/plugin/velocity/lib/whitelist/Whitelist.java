@@ -35,7 +35,7 @@ public class Whitelist implements IWhitelist {
         this.message = message;
         this.strict = strict;
         this.inverted = inverted;
-        this.permission = Permission.constructNode("rustyconnector.whitelist.<whitelist name>",this.name);
+        this.permission = Permission.constructNode("rustyconnector.whitelist.<whitelist id>",this.name);
     }
 
     public boolean usesPlayers() {
@@ -116,7 +116,7 @@ public class Whitelist implements IWhitelist {
      * Initializes a whitelist based on a config.
      * @return A whitelist.
      */
-    public static Whitelist init(DependencyInjector.DI2<List<Component>, LangService> dependencies, String whitelistName) throws IOException {
+    public static Reference init(DependencyInjector.DI3<List<Component>, LangService, WhitelistService> dependencies, String whitelistName) throws IOException {
         Tinder api = Tinder.get();
         List<Component> bootOutput = dependencies.d1();
 
@@ -148,6 +148,18 @@ public class Whitelist implements IWhitelist {
         }
 
         bootOutput.add(Component.text(" | Registered whitelist: "+whitelistName, NamedTextColor.YELLOW));
-        return whitelist;
+
+        dependencies.d3().add(whitelist);
+        return new Whitelist.Reference(whitelistName);
+    }
+
+    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Whitelist, String> {
+        public Reference(String name) {
+            super(name);
+        }
+
+        public Whitelist get() {
+            return Tinder.get().services().whitelist().find(this.referencer).orElseThrow();
+        }
     }
 }

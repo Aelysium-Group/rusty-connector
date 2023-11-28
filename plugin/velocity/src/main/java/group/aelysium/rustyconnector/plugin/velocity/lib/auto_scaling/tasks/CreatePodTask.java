@@ -8,16 +8,16 @@ public class CreatePodTask extends RecursiveAction {
     private K8Service service;
     private String familyName;
     private String containerName;
-    private int containerPort;
+    private String containerImage;
 
-    public CreatePodTask(K8Service service, String familyName, String containerName, int containerPort) {
+    public CreatePodTask(K8Service service, String familyName, String containerName, String containerImage) {
         this.service = service;
         this.familyName = familyName;
         this.containerName = containerName;
-        this.containerPort = containerPort;
+        this.containerImage = containerImage;
     }
 
     protected void compute() {
-        int size = service.getPods(familyName).size();
+        service.createServer(familyName, containerName, containerImage);
     }
 }

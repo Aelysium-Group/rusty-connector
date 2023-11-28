@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.ga
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedSoloGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedTeamGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.PlayerRankLadder;
@@ -120,7 +120,7 @@ public class RankedMatchmaker extends ClockService {
                 PlayerRankLadder.PartitionQuery query = new PlayerRankLadder.PartitionQuery(settings.variance(), min, max);
                 this.handleMultiplePartitions(query);
             } catch (Exception e) {
-                Tinder.get().logger().send(Component.text("There was a fatal error while matchmaking the family: "+owner.name()));
+                Tinder.get().logger().send(Component.text("There was a fatal error while matchmaking the family: "+owner.id()));
                 e.printStackTrace();
             }
 
@@ -137,7 +137,7 @@ public class RankedMatchmaker extends ClockService {
 
                 List<RankedGame> successfullyStartedGames = new ArrayList<>();
                 for (RankedGame game : this.waitingGames) {
-                    PlayerServer server = loadBalancer.current();
+                    MCLoader server = loadBalancer.current();
                     game.connectServer(server);
 
                     owner.lockServer(server);
@@ -146,7 +146,7 @@ public class RankedMatchmaker extends ClockService {
 
                 this.waitingGames.removeAll(successfullyStartedGames);
             } catch (Exception e) {
-                Tinder.get().logger().send(Component.text("There was a fatal error while matchmaking the family: "+owner.name()));
+                Tinder.get().logger().send(Component.text("There was a fatal error while matchmaking the family: "+owner.id()));
                 e.printStackTrace();
             }
 

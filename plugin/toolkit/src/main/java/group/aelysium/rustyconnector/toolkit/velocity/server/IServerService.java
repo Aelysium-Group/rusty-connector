@@ -2,25 +2,18 @@ package group.aelysium.rustyconnector.toolkit.velocity.server;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.lang.ref.WeakReference;
 import java.util.Vector;
 
-public interface IServerService<TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer, TBaseFamily extends IBaseFamily<TPlayerServer, TResolvablePlayer>> extends Service {
+public interface IServerService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TBaseFamily extends IFamily<TMCLoader, TPlayer>> extends Service {
     int serverTimeout();
     int serverInterval();
 
-    /**
-     * Search for a server.
-     * @param serverInfo The server info to search for.
-     * @return A server or `null`
-     */
-    TPlayerServer search(ServerInfo serverInfo);
-
-    Vector<WeakReference<TPlayerServer>> servers();
+    Vector<WeakReference<TMCLoader>> servers();
 
     /**
      * Checks if a server is contained in this server service.
@@ -35,7 +28,7 @@ public interface IServerService<TPlayerServer extends IPlayerServer, TResolvable
      * @param family The family to register the server into.
      * @return A RegisteredServer node.
      */
-    RegisteredServer registerServer(TPlayerServer server, TBaseFamily family) throws Exception;
+    RegisteredServer registerServer(TMCLoader server, TBaseFamily family) throws Exception;
 
     /**
      * Unregister a server from the proxy.

@@ -7,13 +7,12 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -31,9 +30,9 @@ public final class CommandUnFriend {
 
         LiteralCommandNode<CommandSource> unfriend = LiteralArgumentBuilder
                 .<CommandSource>literal("unfriend")
-                .requires(source -> source instanceof Player)
+                .requires(source -> source instanceof com.velocitypowered.api.proxy.Player)
                 .executes(context -> {
-                    if(!(context.getSource() instanceof Player player)) {
+                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                         logger.log("/unfriend must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
@@ -47,11 +46,11 @@ public final class CommandUnFriend {
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
-                            if(!(context.getSource() instanceof Player eventPlayer)) return builder.buildFuture();
-                            RustyPlayer player = RustyPlayer.from(eventPlayer);
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player eventPlayer)) return builder.buildFuture();
+                            Player player = Player.from(eventPlayer);
 
                             try {
-                                List<RustyPlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                List<Player> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -66,7 +65,7 @@ public final class CommandUnFriend {
                             return builder.buildFuture();
                         })
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/unfriend must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -77,16 +76,16 @@ public final class CommandUnFriend {
                             }
 
                             String username = context.getArgument("username", String.class);
-                            RustyPlayer targetPlayer = api.services().player().fetch(username).orElseThrow();
+                            Player targetPlayer = new Player.UsernameReference(username).get();
 
-                            if(!friendsService.areFriends(RustyPlayer.from(player), targetPlayer))
+                            if(!friendsService.areFriends(Player.from(player), targetPlayer))
                                 return closeMessage(player, VelocityLang.UNFRIEND_NOT_FRIENDS.build(username));
 
                             if(targetPlayer == null)
                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
                             try {
-                                friendsService.removeFriends(RustyPlayer.from(player), targetPlayer);
+                                friendsService.removeFriends(Player.from(player), targetPlayer);
 
                                 return closeMessage(player, VelocityLang.UNFRIEND_SUCCESS.build(username));
                             } catch (IllegalStateException e) {
@@ -103,7 +102,7 @@ public final class CommandUnFriend {
         return new BrigadierCommand(unfriend);
     }
 
-    public static int closeMessage(Player player, Component message) {
+    public static int closeMessage(com.velocitypowered.api.proxy.Player player, Component message) {
         player.sendMessage(message);
         return Command.SINGLE_SUCCESS;
     }

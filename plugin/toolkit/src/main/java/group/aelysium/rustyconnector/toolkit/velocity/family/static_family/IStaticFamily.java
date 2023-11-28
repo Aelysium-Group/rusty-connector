@@ -1,14 +1,13 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
-import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IPlayerFocusedFamilyBase;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
-public interface IStaticFamily<TPlayerServer extends IPlayerServer, TRustyPlayer extends IRustyPlayer> extends IPlayerFocusedFamilyBase<TPlayerServer, TRustyPlayer> {
+public interface IStaticFamily<TMCLoader extends IMCLoader, TRustyPlayer extends IPlayer> extends IFamily<TMCLoader, TRustyPlayer> {
     /**
      * Gets the {@link UnavailableProtocol} for this family. {@link UnavailableProtocol} governs what happens when a player's resident server is unavailable.
      * @return {@link UnavailableProtocol}

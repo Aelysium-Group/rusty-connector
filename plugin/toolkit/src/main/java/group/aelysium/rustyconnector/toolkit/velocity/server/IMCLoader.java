@@ -6,7 +6,7 @@ import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 
@@ -14,21 +14,21 @@ import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
-public interface IPlayerServer extends ISortable {
+public interface IMCLoader extends ISortable {
     /**
-     * Checks if the {@link IPlayerServer} is stale.
+     * Checks if the {@link IMCLoader} is stale.
      * @return {@link Boolean}
      */
     boolean stale();
 
     /**
-     * Set's the {@link IPlayerServer PlayerServer's} new timeout.
+     * Set's the {@link IMCLoader PlayerServer's} new timeout.
      * @param newTimeout The new timeout.
      */
     void setTimeout(int newTimeout);
 
     /**
-     * The {@link UUID} of this {@link IPlayerServer}.
+     * The {@link UUID} of this {@link IMCLoader}.
      * This {@link UUID} will always be different between servers.
      * If this server unregisters and then re-registers into the proxy, this ID will be different.
      * @return {@link UUID}
@@ -36,28 +36,28 @@ public interface IPlayerServer extends ISortable {
     UUID id();
 
     /**
-     * Decrease this {@link IPlayerServer PlayerServer's} timeout by 1.
+     * Decrease this {@link IMCLoader PlayerServer's} timeout by 1.
      * Once this value equals 0, this server will become stale and player's won't be able to join it anymore.
      * @return The new timeout value.
      */
     int decreaseTimeout();
 
     /**
-     * Gets {@link IPlayerServer this server's} address in the form of a string.
+     * Gets {@link IMCLoader this server's} address in the form of a string.
      * @return {@link String}
      */
     String address();
 
     /**
-     * Gets {@link IPlayerServer this server's} associated {@link RegisteredServer}.
-     * {@link RegisteredServer} is Velocity's version of RustyConnector's {@link IPlayerServer}.
+     * Gets {@link IMCLoader this server's} associated {@link RegisteredServer}.
+     * {@link RegisteredServer} is Velocity's version of RustyConnector's {@link IMCLoader}.
      * This method give you easy access to this object.
      * @return {@link RegisteredServer}
      */
     RegisteredServer registeredServer();
 
     /**
-     * Gets {@link IPlayerServer this server's} associated {@link ServerInfo}.
+     * Gets {@link IMCLoader this server's} associated {@link ServerInfo}.
      * @return {@link ServerInfo}
      */
     ServerInfo serverInfo();
@@ -137,7 +137,7 @@ public interface IPlayerServer extends ISortable {
 
     /**
      * The soft player cap of this server.
-     * If this value is reached by {@link IPlayerServer#playerCount()}, {@link IPlayerServer#full()} will evaluate to true.
+     * If this value is reached by {@link IMCLoader#playerCount()}, {@link IMCLoader#full()} will evaluate to true.
      * The only way for new players to continue to join this server once it's full is by giving them the soft cap bypass permission.
      * @return {@link Integer}
      */
@@ -145,21 +145,21 @@ public interface IPlayerServer extends ISortable {
 
     /**
      * The hard player cap of this server.
-     * If this value is reached by {@link IPlayerServer#playerCount()}, {@link IPlayerServer#maxed()} will evaluate to true.
+     * If this value is reached by {@link IMCLoader#playerCount()}, {@link IMCLoader#maxed()} will evaluate to true.
      * The only way for new players to continue to join this server once it's maxed is by giving them the hard cap bypass permission.
      *
-     * If this value is reached by {@link IPlayerServer#playerCount()}, it can be assumed that {@link IPlayerServer#full()} is also true, because this value cannot be less than {@link IPlayerServer#softPlayerCap()}.
+     * If this value is reached by {@link IMCLoader#playerCount()}, it can be assumed that {@link IMCLoader#full()} is also true, because this value cannot be less than {@link IMCLoader#softPlayerCap()}.
      * @return {@link Integer}
      */
     int hardPlayerCap();
 
     /**
      * Get the family this server is associated with.
-     * @return {@link IBaseFamily}
+     * @return {@link IFamily}
      * @throws IllegalStateException If the server hasn't been registered yet.
      * @throws NullPointerException If the family associated with this server doesn't exist.
      */
-    IBaseFamily family() throws IllegalStateException, NullPointerException;
+    IFamily family() throws IllegalStateException, NullPointerException;
 
     /**
      * Connect a player to this server.

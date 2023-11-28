@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -14,13 +14,13 @@ import java.rmi.ConnectException;
 import java.util.Random;
 import java.util.Vector;
 
-public class Party implements IParty<PlayerServer> {
+public class Party implements IParty<MCLoader> {
     private final Vector<Player> players;
     private final int maxSize;
     private Player leader;
-    private WeakReference<PlayerServer> server;
+    private WeakReference<MCLoader> server;
 
-    public Party(int maxSize, Player host, PlayerServer server) {
+    public Party(int maxSize, Player host, MCLoader server) {
         this.players = new Vector<>(maxSize);
         this.maxSize = maxSize;
         this.leader = host;
@@ -28,12 +28,12 @@ public class Party implements IParty<PlayerServer> {
         this.server = new WeakReference<>(server);
     }
 
-    public void setServer(PlayerServer server) {
+    public void setServer(MCLoader server) {
         if(server.equals(server())) return;
 
         this.server = new WeakReference<>(server);
     }
-    public PlayerServer server() {
+    public MCLoader server() {
         return this.server.get();
     }
 
@@ -113,7 +113,7 @@ public class Party implements IParty<PlayerServer> {
         this.leader = null;
     }
 
-    public synchronized void connect(PlayerServer server) {
+    public synchronized void connect(MCLoader server) {
         SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
         this.setServer(server);
         Vector<Player> kickedPlayers = new Vector<>();

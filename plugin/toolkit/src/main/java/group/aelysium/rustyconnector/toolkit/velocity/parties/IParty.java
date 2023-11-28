@@ -1,27 +1,27 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
 import java.util.Vector;
 
-public interface IParty<TPlayerServer extends IPlayerServer> {
+public interface IParty<TMCLoader extends IMCLoader> {
     /**
      * Sets the server that this party is assigned to.
      * <p>
      * Setting the server with this method does not cause the party to connect to that new server.
-     * If you'd like to connect the party to a new server, you can use {@link IParty#connect(IPlayerServer)}.
+     * If you'd like to connect the party to a new server, you can use {@link IParty#connect(IMCLoader)}.
      * This will automatically connect the party to the new server and also set the party's server to the new server.
      * @param server The server to assign to this party.
      */
-    void setServer(TPlayerServer server);
+    void setServer(TMCLoader server);
 
     /**
      * Gets the server that this party has been assigned to.
-     * @return {@link IPlayerServer}
+     * @return {@link IMCLoader}
      */
-    TPlayerServer server();
+    TMCLoader server();
 
     /**
      * Gets the leader of this party.
@@ -72,7 +72,7 @@ public interface IParty<TPlayerServer extends IPlayerServer> {
 
     /**
      * Adds the player to this party.
-     * This method does not connect the player to the party's server. You'll need to use {@link IParty#server()}.{@link IPlayerServer#directConnect(Player) directConnect(Player)}.
+     * This method does not connect the player to the party's server. You'll need to use {@link IParty#server()}.{@link IMCLoader#directConnect(Player) directConnect(Player)}.
      * However, once a player is in a party, they will be pulled into the next server the party travels to.
      * @param player The player to join the party.
      * @throws IllegalStateException If the party is empty. Empty parties are marked as "destroyable" and get decomposed. You'll have to create a new party and connect the player to that one instead.
@@ -112,10 +112,10 @@ public interface IParty<TPlayerServer extends IPlayerServer> {
 
     /**
      * This method connects the entire party to the specified server.
-     * It also calls {@link IParty#setServer(IPlayerServer)}, setting the passed server as this party's new server.
+     * It also calls {@link IParty#setServer(IMCLoader)}, setting the passed server as this party's new server.
      * <p>
      * If this player is unable to join the server for some reason, they will be kicked from the party via {@link IParty#leave(Player)} and receive an error message.
      * @param server The server to connect to.
      */
-    void connect(TPlayerServer server);
+    void connect(TMCLoader server);
 }

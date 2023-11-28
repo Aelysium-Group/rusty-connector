@@ -5,16 +5,16 @@ import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 
 import java.util.Objects;
 import java.util.Optional;
 
 public class RankablePlayer implements ISortable, IPlayer {
-    protected RustyPlayer player;
+    protected Player player;
     protected ScoreCard scorecard;
 
-    public RankablePlayer(RustyPlayer player, ScoreCard scorecard) {
+    public RankablePlayer(Player player, ScoreCard scorecard) {
         this.player = player;
         this.scorecard = scorecard;
     }
@@ -28,7 +28,7 @@ public class RankablePlayer implements ISortable, IPlayer {
         return Optional.empty();
     }
 
-    public RustyPlayer player() {
+    public Player player() {
         return player;
     }
 
@@ -66,7 +66,7 @@ public class RankablePlayer implements ISortable, IPlayer {
     }
 
 
-    public static RankablePlayer from(RustyPlayer player, String game) {
+    public static RankablePlayer from(Player player, String game) {
         return new RankablePlayer(player, player.scorecard(game));
     }
 }

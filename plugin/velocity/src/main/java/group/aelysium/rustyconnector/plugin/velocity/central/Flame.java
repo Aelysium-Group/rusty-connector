@@ -348,14 +348,17 @@ class Initialize {
         services.put(FamilyService.class, familyService);
         bootOutput.add(Component.text(" | Finished registering family service to API.", NamedTextColor.GREEN));
 
+        WhitelistService whitelistService = new WhitelistService();
+        services.put(WhitelistService.class, whitelistService);
+
         {
             bootOutput.add(Component.text(" | Building families...", NamedTextColor.DARK_GRAY));
             for (String familyName : familiesConfig.scalarFamilies()) {
-                familyService.add(ScalarFamily.init(inject(bootOutput, dependencies.d2()), familyName));
+                familyService.add(ScalarFamily.init(inject(bootOutput, dependencies.d2(), whitelistService), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             for (String familyName : familiesConfig.staticFamilies()) {
-                familyService.add(StaticFamily.init(inject(bootOutput, dependencies.d2(), dependencies.d3()), familyName));
+                familyService.add(StaticFamily.init(inject(bootOutput, dependencies.d2(), dependencies.d3(), whitelistService), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             bootOutput.add(Component.text(" | Finished building families.", NamedTextColor.GREEN));
@@ -364,9 +367,9 @@ class Initialize {
         {
             bootOutput.add(Component.text(" | Building root family...", NamedTextColor.DARK_GRAY));
 
-            RootFamily rootFamily = RootFamily.init(inject(bootOutput, dependencies.d2()), familiesConfig.rootFamilyName());
+            RootFamily rootFamily = RootFamily.init(inject(bootOutput, dependencies.d2(), whitelistService), familiesConfig.rootFamilyName());
             familyService.setRootFamily(rootFamily);
-            bootOutput.add(Component.text(" | Registered root family: "+rootFamily.name(), NamedTextColor.YELLOW));
+            bootOutput.add(Component.text(" | Registered root family: "+rootFamily.id(), NamedTextColor.YELLOW));
 
             bootOutput.add(Component.text(" | Finished building root family.", NamedTextColor.GREEN));
         }
@@ -404,7 +407,7 @@ class Initialize {
                 throw new IllegalStateException("Unable to load or create magic_config.yml!");
             magicLinkConfig.register();
 
-            if(dependencies.d1().dump().stream().noneMatch(family -> family.name().equals(magicLinkConfig.family())))
+            if(dependencies.d1().dump().stream().noneMatch(family -> family.id().equals(magicLinkConfig.family())))
                 throw new NullPointerException("The magic config `" + file.getName() + "` is pointing to a family: `" + magicLinkConfig.family() + "`, which doesn't exist!");
         }
 
@@ -419,7 +422,7 @@ class Initialize {
 
         bootOutput.add(Component.text("Building proxy whitelist...", NamedTextColor.DARK_GRAY));
         if (dependencies.d1().whitelist_enabled()) {
-            whitelistService.setProxyWhitelist(Whitelist.init(inject(bootOutput, dependencies.d2()), dependencies.d1().whitelist_name()));
+            whitelistService.setProxyWhitelist(Whitelist.init(inject(bootOutput, dependencies.d2(), whitelistService), dependencies.d1().whitelist_name()));
             bootOutput.add(Component.text("Finished building proxy whitelist.", NamedTextColor.GREEN));
         } else
             bootOutput.add(Component.text("Finished building proxy whitelist. No whitelist is enabled for the proxy.", NamedTextColor.GREEN));

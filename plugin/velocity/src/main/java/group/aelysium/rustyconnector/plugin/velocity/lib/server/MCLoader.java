@@ -6,10 +6,9 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -21,19 +20,18 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PlayerServer implements IPlayerServer {
+public class MCLoader implements IMCLoader {
     private final UUID id = UUID.randomUUID();
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
-    private BaseFamily family;
+    private Family family;
     private int playerCount = 0;
     private int weight;
     private int softPlayerCap;
     private int hardPlayerCap;
-
     private AtomicInteger timeout;
 
-    public PlayerServer(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight, int timeout) {
+    public MCLoader(ServerInfo serverInfo, int softPlayerCap, int hardPlayerCap, int weight, int timeout) {
         this.serverInfo = serverInfo;
 
         this.weight = Math.max(weight, 0);
@@ -97,11 +95,11 @@ public class PlayerServer implements IPlayerServer {
     public void register(String familyName) throws Exception {
         Tinder api = Tinder.get();
 
-        BaseFamily family;
+        Family family;
         try {
-            family = new FamilyReference(familyName).get();
+            family = new Family.Reference(familyName).get();
         } catch (Exception ignore) {
-            throw new InvalidAlgorithmParameterException("A family with the name `"+familyName+"` doesn't exist!");
+            throw new InvalidAlgorithmParameterException("A family with the id `"+familyName+"` doesn't exist!");
         }
 
         this.registeredServer = api.services().server().registerServer(this, family);
@@ -136,7 +134,7 @@ public class PlayerServer implements IPlayerServer {
         if(Permission.validate(
                 player,
                 "rustyconnector.hardCapBypass",
-                Permission.constructNode("rustyconnector.<family name>.hardCapBypass",this.family.name())
+                Permission.constructNode("rustyconnector.<family id>.hardCapBypass",this.family.id())
         )) return true; // If the player has permission to bypass hard-player-cap, let them in.
 
         if(this.maxed()) return false; // If the player count is at hard-player-cap. Boot the player.
@@ -144,7 +142,7 @@ public class PlayerServer implements IPlayerServer {
         if(Permission.validate(
                 player,
                 "rustyconnector.softCapBypass",
-                Permission.constructNode("rustyconnector.<family name>.softCapBypass",this.family.name())
+                Permission.constructNode("rustyconnector.<family id>.softCapBypass",this.family.id())
         )) return true; // If the player has permission to bypass soft-player-cap, let them in.
 
         return !this.full();
@@ -193,14 +191,14 @@ public class PlayerServer implements IPlayerServer {
      * @throws IllegalStateException If the server hasn't been registered yet.
      * @throws NullPointerException If the family associated with this server doesn't exist.
      */
-    public BaseFamily family() throws IllegalStateException, NullPointerException {
+    public Family family() throws IllegalStateException, NullPointerException {
         if(this.registeredServer == null) throw new IllegalStateException("This server must be registered before you can find its family!");
 
-        BaseFamily family;
+        Family family;
         try {
-            family = new FamilyReference(this.family.name()).get();
+            family = new Family.Reference(this.family.id()).get();
         } catch (Exception ignore) {
-            throw new NullPointerException("A family with the name `"+this.family.name()+"` doesn't exist!");
+            throw new NullPointerException("A family with the id `"+this.family.id()+"` doesn't exist!");
         }
 
         return family;
@@ -262,10 +260,20 @@ public class PlayerServer implements IPlayerServer {
         return "["+this.serverInfo().getName()+"]" +
                "("+this.serverInfo().getAddress().getHostName()+":"+this.serverInfo().getAddress().getPort()+") - " +
                "["+this.playerCount()+" ("+this.softPlayerCap()+" <> "+this.softPlayerCap()+") w-"+this.weight()+"]" +
-               "{"+ this.family.name() +"}";
+               "{"+ this.family.id() +"}";
     }
 
-    public boolean equals(PlayerServer server) {
+    public boolean equals(MCLoader server) {
         return this.serverInfo.equals(server.serverInfo());
+    }
+
+    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<MCLoader, ServerInfo> {
+        public Reference(ServerInfo serverInfo) {
+            super(serverInfo);
+        }
+
+        public MCLoader get() {
+            return Tinder.get().services().server().fetch(this.referencer).orElseThrow();
+        }
     }
 }

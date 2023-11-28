@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.toolkit.velocity.friends;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.*;
 
-public interface IFriendsService<TRustyPlayer extends IRustyPlayer, TFriendRequest extends IFriendRequest> extends Service {
+public interface IFriendsService<TRustyPlayer extends IPlayer, TFriendRequest extends IFriendRequest> extends Service {
     /**
      * Gets the settings that this {@link IFriendsService} abides by.
      * @return {@link IFriendsService}

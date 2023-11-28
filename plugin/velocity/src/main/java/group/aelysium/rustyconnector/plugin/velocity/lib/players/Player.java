@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
-import com.velocitypowered.api.proxy.Player;
-import de.gesundkrank.jskills.IPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.ScoreCard;
@@ -12,12 +11,12 @@ import one.microstream.reference.Lazy;
 
 import java.util.*;
 
-public class RustyPlayer implements IRustyPlayer, IPlayer {
+public class Player implements IPlayer, de.gesundkrank.jskills.IPlayer {
     protected UUID uuid;
     protected String username;
     protected Lazy<List<ScoreCard>> ranks = Lazy.Reference(null);
 
-    protected RustyPlayer(UUID uuid, String username) {
+    protected Player(UUID uuid, String username) {
         this.uuid = uuid;
         this.username = username;
     }
@@ -72,7 +71,7 @@ public class RustyPlayer implements IRustyPlayer, IPlayer {
         return new RankablePlayer(this, scorecard);
     }
 
-    public Optional<Player> resolve() {
+    public Optional<com.velocitypowered.api.proxy.Player> resolve() {
         return Tinder.get().velocityServer().getPlayer(this.uuid);
     }
 
@@ -81,7 +80,7 @@ public class RustyPlayer implements IRustyPlayer, IPlayer {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
 
-        RustyPlayer that = (RustyPlayer) object;
+        Player that = (Player) object;
         return Objects.equals(uuid, that.uuid) && Objects.equals(username, that.username);
     }
 
@@ -94,22 +93,50 @@ public class RustyPlayer implements IRustyPlayer, IPlayer {
      * Get a resolvable player from the provided player.
      * If no player is stored in storage, the player will be stored.
      * If a player was already stored in the storage, that player will be returned.
+     *
+     * This method really only every needs to be used the first time a player connects to the proxy.
      * @param player The player to convert.
-     * @return {@link RustyPlayer}
+     * @return {@link Player}
      */
-    public static RustyPlayer from(Player player) {
+    public static Player from(com.velocitypowered.api.proxy.Player player) {
         MySQLStorage mySQLStorage = Tinder.get().services().storage();
-        RustyPlayer tempRustyPlayer = new RustyPlayer(player.getUniqueId(), player.getUsername());
+        Player tempPlayer = new Player(player.getUniqueId(), player.getUsername());
 
-        Set<RustyPlayer> players = mySQLStorage.root().players();
-        if(players.add(tempRustyPlayer)) {
+        Set<Player> players = mySQLStorage.root().players();
+        if(players.add(tempPlayer)) {
             mySQLStorage.store(players);
-            return tempRustyPlayer;
+            return tempPlayer;
         }
 
-        return players.stream().filter(player1 -> player1.equals(tempRustyPlayer)).findAny().orElseThrow();
+        return players.stream().filter(player1 -> player1.equals(tempPlayer)).findAny().orElseThrow();
     }
-    public static RustyPlayer from(UUID uuid, String username) {
-        return new RustyPlayer(uuid, username);
+    public static Player from(UUID uuid, String username) {
+        return new Player(uuid, username);
+    }
+
+    public static class UUIDReference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Player, UUID> {
+        public UUIDReference(UUID uuid) {
+            super(uuid);
+        }
+
+        /**
+         * Gets the family referenced.
+         * If no family could be found, this will throw an exception.
+         * @return {@link Family}
+         * @throws java.util.NoSuchElementException If the family can't be found.
+         */
+        public Player get() {
+            return Tinder.get().services().player().fetch(this.referencer).orElseThrow();
+        }
+    }
+
+    public static class UsernameReference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Player, String> {
+        public UsernameReference(String username) {
+            super(username);
+        }
+
+        public Player get() {
+            return Tinder.get().services().player().fetch(this.referencer).orElseThrow();
+        }
     }
 }

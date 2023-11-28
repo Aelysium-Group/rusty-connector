@@ -10,6 +10,28 @@
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                       Display Name                       #
+#                                                          #
+#               ---------------------------                #
+# | Display name is the name of your family, as players    #
+# | will see it, in-game.                                  #
+# | Display name can appear as a result of multiple        #
+# | factors such as the friends module being enabled.      #
+#                                                          #
+# | Display names support MiniMessage.                     #
+#                                                          #
+# | Multiple families are allowed to have the              #
+# | same display name.                                     #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+display-name: ""
+
+
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -30,6 +52,8 @@
 ############################################################
 parent-family: ""
 
+
+
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                      Load Balancing                      #
@@ -46,14 +70,13 @@ parent-family: ""
 ############################################################
 load-balancer: "default"
 
-whitelist:
+
+
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #                        Whitelist                         #
 #                                                          #
 #               ---------------------------                #
-# | RustyConnector attempts to be as flexible as possible  #
-# | when configuring whitelists!                           #
 # | To setup a whitelist, you'll need to navigate to the   #
 # | "whitelists" folder and follow the directions in the   #
 # | provided whitelist-template.                           #
@@ -68,10 +91,11 @@ whitelist:
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
+whitelist:
     enabled: false
 
-#
-# The name of the whitelist configuration file in your "whitelists" folder.
-# You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
-#
+    #
+    # The name of the whitelist configuration file in your "whitelists" folder.
+    # You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
+    #
     name: "whitelist-template"

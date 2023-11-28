@@ -1,49 +1,41 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.ResolvableServer;
-
-import java.util.Optional;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 public class ServerResidence implements IServerResidence {
-    protected RustyPlayer player;
-    protected ResolvableServer server;
-    protected FamilyReference family;
+    protected Player.UUIDReference player;
+    protected MCLoader.Reference server;
+    protected Family.Reference family;
     protected Long expiration;
 
-    public ServerResidence(Player player, PlayerServer server, StaticFamily family, LiquidTimestamp expiration) {
-        this.player = RustyPlayer.from(player);
-        this.server = ResolvableServer.from(server);
-        this.family = new FamilyReference(family.name());
+    public ServerResidence(Player.UUIDReference player, MCLoader server, StaticFamily family, LiquidTimestamp expiration) {
+        this.player = player;
+        this.server = new MCLoader.Reference(server.serverInfo());
+        this.family = new Family.Reference(family.id());
 
         if(expiration == null) this.expiration = null;
         else this.expiration = expiration.epochFromNow();
     }
 
-    public Optional<Player> player() {
-        return Tinder.get().velocityServer().getPlayer(this.player.uuid());
+    public Player player() {
+        return this.player.get();
     }
-    public RustyPlayer rawPlayer() {
+    public Player.UUIDReference rawPlayer() {
         return this.player;
     }
 
-
-    public Optional<PlayerServer> server() {
-        return this.server.resolve();
+    public MCLoader server() {
+        return this.server.get();
     }
-    public ResolvableServer rawServer() {
+    public MCLoader.Reference rawServer() {
         return this.server;
     }
 
-    public BaseFamily family() {
+    public Family family() {
         return this.family.get();
     }
 
@@ -54,10 +46,5 @@ public class ServerResidence implements IServerResidence {
     public void expiration(LiquidTimestamp expiration) {
         if(expiration == null) this.expiration = null;
         else this.expiration = expiration.epochFromNow();
-    }
-
-    @Override
-    public String toString() {
-        return "<ServerResidence username="+this.player.username()+" family="+this.family.get().name()+" server="+this.server.serverInfo().getName()+">";
     }
 }

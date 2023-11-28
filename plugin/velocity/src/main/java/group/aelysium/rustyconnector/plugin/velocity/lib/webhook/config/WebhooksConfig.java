@@ -3,8 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhook;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -31,7 +30,7 @@ public class WebhooksConfig extends YAML {
 
         get(this.data,"webhooks").getChildrenList().forEach(node -> {
             WebhookScope scope = WebhookScope.valueOf(this.getNode(node, "scope", String.class).toUpperCase());
-            String name = this.getNode(node, "name", String.class);
+            String name = this.getNode(node, "id", String.class);
             try {
                 URL url = new URL(this.getNode(node, "url", String.class));
                 DiscordWebhook webhook = new DiscordWebhook(name, url);
@@ -54,9 +53,9 @@ public class WebhooksConfig extends YAML {
                             String familyName = this.getNode(node, "target-family", String.class);
 
                             try {
-                                new FamilyReference(familyName).get();
+                                new Family.Reference(familyName).get();
                             } catch (Exception ignore) {
-                                logger.warn("webhooks.yml is pointing a webhook at a family with the name: " + familyName + ". No family with this name exists!");
+                                logger.warn("webhooks.yml is pointing a webhook at a family with the id: " + familyName + ". No family with this id exists!");
                             }
 
                             WebhookEventManager.on(flag, familyName, webhook);

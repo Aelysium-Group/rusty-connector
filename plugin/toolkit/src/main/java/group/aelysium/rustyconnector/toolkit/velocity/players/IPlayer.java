@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface IRustyPlayer {
+public interface IPlayer {
     UUID uuid();
     String username();
 

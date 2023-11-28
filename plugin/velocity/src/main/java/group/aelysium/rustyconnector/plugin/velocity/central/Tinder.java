@@ -88,8 +88,8 @@ public class Tinder implements VelocityTinder {
     }
 
     /**
-     * Gets a resource by name and returns it as a stream.
-     * @param filename The name of the resource to get.
+     * Gets a resource by id and returns it as a stream.
+     * @param filename The id of the resource to get.
      * @return The resource as a stream.
      */
     public static InputStream resourceAsStream(String filename)  {
@@ -104,7 +104,7 @@ public class Tinder implements VelocityTinder {
     }
 
     /**
-     * Registers a server with this proxy.` A server with this name should not already exist.
+     * Registers a server with this proxy.` A server with this id should not already exist.
      *
      * @param serverInfo the server to register
      * @return the newly registered server

@@ -109,7 +109,7 @@ public class DynamicTeleportConfig extends YAML {
             if(anchors.size() != 0)
                 for (ConfigurationNode entry: anchors)
                     this.familyAnchor_anchors.add(Map.entry(
-                            this.getNode(entry, "name", String.class),
+                            this.getNode(entry, "id", String.class),
                             this.getNode(entry, "family", String.class)
                     ));
         }

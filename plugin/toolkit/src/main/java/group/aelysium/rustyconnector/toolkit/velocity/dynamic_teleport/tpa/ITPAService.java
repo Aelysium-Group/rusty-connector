@@ -2,13 +2,13 @@ package group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IPlayerFocusedFamilyBase;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.List;
 
-public interface ITPAService<TTPACleaningService extends ITPACleaningService<?>, TPlayerServer extends IPlayerServer, TResolvablePlayer extends IRustyPlayer, TPlayerFocusedFamilyBase extends IPlayerFocusedFamilyBase<TPlayerServer, TResolvablePlayer>, TTPARequest extends ITPARequest, TTPAHandler extends ITPAHandler<TTPARequest>> extends Service {
+public interface ITPAService<TTPACleaningService extends ITPACleaningService<?>, TMCLoader extends IMCLoader, TPlayer extends IPlayer, TFamily extends IFamily<TMCLoader, TPlayer>, TTPARequest extends ITPARequest, TTPAHandler extends ITPAHandler<TTPARequest>> extends Service {
     /**
      * Gets the settings that this {@link ITPAService} abides by.
      * @return {@link TPAServiceSettings}
@@ -26,7 +26,7 @@ public interface ITPAService<TTPACleaningService extends ITPACleaningService<?>,
      * @param family The family to get the tpa handler for.
      * @return {@link ITPAHandler}
      */
-    TTPAHandler tpaHandler(TPlayerFocusedFamilyBase family);
+    TTPAHandler tpaHandler(TFamily family);
 
     /**
      * Gets a list of all TPA handlers.
@@ -44,5 +44,5 @@ public interface ITPAService<TTPACleaningService extends ITPACleaningService<?>,
      * @param target The player that sent the invite and is going to have `source` teleported to their location.
      * @param targetServer The server that `target` is currently playing on.
      */
-    void tpaSendPlayer(Player source, Player target, TPlayerServer targetServer);
+    void tpaSendPlayer(Player source, Player target, TMCLoader targetServer);
 }

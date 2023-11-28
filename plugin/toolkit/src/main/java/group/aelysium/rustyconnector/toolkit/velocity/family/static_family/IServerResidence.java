@@ -1,23 +1,20 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family.static_family;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IResolvableFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.family.bases.IBaseFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IRustyPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IPlayerServer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IResolvableServer;
+import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.util.Reference;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
-import java.util.Optional;
-
 public interface IServerResidence {
-    Optional<Player> player();
-    IRustyPlayer rawPlayer();
+    IPlayer player();
+    Reference<? extends IPlayer, ?> rawPlayer();
 
-    Optional<? extends IPlayerServer> server();
-    IResolvableServer rawServer();
+    IMCLoader server();
+    Reference<? extends IMCLoader, ServerInfo> rawServer();
 
-    IBaseFamily family();
+    IFamily family();
 
     Long expiration();
 

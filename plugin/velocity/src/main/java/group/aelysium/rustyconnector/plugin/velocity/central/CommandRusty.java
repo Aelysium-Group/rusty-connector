@@ -11,20 +11,17 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyReference;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.k8.K8Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -46,7 +43,7 @@ public final class CommandRusty {
                 return Command.SINGLE_SUCCESS;
             })
             .then(Message.build(flame, logger, messageCacheService))
-            .then(Family.build(flame, logger, messageCacheService))
+            .then(FamilyC.build(flame, logger, messageCacheService))
             .then(Send.build(flame, logger, messageCacheService))
             .then(Debug.build(flame, logger, messageCacheService))
             .then(Reload.build(flame, logger, messageCacheService))
@@ -145,7 +142,7 @@ class Message {
                 );
     }
 }
-class Family {
+class FamilyC {
     public static ArgumentBuilder<CommandSource, ?> build(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
         return LiteralArgumentBuilder.<CommandSource>literal("family")
                 .executes(context -> {
@@ -161,14 +158,14 @@ class Family {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                BaseFamily family = new FamilyReference(familyName).get();
+                                group.aelysium.rustyconnector.plugin.velocity.lib.family.Family family = new Family.Reference(familyName).get();
 
                                 if(family instanceof ScalarFamily)
                                     VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
                                 if(family instanceof StaticFamily)
                                     VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
                             } catch (NoSuchElementException e) {
-                                VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
+                                VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                             } catch (Exception e) {
                                 VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting that family!\n"+e.getMessage());
                             }
@@ -185,20 +182,20 @@ class Family {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        BaseFamily family = new FamilyReference(familyName).get();
-                        if(!(family instanceof PlayerFocusedFamily)) {
-                            VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on scalar and static families!");
+                        Family family = new Family.Reference(familyName).get();
+                        if(!family.metadata().hasLoadBalancer()) {
+                            VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
                             return Command.SINGLE_SUCCESS;
                         }
 
-                        ((PlayerFocusedFamily) family).loadBalancer().resetIndex();
+                        family.loadBalancer().resetIndex();
 
                         if(family instanceof ScalarFamily)
                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
                         if(family instanceof StaticFamily)
                             VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
                     } catch (NoSuchElementException e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
+                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                     } catch (Exception e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                     }
@@ -211,21 +208,20 @@ class Family {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        BaseFamily family = new FamilyReference(familyName).get();
-
-                        if(!(family instanceof PlayerFocusedFamily)) {
-                            VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only use sort on scalar and static families!");
+                        Family family = new Family.Reference(familyName).get();
+                        if(!family.metadata().hasLoadBalancer()) {
+                            VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
                             return Command.SINGLE_SUCCESS;
                         }
 
-                        ((PlayerFocusedFamily) family).loadBalancer().completeSort();
+                        family.loadBalancer().completeSort();
 
                         if(family instanceof ScalarFamily)
                             VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
                         if(family instanceof StaticFamily)
                             VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
                     } catch (NoSuchElementException e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
+                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                     } catch (Exception e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                     }
@@ -238,14 +234,14 @@ class Family {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        BaseFamily family = new FamilyReference(familyName).get();
+                        Family family = new Family.Reference(familyName).get();
 
                         if(family instanceof ScalarFamily)
                             VelocityLang.RC_SCALAR_FAMILY_INFO_LOCKED.send(logger, (ScalarFamily) family);
                         if(family instanceof StaticFamily)
                             VelocityLang.RC_STATIC_FAMILY_INFO_LOCKED.send(logger, (StaticFamily) family);
                     } catch (NoSuchElementException e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that name doesn't exist!");
+                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                     } catch (Exception e) {
                         VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                     }
@@ -276,15 +272,15 @@ class Send {
                             String username = context.getArgument("username", String.class);
 
                             try {
-                                Player fetchedPlayer = Tinder.get().velocityServer().getPlayer(username).orElse(null);
+                                com.velocitypowered.api.proxy.Player fetchedPlayer = Tinder.get().velocityServer().getPlayer(username).orElse(null);
                                 if(fetchedPlayer == null) {
                                     logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
                                     return Command.SINGLE_SUCCESS;
                                 }
-                                RustyPlayer player = RustyPlayer.from(fetchedPlayer);
+                                Player player = Player.from(fetchedPlayer);
 
-                                BaseFamily family = new FamilyReference(familyName).get();
-                                if(!(family instanceof PlayerFocusedFamily)) {
+                                Family family = new Family.Reference(familyName).get();
+                                if(!family.metadata().hasLoadBalancer()) {
                                     VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
                                     return Command.SINGLE_SUCCESS;
                                 }
@@ -317,7 +313,7 @@ class Send {
                                         String serverName = context.getArgument("serverName", String.class);
                                         String username = context.getArgument("username", String.class);
 
-                                        Player player = Tinder.get().velocityServer().getPlayer(username).orElse(null);
+                                        com.velocitypowered.api.proxy.Player player = Tinder.get().velocityServer().getPlayer(username).orElse(null);
                                         if (player == null) {
                                             logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
                                             return Command.SINGLE_SUCCESS;
@@ -329,8 +325,10 @@ class Send {
                                             return Command.SINGLE_SUCCESS;
                                         }
 
-                                        PlayerServer server = flame.services().server().search(registeredServer.getServerInfo());
-                                        if (server == null) {
+                                        MCLoader server;
+                                        try {
+                                            server = new MCLoader.Reference(registeredServer.getServerInfo()).get();
+                                        } catch (Exception ignore) {
                                             logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
                                             return Command.SINGLE_SUCCESS;
                                         }
@@ -387,7 +385,7 @@ class K8 {
                                                         String containerImage = context.getArgument("containerImage", String.class);
 
                                                         K8Service k8 = new K8Service();
-                                                        k8.createServer(familyName, containerName, Integer.parseInt(containerPort), containerImage);
+                                                        k8.createServer(familyName, containerName, containerImage);
                                                     } catch (Exception e) {
                                                         e.printStackTrace();
                                                     }

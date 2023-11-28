@@ -1,10 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games;
 
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
 
-import java.rmi.ConnectException;
 import java.util.*;
 
 public class RankedSoloGame extends RankedGame {

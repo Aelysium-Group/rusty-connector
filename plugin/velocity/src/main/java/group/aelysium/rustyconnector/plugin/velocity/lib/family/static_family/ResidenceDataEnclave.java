@@ -1,11 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IResidenceDataEnclave;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
 
@@ -14,20 +12,20 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer, RustyPlayer, StaticFamily> {
+public class ResidenceDataEnclave implements IResidenceDataEnclave<MCLoader, Player, Player.UUIDReference, StaticFamily> {
     private final MySQLStorage storage;
 
     public ResidenceDataEnclave(MySQLStorage storage) {
         this.storage = storage;
     }
 
-    public Optional<ServerResidence> fetch(Player player, StaticFamily family) {
+    public Optional<ServerResidence> fetch(Player.UUIDReference player, StaticFamily family) {
         try {
             StorageRoot root = this.storage.root();
 
             Optional<ServerResidence> serverResidence = root.residence().stream()
                 .filter(residence ->
-                    residence.rawPlayer().equals(RustyPlayer.from(player)) &&
+                    residence.rawPlayer().equals(player) &&
                     residence.family().equals(family)
                 )
                 .findAny();
@@ -40,7 +38,7 @@ public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer,
 
         return Optional.empty();
     }
-    public void save(Player player, PlayerServer server, StaticFamily family)  {
+    public void save(Player.UUIDReference player, MCLoader server, StaticFamily family)  {
         StorageRoot root = this.storage.root();
 
         ServerResidence serverResidence = new ServerResidence(player, server, family, family.homeServerExpiration());
@@ -49,12 +47,12 @@ public class ResidenceDataEnclave implements IResidenceDataEnclave<PlayerServer,
         residences.add(serverResidence);
         this.storage.store(residences);
     }
-    public void delete(Player player, StaticFamily family) {
+    public void delete(Player.UUIDReference player, StaticFamily family) {
         StorageRoot root = this.storage.root();
 
         Set<ServerResidence> residences = root.residence();
         residences.removeIf(residence ->
-                residence.rawPlayer().equals(RustyPlayer.from(player)) &&
+                residence.rawPlayer().equals(player) &&
                 residence.family().equals(family)
         );
 

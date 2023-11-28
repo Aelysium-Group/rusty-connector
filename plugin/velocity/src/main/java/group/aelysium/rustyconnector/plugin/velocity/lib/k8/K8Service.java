@@ -1,40 +1,48 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.k8;
 
+import group.aelysium.rustyconnector.core.lib.crypt.Token;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.*;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
 
-import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class K8Service implements Service {
-    private K8AutoScalerService autoScalerService;
+    protected Token token = new Token(16, new SecureRandom(), Token.lower);
 
-    public K8Service() throws IOException {
+    public K8Service() {}
+
+    public List<Pod> familyPods(String familyName) {
+        try {
+            new Family.Reference(familyName).get();
+        } catch (Exception ignore) {
+            throw new NoSuchElementException("A family with the id "+familyName+" doesn't exist!");
+        }
+
+        String namespace = familyNameToNamespace(familyName);
+
+        try (KubernetesClient client = new KubernetesClientBuilder().build()) {
+            return client.pods().inNamespace(namespace).list().getItems();
+        }
     }
 
-    public K8AutoScalerService autoscalers() {
-        return this.autoScalerService;
-    }
-
-    public void createServer(String familyName, String containerName, int containerPort, String containerImage) {
+    public void createServer(String familyName, String containerName, String containerImage) {
         String podName = familyNameToPodPrefix(familyName);
         String namespace = familyNameToNamespace(familyName);
-        String serviceAccountName = "rustyconnector";
-        String image = "your-image-name";
 
         try (KubernetesClient client = new KubernetesClientBuilder().build()) {
             Pod pod = new PodBuilder()
                     .withNewMetadata()
-                    .withName(podName)
+                        .withName(podName)
                     .endMetadata()
                     .withNewSpec()
-                    .addNewContainer()
-                    .withName(containerName)
-                    .withImage(containerImage)
-                    .endContainer()
+                        .addNewContainer()
+                            .withName(containerName)
+                            .withImage(containerImage)
+                        .endContainer()
                     .endSpec()
                     .build();
             client.pods().inNamespace(namespace).resource(pod).create();
@@ -45,24 +53,16 @@ public class K8Service implements Service {
         String namespace = familyNameToNamespace(familyName);
 
         try (KubernetesClient client = new KubernetesClientBuilder().build()) {
-            client.pods().inNamespace(namespace).withName(podName).delete();
-        }
-    }
-
-    public List<Pod> getPods(String familyName) {
-        String namespace = familyNameToNamespace(familyName);
-
-        try (KubernetesClient client = new KubernetesClientBuilder().build()) {
-            return client.pods().inNamespace(namespace).list().getItems();
+            client.pods().inNamespace(namespace).withName(podName.toLowerCase()).delete();
         }
     }
 
     private String familyNameToNamespace(String name) {
-        return "rc-minecraft-family-"+name;
+        return ("rcf-"+name).toLowerCase();
     }
 
     private String familyNameToPodPrefix(String name) {
-        return "rc-minecraft-pod-"+name;
+        return (name+"-"+token.nextString()).toLowerCase();
     }
 
     @Override

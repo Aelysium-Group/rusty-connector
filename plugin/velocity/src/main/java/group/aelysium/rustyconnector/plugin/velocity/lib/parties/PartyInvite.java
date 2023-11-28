@@ -1,32 +1,31 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.RustyPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 
-public class PartyInvite implements IPartyInvite<RustyPlayer> {
+public class PartyInvite implements IPartyInvite<Player> {
     private final PartyService partyService;
     private final WeakReference<Party> party;
-    private RustyPlayer sender;
-    private RustyPlayer target;
+    private Player sender;
+    private Player target;
     private Boolean isAcknowledged = null;
 
-    public PartyInvite(PartyService partyService, Party party, Player sender, Player target) {
+    public PartyInvite(PartyService partyService, Party party, com.velocitypowered.api.proxy.Player sender, com.velocitypowered.api.proxy.Player target) {
         this.partyService = partyService;
         this.party = new WeakReference<>(party);
-        this.sender = RustyPlayer.from(sender);
-        this.target = RustyPlayer.from(target);
+        this.sender = Player.from(sender);
+        this.target = Player.from(target);
     }
 
-    public RustyPlayer sender() {
+    public Player sender() {
         return this.sender;
     }
-    public RustyPlayer target() {
+    public Player target() {
         return this.target;
     }
 
@@ -54,7 +53,7 @@ public class PartyInvite implements IPartyInvite<RustyPlayer> {
             if(!Objects.requireNonNull(party.get()).players().contains(sender.resolve().orElse(null)) && sender.resolve().isPresent())
                 throw new IllegalStateException(VelocityLang.PARTY_INJECTED_INVALID_MEMBER_INVITE);
 
-        Optional<Player> player = this.target.resolve();
+        Optional<com.velocitypowered.api.proxy.Player> player = this.target.resolve();
         if(player.isEmpty())
             throw new IllegalStateException(VelocityLang.PARTY_INJECTED_NO_TARGET);
 

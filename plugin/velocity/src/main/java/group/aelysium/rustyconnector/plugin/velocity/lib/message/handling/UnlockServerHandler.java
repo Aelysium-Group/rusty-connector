@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.variants.UnlockServerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 public class UnlockServerHandler implements PacketHandler {
     protected Tinder api;
@@ -20,10 +20,10 @@ public class UnlockServerHandler implements PacketHandler {
         UnlockServerPacket packet = (UnlockServerPacket) genericPacket;
 
         ServerInfo serverInfo = new ServerInfo(packet.serverName(), packet.address());
-        PlayerServer server = api.services().server().search(serverInfo);
+        MCLoader server = new MCLoader.Reference(serverInfo).get();
 
         if (server != null) {
-            PlayerFocusedFamily family = (PlayerFocusedFamily) server.family();
+            Family family = server.family();
             family.unlockServer(server);
         }
     }

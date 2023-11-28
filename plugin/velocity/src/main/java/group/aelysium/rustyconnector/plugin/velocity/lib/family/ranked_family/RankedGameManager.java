@@ -30,7 +30,7 @@ public class RankedGameManager implements Service {
     }
 
     /**
-     * The name representing this gamemode.
+     * The id representing this gamemode.
      * @return {@link String}
      */
     public String name() {
