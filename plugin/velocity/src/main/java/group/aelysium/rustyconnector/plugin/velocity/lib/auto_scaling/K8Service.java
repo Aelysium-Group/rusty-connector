@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.k8;
+package group.aelysium.rustyconnector.plugin.velocity.lib.auto_scaling;
 
 import group.aelysium.rustyconnector.core.lib.crypt.Token;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;

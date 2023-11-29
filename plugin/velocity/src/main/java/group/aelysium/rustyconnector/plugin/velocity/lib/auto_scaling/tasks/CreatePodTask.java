@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.auto_scaling.tasks;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.k8.K8Service;
+import group.aelysium.rustyconnector.plugin.velocity.lib.auto_scaling.K8Service;
 
 import java.util.concurrent.RecursiveAction;
 
