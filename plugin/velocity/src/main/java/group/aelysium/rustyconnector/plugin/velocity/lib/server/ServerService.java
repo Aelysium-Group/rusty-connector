@@ -66,9 +66,9 @@ public class ServerService implements IServerService<MCLoader, Player, Family> {
 
                 return Optional.of(found);
             } catch (Exception ignore) {
-                if(family.lockedServers().size() == 0) continue;
+                if(family.loadBalancer().size(true) == 0) continue;
 
-                K8MCLoader found = (K8MCLoader) family.lockedServers().stream().filter(s -> {
+                K8MCLoader found = (K8MCLoader) family.loadBalancer().lockedServers().stream().filter(s -> {
                     if (!(s instanceof K8MCLoader)) return false;
                     return ((K8MCLoader) s).podName().equals(podName);
                 }).findAny().orElseThrow();
@@ -93,11 +93,11 @@ public class ServerService implements IServerService<MCLoader, Player, Family> {
         } catch (Exception ignore1) {}
 
 
-        if(family.lockedServers().size() == 0) return Optional.empty();
+        if(family.loadBalancer().size(true) == 0) return Optional.empty();
 
 
         try {
-            K8MCLoader found = (K8MCLoader) family.lockedServers().stream().filter(s -> {
+            K8MCLoader found = (K8MCLoader) family.loadBalancer().lockedServers().stream().filter(s -> {
                 if (!(s instanceof K8MCLoader)) return false;
                 return ((K8MCLoader) s).podName().equals(podName);
             }).findAny().orElseThrow();

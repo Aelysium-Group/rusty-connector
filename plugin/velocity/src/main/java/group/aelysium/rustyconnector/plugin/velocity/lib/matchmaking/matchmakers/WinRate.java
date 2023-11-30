@@ -19,13 +19,13 @@ public class WinRate extends Matchmaker<WinRatePlayerRank> {
     private Session attemptBuild(int playerCount, double variance) {
         // Randomly selects a player index to use as our pivot
         int randomIndex = random.nextInt(playerCount);
-        RankedPlayer<WinRatePlayerRank> pivot = this.items.get(randomIndex);
+        RankedPlayer<WinRatePlayerRank> pivot = this.waitingPlayers.get(randomIndex);
         double pivotRank = pivot.rank().rank();
         double floor = pivotRank - variance;
         double ceiling = pivotRank + variance;
 
         // Check variance mask. Fetches all players that fit variance.
-        List<RankedPlayer<WinRatePlayerRank>> validPlayers = this.items.stream().filter(player -> {
+        List<RankedPlayer<WinRatePlayerRank>> validPlayers = this.waitingPlayers.stream().filter(player -> {
             double rank = player.rank().rank();
             return rank > floor && rank < ceiling;
         }).toList();
@@ -40,7 +40,7 @@ public class WinRate extends Matchmaker<WinRatePlayerRank> {
             playersToUse.add(player);
         }
 
-        this.items.removeAll(playersToUse); // Remove these players from the matchmaker
+        this.waitingPlayers.removeAll(playersToUse); // Remove these players from the matchmaker
 
         return builder.build();
     }
@@ -48,7 +48,7 @@ public class WinRate extends Matchmaker<WinRatePlayerRank> {
     @Override
     public Session make() {
         if(!minimumPlayersExist()) return null;
-        int playerCount = this.items.size(); // Calculate once so we don't keep calling it.
+        int playerCount = this.waitingPlayers.size(); // Calculate once so we don't keep calling it.
         boolean enoughForFullGame = playerCount > maxPlayersPerGame;
 
         if(enoughForFullGame) return null;
@@ -66,6 +66,6 @@ public class WinRate extends Matchmaker<WinRatePlayerRank> {
 
     @Override
     public void completeSort() {
-        WeightedQuickSort.sort(this.items);
+        WeightedQuickSort.sort(this.waitingPlayers);
     }
 }

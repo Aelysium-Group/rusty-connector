@@ -15,17 +15,17 @@ public class Randomized extends Matchmaker<RandomizedPlayerRank> {
     @Override
     public Session make() {
         if(!minimumPlayersExist()) return null;
-        boolean enoughForFullGame = this.items.size() > maxPlayersPerGame;
+        boolean enoughForFullGame = this.waitingPlayers.size() > maxPlayersPerGame;
 
         Session.Builder builder = new Session.Builder().teams(settings.teams());
 
         List<RankedPlayer<RandomizedPlayerRank>> playersToUse = new ArrayList<>();
-        for(RankedPlayer<RandomizedPlayerRank> player : this.items) {
+        for(RankedPlayer<RandomizedPlayerRank> player : this.waitingPlayers) {
             if (!builder.addPlayer(player)) break;
             playersToUse.add(player);
         }
 
-        this.items.removeAll(playersToUse); // Remove these players from the matchmaker
+        this.waitingPlayers.removeAll(playersToUse); // Remove these players from the matchmaker
 
         return builder.build();
     }

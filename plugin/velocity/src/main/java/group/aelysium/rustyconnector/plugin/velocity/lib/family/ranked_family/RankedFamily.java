@@ -4,8 +4,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.config.RankedFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Randomized;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
@@ -72,7 +74,7 @@ public class RankedFamily extends Family {
         if (config.isWhitelist_enabled())
             whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService), config.getWhitelist_name());
 
-        Settings settings = new Settings(familyName, config.displayName(), config.getParent_family(), whitelist, config.getMatchmakingSettings());
+        Settings settings = new Settings(familyName, config.displayName(), config.getParent_family(), whitelist, new Randomized(new Matchmaker.Settings(null, null, null, 0, null)));
         return new RankedFamily(settings);
     }
 

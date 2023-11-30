@@ -58,6 +58,7 @@ public class Session {
 
 
     public void end() {
+        /*
         Tinder api = Tinder.get();
 
         RankedGameAssociatePacket message = (RankedGameAssociatePacket) new GenericPacket.Builder()
@@ -80,7 +81,7 @@ public class Session {
 
         TrueSkillCalculator.calculateNewRatings(this.gameInfo, teams, scores);
 
-        this.ended = true;
+        this.ended = true;*/
     }
 
     public List<RankedPlayer<?>> players() {

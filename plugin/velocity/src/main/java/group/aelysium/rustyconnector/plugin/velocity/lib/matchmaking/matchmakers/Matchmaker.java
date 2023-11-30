@@ -27,7 +27,7 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements 
     protected final int maxPlayersPerGame;
     protected Vector<Session> waitingSessions = new Vector<>();
     protected Vector<Session> runningSessions = new Vector<>();
-    protected Vector<RankedPlayer<TPlayerRank>> items = new Vector<>();
+    protected Vector<RankedPlayer<TPlayerRank>> waitingPlayers = new Vector<>();
 
     public Matchmaker(Settings settings) {
         this.settings = settings;
@@ -48,7 +48,7 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements 
      */
     public abstract Session make();
     public boolean minimumPlayersExist() {
-        return this.items.size() > minPlayersPerGame;
+        return this.waitingPlayers.size() > minPlayersPerGame;
     }
     public abstract void completeSort();
 
@@ -65,27 +65,31 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements 
         try {
             RankedPlayer<TPlayerRank> rankedPlayer = this.settings.game.rankedPlayer(this.settings.storage(), player.uuid());
 
-            if (this.items.contains(rankedPlayer)) return;
+            if (this.waitingPlayers.contains(rankedPlayer)) return;
 
-            this.items.add(rankedPlayer);
-            int index = this.items.size() - 1;
+            this.waitingPlayers.add(rankedPlayer);
+            int index = this.waitingPlayers.size() - 1;
 
-            SingleSort.sort(this.items, index);
+            SingleSort.sort(this.waitingPlayers, index);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    public void remove(RankedPlayer<TPlayerRank> item) {
-        this.items.remove(item);
+    public void remove(Player player) {
+        try {
+            this.waitingPlayers.removeIf(player1 -> player1.uuid().equals(player1.uuid()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     public int size() {
-        return this.items.size();
+        return this.waitingPlayers.size();
     }
     public List<RankedPlayer<TPlayerRank>> dump() {
-        return this.items;
+        return this.waitingPlayers;
     }
     public boolean contains(RankedPlayer<TPlayerRank> item) {
-        return this.items.contains(item);
+        return this.waitingPlayers.contains(item);
     }
 
     public void start(LoadBalancer loadBalancer) {
@@ -94,7 +98,7 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements 
 
         // Build sessions periodically
         this.supervisor.scheduleRecurring(() -> {
-            int playerCount = this.items.size();
+            int playerCount = this.waitingPlayers.size();
             double approximateNumberOfGamesToRun = floor((double) ((playerCount / maxPlayersPerGame) + (playerCount / minPlayersPerGame)) / 2);
 
             for (int i = 0; i < approximateNumberOfGamesToRun; i++) {

@@ -19,13 +19,13 @@ public class WinLoss extends Matchmaker<WinLossPlayerRank> {
     private Session attemptBuild(int playerCount, double variance) {
         // Randomly selects a player index to use as our pivot
         int randomIndex = random.nextInt(playerCount);
-        RankedPlayer<WinLossPlayerRank> pivot = this.items.get(randomIndex);
+        RankedPlayer<WinLossPlayerRank> pivot = this.waitingPlayers.get(randomIndex);
         double pivotRank = pivot.rank().rank();
         double floor = pivotRank - variance;
         double ceiling = pivotRank + variance;
 
         // Check variance mask. Fetches all players that fit variance.
-        List<RankedPlayer<WinLossPlayerRank>> validPlayers = this.items.stream().filter(player -> {
+        List<RankedPlayer<WinLossPlayerRank>> validPlayers = this.waitingPlayers.stream().filter(player -> {
             double rank = player.rank().rank();
             return rank > floor && rank < ceiling;
         }).toList();
@@ -40,7 +40,7 @@ public class WinLoss extends Matchmaker<WinLossPlayerRank> {
             playersToUse.add(player);
         }
 
-        this.items.removeAll(playersToUse); // Remove these players from the matchmaker
+        this.waitingPlayers.removeAll(playersToUse); // Remove these players from the matchmaker
 
         return builder.build();
     }
@@ -48,12 +48,12 @@ public class WinLoss extends Matchmaker<WinLossPlayerRank> {
     @Override
     public Session make() {
         if(!minimumPlayersExist()) return null;
-        int playerCount = this.items.size(); // Calculate once so we don't keep calling it.
+        int playerCount = this.waitingPlayers.size(); // Calculate once so we don't keep calling it.
         boolean enoughForFullGame = playerCount > maxPlayersPerGame;
 
         if(enoughForFullGame) return null;
 
-        double variance = settings.variance() * this.items.lastElement().rank().rank(); // Variance is a percentage of the highest rank
+        double variance = settings.variance() * this.waitingPlayers.lastElement().rank().rank(); // Variance is a percentage of the highest rank
 
         // Attempt to build a game 5 times. If one of the attempts succeeds, we return that and break the loop.
         for (int i = 0; i < 5; i++) {
@@ -66,6 +66,6 @@ public class WinLoss extends Matchmaker<WinLossPlayerRank> {
 
     @Override
     public void completeSort() {
-        WeightedQuickSort.sort(this.items);
+        WeightedQuickSort.sort(this.waitingPlayers);
     }
 }
