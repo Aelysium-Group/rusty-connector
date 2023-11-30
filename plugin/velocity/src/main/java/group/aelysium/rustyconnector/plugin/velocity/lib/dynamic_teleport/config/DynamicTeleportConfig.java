@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.confi
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -109,7 +109,7 @@ public class DynamicTeleportConfig extends YAML {
             if(anchors.size() != 0)
                 for (ConfigurationNode entry: anchors)
                     this.familyAnchor_anchors.add(Map.entry(
-                            this.getNode(entry, "name", String.class),
+                            this.getNode(entry, "id", String.class),
                             this.getNode(entry, "family", String.class)
                     ));
         }

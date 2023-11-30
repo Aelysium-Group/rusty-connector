@@ -1,25 +1,22 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.lang;
 
-import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ServerConnection;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.lang.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
-import group.aelysium.rustyconnector.core.lib.lang.resolver.LanguageResolver;
-import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.core.lib.lang.LanguageResolver;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -29,7 +26,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.kyori.adventure.text.Component.*;
@@ -270,10 +266,10 @@ public class VelocityLang extends Lang {
             SPACING,
             BORDER,
             SPACING,
-            text("/rc send <username> <family name>", GOLD),
+            text("/rc send <username> <family id>", GOLD),
             resolver().get("velocity.send.usage.family"),
             SPACING,
-            text("/rc send server <username> <server name>", GOLD),
+            text("/rc send server <username> <server id>", GOLD),
             resolver().getArray("velocity.send.usage.server"),
             SPACING,
             BORDER
@@ -333,11 +329,11 @@ public class VelocityLang extends Lang {
     public final static Message RC_FAMILY = () -> {
         Tinder api = Tinder.get();
         Component families = text("");
-        for (BaseServerFamily family : api.services().familyService().dump()) {
-            if(family instanceof ScalarServerFamily)
-                families = families.append(text("[ "+family.name()+" ] ").color(GOLD));
-            if(family instanceof StaticServerFamily)
-                families = families.append(text("[ "+family.name()+" ] ").color(DARK_GREEN));
+        for (Family family : api.services().family().dump()) {
+            if(family instanceof ScalarFamily)
+                families = families.append(text("[ "+family.id()+" ] ").color(GOLD));
+            if(family instanceof StaticFamily)
+                families = families.append(text("[ "+family.id()+" ] ").color(DARK_GREEN));
         }
 
         return join(
@@ -353,7 +349,7 @@ public class VelocityLang extends Lang {
                 SPACING,
                 BORDER,
                 SPACING,
-                text("/rc family <family name>",DARK_AQUA),
+                text("/rc family <family id>",DARK_AQUA),
                 resolver().get("velocity.family.details_usage"),
                 SPACING,
                 BORDER
@@ -373,14 +369,14 @@ public class VelocityLang extends Lang {
             BORDER
     );
 
-    public final static ParameterizedMessage1<ScalarServerFamily> RC_SCALAR_FAMILY_INFO = (family) -> {
+    public final static ParameterizedMessage1<ScalarFamily> RC_SCALAR_FAMILY_INFO = (family) -> {
         Component servers = text("");
         int i = 0;
 
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
         else if(family.loadBalancer().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_unlocked_servers");
-        else for (PlayerServer server : family.loadBalancer().dump()) {
+        else for (MCLoader server : family.loadBalancer().dump()) {
                 if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
@@ -399,10 +395,10 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
-        String parentFamilyName = rootFamily.name();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
+        String parentFamilyName = rootFamily.id();
         try {
-            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+            parentFamilyName = Objects.requireNonNull(family.parent()).id();
         } catch (Exception ignore) {}
         if(family.equals(rootFamily)) parentFamilyName = "none";
 
@@ -410,7 +406,7 @@ public class VelocityLang extends Lang {
                 newlines(),
                 BORDER,
                 SPACING,
-                ASCIIAlphabet.generate(family.name(), AQUA),
+                ASCIIAlphabet.generate(family.id(), AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
@@ -421,7 +417,7 @@ public class VelocityLang extends Lang {
                         LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
                         LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
                         LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
                 ),
@@ -430,13 +426,13 @@ public class VelocityLang extends Lang {
                 SPACING,
                 resolver().get("velocity.family.scalar_family.panel.registered_servers"),
                 SPACING,
-                text("/rc family <family name> sort", GOLD),
+                text("/rc family <family id> sort", GOLD),
                 resolver().get("velocity.family.scalar_family.panel.commands.sort"),
                 SPACING,
-                text("/rc family <family name> resetIndex", GOLD),
+                text("/rc family <family id> resetIndex", GOLD),
                 resolver().get("velocity.family.scalar_family.panel.commands.reset_index"),
                 SPACING,
-                text("/rc family <family name> locked", GOLD),
+                text("/rc family <family id> locked", GOLD),
                 resolver().get("velocity.family.scalar_family.panel.commands.locked"),
                 SPACING,
                 servers,
@@ -445,14 +441,14 @@ public class VelocityLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<ScalarServerFamily> RC_SCALAR_FAMILY_INFO_LOCKED = (family) -> {
+    public final static ParameterizedMessage1<ScalarFamily> RC_SCALAR_FAMILY_INFO_LOCKED = (family) -> {
         Component servers = text("");
         int i = 0;
 
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
         else if(family.lockedServers().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_locked_servers");
-        else for (PlayerServer server : family.lockedServers()) {
+        else for (MCLoader server : family.lockedServers()) {
                 servers = servers.append(
                         text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
                                         "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
@@ -464,10 +460,10 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
-        String parentFamilyName = rootFamily.name();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
+        String parentFamilyName = rootFamily.id();
         try {
-            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+            parentFamilyName = Objects.requireNonNull(family.parent()).id();
         } catch (Exception ignore) {}
         if(family.equals(rootFamily)) parentFamilyName = "none";
 
@@ -475,7 +471,7 @@ public class VelocityLang extends Lang {
                 newlines(),
                 BORDER,
                 SPACING,
-                ASCIIAlphabet.generate(family.name(), AQUA),
+                ASCIIAlphabet.generate(family.id(), AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
@@ -486,7 +482,7 @@ public class VelocityLang extends Lang {
                         LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
                         LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
                         LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
                 ),
@@ -495,13 +491,13 @@ public class VelocityLang extends Lang {
                 SPACING,
                 resolver().get("velocity.family.scalar_family.panel.registered_servers"),
                 SPACING,
-                text("/rc family <family name> sort", GOLD),
+                text("/rc family <family id> sort", GOLD),
                 resolver().get("velocity.family.scalar_family.panel.commands.sort"),
                 SPACING,
-                text("/rc family <family name> resetIndex", GOLD),
+                text("/rc family <family id> resetIndex", GOLD),
                 resolver().get("velocity.family.scalar_family.panel.commands.reset_index"),
                 SPACING,
-                text("/rc family <family name> locked", GOLD),
+                text("/rc family <family id> locked", GOLD),
                 resolver().get("velocity.family.scalar_family.panel.commands.locked"),
                 SPACING,
                 servers,
@@ -510,14 +506,14 @@ public class VelocityLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<StaticServerFamily> RC_STATIC_FAMILY_INFO = (family) -> {
+    public final static ParameterizedMessage1<StaticFamily> RC_STATIC_FAMILY_INFO = (family) -> {
         Component servers = text("");
         int i = 0;
 
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
         else if(family.loadBalancer().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_unlocked_servers");
-        else for (PlayerServer server : family.loadBalancer().dump()) {
+        else for (MCLoader server : family.loadBalancer().dump()) {
                 if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
@@ -536,10 +532,10 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
-        String parentFamilyName = rootFamily.name();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
+        String parentFamilyName = rootFamily.id();
         try {
-            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+            parentFamilyName = Objects.requireNonNull(family.parent()).id();
         } catch (Exception ignore) {}
         if(family.equals(rootFamily)) parentFamilyName = "none";
 
@@ -551,7 +547,7 @@ public class VelocityLang extends Lang {
                 newlines(),
                 BORDER,
                 SPACING,
-                ASCIIAlphabet.generate(family.name(), AQUA),
+                ASCIIAlphabet.generate(family.id(), AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
@@ -563,7 +559,7 @@ public class VelocityLang extends Lang {
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
                         LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
                         LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
                 ),
@@ -572,13 +568,13 @@ public class VelocityLang extends Lang {
                 SPACING,
                 resolver().get("velocity.family.static_family.panel.registered_servers"),
                 SPACING,
-                text("/rc family <family name> sort", GOLD),
+                text("/rc family <family id> sort", GOLD),
                 resolver().get("velocity.family.static_family.panel.commands.sort"),
                 SPACING,
-                text("/rc family <family name> resetIndex", GOLD),
+                text("/rc family <family id> resetIndex", GOLD),
                 resolver().get("velocity.family.static_family.panel.commands.reset_index"),
                 SPACING,
-                text("/rc family <family name> locked", GOLD),
+                text("/rc family <family id> locked", GOLD),
                 resolver().get("velocity.family.static_family.panel.commands.locked"),
                 SPACING,
                 servers,
@@ -587,14 +583,14 @@ public class VelocityLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<StaticServerFamily> RC_STATIC_FAMILY_INFO_LOCKED = (family) -> {
+    public final static ParameterizedMessage1<StaticFamily> RC_STATIC_FAMILY_INFO_LOCKED = (family) -> {
         Component servers = text("");
         int i = 0;
 
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
         else if(family.lockedServers().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_locked_servers");
-        else for (PlayerServer server : family.lockedServers()) {
+        else for (MCLoader server : family.lockedServers()) {
                 servers = servers.append(
                         text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
                                         "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
@@ -606,10 +602,10 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        RootServerFamily rootFamily = Tinder.get().services().familyService().rootFamily();
-        String parentFamilyName = rootFamily.name();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
+        String parentFamilyName = rootFamily.id();
         try {
-            parentFamilyName = Objects.requireNonNull(family.parent().get()).name();
+            parentFamilyName = Objects.requireNonNull(family.parent()).id();
         } catch (Exception ignore) {}
 
         LiquidTimestamp expiration = family.homeServerExpiration();
@@ -620,7 +616,7 @@ public class VelocityLang extends Lang {
                 newlines(),
                 BORDER,
                 SPACING,
-                ASCIIAlphabet.generate(family.name(), AQUA),
+                ASCIIAlphabet.generate(family.id(), AQUA),
                 SPACING,
                 BORDER,
                 SPACING,
@@ -632,7 +628,7 @@ public class VelocityLang extends Lang {
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
                         LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
                         LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.isWeighted()),
+                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
                         LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
                         LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
                 ),
@@ -641,13 +637,13 @@ public class VelocityLang extends Lang {
                 SPACING,
                 resolver().get("velocity.family.static_family.panel.registered_servers"),
                 SPACING,
-                text("/rc family <family name> sort", GOLD),
+                text("/rc family <family id> sort", GOLD),
                 resolver().get("velocity.family.static_family.panel.commands.sort"),
                 SPACING,
-                text("/rc family <family name> resetIndex", GOLD),
+                text("/rc family <family id> resetIndex", GOLD),
                 resolver().get("velocity.family.static_family.panel.commands.reset_index"),
                 SPACING,
-                text("/rc family <family name> locked", GOLD),
+                text("/rc family <family id> locked", GOLD),
                 resolver().get("velocity.family.static_family.panel.commands.locked"),
                 SPACING,
                 servers,
@@ -679,7 +675,7 @@ public class VelocityLang extends Lang {
     public final static ParameterizedMessage1<String> TPA_FAILURE_NO_REQUEST = username -> resolver().get("velocity.tpa.no_requests", LanguageResolver.tagHandler("username", username));
     public final static ParameterizedMessage1<String> TPA_REQUEST_DUPLICATE = username -> resolver().get("velocity.tpa.pending_request", LanguageResolver.tagHandler("username", username));
 
-    public final static ParameterizedMessage1<Player> TPA_REQUEST_QUERY = (sender) -> join(
+    public final static ParameterizedMessage1<com.velocitypowered.api.proxy.Player> TPA_REQUEST_QUERY = (sender) -> join(
             newlines(),
             resolver().get("velocity.tpa.target_query.query", LanguageResolver.tagHandler("username", sender.getUsername())),
             join(
@@ -699,14 +695,14 @@ public class VelocityLang extends Lang {
 
     public final static Component HUB_CONNECTION_FAILED = resolver().get("velocity.hub.connection_failed");
 
-    public final static ParameterizedMessage2<Party, Player> PARTY_BOARD = (party, member) -> {
+    public final static ParameterizedMessage2<Party, com.velocitypowered.api.proxy.Player> PARTY_BOARD = (party, member) -> {
         boolean hasParty = party != null;
 
         if(hasParty) {
             boolean isLeader = party.leader().equals(member);
             boolean canInvite;
             try {
-                boolean onlyLeaderCanInvite = Tinder.get().services().partyService().orElseThrow().settings().onlyLeaderCanInvite();
+                boolean onlyLeaderCanInvite = Tinder.get().services().party().orElseThrow().settings().onlyLeaderCanInvite();
                 canInvite = !onlyLeaderCanInvite || isLeader;
             } catch (Exception ignore) {
                 canInvite = isLeader;
@@ -847,7 +843,7 @@ public class VelocityLang extends Lang {
     public final static Component PARTY_LEFT_SELF = resolver().get("velocity.party.left_self");
     public final static Component PARTY_CREATE_ALREADY_IN_PARTY = resolver().get("velocity.party.create.already_in_party");
     public final static Component PARTY_CREATE_NO_SERVER = resolver().get("velocity.party.create.no_server");
-    public final static ParameterizedMessage1<Player> PARTY_STATUS_PROMOTED = (player) -> resolver().get(
+    public final static ParameterizedMessage1<com.velocitypowered.api.proxy.Player> PARTY_STATUS_PROMOTED = (player) -> resolver().get(
             "velocity.party.status_promoted",
             LanguageResolver.tagHandler("username", player.getUsername())
     );
@@ -872,13 +868,13 @@ public class VelocityLang extends Lang {
 
     public final static ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
         Tinder api = Tinder.get();
-        FriendsService friendsService = api.services().friendsService().orElseThrow();
+        FriendsService friendsService = api.services().friends().orElseThrow();
         int maxFriends = friendsService.settings().maxFriends();
         player.sendMessage(resolver().get("velocity.friends.panel.pending"));
 
         boolean isPartyEnabled = false;
         try {
-            api.services().partyService().orElseThrow();
+            api.services().party().orElseThrow();
             isPartyEnabled = true;
         } catch (Exception ignore) {}
         boolean finalIsPartyEnabled = isPartyEnabled;
@@ -886,7 +882,7 @@ public class VelocityLang extends Lang {
         boolean isFriendMessagingEnabled = friendsService.settings().allowMessaging();
         boolean canSeeFriendFamilies = friendsService.settings().showFamilies();
 
-        List<ResolvablePlayer> friends = friendsService.findFriends(player).orElse(null);
+        List<Player> friends = friendsService.findFriends(player).orElse(null);
 
         if(friends != null && friends.size() != 0) {
             final Component[] playersList = {text("")};
@@ -910,7 +906,7 @@ public class VelocityLang extends Lang {
                 }
 
 
-                Player resolvedFriend = friend.resolve().orElse(null);
+                com.velocitypowered.api.proxy.Player resolvedFriend = friend.resolve().orElse(null);
                 if(resolvedFriend == null) {
                     playersList[0] = playersList[0].append(text(friend.username(), GRAY).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.offline"))));
                     return;
@@ -920,9 +916,9 @@ public class VelocityLang extends Lang {
                     return;
                 }
 
-                PlayerServer playerServer = api.services().serverService().search(resolvedFriend.getCurrentServer().get().getServerInfo());
+                MCLoader mcLoader = new MCLoader.Reference(resolvedFriend.getCurrentServer().orElseThrow().getServerInfo()).get();
                 if(canSeeFriendFamilies)
-                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.currently_playing", LanguageResolver.tagHandler("family_name", playerServer.family().name())))));
+                    playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.currently_playing", LanguageResolver.tagHandler("family_name", mcLoader.family().displayName())))));
                 else
                     playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(resolver().get("velocity.friends.panel.online"))));
             });
@@ -945,7 +941,7 @@ public class VelocityLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<Player> FRIEND_REQUEST = (sender) -> join(
+    public final static ParameterizedMessage1<com.velocitypowered.api.proxy.Player> FRIEND_REQUEST = (sender) -> join(
             newlines(),
             resolver().get("velocity.friends.friend_request_query.query", LanguageResolver.tagHandler("username", sender.getUsername())),
             join(
@@ -955,15 +951,15 @@ public class VelocityLang extends Lang {
             )
     );
     public final static ParameterizedMessage1<Player> FRIEND_JOIN = (player) -> {
-        FriendsService friendsService = Tinder.get().services().friendsService().orElseThrow();
+        FriendsService friendsService = Tinder.get().services().friends().orElseThrow();
 
         if(friendsService.settings().allowMessaging())
-            return resolver().get("velocity.friends.friend_joined.resolved", LanguageResolver.tagHandler("username", player.getUsername()));
+            return resolver().get("velocity.friends.friend_joined.resolved", LanguageResolver.tagHandler("username", player.username()));
         else
-            return resolver().get("velocity.friends.friend_joined.regular", LanguageResolver.tagHandler("username", player.getUsername()));
+            return resolver().get("velocity.friends.friend_joined.regular", LanguageResolver.tagHandler("username", player.username()));
     };
     public final static ParameterizedMessage1<Player> FRIEND_LEAVE = (player) ->
-            resolver().get("velocity.friends.friend_leaves", LanguageResolver.tagHandler("username", player.getUsername()));
+            resolver().get("velocity.friends.friend_leaves", LanguageResolver.tagHandler("username", player.username()));
     public final static Message FRIEND_REQUEST_USAGE = () -> text(USAGE+": /friend requests <username> <accept / ignore>",RED);
     public final static ParameterizedMessage1<String> BECOME_FRIENDS = (username) ->
             resolver().get("velocity.friends.become_friends", LanguageResolver.tagHandler("username", username));
@@ -1061,7 +1057,7 @@ public class VelocityLang extends Lang {
                     " "+ resolver().get("velocity.console_icons.unregistered") +" "+familyName
     );
 
-    public final static ParameterizedMessage1<BaseServerFamily> FAMILY_BALANCING = family -> text(
-            family.name() + " " + resolver().get("velocity.console_icons.family_balancing")
+    public final static ParameterizedMessage1<Family> FAMILY_BALANCING = family -> text(
+            family.id() + " " + resolver().get("velocity.console_icons.family_balancing")
     );
 }

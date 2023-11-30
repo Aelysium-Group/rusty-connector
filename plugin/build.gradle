@@ -21,6 +21,7 @@ allprojects {
         maven { url = "https://hub.spigotmc.org/nexus/content/groups/public/" }
         maven { url = "https://oss.sonatype.org/content/groups/public/" }
         maven { url = "https://papermc.io/repo/repository/maven-public/" }
+        maven { url = "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
     }
 }
 
@@ -45,12 +46,13 @@ configurations {
 }
 
 dependencies{
+    modules project(':toolkit')
     modules project(':core')
     modules project(':paper')
     modules project(':velocity')
 }
 
-def projects = [":core", ":paper", ":velocity"]
+def projects = [":toolkit", ":core", ":paper", ":velocity"]
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn(projects.collect {it + ":shadowJar"} )

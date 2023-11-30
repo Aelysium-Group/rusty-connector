@@ -1,38 +1,41 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateHandler;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderFlame;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
-import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
+import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
+import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicTeleportService;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.MagicLink_PingResponseHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.packet_builder.PacketBuilderService;
+import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.paper.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
-import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;
-import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers.MagicLink_PingResponseHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.PacketBuilderService;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.bukkit.Bukkit;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -42,10 +45,10 @@ import java.util.*;
 /**
  * The core module of RustyConnector.
  * All aspects of the plugin should be accessible from here.
- * If not, check {@link Tinder}.
+ * If not, check {@link MCLoaderTinder}.
  */
-public class Flame extends ServiceableService<CoreServiceHandler> {
-    private int configVersion;
+public class Flame extends MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> {
+    private final int configVersion;
     private final String version;
 
     /**
@@ -60,27 +63,18 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
         this.backbone = messenger;
     }
 
-    public String version() { return this.version; }
+    public String versionAsString() { return this.version; }
     public int configVersion() { return this.configVersion; }
 
-    public MessengerConnector<? extends MessengerConnection> backbone() {
-        return this.backbone;
-    }
-
-    /**
-     * Returns the currently active RustyConnector kernel.
-     * This is exactly identical to calling {@link Tinder#get()}{@link Tinder#flame() .flame()}.
-     * @return A {@link Flame}.
-     */
-    public static Flame get() {
-        return Tinder.get().flame();
+    public RedisConnector backbone() {
+        return (RedisConnector) this.backbone;
     }
 
     /**
      * Kill the {@link Flame}.
      * Typically good for if you want to ignite a new one.
      */
-    public void exhaust(PaperRustyConnector plugin) {
+    public void exhaust() {
         this.kill();
     }
 
@@ -89,7 +83,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static Flame fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
+    public static MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
         Initialize initialize = new Initialize();
 
         try {
@@ -128,7 +122,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
  */
 class Initialize {
     private final Tinder api = Tinder.get();
-    private final PluginLogger logger = Tinder.get().logger();
+    private final PluginLogger logger = api.logger();
     private final Map<Class<? extends Service>, Service> services = new HashMap<>();
     private final List<Component> bootOutput = new ArrayList<>();
 
@@ -148,7 +142,7 @@ class Initialize {
 
     public String version() {
         try {
-            InputStream stream = Tinder.get().resourceAsStream("plugin.yml");
+            InputStream stream = MCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()
@@ -167,7 +161,7 @@ class Initialize {
 
     public int configVersion() {
         try {
-            InputStream stream = Tinder.get().resourceAsStream("plugin.yml");
+            InputStream stream = MCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()
@@ -225,8 +219,10 @@ class Initialize {
         RedisConnection connection = messenger.connection().orElseThrow();
 
         Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
-        handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler());
-        handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler());
+        handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler(this.api));
+        handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler(this.api));
+
+        handlers.put(PacketType.ASSOCIATE_RANKED_GAME, new RankedGameAssociateHandler(this.api));
         connection.startListening(cacheService, logger, handlers, originAddress);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
@@ -245,13 +241,16 @@ class Initialize {
     }
 
     public ServerInfoService serverInfo(DefaultConfig defaultConfig) {
+        InetSocketAddress address = null;
+        try {
+            address = AddressUtil.parseAddress(defaultConfig.address());
+        } catch (Exception ignore) {}
+
         ServerInfoService serverInfoService = new ServerInfoService(
-                defaultConfig.getServer_name(),
-                AddressUtil.parseAddress(defaultConfig.getServer_address()),
-                defaultConfig.getServer_family(),
-                defaultConfig.getServer_playerCap_soft(),
-                defaultConfig.getServer_playerCap_hard(),
-                defaultConfig.getServer_weight()
+                address,
+                defaultConfig.magicConfig(),
+                defaultConfig.magicInterfaceResolver(),
+                Bukkit.getPort()
         );
         services.put(ServerInfoService.class, serverInfoService);
 

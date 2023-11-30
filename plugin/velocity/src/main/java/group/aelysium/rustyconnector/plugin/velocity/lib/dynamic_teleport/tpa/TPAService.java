@@ -1,33 +1,34 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAService;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.TPAServiceSettings;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 
-public class TPAService extends ServiceableService<TPAServiceHandler> {
-    private final TPASettings settings;
-    private final Map<BaseServerFamily<?>, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
+public class TPAService implements ITPAService<TPACleaningService, MCLoader, Player, Family, TPARequest, TPAHandler> {
+    private final TPACleaningService cleaningService;
+    private final TPAServiceSettings settings;
+    private final Map<Family, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
 
-    public TPAService(TPASettings settings) {
-        super(new TPAServiceHandler());
-        this.services.add(new TPACleaningService(settings.expiration()));
+    public TPAService(TPAServiceSettings settings) {
+        this.cleaningService = new TPACleaningService(settings.expiration());
         this.settings = settings;
     }
     public void initCommand(DependencyInjector.DI3<FamilyService, ServerService, List<Component>> dependencies) {
@@ -51,11 +52,14 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         bootOutput.add(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
     }
 
-    public TPASettings settings() {
+    public TPAServiceSettings settings() {
         return this.settings;
     }
+    public TPACleaningService cleaner() {
+        return this.cleaningService;
+    }
 
-    public TPAHandler tpaHandler(BaseServerFamily<?> family) {
+    public TPAHandler tpaHandler(Family family) {
         TPAHandler tpaHandler = this.tpaHandlers.get(family);
         if(tpaHandler == null) {
             TPAHandler newTPAHandler = new TPAHandler();
@@ -76,7 +80,7 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
      * @param targetServer The server to send the player to.
      * @throws NullPointerException If the server doesn't exist in the family.
      */
-    public void tpaSendPlayer(Player source, Player target, PlayerServer targetServer) {
+    public void tpaSendPlayer(com.velocitypowered.api.proxy.Player source, com.velocitypowered.api.proxy.Player target, MCLoader targetServer) {
         Tinder api = Tinder.get();
 
         CoordinateRequestQueuePacket message = (CoordinateRequestQueuePacket) new GenericPacket.Builder()
@@ -88,11 +92,11 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
                 .setParameter(CoordinateRequestQueuePacket.ValidParameters.SOURCE_USERNAME, source.getUsername())
                 .buildSendable();
 
-        MessengerConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
+        RedisConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
         backboneMessenger.publish(message);
 
         try {
-            PlayerServer senderServer = api.services().serverService().search(source.getCurrentServer().orElseThrow().getServerInfo());
+            MCLoader senderServer = new MCLoader.Reference(source.getCurrentServer().orElseThrow().getServerInfo()).get();
 
             if (senderServer.equals(targetServer)) return;
         } catch (Exception ignore) {}
@@ -104,11 +108,10 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
         }
     }
 
-    @Override
     public void kill() {
         this.allTPAHandlers().forEach(TPAHandler::decompose);
         this.tpaHandlers.clear();
-        super.kill();
+        this.cleaningService.kill();
 
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         commandManager.unregister("tpa");

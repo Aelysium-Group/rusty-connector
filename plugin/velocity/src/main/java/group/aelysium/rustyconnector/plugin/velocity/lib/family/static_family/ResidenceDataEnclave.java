@@ -1,34 +1,32 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ResolvableFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IResidenceDataEnclave;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
-import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
-public class ResidenceDataEnclave {
+public class ResidenceDataEnclave implements IResidenceDataEnclave<MCLoader, Player, Player.UUIDReference, StaticFamily> {
     private final MySQLStorage storage;
 
     public ResidenceDataEnclave(MySQLStorage storage) {
         this.storage = storage;
     }
 
-    public Optional<ServerResidence> fetch(Player player, StaticServerFamily family) {
+    public Optional<ServerResidence> fetch(Player.UUIDReference player, StaticFamily family) {
         try {
             StorageRoot root = this.storage.root();
 
             Optional<ServerResidence> serverResidence = root.residence().stream()
                 .filter(residence ->
-                    residence.rawPlayer().equals(ResolvablePlayer.from(player)) &&
-                    residence.rawFamily().equals(ResolvableFamily.from(family))
+                    residence.rawPlayer().equals(player) &&
+                    residence.family().equals(family)
                 )
                 .findAny();
 
@@ -40,28 +38,28 @@ public class ResidenceDataEnclave {
 
         return Optional.empty();
     }
-    public void save(Player player, PlayerServer server, StaticServerFamily family)  {
+    public void save(Player.UUIDReference player, MCLoader server, StaticFamily family)  {
         StorageRoot root = this.storage.root();
 
         ServerResidence serverResidence = new ServerResidence(player, server, family, family.homeServerExpiration());
 
-        List<ServerResidence> residences = root.residence();
+        Set<ServerResidence> residences = root.residence();
         residences.add(serverResidence);
         this.storage.store(residences);
     }
-    public void delete(Player player, StaticServerFamily family) {
+    public void delete(Player.UUIDReference player, StaticFamily family) {
         StorageRoot root = this.storage.root();
 
-        List<ServerResidence> residences = root.residence();
+        Set<ServerResidence> residences = root.residence();
         residences.removeIf(residence ->
-                residence.rawPlayer().equals(ResolvablePlayer.from(player)) &&
-                residence.rawFamily().equals(ResolvableFamily.from(family))
+                residence.rawPlayer().equals(player) &&
+                residence.family().equals(family)
         );
 
         this.storage.store(residences);
     }
 
-    public void updateExpirations(LiquidTimestamp expiration, StaticServerFamily family) throws Exception {
+    public void updateExpirations(LiquidTimestamp expiration, StaticFamily family) throws Exception {
         if(expiration == null)
             updateValidExpirations(family);
         else
@@ -72,13 +70,13 @@ public class ResidenceDataEnclave {
      * Deletes all mappings that are expired.
      * @param family The family to search in.
      */
-    protected void purgeExpired(StaticServerFamily family) {
+    public void purgeExpired(StaticFamily family) {
         StorageRoot root = this.storage.root();
 
-        List<ServerResidence> residenceList = root.residence();
+        Set<ServerResidence> residenceList = root.residence();
         residenceList.removeIf(serverResidence ->
                 serverResidence.expiration() < Instant.EPOCH.getEpochSecond() &&
-                serverResidence.rawFamily().equals(ResolvableFamily.from(family))
+                serverResidence.family().equals(family)
         );
 
         this.storage.store(residenceList);
@@ -89,12 +87,12 @@ public class ResidenceDataEnclave {
      * This will update all null expirations to now expire at delay + NOW();
      * @param family The family to search in.
      */
-    protected void updateNullExpirations(StaticServerFamily family) {
+    protected void updateNullExpirations(StaticFamily family) {
         StorageRoot root = this.storage.root();
 
-        List<ServerResidence> residenceList = root.residence();
+        Set<ServerResidence> residenceList = root.residence();
         residenceList.forEach(serverResidence -> {
-            if(!serverResidence.rawFamily().equals(ResolvableFamily.from(family))) return;
+            if(!serverResidence.family().equals(family)) return;
             serverResidence.expiration(null);
         });
 
@@ -106,12 +104,12 @@ public class ResidenceDataEnclave {
      * This will update all expirations to now never expire;
      * @param family The family to search in.
      */
-    protected void updateValidExpirations(StaticServerFamily family) {
+    protected void updateValidExpirations(StaticFamily family) {
         StorageRoot root = this.storage.root();
 
-        List<ServerResidence> residenceList = root.residence();
+        Set<ServerResidence> residenceList = root.residence();
         residenceList.forEach(serverResidence -> {
-            if(!serverResidence.rawFamily().equals(ResolvableFamily.from(family))) return;
+            if(!serverResidence.family().equals(family)) return;
             serverResidence.expiration(family.homeServerExpiration());
         });
 

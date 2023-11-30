@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
-import group.aelysium.rustyconnector.core.lib.model.ClockService;
-import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPACleaningService;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
-public class TPACleaningService extends ClockService {
+public class TPACleaningService extends ClockService implements ITPACleaningService<TPAService> {
     protected final LiquidTimestamp heartbeat;
 
     public TPACleaningService(LiquidTimestamp heartbeat) {

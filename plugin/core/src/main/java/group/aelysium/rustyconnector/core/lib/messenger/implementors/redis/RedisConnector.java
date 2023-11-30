@@ -1,16 +1,19 @@
 package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 
-import group.aelysium.rustyconnector.core.lib.model.UserPass;
+import group.aelysium.rustyconnector.toolkit.core.UserPass;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
+import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import io.lettuce.core.protocol.ProtocolVersion;
 import io.lettuce.core.resource.ClientResources;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
+import java.util.Optional;
 
-public class RedisConnector extends MessengerConnector<RedisConnection> {
+public class RedisConnector extends MessengerConnector<RedisConnection> implements IMessengerConnector<RedisConnection> {
     private static final ClientResources resources = ClientResources.create();
     protected final String dataChannel;
     protected final ProtocolVersion protocolVersion;
@@ -54,4 +57,20 @@ public class RedisConnector extends MessengerConnector<RedisConnection> {
     }
 
     public record RedisConnectorSpec(PacketOrigin origin, InetSocketAddress address, UserPass userPass, ProtocolVersion protocolVersion, String dataChannel) { }
+
+
+    /**
+     * Get the {@link MessengerConnection} created from this {@link MessengerConnector}.
+     * @return An {@link Optional} possibly containing a {@link MessengerConnection}.
+     */
+    @Override
+    public Optional<RedisConnection> connection() {
+        if(this.connection == null) return Optional.empty();
+        return Optional.of(this.connection);
+    }
+
+    @Override
+    public void kill() {
+        if(this.connection != null) this.connection.kill();
+    }
 }
