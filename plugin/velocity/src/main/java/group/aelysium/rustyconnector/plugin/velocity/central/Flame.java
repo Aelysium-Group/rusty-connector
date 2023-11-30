@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicLinkConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.handlers.RankedGameEndHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -47,7 +47,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsC
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingClock;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers.MagicLinkPingHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.MagicLinkPingHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.LockServerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.SendPlayerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.UnlockServerHandler;

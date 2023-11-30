@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers;
+package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicLinkConfig;

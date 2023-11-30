@@ -4,7 +4,7 @@ import de.gesundkrank.jskills.IPlayer;
 import de.gesundkrank.jskills.Team;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.IRanker;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
@@ -18,9 +18,8 @@ public class RankedTeam implements IRanker, ISortable {
         this.settings = settings;
     }
 
-    public void join(RankablePlayer player) throws AccessDeniedException {
+    public void join(RankedPlayer player) throws AccessDeniedException {
         if(this.full()) throw new AccessDeniedException("This team is full!");
-        this.team.addPlayer(player.player(), player.scorecard().rating());
     }
 
     public boolean full() {

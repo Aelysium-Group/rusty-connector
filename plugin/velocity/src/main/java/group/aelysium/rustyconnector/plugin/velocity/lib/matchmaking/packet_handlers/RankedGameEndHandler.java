@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.handlers;
+package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameEndPacket;
@@ -8,10 +8,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.Ra
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
 
-public class RankedUpdateHandler implements PacketHandler {
+public class RankedGameEndHandler implements PacketHandler {
     protected Tinder api;
 
-    public RankedUpdateHandler(Tinder api) {
+    public RankedGameEndHandler(Tinder api) {
         this.api = api;
     }
 

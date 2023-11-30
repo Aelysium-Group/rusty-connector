@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.ga
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedTeam;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.PlayerRankLadder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 
 import java.util.List;
 import java.util.Objects;
@@ -99,7 +99,7 @@ public class RankedGameManager implements Service {
         throw new NullPointerException("No settings were defined for the game manager!");
     }
 
-    public void queue(RankablePlayer player) {
+    public void queue(RankedPlayer player) {
         this.waitingPlayers.add(player);
     }
 

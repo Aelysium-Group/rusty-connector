@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameAssociatePacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.IRankedGame;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
@@ -35,18 +35,18 @@ public abstract class RankedGame implements IRankedGame {
         return this.ended;
     }
 
-    public List<RankablePlayer> players() {
-        List<RankablePlayer> players = new ArrayList<>();
-        this.teams.forEach(team -> players.add((RankablePlayer) team.players()));
+    public List<RankedPlayer> players() {
+        List<RankedPlayer> players = new ArrayList<>();
+        this.teams.forEach(team -> players.add((RankedPlayer) team.players()));
         return players;
     }
 
     public void connectServer(MCLoader server) {
         Vector<com.velocitypowered.api.proxy.Player> kickedPlayers = new Vector<>();
 
-        for (RankablePlayer rankablePlayer : this.players()) {
+        for (RankedPlayer rankedPlayer : this.players()) {
             try {
-                Player player = rankablePlayer.player().resolve().orElseThrow();
+                Player player = rankedPlayer.player().resolve().orElseThrow();
                 try {
                     server.directConnect(player);
                 } catch (ConnectException e) {
@@ -107,16 +107,5 @@ public abstract class RankedGame implements IRankedGame {
          * Represents NvN teams where teams compete against eachother.
          */
         CO_OP
-    }
-
-    public enum ScoringType {
-        /**
-         * Based off of racing: 1st, 2nd, 3rd, etc.
-         */
-        PLACEMENT,
-        /**
-         * Players that collect the most points win.
-         */
-        POINTS,
     }
 }

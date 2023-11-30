@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.PlayerRankLadder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import net.kyori.adventure.text.Component;
 
@@ -52,7 +52,7 @@ public class RankedMatchmaker extends ClockService {
      * @param variance The variance that's allowed for the players to be a part of this game.
      * @throws IndexOutOfBoundsException When a player's rank is outside the variance allowed.
      */
-    protected void createGame(List<RankablePlayer> players, double variance) {
+    protected void createGame(List<RankedPlayer> players, double variance) {
         int middle = (int) Math.round(players.size() * 0.5);
         double pivot = players.get(middle).scorecard().rating().getConservativeRating();
         double bottom = players.get(0).scorecard().rating().getConservativeRating();
@@ -85,9 +85,9 @@ public class RankedMatchmaker extends ClockService {
      */
     protected void handleMultiplePartitions(PlayerRankLadder.PartitionQuery query) {
         try {
-            List<List<RankablePlayer>> partitions = owner.gameManager().playerQueue().partition(query);
+            List<List<RankedPlayer>> partitions = owner.gameManager().playerQueue().partition(query);
 
-            for (List<RankablePlayer> partition : partitions) {
+            for (List<RankedPlayer> partition : partitions) {
                 if (partition.size() < query.min()) continue;
 
                 try {
@@ -109,7 +109,7 @@ public class RankedMatchmaker extends ClockService {
 
 
                 this.waitingPlayers.sort();
-                List<RankablePlayer> players = this.waitingPlayers.players();
+                List<RankedPlayer> players = this.waitingPlayers.players();
 
                 if (players.size() <= max) {
                     this.createGame(this.waitingPlayers.players(), variance);

@@ -1,17 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 
 import java.util.*;
 
 public class RankedTeamGame extends RankedGame {
     protected final Settings settings;
 
-    protected RankedTeamGame(Settings settings, List<RankablePlayer> players) {
+    protected RankedTeamGame(Settings settings, List<RankedPlayer> players) {
         this.settings = settings;
         this.teams = settings.createTeams();
 
-        for (RankablePlayer player : players)
+        for (RankedPlayer player : players)
             for (RankedTeam team : this.teams) {
                 try {
                     team.join(player);
@@ -22,7 +22,7 @@ public class RankedTeamGame extends RankedGame {
             }
     }
 
-    public static RankedTeamGame startNew(Settings settings, List<RankablePlayer> players) {
+    public static RankedTeamGame startNew(Settings settings, List<RankedPlayer> players) {
         return new RankedTeamGame(settings, players);
     }
 

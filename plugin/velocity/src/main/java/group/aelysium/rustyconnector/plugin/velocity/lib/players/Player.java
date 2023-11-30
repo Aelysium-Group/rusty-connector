@@ -4,17 +4,17 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.RankablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players.ScoreCard;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import net.kyori.adventure.text.Component;
-import one.microstream.reference.Lazy;
 
 import java.util.*;
 
-public class Player implements IPlayer, de.gesundkrank.jskills.IPlayer {
+public class Player implements IPlayer {
     protected UUID uuid;
     protected String username;
-    protected Lazy<List<ScoreCard>> ranks = Lazy.Reference(null);
+    protected long firstLogin;
+    protected long lastLogin;
 
     protected Player(UUID uuid, String username) {
         this.uuid = uuid;
@@ -23,31 +23,6 @@ public class Player implements IPlayer, de.gesundkrank.jskills.IPlayer {
 
     public UUID uuid() { return this.uuid; }
     public String username() { return this.username; }
-
-    public Optional<List<ScoreCard>> scorecards() {
-        List<ScoreCard> ranks = Lazy.get(this.ranks);
-
-        if(ranks == null) return Optional.empty();
-        return Optional.of(ranks);
-    }
-
-    public ScoreCard scorecard(String game) {
-        List<ScoreCard> ranks = Lazy.get(this.ranks);
-        if(ranks == null)
-            ranks = new ArrayList<>();
-
-        Optional<ScoreCard> scorecard = ranks.stream().filter(rank -> rank.game().equals(game)).findAny();
-        if(scorecard.isEmpty()) {
-            scorecard = Optional.of(ScoreCard.create(game));
-            ranks.add(scorecard.get());
-
-            // Store the new scorecard
-            this.ranks = Lazy.Reference(ranks);
-            Tinder.get().services().storage().store(this);
-        }
-
-        return scorecard.get();
-    }
 
     public void sendMessage(Component message) {
         try {
@@ -59,16 +34,6 @@ public class Player implements IPlayer, de.gesundkrank.jskills.IPlayer {
         try {
             this.resolve().orElseThrow().disconnect(reason);
         } catch (Exception ignore) {}
-    }
-
-    /**
-     * Fetches the ranked profile of this player.
-     * @param game The game to fetch the rank for.
-     * @return {@link RankablePlayer}
-     */
-    public RankablePlayer ranked(String game) {
-        ScoreCard scorecard = this.scorecard(game);
-        return new RankablePlayer(this, scorecard);
     }
 
     public Optional<com.velocitypowered.api.proxy.Player> resolve() {

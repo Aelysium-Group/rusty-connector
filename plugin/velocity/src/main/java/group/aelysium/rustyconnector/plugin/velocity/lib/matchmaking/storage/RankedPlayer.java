@@ -1,6 +1,6 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.players;
+package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 
-import de.gesundkrank.jskills.IPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -10,13 +10,13 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import java.util.Objects;
 import java.util.Optional;
 
-public class RankablePlayer implements ISortable, IPlayer {
+public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortable {
     protected Player player;
-    protected ScoreCard scorecard;
+    protected TPlayerRank rank;
 
-    public RankablePlayer(Player player, ScoreCard scorecard) {
+    public RankedPlayer(Player player, TPlayerRank rank) {
         this.player = player;
-        this.scorecard = scorecard;
+        this.rank = rank;
     }
 
     public Optional<Party> party() {
@@ -32,13 +32,13 @@ public class RankablePlayer implements ISortable, IPlayer {
         return player;
     }
 
-    public ScoreCard scorecard() {
-        return scorecard;
+    public TPlayerRank rank() {
+        return this.rank;
     }
 
     @Override
     public double sortIndex() {
-        return this.scorecard().rating().getConservativeRating();
+        return (double) this.rank.rank();
     }
 
     @Override
@@ -56,17 +56,12 @@ public class RankablePlayer implements ISortable, IPlayer {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RankablePlayer that = (RankablePlayer) o;
+        RankedPlayer that = (RankedPlayer) o;
         return Objects.equals(this.player(), that.player());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(player);
-    }
-
-
-    public static RankablePlayer from(Player player, String game) {
-        return new RankablePlayer(player, player.scorecard(game));
     }
 }
