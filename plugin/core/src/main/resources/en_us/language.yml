@@ -60,16 +60,14 @@ velocity:
             list: "<dark_gray>Lists all currently cached messages! As new messages get cached, older ones will be pushed out of the cache.</dark_gray>"
         get:
             usage: "<dark_gray>Pulls a message out of the message cache. If a message is to old it might not be available anymore!</dark_gray>"
-    tp:
-        sender_failure: "<red>Unable to tp to <username>!</red>"
-        self_failure: "<red>You can't teleport to yourself!</red>"
-        not_online: "<red><username> isn't online!</red>"
     tpa:
         usage:
             deny: "<gray>Ignore a tpa request from a user.</gray>"
             accept: "<gray>Accept a tpa request from a user.</gray>"
         sender_failure: "<red>Unable to tpa to <username>!</red>"
         target_failure: "<red>Unable to tpa <username> to you!</red>"
+        self_failure: "<red>You can't teleport to yourself!</red>"
+        not_online: "<red><username> isn't online!</red>"
         no_requests: "<red><username> hasn't sent you any requests!</red>"
         pending_request: "<red>You already have a pending tpa request to <username>!</red>"
         request_confirmation: "<green>You requested to teleport to <username>!</green>"

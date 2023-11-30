@@ -167,7 +167,7 @@ public final class CommandTPA {
                                             context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
                                         }
                                     } catch (NoSuchElementException e) {
-                                        context.getSource().sendMessage(VelocityLang.TP_FAILURE_NO_USERNAME.build(username));
+                                        context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_USERNAME.build(username));
                                     } catch (Exception e) {
                                         context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
                                     }
@@ -254,7 +254,7 @@ public final class CommandTPA {
                                             context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
                                         }
                                     } catch (NoSuchElementException e) {
-                                        context.getSource().sendMessage(VelocityLang.TP_FAILURE_NO_USERNAME.build(username));
+                                        context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_USERNAME.build(username));
                                     } catch (Exception e) {
                                         context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
                                     }
@@ -306,7 +306,7 @@ public final class CommandTPA {
                                 Player targetPlayer = api.velocityServer().getPlayer(username).orElseThrow();
 
                                 if(player.equals(targetPlayer)) {
-                                    player.sendMessage(VelocityLang.TP_FAILURE_SELF_TP);
+                                    player.sendMessage(VelocityLang.TPA_FAILURE_SELF_TP);
                                     return Command.SINGLE_SUCCESS;
                                 }
 
@@ -344,7 +344,7 @@ public final class CommandTPA {
                                     context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
                                 }
                             } catch (NoSuchElementException e) {
-                                context.getSource().sendMessage(VelocityLang.TP_FAILURE_NO_USERNAME.build(username));
+                                context.getSource().sendMessage(VelocityLang.TPA_FAILURE_NO_USERNAME.build(username));
                             } catch (Exception e) {
                                 context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
                             }
