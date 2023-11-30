@@ -114,8 +114,8 @@ public class Party implements IParty<MCLoader> {
     }
 
     public synchronized void connect(MCLoader server) {
-        SwitchPower switchPower = Tinder.get().services().partyService().orElseThrow().settings().switchPower();
-        boolean kickOnSendFailure = Tinder.get().services().partyService().orElseThrow().settings().kickOnSendFailure();
+        SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
+        boolean kickOnSendFailure = Tinder.get().services().party().orElseThrow().settings().kickOnSendFailure();
 
         this.setServer(server);
         Vector<Player> unsentPlayers = new Vector<>();
