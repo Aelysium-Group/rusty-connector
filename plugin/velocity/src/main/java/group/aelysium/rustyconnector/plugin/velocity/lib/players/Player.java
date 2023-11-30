@@ -4,8 +4,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import net.kyori.adventure.text.Component;
 
 import java.util.*;
@@ -79,8 +77,8 @@ public class Player implements IPlayer {
         return new Player(uuid, username);
     }
 
-    public static class UUIDReference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Player, UUID> {
-        public UUIDReference(UUID uuid) {
+    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Player, UUID> {
+        public Reference(UUID uuid) {
             super(uuid);
         }
 

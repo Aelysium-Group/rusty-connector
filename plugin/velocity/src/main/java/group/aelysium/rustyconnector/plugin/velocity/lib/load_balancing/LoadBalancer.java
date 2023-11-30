@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
-    private boolean weighted = false;
-    private boolean persistence = false;
-    private int attempts = 5;
+    private boolean weighted;
+    private boolean persistence;
+    private int attempts;
     protected int index = 0;
     protected List<MCLoader> items = new ArrayList<>();
 

@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.config.RankedFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
@@ -9,7 +11,6 @@ import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.events.RankedFamilyEventFactory;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 
@@ -21,28 +22,23 @@ import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.RAN
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
 public class RankedFamily extends Family {
-    protected RankedFamilyEventFactory eventManager = new RankedFamilyEventFactory();
-    protected RankedGameManager gameManager;
+    protected final Matchmaker<?> matchmaker;
 
     protected RankedFamily(Settings settings) {
         super(settings.id(), new Family.Settings(settings.displayName(), null, settings.parentFamily(), settings.whitelist()), RANKED_FAMILY_META);
-        this.gameManager = new RankedGameManager(settings.matchmakerSettings(), this);
-    }
-
-    public RankedGameManager gameManager() {
-        return this.gameManager;
+        this.matchmaker = settings.matchmaker();
     }
 
     /**
      * Queues a player into this family's matchmaking.
      * The player will be connected once a match has been made.
      * The player's queue to this matchmaker will not timeout.
-     * You must manually call {@link #dequeueConnect(Player)} to remove a player from this queue.
+     * You must manually call {@link #dequeue(Player)} to remove a player from this queue.
      * @param player The player to connect.
      * @return null. Always.
      */
     public MCLoader connect(Player player) {
-        this.gameManager.playerQueue().add(player.ranked(this.gameManager().name()));
+        this.matchmaker.add(player);
         return null;
     }
 
@@ -51,8 +47,8 @@ public class RankedFamily extends Family {
      * If the player is already connected to this family, nothing will happen.
      * @param player The player to dequeue.
      */
-    public void dequeueConnect(Player player) {
-        this.gameManager.playerQueue().remove(player.ranked(this.gameManager().name()));
+    public void dequeue(Player player) {
+        this.matchmaker.remove(player);
     }
 
     /**
@@ -85,6 +81,6 @@ public class RankedFamily extends Family {
             Component displayName,
             Family.Reference parentFamily,
             Whitelist.Reference whitelist,
-            RankedMatchmaker.Settings matchmakerSettings
+            Matchmaker<?> matchmaker
     ) {}
 }

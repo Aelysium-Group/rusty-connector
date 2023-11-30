@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -26,8 +27,24 @@ public class RankedGame {
         return this.name;
     }
 
-    public IPlayerRank<?> playerRank(MySQLStorage storage, Player player) {
-        if(rankingSchema == ScoreCard.RankSchema.RANDOMIZED) return new RandomizedPlayerRank();
+    public <TPlayerRank extends IPlayerRank<?>> RankedPlayer<TPlayerRank> rankedPlayer(MySQLStorage storage, UUID uuid) {
+        ScoreCard scorecard = this.scorecards.get(uuid);
+        if(scorecard == null) {
+            ScoreCard newScorecard = new ScoreCard();
+            this.scorecards.put(uuid, newScorecard);
+
+            storage.store(this.scorecards);
+
+            scorecard = newScorecard;
+        }
+
+        TPlayerRank rank = scorecard.fetch(storage, this.rankingSchema);
+
+        return RankedPlayer.from(uuid, rank);
+    }
+
+    public <TPlayerRank extends IPlayerRank<?>> TPlayerRank playerRank(MySQLStorage storage, Player player) throws IllegalStateException {
+        if(rankingSchema == ScoreCard.RankSchema.RANDOMIZED) return (TPlayerRank) new RandomizedPlayerRank();
 
         ScoreCard scorecard = this.scorecards.get(player.uuid());
         if(scorecard == null) {
@@ -39,10 +56,10 @@ public class RankedGame {
             scorecard = fresh;
         }
 
-        IPlayerRank<?> playerRank = scorecard.get(this.rankingSchema).orElse(null);
+        TPlayerRank playerRank = scorecard.fetch(storage, this.rankingSchema);
         if(playerRank == null) {
             try {
-                IPlayerRank<?> fresh = this.rankingSchema.get().getDeclaredConstructor().newInstance();
+                TPlayerRank fresh = (TPlayerRank) this.rankingSchema.get().getDeclaredConstructor().newInstance();
 
                 scorecard.store(storage, fresh);
 

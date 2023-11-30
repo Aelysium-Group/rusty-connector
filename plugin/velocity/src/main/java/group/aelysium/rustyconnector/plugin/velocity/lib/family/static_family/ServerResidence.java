@@ -7,12 +7,12 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 public class ServerResidence implements IServerResidence {
-    protected Player.UUIDReference player;
+    protected Player.Reference player;
     protected MCLoader.Reference server;
     protected Family.Reference family;
     protected Long expiration;
 
-    public ServerResidence(Player.UUIDReference player, MCLoader server, StaticFamily family, LiquidTimestamp expiration) {
+    public ServerResidence(Player.Reference player, MCLoader server, StaticFamily family, LiquidTimestamp expiration) {
         this.player = player;
         this.server = new MCLoader.Reference(server.serverInfo());
         this.family = new Family.Reference(family.id());
@@ -24,7 +24,7 @@ public class ServerResidence implements IServerResidence {
     public Player player() {
         return this.player.get();
     }
-    public Player.UUIDReference rawPlayer() {
+    public Player.Reference rawPlayer() {
         return this.player;
     }
 

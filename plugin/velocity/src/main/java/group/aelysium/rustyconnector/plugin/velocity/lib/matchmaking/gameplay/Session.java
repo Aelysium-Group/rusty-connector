@@ -1,13 +1,13 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games;
+package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay;
 
-import com.velocitypowered.api.proxy.Player;
-import de.gesundkrank.jskills.*;
+import de.gesundkrank.jskills.ITeam;
+import de.gesundkrank.jskills.TrueSkillCalculator;
 import group.aelysium.rustyconnector.core.lib.algorithm.QuickSort;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameAssociatePacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.IRankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
@@ -16,37 +16,21 @@ import java.rmi.ConnectException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class RankedGame implements IRankedGame {
-    protected List<RankedTeam> teams = new ArrayList<>();
-    protected final GameInfo gameInfo = GameInfo.getDefaultGameInfo();
-    protected UUID uuid = UUID.randomUUID();
-    protected MCLoader server = null;
-    protected boolean ended = false;
+public class Session {
+    protected final UUID uuid = UUID.randomUUID();
+    protected final List<Team> teams;
+    protected MCLoader.Reference server = null;
 
-    public UUID uuid() {
-        return this.uuid;
+    protected Session(List<Team> teams) {
+        this.teams = teams;
     }
 
-    public MCLoader server() {
-        return this.server;
-    }
+    public void connect(MCLoader server) {
+        List<com.velocitypowered.api.proxy.Player> kickedPlayers = new Vector<>();
 
-    public boolean ended() {
-        return this.ended;
-    }
-
-    public List<RankedPlayer> players() {
-        List<RankedPlayer> players = new ArrayList<>();
-        this.teams.forEach(team -> players.add((RankedPlayer) team.players()));
-        return players;
-    }
-
-    public void connectServer(MCLoader server) {
-        Vector<com.velocitypowered.api.proxy.Player> kickedPlayers = new Vector<>();
-
-        for (RankedPlayer rankedPlayer : this.players()) {
+        for (RankedPlayer<?> rankedPlayer : this.players()) {
             try {
-                Player player = rankedPlayer.player().resolve().orElseThrow();
+                com.velocitypowered.api.proxy.Player player = new Player.Reference(rankedPlayer.uuid()).get().resolve().orElseThrow();
                 try {
                     server.directConnect(player);
                 } catch (ConnectException e) {
@@ -62,14 +46,16 @@ public abstract class RankedGame implements IRankedGame {
 
         RankedGameAssociatePacket message = (RankedGameAssociatePacket) new GenericPacket.Builder()
                 .setType(PacketType.ASSOCIATE_RANKED_GAME)
-                .setAddress(this.server.address())
+                .setAddress(server.address())
                 .setOrigin(PacketOrigin.PROXY)
-                .setParameter(RankedGameAssociatePacket.ValidParameters.GAME_UUID, this.uuid().toString())
+                .setParameter(RankedGameAssociatePacket.ValidParameters.GAME_UUID, uuid.toString())
                 .buildSendable();
         Tinder.get().services().messenger().connection().orElseThrow().publish(message);
 
-        this.server = server;
+        this.server = new MCLoader.Reference(server.serverInfo());
     }
+
+
 
     public void end() {
         Tinder api = Tinder.get();
@@ -97,15 +83,44 @@ public abstract class RankedGame implements IRankedGame {
         this.ended = true;
     }
 
-    public enum RankerType {
-        /**
-         * Represents 1v1 teams where every player is for themselves.
-         */
-        SOLO,
+    public List<RankedPlayer<?>> players() {
+        List<RankedPlayer<?>> players = new ArrayList<>();
+
+        this.teams.forEach(team -> players.addAll(team.players()));
+
+        return players;
+    }
+
+    public static class Builder {
+        protected List<Team> teams = new ArrayList<>();
+
+        public Builder teams(List<Team.Settings> settings) {
+            settings.forEach(team -> this.teams.add(new Team(team, new Vector<>())));
+
+            return this;
+        }
 
         /**
-         * Represents NvN teams where teams compete against eachother.
+         * Add a player to the match
+         * @param player The player to add.
+         * @return `true` if the player was added successfully. `false` otherwise.
          */
-        CO_OP
+        public boolean addPlayer(RankedPlayer player) {
+            for (Team team : teams)
+                if(team.add(player)) return true;
+
+            return false;
+        }
+
+        /**
+         * Builds the gamematch.
+         * @return A {@link Session}, or `null` if there are still teams that aren't at least filled to the minimum.
+         */
+        public Session build() {
+            for (Team team : teams)
+                if(!team.satisfactory()) return null;
+
+            return new Session(teams);
+        }
     }
 }

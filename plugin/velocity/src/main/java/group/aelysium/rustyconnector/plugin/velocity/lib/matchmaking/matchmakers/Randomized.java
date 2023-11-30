@@ -1,25 +1,23 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.GameMatch;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Randomized extends MatchMaker<RandomizedPlayerRank> {
+public class Randomized extends Matchmaker<RandomizedPlayerRank> {
     public Randomized(Settings settings) {
         super(settings);
     }
 
     @Override
-    public GameMatch make() {
+    public Session make() {
         if(!minimumPlayersExist()) return null;
         boolean enoughForFullGame = this.items.size() > maxPlayersPerGame;
 
-        GameMatch.Builder builder = new GameMatch.Builder().teams(settings.teams());
+        Session.Builder builder = new Session.Builder().teams(settings.teams());
 
         List<RankedPlayer<RandomizedPlayerRank>> playersToUse = new ArrayList<>();
         for(RankedPlayer<RandomizedPlayerRank> player : this.items) {

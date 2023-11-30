@@ -23,15 +23,31 @@ public class ScoreCard {
         storage.store(ranks);
     }
 
+    /**
+     * Fetches the player's current rank based on the schema provided.
+     * If no rank exists for that schema, will create a new rank entry and return that.
+     * @param schema The schema to search for.
+     * @return {@link TRankHolder}
+     * @param <TRankHolder> The schema to search using.
+     * @throws IllegalStateException If there was a fatal exception while attempting to get the user's rank.
+     */
     @SuppressWarnings("unchecked")
-    public <TRankHolder extends IPlayerRank<?>> Optional<TRankHolder> get(RankSchema.Type<?> schema) {
+    public <TRankHolder extends IPlayerRank<?>> TRankHolder fetch(MySQLStorage storage, RankSchema.Type<?> schema) {
         try {
-            TRankHolder s = (TRankHolder) this.ranks.get(schema.get());
-            if (s == null) return Optional.empty();
-            return Optional.of(s);
+            TRankHolder rank = (TRankHolder) this.ranks.get(schema.get());
+            if (rank == null) {
+                TRankHolder newRank = (TRankHolder) schema.get().getDeclaredConstructor().newInstance();
+                this.ranks.put(schema.get(), newRank);
+
+                storage.store(this.ranks);
+
+                return newRank;
+            }
+
+            return rank;
         } catch (Exception ignore) {}
 
-        return Optional.empty();
+        throw new IllegalStateException();
     }
 
     public interface RankSchema {
