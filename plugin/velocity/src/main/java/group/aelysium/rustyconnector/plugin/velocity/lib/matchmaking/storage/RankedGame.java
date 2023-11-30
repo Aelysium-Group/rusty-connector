@@ -27,7 +27,7 @@ public class RankedGame {
         return this.name;
     }
 
-    public <TPlayerRank extends IPlayerRank<?>> RankedPlayer<TPlayerRank> rankedPlayer(MySQLStorage storage, UUID uuid) {
+    public <TPlayerRank extends IPlayerRank<?>> TPlayerRank rankedPlayer(MySQLStorage storage, UUID uuid) {
         ScoreCard scorecard = this.scorecards.get(uuid);
         if(scorecard == null) {
             ScoreCard newScorecard = new ScoreCard();
@@ -40,7 +40,7 @@ public class RankedGame {
 
         TPlayerRank rank = scorecard.fetch(storage, this.rankingSchema);
 
-        return RankedPlayer.from(uuid, rank);
+        return (TPlayerRank) RankedPlayer.from(uuid, rank);
     }
 
     public <TPlayerRank extends IPlayerRank<?>> TPlayerRank playerRank(MySQLStorage storage, Player player) throws IllegalStateException {

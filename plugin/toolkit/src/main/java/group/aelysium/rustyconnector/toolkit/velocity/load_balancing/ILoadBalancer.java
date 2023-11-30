@@ -70,13 +70,14 @@ public interface ILoadBalancer<I> {
     void remove(I item);
 
     /**
-     * Return the number of servers.
+     * Return the number of servers contained in the load balancer.
+     * Specifically will add up the number of locked and unlocked servers and return that number.
      * @return The number of servers.
      */
     int size();
 
     /**
-     * Return the number of servers.
+     * Return the number of servers in the load balancer.
      * @param locked If `true`, will return the number of locked servers. If `false` will return the number of unlocked servers.
      * @return The number of servers.
      */

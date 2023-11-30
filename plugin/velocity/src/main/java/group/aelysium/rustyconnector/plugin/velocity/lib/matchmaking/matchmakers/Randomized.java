@@ -32,7 +32,4 @@ public class Randomized extends Matchmaker<RandomizedPlayerRank> {
 
     @Override
     public void completeSort() {}
-
-    @Override
-    public void singleSort() {}
 }

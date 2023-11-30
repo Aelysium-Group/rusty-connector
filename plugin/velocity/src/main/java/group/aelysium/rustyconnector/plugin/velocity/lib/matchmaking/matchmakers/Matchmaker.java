@@ -8,8 +8,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.Ran
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
@@ -18,12 +20,13 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.floor;
 
-public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> {
+public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements Service {
     protected final ClockService supervisor = new ClockService(5);
     protected final Settings settings;
     protected final int minPlayersPerGame;
     protected final int maxPlayersPerGame;
-    protected Vector<Session> sessions = new Vector<>();
+    protected Vector<Session> waitingSessions = new Vector<>();
+    protected Vector<Session> runningSessions = new Vector<>();
     protected Vector<RankedPlayer<TPlayerRank>> items = new Vector<>();
 
     public Matchmaker(Settings settings) {
@@ -60,7 +63,7 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> {
      */
     public void add(Player player) {
         try {
-            RankedPlayer<TPlayerRank> rankedPlayer = (RankedPlayer<TPlayerRank>) this.settings.game.rankedPlayer(this.settings.storage(), player.uuid());
+            RankedPlayer<TPlayerRank> rankedPlayer = this.settings.game.rankedPlayer(this.settings.storage(), player.uuid());
 
             if (this.items.contains(rankedPlayer)) return;
 
@@ -99,7 +102,7 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> {
                     Session session = this.make();
                     if(session == null) continue;
 
-                    this.sessions.add(session);
+                    this.waitingSessions.add(session);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -111,10 +114,30 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> {
         this.supervisor.scheduleRecurring(() -> {
             if(loadBalancer.size() == 0) return;
 
-            for (Session session : this.sessions) {
+            List<Session> sessionsForLooping = this.waitingSessions.stream().toList();
+            for (Session session : sessionsForLooping) {
+                try {
+                    MCLoader server = loadBalancer.current();
+                    session.connect(server);
 
+                    loadBalancer.lock(server);
+
+                    this.waitingSessions.remove(session);
+                    this.runningSessions.add(session);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }, LiquidTimestamp.from(10, TimeUnit.SECONDS));
+    }
+
+    public void kill() {
+        this.supervisor.kill();
+        this.waitingSessions.forEach(Session::end);
+        this.waitingSessions.clear();
+
+        this.runningSessions.forEach(Session::end);
+        this.runningSessions.clear();
     }
 
     public record Settings (
