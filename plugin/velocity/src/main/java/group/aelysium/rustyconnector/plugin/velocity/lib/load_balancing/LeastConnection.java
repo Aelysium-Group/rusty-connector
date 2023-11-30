@@ -14,8 +14,8 @@ public class LeastConnection extends LoadBalancer {
     @Override
     public void iterate() {
         try {
-            MCLoader thisItem = this.items.get(this.index);
-            MCLoader theNextItem = this.items.get(this.index + 1);
+            MCLoader thisItem = this.servers.get(this.index);
+            MCLoader theNextItem = this.servers.get(this.index + 1);
 
             if(thisItem.playerCount() >= theNextItem.playerCount()) this.index++;
         } catch (IndexOutOfBoundsException ignore) {}
@@ -24,14 +24,14 @@ public class LeastConnection extends LoadBalancer {
     @Override
     public void completeSort() {
         this.index = 0;
-        if(this.weighted()) WeightedQuickSort.sort(this.items);
-        else QuickSort.sort(this.items);
+        if(this.weighted()) WeightedQuickSort.sort(this.servers);
+        else QuickSort.sort(this.servers);
     }
 
     @Override
     public void singleSort() {
         this.index = 0;
-        SingleSort.sort(this.items, this.index);
+        SingleSort.sort(this.servers, this.index);
     }
 
     @Override

@@ -5,13 +5,15 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
     private boolean weighted;
     private boolean persistence;
     private int attempts;
     protected int index = 0;
-    protected List<MCLoader> items = new ArrayList<>();
+    protected Vector<MCLoader> servers = new Vector<>();
+    protected Vector<MCLoader> lockedServers = new Vector<>();
 
     public LoadBalancer(Settings settings) {
         this.weighted = settings.weighted();
@@ -36,8 +38,8 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
         MCLoader item;
         if(this.index >= this.size()) {
             this.index = 0;
-            item = this.items.get(this.index);
-        } else item = this.items.get(this.index);
+            item = this.servers.get(this.index);
+        } else item = this.servers.get(this.index);
 
         assert item != null;
 
@@ -50,12 +52,12 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
 
     public void iterate() {
         this.index += 1;
-        if(this.index >= this.items.size()) this.index = 0;
+        if(this.index >= this.servers.size()) this.index = 0;
     }
 
     final public void forceIterate() {
         this.index += 1;
-        if(this.index >= this.items.size()) this.index = 0;
+        if(this.index >= this.servers.size()) this.index = 0;
     }
 
     public abstract void completeSort();
@@ -63,19 +65,19 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
     public abstract void singleSort();
 
     public void add(MCLoader item) {
-        this.items.add(item);
+        this.servers.add(item);
     }
 
     public void remove(MCLoader item) {
-        this.items.remove(item);
+        this.servers.remove(item);
     }
 
     public int size() {
-        return this.items.size();
+        return this.servers.size();
     }
 
     public List<MCLoader> dump() {
-        return this.items;
+        return this.servers;
     }
 
     public String toString() {
@@ -96,7 +98,7 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
     }
 
     public boolean contains(MCLoader item) {
-        return this.items.contains(item);
+        return this.servers.contains(item);
     }
 
     public record Settings(boolean weighted, boolean persistence, int attempts) {}
