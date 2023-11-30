@@ -376,7 +376,7 @@ public class VelocityLang extends Lang {
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_registered_servers");
         else if(family.loadBalancer().size() == 0) servers = resolver().get("velocity.family.scalar_family.panel.no_unlocked_servers");
-        else for (MCLoader server : family.loadBalancer().dump()) {
+        else for (MCLoader server : family.loadBalancer().servers()) {
                 if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
@@ -513,7 +513,7 @@ public class VelocityLang extends Lang {
         if(family.registeredServers() == null) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
         else if(family.registeredServers().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_registered_servers");
         else if(family.loadBalancer().size() == 0) servers = resolver().get("velocity.family.static_family.panel.no_unlocked_servers");
-        else for (MCLoader server : family.loadBalancer().dump()) {
+        else for (MCLoader server : family.loadBalancer().servers()) {
                 if(family.loadBalancer().index() == i)
                     servers = servers.append(
                             text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +

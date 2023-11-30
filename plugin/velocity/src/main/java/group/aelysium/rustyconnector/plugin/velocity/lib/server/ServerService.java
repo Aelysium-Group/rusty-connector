@@ -59,7 +59,7 @@ public class ServerService implements IServerService<MCLoader, Player, Family> {
     protected Optional<K8MCLoader> fetchPods(String podName) {
         for(Family family : Tinder.get().services().family().dump()) {
             try {
-                K8MCLoader found = (K8MCLoader) family.loadBalancer().dump().stream().filter(s -> {
+                K8MCLoader found = (K8MCLoader) family.loadBalancer().servers().stream().filter(s -> {
                     if (!(s instanceof K8MCLoader)) return false;
                     return ((K8MCLoader) s).podName().equals(podName);
                 }).findAny().orElseThrow();
@@ -84,7 +84,7 @@ public class ServerService implements IServerService<MCLoader, Player, Family> {
 
 
         try {
-            K8MCLoader found = (K8MCLoader) family.loadBalancer().dump().stream().filter(s -> {
+            K8MCLoader found = (K8MCLoader) family.loadBalancer().servers().stream().filter(s -> {
                 if (!(s instanceof K8MCLoader)) return false;
                 return ((K8MCLoader) s).podName().equals(podName);
             }).findAny().orElseThrow();

@@ -69,7 +69,7 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> {
 
     /**
      * Gets all {@link IMCLoader PlayerServers} that are locked on this family.
-     * For a list of unlocked {@link IMCLoader PlayerServers}, use {@link IFamily#loadBalancer()}.{@link ILoadBalancer#dump() dump()}.
+     * For a list of unlocked {@link IMCLoader PlayerServers}, use {@link IFamily#loadBalancer()}.{@link ILoadBalancer#servers() dump()}.
      * @return {@link List< IMCLoader >}
      */
     List<TMCLoader> lockedServers();

@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
+import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
@@ -65,19 +66,29 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
     public abstract void singleSort();
 
     public void add(MCLoader item) {
+        if(this.servers.contains(item)) return;
         this.servers.add(item);
     }
 
     public void remove(MCLoader item) {
-        this.servers.remove(item);
+        if(this.servers.remove(item)) return;
+        this.lockedServers.remove(item);
     }
 
     public int size() {
+        return this.servers.size() + this.lockedServers.size();
+    }
+
+    public int size(boolean locked) {
+        if(locked) return this.lockedServers.size();
         return this.servers.size();
     }
 
-    public List<MCLoader> dump() {
-        return this.servers;
+    public List<MCLoader> servers() {
+        return this.servers.stream().toList();
+    }
+    public List<MCLoader> lockedServers() {
+        return this.servers.stream().toList();
     }
 
     public String toString() {
@@ -99,6 +110,20 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
 
     public boolean contains(MCLoader item) {
         return this.servers.contains(item);
+    }
+
+    public void lock(MCLoader server) {
+        if(!this.servers.remove(server)) return;
+        this.lockedServers.add(server);
+    }
+
+    public void unlock(MCLoader server) {
+        if(!this.lockedServers.remove(server)) return;
+        this.servers.add(server);
+    }
+
+    public boolean joinable(MCLoader server) {
+        return this.servers.contains(server);
     }
 
     public record Settings(boolean weighted, boolean persistence, int attempts) {}
