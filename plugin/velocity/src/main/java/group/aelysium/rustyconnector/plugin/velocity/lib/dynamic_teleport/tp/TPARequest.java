@@ -73,7 +73,7 @@ public class TPARequest {
             BaseServerFamily<?> family = server.family();
             if(family == null) throw new NullPointerException();
 
-            tpService.tpSendPlayer(this.sender(), this.target(), server);
+            tpService.tpaSendPlayer(this.sender(), this.target(), server);
 
             this.sender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.target().getUsername()));
             this.target().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.sender().getUsername()));
