@@ -164,7 +164,7 @@ public class Metrics {
         builder.appendField("velocityVersionName", server.getVersion().getName());
         builder.appendField("velocityVersionVendor", server.getVersion().getVendor());
         builder.appendField("javaVersion", System.getProperty("java.version"));
-        builder.appendField("osName", System.getProperty("os.name"));
+        builder.appendField("osName", System.getProperty("os.id"));
         builder.appendField("osArch", System.getProperty("os.arch"));
         builder.appendField("osVersion", System.getProperty("os.version"));
         builder.appendField("coreCount", Runtime.getRuntime().availableProcessors());

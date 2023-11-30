@@ -1,12 +1,16 @@
 package group.aelysium.rustyconnector.core.lib.messenger;
 
-import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketStatus;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.core.lib.lang.log_gate.GateKey;
+import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
+import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.core.lib.packets.*;
 
 import java.net.InetSocketAddress;
@@ -16,9 +20,9 @@ public abstract class MessengerSubscriber {
     private final AESCryptor cryptor;
     private final PluginLogger logger;
     private MessageCacheService messageCache;
-    private Map<PacketType.Mapping, PacketHandler> handlers;
-    private PacketOrigin origin;
-    private InetSocketAddress originAddress;
+    private final Map<PacketType.Mapping, PacketHandler> handlers;
+    private final PacketOrigin origin;
+    private final InetSocketAddress originAddress;
 
     public MessengerSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin, InetSocketAddress originAddress) {
         this.cryptor = cryptor;

@@ -1,19 +1,19 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 
 import java.util.NoSuchElementException;
 
-public class FriendRequest {
+public class FriendRequest implements IFriendRequest {
     private final FriendsService friendsService;
     private long id;
-    private ResolvablePlayer sender;
-    private ResolvablePlayer target;
+    private Player sender;
+    private Player target;
     private Boolean isAcknowledged = null;
 
-    public FriendRequest(FriendsService friendsService, long id, ResolvablePlayer sender, ResolvablePlayer target) {
+    public FriendRequest(FriendsService friendsService, long id, Player sender, Player target) {
         this.friendsService = friendsService;
         this.id = id;
         this.sender = sender;
@@ -23,18 +23,13 @@ public class FriendRequest {
     public long id() {
         return this.id;
     }
-    public ResolvablePlayer sender() {
+    public Player sender() {
         return this.sender;
     }
-    public ResolvablePlayer target() {
+    public Player target() {
         return this.target;
     }
 
-
-    /**
-     * Accept the party invite.
-     * This will subsequently connect the player to the party's server and then decompose the invite and remove it from the PartyService that it belongs to.
-     */
     public synchronized void accept() {
         try {
             if (friendsService.friendCount(this.target).orElseThrow() > friendsService.settings().maxFriends())
@@ -53,11 +48,11 @@ public class FriendRequest {
             friendsService.addFriends(this.sender, this.target);
 
             try {
-                Player resolved = this.target.resolve().orElseThrow();
+                com.velocitypowered.api.proxy.Player resolved = this.target.resolve().orElseThrow();
                 resolved.sendMessage(VelocityLang.BECOME_FRIENDS.build(sender.username()));
             } catch (NoSuchElementException ignore) {}
             try {
-                Player resolved = this.sender.resolve().orElseThrow();
+                com.velocitypowered.api.proxy.Player resolved = this.sender.resolve().orElseThrow();
                 resolved.sendMessage(VelocityLang.BECOME_FRIENDS.build(target.username()));
             } catch (NoSuchElementException ignore) {}
 
@@ -69,10 +64,6 @@ public class FriendRequest {
         }
     }
 
-    /**
-     * Deny the party invite.
-     * This will subsequently decompose the invite and remove it from the PartyService that it belongs to.
-     */
     public synchronized void ignore() {
         try {
             friendsService.closeInvite(this);

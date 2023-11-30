@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -42,10 +41,10 @@ public class FamiliesConfig extends YAML {
 
         // Families
         try {
-            this.rootFamily_name = this.getNode(this.data, "root-family.name", String.class);
+            this.rootFamily_name = this.getNode(this.data, "root-family.id", String.class);
             if (this.rootFamily_name.equals("") || this.rootFamily_name.length() < 1) throw new Exception();
         } catch (Exception ignore) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.name] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
+            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.id] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
             this.rootFamily_name = "lobby";
         }
 
@@ -62,36 +61,27 @@ public class FamiliesConfig extends YAML {
         }
 
         this.scalar.forEach(familyName -> {
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
+            if(familyName.length() > 16)
+                throw new IllegalStateException("All family names must be under 16 characters long! `" + familyName + "` was " + familyName.length());
         });
 
         this.staticF.forEach(familyName -> {
-            if(familyName.length() > 32)
-                throw new IllegalStateException("All family names must be under 32 characters long! `" + familyName + "` was " + familyName.length());
+            if(familyName.length() > 16)
+                throw new IllegalStateException("All family names must be under 16 characters long! `" + familyName + "` was " + familyName.length());
         });
 
         if(this.checkForAll())
-            throw new IllegalStateException("You can't name a family: `all`");
+            throw new IllegalStateException("You can't id a family: `all`");
 
         if(this.doDuplicatesExist())
-            throw new IllegalStateException("You can't have two families with the same name! This rule is regardless of what type the family is!");
+            throw new IllegalStateException("You can't have two families with the same id! This rule is regardless of what type the family is!");
 
-        if(this.isRootFamilyDuplicated()) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, this.rootFamily_name + " was found duplicated in your family nodes. This is no longer supported. Instead, ONLY place the name of your root family in [root-family.name]. Ignoring...", NamedTextColor.YELLOW);
-            this.scalar.remove(this.rootFamily_name);
-            this.staticF.remove(this.rootFamily_name);
-        }
     }
 
     private boolean doDuplicatesExist() {
         return this.scalar.stream().filter(this.staticF::contains).toList().size() > 0;
     }
 
-    private boolean isRootFamilyDuplicated() {
-        return this.scalar.contains(this.rootFamily_name) ||
-               this.staticF.contains(this.rootFamily_name);
-    }
 
     private boolean checkForAll() {
         return this.rootFamily_name.equalsIgnoreCase("all") ||

@@ -1,18 +1,18 @@
 package group.aelysium.rustyconnector.core.lib.algorithm;
 
-import group.aelysium.rustyconnector.core.lib.model.Sortable;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 
 import java.util.Collections;
 import java.util.List;
 
 public class WeightOnlyQuickSort {
-    static <I extends Sortable> void swap(List<I> array, int i, int j) {
+    static <I extends ISortable> void swap(List<I> array, int i, int j) {
         I temp = array.get(i);
         array.set(i, array.get(j));
         array.set(j, temp);
     }
 
-    static int partition(List<? extends Sortable> array, int low, int high) {
+    static int partition(List<? extends ISortable> array, int low, int high) {
         // pivot
         int pivot = array.get(high).weight();
   
@@ -37,7 +37,7 @@ public class WeightOnlyQuickSort {
         return (i + 1);
     }
 
-    static void innerSort(List<? extends Sortable> array, int start, int end) {
+    static void innerSort(List<? extends ISortable> array, int start, int end) {
         if (start < end) {
             int partitionIndex = partition(array, start, end);
 
@@ -53,7 +53,7 @@ public class WeightOnlyQuickSort {
      * This will only sort entries by the weight value associated with them.
      * @param array The array to sort.
      */
-    public static void sort(List<? extends Sortable> array) {
+    public static void sort(List<? extends ISortable> array) {
         innerSort(array, 0, array.size() - 1);
     }
 }

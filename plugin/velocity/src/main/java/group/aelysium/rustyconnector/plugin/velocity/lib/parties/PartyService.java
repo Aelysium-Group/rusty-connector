@@ -1,15 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.PartyServiceSettings;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -19,13 +19,13 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PartyService extends Service {
+public class PartyService implements IPartyService<Player, MCLoader, Party, PartyInvite> {
     private final Vector<Party> parties = new Vector<>();
     private final Vector<PartyInvite> invites = new Vector<>();
-    private final PartySettings settings;
+    private final PartyServiceSettings settings;
     private final ExecutorService connector;
 
-    public PartyService(PartySettings settings) {
+    public PartyService(PartyServiceSettings settings) {
         this.settings = settings;
 
         this.connector = Executors.newFixedThreadPool(10);
@@ -54,12 +54,12 @@ public class PartyService extends Service {
         this.connector.submit(runnable);
     }
 
-    public PartySettings settings() {
+    public PartyServiceSettings settings() {
         return this.settings;
     }
 
-    public Party create(Player host, PlayerServer server) {
-        Party party = new Party(this.settings.maxMembers, host, server);
+    public Party create(com.velocitypowered.api.proxy.Player host, MCLoader server) {
+        Party party = new Party(this.settings.maxMembers(), host, server);
         this.parties.add(party);
         return party;
     }
@@ -69,36 +69,32 @@ public class PartyService extends Service {
         this.parties.remove(party);
     }
 
-    /**
-     * Find a party based on its member.
-     * @return A party.
-     */
-    public Optional<Party> find(Player member) {
+    public Optional<Party> find(com.velocitypowered.api.proxy.Player member) {
         return this.parties.stream().filter(party -> party.contains(member)).findFirst();
     }
 
     public void disband(Party party) {
-        for (Player player : party.players()) {
+        for (com.velocitypowered.api.proxy.Player player : party.players()) {
             player.sendMessage(VelocityLang.PARTY_DISBANDED);
         }
         this.delete(party);
     }
 
-    public PartyInvite invitePlayer(Party party, Player sender, Player target) {
+    public PartyInvite invitePlayer(Party party, com.velocitypowered.api.proxy.Player sender, com.velocitypowered.api.proxy.Player target) {
         Tinder api = Tinder.get();
 
-        if(party.leader() != sender && this.settings.onlyLeaderCanInvite)
+        if(party.leader() != sender && this.settings.onlyLeaderCanInvite())
             throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ONLY_LEADER_CAN_INVITE);
 
         if(this.settings.friendsOnly())
             try {
-                FriendsService friendsService = api.services().friendsService().orElse(null);
+                FriendsService friendsService = api.services().friends().orElse(null);
                 if(friendsService == null) {
                     api.logger().send(Component.text(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
                     throw new NoOutputException();
                 }
 
-                if(friendsService.findFriends(sender).orElseThrow().contains(target))
+                if(friendsService.findFriends(Player.from(sender)).orElseThrow().contains(target))
                     throw new IllegalStateException(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION);
             } catch (IllegalStateException e) {
                 throw e;
@@ -113,10 +109,10 @@ public class PartyService extends Service {
         return invite;
     }
 
-    public List<PartyInvite> findInvitesToTarget(ResolvablePlayer target) {
+    public List<PartyInvite> findInvitesToTarget(Player target) {
         return this.invites.stream().filter(invite -> invite.target().equals(target)).findAny().stream().toList();
     }
-    public Optional<PartyInvite> findInvite(ResolvablePlayer target, ResolvablePlayer sender) {
+    public Optional<PartyInvite> findInvite(Player target, Player sender) {
         return this.invites.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();
     }
 
@@ -138,16 +134,4 @@ public class PartyService extends Service {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         commandManager.unregister("party");
     }
-
-    public record PartySettings(
-                                int maxMembers,
-                                boolean friendsOnly,
-                                boolean localOnly,
-                                boolean onlyLeaderCanInvite,
-                                boolean onlyLeaderCanKick,
-                                boolean onlyLeaderCanSwitchServers,
-                                boolean disbandOnLeaderQuit,
-                                SwitchPower switchPower,
-                                boolean kickOnSendFailure
-                                ) {}
 }

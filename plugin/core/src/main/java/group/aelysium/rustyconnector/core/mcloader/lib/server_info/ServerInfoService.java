@@ -1,0 +1,72 @@
+package group.aelysium.rustyconnector.core.mcloader.lib.server_info;
+
+import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.toolkit.mc_loader.server_info.IServerInfoService;
+import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
+import group.aelysium.rustyconnector.core.TinderAdapterForCore;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.nio.channels.SocketChannel;
+import java.util.Enumeration;
+import java.util.UUID;
+
+public class ServerInfoService implements IServerInfoService {
+    private final UUID sessionUUID = UUID.randomUUID();
+    private final InetSocketAddress address;
+    private final String magicConfigPointer;
+    public ServerInfoService(InetSocketAddress address, String magicConfigPointer, boolean magicInterfaceResolver, int port) {
+        this.magicConfigPointer = magicConfigPointer;
+
+        if(magicInterfaceResolver)
+            this.address = convertPortToAddress(port);
+        else if(address == null)
+            this.address = convertPortToAddress(port);
+        else
+            this.address = address;
+    }
+    public ServerInfo serverInfo() {
+        return new ServerInfo(this.sessionUUID.toString(), address);
+    }
+
+    public UUID sessionUUID() {
+        return this.sessionUUID;
+    }
+    public String address() {
+        return AddressUtil.addressToString(this.address);
+    }
+
+    public int playerCount() {
+        return TinderAdapterForCore.getTinder().onlinePlayerCount();
+    }
+
+    public String magicConfig() {
+        return magicConfigPointer;
+    }
+
+    public void kill() {}
+
+    private static InetSocketAddress convertPortToAddress(int port) {
+        try {
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface netInterface = networkInterfaces.nextElement();
+                Enumeration<InetAddress> inetAddresses = netInterface.getInetAddresses();
+                while (inetAddresses.hasMoreElements()) {
+                    InetAddress address = inetAddresses.nextElement();
+                    try (SocketChannel socket = SocketChannel.open()) {
+                        socket.bind(new InetSocketAddress(address, 0));
+                        socket.connect(new InetSocketAddress("localhost", port));
+                        System.out.println("Network Interface: " + netInterface.getDisplayName());
+                        System.out.println("IP Address: " + address.getHostAddress());
+                        return new InetSocketAddress(address, port);
+                    } catch (IOException ignore) {}
+                }
+            }
+        } catch (SocketException ignored) {}
+        return null;
+    }
+}

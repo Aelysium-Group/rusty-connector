@@ -1,23 +1,22 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport;
 
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.TPAServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPASettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static group.aelysium.rustyconnector.core.lib.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
 public class DynamicTeleportService extends ServiceableService<DynamicTeleportServiceHandler> {
     protected DynamicTeleportService(Map<Class<? extends Service>, Service> services) {
@@ -33,7 +32,7 @@ public class DynamicTeleportService extends ServiceableService<DynamicTeleportSe
             DynamicTeleportService.Builder builder = new DynamicTeleportService.Builder();
 
             if(config.isTpa_enabled()) {
-                TPASettings tpaSettings = new TPASettings(
+                TPAServiceSettings tpaSettings = new TPAServiceSettings(
                         config.isTpa_friendsOnly(),
                         config.isTpa_ignorePlayerCap(),
                         config.getTpa_expiration(),

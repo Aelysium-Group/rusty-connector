@@ -1,26 +1,21 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsDataEnclave;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
 
-import java.sql.SQLException;
 import java.util.*;
 
-public class FriendsDataEnclave {
+public class FriendsDataEnclave implements IFriendsDataEnclave<Player, FriendMapping> {
     private final MySQLStorage storage;
 
-    public FriendsDataEnclave(MySQLStorage storage) {
-        this.storage = storage;
+    public FriendsDataEnclave(IMySQLStorageService storage) {
+        this.storage = (MySQLStorage) storage;
     }
 
-    /**
-     * Find all friends of a player.
-     * @param player The player to find friends of.
-     * @return A list of friends.
-     * @throws SQLException If there was an issue.
-     */
-    public Optional<List<FriendMapping>> findFriends(ResolvablePlayer player) {
+    public Optional<List<FriendMapping>> findFriends(Player player) {
         try {
             StorageRoot root = this.storage.root();
 
@@ -36,24 +31,12 @@ public class FriendsDataEnclave {
         return Optional.empty();
     }
 
-    /**
-     * Check if two players are friends.
-     * @param player1 The first player.
-     * @param player2 The second player.
-     * @return `true` If the two players are friends.
-     */
-    public boolean areFriends(ResolvablePlayer player1, ResolvablePlayer player2) throws RuntimeException {
+    public boolean areFriends(Player player1, Player player2) throws RuntimeException {
         StorageRoot root = this.storage.root();
         return root.friends().contains(new FriendMapping(player1, player2));
     }
 
-    /**
-     * Get number of friends of a player.
-     * @param player The player to get the friend count of.
-     * @return The number of friends a player has.
-     * @throws SQLException If there was an issue.
-     */
-    public Optional<Long> getFriendCount(ResolvablePlayer player) {
+    public Optional<Long> getFriendCount(Player player) {
         try {
             StorageRoot root = this.storage.root();
             long count = root.friends().stream().filter(friendMapping -> friendMapping.contains(player)).count();
@@ -66,13 +49,13 @@ public class FriendsDataEnclave {
         return Optional.empty();
     }
 
-    public Optional<FriendMapping> addFriend(ResolvablePlayer player1, ResolvablePlayer player2) {
+    public Optional<FriendMapping> addFriend(Player player1, Player player2) {
         try {
             StorageRoot root = this.storage.root();
 
             FriendMapping friendMapping = FriendMapping.from(player1, player2);
 
-            List<FriendMapping> networkFriends = root.friends();
+            Set<FriendMapping> networkFriends = root.friends();
             networkFriends.add(friendMapping);
 
             this.storage.store(networkFriends);
@@ -85,13 +68,13 @@ public class FriendsDataEnclave {
         return Optional.empty();
     }
 
-    public void removeFriend(ResolvablePlayer player1, ResolvablePlayer player2) {
+    public void removeFriend(Player player1, Player player2) {
         try {
             StorageRoot root = this.storage.root();
 
             FriendMapping friendMapping = FriendMapping.from(player1, player2);
 
-            List<FriendMapping> networkFriends = root.friends();
+            Set<FriendMapping> networkFriends = root.friends();
             networkFriends.remove(friendMapping);
 
             this.storage.store(networkFriends);

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
+import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
