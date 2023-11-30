@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
 

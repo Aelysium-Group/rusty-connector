@@ -6,12 +6,13 @@ import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp.TPService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp.TPASettings;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPASettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +40,9 @@ public class DynamicTeleportService extends ServiceableService<DynamicTeleportSe
                         config.getTpa_enabledFamilies()
                 );
 
-                TPService tpService = new TPService(tpaSettings);
+                TPAService tpaService = new TPAService(tpaSettings);
 
-                builder.addService(tpService);
+                builder.addService(tpaService);
                 bootOutput.add(Component.text(" | The TPA module was enabled!", NamedTextColor.GREEN));
             } else
                 bootOutput.add(Component.text(" | The TPA module wasn't enabled.",NamedTextColor.DARK_GRAY));

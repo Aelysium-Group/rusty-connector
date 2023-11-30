@@ -1,9 +1,10 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -32,10 +33,10 @@ public class TPAHandler {
 
     public TPARequest newRequest(Player sender, Player target) {
         Tinder api = Tinder.get();
-        TPService tpService = api.services().dynamicTeleportService().orElseThrow()
-                                   .services().tpService().orElseThrow();
+        TPAService tpaService = api.services().dynamicTeleportService().orElseThrow()
+                                   .services().tpaService().orElseThrow();
 
-        TPARequest tpaRequest = new TPARequest(sender, target, tpService.settings().expiration());
+        TPARequest tpaRequest = new TPARequest(sender, target, tpaService.settings().expiration());
         requests.add(tpaRequest);
 
         return tpaRequest;

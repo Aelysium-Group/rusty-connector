@@ -1,7 +1,8 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import group.aelysium.rustyconnector.core.lib.model.ClockService;
 import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 
 public class TPACleaningService extends ClockService {
     protected final LiquidTimestamp heartbeat;
@@ -11,9 +12,9 @@ public class TPACleaningService extends ClockService {
         this.heartbeat = heartbeat;
     }
 
-    public void startHeartbeat(TPService tpService) {
+    public void startHeartbeat(TPAService tpaService) {
         this.scheduleRecurring(() -> {
-            for(TPAHandler handler : tpService.allTPAHandlers()) {
+            for(TPAHandler handler : tpaService.allTPAHandlers()) {
                 try {
                     handler.clearExpired();
                 } catch (Exception ignore) {}

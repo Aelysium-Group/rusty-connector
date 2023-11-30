@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp;
+package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
@@ -10,8 +10,8 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequest
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp.commands.CommandTP;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp.commands.CommandTPA;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTP;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -22,12 +22,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 
-public class TPService extends ServiceableService<TPServiceHandler> {
+public class TPAService extends ServiceableService<TPAServiceHandler> {
     private final TPASettings settings;
     private final Map<BaseServerFamily<?>, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
 
-    public TPService(TPASettings settings) {
-        super(new TPServiceHandler());
+    public TPAService(TPASettings settings) {
+        super(new TPAServiceHandler());
         this.services.add(new TPACleaningService(settings.expiration()));
         this.settings = settings;
     }

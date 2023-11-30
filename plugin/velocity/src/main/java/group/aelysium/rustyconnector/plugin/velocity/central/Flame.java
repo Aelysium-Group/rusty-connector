@@ -34,7 +34,7 @@ import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerKicked;
 import group.aelysium.rustyconnector.plugin.velocity.lib.data_transit.config.DataTransitConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp.TPService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.config.FamiliesConfig;
@@ -629,9 +629,9 @@ class Initialize {
             DynamicTeleportService dynamicTeleportService = DynamicTeleportService.init(inject(bootOutput, dependencies.d1()), config);
 
             try {
-                TPService tpService = dynamicTeleportService.services().tpService().orElseThrow();
-                tpService.services().tpaCleaningService().startHeartbeat(tpService);
-                tpService.initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
+                TPAService tpaService = dynamicTeleportService.services().tpaService().orElseThrow();
+                tpaService.services().tpaCleaningService().startHeartbeat(tpaService);
+                tpaService.initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
                 bootOutput.add(Component.text(" | The TPA module was started successfully!",NamedTextColor.GREEN));
             } catch (NoSuchElementException ignore) {
             } catch (Exception e) {

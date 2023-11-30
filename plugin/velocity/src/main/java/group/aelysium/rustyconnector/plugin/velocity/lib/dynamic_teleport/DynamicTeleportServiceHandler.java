@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport;
 import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tp.TPService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 
 import java.util.Map;
 import java.util.Optional;
@@ -16,8 +16,8 @@ public class DynamicTeleportServiceHandler extends group.aelysium.rustyconnector
         super();
     }
 
-    public Optional<TPService> tpService() {
-        return this.find(TPService.class);
+    public Optional<TPAService> tpaService() {
+        return this.find(TPAService.class);
     }
     public Optional<AnchorService> anchorService() {
         return this.find(AnchorService.class);
