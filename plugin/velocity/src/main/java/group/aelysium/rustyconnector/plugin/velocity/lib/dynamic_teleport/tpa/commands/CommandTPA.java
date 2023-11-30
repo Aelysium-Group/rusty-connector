@@ -332,7 +332,7 @@ public final class CommandTPA {
 
                                     if (Permission.validate(player, "rustyconnector.command.tpa.bypassRequest")) {
                                         ServerInfo recieverServerInfo = targetPlayer.getCurrentServer().orElseThrow().getServerInfo();
-                                        PlayerServer targetServer = serverService.search(recieverServerInfo);
+                                        MCLoader targetServer = new MCLoader.Reference(recieverServerInfo).get();
 
                                         tpaService.tpaSendPlayer(player, targetPlayer, targetServer);
                                         player.sendMessage(VelocityLang.TPA_REQUEST_BYPASSED.build(targetPlayer.getUsername()));
