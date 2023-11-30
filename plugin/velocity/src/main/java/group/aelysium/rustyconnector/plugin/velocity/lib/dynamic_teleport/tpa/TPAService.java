@@ -10,7 +10,6 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequest
 import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTP;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
@@ -45,18 +44,6 @@ public class TPAService extends ServiceableService<TPAServiceHandler> {
                 );
 
                 bootOutput.add(Component.text(" | Registered: /tpa", NamedTextColor.YELLOW));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        if(!commandManager.hasCommand("tp"))
-            try {
-                commandManager.register(
-                        commandManager.metaBuilder("tp").build(),
-                        CommandTP.create(DependencyInjector.inject(dependencies.d1(), dependencies.d2(), this))
-                );
-
-                bootOutput.add(Component.text(" | Registered: /tp", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
