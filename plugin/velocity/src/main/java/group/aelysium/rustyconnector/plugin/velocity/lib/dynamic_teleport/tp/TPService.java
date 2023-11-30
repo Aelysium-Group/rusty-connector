@@ -35,7 +35,7 @@ public class TPService extends ServiceableService<TPServiceHandler> {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         List<Component> bootOutput = dependencies.d3();
 
-        bootOutput.add(Component.text("Building tp service commands...", NamedTextColor.DARK_GRAY));
+        bootOutput.add(Component.text("Building tpa service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("tpa"))
             try {
@@ -61,7 +61,7 @@ public class TPService extends ServiceableService<TPServiceHandler> {
                 e.printStackTrace();
             }
 
-        bootOutput.add(Component.text("Finished building tp service commands.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished building tpa service commands.", NamedTextColor.GREEN));
     }
 
     public TPASettings settings() {
@@ -84,12 +84,12 @@ public class TPService extends ServiceableService<TPServiceHandler> {
 
     /**
      * Attempts to directly connect a player to a server and then teleport that player to another player.
-     * @param source The player requesting to tp.
-     * @param target The player to tp to.
+     * @param source The player requesting to tpa.
+     * @param target The player to tpa to.
      * @param targetServer The server to send the player to.
      * @throws NullPointerException If the server doesn't exist in the family.
      */
-    public void tpSendPlayer(Player source, Player target, PlayerServer targetServer) {
+    public void tpaSendPlayer(Player source, Player target, PlayerServer targetServer) {
         Tinder api = Tinder.get();
 
         CoordinateRequestQueuePacket message = (CoordinateRequestQueuePacket) new GenericPacket.Builder()
@@ -125,6 +125,5 @@ public class TPService extends ServiceableService<TPServiceHandler> {
 
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         commandManager.unregister("tpa");
-        commandManager.unregister("tp");
     }
 }
