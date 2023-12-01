@@ -2,11 +2,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.c
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedMatchmaker;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedGame;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedSoloGame;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedTeam;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.games.RankedTeamGame;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -20,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 public class RankedFamilyConfig extends YAML {
     private Component displayName;
 
-    private RankedMatchmaker.Settings matchmakingSettings;
     private Family.Reference parent_family = Family.Reference.rootFamily();
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
@@ -30,9 +24,6 @@ public class RankedFamilyConfig extends YAML {
     }
 
     public Component displayName() { return displayName; }
-    public RankedMatchmaker.Settings getMatchmakingSettings() {
-        return matchmakingSettings;
-    }
     public Family.Reference getParent_family() { return parent_family; }
 
     public boolean isWhitelist_enabled() {
@@ -44,6 +35,7 @@ public class RankedFamilyConfig extends YAML {
     }
 
     public void register(String familyName) throws IllegalStateException {
+        /*
         try {
             String name = this.getNode(this.data, "display-id", String.class);
             this.displayName = MiniMessage.miniMessage().deserialize(name);
@@ -107,6 +99,6 @@ public class RankedFamilyConfig extends YAML {
         if(this.whitelist_enabled && this.whitelist_name.equals(""))
             throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist in a family!");
 
-        this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
+        this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");*/
     }
 }

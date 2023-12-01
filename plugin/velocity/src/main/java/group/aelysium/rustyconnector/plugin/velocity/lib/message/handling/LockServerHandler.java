@@ -23,7 +23,7 @@ public class LockServerHandler implements PacketHandler {
 
         if (server != null) {
             Family family = server.family();
-            family.lockServer(server);
+            family.loadBalancer().lock(server);
         }
     }
 }

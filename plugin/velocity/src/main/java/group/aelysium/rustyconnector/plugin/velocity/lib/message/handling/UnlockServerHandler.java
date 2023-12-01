@@ -24,7 +24,7 @@ public class UnlockServerHandler implements PacketHandler {
 
         if (server != null) {
             Family family = server.family();
-            family.unlockServer(server);
+            family.loadBalancer().unlock(server);
         }
     }
 }

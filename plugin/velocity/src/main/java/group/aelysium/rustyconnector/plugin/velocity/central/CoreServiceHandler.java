@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.Redis
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingClock;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
@@ -49,8 +49,8 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
     public WhitelistService whitelist() {
         return this.find(WhitelistService.class).orElseThrow();
     }
-    public LoadBalancingClock loadBalancingService() {
-        return this.find(LoadBalancingClock.class).orElseThrow();
+    public LoadBalancingService loadBalancingService() {
+        return this.find(LoadBalancingService.class).orElseThrow();
     }
     public MagicLinkService magicLinkService() {
         return this.find(MagicLinkService.class).orElseThrow();

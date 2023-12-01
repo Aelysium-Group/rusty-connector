@@ -20,7 +20,6 @@ public abstract class Family implements IFamily<MCLoader, Player> {
     protected final String id;
     protected Metadata metadata;
     protected Settings settings;
-    protected final List<MCLoader> lockedServers = new ArrayList<>();
 
     protected Family(String id, Settings settings, Metadata metadata) {
         this.id = id;
@@ -30,7 +29,7 @@ public abstract class Family implements IFamily<MCLoader, Player> {
 
     public long playerCount() {
         AtomicLong newPlayerCount = new AtomicLong();
-        this.settings.loadBalancer.dump().forEach(server -> newPlayerCount.addAndGet(server.playerCount()));
+        this.settings.loadBalancer.servers().forEach(server -> newPlayerCount.addAndGet(server.playerCount()));
 
         return newPlayerCount.get();
     }
@@ -51,8 +50,6 @@ public abstract class Family implements IFamily<MCLoader, Player> {
     public Component displayName() {
         return this.settings.displayName;
     }
-
-    public List<MCLoader> lockedServers() { return this.lockedServers;}
 
     public Metadata metadata() {
         return this.metadata;
@@ -78,26 +75,6 @@ public abstract class Family implements IFamily<MCLoader, Player> {
 
     public void removeServer(MCLoader server) {
         this.settings.loadBalancer.remove(server);
-        this.lockedServers.remove(server);
-    }
-
-    public void lockServer(MCLoader server) {
-        if (!this.settings.loadBalancer.contains(server)) return;
-        this.settings.loadBalancer.remove(server);
-        this.lockedServers.add(server);
-
-        this.settings.loadBalancer.completeSort();
-    }
-    public void unlockServer(MCLoader server) {
-        if (!this.lockedServers.contains(server)) return;
-        this.lockedServers.remove(server);
-        this.settings.loadBalancer.add(server);
-
-        this.settings.loadBalancer.completeSort();
-    }
-    public boolean joinable(MCLoader server) {
-        if (!this.registeredServers().contains(server)) return false;
-        return !this.lockedServers.contains(server);
     }
 
     public List<com.velocitypowered.api.proxy.Player> players(int max) {
@@ -115,8 +92,8 @@ public abstract class Family implements IFamily<MCLoader, Player> {
 
     public List<MCLoader> registeredServers() {
         List<MCLoader> servers = new ArrayList<>();
-        servers.addAll(this.settings.loadBalancer.dump());
-        servers.addAll(this.lockedServers);
+        servers.addAll(this.settings.loadBalancer.servers());
+        servers.addAll(this.settings.loadBalancer.lockedServers());
         return servers;
     }
 

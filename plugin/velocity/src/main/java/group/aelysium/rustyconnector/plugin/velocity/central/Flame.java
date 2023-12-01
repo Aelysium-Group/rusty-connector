@@ -45,7 +45,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.St
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingClock;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.MagicLinkPingHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.LockServerHandler;
@@ -376,8 +376,8 @@ class Initialize {
 
         {
             bootOutput.add(Component.text(" | Registering load balancing service to the API...", NamedTextColor.DARK_GRAY));
-            LoadBalancingClock clock = new LoadBalancingClock(familyService.size(), LiquidTimestamp.from(20, TimeUnit.SECONDS));
-            services.put(LoadBalancingClock.class, clock);
+            LoadBalancingService clock = new LoadBalancingService(familyService.size(), LiquidTimestamp.from(20, TimeUnit.SECONDS));
+            services.put(LoadBalancingService.class, clock);
             clock.init(inject(familyService, this.api.logger()));
             bootOutput.add(Component.text(" | Finished registering load balancing service to the API.", NamedTextColor.GREEN));
         }

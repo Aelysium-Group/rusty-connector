@@ -209,7 +209,7 @@ class StaticFamilyConnector {
         if(!shouldRegisterNew) return server;
 
         try {
-            this.family.dataEnclave().save(new Player.UUIDReference(player.getUniqueId()), server, this.family);
+            this.family.dataEnclave().save(new Player.Reference(player.getUniqueId()), server, this.family);
         } catch (Exception e) {
             Tinder.get().logger().send(Component.text("Unable to save "+ this.player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
             e.printStackTrace();
@@ -227,7 +227,7 @@ class StaticFamilyConnector {
      */
     public MCLoader connectHomeServer() throws RuntimeException {
         try {
-            Optional<ServerResidence> residence = this.family.dataEnclave().fetch(new Player.UUIDReference(player.getUniqueId()), this.family);
+            Optional<ServerResidence> residence = this.family.dataEnclave().fetch(new Player.Reference(player.getUniqueId()), this.family);
 
             if(residence.isPresent()) {
                 try {
@@ -237,7 +237,7 @@ class StaticFamilyConnector {
             }
             switch (this.family.unavailableProtocol()) {
                 case ASSIGN_NEW_HOME -> {
-                    this.family.dataEnclave().delete(new Player.UUIDReference(player.getUniqueId()), this.family);
+                    this.family.dataEnclave().delete(new Player.Reference(player.getUniqueId()), this.family);
                     return this.establishNewConnection(true);
                 }
                 case CONNECT_WITH_ERROR -> {

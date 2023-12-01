@@ -12,14 +12,14 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-public class ResidenceDataEnclave implements IResidenceDataEnclave<MCLoader, Player, Player.UUIDReference, StaticFamily> {
+public class ResidenceDataEnclave implements IResidenceDataEnclave<MCLoader, Player, Player.Reference, StaticFamily> {
     private final MySQLStorage storage;
 
     public ResidenceDataEnclave(MySQLStorage storage) {
         this.storage = storage;
     }
 
-    public Optional<ServerResidence> fetch(Player.UUIDReference player, StaticFamily family) {
+    public Optional<ServerResidence> fetch(Player.Reference player, StaticFamily family) {
         try {
             StorageRoot root = this.storage.root();
 
@@ -38,7 +38,7 @@ public class ResidenceDataEnclave implements IResidenceDataEnclave<MCLoader, Pla
 
         return Optional.empty();
     }
-    public void save(Player.UUIDReference player, MCLoader server, StaticFamily family)  {
+    public void save(Player.Reference player, MCLoader server, StaticFamily family)  {
         StorageRoot root = this.storage.root();
 
         ServerResidence serverResidence = new ServerResidence(player, server, family, family.homeServerExpiration());
@@ -47,7 +47,7 @@ public class ResidenceDataEnclave implements IResidenceDataEnclave<MCLoader, Pla
         residences.add(serverResidence);
         this.storage.store(residences);
     }
-    public void delete(Player.UUIDReference player, StaticFamily family) {
+    public void delete(Player.Reference player, StaticFamily family) {
         StorageRoot root = this.storage.root();
 
         Set<ServerResidence> residences = root.residence();

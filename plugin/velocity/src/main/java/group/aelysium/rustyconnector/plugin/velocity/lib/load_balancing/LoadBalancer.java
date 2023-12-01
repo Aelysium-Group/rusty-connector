@@ -1,17 +1,20 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
+import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
-    private boolean weighted = false;
-    private boolean persistence = false;
-    private int attempts = 5;
+    private boolean weighted;
+    private boolean persistence;
+    private int attempts;
     protected int index = 0;
-    protected List<MCLoader> items = new ArrayList<>();
+    protected Vector<MCLoader> servers = new Vector<>();
+    protected Vector<MCLoader> lockedServers = new Vector<>();
 
     public LoadBalancer(Settings settings) {
         this.weighted = settings.weighted();
@@ -36,8 +39,8 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
         MCLoader item;
         if(this.index >= this.size()) {
             this.index = 0;
-            item = this.items.get(this.index);
-        } else item = this.items.get(this.index);
+            item = this.servers.get(this.index);
+        } else item = this.servers.get(this.index);
 
         assert item != null;
 
@@ -50,12 +53,12 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
 
     public void iterate() {
         this.index += 1;
-        if(this.index >= this.items.size()) this.index = 0;
+        if(this.index >= this.servers.size()) this.index = 0;
     }
 
     final public void forceIterate() {
         this.index += 1;
-        if(this.index >= this.items.size()) this.index = 0;
+        if(this.index >= this.servers.size()) this.index = 0;
     }
 
     public abstract void completeSort();
@@ -63,19 +66,29 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
     public abstract void singleSort();
 
     public void add(MCLoader item) {
-        this.items.add(item);
+        if(this.servers.contains(item)) return;
+        this.servers.add(item);
     }
 
     public void remove(MCLoader item) {
-        this.items.remove(item);
+        if(this.servers.remove(item)) return;
+        this.lockedServers.remove(item);
     }
 
     public int size() {
-        return this.items.size();
+        return this.servers.size() + this.lockedServers.size();
     }
 
-    public List<MCLoader> dump() {
-        return this.items;
+    public int size(boolean locked) {
+        if(locked) return this.lockedServers.size();
+        return this.servers.size();
+    }
+
+    public List<MCLoader> servers() {
+        return this.servers.stream().toList();
+    }
+    public List<MCLoader> lockedServers() {
+        return this.servers.stream().toList();
     }
 
     public String toString() {
@@ -96,7 +109,21 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
     }
 
     public boolean contains(MCLoader item) {
-        return this.items.contains(item);
+        return this.servers.contains(item);
+    }
+
+    public void lock(MCLoader server) {
+        if(!this.servers.remove(server)) return;
+        this.lockedServers.add(server);
+    }
+
+    public void unlock(MCLoader server) {
+        if(!this.lockedServers.remove(server)) return;
+        this.servers.add(server);
+    }
+
+    public boolean joinable(MCLoader server) {
+        return this.servers.contains(server);
     }
 
     public record Settings(boolean weighted, boolean persistence, int attempts) {}
