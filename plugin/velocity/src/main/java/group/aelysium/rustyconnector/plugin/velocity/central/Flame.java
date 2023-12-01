@@ -606,7 +606,7 @@ class Initialize {
             DynamicTeleportService dynamicTeleportService = DynamicTeleportService.init(inject(bootOutput, dependencies.d1()), config);
 
             try {
-                TPAService tpaService = dynamicTeleportService.services().tpaService().orElseThrow();
+                TPAService tpaService = dynamicTeleportService.services().tpa().orElseThrow();
                 tpaService.cleaner().startHeartbeat(tpaService);
                 tpaService.initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
                 bootOutput.add(Component.text(" | The TPA module was started successfully!",NamedTextColor.GREEN));
@@ -617,7 +617,7 @@ class Initialize {
             }
 
             try {
-                dynamicTeleportService.services().hubService().orElseThrow().initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
+                dynamicTeleportService.services().hub().orElseThrow().initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
                 bootOutput.add(Component.text(" | The HUB module was started successfully!",NamedTextColor.GREEN));
             } catch (NoSuchElementException ignore) {
             } catch (Exception e) {
@@ -626,7 +626,7 @@ class Initialize {
             }
 
             try {
-                dynamicTeleportService.services().anchorService().orElseThrow().initCommands(inject(dynamicTeleportService, dependencies.d2(), bootOutput));
+                dynamicTeleportService.services().anchor().orElseThrow().initCommands(inject(dynamicTeleportService, dependencies.d2(), bootOutput));
                 bootOutput.add(Component.text(" | The Anchor module was started successfully!",NamedTextColor.GREEN));
             } catch (NoSuchElementException ignore) {
             } catch (Exception e) {

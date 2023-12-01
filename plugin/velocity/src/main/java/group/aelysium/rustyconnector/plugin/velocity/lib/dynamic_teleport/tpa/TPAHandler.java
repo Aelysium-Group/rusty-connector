@@ -34,7 +34,7 @@ public class TPAHandler implements ITPAHandler<TPARequest> {
     public TPARequest newRequest(Player sender, Player target) {
         Tinder api = Tinder.get();
         TPAService tpaService = api.services().dynamicTeleport().orElseThrow()
-                                   .services().tpaService().orElseThrow();
+                                   .services().tpa().orElseThrow();
 
         TPARequest tpaRequest = new TPARequest(sender, target, tpaService.settings().expiration());
         requests.add(tpaRequest);

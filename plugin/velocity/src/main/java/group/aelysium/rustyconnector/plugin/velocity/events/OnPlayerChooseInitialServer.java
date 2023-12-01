@@ -4,6 +4,8 @@ import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors.InjectorService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -17,12 +19,16 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IInitiallyConnectableFamily;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
 
 public class OnPlayerChooseInitialServer {
     /**
@@ -37,6 +43,7 @@ public class OnPlayerChooseInitialServer {
 
         return EventTask.async(() -> {
             try {
+                // Check for network whitelist
                 try {
                     Whitelist whitelist = api.services().whitelist().proxyWhitelist();
                     if (!whitelist.validate(eventPlayer)) {
@@ -46,9 +53,22 @@ public class OnPlayerChooseInitialServer {
                     }
                 } catch (Exception ignore) {}
 
-                RootFamily rootFamily = api.services().family().rootFamily();
+                // Handle family injectors if they exist
+                IInitiallyConnectableFamily<MCLoader, Player> family = null;
+                try {
+                    InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
+                    String host = eventPlayer.getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
 
-                MCLoader server = rootFamily.connect(event);
+                    family = injectors.familyOf(host).orElseThrow();
+                } catch (NoSuchElementException ignore) {
+                } catch (Exception e) {
+                    logger.send(Component.text("Error while using Family Injectors! Players will attempt to connect to the root family because of this! "+e.getMessage(), NamedTextColor.RED));
+
+                    family = api.services().family().rootFamily();
+                }
+                if(family == null) throw new RuntimeException("Unable to fetch a server to connect to.");
+
+                MCLoader server = family.connect(event);
 
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, DiscordWebhookMessage.PROXY__PLAYER_JOIN.build(player, server));
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, server));

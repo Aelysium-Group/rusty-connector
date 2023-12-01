@@ -39,7 +39,7 @@ public final class CommandTPA {
         Tinder api = Tinder.get();
         try {
             TPAService tpaService = api.services().dynamicTeleport().orElseThrow()
-                                       .services().tpaService().orElseThrow();
+                                       .services().tpa().orElseThrow();
 
             ServerInfo serverInfo = sender.getCurrentServer().orElseThrow().getServerInfo();
             MCLoader targetServer = new MCLoader.Reference(serverInfo).get();
