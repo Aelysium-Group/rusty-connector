@@ -68,39 +68,9 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> {
     long playerCount();
 
     /**
-     * Gets all {@link IMCLoader PlayerServers} that are locked on this family.
-     * For a list of unlocked {@link IMCLoader PlayerServers}, use {@link IFamily#loadBalancer()}.{@link ILoadBalancer#dump() dump()}.
-     * @return {@link List< IMCLoader >}
-     */
-    List<TMCLoader> lockedServers();
-
-    /**
-     * Unlock a {@link IMCLoader}, allowing players to connect to it via the load balancer.
-     * If the requested server isn't registered to this family, nothing will happen.
-     * @param server The {@link IMCLoader} to unlock.
-     */
-    void unlockServer(TMCLoader server);
-
-    /**
-     * Lock a {@link IMCLoader}, preventing players from connect to it via the load balancer.
-     * If the requested server isn't registered to this family, nothing will happen.
-     * </p>
-     * Event though a locked server can't be joined via the load balancer, you can still send players to it by using the RC send command.
-     * @param server The {@link IMCLoader} to lock.
-     */
-    void lockServer(TMCLoader server);
-
-    /**
-     * Checks if the requested {@link IMCLoader} is joinable.
-     * @param server The {@link IMCLoader} to check.
-     * @return `true` if the {@link IMCLoader} can be joined via the family's load balancer. `false` otherwise.
-     */
-    boolean joinable(TMCLoader server);
-
-    /**
      * Gets the number of {@link IMCLoader PlayerServers} that are registered to this family.
      * This method counts both locked and unlocked servers.
-     * To get the count of either locked or unlocked use: {@link IFamily#lockedServers()}.{@link List#size() size()} or {@link IFamily#loadBalancer()}.{@link ILoadBalancer#size() size()}
+     * To get the count of either locked or unlocked use: {@link ILoadBalancer#size(boolean) loadBalancer().size(true)} or {@link ILoadBalancer#size(boolean) loadBalancer().size(false)}
      * @return {@link Long}
      */
     long serverCount();

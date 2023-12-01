@@ -28,6 +28,6 @@ public class RankedGameEndHandler implements PacketHandler {
         );
         if(!family.containsServer(serverInfo)) return;
 
-        ((RankedFamily) family).gameManager().end(packet.uuid());
+        //((RankedFamily) family).gameManager().end(packet.uuid());
     }
 }

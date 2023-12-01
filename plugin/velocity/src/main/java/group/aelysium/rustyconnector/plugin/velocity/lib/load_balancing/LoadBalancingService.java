@@ -9,9 +9,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
-public class LoadBalancingClock extends ClockService {
+public class LoadBalancingService extends ClockService {
     protected final LiquidTimestamp heartbeat;
-    public LoadBalancingClock(int threads, LiquidTimestamp heartbeat) {
+    public LoadBalancingService(int threads, LiquidTimestamp heartbeat) {
         super(threads);
         this.heartbeat = heartbeat;
     }

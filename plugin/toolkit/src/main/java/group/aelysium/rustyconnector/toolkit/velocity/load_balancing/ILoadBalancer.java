@@ -70,16 +70,32 @@ public interface ILoadBalancer<I> {
     void remove(I item);
 
     /**
-     * Return the number of items.
-     * @return The number of items.
+     * Return the number of servers contained in the load balancer.
+     * Specifically will add up the number of locked and unlocked servers and return that number.
+     * @return The number of servers.
      */
     int size();
 
     /**
-     * Return all items from the load balancer.
-     * @return The items to return.
+     * Return the number of servers in the load balancer.
+     * @param locked If `true`, will return the number of locked servers. If `false` will return the number of unlocked servers.
+     * @return The number of servers.
      */
-    List<I> dump();
+    int size(boolean locked);
+
+    /**
+     * Return all open servers from the load balancer.
+     * The returned list is separated from the list the load balancer uses. Changes to the returned list will not be reflected in the load balancer.
+     * @return The servers to return.
+     */
+    List<I> servers();
+
+    /**
+     * Return all locked servers from the load balancer.
+     * The returned list is separated from the list the load balancer uses. Changes to the returned list will not be reflected in the load balancer.
+     * @return The locked servers to return.
+     */
+    List<I> lockedServers();
 
     /**
      * Checks if the load balancer contains the specified item.
@@ -110,4 +126,25 @@ public interface ILoadBalancer<I> {
      * Resets the index of the load balancer.
      */
     void resetIndex();
+
+    /**
+     * Locks the specific server so that the load balancer won't return it.
+     * If the server is already locked, or doesn't exist in the load balancer, nothing will happen.
+     * @param server The server to lock.
+     */
+    void lock(I server);
+
+    /**
+     * Unlocks the specific server so that the load balancer can return it.
+     * If the server is already unlocked, or doesn't exist in the load balancer, nothing will happen.
+     * @param server The server to unlock.
+     */
+    void unlock(I server);
+
+    /**
+     * Checks if the specified server will be joinable via the load balancer.
+     * @param server The server to check.
+     * @return `true` is the server is joinable via the load balancer. `false` if the server is locked or simply doesn't exist in the load balancer.
+     */
+    boolean joinable(I server);
 }

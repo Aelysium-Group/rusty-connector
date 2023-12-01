@@ -14,10 +14,10 @@ public class MostConnection extends LeastConnection {
     @Override
     public void iterate() {
         try {
-            MCLoader currentItem = this.items.get(this.index);
+            MCLoader currentItem = this.servers.get(this.index);
 
             if(currentItem.playerCount() + 1 > currentItem.hardPlayerCap()) this.index++;
-            if(this.index >= this.items.size()) this.index = 0;
+            if(this.index >= this.servers.size()) this.index = 0;
         } catch (IndexOutOfBoundsException ignore) {}
     }
 
@@ -25,10 +25,10 @@ public class MostConnection extends LeastConnection {
     @Override
     public void completeSort() {
         this.index = 0;
-        if(this.weighted()) WeightedQuickSort.sort(this.items);
+        if(this.weighted()) WeightedQuickSort.sort(this.servers);
         else {
-            QuickSort.sort(this.items);
-            Collections.reverse(this.items);
+            QuickSort.sort(this.servers);
+            Collections.reverse(this.servers);
         }
     }
 
