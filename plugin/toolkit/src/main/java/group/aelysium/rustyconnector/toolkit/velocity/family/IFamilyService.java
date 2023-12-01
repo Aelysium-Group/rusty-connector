@@ -7,10 +7,10 @@ import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.List;
 
-public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TRootFamily extends IRootFamily<TMCLoader, TPlayer>, TBaseFamily extends IFamily<TMCLoader, TPlayer>> extends Service {
+public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TBaseFamily extends IFamily<TMCLoader, TPlayer>> extends Service {
     boolean shouldCatchDisconnectingPlayers();
 
-    void setRootFamily(TRootFamily family);
+    void setRootFamily(IRootConnectable<TMCLoader, TPlayer> family);
 
     /**
      * Get the root family of this FamilyService.
@@ -18,7 +18,7 @@ public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPl
      * this will return `null`.
      * @return A {@link IRootFamily} or `null`
      */
-    TRootFamily rootFamily();
+    IRootConnectable<TMCLoader, TPlayer> rootFamily();
 
     /**
      * Get the number of families in this {@link IFamilyService}.
@@ -30,17 +30,17 @@ public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPl
      * Add a family to this manager.
      * @param family The family to add to this manager.
      */
-    void add(TBaseFamily family);
+    void add(IConnectable<TMCLoader, TPlayer> family);
 
     /**
      * Remove a family from this manager.
      * @param family The family to remove from this manager.
      */
-    void remove(TBaseFamily family);
+    void remove(IConnectable<TMCLoader, TPlayer> family);
 
     /**
      * Gets a list of all families in this service.
      * @return {@link List<TBaseFamily>}
      */
-    List<TBaseFamily> dump();
+    List<IConnectable<TMCLoader, TPlayer>> dump();
 }

@@ -5,11 +5,9 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors.InjectorService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -19,7 +17,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IInitiallyConnectableFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IInitialEventConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IRootConnectable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -54,7 +54,7 @@ public class OnPlayerChooseInitialServer {
                 } catch (Exception ignore) {}
 
                 // Handle family injectors if they exist
-                IInitiallyConnectableFamily<MCLoader, Player> family = null;
+                IRootConnectable<MCLoader, Player> family = null;
                 try {
                     InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
                     String host = eventPlayer.getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);

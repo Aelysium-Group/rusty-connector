@@ -32,7 +32,7 @@ root-family:
     # If a player is kicked or disconnected from a family in this proxy.
     # Should the root family catch them? If not, they will disconnect from the whole network.
     # This setting is great if you want a player to join back into the lobby if they get kicked from
-    # a gamemode or sub-family.
+    # a gamemode or subfamily.
     #
     catch-disconnecting-players: false
 
@@ -99,37 +99,26 @@ static: []
 ranked: []
 
 
+
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                     Versioned Family                     #
+#                    Versioned Filters                     #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
-# | Versioned families are fake families.                  #
-# | They don't actually exist.                             #
-#                                                          #
-# | A versioned family does not allow servers to be        #
-# | registered to it.                                      #
-# | Instead, you register other families to it. Then,      #
-# | when players connect to the versioned family, they     #
-# | will be connected to one of the subfamilies based      #
-# | on the version of Minecraft they are using.            #
-#                                                          #
-# | Versioned families are not allowed to have the same    #
-# | name as a regular family.                              #
-#                                                          #
-# | All target families used by a versioned families       #
-# | must be of the same type.                              #
+# | Versioned Filters are filters that player can connect  #
+# | to, just like a family.                                #
+# | Once a player connects to a Versioned Filter,          #
+# | it will look at what version they're using and send    #
+# | them to a predefined family.                           #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-versioned-families: []
-## This is an example versioned family.
-## Versioned families are not allowed to use other versioned families as a target.
+versioned-filters: []
+## This is an example versioned connector.
 ## `target-family` must point to an already existing family.
-## You can also use sub versions such as 1.20.2.
 ##
 ##    - name: "lobby"
 ##      mappings:

@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
@@ -88,7 +89,7 @@ public abstract class Family implements IFamily<MCLoader, Player> {
         return this.settings.loadBalancer;
     }
 
-    public Family parent() {
+    public IConnectable<MCLoader, Player> parent() {
         return this.settings.parent.get(true);
     }
 
@@ -118,6 +119,46 @@ public abstract class Family implements IFamily<MCLoader, Player> {
         }
 
         public Family get() {
+            if(rootFamily) return (Family) Tinder.get().services().family().rootFamily();
+            return (Family) Tinder.get().services().family().find(this.referencer).orElseThrow();
+        }
+
+        /**
+         * Gets the family referenced.
+         * If no family could be found and {@param fetchRoot} is disabled, will throw an exception.
+         * If {@param fetchRoot} is enabled and the family isn't found, will return the root family instead.
+         * @param fetchRoot Should the root family be returned if the parent family can't be found?
+         * @return {@link Family}
+         * @throws java.util.NoSuchElementException If {@param fetchRoot} is disabled and the family can't be found.
+         */
+        public Family get(boolean fetchRoot) {
+            if(rootFamily) return (Family) Tinder.get().services().family().rootFamily();
+            if(fetchRoot)
+                try {
+                    return (Family) Tinder.get().services().family().find(this.referencer).orElseThrow();
+                } catch (Exception ignore) {
+                    return (Family) Tinder.get().services().family().rootFamily();
+                }
+            else return (Family) Tinder.get().services().family().find(this.referencer).orElseThrow();
+        }
+
+        public static Reference rootFamily() {
+            return new Reference();
+        }
+    }
+
+    public static class ConnectableReference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IConnectable<MCLoader, Player>, String> {
+        private boolean rootFamily = false;
+
+        public ConnectableReference(String name) {
+            super(name);
+        }
+        protected ConnectableReference() {
+            super(null);
+            this.rootFamily = true;
+        }
+
+        public IConnectable<MCLoader, Player> get() {
             if(rootFamily) return Tinder.get().services().family().rootFamily();
             return Tinder.get().services().family().find(this.referencer).orElseThrow();
         }
@@ -130,7 +171,7 @@ public abstract class Family implements IFamily<MCLoader, Player> {
          * @return {@link Family}
          * @throws java.util.NoSuchElementException If {@param fetchRoot} is disabled and the family can't be found.
          */
-        public Family get(boolean fetchRoot) {
+        public IConnectable<MCLoader, Player> get(boolean fetchRoot) {
             if(rootFamily) return Tinder.get().services().family().rootFamily();
             if(fetchRoot)
                 try {

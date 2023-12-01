@@ -12,6 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IRootConnectable;
 import net.kyori.adventure.text.Component;
 
 public class OnPlayerKicked {
@@ -45,11 +46,10 @@ public class OnPlayerKicked {
             try {
                 if (!api.services().family().shouldCatchDisconnectingPlayers()) throw new NoOutputException();
 
-                RootFamily rootFamily = api.services().family().rootFamily();
-                if(rootFamily.registeredServers().isEmpty()) throw new RuntimeException("There are no available servers for you to connect to!");
+                IRootConnectable<MCLoader, Player> rootFamily = api.services().family().rootFamily();
                 if(isFromRootFamily) throw new NoOutputException();
 
-                MCLoader newServer = rootFamily.fetchAny(player);
+                MCLoader newServer = rootFamily.connect(player);
                 if(newServer == null) throw new RuntimeException("Server closed.");
 
                 try {

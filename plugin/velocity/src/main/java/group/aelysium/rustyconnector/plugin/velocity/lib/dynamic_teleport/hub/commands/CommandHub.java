@@ -7,6 +7,8 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IRootConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -43,7 +45,7 @@ public class CommandHub {
 
                     MCLoader sendersServer = new MCLoader.Reference(serverInfo).get();
                     Family family = sendersServer.family();
-                    RootFamily rootFamily = familyService.rootFamily();
+                    IRootConnectable<MCLoader, Player> rootFamily = familyService.rootFamily();
 
                     if(!hubService.isEnabled(family.id())) {
                         context.getSource().sendMessage(VelocityLang.UNKNOWN_COMMAND);
@@ -64,7 +66,7 @@ public class CommandHub {
                     }
 
                     try {
-                        Family parent = family.parent();
+                        IConnectable<MCLoader, Player> parent = family.parent();
 
                         if(parent != null) {
                             parent.connect(player);

@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.toolkit.velocity.family.static_family;
 
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IInitiallyConnectableFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IInitialEventConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.Reference;
 
 import java.util.UUID;
 
-public interface IStaticFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> extends IFamily<TMCLoader, TPlayer>, IInitiallyConnectableFamily<TMCLoader, TPlayer> {
+public interface IStaticFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> extends IFamily<TMCLoader, TPlayer>, IInitialEventConnectable<TMCLoader, TPlayer> {
     /**
      * Gets the {@link UnavailableProtocol} for this family. {@link UnavailableProtocol} governs what happens when a player's resident server is unavailable.
      * @return {@link UnavailableProtocol}
