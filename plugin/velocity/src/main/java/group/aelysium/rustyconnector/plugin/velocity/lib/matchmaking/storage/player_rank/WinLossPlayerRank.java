@@ -1,10 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.ScoreCard;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IRandomizedPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IWinLossPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 

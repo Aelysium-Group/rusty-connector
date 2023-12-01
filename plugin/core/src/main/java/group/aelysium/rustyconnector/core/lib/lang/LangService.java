@@ -2,13 +2,16 @@ package group.aelysium.rustyconnector.core.lib.lang;
 
 import group.aelysium.rustyconnector.toolkit.core.lang.ILangService;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static net.kyori.adventure.text.Component.*;
 
 public class LangService implements ILangService<LanguageResolver> {
     protected LanguageResolver resolver;
@@ -50,7 +53,7 @@ public class LangService implements ILangService<LanguageResolver> {
         languageCode = languageCode.toLowerCase();
         languageCode = languageCode.replace("-", "_");
 
-        if(languageCode.equals("en_us")) return LangService.loadEnglish();
+        if(InternalLangConfigurations.internalCodes().contains(languageCode)) return LangService.loadInternal(InternalLangConfigurations.get(languageCode).build());
 
         File langFolder = new File(dataFolder.toString(), "lang/"+languageCode);
         if(!langFolder.exists())
@@ -60,7 +63,7 @@ public class LangService implements ILangService<LanguageResolver> {
             return loadOther(languageCode, langFolder);
         } catch (Exception e) {
             try {
-                return LangService.loadEnglish();
+                return LangService.loadInternal(InternalLangConfigurations.ENGLISH.build());
             } catch (Exception e2) {
                 throw new RuntimeException(e2);
             }
@@ -86,12 +89,14 @@ public class LangService implements ILangService<LanguageResolver> {
         }
     }
 
-    public static LangService loadEnglish() {
+    public static LangService loadInternal(String internal) throws NoSuchElementException {
+        if(InternalLangConfigurations.internalCodes().contains(internal)) throw new NoSuchElementException();
+
         List<LangFileMappings.Mapping> mappings = LangFileMappings.toList();
 
         Map<LangFileMappings.Mapping, File> files = new HashMap<>();
         for (LangFileMappings.Mapping path : mappings) {
-            URL url = LangService.class.getClassLoader().getResource("en_us/"+path.path());
+            URL url = LangService.class.getClassLoader().getResource(internal+"/"+path.path());
             try {
                 File file = new File(url.getPath());
                 files.put(path, file);
@@ -100,6 +105,37 @@ public class LangService implements ILangService<LanguageResolver> {
             }
         }
 
-        return new LangService("en_us", files);
+        return new LangService(internal, files);
+    }
+
+    public static class InternalLangConfigurations {
+        public static Entry ENGLISH = () -> "en_us";
+        public static Entry SIMPLIFIED_CHINESE = () -> "zh_cn";
+
+        public static List<Entry> internalEntries() {
+            List<Entry> internalCodes = new ArrayList<>();
+
+            internalCodes.add(ENGLISH);
+            internalCodes.add(SIMPLIFIED_CHINESE);
+
+            return internalCodes;
+        }
+
+        public static List<String> internalCodes() {
+            List<String> internalCodes = new ArrayList<>();
+
+            internalEntries().forEach(entry -> internalCodes.add(entry.build()));
+
+            return internalCodes;
+        }
+
+
+        public static Entry get(String internal) {
+            return internalEntries().stream().filter(entry -> entry.build().equals(internal)).findAny().orElseThrow();
+        }
+
+        public interface Entry {
+            String build();
+        }
     }
 }
