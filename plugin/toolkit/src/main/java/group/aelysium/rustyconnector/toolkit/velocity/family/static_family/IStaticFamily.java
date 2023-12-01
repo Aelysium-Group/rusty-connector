@@ -6,8 +6,11 @@ import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.velocity.util.Reference;
 
-public interface IStaticFamily<TMCLoader extends IMCLoader, TRustyPlayer extends IPlayer> extends IFamily<TMCLoader, TRustyPlayer> {
+import java.util.UUID;
+
+public interface IStaticFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> extends IFamily<TMCLoader, TPlayer> {
     /**
      * Gets the {@link UnavailableProtocol} for this family. {@link UnavailableProtocol} governs what happens when a player's resident server is unavailable.
      * @return {@link UnavailableProtocol}
@@ -28,5 +31,5 @@ public interface IStaticFamily<TMCLoader extends IMCLoader, TRustyPlayer extends
      * Data enclave gives you an interface between this family and the remote storage connector that this family uses.
      * @return {@link IResidenceDataEnclave}
      */
-    IResidenceDataEnclave dataEnclave();
+    <TResidenceDataEnclave extends IResidenceDataEnclave<TMCLoader, TPlayer, Reference<TPlayer, UUID>, IStaticFamily<TMCLoader, TPlayer>>> TResidenceDataEnclave dataEnclave();
 }

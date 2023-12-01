@@ -2,14 +2,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.config.RankedFamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Randomized;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -23,7 +22,7 @@ import java.util.List;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.RANKED_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class RankedFamily extends Family {
+public class RankedFamily extends Family implements IRankedFamily<MCLoader, Player> {
     protected final Matchmaker<?> matchmaker;
 
     protected RankedFamily(Settings settings) {
@@ -31,24 +30,11 @@ public class RankedFamily extends Family {
         this.matchmaker = settings.matchmaker();
     }
 
-    /**
-     * Queues a player into this family's matchmaking.
-     * The player will be connected once a match has been made.
-     * The player's queue to this matchmaker will not timeout.
-     * You must manually call {@link #dequeue(Player)} to remove a player from this queue.
-     * @param player The player to connect.
-     * @return null. Always.
-     */
     public MCLoader connect(Player player) {
         this.matchmaker.add(player);
         return null;
     }
 
-    /**
-     * Dequeues a player from this family's matchmaking.
-     * If the player is already connected to this family, nothing will happen.
-     * @param player The player to dequeue.
-     */
     public void dequeue(Player player) {
         this.matchmaker.remove(player);
     }

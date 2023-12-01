@@ -3,15 +3,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmaker
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Team;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
-import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
@@ -20,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.floor;
 
-public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements Service {
+public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements IMatchmaker<Player, IPlayerRank<?>> {
     protected final ClockService supervisor = new ClockService(5);
     protected final Settings settings;
     protected final int minPlayersPerGame;
@@ -34,7 +32,7 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements 
 
         final int[] min = {0};
         final int[] max = {0};
-        settings.teams.forEach(team -> {
+        settings.teams().forEach(team -> {
             min[0] = min[0] + team.min();
             max[0] = max[0] + team.max();
         });
@@ -43,27 +41,15 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements 
         this.maxPlayersPerGame = max[0];
     }
 
-    /**
-     * Using the players contained in the matchmaker, make a game.
-     */
     public abstract Session make();
     public boolean minimumPlayersExist() {
         return this.waitingPlayers.size() > minPlayersPerGame;
     }
     public abstract void completeSort();
 
-    /**
-     * Inserts a player into the matchmaker.
-     * <p>
-     * Specifically, this method performs a {@link SingleSort#sort(List, int)} and injects the player into
-     * an approximation of the best place for them to reside.
-     * Thus reducing how frequently you'll need to perform a full sort on the metchmaker.
-     * @param player The player to add.
-     * @throws RuntimeException If there was an issue while adding the player to this matchmaker.
-     */
     public void add(Player player) {
         try {
-            RankedPlayer<TPlayerRank> rankedPlayer = this.settings.game.rankedPlayer(this.settings.storage(), player.uuid());
+            RankedPlayer<TPlayerRank> rankedPlayer = this.settings.game().rankedPlayer(this.settings.storage(), player.uuid());
 
             if (this.waitingPlayers.contains(rankedPlayer)) return;
 
@@ -85,10 +71,7 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements 
     public int size() {
         return this.waitingPlayers.size();
     }
-    public List<RankedPlayer<TPlayerRank>> dump() {
-        return this.waitingPlayers;
-    }
-    public boolean contains(RankedPlayer<TPlayerRank> item) {
+    public boolean contains(IRankedPlayer<Player, IPlayerRank<?>> item) {
         return this.waitingPlayers.contains(item);
     }
 
@@ -143,12 +126,4 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements 
         this.runningSessions.forEach(Session::end);
         this.runningSessions.clear();
     }
-
-    public record Settings (
-            MySQLStorage storage,
-            RankedGame game,
-            List<Team.Settings> teams,
-            double variance,
-            LiquidTimestamp interval
-    ) {}
 }

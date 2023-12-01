@@ -2,20 +2,25 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.pl
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.ScoreCard;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IRandomizedPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IWinLossPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 
 import static one.microstream.math.XMath.round;
 
-public class WinLossPlayerRank implements IPlayerRank<Double> {
+public class WinLossPlayerRank implements IWinLossPlayerRank {
     protected int wins = 0;
     protected int losses = 0;
 
-    public void markWin(MySQLStorage storage) {
+    public <TMySQLStorage extends IMySQLStorageService> void markWin(TMySQLStorage storage) {
         this.wins = this.wins + 1;
 
         storage.store(this);
     }
 
-    public void markLoss(MySQLStorage storage) {
+    public <TMySQLStorage extends IMySQLStorageService> void markLoss(TMySQLStorage storage) {
         this.losses = this.losses + 1;
 
         storage.store(this);
@@ -25,7 +30,7 @@ public class WinLossPlayerRank implements IPlayerRank<Double> {
         return round((double) wins / losses, 2);
     }
 
-    public ScoreCard.RankSchema.Type<Class<WinLossPlayerRank>> type() {
-        return ScoreCard.RankSchema.WIN_LOSS;
+    public IScoreCard.IRankSchema.Type<Class<IWinLossPlayerRank>> type() {
+        return IScoreCard.IRankSchema.WIN_LOSS;
     }
 }

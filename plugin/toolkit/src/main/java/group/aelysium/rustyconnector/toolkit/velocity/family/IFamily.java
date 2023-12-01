@@ -36,9 +36,8 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> {
     void removeServer(TMCLoader server);
 
     /**
-     * Get the whitelist for this family.
-     * @return {@link IWhitelist}
-     * @throws java.util.NoSuchElementException If no whitelist exists for this fmaily.
+     * Get the whitelist for this family, or `null` if there isn't one.
+     * @return The whitelist or `null` if there isn't one.
      */
     IWhitelist whitelist();
 
@@ -91,7 +90,7 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> {
 
     /**
      * Returns the metadata for this family.
-     * @return
+     * @return {@link Metadata}
      */
     Metadata metadata();
 }

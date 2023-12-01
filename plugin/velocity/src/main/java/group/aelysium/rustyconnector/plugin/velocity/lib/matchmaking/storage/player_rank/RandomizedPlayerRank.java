@@ -1,14 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.ScoreCard;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IRandomizedPlayerRank;
 
-import static one.microstream.math.XMath.round;
-
-public class RandomizedPlayerRank implements IPlayerRank<Boolean> {
+public class RandomizedPlayerRank implements IRandomizedPlayerRank {
     public Boolean rank() { return false; }
 
-    public ScoreCard.RankSchema.Type<Class<RandomizedPlayerRank>> type() {
-        return ScoreCard.RankSchema.RANDOMIZED;
+    public IScoreCard.IRankSchema.Type<Class<IRandomizedPlayerRank>> type() {
+        return IScoreCard.IRankSchema.RANDOMIZED;
     }
+
 }

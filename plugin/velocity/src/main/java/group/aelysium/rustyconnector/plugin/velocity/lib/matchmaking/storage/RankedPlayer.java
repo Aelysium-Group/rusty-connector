@@ -1,12 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.IPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
-public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortable {
+public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortable, IRankedPlayer<Player, TPlayerRank> {
     protected UUID uuid;
     protected TPlayerRank rank;
 
@@ -17,6 +20,14 @@ public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortab
 
     public UUID uuid() {
         return uuid;
+    }
+
+    public Optional<Player> player() {
+        try {
+            return Optional.of(new Player.Reference(this.uuid).get());
+        } catch (Exception ignore) {}
+
+        return Optional.empty();
     }
 
     public TPlayerRank rank() {

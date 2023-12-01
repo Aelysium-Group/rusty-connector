@@ -1,24 +1,25 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
  * ScoreCard is a representation of a player's entire ranked game history.
  * All ranks associated with a player should be able to be fetched using their score card.
  */
-public class RankedGame {
+public class RankedGame implements IRankedGame<Player, MySQLStorage> {
     protected String name;
-    protected ScoreCard.RankSchema.Type<?> rankingSchema;
+    protected IScoreCard.IRankSchema.Type<?> rankingSchema;
     protected HashMap<UUID, ScoreCard> scorecards = new HashMap<>();
 
-    public RankedGame(String name, ScoreCard.RankSchema.Type<?> schema) {
+    public RankedGame(String name, IScoreCard.IRankSchema.Type<?> schema) {
         this.name = name;
         this.rankingSchema = schema;
     }
@@ -44,7 +45,7 @@ public class RankedGame {
     }
 
     public <TPlayerRank extends IPlayerRank<?>> TPlayerRank playerRank(MySQLStorage storage, Player player) throws IllegalStateException {
-        if(rankingSchema == ScoreCard.RankSchema.RANDOMIZED) return (TPlayerRank) new RandomizedPlayerRank();
+        if(rankingSchema == IScoreCard.IRankSchema.RANDOMIZED) return (TPlayerRank) new RandomizedPlayerRank();
 
         ScoreCard scorecard = this.scorecards.get(player.uuid());
         if(scorecard == null) {

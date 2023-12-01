@@ -1,12 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.IPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ITeam;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 
 import java.util.List;
 import java.util.Vector;
 
-public class Team {
+public class Team implements ITeam<Player, RankedPlayer<IPlayerRank<?>>> {
     protected final Settings settings;
     protected final Vector<RankedPlayer<IPlayerRank<?>>> players;
 
@@ -33,6 +35,4 @@ public class Team {
     public boolean full() {
         return this.players.size() > settings.max();
     }
-
-    public record Settings(int min, int max) {}
 }
