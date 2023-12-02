@@ -118,7 +118,6 @@ public class Party implements IParty<MCLoader> {
         boolean kickOnSendFailure = Tinder.get().services().party().orElseThrow().settings().kickOnSendFailure();
 
         this.setServer(server);
-        Vector<Player> unsentPlayers = new Vector<>();
 
         Tinder.get().services().party().orElseThrow().queueConnector(() -> {
             for (Player player : this.players)
@@ -126,14 +125,20 @@ public class Party implements IParty<MCLoader> {
                     switch (switchPower) {
                         case MINIMAL -> {
                             if(server.full()) {
-                                unsentPlayers.add(player);
+                                if (kickOnSendFailure) {
+                                    player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
+                                    this.leave(player);
+                                } else player.sendMessage(VelocityLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
                                 return;
                             }
                             server.directConnect(player);
                         }
                         case MODERATE -> {
                             if(server.maxed()) {
-                                unsentPlayers.add(player);
+                                if (kickOnSendFailure) {
+                                    player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
+                                    this.leave(player);
+                                } else player.sendMessage(VelocityLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
                                 return;
                             }
                             server.directConnect(player);
@@ -141,15 +146,11 @@ public class Party implements IParty<MCLoader> {
                         case AGGRESSIVE -> server.directConnect(player);
                     }
                 } catch (ConnectException e) {
-                    unsentPlayers.add(player);
+                    if (kickOnSendFailure) {
+                        player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED_GENERIC);
+                        this.leave(player);
+                    } else player.sendMessage(VelocityLang.PARTY_FOLLOWING_FAILED_GENERIC);
                 }
-
-            unsentPlayers.forEach(player -> {
-                if (kickOnSendFailure) {
-                    player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED);
-                    this.leave(player);
-                } else player.sendMessage(VelocityLang.PARTY_FOLLOWING_FAILED);
-            });
         });
     }
 
