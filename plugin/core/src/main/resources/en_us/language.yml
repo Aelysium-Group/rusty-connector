@@ -193,10 +193,10 @@ velocity:
         already_leader: "<red>You're already the leader!</red>"
         demoted: "<yellow>You are no longer party leader.</yellow>"
         following_kicked:
-            server_full: "<red>There's not enough space in your parties new server so you were removed from the party.</red>"
+            server_full: "<red>There's not enough space in your party's new server so you were removed from the party.</red>"
             generic: "<red>There was an issue following your party! You've been kicked.</red>"
         following_failed:
-            server_full: "<red>There's not enough space in your parties new server so you did not follow them.</red>"
+            server_full: "<red>There's not enough space in your party's new server so you did not follow them.</red>"
             generic: "<red>There was an issue following your party!</red>"
         created: "<green>You created a new party!</green>"
         left_self: "<green>You left the party.</green>"
