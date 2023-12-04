@@ -63,7 +63,7 @@ public class TPARequest implements ITPARequest {
 
         DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleport().orElse(null);
         if(dynamicTeleportService == null) throw new NullPointerException("Dynamic Teleport must be enabled to use tpa functions!");
-        TPAService tpaService = dynamicTeleportService.services().tpaService().orElse(null);
+        TPAService tpaService = dynamicTeleportService.services().tpa().orElse(null);
         if(tpaService == null) throw new NullPointerException("TPA in Dynamic Teleport must be enabled to use tpa functions!");
 
         try {

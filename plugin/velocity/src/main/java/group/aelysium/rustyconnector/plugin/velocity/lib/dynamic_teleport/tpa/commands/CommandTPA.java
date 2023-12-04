@@ -39,7 +39,7 @@ public final class CommandTPA {
         Tinder api = Tinder.get();
         try {
             TPAService tpaService = api.services().dynamicTeleport().orElseThrow()
-                                       .services().tpaService().orElseThrow();
+                                       .services().tpa().orElseThrow();
 
             ServerInfo serverInfo = sender.getCurrentServer().orElseThrow().getServerInfo();
             MCLoader targetServer = new MCLoader.Reference(serverInfo).get();
@@ -330,17 +330,24 @@ public final class CommandTPA {
                                     if(!family.metadata().tpaAllowed()) throw new NullPointerException();
                                     TPAHandler tpaHandler = tpaService.tpaHandler(family);
 
-                                    if(tpaHandler.findRequestSender(player) != null) {
-                                        context.getSource().sendMessage(VelocityLang.TPA_REQUEST_DUPLICATE.build(targetPlayer.getUsername()));
-                                        return Command.SINGLE_SUCCESS;
+                                    if (Permission.validate(player, "rustyconnector.command.tpa.bypassRequest")) {
+                                        ServerInfo recieverServerInfo = targetPlayer.getCurrentServer().orElseThrow().getServerInfo();
+                                        MCLoader targetServer = new MCLoader.Reference(recieverServerInfo).get();
+
+                                        tpaService.tpaSendPlayer(player, targetPlayer, targetServer);
+                                        player.sendMessage(VelocityLang.TPA_REQUEST_BYPASSED.build(targetPlayer.getUsername()));
+                                    } else {
+                                        if(tpaHandler.findRequestSender(player) != null) {
+                                            context.getSource().sendMessage(VelocityLang.TPA_REQUEST_DUPLICATE.build(targetPlayer.getUsername()));
+                                            return Command.SINGLE_SUCCESS;
+                                        }
+
+                                        TPARequest request = tpaHandler.newRequest(player, targetPlayer);
+                                        request.submit();
                                     }
-
-                                    TPARequest request = tpaHandler.newRequest(player, targetPlayer);
-                                    request.submit();
-
                                     return Command.SINGLE_SUCCESS;
                                 } catch (NullPointerException e) {
-                                    logger.send(Component.text("Player attempted to use /tpa from a family that doesn't exist! (How did this happen?)", NamedTextColor.RED));
+                                    logger.send(Component.text("Player attempted to use /tpa from a family that doesn't exist!", NamedTextColor.RED));
                                     context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
                                 }
                             } catch (NoSuchElementException e) {

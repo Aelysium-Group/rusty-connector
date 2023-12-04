@@ -1,8 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay;
 
-import de.gesundkrank.jskills.ITeam;
-import de.gesundkrank.jskills.TrueSkillCalculator;
-import group.aelysium.rustyconnector.core.lib.algorithm.QuickSort;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameAssociatePacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -11,12 +8,12 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 
 import java.rmi.ConnectException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class Session {
+public class Session implements ISession<MCLoader> {
     protected final UUID uuid = UUID.randomUUID();
     protected final List<Team> teams;
     protected MCLoader.Reference server = null;

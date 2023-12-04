@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service
 
 import java.util.*;
 
-public interface IFriendsService<TRustyPlayer extends IPlayer, TFriendRequest extends IFriendRequest> extends Service {
+public interface IFriendsService<TPlayer extends IPlayer, TFriendRequest extends IFriendRequest> extends Service {
     /**
      * Gets the settings that this {@link IFriendsService} abides by.
      * @return {@link IFriendsService}
@@ -18,24 +18,24 @@ public interface IFriendsService<TRustyPlayer extends IPlayer, TFriendRequest ex
      * @param target The target to search for.
      * @return {@link List<IFriendRequest>}
      */
-    List<TFriendRequest> findRequestsToTarget(TRustyPlayer target);
+    List<TFriendRequest> findRequestsToTarget(TPlayer target);
 
     /**
      * Searches for a list of {@link IFriendRequest friend requests} that are addressed to a target.
      * @param target The target to search for.
      * @return {@link List<IFriendRequest>}
      */
-    Optional<TFriendRequest> findRequest(TRustyPlayer target, TRustyPlayer sender);
+    Optional<TFriendRequest> findRequest(TPlayer target, TPlayer sender);
 
-    Optional<List<TRustyPlayer>> findFriends(TRustyPlayer player);
+    Optional<List<TPlayer>> findFriends(TPlayer player);
 
-    boolean areFriends(TRustyPlayer player1, TRustyPlayer player2);
-    void addFriends(TRustyPlayer player1, TRustyPlayer player2);
-    void removeFriends(TRustyPlayer player1, TRustyPlayer player2);
+    boolean areFriends(TPlayer player1, TPlayer player2);
+    void addFriends(TPlayer player1, TPlayer player2);
+    void removeFriends(TPlayer player1, TPlayer player2);
 
-    IFriendMapping<TRustyPlayer> sendRequest(Player sender, TRustyPlayer target);
+    IFriendMapping<TPlayer> sendRequest(Player sender, TPlayer target);
 
     void closeInvite(TFriendRequest request);
 
-    Optional<Long> friendCount(TRustyPlayer player);
+    Optional<Long> friendCount(TPlayer player);
 }

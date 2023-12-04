@@ -88,6 +88,7 @@ velocity:
             - "<red><username>'s tpa request has been denied!</red>"
             - "<gray>They've been notified...</gray>"
         expired_request: "<gray>Your tpa request to <username> has expired!</gray>"
+        bypassed_request: "<gray>You teleported to <username> without sending a request.</gray>"
     hub:
         connection_failed: "<red>Failed to connect you to the hub!</red>"
     send:

@@ -101,33 +101,23 @@ ranked: []
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                     Versioned Family                     #
+#                     Version Filters                      #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
-# | Versioned families are fake families.                  #
-# | They don't actually exist.                             #
-#                                                          #
-# | A versioned family does not allow servers to be        #
-# | registered to it.                                      #
-# | Instead, you register other families to it. Then,      #
-# | when players connect to the versioned family, they     #
-# | will be connected to one of the subfamilies based      #
-# | on the version of Minecraft they are using.            #
-#                                                          #
-# | Versioned families are not allowed to have the same    #
-# | name as a regular family.                              #
-#                                                          #
-# | All target families used by a versioned families       #
-# | must be of the same type.                              #
+# | Version Filters are collections of families.           #
+# | When a player connections to a version filter          #
+# | the filter will assess the player's client version and #
+# | connect them to the appropriate family for             #
+# | their version.                                         #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-versioned-families: []
-## This is an example versioned family.
-## Versioned families are not allowed to use other versioned families as a target.
+version-filters: []
+## This is an example of a Version Filter.
+## Version Filters are not allowed to use other Version Filters as a target.
 ## `target-family` must point to an already existing family.
 ## You can also use sub versions such as 1.20.2.
 ##

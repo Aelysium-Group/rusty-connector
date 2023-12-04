@@ -57,6 +57,15 @@ enabled: false
 #              /tpa <target players username>              #
 #               ----------------------------               #
 #                                                          #
+# | You can also make it so that specific players do not   #
+# | send a request when using /tpa and instead directly    #
+# | teleport to the target player using a permission.      #
+#                                                          #
+#               ----------------------------               #
+#                 Bypass Request Permission:               #
+#         rustyconnector.command.tpa.bypassRequest         #
+#               ----------------------------               #
+#                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 tpa:
@@ -140,7 +149,7 @@ family-anchor:
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                     Family Injection                     #
+#                     Family Injectors                     #
 #                                                          #
 #               ----------------------------               #
 #                                                          #
@@ -154,7 +163,7 @@ family-anchor:
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-family-injection:
+family-injectors:
     enabled: false
 
     #

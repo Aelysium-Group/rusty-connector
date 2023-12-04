@@ -12,7 +12,7 @@ public interface IAnchorService<TMCLoader extends IMCLoader, TPlayer extends IPl
     /**
      * Gets a family which has the anchor which is provided.
      * @param anchor The anchor to find the family of.
-     * @return {@link Optional< IFamily >}
+     * @return {@link Optional<IFamily>}
      */
     Optional<TFamily> familyOf(String anchor);
 

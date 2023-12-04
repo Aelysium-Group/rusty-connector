@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.message.handling;
+package group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;

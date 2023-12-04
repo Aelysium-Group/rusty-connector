@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors.InjectorService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
@@ -17,13 +18,16 @@ public class DynamicTeleportServiceHandler extends ServiceHandler {
         super();
     }
 
-    public Optional<TPAService> tpaService() {
+    public Optional<TPAService> tpa() {
         return this.find(TPAService.class);
     }
-    public Optional<AnchorService> anchorService() {
+    public Optional<AnchorService> anchor() {
         return this.find(AnchorService.class);
     }
-    public Optional<HubService> hubService() {
+    public Optional<InjectorService> injector() {
+        return this.find(InjectorService.class);
+    }
+    public Optional<HubService> hub() {
         return this.find(HubService.class);
     }
 }

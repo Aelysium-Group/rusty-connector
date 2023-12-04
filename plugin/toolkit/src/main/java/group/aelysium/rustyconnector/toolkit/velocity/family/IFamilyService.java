@@ -2,12 +2,13 @@ package group.aelysium.rustyconnector.toolkit.velocity.family;
 
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.List;
 
-public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TRootFamily extends IRootFamily<TMCLoader, TPlayer>, TBaseFamily extends IFamily<TMCLoader, TPlayer>> extends Service {
+public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TRootFamily extends IRootFamily<TMCLoader, TPlayer>, TFamily extends IFamily<TMCLoader, TPlayer>> extends Service {
     boolean shouldCatchDisconnectingPlayers();
 
     void setRootFamily(TRootFamily family);
@@ -30,17 +31,21 @@ public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPl
      * Add a family to this manager.
      * @param family The family to add to this manager.
      */
-    void add(TBaseFamily family);
+    void add(TFamily family);
 
     /**
      * Remove a family from this manager.
      * @param family The family to remove from this manager.
      */
-    void remove(TBaseFamily family);
+    void remove(TFamily family);
+
+    void add(IFamilyCategory<TPlayer> category);
+
+    void remove(IFamilyCategory<TPlayer> category);
 
     /**
      * Gets a list of all families in this service.
-     * @return {@link List<TBaseFamily>}
+     * @return {@link List< TFamily >}
      */
-    List<TBaseFamily> dump();
+    List<TFamily> dump();
 }

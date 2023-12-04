@@ -1,14 +1,21 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family_categories;
+package group.aelysium.rustyconnector.plugin.velocity.lib.family.version_filter;
 
 import com.velocitypowered.api.network.ProtocolVersion;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class VersionedFamily<TFamily extends Family> implements FamilyCategory<TFamily> {
-    protected Map<ProtocolVersion, TFamily> families = new HashMap<>();
+public class VersionFilter implements IFamilyCategory<Player> {
+    protected final String id;
+    protected final Map<ProtocolVersion, Family> families = new HashMap<>();
+
+    public VersionFilter(String id) {
+        this.id = id;
+    }
 
     /**
      * Registers a family to be associated with the specified version.
@@ -17,8 +24,13 @@ public class VersionedFamily<TFamily extends Family> implements FamilyCategory<T
      * @param version The version to be targeted.
      * @param family The family to associate with the version.
      */
-    public void register(ProtocolVersion version, TFamily family) {
+    public void register(ProtocolVersion version, Family family) {
         this.families.put(version, family);
+    }
+
+    @Override
+    public String id() {
+        return this.id;
     }
 
     /**
@@ -30,7 +42,7 @@ public class VersionedFamily<TFamily extends Family> implements FamilyCategory<T
     public void connect(Player rustyPlayer) throws IllegalAccessException {
         com.velocitypowered.api.proxy.Player player = rustyPlayer.resolve().orElseThrow();
 
-        TFamily family = this.families.get(player.getProtocolVersion());
+        Family family = this.families.get(player.getProtocolVersion());
         if(family == null) throw new IllegalAccessException();
 
         family.connect(rustyPlayer);

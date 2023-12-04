@@ -20,7 +20,7 @@ import java.util.*;
 public class AnchorService implements IAnchorService<MCLoader, Player, Family> {
     private final Map<String, Family> anchors;
 
-    private AnchorService(Map<String, Family> anchors) {
+    protected AnchorService(Map<String, Family> anchors) {
         this.anchors = anchors;
     }
 
@@ -75,10 +75,8 @@ public class AnchorService implements IAnchorService<MCLoader, Player, Family> {
         return anchors;
     }
 
-    public static Optional<AnchorService> init(DependencyInjector.DI2<List<Component>, FamilyService> dependencies, DynamicTeleportConfig config) {
-        Tinder api = Tinder.get();
+    public static Optional<AnchorService> init(DependencyInjector.DI1<List<Component>> dependencies, DynamicTeleportConfig config) {
         List<Component> bootOutput = dependencies.d1();
-        FamilyService familyService = dependencies.d2();
 
         try {
             if(!config.isFamilyAnchor_enabled()) return Optional.empty();

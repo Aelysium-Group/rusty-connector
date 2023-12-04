@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
@@ -131,6 +133,11 @@ public class StaticFamily extends Family implements IStaticFamily<MCLoader, Play
         return family;
     }
 
+    @Override
+    public MCLoader connect(PlayerChooseInitialServerEvent event) {
+        return null;
+    }
+
     public record Settings(
             String id,
             Component displayName,
@@ -147,10 +154,17 @@ class StaticFamilyConnector {
     private final StaticFamily family;
     private final com.velocitypowered.api.proxy.Player player;
     private Component postConnectionError = null;
+    private final PlayerChooseInitialServerEvent event;
 
     public StaticFamilyConnector(StaticFamily family, com.velocitypowered.api.proxy.Player player) {
         this.family = family;
         this.player = player;
+        this.event = null;
+    }
+    public StaticFamilyConnector(StaticFamily family, PlayerChooseInitialServerEvent event) {
+        this.family = family;
+        this.player = event.getPlayer();
+        this.event = event;
     }
 
     public MCLoader connect() throws RuntimeException {
@@ -231,7 +245,14 @@ class StaticFamilyConnector {
 
             if(residence.isPresent()) {
                 try {
-                    residence.orElseThrow().server().connect(this.player);
+                    if(this.event == null) {
+                        if (!residence.orElseThrow().server().connect(this.player))
+                            throw new RuntimeException("There was an issue connecting you to the server!");
+                    } else {
+                        if (!residence.orElseThrow().server().directConnect(this.event))
+                            throw new RuntimeException("There was an issue connecting you to the server!");
+                    }
+
                     return residence.orElseThrow().server();
                 } catch (Exception ignore) {}
             }
@@ -261,8 +282,14 @@ class StaticFamilyConnector {
             if(!server.validatePlayer(this.player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
 
-            if (!server.connect(this.player))
-                throw new RuntimeException("There was an issue connecting you to the server!");
+
+            if(this.event == null) {
+                if (!server.connect(this.player))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+            } else {
+                if (!server.directConnect(this.event))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
+            }
 
             this.family.loadBalancer().iterate();
 
@@ -283,11 +310,18 @@ class StaticFamilyConnector {
                 if (!server.validatePlayer(this.player))
                     throw new RuntimeException("The server you're trying to connect to is full!");
 
-                if (server.connect(this.player)) {
-                    this.family.loadBalancer().forceIterate();
 
-                    return server;
-                } else throw new RuntimeException("Unable to connect you to the server in time!");
+                if(this.event == null) {
+                    if (!server.connect(this.player))
+                        throw new RuntimeException("There was an issue connecting you to the server!");
+                } else {
+                    if (!server.directConnect(this.event))
+                        throw new RuntimeException("There was an issue connecting you to the server!");
+                }
+
+                this.family.loadBalancer().forceIterate();
+
+                return server;
             } catch (Exception e) {
                 if (isFinal)
                     this.player.disconnect(Component.text(e.getMessage()));

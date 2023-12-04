@@ -27,6 +27,54 @@ public abstract class Family implements IFamily<MCLoader, Player> {
         this.metadata = metadata;
     }
 
+    public String id() {
+        return this.id;
+    }
+
+    public Component displayName() {
+        return this.settings.displayName;
+    }
+
+    public MCLoader findServer(@NotNull ServerInfo serverInfo) {
+        return this.registeredServers().stream()
+                .filter(server -> server.serverInfo().equals(serverInfo)
+                ).findFirst().orElse(null);
+    }
+
+    public void addServer(MCLoader server) {
+        this.settings.loadBalancer.add(server);
+    }
+
+    public void removeServer(MCLoader server) {
+        this.settings.loadBalancer.remove(server);
+    }
+
+    public Whitelist whitelist() {
+        return this.settings.whitelist.get();
+    }
+
+    public List<com.velocitypowered.api.proxy.Player> players(int max) {
+        List<com.velocitypowered.api.proxy.Player> players = new ArrayList<>();
+
+        for (MCLoader server : this.registeredServers()) {
+            if(players.size() > max) break;
+
+            players.addAll(server.registeredServer().getPlayersConnected());
+        }
+
+        return players;
+    }
+
+    public List<MCLoader> registeredServers() {
+        List<MCLoader> servers = new ArrayList<>();
+        servers.addAll(this.settings.loadBalancer.servers());
+        servers.addAll(this.settings.loadBalancer.lockedServers());
+        return servers;
+    }
+    public boolean containsServer(ServerInfo serverInfo) {
+        return !(this.findServer(serverInfo) == null);
+    }
+
     public long playerCount() {
         AtomicLong newPlayerCount = new AtomicLong();
         this.settings.loadBalancer.servers().forEach(server -> newPlayerCount.addAndGet(server.playerCount()));
@@ -44,63 +92,9 @@ public abstract class Family implements IFamily<MCLoader, Player> {
         return this.settings.parent.get(true);
     }
 
-    public String id() {
-        return this.id;
-    }
-    public Component displayName() {
-        return this.settings.displayName;
-    }
-
     public Metadata metadata() {
         return this.metadata;
     }
-
-    /**
-     * Get the whitelist for this family, or `null` if there isn't one.
-     * @return The whitelist or `null` if there isn't one.
-     */
-    public Whitelist whitelist() {
-        return this.settings.whitelist.get();
-    }
-
-    public MCLoader findServer(@NotNull ServerInfo serverInfo) {
-        return this.registeredServers().stream()
-                .filter(server -> server.serverInfo().equals(serverInfo)
-                ).findFirst().orElse(null);
-    }
-
-    public void addServer(MCLoader server) {
-        this.settings.loadBalancer.add(server);
-    }
-
-    public void removeServer(MCLoader server) {
-        this.settings.loadBalancer.remove(server);
-    }
-
-    public List<com.velocitypowered.api.proxy.Player> players(int max) {
-        List<com.velocitypowered.api.proxy.Player> players = new ArrayList<>();
-
-        for (MCLoader server : this.registeredServers()) {
-            if(players.size() > max) break;
-
-            players.addAll(server.registeredServer().getPlayersConnected());
-        }
-
-        return players;
-    }
-
-
-    public List<MCLoader> registeredServers() {
-        List<MCLoader> servers = new ArrayList<>();
-        servers.addAll(this.settings.loadBalancer.servers());
-        servers.addAll(this.settings.loadBalancer.lockedServers());
-        return servers;
-    }
-
-    public boolean containsServer(ServerInfo serverInfo) {
-        return !(this.findServer(serverInfo) == null);
-    }
-
 
     @Override
     public boolean equals(Object o) {
