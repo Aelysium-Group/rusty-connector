@@ -2,12 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.webhook;
 
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
-/**
- * Thank you to <a href="https://github.com/LuckPerms/LuckPerms">...</a> for inspiring this implementation.
- */
 public interface DiscordWebhookMessage {
     String IMAGE_PROXY__REGISTER_ALL = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480087037591653/PROXY__REGISTER_ALL.png";
     String IMAGE_PROXY__SERVER_REGISTER = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480087289237537/PROXY__SERVER_REGISTER.png";
@@ -42,7 +39,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_AQUA)
                     .build();
 
-    ParameterizedEmbed2<PlayerServer, String> PROXY__SERVER_REGISTER = (server, familyName) ->
+    ParameterizedEmbed2<MCLoader, String> PROXY__SERVER_REGISTER = (server, familyName) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -56,7 +53,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_GREEN)
                     .build();
 
-    ParameterizedEmbed1<PlayerServer> PROXY__SERVER_UNREGISTER = (server) ->
+    ParameterizedEmbed1<MCLoader> PROXY__SERVER_UNREGISTER = (server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -65,12 +62,12 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Was unregistered from: " + server.family().name(), null)
+                            new WebhookEmbed.EmbedTitle("Was unregistered from: " + server.family().id(), null)
                     )
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed2<Player, PlayerServer> PROXY__PLAYER_JOIN = (player, server) ->
+    ParameterizedEmbed2<Player, MCLoader> PROXY__PLAYER_JOIN = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -79,9 +76,9 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle(player.getUsername(), null)
+                            new WebhookEmbed.EmbedTitle(player.username(), null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.family().name()))
+                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.family().id()))
                     .addField(new WebhookEmbed.EmbedField(true, "Server", server.serverInfo().getName()))
                     .setColor(COLOR_GREEN)
                     .build();
@@ -95,46 +92,46 @@ public interface DiscordWebhookMessage {
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle(player.getUsername(), null)
+                            new WebhookEmbed.EmbedTitle(player.username(), null)
                     )
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed2<Player, PlayerServer> PROXY__PLAYER_JOIN_FAMILY = (player, server) ->
+    ParameterizedEmbed2<Player, MCLoader> PROXY__PLAYER_JOIN_FAMILY = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
-                                    player.getUsername(),
+                                    player.username(),
                                     IMAGE_FAMILY__PLAYER_JOIN, null
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Joined the family: " + server.family().name(),null)
+                            new WebhookEmbed.EmbedTitle("Joined the family: " + server.family().id(),null)
                     )
                     .addField(new WebhookEmbed.EmbedField(false, "Server", server.serverInfo().getName()))
                     .setColor(COLOR_GREEN)
                     .build();
 
-    ParameterizedEmbed2<Player, PlayerServer> PROXY__PLAYER_LEAVE_FAMILY = (player, server) ->
+    ParameterizedEmbed2<Player, MCLoader> PROXY__PLAYER_LEAVE_FAMILY = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
-                                    player.getUsername(),
+                                    player.username(),
                                     IMAGE_FAMILY__PLAYER_LEAVE, null
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Left the family: " + server.family().name(), null)
+                            new WebhookEmbed.EmbedTitle("Left the family: " + server.family().id(), null)
                     )
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed3<Player, PlayerServer, PlayerServer> PROXY__PLAYER_SWITCH_SERVER = (player, oldServer, newServer) -> {
+    ParameterizedEmbed3<Player, MCLoader, MCLoader> PROXY__PLAYER_SWITCH_SERVER = (player, oldServer, newServer) -> {
         if(oldServer.family().equals(newServer.family()))
             return new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
-                                    player.getUsername(),
+                                    player.username(),
                                     IMAGE__PLAYER_SERVER_SWITCH, null
                             )
                     )
@@ -148,7 +145,7 @@ public interface DiscordWebhookMessage {
         return new WebhookEmbedBuilder()
                 .setAuthor(
                         new WebhookEmbed.EmbedAuthor(
-                                player.getUsername(),
+                                player.username(),
                                 IMAGE__PLAYER_SERVER_SWITCH, null
                         )
                 )
@@ -161,30 +158,30 @@ public interface DiscordWebhookMessage {
                 .build();
     };
 
-    ParameterizedEmbed3<Player, PlayerServer, PlayerServer> PROXY__PLAYER_SWITCH_FAMILY = (player, oldServer, newServer) ->
+    ParameterizedEmbed3<Player, MCLoader, MCLoader> PROXY__PLAYER_SWITCH_FAMILY = (player, oldServer, newServer) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
-                                    player.getUsername(),
+                                    player.username(),
                                     IMAGE__PLAYER_FAMILY_SWITCH, null
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Switched families from " + oldServer.family().name() + " to " + newServer.family().name(), null)
+                            new WebhookEmbed.EmbedTitle("Switched families from " + oldServer.family().id() + " to " + newServer.family().id(), null)
                     )
                     .setColor(COLOR_BLUE)
                     .build();
 
-    ParameterizedEmbed2<Player, PlayerServer> PROXY__DISCONNECT_CATCH = (player, newServer) ->
+    ParameterizedEmbed2<Player, MCLoader> PROXY__DISCONNECT_CATCH = (player, newServer) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
-                                    player.getUsername(),
+                                    player.username(),
                                     IMAGE_PROXY__DISCONNECT_CATCH, null
                             )
                     )
                     .setTitle(
-                            new WebhookEmbed.EmbedTitle("Was caught by " + newServer.family().name() + " after being disconnected from another server", null)
+                            new WebhookEmbed.EmbedTitle("Was caught by " + newServer.family().id() + " after being disconnected from another server", null)
                     )
                     .setColor(COLOR_BLUE)
                     .build();
@@ -203,7 +200,7 @@ public interface DiscordWebhookMessage {
                     )
                     .setColor(COLOR_AQUA)
                     .build();
-    ParameterizedEmbed2<PlayerServer, String> FAMILY__SERVER_REGISTER = (server, familyName) ->
+    ParameterizedEmbed2<MCLoader, String> FAMILY__SERVER_REGISTER = (server, familyName) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -217,7 +214,7 @@ public interface DiscordWebhookMessage {
                     .addField(new WebhookEmbed.EmbedField(false, "Family", familyName))
                     .setColor(COLOR_GREEN)
                     .build();
-    ParameterizedEmbed1<PlayerServer> FAMILY__SERVER_UNREGISTER = (server) ->
+    ParameterizedEmbed1<MCLoader> FAMILY__SERVER_UNREGISTER = (server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -228,54 +225,54 @@ public interface DiscordWebhookMessage {
                     .setTitle(
                             new WebhookEmbed.EmbedTitle(server.serverInfo().getName(), null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(false, "Family", server.family().name()))
+                    .addField(new WebhookEmbed.EmbedField(false, "Family", server.family().id()))
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed2<Player, PlayerServer> FAMILY__PLAYER_JOIN = (player, server) ->
+    ParameterizedEmbed2<Player, MCLoader> FAMILY__PLAYER_JOIN = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
-                                    player.getUsername(),
+                                    player.username(),
                                     IMAGE_FAMILY__PLAYER_JOIN, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Joined the family: ", null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.family().name()))
+                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.family().id()))
                     .addField(new WebhookEmbed.EmbedField(true, "Server", server.serverInfo().getName()))
                     .setColor(COLOR_GREEN)
                     .build();
 
-    ParameterizedEmbed2<Player, PlayerServer> FAMILY__PLAYER_LEAVE = (player, server) ->
+    ParameterizedEmbed2<Player, MCLoader> FAMILY__PLAYER_LEAVE = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
-                                    player.getUsername(),
+                                    player.username(),
                                     IMAGE_FAMILY__PLAYER_LEAVE, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Left the family: ", null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.family().name()))
+                    .addField(new WebhookEmbed.EmbedField(true, "Family", server.family().id()))
                     .addField(new WebhookEmbed.EmbedField(true, "Server", server.serverInfo().getName()))
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed3<Player, PlayerServer, PlayerServer> FAMILY__PLAYER_SWITCH = (player, oldServer, newServer) ->
+    ParameterizedEmbed3<Player, MCLoader, MCLoader> FAMILY__PLAYER_SWITCH = (player, oldServer, newServer) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
-                                    player.getUsername(),
+                                    player.username(),
                                     IMAGE__PLAYER_SERVER_SWITCH, null
                             )
                     )
                     .setTitle(
                             new WebhookEmbed.EmbedTitle("Switched servers from " + oldServer.serverInfo().getName() + " to " + newServer.serverInfo().getName(), null)
                     )
-                    .addField(new WebhookEmbed.EmbedField(false, "Family", newServer.family().name()))
+                    .addField(new WebhookEmbed.EmbedField(false, "Family", newServer.family().id()))
                     .setColor(COLOR_PINK)
                     .build();
 

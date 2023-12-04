@@ -4,20 +4,22 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import com.velocitypowered.api.scheduler.Scheduler;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 /**
  * The root api endpoint for the entire RustyConnector api.
  */
-public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Scheduler> {
+public class Tinder implements VelocityTinder {
     private static Tinder instance;
     public static Tinder get() {
         return instance;
@@ -42,34 +44,19 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
 
     /**
      * Ignites a {@link Flame} which effectively starts the RustyConnector kernel.
-     * @return A {@link Flame}.
      */
-    public Flame ignite() throws RuntimeException {
+    public void ignite() throws RuntimeException {
         this.flame = Flame.fabricateNew(this.plugin, this.lang);
-        return flame;
     }
 
-    @Override
-    public InputStream resourceAsStream(String filename)  {
-        return getClass().getClassLoader().getResourceAsStream(filename);
-    }
-
-    @Override
-    public Scheduler scheduler() {
-        return velocityServer().getScheduler();
-    }
-
-    @Override
     public PluginLogger logger() {
         return this.pluginLogger;
     }
 
-    @Override
     public String dataFolder() {
         return String.valueOf(this.dataFolder);
     }
 
-    @Override
     public LangService lang() {
         return this.lang;
     }
@@ -101,6 +88,15 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
     }
 
     /**
+     * Gets a resource by id and returns it as a stream.
+     * @param filename The id of the resource to get.
+     * @return The resource as a stream.
+     */
+    public static InputStream resourceAsStream(String filename)  {
+        return MCLoaderTinder.class.getClassLoader().getResourceAsStream(filename);
+    }
+
+    /**
      * Get the velocity server
      */
     public ProxyServer velocityServer() {
@@ -108,7 +104,7 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
     }
 
     /**
-     * Registers a server with this proxy.` A server with this name should not already exist.
+     * Registers a server with this proxy.` A server with this id should not already exist.
      *
      * @param serverInfo the server to register
      * @return the newly registered server

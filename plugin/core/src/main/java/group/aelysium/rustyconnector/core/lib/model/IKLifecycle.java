@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.model;
 
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler;
-import group.aelysium.rustyconnector.core.lib.serviceable.Serviceable;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.Serviceable;
 
 public abstract class IKLifecycle<H extends ServiceHandler> extends Serviceable<H> {
     protected IKLifecycle(H services) {

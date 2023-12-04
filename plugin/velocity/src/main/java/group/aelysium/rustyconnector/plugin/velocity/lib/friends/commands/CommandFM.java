@@ -7,13 +7,12 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -22,11 +21,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 
 public final class CommandFM {
-    public static BrigadierCommand create() {
+    public static BrigadierCommand create(FriendsService friendsService) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        FriendsService friendsService = api.services().friendsService().orElse(null);
         if (friendsService == null) {
             logger.send(Component.text("The Friends service must be enabled to load the /friends command.", NamedTextColor.YELLOW));
             return null;
@@ -34,9 +32,9 @@ public final class CommandFM {
 
         LiteralCommandNode<CommandSource> fm = LiteralArgumentBuilder
                 .<CommandSource>literal("fm")
-                .requires(source -> source instanceof Player)
+                .requires(source -> source instanceof com.velocitypowered.api.proxy.Player)
                 .executes(context -> {
-                    if(!(context.getSource() instanceof Player player)) {
+                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                         logger.log("/fm must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
@@ -46,14 +44,15 @@ public final class CommandFM {
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(player, VelocityLang.FM_USAGE.build());
+                    return closeMessage(player, VelocityLang.FM_USAGE);
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
-                            if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player eventPlayer)) return builder.buildFuture();
+                            Player player = Player.from(eventPlayer);
 
                             try {
-                                List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, false).orElseThrow();
+                                List<Player> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -68,7 +67,7 @@ public final class CommandFM {
                             return builder.buildFuture();
                         })
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/fm must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -78,10 +77,10 @@ public final class CommandFM {
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            return closeMessage(player, VelocityLang.FM_USAGE.build());
+                            return closeMessage(player, VelocityLang.FM_USAGE);
                         }).then(RequiredArgumentBuilder.<CommandSource, String>argument("message", StringArgumentType.greedyString())
                             .executes(context -> {
-                                if(!(context.getSource() instanceof Player player)) {
+                                if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                     logger.log("/fm must be sent as a player!");
                                     return Command.SINGLE_SUCCESS;
                                 }
@@ -92,22 +91,22 @@ public final class CommandFM {
                                 }
 
                                 String username = context.getArgument("username", String.class);
-                                Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
+                                com.velocitypowered.api.proxy.Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
 
                                 if(targetPlayer == null)
-                                    return closeMessage(player, Component.text(username + " doesn't seem to exist!", NamedTextColor.RED));
+                                    return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
                                 if(player.equals(targetPlayer))
-                                    return closeMessage(player, Component.text("You can't message yourself!", NamedTextColor.RED));
-                                if(!friendsService.services().dataEnclave().areFriends(
-                                        PlayerDataEnclave.FakePlayer.from(player),
-                                        PlayerDataEnclave.FakePlayer.from(targetPlayer)
+                                    return closeMessage(player, VelocityLang.FRIEND_MESSAGING_NO_SELF_MESSAGING);
+                                if(!friendsService.areFriends(
+                                        Player.from(player),
+                                        Player.from(targetPlayer)
                                 ))
-                                    return closeMessage(player, Component.text("You can only send messages to your friends!", NamedTextColor.RED));
+                                    return closeMessage(player, VelocityLang.FRIEND_MESSAGING_ONLY_FRIENDS);
 
                                 String message = context.getArgument("message", String.class);
 
                                 player.sendMessage(Component.text("[you -> "+targetPlayer.getUsername()+"]: "+message, NamedTextColor.GRAY));
-                                targetPlayer.sendMessage(Component.text("["+player.getUsername()+" -> you]: "+message, NamedTextColor.GRAY).hoverEvent(HoverEvent.showText(Component.text("Click to reply"))).clickEvent(ClickEvent.suggestCommand("/fm "+player.getUsername()+" ")));
+                                targetPlayer.sendMessage(Component.text("["+player.getUsername()+" -> you]: "+message, NamedTextColor.GRAY).hoverEvent(HoverEvent.showText(VelocityLang.FRIEND_MESSAGING_REPLY)).clickEvent(ClickEvent.suggestCommand("/fm "+player.getUsername()+" ")));
 
                                 return Command.SINGLE_SUCCESS;
                             })
@@ -119,7 +118,7 @@ public final class CommandFM {
         return new BrigadierCommand(fm);
     }
 
-    public static int closeMessage(Player player, Component message) {
+    public static int closeMessage(com.velocitypowered.api.proxy.Player player, Component message) {
         player.sendMessage(message);
         return Command.SINGLE_SUCCESS;
     }

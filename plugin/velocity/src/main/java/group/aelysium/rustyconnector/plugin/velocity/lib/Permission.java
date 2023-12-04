@@ -32,7 +32,7 @@ public class Permission {
      * Construct a permission node using insertion nodes. Define your string to be inserted into.
      * By surrounding a string with `<>` brackets you can mark to be replaced.
      * <h3>Example:</h3>
-     * `rustyconnector.<server name>.access`
+     * `rustyconnector.<server id>.access`
      *
      * Insertion points are replaced with the defined values in the order that they are defined.
      * @param pattern The pattern to change

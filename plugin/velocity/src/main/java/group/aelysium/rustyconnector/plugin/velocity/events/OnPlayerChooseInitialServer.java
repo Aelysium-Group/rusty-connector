@@ -4,29 +4,31 @@ import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors.InjectorService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootServerFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IInitiallyConnectableFamily;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Locale;
+import java.util.NoSuchElementException;
 
 public class OnPlayerChooseInitialServer {
     /**
@@ -36,89 +38,81 @@ public class OnPlayerChooseInitialServer {
     public EventTask onPlayerChooseInitialServer(PlayerChooseInitialServerEvent event) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
-        Player player = event.getPlayer();
+        Player player = Player.from(event.getPlayer());
+        com.velocitypowered.api.proxy.Player eventPlayer = event.getPlayer();
 
         return EventTask.async(() -> {
             try {
+                // Check for network whitelist
                 try {
-                    Whitelist whitelist = api.services().whitelistService().proxyWhitelist().orElseThrow();
-                    if (!whitelist.validate(player)) {
+                    Whitelist whitelist = api.services().whitelist().proxyWhitelist();
+                    if (!whitelist.validate(eventPlayer)) {
                         logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
-                        player.disconnect(Component.text(whitelist.message()));
+                        eventPlayer.disconnect(Component.text(whitelist.message()));
                         return;
                     }
                 } catch (Exception ignore) {}
 
-                RootServerFamily rootFamily = api.services().familyService().rootFamily();
+                // Handle family injectors if they exist
+                IInitiallyConnectableFamily<MCLoader, Player> family = null;
+                try {
+                    InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
+                    String host = eventPlayer.getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
 
-                PlayerServer server = rootFamily.connect(event);
+                    family = injectors.familyOf(host).orElseThrow();
+                } catch (NoSuchElementException ignore) {
+                } catch (Exception e) {
+                    logger.send(Component.text("Error while using Family Injectors! Players will attempt to connect to the root family because of this! "+e.getMessage(), NamedTextColor.RED));
+
+                    family = api.services().family().rootFamily();
+                }
+                if(family == null) throw new RuntimeException("Unable to fetch a server to connect to.");
+
+                MCLoader server = family.connect(event);
 
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, DiscordWebhookMessage.PROXY__PLAYER_JOIN.build(player, server));
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, server));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, server.family().name(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, server));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, server.family().id(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, server));
             } catch (Exception e) {
-                player.disconnect(Component.text("Disconnected. "+e.getMessage()));
+                eventPlayer.disconnect(Component.text("Disconnected. "+e.getMessage()));
                 e.printStackTrace();
             }
 
-            // Save player if they haven't joined before
-            try {
-                PlayerDataEnclave dataEnclave = api.services().playerService().orElseThrow().dataEnclave();
-                dataEnclave.savePlayer(player);
-            } catch (Exception ignore) {}
-
             // Check for active friend requests
             try {
-                FriendsService friendsService = api.services().friendsService().orElseThrow();
-                List<FriendRequest> requests = friendsService.findRequestsToTarget(PlayerDataEnclave.FakePlayer.from(player));
+                FriendsService friendsService = api.services().friends().orElseThrow();
+                List<FriendRequest> requests = friendsService.findRequestsToTarget(player);
 
                 if(requests.size() == 0) throw new NoOutputException();
 
-                if(requests.size() > 10) {
-                    player.sendMessage(Component.text("You have " + requests.size() + " pending friend requests!", NamedTextColor.GRAY));
-                    player.sendMessage(Component.text("Address them using: ", NamedTextColor.GRAY)
-                            .append(Component.text("/friends requests <username> accept/deny", NamedTextColor.BLUE, TextDecoration.UNDERLINED)
-                                    .clickEvent(ClickEvent.suggestCommand("/friends requests "))));
-                } else {
-                    AtomicReference<String> from = new AtomicReference<>("");
-                    requests.forEach(request -> {
-                        try {
-                            from.set(from + ", " + request.sender().username());
-                        } catch (Exception ignore) {}
-                    });
-
-                    player.sendMessage(Component.text("You have " + requests.size() + " pending friend requests from: " + from + ".", NamedTextColor.GRAY));
-                    player.sendMessage(Component.text("Address them using: ", NamedTextColor.GRAY)
-                            .append(Component.text("/friends requests <username> accept/deny", NamedTextColor.BLUE, TextDecoration.UNDERLINED)
-                                    .clickEvent(ClickEvent.suggestCommand("/friends requests "))));
-                }
+                eventPlayer.sendMessage(VelocityLang.FRIENDS_JOIN_MESSAGE.build(requests));
             } catch (Exception ignore) {}
 
             // Check for online friends
             try {
-                FriendsService friendsService = api.services().friendsService().orElseThrow();
-                List<PlayerDataEnclave.FakePlayer> friends = friendsService.findFriends(player, true).orElseThrow();
+                FriendsService friendsService = api.services().friends().orElseThrow();
+                List<Player> friends = friendsService.findFriends(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 
-                List<Player> onlineFriends = new ArrayList<>();
+                List<com.velocitypowered.api.proxy.Player> onlineFriends = new ArrayList<>();
                 friends.forEach(friend -> {
                     try {
-                        Player onlineFriend = friend.resolve().orElseThrow();
+                        com.velocitypowered.api.proxy.Player onlineFriend = friend.resolve().orElseThrow();
 
                         if (onlineFriend.isActive()) onlineFriends.add(onlineFriend);
                     } catch (Exception ignore) {}
                 });
 
                 if(friends.size() == 0 || onlineFriends.size() == 0) {
-                    player.sendMessage(Component.text("None of your friends are online right now.", NamedTextColor.GRAY));
+                    eventPlayer.sendMessage(VelocityLang.NO_ONLINE_FRIENDS);
                     throw new NoOutputException();
                 }
 
-                player.sendMessage(Component.text("You have friends online!", NamedTextColor.GRAY));
+                eventPlayer.sendMessage(VelocityLang.ONLINE_FRIENDS);
                 final Component[] friendsList = {Component.text("", NamedTextColor.WHITE)};
                 onlineFriends.forEach(friend -> friendsList[0] = friendsList[0].append(Component.text(friend.getUsername())));
-                player.sendMessage(Component.join(JoinConfiguration.commas(true), friendsList));
+                eventPlayer.sendMessage(Component.join(JoinConfiguration.commas(true), friendsList));
 
                 onlineFriends.forEach(friend -> friend.sendMessage(VelocityLang.FRIEND_JOIN.build(player)));
             } catch (Exception ignore) {}

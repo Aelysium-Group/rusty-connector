@@ -1,19 +1,44 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
-import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayerService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
 
-public class PlayerService extends Service {
-    protected PlayerDataEnclave dataEnclave;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
-    public PlayerService(MySQLConnector connector) throws Exception {
-        this.dataEnclave = new PlayerDataEnclave(connector);
+public class PlayerService implements IPlayerService {
+    private final MySQLStorage storage;
+
+    public PlayerService(MySQLStorage storage) {
+        this.storage = storage;
     }
 
-    public PlayerDataEnclave dataEnclave() { return this.dataEnclave; }
+    protected Optional<Player> fetch(UUID uuid) {
+        try {
+            StorageRoot root = this.storage.root();
+
+            return root.players().stream().filter(fakePlayer -> fakePlayer.uuid().equals(uuid)).findAny();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
+
+    protected Optional<Player> fetch(String username) {
+        try {
+            StorageRoot root = this.storage.root();
+
+            return root.players().stream().filter(fakePlayer -> fakePlayer.username().equals(username)).findAny();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
 
     @Override
-    public void kill() {
-        this.dataEnclave.kill();
-    }
+    public void kill() {}
 }

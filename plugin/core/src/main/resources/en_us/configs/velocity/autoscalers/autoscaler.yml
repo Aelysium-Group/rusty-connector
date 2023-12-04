@@ -1,0 +1,114 @@
+#############################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                     Elastic Autoscaler                    #
+#                                                           #
+#               ----------------------------                #
+#                                                           #
+# | Autoscalers hook directly into your Kubernetes instance #
+# | to allow your families to dynamically resize the number #
+# | of servers they use to handle different                 #
+# | influxes of players.                                    #
+#                                                           #
+# | If you assign the same autoscaler to multiple families  #
+# | They will all follow the rules of that one autoscaler.  #
+#                                                           #
+# | An elastic autoscaler will dynamically adjust server    #
+# | volumes based on player influxes.                       #
+#                                                           #
+#               ----------------------------                #
+#                                                           #
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#############################################################
+#
+# Is this autoscaler enabled?
+# If false, the family will not scale at all.
+#
+enabled: false
+
+container:
+    #
+    # The name of the container to use.
+    #
+    name: ""
+
+    #
+    # The name of the docker image to load onto the container.
+    #
+    image: ""
+
+#
+# The minimum number of servers that are allowed to be active.
+# Even if no players are online, there should never be fewer servers than this number.
+#
+minimum-capacity: 1
+
+#
+# The maximum number of servers that this autoscaler is allowed to create.
+# The autoscaler will never be allowed to create more servers than this amount.
+#
+maximum-capacity: 10
+
+
+
+#
+# The ratio of players to server capacity that needs to be met for new servers to be created.
+# If the total of your server's soft-cap capacity is 100 players and you have 80 players online,
+# it's a ratio of 0.8.
+#
+generating-ratio: 0.8
+
+#
+# The ratio of players to server capacity that needs to be met for servers to be deleted.
+# If the total of your server's soft-cap capacity is 100 players and you have only 20 players online,
+# it's a ratio of 0.2.
+#
+# Servers which are at or below this number will be deleted.
+#
+shaving-ratio: 0.0
+
+
+
+#
+# Traffic compensation will cause the autoscaler to raise it's `minimum capacity` during
+# certain times in order to be better prepared for player inflows.
+#
+# If you know that your network gets a large inflow of traffic at 6pm every evening, you can instruct the autoscaler
+# to get more servers started to be ready to deal with the extra players.
+#
+
+# traffic-compensation:
+#     enabled: false
+#
+#     #
+#     # What timespan should the traffic calculator account for?
+#     #
+#     # DAILY - Days won't have to be defined, only hour and minute times.
+#     # WEEKLY - Days and times will be defined. Day 1 is Sunday, Day 7 is Saturday,
+#     # MONTHLY - Days and times will be defined. Day 1 is the first day of the month.
+#     #           If a day is listed which doesn't exist in the month (like Day 31 when it's February) it will be ignored.
+#     #
+#     timespan: WEEKLY
+#
+#     #
+#     # Define timestops where capacity parameters can be changed.
+#     #
+#     ##### If `timespan` is set to `DAILY`. The syntax should be:
+#     #####   - at: <time>
+#     #####     minimum-capacity: <number OR "default">
+#     #####     maximum-capacity: <number OR "default">
+#     #
+#     ##### If `timespan` is set to `WEEKLY` or `MONTHLY`. The syntax should be:
+#     #####   - at: <day> <time>
+#     #####     minimum-capacity: <number OR "default">
+#     #####     maximum-capacity: <number OR "default">
+#     #
+#     # If you want to reset one of the capacity parameters, you can set it to "default" and it will be set
+#     # to the same as what you defined at the beginning of this config.
+#     #
+#     stops:
+#         - at: Day1 12:00pm
+#           minimum-capacity: 5
+#           maximum-capacity: 20
+#         - at: Day2 6:00pm
+#           minimum-capacity: default
+#           maximum-capacity: default

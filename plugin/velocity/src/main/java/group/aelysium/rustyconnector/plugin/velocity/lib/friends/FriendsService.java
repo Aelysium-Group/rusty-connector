@@ -3,50 +3,52 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.connectors.implementors.storage.mysql.MySQLConnector;
-import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsService;
+import group.aelysium.rustyconnector.core.lib.crypt.Snowflake;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerDataEnclave;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class FriendsService extends ServiceableService<FriendsServiceHandler> {
+public class FriendsService implements IFriendsService<Player, FriendRequest> {
     private final Cache<Long, FriendRequest> friendRequests;
-    private final FriendsSettings settings;
+    private final FriendsServiceSettings settings;
     private final Snowflake snowflakeGenerator = new Snowflake();
+    private final FriendsDataEnclave dataEnclave;
 
-    public FriendsService(FriendsSettings settings, MySQLConnector storage) throws Exception {
-        super(new FriendsServiceHandler());
-        this.services().add(new FriendsDataEnclave(storage));
+    public FriendsService(FriendsServiceSettings settings) throws Exception {
         this.settings = settings;
 
         this.friendRequests = CacheBuilder.newBuilder()
                 .maximumSize(500)
                 .expireAfterWrite(10, TimeUnit.MINUTES)
                 .build();
+
+        this.dataEnclave = new FriendsDataEnclave(this.settings.storage());
     }
 
-    public void initCommand() {
+    public void initCommand(DependencyInjector.DI1<List<Component>> dependencies) {
+        List<Component> bootOutput = dependencies.d1();
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
-        Tinder.get().logger().send(Component.text("Building friends service commands...", NamedTextColor.DARK_GRAY));
+        bootOutput.add(Component.text("Building friends service commands...", NamedTextColor.DARK_GRAY));
 
         if(!commandManager.hasCommand("friends"))
             try {
                 commandManager.register(
                         commandManager.metaBuilder("friends").build(),
-                        CommandFriends.create()
+                        CommandFriends.create(this)
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /friends", NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /friends", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -54,10 +56,10 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
             try {
                 commandManager.register(
                         commandManager.metaBuilder("unfriend").build(),
-                        CommandUnFriend.create()
+                        CommandUnFriend.create(this)
                 );
 
-                Tinder.get().logger().send(Component.text(" | Registered: /unfriend", NamedTextColor.YELLOW));
+                bootOutput.add(Component.text(" | Registered: /unfriend", NamedTextColor.YELLOW));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -66,22 +68,22 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
                 try {
                     commandManager.register(
                             commandManager.metaBuilder("fm").build(),
-                            CommandFM.create()
+                            CommandFM.create(this)
                     );
 
-                    Tinder.get().logger().send(Component.text(" | Registered: /fm", NamedTextColor.YELLOW));
+                    bootOutput.add(Component.text(" | Registered: /fm", NamedTextColor.YELLOW));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-        Tinder.get().logger().send(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
+        bootOutput.add(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
     }
 
-    public FriendsSettings settings() {
+    public FriendsServiceSettings settings() {
         return this.settings;
     }
 
-    public List<FriendRequest> findRequestsToTarget(PlayerDataEnclave.FakePlayer target) {
+    public List<FriendRequest> findRequestsToTarget(Player target) {
         List<Map.Entry<Long, FriendRequest>> entries = this.friendRequests.asMap().entrySet().stream().filter(request -> request.getValue().target().equals(target)).findAny().stream().toList();
 
         List<FriendRequest> requests = new ArrayList<>();
@@ -90,42 +92,52 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
 
         return requests;
     }
-    public Optional<FriendRequest> findRequest(PlayerDataEnclave.FakePlayer target, PlayerDataEnclave.FakePlayer sender) {
+    public Optional<FriendRequest> findRequest(Player target, Player sender) {
         Optional<Map.Entry<Long, FriendRequest>> entry = this.friendRequests.asMap().entrySet().stream().filter(invite -> invite.getValue().target().equals(target) && invite.getValue().sender().equals(sender)).findFirst();
         return entry.map(Map.Entry::getValue);
     }
 
-    public Optional<List<PlayerDataEnclave.FakePlayer>> findFriends(Player player, boolean forcePull) {
-        List<PlayerDataEnclave.FakePlayer> friends = new ArrayList<>();
-        List<FriendsDataEnclave.FriendMapping> friendMappings = this.services.dataEnclave().findFriends(PlayerDataEnclave.FakePlayer.from(player), forcePull).orElse(null);
+    public Optional<List<Player>> findFriends(Player player) {
+        List<Player> friends = new ArrayList<>();
+        List<FriendMapping> friendMappings = this.dataEnclave.findFriends(player).orElse(null);
         if(friendMappings == null) return Optional.empty();
 
         friendMappings.forEach(mapping -> {
             try {
-                friends.add(mapping.friendOf(player));
+                friends.add(mapping.fetchOther(player));
             } catch (NullPointerException ignore) {}
         });
 
         return Optional.of(friends);
     }
 
-    public FriendsDataEnclave.FriendMapping sendRequest(Player sender, PlayerDataEnclave.FakePlayer target) {
-        if(this.friendCount(PlayerDataEnclave.FakePlayer.from(sender)).orElseThrow() > this.settings().maxFriends())
-            sender.sendMessage(Component.text("You have reached the max number of friends!", NamedTextColor.RED));
+    public boolean areFriends(Player player1, Player player2) {
+        return this.dataEnclave.areFriends(player1, player2);
+    }
+    public void addFriends(Player player1, Player player2) {
+        this.dataEnclave.addFriend(player1, player2);
+    }
+    public void removeFriends(Player player1, Player player2) {
+        this.dataEnclave.removeFriend(player1, player2);
+    }
 
-        PlayerDataEnclave.FakePlayer fakeSender = PlayerDataEnclave.FakePlayer.from(sender);
-        FriendRequest friendRequest = new FriendRequest(snowflakeGenerator.nextId(), fakeSender, target);
+    public FriendMapping sendRequest(com.velocitypowered.api.proxy.Player sender, Player target) {
+        if(this.friendCount(Player.from(sender)).orElseThrow() > this.settings().maxFriends())
+            sender.sendMessage(VelocityLang.MAX_FRIENDS_REACHED);
+
+        Player fakeSender = Player.from(sender);
+        FriendRequest friendRequest = new FriendRequest(this, snowflakeGenerator.nextId(), fakeSender, target);
         this.friendRequests.put(friendRequest.id(), friendRequest);
 
 
         try {
             target.resolve().orElseThrow().sendMessage(VelocityLang.FRIEND_REQUEST.build(sender));
-            sender.sendMessage(Component.text("Friend request sent to " + target.username() + "! It will expire in 10 minutes.", NamedTextColor.GREEN));
+            sender.sendMessage(VelocityLang.FRIEND_REQUEST_SENT.build(target.username()));
         } catch (NoSuchElementException ignore) {
-            sender.sendMessage(Component.text(target.username() + " doesn't seem to be online, we'll let them know about your friend request when they log in! Your request will expire in 10 minutes.", NamedTextColor.GREEN));
+            sender.sendMessage(VelocityLang.FRIEND_REQUEST_TARGET_NOT_ONLINE.build(target.username()));
         }
 
-        return FriendsDataEnclave.FriendMapping.from(fakeSender, target);
+        return FriendMapping.from(fakeSender, target);
     }
 
     public void closeInvite(FriendRequest request) {
@@ -133,26 +145,18 @@ public class FriendsService extends ServiceableService<FriendsServiceHandler> {
         request.decompose();
     }
 
-    public Optional<Integer> friendCount(PlayerDataEnclave.FakePlayer player) {
-        return this.services().dataEnclave().getFriendCount(player);
+    public Optional<Long> friendCount(Player player) {
+        return this.dataEnclave.getFriendCount(player);
     }
 
     @Override
     public void kill() {
         this.friendRequests.asMap().forEach((key, value) -> value.decompose());
         this.friendRequests.invalidateAll();
-        super.kill();
 
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         commandManager.unregister("friends");
         commandManager.unregister("unfriend");
         commandManager.unregister("fm");
     }
-
-    public record FriendsSettings(
-            int maxFriends,
-            boolean sendNotifications,
-            boolean showFamilies,
-            boolean allowMessaging
-    ) {}
 }

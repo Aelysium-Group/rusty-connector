@@ -1,40 +1,25 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
 
 public class ScalarFamilyConfig extends YAML {
-    private String parent_family = "";
-    private boolean loadBalancing_weighted = false;
-    private String loadBalancing_algorithm = "ROUND_ROBIN";
-    private boolean loadBalancing_persistence_enabled = false;
-    private int loadBalancing_persistence_attempts = 5;
+    private Component displayName;
+    private Family.Reference parent_family = Family.Reference.rootFamily();
+    private String loadBalancer = "default";
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
-    public ScalarFamilyConfig(File configPointer) {
-        super(configPointer);
+    public ScalarFamilyConfig(String dataFolder, String familyName) {
+        super(new File(dataFolder, "families/"+familyName+".scalar.yml"));
     }
-
-    public String getParent_family() { return parent_family; }
-
-    public boolean isLoadBalancing_weighted() {
-        return loadBalancing_weighted;
-    }
-
-    public boolean isLoadBalancing_persistence_enabled() {
-        return loadBalancing_persistence_enabled;
-    }
-
-    public int getLoadBalancing_persistence_attempts() {
-        return loadBalancing_persistence_attempts;
-    }
-
-    public String getLoadBalancing_algorithm() {
-        return loadBalancing_algorithm;
-    }
+    public Component displayName() { return displayName; }
+    public Family.Reference getParent_family() { return parent_family; }
+    public String loadBalancer() { return loadBalancer; }
 
     public boolean isWhitelist_enabled() {
         return whitelist_enabled;
@@ -46,29 +31,25 @@ public class ScalarFamilyConfig extends YAML {
 
     public void register() throws IllegalStateException {
         try {
-            this.parent_family = this.getNode(this.data, "parent-family", String.class);
-        } catch (Exception ignore) {
-            this.parent_family = "";
-        }
-
-        this.loadBalancing_weighted = this.getNode(this.data,"load-balancing.weighted",Boolean.class);
-        this.loadBalancing_algorithm = this.getNode(this.data,"load-balancing.algorithm",String.class);
+            String name = this.getNode(this.data, "display-id", String.class);
+            this.displayName = MiniMessage.miniMessage().deserialize(name);
+        } catch (Exception ignore) {}
 
         try {
-            Enum.valueOf(AlgorithmType.class, this.loadBalancing_algorithm);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("The load balancing algorithm: "+this.loadBalancing_algorithm+" doesn't exist!");
-        }
+            this.parent_family = new Family.Reference(this.getNode(this.data, "parent-family", String.class));
+        } catch (Exception ignore) {}
 
-        this.loadBalancing_persistence_enabled = this.getNode(this.data,"load-balancing.persistence.enabled",Boolean.class);
-        this.loadBalancing_persistence_attempts = this.getNode(this.data,"load-balancing.persistence.attempts",Integer.class);
-        if(this.loadBalancing_persistence_enabled && this.loadBalancing_persistence_attempts <= 0)
-            throw new IllegalStateException("Load balancing persistence must allow at least 1 attempt.");
+        try {
+            this.loadBalancer = this.getNode(this.data, "load-balancer", String.class);
+        } catch (Exception ignore) {
+            this.loadBalancer = "default";
+        }
+        this.loadBalancer = this.loadBalancer.replaceFirst("\\.yml$|\\.yaml$","");
 
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
-        this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
+        this.whitelist_name = this.getNode(this.data,"whitelist.id",String.class);
         if(this.whitelist_enabled && this.whitelist_name.equals(""))
-            throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist in a family!");
+            throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
     }

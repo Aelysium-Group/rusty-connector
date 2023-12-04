@@ -1,13 +1,10 @@
 package group.aelysium.rustyconnector.core.lib.key.config;
 
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public class MemberKeyConfig {

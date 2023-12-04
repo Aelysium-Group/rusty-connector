@@ -1,47 +1,32 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
-import group.aelysium.rustyconnector.core.lib.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.core.lib.model.LiquidTimestamp;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.UnavailableProtocol;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
 import java.text.ParseException;
 
 public class StaticFamilyConfig extends YAML {
-    private String parent_family = "";
-    private boolean firstConnection_loadBalancing_weighted = false;
-    private String firstConnection_loadBalancing_algorithm = "ROUND_ROBIN";
-    private boolean firstConnection_loadBalancing_persistence_enabled = false;
-    private int firstConnection_loadBalancing_persistence_attempts = 5;
+    private Component displayName;
+    private Family.Reference parent_family = Family.Reference.rootFamily();
+    private String firstConnection_loadBalancer = "default";
 
-    private String consecutiveConnections_residencyStorage;
     private UnavailableProtocol consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.ASSIGN_NEW_HOME;
     private LiquidTimestamp consecutiveConnections_homeServer_expiration = null;
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
-    public StaticFamilyConfig(File configPointer) {
-        super(configPointer);
+    public StaticFamilyConfig(String dataFolder, String familyName) {
+        super(new File(dataFolder, "families/"+familyName+".static.yml"));
     }
 
-    public String getParent_family() { return parent_family; }
-
-    public boolean isFirstConnection_loadBalancing_weighted() {
-        return firstConnection_loadBalancing_weighted;
-    }
-
-    public boolean isFirstConnection_loadBalancing_persistence_enabled() {
-        return firstConnection_loadBalancing_persistence_enabled;
-    }
-
-    public int getFirstConnection_loadBalancing_persistence_attempts() {
-        return firstConnection_loadBalancing_persistence_attempts;
-    }
-
-    public String getFirstConnection_loadBalancing_algorithm() {
-        return firstConnection_loadBalancing_algorithm;
-    }
+    public Component displayName() { return displayName; }
+    public Family.Reference getParent_family() { return parent_family; }
+    public String getFirstConnection_loadBalancer() { return firstConnection_loadBalancer; }
 
     public boolean isWhitelist_enabled() {
         return whitelist_enabled;
@@ -51,9 +36,6 @@ public class StaticFamilyConfig extends YAML {
         return whitelist_name;
     }
 
-    public String getConsecutiveConnections_residencyStorage() {
-        return this.consecutiveConnections_residencyStorage;
-    }
     public UnavailableProtocol getConsecutiveConnections_homeServer_ifUnavailable() {
         return consecutiveConnections_homeServer_ifUnavailable;
     }
@@ -63,26 +45,21 @@ public class StaticFamilyConfig extends YAML {
 
     public void register() throws IllegalStateException {
         try {
-            this.parent_family = this.getNode(this.data, "parent-family", String.class);
-        } catch (Exception ignore) {
-            this.parent_family = "";
-        }
-
-        this.firstConnection_loadBalancing_weighted = this.getNode(this.data,"first-connection.load-balancing.weighted",Boolean.class);
-        this.firstConnection_loadBalancing_algorithm = this.getNode(this.data,"first-connection.load-balancing.algorithm",String.class);
+            String name = this.getNode(this.data, "display-id", String.class);
+            this.displayName = MiniMessage.miniMessage().deserialize(name);
+        } catch (Exception ignore) {}
 
         try {
-            Enum.valueOf(AlgorithmType.class, this.firstConnection_loadBalancing_algorithm);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("The load balancing algorithm: "+this.firstConnection_loadBalancing_algorithm +" doesn't exist!");
+            this.parent_family = new Family.Reference(this.getNode(this.data, "parent-family", String.class));
+        } catch (Exception ignore) {}
+
+        try {
+            this.firstConnection_loadBalancer = this.getNode(this.data, "first-connection.load-balancer", String.class);
+        } catch (Exception ignore) {
+            this.firstConnection_loadBalancer = "default";
         }
+        this.firstConnection_loadBalancer = this.firstConnection_loadBalancer.replaceFirst("\\.yml$|\\.yaml$","");
 
-        this.firstConnection_loadBalancing_persistence_enabled = this.getNode(this.data,"first-connection.load-balancing.persistence.enabled",Boolean.class);
-        this.firstConnection_loadBalancing_persistence_attempts = this.getNode(this.data,"first-connection.load-balancing.persistence.attempts",Integer.class);
-        if(this.firstConnection_loadBalancing_persistence_enabled && this.firstConnection_loadBalancing_persistence_attempts <= 0)
-            throw new IllegalStateException("Load balancing persistence must allow at least 1 attempt.");
-
-        this.consecutiveConnections_residencyStorage = this.getNode(this.data,"consecutive-connections.residency-storage",String.class);
         try {
             this.consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.valueOf(this.getNode(this.data,"consecutive-connections.home-server.if-unavailable",String.class));
         } catch (IllegalArgumentException ignore) {
@@ -97,9 +74,9 @@ public class StaticFamilyConfig extends YAML {
         }
 
         this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
-        this.whitelist_name = this.getNode(this.data,"whitelist.name",String.class);
+        this.whitelist_name = this.getNode(this.data,"whitelist.id",String.class);
         if(this.whitelist_enabled && this.whitelist_name.equals(""))
-            throw new IllegalStateException("whitelist.name cannot be empty in order to use a whitelist in a family!");
+            throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
     }

@@ -21,14 +21,6 @@ public class LoggerConfig extends YAML {
     private boolean log_playerMove = false;
     private boolean log_familyBalancing = false;
 
-    private String consoleIcons_attemptingRegistration = "?>>>?";
-    private String consoleIcons_registered = ">>>>>";
-    private String consoleIcons_attemptingUnregistration = "?///?";
-    private String consoleIcons_unregistered = "/////";
-    private String consoleIcons_canceledRequest = "xxxxx";
-    private String consoleIcons_familyBalancing = "▲▼▲▼▲";
-    private String consoleIcons_ping = "|>>>>";
-
     private LoggerConfig(File configPointer) {
         super(configPointer);
     }
@@ -73,34 +65,6 @@ public class LoggerConfig extends YAML {
         return log_familyBalancing;
     }
 
-    public String getConsoleIcons_attemptingRegistration() {
-        return consoleIcons_attemptingRegistration;
-    }
-
-    public String getConsoleIcons_registered() {
-        return consoleIcons_registered;
-    }
-
-    public String getConsoleIcons_attemptingUnregistration() {
-        return consoleIcons_attemptingUnregistration;
-    }
-
-    public String getConsoleIcons_unregistered() {
-        return consoleIcons_unregistered;
-    }
-
-    public String getConsoleIcons_canceledRequest() {
-        return consoleIcons_canceledRequest;
-    }
-
-    public String getConsoleIcons_familyBalancing() {
-        return consoleIcons_familyBalancing;
-    }
-
-    public String getConsoleIcons_ping() {
-        return consoleIcons_ping;
-    }
-
     /**
      * Create a new config for the proxy, this will delete the old config.
      * @return The newly created config.
@@ -124,13 +88,5 @@ public class LoggerConfig extends YAML {
         this.log_playerLeave = this.getNode(this.data,"log.player-leave",Boolean.class);
         this.log_playerMove = this.getNode(this.data,"log.player-move",Boolean.class);
         this.log_familyBalancing = this.getNode(this.data,"log.family-balancing",Boolean.class);
-
-        this.consoleIcons_attemptingRegistration = this.getNode(this.data,"console-icons.attempting-registration",String.class);
-        this.consoleIcons_registered = this.getNode(this.data,"console-icons.registered",String.class);
-        this.consoleIcons_attemptingUnregistration = this.getNode(this.data,"console-icons.attempting-unregistration",String.class);
-        this.consoleIcons_unregistered = this.getNode(this.data,"console-icons.unregistered",String.class);
-        this.consoleIcons_canceledRequest = this.getNode(this.data,"console-icons.canceled-request",String.class);
-        this.consoleIcons_familyBalancing = this.getNode(this.data,"console-icons.family-balancing",String.class);
-        this.consoleIcons_ping = this.getNode(this.data,"console-icons.ping",String.class);
     }
 }

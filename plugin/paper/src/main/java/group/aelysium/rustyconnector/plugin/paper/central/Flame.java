@@ -1,51 +1,54 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.core.lib.connectors.Connector;
-import group.aelysium.rustyconnector.core.lib.connectors.ConnectorsService;
-import group.aelysium.rustyconnector.core.lib.connectors.config.ConnectorsConfig;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnection;
-import group.aelysium.rustyconnector.core.lib.connectors.messenger.MessengerConnector;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
-import group.aelysium.rustyconnector.core.lib.packets.PacketHandler;
-import group.aelysium.rustyconnector.core.lib.packets.PacketOrigin;
-import group.aelysium.rustyconnector.core.lib.packets.PacketType;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateHandler;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderFlame;
+import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
+import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.core.lib.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
+import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
+import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicTeleportService;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.MagicLink_PingResponseHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.packet_builder.PacketBuilderService;
+import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.paper.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
-import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.DynamicTeleportService;
-import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.paper.lib.magic_link.handlers.MagicLink_PingResponseHandler;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.PacketBuilderService;
-import group.aelysium.rustyconnector.plugin.paper.lib.services.ServerInfoService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.bukkit.Bukkit;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
  * The core module of RustyConnector.
  * All aspects of the plugin should be accessible from here.
- * If not, check {@link Tinder}.
+ * If not, check {@link MCLoaderTinder}.
  */
-public class Flame extends ServiceableService<CoreServiceHandler> {
-    private int configVersion;
+public class Flame extends MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> {
+    private final int configVersion;
     private final String version;
 
     /**
@@ -53,34 +56,25 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
      */
     private final MessengerConnector<?> backbone;
 
-    public Flame(String version, int configVersion, Map<Class<? extends Service>, Service> services, String backboneConnector) {
+    public Flame(String version, int configVersion, Map<Class<? extends Service>, Service> services, RedisConnector messenger) {
         super(new CoreServiceHandler(services));
         this.version = version;
         this.configVersion = configVersion;
-        this.backbone = this.services().connectors().getMessenger(backboneConnector);
+        this.backbone = messenger;
     }
 
-    public String version() { return this.version; }
+    public String versionAsString() { return this.version; }
     public int configVersion() { return this.configVersion; }
 
-    public MessengerConnector<? extends MessengerConnection> backbone() {
-        return this.backbone;
-    }
-
-    /**
-     * Returns the currently active RustyConnector kernel.
-     * This is exactly identical to calling {@link Tinder#get()}{@link Tinder#flame() .flame()}.
-     * @return A {@link Flame}.
-     */
-    public static Flame get() {
-        return Tinder.get().flame();
+    public RedisConnector backbone() {
+        return (RedisConnector) this.backbone;
     }
 
     /**
      * Kill the {@link Flame}.
      * Typically good for if you want to ignite a new one.
      */
-    public void exhaust(PaperRustyConnector plugin) {
+    public void exhaust() {
         this.kill();
     }
 
@@ -89,7 +83,7 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static Flame fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
+    public static MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
         Initialize initialize = new Initialize();
 
         try {
@@ -97,25 +91,20 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
             int configVersion = initialize.configVersion();
             AESCryptor cryptor = initialize.privateKey();
             DefaultConfig defaultConfig = initialize.defaultConfig(langService);
+            ServerInfoService serverInfoService = initialize.serverInfo(defaultConfig);
 
             MessageCacheService messageCacheService = initialize.messageCache();
-            Callable<Runnable> resolveConnectors = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService);
+            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService, AddressUtil.stringToAddress(serverInfoService.address()));
 
-            initialize.serverInfo(defaultConfig);
             initialize.messageCache();
             PacketBuilderService packetBuilderService = initialize.packetBuilder();
             initialize.dynamicTeleport();
             initialize.magicLink(packetBuilderService);
 
-            Runnable connectRemotes = resolveConnectors.execute();
-            connectRemotes.run();
-
             initialize.events(plugin);
             initialize.commands();
 
-            Flame flame = new Flame(version, configVersion, initialize.getServices(), defaultConfig.getMessenger());
-
-            return flame;
+            return new Flame(version, configVersion, initialize.getServices(), messenger);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -133,9 +122,8 @@ public class Flame extends ServiceableService<CoreServiceHandler> {
  */
 class Initialize {
     private final Tinder api = Tinder.get();
-    private final PluginLogger logger = Tinder.get().logger();
+    private final PluginLogger logger = api.logger();
     private final Map<Class<? extends Service>, Service> services = new HashMap<>();
-    private final List<String> requestedConnectors = new ArrayList<>();
     private final List<Component> bootOutput = new ArrayList<>();
 
     public Map<Class<? extends Service>, Service> getServices() {
@@ -154,7 +142,7 @@ class Initialize {
 
     public String version() {
         try {
-            InputStream stream = Tinder.get().resourceAsStream("plugin.yml");
+            InputStream stream = MCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()
@@ -173,7 +161,7 @@ class Initialize {
 
     public int configVersion() {
         try {
-            InputStream stream = Tinder.get().resourceAsStream("plugin.yml");
+            InputStream stream = MCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()
@@ -205,70 +193,41 @@ class Initialize {
             throw new IllegalStateException("Unable to load or create config.yml!");
         defaultConfig.register(this.configVersion());
 
-        requestedConnectors.add(defaultConfig.getMessenger());
-
         return defaultConfig;
     }
 
-    /**
-     * Initializes the connectors service.
-     * First returns a {@link Callable} which once run, will return a {@link Runnable}.
-     * <p>
-     * {@link Callable} - Runs linting to only build the connectors actually being referenced by the configs. Returns:
-     * <p>
-     * a {@link Runnable} - Starts up all connectors and connects them to their remote resources.
-     * @return A runnable which will wrap up the connectors' initialization. Should be run after all other initialization logic has run.
-     */
-    public Callable<Runnable> connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang) throws IOException {
+    public RedisConnector connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang, InetSocketAddress originAddress) throws IOException {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
-        ConnectorsConfig connectorsConfig = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
-        if (!connectorsConfig.generate(bootOutput, lang, LangFileMappings.PAPER_CONNECTORS_TEMPLATE))
+        ConnectorsConfig config = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
+        if (!config.generate(bootOutput, lang, LangFileMappings.PAPER_CONNECTORS_TEMPLATE))
             throw new IllegalStateException("Unable to load or create connectorsConfig.yml!");
-        ConnectorsService connectorsService = connectorsConfig.register(cryptor, true, false, PacketOrigin.PROXY, api.dataFolder());
-        services.put(ConnectorsService.class, connectorsService);
+        config.register(true, false);
+
+        RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
+                PacketOrigin.SERVER,
+                config.getRedis_address(),
+                config.getRedis_user(),
+                config.getRedis_protocol(),
+                config.getRedis_dataChannel()
+        );
+        RedisConnector messenger = RedisConnector.create(cryptor, spec);
+        services.put(RedisConnector.class, messenger);
+
+
+        messenger.connect();
+        RedisConnection connection = messenger.connection().orElseThrow();
+
+        Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
+        handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler(this.api));
+        handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler(this.api));
+
+        handlers.put(PacketType.ASSOCIATE_RANKED_GAME, new RankedGameAssociateHandler(this.api));
+        connection.startListening(cacheService, logger, handlers, originAddress);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
 
-        // Needs to be run after all other services boot so that we can setup the connectors we actually need.
-        return () -> {
-            logger.send(Component.text("Validating Connector service...", NamedTextColor.DARK_GRAY));
-
-            /*
-             * Make sure that configs aren't trying to access connectors which don't exist.
-             * Also makes sure that, if there are excess connectors defined, we only load and attempt to boot the ones that are actually being called.
-             */
-            for (String name : requestedConnectors) {
-                logger.send(Component.text(" | Checking and building connector ["+name+"]...", NamedTextColor.DARK_GRAY));
-
-                if(!connectorsService.containsKey(name))
-                    throw new RuntimeException("No connector with the name '"+name+"' was found!");
-
-                Connector<?> connector = connectorsService.getMessenger(name);
-                try {
-                    connector.connect();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            logger.send(Component.text("Finished validating Connector service.", NamedTextColor.GREEN));
-
-            // Needs to run even later to actually boot all the connectors and connect them to their remote resources.
-            return () -> {
-                logger.send(Component.text("Booting Connectors service...", NamedTextColor.DARK_GRAY));
-
-                Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
-                handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler());
-                handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler());
-
-                connectorsService.messengers().forEach(connector -> {
-                    if(connector.connection().isEmpty()) return;
-                    MessengerConnection connection = connector.connection().orElseThrow();
-                    connection.startListening(cacheService, logger, handlers);
-                });
-                logger.send(Component.text("Finished booting Connectors service.", NamedTextColor.GREEN));
-            };
-        };
+        return messenger;
     }
 
     public void magicLink(PacketBuilderService packetBuilderService) {
@@ -281,16 +240,21 @@ class Initialize {
         logger.send(Component.text("Finished booting magic link service.", NamedTextColor.GREEN));
     }
 
-    public void serverInfo(DefaultConfig defaultConfig) {
+    public ServerInfoService serverInfo(DefaultConfig defaultConfig) {
+        InetSocketAddress address = null;
+        try {
+            address = AddressUtil.parseAddress(defaultConfig.address());
+        } catch (Exception ignore) {}
+
         ServerInfoService serverInfoService = new ServerInfoService(
-                defaultConfig.getServer_name(),
-                AddressUtil.parseAddress(defaultConfig.getServer_address()),
-                defaultConfig.getServer_family(),
-                defaultConfig.getServer_playerCap_soft(),
-                defaultConfig.getServer_playerCap_hard(),
-                defaultConfig.getServer_weight()
+                address,
+                defaultConfig.magicConfig(),
+                defaultConfig.magicInterfaceResolver(),
+                Bukkit.getPort()
         );
         services.put(ServerInfoService.class, serverInfoService);
+
+        return serverInfoService;
     }
 
     public MessageCacheService messageCache() {

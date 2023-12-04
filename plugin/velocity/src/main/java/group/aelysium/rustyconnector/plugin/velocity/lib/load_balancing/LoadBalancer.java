@@ -1,107 +1,130 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
-public class LoadBalancer implements group.aelysium.rustyconnector.core.lib.LoadBalancer<PlayerServer> {
-    private boolean weighted = false;
-    private boolean persistence = false;
-    private int attempts = 5;
+public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
+    private boolean weighted;
+    private boolean persistence;
+    private int attempts;
     protected int index = 0;
-    protected List<PlayerServer> items = new ArrayList<>();
+    protected Vector<MCLoader> servers = new Vector<>();
+    protected Vector<MCLoader> lockedServers = new Vector<>();
 
-    @Override
+    public LoadBalancer(Settings settings) {
+        this.weighted = settings.weighted();
+        this.persistence = settings.persistence();
+        this.attempts = settings.attempts();
+    }
+
     public boolean persistent() {
         return this.persistence;
     }
 
-    @Override
     public int attempts() {
         if(!this.persistent()) return 0;
         return this.attempts;
     }
 
-    @Override
     public boolean weighted() {
         return this.weighted;
     }
 
-    @Override
-    public PlayerServer current() {
-        PlayerServer item;
+    public MCLoader current() {
+        MCLoader item;
         if(this.index >= this.size()) {
             this.index = 0;
-            item = this.items.get(this.index);
-        } else item = this.items.get(this.index);
+            item = this.servers.get(this.index);
+        } else item = this.servers.get(this.index);
 
         assert item != null;
 
         return item;
     }
 
-    @Override
     public int index() {
         return this.index;
     }
 
-    @Override
     public void iterate() {
         this.index += 1;
-        if(this.index >= this.items.size()) this.index = 0;
+        if(this.index >= this.servers.size()) this.index = 0;
     }
 
-    @Override
     final public void forceIterate() {
         this.index += 1;
-        if(this.index >= this.items.size()) this.index = 0;
+        if(this.index >= this.servers.size()) this.index = 0;
     }
 
-    @Override
-    public void completeSort() {}
+    public abstract void completeSort();
 
-    @Override
-    public void singleSort() {}
+    public abstract void singleSort();
 
-    @Override
-    public void add(PlayerServer item) {
-        this.items.add(item);
+    public void add(MCLoader item) {
+        if(this.servers.contains(item)) return;
+        this.servers.add(item);
     }
 
-    @Override
-    public void remove(PlayerServer item) {
-        this.items.remove(item);
+    public void remove(MCLoader item) {
+        if(this.servers.remove(item)) return;
+        this.lockedServers.remove(item);
     }
 
-    @Override
     public int size() {
-        return this.items.size();
+        return this.servers.size() + this.lockedServers.size();
     }
 
-    @Override
-    public List<PlayerServer> dump() {
-        return this.items;
+    public int size(boolean locked) {
+        if(locked) return this.lockedServers.size();
+        return this.servers.size();
     }
 
-    @Override
+    public List<MCLoader> servers() {
+        return this.servers.stream().toList();
+    }
+    public List<MCLoader> lockedServers() {
+        return this.servers.stream().toList();
+    }
+
     public String toString() {
         return "LoadBalancer (RoundRobin): "+this.size()+" items";
     }
 
-    @Override
     public void setPersistence(boolean persistence, int attempts) {
         this.persistence = persistence;
         this.attempts = attempts;
     }
 
-    @Override
     public void setWeighted(boolean weighted) {
         this.weighted = weighted;
     }
 
-    @Override
     public void resetIndex() {
         this.index = 0;
     }
+
+    public boolean contains(MCLoader item) {
+        return this.servers.contains(item);
+    }
+
+    public void lock(MCLoader server) {
+        if(!this.servers.remove(server)) return;
+        this.lockedServers.add(server);
+    }
+
+    public void unlock(MCLoader server) {
+        if(!this.lockedServers.remove(server)) return;
+        this.servers.add(server);
+    }
+
+    public boolean joinable(MCLoader server) {
+        return this.servers.contains(server);
+    }
+
+    public record Settings(boolean weighted, boolean persistence, int attempts) {}
 }
