@@ -347,7 +347,7 @@ public final class CommandTPA {
                                     }
                                     return Command.SINGLE_SUCCESS;
                                 } catch (NullPointerException e) {
-                                    logger.send(Component.text("Player attempted to use /tpa from a family that doesn't exist! (How did this happen?)", NamedTextColor.RED));
+                                    logger.send(Component.text("Player attempted to use /tpa from a family that doesn't exist!", NamedTextColor.RED));
                                     context.getSource().sendMessage(VelocityLang.TPA_FAILURE.build(username));
                                 }
                             } catch (NoSuchElementException e) {

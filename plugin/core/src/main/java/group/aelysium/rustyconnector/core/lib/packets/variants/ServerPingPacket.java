@@ -17,6 +17,7 @@ public class ServerPingPacket extends GenericPacket {
     private ConnectionIntent intent;
     private String magicConfigName;
     private Integer playerCount;
+    private String podName;
 
     public String serverName() {
         return serverName;
@@ -29,6 +30,9 @@ public class ServerPingPacket extends GenericPacket {
     }
     public Integer playerCount() {
         return playerCount;
+    }
+    public String podName() {
+        return podName;
     }
 
     public ServerPingPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
@@ -46,6 +50,7 @@ public class ServerPingPacket extends GenericPacket {
                 case ValidParameters.INTENT -> this.intent = ConnectionIntent.valueOf(value.getAsString());
                 case ValidParameters.MAGIC_CONFIG_NAME -> this.magicConfigName = value.getAsString();
                 case ValidParameters.PLAYER_COUNT -> this.playerCount = value.getAsInt();
+                case ValidParameters.POD_NAME -> this.podName = value.getAsString();
             }
         });
     }
@@ -64,6 +69,7 @@ public class ServerPingPacket extends GenericPacket {
                 case ValidParameters.INTENT -> this.intent = ConnectionIntent.valueOf(value.getAsString());
                 case ValidParameters.MAGIC_CONFIG_NAME -> this.magicConfigName = value.getAsString();
                 case ValidParameters.PLAYER_COUNT -> this.playerCount = value.getAsInt();
+                case ValidParameters.POD_NAME -> this.podName = value.getAsString();
             }
         });
     }
@@ -77,6 +83,7 @@ public class ServerPingPacket extends GenericPacket {
         parameters.add(ValidParameters.INTENT, new JsonPrimitive(this.intent.toString()));
         parameters.add(ValidParameters.MAGIC_CONFIG_NAME, new JsonPrimitive(this.magicConfigName));
         parameters.add(ValidParameters.PLAYER_COUNT, new JsonPrimitive(this.playerCount));
+        parameters.add(ValidParameters.POD_NAME, new JsonPrimitive(this.podName));
 
         object.add(MasterValidParameters.PARAMETERS, parameters);
 
@@ -88,12 +95,14 @@ public class ServerPingPacket extends GenericPacket {
         String MAGIC_CONFIG_NAME = "c";
         String INTENT = "i";
         String PLAYER_COUNT = "pc";
+        String POD_NAME = "k8";
 
         static List<String> toList() {
             List<String> list = new ArrayList<>();
             list.add(MAGIC_CONFIG_NAME);
             list.add(INTENT);
             list.add(PLAYER_COUNT);
+            list.add(POD_NAME);
 
             return list;
         }

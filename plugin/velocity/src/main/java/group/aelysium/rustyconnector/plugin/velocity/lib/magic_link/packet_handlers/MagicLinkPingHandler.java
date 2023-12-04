@@ -62,10 +62,10 @@ public class MagicLinkPingHandler implements PacketHandler {
         try {
             MCLoader server = new ServerService.ServerBuilder()
                     .setServerInfo(serverInfo)
-                    .setFamilyName(magicLinkConfig.family())
                     .setSoftPlayerCap(magicLinkConfig.playerCap_soft())
                     .setHardPlayerCap(magicLinkConfig.playerCap_hard())
                     .setWeight(magicLinkConfig.weight())
+                    .setPodName(packet.podName())
                     .build();
 
             server.register(magicLinkConfig.family());
@@ -97,7 +97,7 @@ public class MagicLinkPingHandler implements PacketHandler {
     private static void disconnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) throws Exception {
         MagicLinkConfig magicLinkConfig = new MagicLinkConfig(api.dataFolder(), packet.magicConfigName());
         if(!magicLinkConfig.generate(new ArrayList<>(), Tinder.get().lang(), LangFileMappings.VELOCITY_MAGIC_CONFIG_TEMPLATE))
-            throw new IllegalStateException("Unable to fetch config!");
+            throw new IllegalStateException("Unable to fetch magic config!");
         magicLinkConfig.register();
 
         api.services().server().unregisterServer(serverInfo, magicLinkConfig.family(), true);

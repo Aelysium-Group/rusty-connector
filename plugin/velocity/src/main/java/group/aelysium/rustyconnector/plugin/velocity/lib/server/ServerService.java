@@ -253,33 +253,15 @@ public class ServerService implements IServerService<MCLoader, Player, Family> {
 
     public static class ServerBuilder {
         private ServerInfo serverInfo;
-        private String familyName;
-        private int playerCount = 0;
+        private String podName;
         private int weight;
         private int softPlayerCap;
         private int hardPlayerCap;
-
-        private String parentFamilyName;
 
         protected int initialTimeout = 15;
 
         public ServerService.ServerBuilder setServerInfo(ServerInfo serverInfo) {
             this.serverInfo = serverInfo;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setFamilyName(String familyName) {
-            this.familyName = familyName;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setParentFamilyName(String parentFamilyName) {
-            this.parentFamilyName = parentFamilyName;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setPlayerCount(int playerCount) {
-            this.playerCount = playerCount;
             return this;
         }
 
@@ -298,10 +280,16 @@ public class ServerService implements IServerService<MCLoader, Player, Family> {
             return this;
         }
 
+        public ServerService.ServerBuilder setPodName(String podName) {
+            this.podName = podName;
+            return this;
+        }
+
         public MCLoader build() {
             this.initialTimeout = Tinder.get().services().server().serverTimeout();
 
-            return new MCLoader(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
+            if(this.podName.equals("")) return new MCLoader(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
+            return new K8MCLoader(this.podName, serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
         }
     }
 }
