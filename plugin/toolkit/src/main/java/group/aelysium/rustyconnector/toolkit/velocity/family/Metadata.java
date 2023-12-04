@@ -5,7 +5,7 @@ public record Metadata(
         boolean hasLoadBalancer,
         boolean canBeAParentFamily,
         boolean tpaAllowed,
-        boolean supportsInitialEventConnections
+        boolean supportsInjectors
         ) {
     public enum StateType {
         STATEFUL,

@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalanc
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
-public interface IInitialEventConnectable<TMCLoader extends IMCLoader, TPlayer extends IPlayer> extends IConnectable<TMCLoader, TPlayer> {
+public interface IInitiallyConnectableFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> extends IFamily<TMCLoader, TPlayer> {
     /**
      * Connects a {@link Player} to this {@link IScalarFamily} in accordance with it's {@link ILoadBalancer}.
      * This method primarily exists as compatibility with Velocity's built-in events' system.

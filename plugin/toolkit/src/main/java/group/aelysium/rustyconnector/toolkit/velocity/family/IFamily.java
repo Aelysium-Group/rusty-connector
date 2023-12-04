@@ -12,7 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> extends IConnectable<TMCLoader, TPlayer> {
+public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> {
+    String id();
     Component displayName();
 
     /**
@@ -52,6 +53,14 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> e
     boolean containsServer(ServerInfo serverInfo);
 
     /**
+     * Method added for convenience.
+     * Any implementation of this interface should perform some form of operation when connect is called.
+     * @param player The player to ultimately connect to the family
+     * @return The server that the player was connected to.
+     */
+    TMCLoader connect(TPlayer player);
+
+    /**
      * Gets the aggregate player count across all servers in this family
      * @return A player count
      */
@@ -77,7 +86,7 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> e
      * If this family is the root family, this method will always return `null`.
      * @return {@link WeakReference <IBaseFamily>}
      */
-    IConnectable<TMCLoader, TPlayer> parent();
+    IFamily<TMCLoader, TPlayer> parent();
 
     /**
      * Returns the metadata for this family.

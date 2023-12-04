@@ -5,8 +5,6 @@ import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.lang.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.lang.LanguageResolver;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IConnectable;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IRootConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -331,7 +329,7 @@ public class VelocityLang extends Lang {
     public final static Message RC_FAMILY = () -> {
         Tinder api = Tinder.get();
         Component families = text("");
-        for (IConnectable<MCLoader, Player> family : api.services().family().dump()) {
+        for (Family family : api.services().family().dump()) {
             if(family instanceof ScalarFamily)
                 families = families.append(text("[ "+family.id()+" ] ").color(GOLD));
             if(family instanceof StaticFamily)
@@ -397,7 +395,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        IRootConnectable<MCLoader, Player> rootFamily = Tinder.get().services().family().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.id();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent()).id();
@@ -462,7 +460,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        IRootConnectable<MCLoader, Player> rootFamily = Tinder.get().services().family().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.id();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent()).id();
@@ -534,7 +532,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        IRootConnectable<MCLoader, Player> rootFamily = Tinder.get().services().family().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.id();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent()).id();
@@ -604,7 +602,7 @@ public class VelocityLang extends Lang {
                 i++;
             }
 
-        IRootConnectable<MCLoader, Player> rootFamily = Tinder.get().services().family().rootFamily();
+        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.id();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent()).id();

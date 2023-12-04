@@ -15,7 +15,6 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -159,7 +158,7 @@ class FamilyC {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                IConnectable<MCLoader, Player> family = new Family.ConnectableReference(familyName).get();
+                                group.aelysium.rustyconnector.plugin.velocity.lib.family.Family family = new Family.Reference(familyName).get();
 
                                 if(family instanceof ScalarFamily)
                                     VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
@@ -280,7 +279,11 @@ class Send {
                                 }
                                 Player player = Player.from(fetchedPlayer);
 
-                                IConnectable<MCLoader, Player> family = new Family.ConnectableReference(familyName).get();
+                                Family family = new Family.Reference(familyName).get();
+                                if(!family.metadata().hasLoadBalancer()) {
+                                    VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
+                                    return Command.SINGLE_SUCCESS;
+                                }
 
                                 family.connect(player);
                             } catch (NoSuchElementException e) {

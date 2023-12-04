@@ -119,7 +119,7 @@ public class DynamicTeleportConfig extends YAML {
             if(anchors.size() != 0)
                 for (ConfigurationNode entry: anchors)
                     this.familyAnchor_anchors.add(Map.entry(
-                            this.getNode(entry, "id", String.class).toLowerCase().replaceAll("/", ""),
+                            this.getNode(entry, "id", String.class),
                             this.getNode(entry, "family", String.class)
                     ));
         }
@@ -132,7 +132,7 @@ public class DynamicTeleportConfig extends YAML {
             if(injectors.size() != 0)
                 for (ConfigurationNode entry: injectors)
                     this.familyInjector_injectors.add(Map.entry(
-                            this.getNode(entry, "host", String.class).toLowerCase(),
+                            this.getNode(entry, "host", String.class),
                             this.getNode(entry, "family", String.class)
                     ));
         }

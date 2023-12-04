@@ -1,11 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IRootConnectable;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -13,9 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class FamilyService implements IFamilyService<MCLoader, Player, Family> {
-    private final Map<String, IConnectable<MCLoader, Player>> registeredFamilies = new HashMap<>();
-    private WeakReference<IRootConnectable<MCLoader, Player>> rootFamily;
+public class FamilyService implements IFamilyService<MCLoader, Player, RootFamily, Family> {
+    private final Map<String, Family> families = new HashMap<>();
+    private final Map<String, IFamilyCategory<Player>> categories = new HashMap<>();
+    private WeakReference<RootFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
 
     public FamilyService(boolean catchDisconnectingPlayers) {
@@ -26,43 +26,57 @@ public class FamilyService implements IFamilyService<MCLoader, Player, Family> {
         return this.catchDisconnectingPlayers;
     }
 
-    public void setRootFamily(IRootConnectable<MCLoader, Player> family) {
-        this.registeredFamilies.put(family.id(), family);
+    public void setRootFamily(RootFamily family) {
+        this.families.put(family.id(), family);
         this.rootFamily = new WeakReference<>(family);
     }
 
-    public IRootConnectable<MCLoader, Player> rootFamily() {
+    public RootFamily rootFamily() {
         return this.rootFamily.get();
     }
 
-    protected Optional<IConnectable<MCLoader, Player>> find(String name) {
-        IConnectable<MCLoader, Player> family = this.registeredFamilies.get(name);
+    protected Optional<Family> find(String id) {
+        Family family = this.families.get(id);
         if(family == null) return Optional.empty();
         return Optional.of(family);
     }
 
-    public void add(IConnectable<MCLoader, Player> family) {
-        this.registeredFamilies.put(family.id(),family);
+    protected Optional<IFamilyCategory<Player>> findCategory(String id) {
+        IFamilyCategory<Player> family = this.categories.get(id);
+        if(family == null) return Optional.empty();
+        return Optional.of(family);
     }
 
-    public void remove(IConnectable<MCLoader, Player> family) {
-        this.registeredFamilies.remove(family.id());
+    public void add(Family family) {
+        this.families.put(family.id(),family);
     }
 
-    public List<IConnectable<MCLoader, Player>> dump() {
-        return this.registeredFamilies.values().stream().toList();
+    public void remove(Family family) {
+        this.families.remove(family.id());
+    }
+
+    public void add(IFamilyCategory<Player> category) {
+        this.categories.put(category.id(), category);
+    }
+
+    public void remove(IFamilyCategory<Player> category) {
+        this.categories.remove(category.id());
+    }
+
+    public List<Family> dump() {
+        return this.families.values().stream().toList();
     }
 
     public void clear() {
-        this.registeredFamilies.clear();
+        this.families.clear();
     }
 
     public int size() {
-        return this.registeredFamilies.size();
+        return this.families.size();
     }
 
     public void kill() {
-        this.registeredFamilies.clear();
+        this.families.clear();
         this.rootFamily.clear();
     }
 }

@@ -32,7 +32,7 @@ root-family:
     # If a player is kicked or disconnected from a family in this proxy.
     # Should the root family catch them? If not, they will disconnect from the whole network.
     # This setting is great if you want a player to join back into the lobby if they get kicked from
-    # a gamemode or subfamily.
+    # a gamemode or sub-family.
     #
     catch-disconnecting-players: false
 
@@ -99,26 +99,27 @@ static: []
 ranked: []
 
 
-
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                    Versioned Filters                     #
+#                     Version Filters                      #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
-# | Versioned Filters are filters that player can connect  #
-# | to, just like a family.                                #
-# | Once a player connects to a Versioned Filter,          #
-# | it will look at what version they're using and send    #
-# | them to a predefined family.                           #
+# | Version Filters are collections of families.           #
+# | When a player connections to a version filter          #
+# | the filter will assess the player's client version and #
+# | connect them to the appropriate family for             #
+# | their version.                                         #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-versioned-filters: []
-## This is an example versioned connector.
+version-filters: []
+## This is an example of a Version Filter.
+## Version Filters are not allowed to use other Version Filters as a target.
 ## `target-family` must point to an already existing family.
+## You can also use sub versions such as 1.20.2.
 ##
 ##    - name: "lobby"
 ##      mappings:

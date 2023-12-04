@@ -138,9 +138,10 @@ family-anchor:
 
     #
     # List as many anchors as you'd like!
-    # In addition to families, you can also make injectors point to Versioned Filters.
     #
     # All anchor commands are executed using `/<anchor name>`
+    #
+    # NOTE: Make sure that, when you define your name, you don't include a slash!
     #
     anchors:
         - name: "lobby"
@@ -167,7 +168,6 @@ family-injectors:
 
     #
     # List as many injectors as you'd like!
-    # In addition to families, you can also make injectors point to Versioned Filters.
     #
     injectors:
         - host: "join.aelysium.group"
