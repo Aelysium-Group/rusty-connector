@@ -120,3 +120,7 @@ run/
 
 node_modules/
 bin/
+
+# Remove Ignore List
+
+!/plugin/gradle/wrapper/gradle-wrapper.jar

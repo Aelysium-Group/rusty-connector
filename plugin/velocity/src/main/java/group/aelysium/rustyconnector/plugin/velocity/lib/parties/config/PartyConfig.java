@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties.config;
 
-import group.aelysium.rustyconnector.api.velocity.parties.SwitchPower;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;

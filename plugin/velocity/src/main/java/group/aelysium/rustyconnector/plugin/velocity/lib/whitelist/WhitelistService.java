@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
-import group.aelysium.rustyconnector.api.velocity.whitelist.IWhitelistService;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,30 +9,21 @@ import java.util.Optional;
 
 public class WhitelistService implements IWhitelistService<Whitelist> {
     private final Map<String, Whitelist> registeredWhitelists = new HashMap<>();
-    private Whitelist proxyWhitelist;
+    private Whitelist.Reference proxyWhitelist;
 
-    public Optional<Whitelist> proxyWhitelist() {
-        try {
-            Whitelist whitelist = this.proxyWhitelist;
-            if(whitelist != null) return Optional.of(whitelist);
-        } catch (Exception ignore) {}
-
-        return Optional.empty();
+    public Whitelist proxyWhitelist() {
+        return proxyWhitelist.get();
     }
 
-    public void setProxyWhitelist(Whitelist whitelist) {
+    public void setProxyWhitelist(Whitelist.Reference whitelist) {
         this.proxyWhitelist = whitelist;
     }
 
-    /**
-     * Get a whitelist via its name.
-     * @param name The name of the whitelist to get.
-     * @return A family.
-     */
-    @Override
-    public Whitelist find(String name) {
-        if(name == null) return null;
-        return this.registeredWhitelists.get(name);
+    protected Optional<Whitelist> find(String name) {
+        Whitelist whitelist = this.registeredWhitelists.get(name);
+        if(whitelist == null) return Optional.empty();
+
+        return Optional.of(whitelist);
     }
 
     /**

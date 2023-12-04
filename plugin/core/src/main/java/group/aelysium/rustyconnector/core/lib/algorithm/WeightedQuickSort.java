@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.algorithm;
 
-import group.aelysium.rustyconnector.api.velocity.load_balancing.ISortable;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 
 import java.util.*;
 

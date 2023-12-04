@@ -1,12 +1,14 @@
 package group.aelysium.rustyconnector.core.lib.algorithm;
 
-import group.aelysium.rustyconnector.api.velocity.load_balancing.ISortable;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 
 import java.util.List;
 
 public class SingleSort {
     /**
      * Sorts a single index back into the entry set.
+     * Great for inserting items into the array and approximately sorting them into where they belong.
+     * Thus reducing how frequently you'll have to perform a full sort.
      * @param index The index to sort.
      */
     public static <I extends ISortable> void sort(List<I> array, int index) {

@@ -1,9 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport;
 
-import group.aelysium.rustyconnector.api.core.serviceable.ServiceableService;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.TPAServiceSettings;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors.InjectorService;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.TPAServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
 public class DynamicTeleportService extends ServiceableService<DynamicTeleportServiceHandler> {
     protected DynamicTeleportService(Map<Class<? extends Service>, Service> services) {
@@ -58,13 +59,23 @@ public class DynamicTeleportService extends ServiceableService<DynamicTeleportSe
 
             if(config.isFamilyAnchor_enabled()) {
                 try {
-                    builder.addService(AnchorService.init(inject(bootOutput, dependencies.d2()), config).orElseThrow());
+                    builder.addService(AnchorService.init(inject(bootOutput), config).orElseThrow());
                     bootOutput.add(Component.text(" | The Anchor module was enabled!",NamedTextColor.GREEN));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             } else
                 bootOutput.add(Component.text(" | The Anchor module wasn't enabled.",NamedTextColor.DARK_GRAY));
+
+            if(config.isFamilyInjector_enabled()) {
+                try {
+                    builder.addService(InjectorService.init(inject(bootOutput), config).orElseThrow());
+                    bootOutput.add(Component.text(" | The Injector module was enabled!",NamedTextColor.GREEN));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else
+                bootOutput.add(Component.text(" | The Injector module wasn't enabled.",NamedTextColor.DARK_GRAY));
 
             return builder.build();
         } catch (Exception e) {

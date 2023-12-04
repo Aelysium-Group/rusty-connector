@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.event_factory;
 
-import group.aelysium.rustyconnector.api.velocity.util.Entry;
+import group.aelysium.rustyconnector.toolkit.velocity.util.Entry;
 
 import java.util.ArrayList;
 import java.util.List;

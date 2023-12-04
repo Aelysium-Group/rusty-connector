@@ -7,7 +7,6 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -17,8 +16,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -32,9 +31,9 @@ public final class CommandParty {
 
         LiteralCommandNode<CommandSource> partyCommand = LiteralArgumentBuilder
                 .<CommandSource>literal("party")
-                .requires(source -> source instanceof Player)
+                .requires(source -> source instanceof com.velocitypowered.api.proxy.Player)
                 .executes(context -> {
-                    if(!(context.getSource() instanceof Player player)) {
+                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                         logger.log("/party must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
@@ -51,7 +50,7 @@ public final class CommandParty {
                 })
                 .then(LiteralArgumentBuilder.<CommandSource>literal("invites")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/party must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -66,10 +65,10 @@ public final class CommandParty {
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                                 .suggests((context, builder) -> {
-                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                                     try {
-                                        List<PartyInvite> invites = partyService.findInvitesToTarget(ResolvablePlayer.from(player));
+                                        List<PartyInvite> invites = partyService.findInvitesToTarget(Player.from(player));
 
                                         if(invites.size() == 0) {
                                             builder.suggest("You have no pending party invites!");
@@ -87,7 +86,7 @@ public final class CommandParty {
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                         logger.log("/party must be sent as a player!");
                                         return Command.SINGLE_SUCCESS;
                                     }
@@ -102,7 +101,7 @@ public final class CommandParty {
                                 })
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("ignore")
                                         .executes(context -> {
-                                            if(!(context.getSource() instanceof Player player)) {
+                                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                                 logger.log("/party must be sent as a player!");
                                                 return Command.SINGLE_SUCCESS;
                                             }
@@ -113,13 +112,13 @@ public final class CommandParty {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
+                                            com.velocitypowered.api.proxy.Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
 
                                             if(senderPlayer == null)
                                                 return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
 
                                             try {
-                                                PartyInvite invite = partyService.findInvite(ResolvablePlayer.from(player), ResolvablePlayer.from(senderPlayer)).orElse(null);
+                                                PartyInvite invite = partyService.findInvite(Player.from(player), Player.from(senderPlayer)).orElse(null);
                                                 if(invite == null) throw new NoOutputException();
 
                                                 try {
@@ -135,7 +134,7 @@ public final class CommandParty {
                                 )
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
                                         .executes(context -> {
-                                            if(!(context.getSource() instanceof Player player)) {
+                                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                                 logger.log("/party must be sent as a player!");
                                                 return Command.SINGLE_SUCCESS;
                                             }
@@ -149,11 +148,11 @@ public final class CommandParty {
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_NO_DOUBLE_DIPPING);
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
+                                            com.velocitypowered.api.proxy.Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                             if(senderPlayer == null || !senderPlayer.isActive())
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_TARGET_NOT_ONLINE.build(username));
 
-                                            PartyInvite invite = partyService.findInvite(ResolvablePlayer.from(player), ResolvablePlayer.from(senderPlayer)).orElse(null);
+                                            PartyInvite invite = partyService.findInvite(Player.from(player), Player.from(senderPlayer)).orElse(null);
                                             if(invite == null)
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_EXPIRED);
 
@@ -172,7 +171,7 @@ public final class CommandParty {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("create")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/party must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -188,7 +187,7 @@ public final class CommandParty {
                             if(player.getCurrentServer().orElse(null) == null)
                                 return closeMessage(player, VelocityLang.PARTY_CREATE_NO_SERVER);
 
-                            PlayerServer server = api.services().server().search(player.getCurrentServer().orElse(null).getServerInfo());
+                            MCLoader server = new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
                             Party party = partyService.create(player, server);
 
                             context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
@@ -198,7 +197,7 @@ public final class CommandParty {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("disband")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/party must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -220,7 +219,7 @@ public final class CommandParty {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("leave")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/party must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -240,7 +239,7 @@ public final class CommandParty {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("invite")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/party must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -255,11 +254,11 @@ public final class CommandParty {
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                                 .suggests((context, builder) -> {
-                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                                     try {
                                         if(!partyService.settings().friendsOnly()) {
-                                            PlayerServer server = api.services().server().search(player.getCurrentServer().orElseThrow().getServerInfo());
+                                            MCLoader server = new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
 
                                             server.registeredServer().getPlayersConnected().forEach(nearbyPlayer -> {
                                                 if(nearbyPlayer.equals(player)) return;
@@ -271,7 +270,7 @@ public final class CommandParty {
                                         }
 
                                         FriendsService friendsService = api.services().friends().orElseThrow();
-                                        List<ResolvablePlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                        List<Player> friends = friendsService.findFriends(Player.from(player)).orElseThrow();
                                         if(friends.size() == 0) {
                                             builder.suggest("You don't have any friends you can invite to your party!");
                                             return builder.buildFuture();
@@ -290,7 +289,7 @@ public final class CommandParty {
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                         logger.log("/party must be sent as a player!");
                                         return Command.SINGLE_SUCCESS;
                                     }
@@ -305,7 +304,7 @@ public final class CommandParty {
                                         if(player.getCurrentServer().orElse(null) == null)
                                             return closeMessage(player, VelocityLang.PARTY_CREATE_NO_SERVER);
 
-                                        PlayerServer server = api.services().server().search(player.getCurrentServer().orElse(null).getServerInfo());
+                                        MCLoader server = new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
                                         Party newParty = partyService.create(player, server);
                                         player.sendMessage(VelocityLang.PARTY_CREATED);
 
@@ -317,15 +316,19 @@ public final class CommandParty {
                                             return closeMessage(player, VelocityLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
 
                                     String username = context.getArgument("username", String.class);
-                                    ResolvablePlayer targetPlayerResolvable = api.services().player().fetch(username).orElse(null);
-                                    if(targetPlayerResolvable == null || targetPlayerResolvable.resolve().isEmpty())
+                                    Player targetPlayerResolvable;
+                                    try {
+                                        targetPlayerResolvable = new Player.UsernameReference(username).get();
+                                        if(targetPlayerResolvable.resolve().isEmpty()) throw new Exception();
+                                    } catch (Exception ignore) {
                                         return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                    }
 
-                                    Player targetPlayer = targetPlayerResolvable.resolve().orElseThrow();
+                                    com.velocitypowered.api.proxy.Player targetPlayer = targetPlayerResolvable.resolve().orElseThrow();
 
                                     try {
 
-                                        Collection<Player> connectedPlayers = targetPlayer.getCurrentServer().orElseThrow().getServer().getPlayersConnected();
+                                        Collection<com.velocitypowered.api.proxy.Player> connectedPlayers = targetPlayer.getCurrentServer().orElseThrow().getServer().getPlayersConnected();
                                         if (partyService.settings().localOnly())
                                             if (!connectedPlayers.contains(targetPlayer))
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_NOT_ONLINE);
@@ -333,8 +336,8 @@ public final class CommandParty {
                                     try {
                                         if (partyService.settings().friendsOnly())
                                             if (!api.services().friends().orElseThrow().areFriends(
-                                                    ResolvablePlayer.from(player),
-                                                    ResolvablePlayer.from(targetPlayer)
+                                                    Player.from(player),
+                                                    Player.from(targetPlayer)
                                             ))
                                                 return closeMessage(player, VelocityLang.PARTY_INVITE_FRIENDS_ONLY);
                                     } catch (Exception ignore) {}
@@ -354,7 +357,7 @@ public final class CommandParty {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("kick")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/party must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -369,7 +372,7 @@ public final class CommandParty {
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                                 .suggests((context, builder) -> {
-                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                                     try {
                                         Party party = partyService.find(player).orElse(null);
@@ -390,7 +393,7 @@ public final class CommandParty {
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                         logger.log("/party must be sent as a player!");
                                         return Command.SINGLE_SUCCESS;
                                     }
@@ -408,7 +411,7 @@ public final class CommandParty {
                                             return closeMessage(player, VelocityLang.PARTY_ONLY_LEADER_CAN_KICK);
 
                                     String username = context.getArgument("username", String.class);
-                                    Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
+                                    com.velocitypowered.api.proxy.Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null)
                                         return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
                                     if(targetPlayer.equals(player))
@@ -426,7 +429,7 @@ public final class CommandParty {
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("promote")
                         .executes(context -> {
-                            if(!(context.getSource() instanceof Player player)) {
+                            if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                 logger.log("/party must be sent as a player!");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -441,7 +444,7 @@ public final class CommandParty {
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                                 .suggests((context, builder) -> {
-                                    if(!(context.getSource() instanceof Player player)) return builder.buildFuture();
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                                     try {
                                         Party party = partyService.find(player).orElse(null);
@@ -462,7 +465,7 @@ public final class CommandParty {
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
-                                    if(!(context.getSource() instanceof Player player)) {
+                                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
                                         logger.log("/party must be sent as a player!");
                                         return Command.SINGLE_SUCCESS;
                                     }
@@ -480,7 +483,7 @@ public final class CommandParty {
                                             return closeMessage(player, VelocityLang.PARTY_ONLY_LEADER_CAN_PROMOTE);
 
                                     String username = context.getArgument("username", String.class);
-                                    Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
+                                    com.velocitypowered.api.proxy.Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null)
                                         return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
                                     if(targetPlayer.equals(player))
@@ -515,7 +518,7 @@ public final class CommandParty {
         return new BrigadierCommand(partyCommand);
     }
 
-    public static int closeMessage(Player player, Component message) {
+    public static int closeMessage(com.velocitypowered.api.proxy.Player player, Component message) {
         player.sendMessage(message);
         return Command.SINGLE_SUCCESS;
     }

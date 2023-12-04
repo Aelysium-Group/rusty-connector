@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.core.lib.messenger;
 
-import group.aelysium.rustyconnector.api.core.UserPass;
-import group.aelysium.rustyconnector.api.core.messenger.IMessengerConnection;
+import group.aelysium.rustyconnector.toolkit.core.UserPass;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
-import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;

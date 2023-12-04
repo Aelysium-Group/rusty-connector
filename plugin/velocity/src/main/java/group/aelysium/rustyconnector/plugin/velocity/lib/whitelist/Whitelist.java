@@ -2,11 +2,11 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
 import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.whitelist.IWhitelist;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config.WhitelistConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
@@ -35,7 +35,7 @@ public class Whitelist implements IWhitelist {
         this.message = message;
         this.strict = strict;
         this.inverted = inverted;
-        this.permission = Permission.constructNode("rustyconnector.whitelist.<whitelist name>",this.name);
+        this.permission = Permission.constructNode("rustyconnector.whitelist.<whitelist id>",this.name);
     }
 
     public boolean usesPlayers() {
@@ -116,7 +116,7 @@ public class Whitelist implements IWhitelist {
      * Initializes a whitelist based on a config.
      * @return A whitelist.
      */
-    public static Whitelist init(DependencyInjector.DI2<List<Component>, LangService> dependencies, String whitelistName) throws IOException {
+    public static Reference init(DependencyInjector.DI3<List<Component>, LangService, WhitelistService> dependencies, String whitelistName) throws IOException {
         Tinder api = Tinder.get();
         List<Component> bootOutput = dependencies.d1();
 
@@ -148,6 +148,18 @@ public class Whitelist implements IWhitelist {
         }
 
         bootOutput.add(Component.text(" | Registered whitelist: "+whitelistName, NamedTextColor.YELLOW));
-        return whitelist;
+
+        dependencies.d3().add(whitelist);
+        return new Whitelist.Reference(whitelistName);
+    }
+
+    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Whitelist, String> {
+        public Reference(String name) {
+            super(name);
+        }
+
+        public Whitelist get() {
+            return Tinder.get().services().whitelist().find(this.referencer).orElseThrow();
+        }
     }
 }

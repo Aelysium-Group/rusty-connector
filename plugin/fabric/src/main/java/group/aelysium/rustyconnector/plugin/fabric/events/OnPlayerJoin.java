@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.fabric.events;
 
-import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.CoordinateRequest;
-import group.aelysium.rustyconnector.core.plugin.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.CoordinateRequest;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.network.ServerPlayerEntity;

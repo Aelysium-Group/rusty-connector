@@ -9,12 +9,11 @@ dependencies {
     implementation "com.jcabi:jcabi-log:${project.jcabi_version}"
     implementation "org.spongepowered:configurate-yaml:${project.configurate_version}"
     implementation "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
-    implementation "javax.websocket:javax.websocket-api:${project.javax_websocket_version}"
     implementation "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
     implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
 
     // Dev only
-    shadow project(path: ':api', configuration: 'shadow')
+    shadow project(path: ':toolkit', configuration: 'shadow')
     shadow "com.google.code.gson:gson:${project.gson_version}"
     shadow "org.yaml:snakeyaml:${project.snakeyaml_version}"
 }

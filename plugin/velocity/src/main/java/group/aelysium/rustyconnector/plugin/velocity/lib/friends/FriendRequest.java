@@ -1,20 +1,19 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.friends.IFriendRequest;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 
 import java.util.NoSuchElementException;
 
 public class FriendRequest implements IFriendRequest {
     private final FriendsService friendsService;
     private long id;
-    private ResolvablePlayer sender;
-    private ResolvablePlayer target;
+    private Player sender;
+    private Player target;
     private Boolean isAcknowledged = null;
 
-    public FriendRequest(FriendsService friendsService, long id, ResolvablePlayer sender, ResolvablePlayer target) {
+    public FriendRequest(FriendsService friendsService, long id, Player sender, Player target) {
         this.friendsService = friendsService;
         this.id = id;
         this.sender = sender;
@@ -24,10 +23,10 @@ public class FriendRequest implements IFriendRequest {
     public long id() {
         return this.id;
     }
-    public ResolvablePlayer sender() {
+    public Player sender() {
         return this.sender;
     }
-    public ResolvablePlayer target() {
+    public Player target() {
         return this.target;
     }
 
@@ -49,11 +48,11 @@ public class FriendRequest implements IFriendRequest {
             friendsService.addFriends(this.sender, this.target);
 
             try {
-                Player resolved = this.target.resolve().orElseThrow();
+                com.velocitypowered.api.proxy.Player resolved = this.target.resolve().orElseThrow();
                 resolved.sendMessage(VelocityLang.BECOME_FRIENDS.build(sender.username()));
             } catch (NoSuchElementException ignore) {}
             try {
-                Player resolved = this.sender.resolve().orElseThrow();
+                com.velocitypowered.api.proxy.Player resolved = this.sender.resolve().orElseThrow();
                 resolved.sendMessage(VelocityLang.BECOME_FRIENDS.build(target.username()));
             } catch (NoSuchElementException ignore) {}
 

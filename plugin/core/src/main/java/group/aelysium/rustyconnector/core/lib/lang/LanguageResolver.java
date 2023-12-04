@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.lang;
 
-import group.aelysium.rustyconnector.api.core.lang.ILanguageResolver;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.core.lang.ILanguageResolver;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;

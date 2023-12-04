@@ -1,12 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.players.IPlayerService;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class PlayerService implements IPlayerService {
@@ -16,7 +15,7 @@ public class PlayerService implements IPlayerService {
         this.storage = storage;
     }
 
-    public Optional<ResolvablePlayer> fetch(UUID uuid) {
+    protected Optional<Player> fetch(UUID uuid) {
         try {
             StorageRoot root = this.storage.root();
 
@@ -28,7 +27,7 @@ public class PlayerService implements IPlayerService {
         return Optional.empty();
     }
 
-    public Optional<ResolvablePlayer> fetch(String username) {
+    protected Optional<Player> fetch(String username) {
         try {
             StorageRoot root = this.storage.root();
 
@@ -38,19 +37,6 @@ public class PlayerService implements IPlayerService {
         }
 
         return Optional.empty();
-    }
-
-    public void savePlayer(Player player) {
-        try {
-            StorageRoot root = this.storage.root();
-
-            List<ResolvablePlayer> players = root.players();
-            players.add(ResolvablePlayer.from(player));
-
-            this.storage.store(players);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

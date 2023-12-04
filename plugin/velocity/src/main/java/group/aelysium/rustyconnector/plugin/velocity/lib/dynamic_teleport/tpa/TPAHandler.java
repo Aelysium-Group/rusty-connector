@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.ITPAHandler;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAHandler;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 
@@ -34,7 +34,7 @@ public class TPAHandler implements ITPAHandler<TPARequest> {
     public TPARequest newRequest(Player sender, Player target) {
         Tinder api = Tinder.get();
         TPAService tpaService = api.services().dynamicTeleport().orElseThrow()
-                                   .services().tpaService().orElseThrow();
+                                   .services().tpa().orElseThrow();
 
         TPARequest tpaRequest = new TPARequest(sender, target, tpaService.settings().expiration());
         requests.add(tpaRequest);

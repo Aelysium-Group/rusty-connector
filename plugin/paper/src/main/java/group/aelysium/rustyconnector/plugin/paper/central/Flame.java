@@ -1,31 +1,31 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderFlame;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateHandler;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderFlame;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
-import group.aelysium.rustyconnector.api.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
-import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.api.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.api.velocity.util.AddressUtil;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.core.plugin.central.CoreServiceHandler;
-import group.aelysium.rustyconnector.core.plugin.central.config.DefaultConfig;
-import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.DynamicTeleportService;
-import group.aelysium.rustyconnector.core.plugin.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
-import group.aelysium.rustyconnector.core.plugin.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.core.plugin.lib.magic_link.handlers.MagicLink_PingResponseHandler;
-import group.aelysium.rustyconnector.core.plugin.lib.packet_builder.PacketBuilderService;
-import group.aelysium.rustyconnector.core.plugin.lib.server_info.ServerInfoService;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
+import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
+import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicTeleportService;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.MagicLink_PingResponseHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.packet_builder.PacketBuilderService;
+import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
@@ -35,6 +35,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.bukkit.Bukkit;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -218,8 +219,10 @@ class Initialize {
         RedisConnection connection = messenger.connection().orElseThrow();
 
         Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
-        handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler());
-        handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler());
+        handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler(this.api));
+        handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler(this.api));
+
+        handlers.put(PacketType.ASSOCIATE_RANKED_GAME, new RankedGameAssociateHandler(this.api));
         connection.startListening(cacheService, logger, handlers, originAddress);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
@@ -238,13 +241,16 @@ class Initialize {
     }
 
     public ServerInfoService serverInfo(DefaultConfig defaultConfig) {
+        InetSocketAddress address = null;
+        try {
+            address = AddressUtil.parseAddress(defaultConfig.address());
+        } catch (Exception ignore) {}
+
         ServerInfoService serverInfoService = new ServerInfoService(
-                defaultConfig.getServer_name(),
-                AddressUtil.parseAddress(defaultConfig.getServer_address()),
-                defaultConfig.getServer_family(),
-                defaultConfig.getServer_playerCap_soft(),
-                defaultConfig.getServer_playerCap_hard(),
-                defaultConfig.getServer_weight()
+                address,
+                defaultConfig.magicConfig(),
+                defaultConfig.magicInterfaceResolver(),
+                Bukkit.getPort()
         );
         services.put(ServerInfoService.class, serverInfoService);
 

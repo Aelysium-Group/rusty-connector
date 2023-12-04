@@ -4,10 +4,10 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.central.VelocityTinder;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
-import group.aelysium.rustyconnector.api.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import org.slf4j.Logger;
@@ -88,8 +88,8 @@ public class Tinder implements VelocityTinder {
     }
 
     /**
-     * Gets a resource by name and returns it as a stream.
-     * @param filename The name of the resource to get.
+     * Gets a resource by id and returns it as a stream.
+     * @param filename The id of the resource to get.
      * @return The resource as a stream.
      */
     public static InputStream resourceAsStream(String filename)  {
@@ -104,7 +104,7 @@ public class Tinder implements VelocityTinder {
     }
 
     /**
-     * Registers a server with this proxy.` A server with this name should not already exist.
+     * Registers a server with this proxy.` A server with this id should not already exist.
      *
      * @param serverInfo the server to register
      * @return the newly registered server

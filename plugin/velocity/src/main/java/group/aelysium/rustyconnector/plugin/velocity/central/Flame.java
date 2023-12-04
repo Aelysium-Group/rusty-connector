@@ -4,29 +4,28 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
-import group.aelysium.rustyconnector.api.velocity.central.VelocityFlame;
-import group.aelysium.rustyconnector.api.velocity.friends.FriendsServiceSettings;
-import group.aelysium.rustyconnector.api.velocity.util.Version;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicLinkConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndHandler;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.velocity.util.Version;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.MemberKeyConfig;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.api.core.packet.PacketHandler;
-import group.aelysium.rustyconnector.api.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.api.core.packet.PacketType;
-import group.aelysium.rustyconnector.api.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.central.command.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.central.config.LoggerConfig;
@@ -39,7 +38,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.Dynami
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.config.FamiliesConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -49,18 +47,16 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsC
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.handlers.MagicLinkPingHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.LockServerHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.SendPlayerHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.message.handling.UnlockServerHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.MagicLinkPingHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.LockServerHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.SendPlayerHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.UnlockServerHandler;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
-import group.aelysium.rustyconnector.api.velocity.parties.PartyServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.PartyServiceSettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.config.PartyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.config.ViewportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config.WebhooksConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
@@ -71,9 +67,9 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
 
-import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
 /**
  * The core RustyConnector kernel.
@@ -144,6 +140,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
 
             logger.send(Component.text("Initializing 30%...", NamedTextColor.DARK_GRAY));
             FamilyService familyService = initialize.families(inject(defaultConfig, langService, connectors.d2()));
+            initialize.magicConfigs(inject(familyService, langService));
             logger.send(Component.text("Initializing 40%...", NamedTextColor.DARK_GRAY));
             ServerService serverService = initialize.servers(defaultConfig);
             logger.send(Component.text("Initializing 50%...", NamedTextColor.DARK_GRAY));
@@ -155,11 +152,10 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
             logger.send(Component.text("Initializing 70%...", NamedTextColor.DARK_GRAY));
             initialize.friendsService(inject(connectors.d2(), langService));
             initialize.playerService(inject(connectors.d2(), langService));
+            logger.send(Component.text("Initializing 80%...", NamedTextColor.DARK_GRAY));
             initialize.partyService(langService);
             initialize.dynamicTeleportService(inject(familyService, serverService, langService));
-            logger.send(Component.text("Initializing 80%...", NamedTextColor.DARK_GRAY));
 
-            Consumer<PluginLogger> printViewportURI = initialize.viewportService(inject(langService, memberKey));
             logger.send(Component.text("Initializing 90%...", NamedTextColor.DARK_GRAY));
 
             Flame flame = new Flame(new Version(version), configVersion, memberKey, initialize.getServices(), initialize.getBootOutput());
@@ -167,8 +163,6 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
             initialize.events(plugin);
             initialize.commands(inject(flame, logger, messageCacheService));
             logger.send(Component.text("Initializing 100%...", NamedTextColor.DARK_GRAY));
-
-            printViewportURI.accept(logger);
 
             return flame;
         } catch (Exception e) {
@@ -314,22 +308,28 @@ class Initialize {
         bootOutput.add(Component.text("Booting Messenger...", NamedTextColor.DARK_GRAY));
 
         Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
-        handlers.put(PacketType.PING, new MagicLinkPingHandler());
-        handlers.put(PacketType.SEND_PLAYER, new SendPlayerHandler());
-        handlers.put(PacketType.LOCK_SERVER, new LockServerHandler());
-        handlers.put(PacketType.UNLOCK_SERVER, new UnlockServerHandler());
+        {
+            handlers.put(PacketType.PING, new MagicLinkPingHandler(this.api));
+            handlers.put(PacketType.SEND_PLAYER, new SendPlayerHandler(this.api));
+            handlers.put(PacketType.LOCK_SERVER, new LockServerHandler(this.api));
+            handlers.put(PacketType.UNLOCK_SERVER, new UnlockServerHandler(this.api));
+
+            handlers.put(PacketType.END_RANKED_GAME, new RankedGameEndHandler(this.api));
+        }
 
         messenger.connect();
         RedisConnection connection = messenger.connection().orElseThrow();
         connection.startListening(dependencies.d2(), dependencies.d3(), handlers, null);
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
 
+        bootOutput.add(Component.text("Booting MicroStream MariaDB driver...", NamedTextColor.DARK_GRAY));
         MySQLStorage storage = MySQLStorage.create(
                 config.getMysql_address(),
                 config.getMysql_user(),
                 config.getMysql_database()
         );
         services.put(MySQLStorage.class, storage);
+        bootOutput.add(Component.text("Finished booting MariaDB driver.", NamedTextColor.GREEN));
 
         bootOutput.add(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
         return DependencyInjector.inject(messenger, storage);
@@ -348,14 +348,17 @@ class Initialize {
         services.put(FamilyService.class, familyService);
         bootOutput.add(Component.text(" | Finished registering family service to API.", NamedTextColor.GREEN));
 
+        WhitelistService whitelistService = new WhitelistService();
+        services.put(WhitelistService.class, whitelistService);
+
         {
             bootOutput.add(Component.text(" | Building families...", NamedTextColor.DARK_GRAY));
             for (String familyName : familiesConfig.scalarFamilies()) {
-                familyService.add(ScalarFamily.init(inject(bootOutput, dependencies.d2()), familyName));
+                familyService.add(ScalarFamily.init(inject(bootOutput, dependencies.d2(), whitelistService), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             for (String familyName : familiesConfig.staticFamilies()) {
-                familyService.add(StaticFamily.init(inject(bootOutput, dependencies.d2(), dependencies.d3()), familyName));
+                familyService.add(StaticFamily.init(inject(bootOutput, dependencies.d2(), dependencies.d3(), whitelistService), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             bootOutput.add(Component.text(" | Finished building families.", NamedTextColor.GREEN));
@@ -364,34 +367,51 @@ class Initialize {
         {
             bootOutput.add(Component.text(" | Building root family...", NamedTextColor.DARK_GRAY));
 
-            RootFamily rootFamily = RootFamily.init(inject(bootOutput, dependencies.d2()), familiesConfig.rootFamilyName());
+            RootFamily rootFamily = RootFamily.init(inject(bootOutput, dependencies.d2(), whitelistService), familiesConfig.rootFamilyName());
             familyService.setRootFamily(rootFamily);
-            bootOutput.add(Component.text(" | Registered root family: "+rootFamily.name(), NamedTextColor.YELLOW));
+            bootOutput.add(Component.text(" | Registered root family: "+rootFamily.id(), NamedTextColor.YELLOW));
 
             bootOutput.add(Component.text(" | Finished building root family.", NamedTextColor.GREEN));
         }
 
         {
             bootOutput.add(Component.text(" | Registering load balancing service to the API...", NamedTextColor.DARK_GRAY));
-            if (dependencies.d1().services_loadBalancing_enabled())
-                services.put(LoadBalancingService.class, new LoadBalancingService(familyService.size(), dependencies.d1().services_loadBalancing_interval()));
+            LoadBalancingService clock = new LoadBalancingService(familyService.size(), LiquidTimestamp.from(20, TimeUnit.SECONDS));
+            services.put(LoadBalancingService.class, clock);
+            clock.init(inject(familyService, this.api.logger()));
             bootOutput.add(Component.text(" | Finished registering load balancing service to the API.", NamedTextColor.GREEN));
-        }
-
-        {
-            bootOutput.add(Component.text(" | Resolving family parents...", NamedTextColor.DARK_GRAY));
-            familyService.dump().forEach(baseServerFamily -> {
-                try {
-                    ((PlayerFocusedFamily) baseServerFamily).resolveParent(familyService);
-                } catch (Exception e) {
-                    bootOutput.add(Component.text("There was an issue resolving the parent for " + baseServerFamily.name() + ". " + e.getMessage()));
-                }
-            });
-            bootOutput.add(Component.text(" | Finished resolving family parents.", NamedTextColor.GREEN));
         }
 
         bootOutput.add(Component.text("Finished building families service.", NamedTextColor.GREEN));
         return familyService;
+    }
+
+    public void magicConfigs(DependencyInjector.DI2<FamilyService, LangService> dependencies) throws Exception {
+        bootOutput.add(Component.text("Validating Magic Configs...", NamedTextColor.DARK_GRAY));
+
+        File folder = new File(api.dataFolder(), "/magic_configs");
+        if (!folder.exists() && !folder.isDirectory())
+            folder.mkdirs();
+        File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
+        try {
+            if (files.length == 0) {
+                files = new File[]{new File("default.yml")};
+            }
+        } catch (Exception ignore) {
+            files = new File[]{new File("default.yml")};
+        }
+
+        for (File file : files) {
+            MagicLinkConfig magicLinkConfig = new MagicLinkConfig(api.dataFolder(), file.getName());
+            if (!magicLinkConfig.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_MAGIC_CONFIG_TEMPLATE))
+                throw new IllegalStateException("Unable to load or create magic_config.yml!");
+            magicLinkConfig.register();
+
+            if(dependencies.d1().dump().stream().noneMatch(family -> family.id().equals(magicLinkConfig.family())))
+                throw new NullPointerException("The magic config `" + file.getName() + "` is pointing to a family: `" + magicLinkConfig.family() + "`, which doesn't exist!");
+        }
+
+        bootOutput.add(Component.text("Magic Configs have been validated!", NamedTextColor.GREEN));
     }
 
     public void networkWhitelist(DependencyInjector.DI2<DefaultConfig, LangService> dependencies) throws IOException {
@@ -402,7 +422,7 @@ class Initialize {
 
         bootOutput.add(Component.text("Building proxy whitelist...", NamedTextColor.DARK_GRAY));
         if (dependencies.d1().whitelist_enabled()) {
-            whitelistService.setProxyWhitelist(Whitelist.init(inject(bootOutput, dependencies.d2()), dependencies.d1().whitelist_name()));
+            whitelistService.setProxyWhitelist(Whitelist.init(inject(bootOutput, dependencies.d2(), whitelistService), dependencies.d1().whitelist_name()));
             bootOutput.add(Component.text("Finished building proxy whitelist.", NamedTextColor.GREEN));
         } else
             bootOutput.add(Component.text("Finished building proxy whitelist. No whitelist is enabled for the proxy.", NamedTextColor.GREEN));
@@ -459,7 +479,7 @@ class Initialize {
     public void magicLink(DependencyInjector.DI2<DefaultConfig, ServerService> dependencies) {
         bootOutput.add(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-        MagicLinkService magicLinkService = new MagicLinkService(3, dependencies.d1().services_serverLifecycle_serverPingInterval());
+        MagicLinkService magicLinkService = new MagicLinkService(3, dependencies.d1().magicLink_serverPingInterval());
         services.put(MagicLinkService.class, magicLinkService);
 
         bootOutput.add(Component.text("Finished building magic link service.", NamedTextColor.GREEN));
@@ -474,8 +494,8 @@ class Initialize {
         bootOutput.add(Component.text("Building server service...", NamedTextColor.DARK_GRAY));
 
         ServerService.Builder serverServiceBuilder = new ServerService.Builder()
-                .setServerTimeout(defaultConfig.services_serverLifecycle_serverTimeout())
-                .setServerInterval(defaultConfig.services_serverLifecycle_serverPingInterval());
+                .setServerTimeout(defaultConfig.magicLink_serverTimeout())
+                .setServerInterval(defaultConfig.magicLink_serverPingInterval());
 
         ServerService serverService = serverServiceBuilder.build();
         services.put(ServerService.class, serverService);
@@ -526,46 +546,6 @@ class Initialize {
             bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
             bootOutput.add(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
         }
-    }
-    public Consumer<PluginLogger> viewportService(DependencyInjector.DI2<LangService, Optional<char[]>> dependencies) {
-        // If there's no membership key they can't even use Viewport so don't even load a config file
-        if(dependencies.d2().isEmpty()) return (l)->{};
-
-        try {
-            bootOutput.add(Component.text("Building viewport service...", NamedTextColor.DARK_GRAY));
-
-            ViewportConfig viewportConfig = new ViewportConfig(new File(api.dataFolder(), "viewport.yml"));
-            if (!viewportConfig.generate(bootOutput, dependencies.d1(), LangFileMappings.VELOCITY_VIEWPORT_TEMPLATE))
-                throw new IllegalStateException("Unable to load or create viewport.yml!");
-            viewportConfig.register();
-
-            if(!viewportConfig.isEnabled()) {
-                bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
-                return (l)->{};
-            }
-
-            ViewportService service = ViewportService.create(viewportConfig);
-
-            services.put(ViewportService.class, service);
-
-            return (logger) -> {
-                if(viewportConfig.isSendURI()) {
-                    logger.send(Component.text("You can sign into Viewport with the token:", NamedTextColor.GREEN));
-
-                    String address = viewportConfig.getApi_address().getHostName()+":"+viewportConfig.getApi_address().getPort();
-                    if (viewportConfig.isApi_ssl())
-                        logger.send(Component.text(new String(dependencies.d2().orElseThrow())+";t;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
-                    else {
-                        logger.send(Component.text(new String(dependencies.d2().orElseThrow())+";f;" + address + ";" + viewportConfig.getCredentials().user(), NamedTextColor.GREEN));
-                        logger.send(Component.text("Because this connection will be unencrypted, you may be required to enable \"Display Insecure Resources\" on your browser for the Viewport website.", NamedTextColor.YELLOW));
-                    }
-                }
-            };
-        } catch (Exception e) {
-            bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
-            bootOutput.add(Component.text("The viewport service wasn't enabled.", NamedTextColor.GRAY));
-        }
-        return (l)->{};
     }
 
     public void friendsService(DependencyInjector.DI2<MySQLStorage, LangService> dependencies) {
@@ -626,7 +606,7 @@ class Initialize {
             DynamicTeleportService dynamicTeleportService = DynamicTeleportService.init(inject(bootOutput, dependencies.d1()), config);
 
             try {
-                TPAService tpaService = dynamicTeleportService.services().tpaService().orElseThrow();
+                TPAService tpaService = dynamicTeleportService.services().tpa().orElseThrow();
                 tpaService.cleaner().startHeartbeat(tpaService);
                 tpaService.initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
                 bootOutput.add(Component.text(" | The TPA module was started successfully!",NamedTextColor.GREEN));
@@ -637,7 +617,7 @@ class Initialize {
             }
 
             try {
-                dynamicTeleportService.services().hubService().orElseThrow().initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
+                dynamicTeleportService.services().hub().orElseThrow().initCommand(inject(dependencies.d1(), dependencies.d2(), bootOutput));
                 bootOutput.add(Component.text(" | The HUB module was started successfully!",NamedTextColor.GREEN));
             } catch (NoSuchElementException ignore) {
             } catch (Exception e) {
@@ -646,7 +626,7 @@ class Initialize {
             }
 
             try {
-                dynamicTeleportService.services().anchorService().orElseThrow().initCommands(inject(dynamicTeleportService, dependencies.d2(), bootOutput));
+                dynamicTeleportService.services().anchor().orElseThrow().initCommands(inject(dynamicTeleportService, dependencies.d2(), bootOutput));
                 bootOutput.add(Component.text(" | The Anchor module was started successfully!",NamedTextColor.GREEN));
             } catch (NoSuchElementException ignore) {
             } catch (Exception e) {

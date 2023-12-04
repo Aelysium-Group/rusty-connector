@@ -10,7 +10,8 @@ dependencies {
     implementation "one.microstream:microstream-storage-embedded:${project.microstream_version}"
     implementation "one.microstream:microstream-afs-sql:${project.microstream_sql_version}"
     implementation "org.mariadb.jdbc:mariadb-java-client:${project.mariadb_version}"
-    implementation "io.kubernetes:client-java:${project.kubernetes_version}"
+    implementation "io.fabric8:kubernetes-client:${project.kubernetes_version}"
+    implementation "de.gesundkrank.jskills:jskills:${project.jskills_version}"
 
     // Dev Only
     shadow project(path: ':core', configuration: 'shadow')
@@ -30,7 +31,7 @@ jar.finalizedBy('shadowJar')
 
 def plugin_version = project.plugin_version
 processResources {
-    def props = ['version': plugin_version, 'config_version': velocity_config_version]
+    def props = ['version': plugin_version, 'config_version': velocity_config_version, 'magic_link_protocol_version': magic_link_protocol_version]
     inputs.properties props
     filteringCharset "UTF-8"
 

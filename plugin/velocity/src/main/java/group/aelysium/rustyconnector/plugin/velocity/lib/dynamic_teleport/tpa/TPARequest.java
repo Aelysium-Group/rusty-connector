@@ -2,13 +2,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.api.velocity.dynamic_teleport.tpa.ITPARequest;
-import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPARequest;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 import java.util.Date;
 
@@ -63,15 +63,15 @@ public class TPARequest implements ITPARequest {
 
         DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleport().orElse(null);
         if(dynamicTeleportService == null) throw new NullPointerException("Dynamic Teleport must be enabled to use tpa functions!");
-        TPAService tpaService = dynamicTeleportService.services().tpaService().orElse(null);
+        TPAService tpaService = dynamicTeleportService.services().tpa().orElse(null);
         if(tpaService == null) throw new NullPointerException("TPA in Dynamic Teleport must be enabled to use tpa functions!");
 
         try {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.target().getCurrentServer().orElseThrow().getServerInfo();
-            PlayerServer server = api.services().server().search(serverInfo);
-            BaseFamily family = server.family();
+            MCLoader server = new MCLoader.Reference(serverInfo).get();
+            Family family = server.family();
             if(family == null) throw new NullPointerException();
 
             tpaService.tpaSendPlayer(this.sender(), this.target(), server);

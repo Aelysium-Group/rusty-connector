@@ -1,46 +1,61 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.api.velocity.family.scalar_family.IScalarFamily;
-import group.aelysium.rustyconnector.api.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
+import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IScalarFamily;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.api.velocity.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.api.velocity.util.DependencyInjector;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.ConnectException;
 import java.util.List;
 
-import static group.aelysium.rustyconnector.api.velocity.util.DependencyInjector.inject;
+import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.SCALAR_FAMILY_META;
+import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<PlayerServer> {
-    protected ScalarFamily(String name, Whitelist whitelist, Class<? extends LoadBalancer> clazz, boolean weighted, boolean persistence, int attempts, String parentFamily) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        super(name, whitelist, clazz, weighted, persistence, attempts, parentFamily);
+public class ScalarFamily extends Family implements IScalarFamily<MCLoader, Player> {
+
+    public ScalarFamily(Settings settings) {
+        super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), SCALAR_FAMILY_META);
     }
 
-    public PlayerServer connect(Player player) throws RuntimeException {
+    /**
+     * Used by {@link RootFamily}.
+     */
+    protected ScalarFamily(Settings settings, Metadata metadata) {
+        super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), metadata);
+    }
+
+    public MCLoader connect(Player rustyPlayer) throws RuntimeException {
+        com.velocitypowered.api.proxy.Player player = rustyPlayer.resolve().orElseThrow();
+
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
         return connector.connect();
     }
-    public PlayerServer connect(PlayerChooseInitialServerEvent event) throws RuntimeException {
+    public MCLoader connect(PlayerChooseInitialServerEvent event) throws RuntimeException {
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, event);
         return connector.connect();
     }
 
-    public PlayerServer fetchAny(Player player) throws RuntimeException {
+    public MCLoader fetchAny(Player rustyPlayer) throws RuntimeException {
+        com.velocitypowered.api.proxy.Player player = rustyPlayer.resolve().orElseThrow();
+
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
         return connector.fetchAny();
     }
@@ -50,67 +65,67 @@ public class ScalarFamily extends PlayerFocusedFamily implements IScalarFamily<P
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static ScalarFamily init(DependencyInjector.DI2<List<Component>, LangService> dependencies, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+    public static ScalarFamily init(DependencyInjector.DI3<List<Component>, LangService, WhitelistService> dependencies, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Tinder api = Tinder.get();
+        List<Component> bootOutput = dependencies.d1();
+        LangService lang = dependencies.d2();
+        WhitelistService whitelistService = dependencies.d3();
 
-        ScalarFamilyConfig scalarFamilyConfig = new ScalarFamilyConfig(new File(String.valueOf(api.dataFolder()), "families/"+familyName+".scalar.yml"));
-        if(!scalarFamilyConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
+        ScalarFamilyConfig config = new ScalarFamilyConfig(api.dataFolder(), familyName);
+        if(!config.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
             throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
         }
-        scalarFamilyConfig.register();
+        config.register();
 
-        Whitelist whitelist = null;
-        if(scalarFamilyConfig.isWhitelist_enabled()) {
-            whitelist = Whitelist.init(dependencies, scalarFamilyConfig.getWhitelist_name());
+        AlgorithmType loadBalancerAlgorithm;
+        LoadBalancer.Settings loadBalancerSettings;
+        {
+            LoadBalancerConfig loadBalancerConfig = new LoadBalancerConfig(api.dataFolder(), config.loadBalancer());
+            if (!loadBalancerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_LOAD_BALANCER_TEMPLATE)) {
+                throw new IllegalStateException("Unable to load or create load_balancer/" + config.loadBalancer() + ".yml!");
+            }
+            loadBalancerConfig.register();
 
-            api.services().whitelist().add(whitelist);
+            loadBalancerAlgorithm = loadBalancerConfig.getAlgorithm();
+
+            loadBalancerSettings = new LoadBalancer.Settings(
+                    loadBalancerConfig.isWeighted(),
+                    loadBalancerConfig.isPersistence_enabled(),
+                    loadBalancerConfig.getPersistence_attempts()
+            );
         }
 
-        switch (Enum.valueOf(AlgorithmType.class, scalarFamilyConfig.getLoadBalancing_algorithm())) {
-            case ROUND_ROBIN -> {
-                return new ScalarFamily(
-                        familyName,
-                        whitelist,
-                        RoundRobin.class,
-                        scalarFamilyConfig.isLoadBalancing_weighted(),
-                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        scalarFamilyConfig.getParent_family()
-                );
-            }
-            case LEAST_CONNECTION -> {
-                return new ScalarFamily(
-                        familyName,
-                        whitelist,
-                        LeastConnection.class,
-                        scalarFamilyConfig.isLoadBalancing_weighted(),
-                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        scalarFamilyConfig.getParent_family()
-                );
-            }
-            case MOST_CONNECTION -> {
-                return new ScalarFamily(
-                        familyName,
-                        whitelist,
-                        MostConnection.class,
-                        scalarFamilyConfig.isLoadBalancing_weighted(),
-                        scalarFamilyConfig.isLoadBalancing_persistence_enabled(),
-                        scalarFamilyConfig.getLoadBalancing_persistence_attempts(),
-                        scalarFamilyConfig.getParent_family()
-                );
-            }
-            default -> throw new RuntimeException("The name used for "+familyName+"'s load balancer is invalid!");
+        Whitelist.Reference whitelist = null;
+        if (config.isWhitelist_enabled())
+            whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService), config.getWhitelist_name());
+
+        LoadBalancer loadBalancer;
+        switch (loadBalancerAlgorithm) {
+            case ROUND_ROBIN -> loadBalancer = new RoundRobin(loadBalancerSettings);
+            case LEAST_CONNECTION -> loadBalancer = new LeastConnection(loadBalancerSettings);
+            case MOST_CONNECTION -> loadBalancer = new MostConnection(loadBalancerSettings);
+            default -> throw new RuntimeException("The id used for "+familyName+"'s load balancer is invalid!");
         }
+
+        Settings settings = new Settings(familyName, config.displayName(), loadBalancer, config.getParent_family(), whitelist);
+        return new ScalarFamily(settings);
     }
+
+    public record Settings(
+            String id,
+            Component displayName,
+            LoadBalancer loadBalancer,
+            Family.Reference parentFamily,
+            Whitelist.Reference whitelist
+    ) {}
 }
 
 class ScalarFamilyConnector {
     private final ScalarFamily family;
-    private final Player player;
+    private final com.velocitypowered.api.proxy.Player player;
     private final PlayerChooseInitialServerEvent event;
 
-    public ScalarFamilyConnector(ScalarFamily family, Player player) {
+    public ScalarFamilyConnector(ScalarFamily family, com.velocitypowered.api.proxy.Player player) {
         this.family = family;
         this.player = player;
         this.event = null;
@@ -121,7 +136,7 @@ class ScalarFamilyConnector {
         this.event = event;
     }
 
-    public PlayerServer connect() throws RuntimeException {
+    public MCLoader connect() throws RuntimeException {
         if(this.family.loadBalancer().size() == 0)
             throw new RuntimeException("There are no servers for you to connect to!");
 
@@ -130,7 +145,7 @@ class ScalarFamilyConnector {
         return this.establishAnyConnection();
     }
 
-    public PlayerServer fetchAny() throws RuntimeException {
+    public MCLoader fetchAny() throws RuntimeException {
         if(this.family.loadBalancer().size() == 0)
             throw new RuntimeException("There are no servers for you to connect to!");
 
@@ -148,8 +163,8 @@ class ScalarFamilyConnector {
         }
     }
 
-    public PlayerServer establishAnyConnection() {
-        PlayerServer server;
+    public MCLoader establishAnyConnection() {
+        MCLoader server;
         if(this.family.loadBalancer().persistent() && this.family.loadBalancer().attempts() > 1)
             server = this.connectPersistent();
         else
@@ -158,8 +173,8 @@ class ScalarFamilyConnector {
         return server;
     }
 
-    private PlayerServer connectSingleton() {
-        PlayerServer server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
+    private MCLoader connectSingleton() {
+        MCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
         try {
             if(!server.validatePlayer(player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
@@ -180,12 +195,12 @@ class ScalarFamilyConnector {
         }
     }
 
-    private PlayerServer connectPersistent() {
+    private MCLoader connectPersistent() {
         int attemptsLeft = this.family.loadBalancer().attempts();
 
         for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
             boolean isFinal = (attempt == attemptsLeft);
-            PlayerServer server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
+            MCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
 
             try {
                 if(!server.validatePlayer(player))

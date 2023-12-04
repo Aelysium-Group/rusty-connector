@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.confi
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.api.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,8 +22,10 @@ public class DynamicTeleportConfig extends YAML {
     private LiquidTimestamp tpa_expiration;
 
     private boolean familyAnchor_enabled = false;
-
     private List<Map.Entry<String, String>> familyAnchor_anchors;
+
+    private boolean familyInjector_enabled = false;
+    private List<Map.Entry<String, String>> familyInjector_injectors;
 
     private boolean hub_enabled = false;
     private List<String> hub_enabledFamilies = new ArrayList<>();
@@ -62,6 +64,14 @@ public class DynamicTeleportConfig extends YAML {
 
     public List<Map.Entry<String, String>> getFamilyAnchor_anchors() {
         return familyAnchor_anchors;
+    }
+
+    public boolean isFamilyInjector_enabled() {
+        return familyInjector_enabled;
+    }
+
+    public List<Map.Entry<String, String>> getFamilyInjector_injectors() {
+        return familyInjector_injectors;
     }
 
     public boolean isHub_enabled() {
@@ -109,7 +119,20 @@ public class DynamicTeleportConfig extends YAML {
             if(anchors.size() != 0)
                 for (ConfigurationNode entry: anchors)
                     this.familyAnchor_anchors.add(Map.entry(
-                            this.getNode(entry, "name", String.class),
+                            this.getNode(entry, "id", String.class),
+                            this.getNode(entry, "family", String.class)
+                    ));
+        }
+
+        this.familyInjector_enabled = this.getNode(this.data, "family-injectors.enabled", Boolean.class);
+        if(this.familyInjector_enabled) {
+            List<? extends ConfigurationNode> injectors = get(this.data, "family-injectors.injectors").getChildrenList();
+
+            this.familyInjector_injectors = new ArrayList<>();
+            if(injectors.size() != 0)
+                for (ConfigurationNode entry: injectors)
+                    this.familyInjector_injectors.add(Map.entry(
+                            this.getNode(entry, "host", String.class),
                             this.getNode(entry, "family", String.class)
                     ));
         }
