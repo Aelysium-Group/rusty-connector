@@ -40,5 +40,17 @@ public interface IScoreCard<TMySQLStorageService extends IMySQLStorageService> {
                 return this.holder;
             }
         }
+
+        static Type<?> valueOf(String type) {
+            switch (type.toUpperCase()) {
+                case "WIN_LOSS" -> {
+                    return WIN_LOSS;
+                }
+                case "WIN_RATE" -> {
+                    return WIN_RATE;
+                }
+            }
+            return RANDOMIZED;
+        }
     }
 }

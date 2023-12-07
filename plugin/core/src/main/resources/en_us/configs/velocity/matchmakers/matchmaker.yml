@@ -1,0 +1,96 @@
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                       Matchmaking                        #
+#                                                          #
+#               ---------------------------                #
+# | Matchmakers are used by Ranked Families to handle      #
+# | player ranking.                                        #
+#                                                          #
+# | When players connect to a ranked family, the           #
+# | matchmaker will connect them to a game with other      #
+# | players of the same rank, allowing for better          #
+# | playing experiences.                                   #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Algorithm                         #
+#                                                          #
+#               ---------------------------                #
+# | Algorithm controls not only how a player is ranked     #
+# | but also how ranked matches are created.               #
+#                                                          #
+# | If you change algorithms, player skills, will reset.   #
+# | If you switch from WIN_LOSS to RANDOM, the player      #
+# | skills will reset, however if you switch back to       #
+# | WIN_LOSS, the player's ranks will reload to what they  #
+# | were before you switched away from WIN_LOSS.           #
+#                                                          #
+# | Your options are:                                      #
+#  ⚫ RANDOMIZED -                                         #
+#           Randomly select players for a game.            #
+#            Player skill levels are totally ignored.      #
+#  ⚫ WIN_LOSS -                                           #
+#           Ranks player based on their win/loss ratio.    #
+#  ⚫ WIN_RATE -                                           #
+#           Ranks players based on the percentage of how   #
+#           many games they've won versus lost.            #
+#           Win-rate ranking ignores the number of games   #
+#           ranked players have played.                    #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+algorithm: RANDOMIZED
+
+
+
+#
+# The teams to use for this gamemode.
+# If you want the matchmaker to load exactly n number of players into a team,
+# set `min-players` and `max-player` to the same number.
+#
+# Teams are not allowed to have the same name.
+#
+teams:
+    - name: "red_team"
+      min-players: 9
+      max-players: 10
+    - name: "blue_team"
+      min-players: 9
+      max-players: 10
+
+
+
+#
+# A decimal representing the percentage that player's ranks are allowed to deviate from one-another.
+#
+# Cannot be set to 0.
+#
+# If algorithm is set to `RANDOM` this will be ignored.
+#
+# 0.1 means that other players in the round must have a rank within 10% of each-other.
+# If set to 1.0, any players are allowed to be in a match together; regardless of rank.
+# Setting to 1.0 is effectively the same as setting `algorithm` to RANDOM.
+#
+# For ranking systems with an infinitely high top-rank, variance will be calculated based on the highest ranking
+# player in the matchmaking queue representing 100%.
+#
+variance: 0.2
+
+
+
+#
+# A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to build a match.
+# This should be set relatively low depending on what you expect player influxes to be.
+# Can't be set lower than `3 SECONDS`.
+#
+# Keep in mind that this setting doesn't necessarily mean that new matches will be made every interval.
+# Matches will only be made if there is a satisfactory number of players with the proper ranks.
+#
+matchmaking-interval: 10 SECONDS

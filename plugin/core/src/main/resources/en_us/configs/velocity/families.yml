@@ -92,6 +92,13 @@ static: []
 #                                                          #
 # | Ranked families can't be used as parent families.      #
 #                                                          #
+# WARNING:                                                 #
+#   Ranked families are disrespectful of player parties    #
+#   if a party attempts to connect to a ranked family      #
+#   they will be blocked and forced to separate before     #
+#   they can join. Full party support will most likely     #
+#   come in a future update.                               #
+#                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -101,7 +108,7 @@ ranked: []
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                     Version Filters                      #
+#                     Version Funnels                      #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
@@ -115,9 +122,9 @@ ranked: []
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-version-filters: []
-## This is an example of a Version Filter.
-## Version Filters are not allowed to use other Version Filters as a target.
+version-funnels: []
+## This is an example of a Version Funnel.
+## Version Funnels are not allowed to use other Version Funnels as a target.
 ## `target-family` must point to an already existing family.
 ## You can also use sub versions such as 1.20.2.
 ##

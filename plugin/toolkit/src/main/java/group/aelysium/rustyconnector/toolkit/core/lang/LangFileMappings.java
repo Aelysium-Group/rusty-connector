@@ -28,6 +28,7 @@ public class LangFileMappings {
     public static Mapping VELOCITY_STATIC_FAMILY_TEMPLATE = new LangFileMappings.Mapping("velocity_static_family_template", "configs/velocity/families/family.static.yml");
     public static Mapping VELOCITY_RANKED_FAMILY_TEMPLATE = new LangFileMappings.Mapping("velocity_ranked_family_template", "configs/velocity/families/family.ranked.yml");
     public static Mapping VELOCITY_LOAD_BALANCER_TEMPLATE = new LangFileMappings.Mapping("velocity_load_balancer_template", "configs/velocity/load_balancers/load_balancer.yml");
+    public static Mapping VELOCITY_MATCHMAKER_TEMPLATE = new LangFileMappings.Mapping("velocity_matchmaker_template", "configs/velocity/matchmakers/matchmaker.yml");
 
     public static List<Mapping> toList() {
         List<Mapping> list = new ArrayList<>();
@@ -48,6 +49,8 @@ public class LangFileMappings {
         list.add(VELOCITY_WHITELIST_TEMPLATE);
 
         list.add(VELOCITY_LOAD_BALANCER_TEMPLATE);
+
+        list.add(VELOCITY_MATCHMAKER_TEMPLATE);
 
         list.add(VELOCITY_SCALAR_FAMILY_TEMPLATE);
         list.add(VELOCITY_STATIC_FAMILY_TEMPLATE);

@@ -9,13 +9,17 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FamiliesConfig extends YAML {
     private String rootFamily_name = "lobby";
     private Boolean rootFamily_catchDisconnectingPlayers = false;
-    private List<String> scalar = new ArrayList<>();
-    private List<String> staticF = new ArrayList<>();
+    private Map<String, Boolean> scalar = new HashMap<>();
+    private Map<String, Boolean> staticF = new HashMap<>();
+    private Map<String, Boolean> ranked = new HashMap<>();
+    private Map<String, Boolean> versionedFunnels = new HashMap<>();
 
     public FamiliesConfig(File configPointer) {
         super(configPointer);
@@ -29,10 +33,16 @@ public class FamiliesConfig extends YAML {
     }
 
     public List<String> scalarFamilies() {
-        return this.scalar;
+        return this.scalar.keySet().stream().toList();
     }
     public List<String> staticFamilies() {
-        return this.staticF;
+        return this.staticF.keySet().stream().toList();
+    }
+    public List<String> rankedFamilies() {
+        return this.ranked.keySet().stream().toList();
+    }
+    public List<String> versionedFunnels() {
+        return this.versionedFunnels.keySet().stream().toList();
     }
 
     @SuppressWarnings("unchecked")
@@ -41,51 +51,70 @@ public class FamiliesConfig extends YAML {
 
         // Families
         try {
-            this.rootFamily_name = this.getNode(this.data, "root-family.id", String.class);
+            this.rootFamily_name = this.getNode(this.data, "root-family.name", String.class);
             if (this.rootFamily_name.equals("") || this.rootFamily_name.length() < 1) throw new Exception();
         } catch (Exception ignore) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.id] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
+            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.name] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
             this.rootFamily_name = "lobby";
         }
 
         this.rootFamily_catchDisconnectingPlayers = this.getNode(this.data,"root-family.catch-disconnecting-players",Boolean.class);
         try {
-            this.scalar = (List<String>) (this.getNode(this.data,"scalar",List.class));
+            List<String> array = (List<String>) (this.getNode(this.data,"scalar",List.class));
+            array.forEach(item -> this.scalar.put(item.toLowerCase(), false));
         } catch (Exception e) {
             throw new IllegalStateException("The node [scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
         try {
-            this.staticF = (List<String>) (this.getNode(this.data,"static",List.class));
+            List<String> array = (List<String>) (this.getNode(this.data,"static",List.class));
+            array.forEach(item -> this.staticF.put(item.toLowerCase(), false));
         } catch (Exception e) {
             throw new IllegalStateException("The node [scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
-
-        this.scalar.forEach(familyName -> {
-            if(familyName.length() > 16)
-                throw new IllegalStateException("All family names must be under 16 characters long! `" + familyName + "` was " + familyName.length());
-        });
-
-        this.staticF.forEach(familyName -> {
-            if(familyName.length() > 16)
-                throw new IllegalStateException("All family names must be under 16 characters long! `" + familyName + "` was " + familyName.length());
-        });
-
-        if(this.checkForAll())
-            throw new IllegalStateException("You can't id a family: `all`");
-
-        if(this.doDuplicatesExist())
-            throw new IllegalStateException("You can't have two families with the same id! This rule is regardless of what type the family is!");
-
-    }
-
-    private boolean doDuplicatesExist() {
-        return this.scalar.stream().filter(this.staticF::contains).toList().size() > 0;
-    }
+        try {
+            List<String> array = (List<String>) (this.getNode(this.data,"ranked",List.class));
+            array.forEach(item -> this.ranked.put(item.toLowerCase(), false));
+        } catch (Exception e) {
+            throw new IllegalStateException("The node [ranked] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
+        }
 
 
-    private boolean checkForAll() {
-        return this.rootFamily_name.equalsIgnoreCase("all") ||
-               this.scalar.contains("all") ||
-               this.staticF.contains("all");
+
+        // Get ready to perform some checks
+        List<String> all = new ArrayList<>();
+        all.addAll(this.scalarFamilies());
+        all.addAll(this.staticFamilies());
+        all.addAll(this.rankedFamilies());
+
+        // Check family name length
+        {
+            all.forEach(familyName -> {
+                if (familyName.length() > 16)
+                    throw new IllegalStateException("All family names must be under 16 characters long! `" + familyName + "` was " + familyName.length());
+            });
+        }
+
+        // Check for the word "all"
+        {
+            if (all.contains("all"))
+                throw new IllegalStateException("You can't name a family: `all`");
+        }
+
+        // Check for duplicate names
+        {
+            Map<String, Integer> familyNames = new HashMap<>();
+            for (String name : all) {
+                if (familyNames.containsKey(name)) {
+                    familyNames.put(name, familyNames.get(name) + 1);
+                    continue;
+                }
+
+                familyNames.put(name, 0);
+            }
+            for (Map.Entry<String, Integer> entry : familyNames.entrySet()) {
+                if (entry.getValue() > 0)
+                    throw new IllegalStateException("You can't have two families with the same id! This rule is regardless of what type the family is! Found duplicate: " + entry.getKey());
+            }
+        }
     }
 }

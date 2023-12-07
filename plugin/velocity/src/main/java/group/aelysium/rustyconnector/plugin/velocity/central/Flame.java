@@ -4,6 +4,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicLinkConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
@@ -80,9 +81,9 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
     private final int configVersion;
     private final Version version;
     private final List<Component> bootOutput;
-    private final Optional<char[]> memberKey;
+    private final char[] memberKey;
 
-    protected Flame(Version version, int configVersion, Optional<char[]> memberKey, Map<Class<? extends Service>, Service> services, List<Component> bootOutput) {
+    protected Flame(Version version, int configVersion, char[] memberKey, Map<Class<? extends Service>, Service> services, List<Component> bootOutput) {
         super(new CoreServiceHandler(services));
         this.version = version;
         this.configVersion = configVersion;
@@ -96,7 +97,10 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
 
 
     public int configVersion() { return this.configVersion; }
-    private Optional<char[]> memberKey() { return this.memberKey; }
+    private Optional<char[]> memberKey() {
+        if (this.memberKey.length == 0) return Optional.empty();
+        return Optional.of(this.memberKey);
+    }
     public List<Component> bootLog() { return this.bootOutput; }
 
     public RedisConnector backbone() {
@@ -158,7 +162,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
 
             logger.send(Component.text("Initializing 90%...", NamedTextColor.DARK_GRAY));
 
-            Flame flame = new Flame(new Version(version), configVersion, memberKey, initialize.getServices(), initialize.getBootOutput());
+            Flame flame = new Flame(new Version(version), configVersion, memberKey.orElse(new char[0]), initialize.getServices(), initialize.getBootOutput());
 
             initialize.events(plugin);
             initialize.commands(inject(flame, logger, messageCacheService));
@@ -360,6 +364,14 @@ class Initialize {
             for (String familyName : familiesConfig.staticFamilies()) {
                 familyService.add(StaticFamily.init(inject(bootOutput, dependencies.d2(), dependencies.d3(), whitelistService), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
+            }
+            for (String familyName : familiesConfig.rankedFamilies()) {
+                RankedFamily family = RankedFamily.init(inject(bootOutput, dependencies.d2(), dependencies.d3(), whitelistService), familyName);
+                familyService.add(family);
+                bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
+                bootOutput.add(Component.text("   | Starting "+familyName+"'s matchmaker...", NamedTextColor.DARK_GRAY));
+                family.start();
+                bootOutput.add(Component.text("   | Started "+familyName+"'s matchmaker.", NamedTextColor.YELLOW));
             }
             bootOutput.add(Component.text(" | Finished building families.", NamedTextColor.GREEN));
         }

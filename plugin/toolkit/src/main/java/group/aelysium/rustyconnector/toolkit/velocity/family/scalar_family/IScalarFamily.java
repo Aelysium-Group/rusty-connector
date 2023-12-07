@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalanc
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
-public interface IScalarFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> extends IFamily<TMCLoader, TPlayer>, IInitiallyConnectableFamily<TMCLoader, TPlayer> {
+public interface IScalarFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>> extends IFamily<TMCLoader, TPlayer, TLoadBalancer>, IInitiallyConnectableFamily<TMCLoader, TPlayer, TLoadBalancer> {
     /**
      * Fetches the current server that this family's {@link ILoadBalancer} is pointing to.
      * @param player {@link TPlayer}

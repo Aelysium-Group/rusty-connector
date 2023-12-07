@@ -29,7 +29,7 @@ import java.util.List;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.SCALAR_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class ScalarFamily extends Family implements IScalarFamily<MCLoader, Player> {
+public class ScalarFamily extends Family implements IScalarFamily<MCLoader, Player, LoadBalancer> {
 
     public ScalarFamily(Settings settings) {
         super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), SCALAR_FAMILY_META);

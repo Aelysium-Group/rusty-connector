@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISess
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ITeam;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
@@ -65,7 +66,8 @@ public interface IMatchmaker<TPlayer extends IPlayer, TPlayerRank extends IPlaye
 
     record Settings (
             IMySQLStorageService storage,
-            IRankedGame<IPlayer, IMySQLStorageService> game,
+            IScoreCard.IRankSchema.Type<?> algorithm,
+            IRankedGame<? extends IPlayer> game,
             List<ITeam.Settings> teams,
             double variance,
             LiquidTimestamp interval

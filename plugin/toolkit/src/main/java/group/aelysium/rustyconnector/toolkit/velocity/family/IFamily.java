@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> {
+public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>> {
     String id();
     Component displayName();
 
@@ -78,7 +78,7 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> {
      * Returns this family's {@link ILoadBalancer}.
      * @return {@link ILoadBalancer}
      */
-    ILoadBalancer<TMCLoader> loadBalancer();
+    TLoadBalancer loadBalancer();
 
     /**
      * Fetches a reference to the parent of this family.
@@ -86,11 +86,40 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> {
      * If this family is the root family, this method will always return `null`.
      * @return {@link WeakReference <IBaseFamily>}
      */
-    IFamily<TMCLoader, TPlayer> parent();
+    IFamily<TMCLoader, TPlayer, TLoadBalancer> parent();
 
     /**
      * Returns the metadata for this family.
      * @return {@link Metadata}
      */
     Metadata metadata();
+
+    record Settings<TPlayer extends IPlayer, TMCLoader extends IMCLoader, TFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>, TLoadBalancer extends ILoadBalancer<TMCLoader>, TWhitelist extends IWhitelist>
+            (Component displayName, TLoadBalancer loadBalancer, Reference<TMCLoader, TPlayer, TLoadBalancer, TFamily> parent, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<TWhitelist, String> whitelist) {}
+
+
+    abstract class Reference<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>> extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<TFamily, String> {
+        public Reference(String referencer) {
+            super(referencer);
+        }
+
+        /**
+         * Gets the family referenced.
+         * If the family could not be found, this will throw an exception.
+         * This method is equivalent to calling {@link #get(boolean) .get(false)}
+         * @return {@link TFamily}
+         * @throws java.util.NoSuchElementException If the owner of this reference can't be found.
+         */
+        public abstract TFamily get();
+
+        /**
+         * Gets the family referenced.
+         * If no family could be found and {@param fetchRoot} is disabled, will throw an exception.
+         * If {@param fetchRoot} is enabled and the family isn't found, will return the root family instead.
+         * @param fetchRoot Should the root family be returned if the parent family can't be found?
+         * @return {@link TFamily}
+         * @throws java.util.NoSuchElementException If {@param fetchRoot} is disabled and the family can't be found.
+         */
+        public abstract TFamily get(boolean fetchRoot);
+    }
 }

@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class Family implements IFamily<MCLoader, Player> {
+public abstract class Family implements IFamily<MCLoader, Player, LoadBalancer> {
     protected final String id;
     protected Metadata metadata;
-    protected Settings settings;
+    protected Settings<Player, MCLoader, Family, LoadBalancer, Whitelist> settings;
 
-    protected Family(String id, Settings settings, Metadata metadata) {
+    protected Family(String id, Settings<Player, MCLoader, Family, LoadBalancer, Whitelist> settings, Metadata metadata) {
         this.id = id;
         this.settings = settings;
         this.metadata = metadata;
@@ -32,7 +32,7 @@ public abstract class Family implements IFamily<MCLoader, Player> {
     }
 
     public Component displayName() {
-        return this.settings.displayName;
+        return this.settings.displayName();
     }
 
     public MCLoader findServer(@NotNull ServerInfo serverInfo) {
@@ -42,15 +42,15 @@ public abstract class Family implements IFamily<MCLoader, Player> {
     }
 
     public void addServer(MCLoader server) {
-        this.settings.loadBalancer.add(server);
+        this.settings.loadBalancer().add(server);
     }
 
     public void removeServer(MCLoader server) {
-        this.settings.loadBalancer.remove(server);
+        this.settings.loadBalancer().remove(server);
     }
 
     public Whitelist whitelist() {
-        return this.settings.whitelist.get();
+        return (Whitelist) this.settings.whitelist().get();
     }
 
     public List<com.velocitypowered.api.proxy.Player> players(int max) {
@@ -67,8 +67,8 @@ public abstract class Family implements IFamily<MCLoader, Player> {
 
     public List<MCLoader> registeredServers() {
         List<MCLoader> servers = new ArrayList<>();
-        servers.addAll(this.settings.loadBalancer.servers());
-        servers.addAll(this.settings.loadBalancer.lockedServers());
+        servers.addAll(this.settings.loadBalancer().servers());
+        servers.addAll(this.settings.loadBalancer().lockedServers());
         return servers;
     }
     public boolean containsServer(ServerInfo serverInfo) {
@@ -77,7 +77,7 @@ public abstract class Family implements IFamily<MCLoader, Player> {
 
     public long playerCount() {
         AtomicLong newPlayerCount = new AtomicLong();
-        this.settings.loadBalancer.servers().forEach(server -> newPlayerCount.addAndGet(server.playerCount()));
+        this.settings.loadBalancer().servers().forEach(server -> newPlayerCount.addAndGet(server.playerCount()));
 
         return newPlayerCount.get();
     }
@@ -85,11 +85,11 @@ public abstract class Family implements IFamily<MCLoader, Player> {
     public long serverCount() { return this.registeredServers().size(); }
 
     public LoadBalancer loadBalancer() {
-        return this.settings.loadBalancer;
+        return this.settings.loadBalancer();
     }
 
     public Family parent() {
-        return this.settings.parent.get(true);
+        return this.settings.parent().get(true);
     }
 
     public Metadata metadata() {
@@ -104,9 +104,7 @@ public abstract class Family implements IFamily<MCLoader, Player> {
         return Objects.equals(id, that.id);
     }
 
-    public record Settings(Component displayName, LoadBalancer loadBalancer, Family.Reference parent, Whitelist.Reference whitelist) {}
-
-    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Family, String> {
+    public static class Reference extends IFamily.Reference<MCLoader, Player, LoadBalancer, Family> {
         private boolean rootFamily = false;
 
         public Reference(String name) {
@@ -122,14 +120,6 @@ public abstract class Family implements IFamily<MCLoader, Player> {
             return Tinder.get().services().family().find(this.referencer).orElseThrow();
         }
 
-        /**
-         * Gets the family referenced.
-         * If no family could be found and {@param fetchRoot} is disabled, will throw an exception.
-         * If {@param fetchRoot} is enabled and the family isn't found, will return the root family instead.
-         * @param fetchRoot Should the root family be returned if the parent family can't be found?
-         * @return {@link Family}
-         * @throws java.util.NoSuchElementException If {@param fetchRoot} is disabled and the family can't be found.
-         */
         public Family get(boolean fetchRoot) {
             if(rootFamily) return Tinder.get().services().family().rootFamily();
             if(fetchRoot)

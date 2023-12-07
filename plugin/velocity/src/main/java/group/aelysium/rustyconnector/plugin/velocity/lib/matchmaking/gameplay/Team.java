@@ -29,10 +29,10 @@ public class Team implements ITeam<Player, RankedPlayer<IPlayerRank<?>>> {
     }
 
     public boolean satisfactory() {
-        return this.players.size() > settings.min();
+        return this.players.size() >= settings.min();
     }
 
     public boolean full() {
-        return this.players.size() > settings.max();
+        return this.players.size() >= settings.max();
     }
 }

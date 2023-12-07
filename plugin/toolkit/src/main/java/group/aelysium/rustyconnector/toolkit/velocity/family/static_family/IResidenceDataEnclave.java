@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface IResidenceDataEnclave<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TReference extends Reference<TPlayer, UUID>, TStaticFamily extends IStaticFamily<TMCLoader, TPlayer>> {
+public interface IResidenceDataEnclave<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TReference extends Reference<TPlayer, UUID>, TStaticFamily extends IStaticFamily<TMCLoader, TPlayer, ?>> {
     /**
      * Fetches the {@link IServerResidence residence} of a {@link Player} inside of this {@link IStaticFamily family}.
      * @param player The {@link Player} to fetch.

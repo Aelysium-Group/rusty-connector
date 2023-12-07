@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class StorageRoot implements IStorageRoot<Player, FriendMapping, ServerResidence> {
@@ -28,8 +29,8 @@ public class StorageRoot implements IStorageRoot<Player, FriendMapping, ServerRe
         return residence;
     }
 
-    public RankedGame getGame(String name) {
-        return games.get(name);
+    public Optional<RankedGame> getGame(String name) {
+        return Optional.ofNullable(games.get(name));
     }
     public void saveGame(MySQLStorage storage, RankedGame game) {
         games.put(game.name(), game);

@@ -27,7 +27,7 @@ import java.util.List;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.ROOT_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class RootFamily extends ScalarFamily implements IRootFamily<MCLoader, Player> {
+public class RootFamily extends ScalarFamily implements IRootFamily<MCLoader, Player, LoadBalancer> {
 
     public RootFamily(Settings settings) {
         super(settings, ROOT_FAMILY_META);

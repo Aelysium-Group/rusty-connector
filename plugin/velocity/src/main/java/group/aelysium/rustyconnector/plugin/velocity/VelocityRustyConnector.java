@@ -6,7 +6,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import group.aelysium.rustyconnector.toolkit.RustyConnectorToolkit;
+import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
@@ -50,7 +50,7 @@ public class VelocityRustyConnector {
         }
 
         VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(Tinder.get().logger(), "v"+Tinder.get().flame().version().toString());
-        RustyConnectorToolkit.register(Tinder.get());
+        RustyConnector.Toolkit.register(Tinder.get());
 
         if(!Tinder.get().velocityServer().getConfiguration().isOnlineMode())
             Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!", NamedTextColor.RED));
@@ -69,7 +69,7 @@ public class VelocityRustyConnector {
     @Subscribe
     public void onUnload(ProxyShutdownEvent event) {
         try {
-            RustyConnectorToolkit.unregister();
+            RustyConnector.Toolkit.unregister();
             this.tinder.flame().exhaust(this);
         } catch (Exception e) {
             Tinder.get().logger().log("RustyConnector: " + e.getMessage());

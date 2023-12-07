@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
@@ -76,6 +78,12 @@ public class FamilyService implements IFamilyService<MCLoader, Player, RootFamil
     }
 
     public void kill() {
+        // Teardown logic for any families that need it
+        for (Family family : this.families.values()) {
+            if(family instanceof Service)
+                ((Service) family).kill();
+        }
+
         this.families.clear();
         this.rootFamily.clear();
     }

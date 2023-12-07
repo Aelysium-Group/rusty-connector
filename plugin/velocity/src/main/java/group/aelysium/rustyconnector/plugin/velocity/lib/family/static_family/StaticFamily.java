@@ -33,7 +33,7 @@ import java.util.Optional;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.STATIC_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class StaticFamily extends Family implements IStaticFamily<MCLoader, Player> {
+public class StaticFamily extends Family implements IStaticFamily<MCLoader, Player, LoadBalancer> {
 
     protected LiquidTimestamp homeServerExpiration;
     protected UnavailableProtocol unavailableProtocol;

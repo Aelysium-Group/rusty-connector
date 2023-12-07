@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IInitiallyConnectableFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -11,7 +12,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.Reference;
 
 import java.util.UUID;
 
-public interface IStaticFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer> extends IFamily<TMCLoader, TPlayer>, IInitiallyConnectableFamily<TMCLoader, TPlayer> {
+public interface IStaticFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>> extends IFamily<TMCLoader, TPlayer, TLoadBalancer>, IInitiallyConnectableFamily<TMCLoader, TPlayer, TLoadBalancer> {
     /**
      * Gets the {@link UnavailableProtocol} for this family. {@link UnavailableProtocol} governs what happens when a player's resident server is unavailable.
      * @return {@link UnavailableProtocol}
@@ -32,5 +33,5 @@ public interface IStaticFamily<TMCLoader extends IMCLoader, TPlayer extends IPla
      * Data enclave gives you an interface between this family and the remote storage connector that this family uses.
      * @return {@link IResidenceDataEnclave}
      */
-    <TResidenceDataEnclave extends IResidenceDataEnclave<TMCLoader, TPlayer, Reference<TPlayer, UUID>, IStaticFamily<TMCLoader, TPlayer>>> TResidenceDataEnclave dataEnclave();
+    <TResidenceDataEnclave extends IResidenceDataEnclave<TMCLoader, TPlayer, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<TPlayer, UUID>, IStaticFamily<TMCLoader, TPlayer, TLoadBalancer>>> TResidenceDataEnclave dataEnclave();
 }

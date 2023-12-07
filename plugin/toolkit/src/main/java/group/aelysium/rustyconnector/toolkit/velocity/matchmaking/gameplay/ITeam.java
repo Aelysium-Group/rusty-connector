@@ -32,5 +32,5 @@ public interface ITeam<TPlayer extends IPlayer, TRankedPlayer extends IRankedPla
      */
     boolean full();
 
-    record Settings(int min, int max) {}
+    record Settings(String name, int min, int max) {}
 }

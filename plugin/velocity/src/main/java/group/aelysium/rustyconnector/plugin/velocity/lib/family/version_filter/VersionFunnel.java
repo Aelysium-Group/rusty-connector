@@ -4,16 +4,15 @@ import com.velocitypowered.api.network.ProtocolVersion;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class VersionFilter implements IFamilyCategory<Player> {
+public class VersionFunnel implements IFamilyCategory<Player> {
     protected final String id;
     protected final Map<ProtocolVersion, Family> families = new HashMap<>();
 
-    public VersionFilter(String id) {
+    public VersionFunnel(String id) {
         this.id = id;
     }
 
