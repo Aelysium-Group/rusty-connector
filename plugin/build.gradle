@@ -31,9 +31,6 @@ subprojects {
 
     dependencies {
         compileOnly "io.lettuce:lettuce-core:${project.lettuce_version}"
-        compileOnly "commons-codec:commons-codec:${project.commons_version}"
-        compileOnly "com.jcabi:jcabi-log:${project.jcabi_version}"
-        compileOnly "org.spongepowered:configurate-yaml:${project.configurate_version}"
         compileOnly "mysql:mysql-connector-java:${project.mysql_version}"
         compileOnly "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
         compileOnly "com.google.guava:guava:${project.guava_version}"

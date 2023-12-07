@@ -4,7 +4,6 @@ compileJava {
 
 dependencies {
     shadow "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
-    shadow "net.kyori:adventure-api:${project.adventure_version}"
     shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
 }
 

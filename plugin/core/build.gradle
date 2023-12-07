@@ -6,10 +6,7 @@ dependencies {
     // Include in jar
     implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
     implementation "commons-codec:commons-codec:${project.commons_version}"
-    implementation "com.jcabi:jcabi-log:${project.jcabi_version}"
-    implementation "org.spongepowered:configurate-yaml:${project.configurate_version}"
     implementation "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
-    implementation "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
     implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
 
     // Dev only
