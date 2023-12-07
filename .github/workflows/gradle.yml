@@ -5,9 +5,6 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-# TODO
-# Add Cache Gradle packages
-
 name: Java CI with Gradle
 
 on:
@@ -28,6 +25,12 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: rustyconnector
+    - name: Cache Gradle Packages
+      uses: actions/cache@v3
+      with:
+        key: ${{ runner.os }}-rcbuild-${{ hashFiles('**rustyconnector/plugin/gradle.properties') }}
+        path: |
+          rustyconnector/plugin/.gradle/loom-cache
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
@@ -57,6 +60,12 @@ jobs:
 #      uses: actions/checkout@v3
 #      with:
 #        path: rustyconnector
+#    - name: Cache Gradle Packages
+#      uses: actions/cache@v3
+#      with:
+#        key: ${{ runner.os }}-wsbridge_build-${{ hashFiles('**rustyconnector/websocket-bridge/build.gradle') }}
+#        path: |
+#          rustyconnector/websocket-bridge/.gradle/caches
 #    - name: Set up JDK 17
 #      uses: actions/setup-java@v3
 #      with:
