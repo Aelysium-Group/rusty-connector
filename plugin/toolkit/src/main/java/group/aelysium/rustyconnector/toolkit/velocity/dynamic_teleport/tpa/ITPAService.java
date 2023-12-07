@@ -3,12 +3,13 @@ package group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.List;
 
-public interface ITPAService<TTPACleaningService extends ITPACleaningService<?>, TMCLoader extends IMCLoader, TPlayer extends IPlayer, TFamily extends IFamily<TMCLoader, TPlayer>, TTPARequest extends ITPARequest, TTPAHandler extends ITPAHandler<TTPARequest>> extends Service {
+public interface ITPAService<TTPACleaningService extends ITPACleaningService<?>, TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>, TTPARequest extends ITPARequest, TTPAHandler extends ITPAHandler<TTPARequest>> extends Service {
     /**
      * Gets the settings that this {@link ITPAService} abides by.
      * @return {@link TPAServiceSettings}

@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsService;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
@@ -26,15 +27,15 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * Gets the {@link IFamilyService family service} which allows access to server families and other family related logic.
      * @return {@link IFamilyService}
      */
-    <TMCLoader extends IMCLoader, TPlayer extends IPlayer, TRootFamily extends IRootFamily<TMCLoader, TPlayer>, TBaseFamily extends IFamily<TMCLoader, TPlayer>>
-        IFamilyService<TMCLoader, TPlayer, TRootFamily, TBaseFamily> family();
+    <TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TRootFamily extends IRootFamily<TMCLoader, TPlayer, TLoadBalancer>, TBaseFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>>
+        IFamilyService<TMCLoader, TPlayer, TLoadBalancer, TRootFamily, TBaseFamily> family();
 
     /**
      * Gets the {@link IServerService server service} which allows access to server registration, unregistration, connection, and other server related logic.
      * @return {@link IServerService}
      */
-    <TMCLoader extends IMCLoader, TPlayer extends IPlayer, TBaseFamily extends IFamily<TMCLoader, TPlayer>>
-        IServerService<TMCLoader, TPlayer, TBaseFamily> server();
+    <TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TBaseFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>>
+        IServerService<TMCLoader, TPlayer, TLoadBalancer, TBaseFamily> server();
 
     /**
      * Gets RustyConnector's {@link IMySQLStorageService remote storage connector service} which allows direct access to database storage.

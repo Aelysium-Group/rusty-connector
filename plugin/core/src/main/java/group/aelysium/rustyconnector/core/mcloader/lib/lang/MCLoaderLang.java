@@ -77,7 +77,7 @@ public class MCLoaderLang extends Lang {
                 SPACING,
                 BORDER,
                 SPACING,
-                resolver().get("core.boot_wordmark.developed_by"),
+                resolver().get("core.boot_wordmark.developed_by").append(text(" Aelysium | Juice")),
                 resolver().get("core.boot_wordmark.usage").color(YELLOW),
                 SPACING,
                 BORDER

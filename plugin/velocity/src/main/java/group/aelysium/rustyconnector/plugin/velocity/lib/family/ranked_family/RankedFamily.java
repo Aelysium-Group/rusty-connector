@@ -3,17 +3,14 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.config.RankedFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.config.MatchMakerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Randomized;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
-import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
@@ -32,7 +29,7 @@ import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.RAN
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
 public class RankedFamily extends Family implements IRankedFamily<MCLoader, Player, LoadBalancer> {
-    protected final Matchmaker<?> matchmaker;
+    protected final Matchmaker<? extends IPlayerRank<?>> matchmaker;
 
     protected RankedFamily(Settings settings) {
         super(settings.id(), new Family.Settings(settings.displayName(), null, settings.parentFamily(), settings.whitelist()), RANKED_FAMILY_META);
@@ -53,6 +50,23 @@ public class RankedFamily extends Family implements IRankedFamily<MCLoader, Play
      */
     public void start() {
         this.matchmaker.start(this.loadBalancer());
+    }
+
+    @Override
+    public long playerCount() {
+        return super.playerCount() + this.waitingPlayers();
+    }
+
+    public Matchmaker<? extends IPlayerRank<?>> matchmaker() {
+        return this.matchmaker;
+    }
+
+    public int waitingPlayers() {
+        return this.matchmaker.waitingPlayers().size();
+    }
+
+    public long activePlayers() {
+        return super.playerCount();
     }
 
     /**
@@ -111,6 +125,6 @@ public class RankedFamily extends Family implements IRankedFamily<MCLoader, Play
             Component displayName,
             Family.Reference parentFamily,
             Whitelist.Reference whitelist,
-            Matchmaker<?> matchmaker
+            Matchmaker<? extends IPlayerRank<?>> matchmaker
     ) {}
 }

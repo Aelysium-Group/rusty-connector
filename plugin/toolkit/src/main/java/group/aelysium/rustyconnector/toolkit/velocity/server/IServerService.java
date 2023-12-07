@@ -4,12 +4,13 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.lang.ref.WeakReference;
 import java.util.Vector;
 
-public interface IServerService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TBaseFamily extends IFamily<TMCLoader, TPlayer>> extends Service {
+public interface IServerService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TBaseFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>> extends Service {
     int serverTimeout();
     int serverInterval();
 

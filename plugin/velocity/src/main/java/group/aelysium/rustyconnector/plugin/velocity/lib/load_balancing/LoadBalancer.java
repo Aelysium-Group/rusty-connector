@@ -85,10 +85,18 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
     }
 
     public List<MCLoader> servers() {
+        List<MCLoader> servers = new ArrayList<>();
+
+        servers.addAll(openServers());
+        servers.addAll(lockedServers());
+
+        return servers;
+    }
+    public List<MCLoader> openServers() {
         return this.servers.stream().toList();
     }
     public List<MCLoader> lockedServers() {
-        return this.servers.stream().toList();
+        return this.lockedServers.stream().toList();
     }
 
     public String toString() {

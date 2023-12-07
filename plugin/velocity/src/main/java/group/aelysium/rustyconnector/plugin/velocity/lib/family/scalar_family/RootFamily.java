@@ -2,9 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
-import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
@@ -29,7 +27,7 @@ import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInje
 
 public class RootFamily extends ScalarFamily implements IRootFamily<MCLoader, Player, LoadBalancer> {
 
-    public RootFamily(Settings settings) {
+    public RootFamily(ScalarFamily.Settings settings) {
         super(settings, ROOT_FAMILY_META);
     }
 
@@ -75,7 +73,7 @@ public class RootFamily extends ScalarFamily implements IRootFamily<MCLoader, Pl
             default -> throw new RuntimeException("The id used for "+familyName+"'s load balancer is invalid!");
         }
 
-        Settings settings = new ScalarFamily.Settings(familyName, config.displayName(), loadBalancer, null, whitelist);
+        ScalarFamily.Settings settings = new ScalarFamily.Settings(familyName, config.displayName(), loadBalancer, null, whitelist);
         return new RootFamily(settings);
     }
 }

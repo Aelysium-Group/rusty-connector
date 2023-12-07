@@ -13,7 +13,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
 
-public interface IMatchmaker<TPlayer extends IPlayer, TPlayerRank extends IPlayerRank<?>> extends Service {
+public interface IMatchmaker<TPlayer extends IPlayer, TRankedPlayer extends IRankedPlayer<? extends IPlayer, ? extends IPlayerRank<?>>> extends Service {
     /**
      * Using the players contained in the matchmaker, attempt to make a game.
      */
@@ -55,14 +55,14 @@ public interface IMatchmaker<TPlayer extends IPlayer, TPlayerRank extends IPlaye
      * Gets The number of players currently waiting in the matchmaker.
      * @return The number of players waiting.
      */
-    int size();
+    List<TRankedPlayer> waitingPlayers();
 
     /**
      * Checks if a player is currently waiting in the matchmaker.
      * @param player The player to look for.
      * @return `true` if the player is waiting in the matchmaker. `false` otherwise.
      */
-    boolean contains(IRankedPlayer<TPlayer, TPlayerRank> player);
+    boolean contains(TRankedPlayer player);
 
     record Settings (
             IMySQLStorageService storage,

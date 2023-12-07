@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
@@ -22,7 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Vector;
 
-public class ServerService implements IServerService<MCLoader, Player, Family> {
+public class ServerService implements IServerService<MCLoader, Player, LoadBalancer, Family> {
     private final Vector<WeakReference<MCLoader>> servers =  new Vector<>();
 
     private final int serverTimeout;

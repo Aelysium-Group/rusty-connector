@@ -65,6 +65,16 @@ public abstract class Family implements IFamily<MCLoader, Player, LoadBalancer> 
         return players;
     }
 
+    public List<com.velocitypowered.api.proxy.Player> players() {
+        List<com.velocitypowered.api.proxy.Player> players = new ArrayList<>();
+
+        for (MCLoader server : this.registeredServers()) {
+            players.addAll(server.registeredServer().getPlayersConnected());
+        }
+
+        return players;
+    }
+
     public List<MCLoader> registeredServers() {
         List<MCLoader> servers = new ArrayList<>();
         servers.addAll(this.settings.loadBalancer().servers());
@@ -81,8 +91,6 @@ public abstract class Family implements IFamily<MCLoader, Player, LoadBalancer> 
 
         return newPlayerCount.get();
     }
-
-    public long serverCount() { return this.registeredServers().size(); }
 
     public LoadBalancer loadBalancer() {
         return this.settings.loadBalancer();

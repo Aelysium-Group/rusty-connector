@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors;
 
 import com.velocitypowered.api.command.CommandManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.anchors.IAnchorService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
@@ -17,7 +18,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 
-public class AnchorService implements IAnchorService<MCLoader, Player, Family> {
+public class AnchorService implements IAnchorService<MCLoader, Player, LoadBalancer, Family> {
     private final Map<String, Family> anchors;
 
     protected AnchorService(Map<String, Family> anchors) {

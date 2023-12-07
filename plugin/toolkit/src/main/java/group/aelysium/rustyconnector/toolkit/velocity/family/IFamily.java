@@ -42,6 +42,12 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, T
     IWhitelist whitelist();
 
     /**
+     * Get all players in the family.
+     * @return A list of players.
+     */
+    List<Player> players();
+
+    /**
      * Get all players in the family up to approximately `max`.
      * @param max The approximate max number of players to return.
      * @return A list of players.
@@ -65,14 +71,6 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, T
      * @return A player count
      */
     long playerCount();
-
-    /**
-     * Gets the number of {@link IMCLoader PlayerServers} that are registered to this family.
-     * This method counts both locked and unlocked servers.
-     * To get the count of either locked or unlocked use: {@link ILoadBalancer#size(boolean) loadBalancer().size(true)} or {@link ILoadBalancer#size(boolean) loadBalancer().size(false)}
-     * @return {@link Long}
-     */
-    long serverCount();
 
     /**
      * Returns this family's {@link ILoadBalancer}.

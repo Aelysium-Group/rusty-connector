@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAService;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.TPAServiceSettings;
@@ -22,7 +23,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 
-public class TPAService implements ITPAService<TPACleaningService, MCLoader, Player, Family, TPARequest, TPAHandler> {
+public class TPAService implements ITPAService<TPACleaningService, MCLoader, Player, LoadBalancer, Family, TPARequest, TPAHandler> {
     private final TPACleaningService cleaningService;
     private final TPAServiceSettings settings;
     private final Map<Family, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());

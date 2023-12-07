@@ -5,6 +5,7 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors.InjectorService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -52,7 +53,7 @@ public class OnPlayerChooseInitialServer {
                 } catch (Exception ignore) {}
 
                 // Handle family injectors if they exist
-                IInitiallyConnectableFamily<MCLoader, Player> family = null;
+                IInitiallyConnectableFamily<MCLoader, Player, LoadBalancer> family = null;
                 try {
                     InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
                     String host = eventPlayer.getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);

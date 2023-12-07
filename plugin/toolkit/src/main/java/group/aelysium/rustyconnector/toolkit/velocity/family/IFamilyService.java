@@ -3,12 +3,13 @@ package group.aelysium.rustyconnector.toolkit.velocity.family;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.List;
 
-public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TRootFamily extends IRootFamily<TMCLoader, TPlayer>, TFamily extends IFamily<TMCLoader, TPlayer>> extends Service {
+public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TRootFamily extends IRootFamily<TMCLoader, TPlayer, TLoadBalancer>, TFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>> extends Service {
     boolean shouldCatchDisconnectingPlayers();
 
     void setRootFamily(TRootFamily family);
@@ -45,7 +46,7 @@ public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPl
 
     /**
      * Gets a list of all families in this service.
-     * @return {@link List< TFamily >}
+     * @return {@link List<TFamily>}
      */
     List<TFamily> dump();
 }

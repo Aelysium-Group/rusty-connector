@@ -5,6 +5,11 @@ import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.lang.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.lang.LanguageResolver;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.WinLoss;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.WinRate;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -107,7 +112,7 @@ public class ProxyLang extends Lang {
                 SPACING,
                 BORDER,
                 SPACING,
-                resolver().get("core.boot_wordmark.developed_by"),
+                resolver().get("core.boot_wordmark.developed_by").append(text(" Aelysium | Juice")),
                 resolver().get("core.boot_wordmark.usage").color(YELLOW),
                 SPACING,
                 BORDER
@@ -330,10 +335,14 @@ public class ProxyLang extends Lang {
         Tinder api = Tinder.get();
         Component families = text("");
         for (Family family : api.services().family().dump()) {
+            if(family instanceof RootFamily)
+                families = families.append(text("["+family.id()+"*] ").color(BLUE));
             if(family instanceof ScalarFamily)
-                families = families.append(text("[ "+family.id()+" ] ").color(GOLD));
+                families = families.append(text("["+family.id()+"] ").color(BLUE));
             if(family instanceof StaticFamily)
-                families = families.append(text("[ "+family.id()+" ] ").color(DARK_GREEN));
+                families = families.append(text("["+family.id()+"] ").color(DARK_GREEN));
+            if(family instanceof RankedFamily)
+                families = families.append(text("["+family.id()+"] ").color(YELLOW));
         }
 
         return join(
@@ -344,7 +353,7 @@ public class ProxyLang extends Lang {
                 SPACING,
                 BORDER,
                 SPACING,
-                resolver().get("proxy.family.description"),
+                resolver().getArray("proxy.family.description"),
                 families,
                 SPACING,
                 BORDER,
@@ -369,31 +378,42 @@ public class ProxyLang extends Lang {
             BORDER
     );
 
-    public final static ParameterizedMessage1<ScalarFamily> RC_SCALAR_FAMILY_INFO = (family) -> {
+    public final static ParameterizedMessage2<ScalarFamily, Boolean> RC_SCALAR_FAMILY_INFO = (family, locked) -> {
         Component servers = text("");
         int i = 0;
 
-        if(family.registeredServers() == null) servers = resolver().get("proxy.family.scalar_family.panel.no_registered_servers");
-        else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.scalar_family.panel.no_registered_servers");
-        else if(family.loadBalancer().size() == 0) servers = resolver().get("proxy.family.scalar_family.panel.no_unlocked_servers");
-        else for (MCLoader server : family.loadBalancer().servers()) {
-                if(family.loadBalancer().index() == i)
-                    servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] <<<<<"
-                                    , GREEN));
-                else
-                    servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
-                                    , GRAY));
+        if(family.registeredServers() == null) servers = resolver().get("proxy.family.generic.servers.no_registered_servers");
+        else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_registered_servers");
+        else if(family.loadBalancer().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_unlocked_servers");
+        else {
+            List<MCLoader> serverList;
+            if(locked)
+                serverList = family.loadBalancer().lockedServers();
+            else
+                serverList = family.loadBalancer().openServers();
 
-                servers = servers.append(newline());
+            for (MCLoader server : serverList) {
+                Component serverEntry = resolver().get(
+                        "proxy.family.generic.servers.details",
+                        LanguageResolver.tagHandler("index_number", i + 1),
+                        LanguageResolver.tagHandler("server_name", server.registeredServer().getServerInfo().getName()),
+                        LanguageResolver.tagHandler("server_address", AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress())),
+                        LanguageResolver.tagHandler("player_count", server.playerCount()),
+                        LanguageResolver.tagHandler("player_soft_cap", server.softPlayerCap()),
+                        LanguageResolver.tagHandler("player_hard_cap", server.hardPlayerCap()),
+                        LanguageResolver.tagHandler("server_weight", server.weight())
+                );
+
+                if(family.loadBalancer().index() == i && !locked)
+                    serverEntry = serverEntry.color(GREEN);
+                else
+                    serverEntry = serverEntry.color(GRAY);
+
+                servers = servers.append(serverEntry).append(newline());
 
                 i++;
             }
+        }
 
         RootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.id();
@@ -401,6 +421,10 @@ public class ProxyLang extends Lang {
             parentFamilyName = Objects.requireNonNull(family.parent()).id();
         } catch (Exception ignore) {}
         if(family.equals(rootFamily)) parentFamilyName = "none";
+
+        String persistence = "Disabled";
+        if(family.loadBalancer().persistent())
+            persistence = family.loadBalancer().attempts() + " Attempts";
 
         return join(
                 newlines(),
@@ -411,29 +435,32 @@ public class ProxyLang extends Lang {
                 BORDER,
                 SPACING,
                 resolver().getArray(
-                        "proxy.family.scalar_family.panel.info",
-                        LanguageResolver.tagHandler("player_count", family.playerCount()),
-                        LanguageResolver.tagHandler("server_count", family.serverCount()),
-                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
+                        "proxy.family.scalar.panel.info",
+                        LanguageResolver.tagHandler("display_name", family.displayName()),
                         LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
-                        LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
-                        LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
-                        LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
+                        LanguageResolver.tagHandler("players_count", family.playerCount()),
+
+                        LanguageResolver.tagHandler("servers_count", family.loadBalancer().size()),
+                        LanguageResolver.tagHandler("servers_open", family.loadBalancer().size(false)),
+                        LanguageResolver.tagHandler("servers_locked", family.loadBalancer().size(true)),
+
+                        LanguageResolver.tagHandler("load_balancing_algorithm", family.loadBalancer()),
+                        LanguageResolver.tagHandler("load_balancing_weighted", family.loadBalancer().weighted()),
+                        LanguageResolver.tagHandler("load_balancing_persistence", persistence)
                 ),
                 SPACING,
                 BORDER,
                 SPACING,
-                resolver().get("proxy.family.scalar_family.panel.registered_servers"),
+                resolver().get("proxy.family.generic.servers.open_servers"),
                 SPACING,
                 text("/rc family <family id> sort", GOLD),
-                resolver().get("proxy.family.scalar_family.panel.commands.sort"),
+                resolver().get("proxy.family.generic.command_descriptions.sort"),
                 SPACING,
                 text("/rc family <family id> resetIndex", GOLD),
-                resolver().get("proxy.family.scalar_family.panel.commands.reset_index"),
+                resolver().get("proxy.family.generic.command_descriptions.reset_index"),
                 SPACING,
                 text("/rc family <family id> locked", GOLD),
-                resolver().get("proxy.family.scalar_family.panel.commands.locked"),
+                resolver().get("proxy.family.generic.command_descriptions.locked"),
                 SPACING,
                 servers,
                 SPACING,
@@ -441,108 +468,53 @@ public class ProxyLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<ScalarFamily> RC_SCALAR_FAMILY_INFO_LOCKED = (family) -> {
+    public final static ParameterizedMessage2<StaticFamily, Boolean> RC_STATIC_FAMILY_INFO = (family, locked) -> {
         Component servers = text("");
         int i = 0;
 
-        if(family.registeredServers() == null) servers = resolver().get("proxy.family.scalar_family.panel.no_registered_servers");
-        else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.scalar_family.panel.no_registered_servers");
-        else if(family.loadBalancer().size(true) == 0) servers = resolver().get("proxy.family.scalar_family.panel.no_locked_servers");
-        else for (MCLoader server : family.loadBalancer().lockedServers()) {
-                servers = servers.append(
-                        text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                        "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                        "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
-                                , RED));
+        if(family.registeredServers() == null) servers = resolver().get("proxy.family.generic.servers.no_registered_servers");
+        else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_registered_servers");
+        else if(family.loadBalancer().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_unlocked_servers");
+        else {
+            List<MCLoader> serverList;
+            if(locked)
+                serverList = family.loadBalancer().lockedServers();
+            else
+                serverList = family.loadBalancer().openServers();
 
-                servers = servers.append(newline());
+            for (MCLoader server : serverList) {
+                Component serverEntry = resolver().get(
+                        "proxy.family.generic.servers.details",
+                        LanguageResolver.tagHandler("index_number", i + 1),
+                        LanguageResolver.tagHandler("server_name", server.registeredServer().getServerInfo().getName()),
+                        LanguageResolver.tagHandler("server_address", AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress())),
+                        LanguageResolver.tagHandler("player_count", server.playerCount()),
+                        LanguageResolver.tagHandler("player_soft_cap", server.softPlayerCap()),
+                        LanguageResolver.tagHandler("player_hard_cap", server.hardPlayerCap()),
+                        LanguageResolver.tagHandler("server_weight", server.weight())
+                );
 
-                i++;
-            }
-
-        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
-        String parentFamilyName = rootFamily.id();
-        try {
-            parentFamilyName = Objects.requireNonNull(family.parent()).id();
-        } catch (Exception ignore) {}
-        if(family.equals(rootFamily)) parentFamilyName = "none";
-
-        return join(
-                newlines(),
-                BORDER,
-                SPACING,
-                ASCIIAlphabet.generate(family.id(), AQUA),
-                SPACING,
-                BORDER,
-                SPACING,
-                resolver().getArray(
-                        "proxy.family.scalar_family.panel.info",
-                        LanguageResolver.tagHandler("player_count", family.playerCount()),
-                        LanguageResolver.tagHandler("server_count", family.serverCount()),
-                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
-                        LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
-                        LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
-                        LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
-                        LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
-                ),
-                SPACING,
-                BORDER,
-                SPACING,
-                resolver().get("proxy.family.scalar_family.panel.registered_servers"),
-                SPACING,
-                text("/rc family <family id> sort", GOLD),
-                resolver().get("proxy.family.scalar_family.panel.commands.sort"),
-                SPACING,
-                text("/rc family <family id> resetIndex", GOLD),
-                resolver().get("proxy.family.scalar_family.panel.commands.reset_index"),
-                SPACING,
-                text("/rc family <family id> locked", GOLD),
-                resolver().get("proxy.family.scalar_family.panel.commands.locked"),
-                SPACING,
-                servers,
-                SPACING,
-                BORDER
-        );
-    };
-
-    public final static ParameterizedMessage1<StaticFamily> RC_STATIC_FAMILY_INFO = (family) -> {
-        Component servers = text("");
-        int i = 0;
-
-        if(family.registeredServers() == null) servers = resolver().get("proxy.family.static_family.panel.no_registered_servers");
-        else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.static_family.panel.no_registered_servers");
-        else if(family.loadBalancer().size() == 0) servers = resolver().get("proxy.family.static_family.panel.no_unlocked_servers");
-        else for (MCLoader server : family.loadBalancer().servers()) {
-                if(family.loadBalancer().index() == i)
-                    servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"] <<<<<"
-                                    , GREEN));
+                if(family.loadBalancer().index() == i && !locked)
+                    serverEntry = serverEntry.color(GREEN);
                 else
-                    servers = servers.append(
-                            text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                            "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                            "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
-                                    , GRAY));
+                    serverEntry = serverEntry.color(GRAY);
 
-                servers = servers.append(newline());
+                servers = servers.append(serverEntry).append(newline());
 
                 i++;
             }
+        }
 
-        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
-        String parentFamilyName = rootFamily.id();
-        try {
-            parentFamilyName = Objects.requireNonNull(family.parent()).id();
-        } catch (Exception ignore) {}
-        if(family.equals(rootFamily)) parentFamilyName = "none";
-
+        // Compile residence expiration
         LiquidTimestamp expiration = family.homeServerExpiration();
         String homeServerExpiration = "NEVER";
         if(expiration != null) homeServerExpiration = expiration.toString();
 
+        // Compile Persistence
+        String persistence = "Disabled";
+        if(family.loadBalancer().persistent())
+            persistence = family.loadBalancer().attempts() + " Attempts";
+
         return join(
                 newlines(),
                 BORDER,
@@ -552,30 +524,33 @@ public class ProxyLang extends Lang {
                 BORDER,
                 SPACING,
                 resolver().getArray(
-                        "proxy.family.static_family.panel.info",
+                        "proxy.family.static.panel.info",
+                        LanguageResolver.tagHandler("display_name", family.displayName()),
+                        LanguageResolver.tagHandler("parent_family_name", family.parent().id()),
                         LanguageResolver.tagHandler("player_count", family.playerCount()),
-                        LanguageResolver.tagHandler("server_count", family.serverCount()),
-                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
-                        LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
+
                         LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
-                        LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
-                        LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
-                        LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
+                        LanguageResolver.tagHandler("servers_count", family.loadBalancer().size()),
+                        LanguageResolver.tagHandler("servers_open", family.loadBalancer().size(false)),
+                        LanguageResolver.tagHandler("servers_locked", family.loadBalancer().size(true)),
+
+                        LanguageResolver.tagHandler("load_balancing_algorithm", family.loadBalancer()),
+                        LanguageResolver.tagHandler("load_balancing_weighted", family.loadBalancer().weighted()),
+                        LanguageResolver.tagHandler("load_balancing_persistence", persistence)
                 ),
                 SPACING,
                 BORDER,
                 SPACING,
-                resolver().get("proxy.family.static_family.panel.registered_servers"),
+                resolver().get("proxy.family.generic.servers.open_servers"),
                 SPACING,
                 text("/rc family <family id> sort", GOLD),
-                resolver().get("proxy.family.static_family.panel.commands.sort"),
+                resolver().get("proxy.family.generic.command_descriptions.sort"),
                 SPACING,
                 text("/rc family <family id> resetIndex", GOLD),
-                resolver().get("proxy.family.static_family.panel.commands.reset_index"),
+                resolver().get("proxy.family.generic.command_descriptions.reset_index"),
                 SPACING,
                 text("/rc family <family id> locked", GOLD),
-                resolver().get("proxy.family.static_family.panel.commands.locked"),
+                resolver().get("proxy.family.generic.command_descriptions.locked"),
                 SPACING,
                 servers,
                 SPACING,
@@ -583,34 +558,49 @@ public class ProxyLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<StaticFamily> RC_STATIC_FAMILY_INFO_LOCKED = (family) -> {
+    public final static ParameterizedMessage2<RankedFamily, Boolean> RC_RANKED_FAMILY_INFO = (family, locked) -> {
         Component servers = text("");
         int i = 0;
 
-        if(family.registeredServers() == null) servers = resolver().get("proxy.family.static_family.panel.no_registered_servers");
-        else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.static_family.panel.no_registered_servers");
-        else if(family.loadBalancer().size(true) == 0) servers = resolver().get("proxy.family.static_family.panel.no_locked_servers");
-        else for (MCLoader server : family.loadBalancer().lockedServers()) {
-                servers = servers.append(
-                        text("   ---| "+(i + 1)+". ["+server.registeredServer().getServerInfo().getName()+"]" +
-                                        "("+ AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress()) +") " +
-                                        "["+server.playerCount()+" ("+server.softPlayerCap()+" <> "+server.hardPlayerCap()+") w-"+server.weight()+"]"
-                                , RED));
+        if(family.registeredServers() == null) servers = resolver().get("proxy.family.generic.servers.no_registered_servers");
+        else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_registered_servers");
+        else if(family.loadBalancer().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_unlocked_servers");
+        else {
+            List<MCLoader> serverList;
+            if(locked)
+                serverList = family.loadBalancer().lockedServers();
+            else
+                serverList = family.loadBalancer().openServers();
 
-                servers = servers.append(newline());
+            for (MCLoader server : serverList) {
+                Component serverEntry = resolver().get(
+                        "proxy.family.generic.servers.details",
+                        LanguageResolver.tagHandler("index_number", i + 1),
+                        LanguageResolver.tagHandler("server_name", server.registeredServer().getServerInfo().getName()),
+                        LanguageResolver.tagHandler("server_address", AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress())),
+                        LanguageResolver.tagHandler("player_count", server.playerCount()),
+                        LanguageResolver.tagHandler("player_soft_cap", server.softPlayerCap()),
+                        LanguageResolver.tagHandler("player_hard_cap", server.hardPlayerCap()),
+                        LanguageResolver.tagHandler("server_weight", server.weight())
+                );
+
+                if(family.loadBalancer().index() == i && !locked)
+                    serverEntry = serverEntry.color(GREEN);
+                else
+                    serverEntry = serverEntry.color(GRAY);
+
+                servers = servers.append(serverEntry).append(newline());
 
                 i++;
             }
+        }
 
-        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
-        String parentFamilyName = rootFamily.id();
-        try {
-            parentFamilyName = Objects.requireNonNull(family.parent()).id();
-        } catch (Exception ignore) {}
+        String algorithm = "RANDOMIZE";
+        Matchmaker<? extends IPlayerRank<?>> matchmaker = family.matchmaker();
+        if(matchmaker instanceof WinLoss) algorithm = "WIN_LOSS";
+        if(matchmaker instanceof WinRate) algorithm = "WIN_RATE";
 
-        LiquidTimestamp expiration = family.homeServerExpiration();
-        String homeServerExpiration = "NEVER";
-        if(expiration != null) homeServerExpiration = expiration.toString();
+        int waitingPlayersCount = family.waitingPlayers();
 
         return join(
                 newlines(),
@@ -621,30 +611,35 @@ public class ProxyLang extends Lang {
                 BORDER,
                 SPACING,
                 resolver().getArray(
-                        "proxy.family.static_family.panel.info",
+                        "proxy.family.ranked.panel.info",
+                        LanguageResolver.tagHandler("display_name", family.displayName()),
+                        LanguageResolver.tagHandler("parent_family_name", family.parent().id()),
+
                         LanguageResolver.tagHandler("player_count", family.playerCount()),
-                        LanguageResolver.tagHandler("server_count", family.serverCount()),
-                        LanguageResolver.tagHandler("joinable_count", family.loadBalancer().size()),
-                        LanguageResolver.tagHandler("parent_family_name", parentFamilyName),
-                        LanguageResolver.tagHandler("residence_expiration", homeServerExpiration),
-                        LanguageResolver.tagHandler("balancing_algorithm", family.loadBalancer()),
-                        LanguageResolver.tagHandler("weighted", family.loadBalancer().weighted()),
-                        LanguageResolver.tagHandler("persistence", family.loadBalancer().persistent()),
-                        LanguageResolver.tagHandler("persistence_attempts", family.loadBalancer().attempts())
+                        LanguageResolver.tagHandler("active_players", family.activePlayers()),
+                        LanguageResolver.tagHandler("waiting_players", waitingPlayersCount),
+
+                        LanguageResolver.tagHandler("servers_count", family.loadBalancer().size()),
+                        LanguageResolver.tagHandler("servers_open", family.loadBalancer().size(false)),
+                        LanguageResolver.tagHandler("servers_locked", family.loadBalancer().size(true)),
+
+                        LanguageResolver.tagHandler("matchmaking_algorithm", algorithm),
+                        LanguageResolver.tagHandler("matchmaking_highest_player", matchmaker.waitingPlayers().get(waitingPlayersCount - 1)),
+                        LanguageResolver.tagHandler("matchmaking_lowest_player", matchmaker.waitingPlayers().get(0))
                 ),
                 SPACING,
                 BORDER,
                 SPACING,
-                resolver().get("proxy.family.static_family.panel.registered_servers"),
+                resolver().get("proxy.family.generic.servers.open_servers"),
                 SPACING,
                 text("/rc family <family id> sort", GOLD),
-                resolver().get("proxy.family.static_family.panel.commands.sort"),
+                resolver().get("proxy.family.generic.command_descriptions.sort"),
                 SPACING,
                 text("/rc family <family id> resetIndex", GOLD),
-                resolver().get("proxy.family.static_family.panel.commands.reset_index"),
+                resolver().get("proxy.family.generic.command_descriptions.reset_index"),
                 SPACING,
                 text("/rc family <family id> locked", GOLD),
-                resolver().get("proxy.family.static_family.panel.commands.locked"),
+                resolver().get("proxy.family.generic.command_descriptions.locked"),
                 SPACING,
                 servers,
                 SPACING,
@@ -652,8 +647,8 @@ public class ProxyLang extends Lang {
         );
     };
 
-    public final static Component MISSING_HOME_SERVER = resolver().get("proxy.family.static_family.residence.missing");
-    public final static Component BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT = resolver().get("proxy.family.static_family.residence.blocked_join_attempt");
+    public final static Component MISSING_HOME_SERVER = resolver().get("proxy.family.static.residence.missing");
+    public final static Component BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT = resolver().get("proxy.family.static.residence.blocked_join_attempt");
 
     public final static Component TPA_USAGE = text(USAGE+": /tpa <<username>, deny, accept>",RED);
     public final static Message TPA_DENY_USAGE = () -> join(

@@ -3,16 +3,13 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmaker
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
-import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
@@ -22,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import static group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard.IRankSchema.*;
 import static java.lang.Math.floor;
 
-public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements IMatchmaker<Player, IPlayerRank<?>> {
+public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements IMatchmaker<Player, RankedPlayer<TPlayerRank>> {
     protected final ClockService supervisor = new ClockService(5);
     protected final Settings settings;
     protected final int minPlayersPerGame;
@@ -72,10 +69,10 @@ public abstract class Matchmaker<TPlayerRank extends IPlayerRank<?>> implements 
             throw new RuntimeException(e);
         }
     }
-    public int size() {
-        return this.waitingPlayers.size();
+    public List<RankedPlayer<TPlayerRank>> waitingPlayers() {
+        return this.waitingPlayers.stream().toList();
     }
-    public boolean contains(IRankedPlayer<Player, IPlayerRank<?>> item) {
+    public boolean contains(RankedPlayer<TPlayerRank> item) {
         return this.waitingPlayers.contains(item);
     }
 

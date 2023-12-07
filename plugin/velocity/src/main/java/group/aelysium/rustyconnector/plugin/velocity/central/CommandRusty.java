@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -26,6 +27,7 @@ import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -161,9 +163,11 @@ class FamilyC {
                                 group.aelysium.rustyconnector.plugin.velocity.lib.family.Family family = new Family.Reference(familyName).get();
 
                                 if(family instanceof ScalarFamily)
-                                    ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
+                                    ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family, false);
                                 if(family instanceof StaticFamily)
-                                    ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
+                                    ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family, false);
+                                if(family instanceof RankedFamily)
+                                    ProxyLang.RC_RANKED_FAMILY_INFO.send(logger, (RankedFamily) family, false);
                             } catch (NoSuchElementException e) {
                                 ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                             } catch (Exception e) {
@@ -191,9 +195,11 @@ class FamilyC {
                         family.loadBalancer().resetIndex();
 
                         if(family instanceof ScalarFamily)
-                            ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
+                            ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family, false);
                         if(family instanceof StaticFamily)
-                            ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
+                            ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family, false);
+                        if(family instanceof RankedFamily)
+                            ProxyLang.RC_RANKED_FAMILY_INFO.send(logger, (RankedFamily) family, false);
                     } catch (NoSuchElementException e) {
                         ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                     } catch (Exception e) {
@@ -217,9 +223,11 @@ class FamilyC {
                         family.loadBalancer().completeSort();
 
                         if(family instanceof ScalarFamily)
-                            ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
+                            ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family, false);
                         if(family instanceof StaticFamily)
-                            ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
+                            ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family, false);
+                        if(family instanceof RankedFamily)
+                            ProxyLang.RC_RANKED_FAMILY_INFO.send(logger, (RankedFamily) family, false);
                     } catch (NoSuchElementException e) {
                         ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                     } catch (Exception e) {
@@ -237,9 +245,39 @@ class FamilyC {
                         Family family = new Family.Reference(familyName).get();
 
                         if(family instanceof ScalarFamily)
-                            ProxyLang.RC_SCALAR_FAMILY_INFO_LOCKED.send(logger, (ScalarFamily) family);
+                            ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family, true);
                         if(family instanceof StaticFamily)
-                            ProxyLang.RC_STATIC_FAMILY_INFO_LOCKED.send(logger, (StaticFamily) family);
+                            ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family, true);
+                        if(family instanceof RankedFamily)
+                            ProxyLang.RC_RANKED_FAMILY_INFO.send(logger, (RankedFamily) family, true);
+                    } catch (NoSuchElementException e) {
+                        ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                    } catch (Exception e) {
+                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
+                    }
+                    return 1;
+                });
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> players(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
+        return LiteralArgumentBuilder.<CommandSource>literal("players")
+                .executes(context -> {
+                    try {
+                        String familyName = context.getArgument("familyName", String.class);
+                        Family family = new Family.Reference(familyName).get();
+
+                        String playerNames = "";
+                        List<com.velocitypowered.api.proxy.Player> players = family.players();
+                        com.velocitypowered.api.proxy.Player lastPlayer = players.get(players.size() - 1);
+                        for (com.velocitypowered.api.proxy.Player player : players) {
+                            if(player.equals(lastPlayer)) {
+                                playerNames = playerNames + player.getUsername();
+                                break;
+                            }
+                            playerNames = playerNames + player.getUsername() + ", ";
+                        }
+
+                        logger.send(Component.text(playerNames));
                     } catch (NoSuchElementException e) {
                         ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                     } catch (Exception e) {

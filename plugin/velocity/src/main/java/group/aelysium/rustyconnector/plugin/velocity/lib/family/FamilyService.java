@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class FamilyService implements IFamilyService<MCLoader, Player, RootFamily, Family> {
+public class FamilyService implements IFamilyService<MCLoader, Player, LoadBalancer, RootFamily, Family> {
     private final Map<String, Family> families = new HashMap<>();
     private final Map<String, IFamilyCategory<Player>> categories = new HashMap<>();
     private WeakReference<RootFamily> rootFamily;
