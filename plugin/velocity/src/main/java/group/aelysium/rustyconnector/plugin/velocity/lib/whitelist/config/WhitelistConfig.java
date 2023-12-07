@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -70,7 +70,7 @@ public class WhitelistConfig extends YAML {
 
         this.use_country = this.getNode(this.data,"use-country",Boolean.class);
         if(this.use_country)
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false.", NamedTextColor.YELLOW);
+            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false.", NamedTextColor.YELLOW);
         this.use_country = false;
         this.countries = new ArrayList<>();
 

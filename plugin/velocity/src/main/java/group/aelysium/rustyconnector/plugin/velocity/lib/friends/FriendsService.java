@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -123,7 +123,7 @@ public class FriendsService implements IFriendsService<Player, FriendRequest> {
 
     public FriendMapping sendRequest(com.velocitypowered.api.proxy.Player sender, Player target) {
         if(this.friendCount(Player.from(sender)).orElseThrow() > this.settings().maxFriends())
-            sender.sendMessage(VelocityLang.MAX_FRIENDS_REACHED);
+            sender.sendMessage(ProxyLang.MAX_FRIENDS_REACHED);
 
         Player fakeSender = Player.from(sender);
         FriendRequest friendRequest = new FriendRequest(this, snowflakeGenerator.nextId(), fakeSender, target);
@@ -131,10 +131,10 @@ public class FriendsService implements IFriendsService<Player, FriendRequest> {
 
 
         try {
-            target.resolve().orElseThrow().sendMessage(VelocityLang.FRIEND_REQUEST.build(sender));
-            sender.sendMessage(VelocityLang.FRIEND_REQUEST_SENT.build(target.username()));
+            target.resolve().orElseThrow().sendMessage(ProxyLang.FRIEND_REQUEST.build(sender));
+            sender.sendMessage(ProxyLang.FRIEND_REQUEST_SENT.build(target.username()));
         } catch (NoSuchElementException ignore) {
-            sender.sendMessage(VelocityLang.FRIEND_REQUEST_TARGET_NOT_ONLINE.build(target.username()));
+            sender.sendMessage(ProxyLang.FRIEND_REQUEST_TARGET_NOT_ONLINE.build(target.username()));
         }
 
         return FriendMapping.from(fakeSender, target);

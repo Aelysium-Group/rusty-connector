@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -74,7 +74,7 @@ public class PartyConfig extends YAML {
             if(this.friendsOnly)
                 Tinder.get().services().friends().orElseThrow();
         } catch (Exception ignore) {
-            Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("[friends-only] in `party.yml` is set to true. But the friends module isn't enabled! Ignoring...", NamedTextColor.YELLOW));
+            Tinder.get().logger().send(ProxyLang.BOXED_MESSAGE_COLORED.build("[friends-only] in `party.yml` is set to true. But the friends module isn't enabled! Ignoring...", NamedTextColor.YELLOW));
             this.friendsOnly = false;
         }
         this.localOnly = this.getNode(this.data, "local-only", Boolean.class);

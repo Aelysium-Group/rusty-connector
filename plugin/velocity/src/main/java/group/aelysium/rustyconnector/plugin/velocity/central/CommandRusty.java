@@ -20,7 +20,7 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.auto_scaling.K8Service;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import net.kyori.adventure.text.Component;
@@ -39,7 +39,7 @@ public final class CommandRusty {
             .<CommandSource>literal("rc")
             .requires(source -> source instanceof ConsoleCommandSource)
             .executes(context -> {
-                logger.send(VelocityLang.RC_ROOT_USAGE);
+                logger.send(ProxyLang.RC_ROOT_USAGE);
                 return Command.SINGLE_SUCCESS;
             })
             .then(Message.build(flame, logger, messageCacheService))
@@ -64,7 +64,7 @@ class Message {
     public static ArgumentBuilder<CommandSource, ?> build(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
         return LiteralArgumentBuilder.<CommandSource>literal("message")
                 .executes(context -> {
-                    logger.send(VelocityLang.RC_MESSAGE_ROOT_USAGE);
+                    logger.send(ProxyLang.RC_MESSAGE_ROOT_USAGE);
                     return Command.SINGLE_SUCCESS;
                 })
                 .then(listMessages(flame, logger, messageCacheService))
@@ -81,17 +81,17 @@ class Message {
 
                                 List<CacheableMessage> messagesPage = messageCacheService.fetchMessagesPage(1);
 
-                                VelocityLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
+                                ProxyLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
                                 return;
                             }
 
                             List<CacheableMessage> messages = messageCacheService.messages();
 
-                            VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
+                            ProxyLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
                         } catch (Exception e) {
-                            VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting those messages!\n"+e.getMessage());
+                            ProxyLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting those messages!\n"+e.getMessage());
                         }
                     }).start();
 
@@ -107,9 +107,9 @@ class Message {
 
                                     int numberOfPages = Math.floorDiv(messageCacheService.size(),10) + 1;
 
-                                    VelocityLang.RC_MESSAGE_PAGE.send(logger,messages,pageNumber,numberOfPages);
+                                    ProxyLang.RC_MESSAGE_PAGE.send(logger,messages,pageNumber,numberOfPages);
                                 } catch (Exception e) {
-                                    VelocityLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting that page!\n"+e.getMessage());
+                                    ProxyLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting that page!\n"+e.getMessage());
                                 }
 
                             }).start();
@@ -121,7 +121,7 @@ class Message {
     private static ArgumentBuilder<CommandSource, ?> getMessage(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
         return LiteralArgumentBuilder.<CommandSource>literal("get")
                 .executes(context -> {
-                    logger.send(VelocityLang.RC_MESSAGE_GET_USAGE);
+                    logger.send(ProxyLang.RC_MESSAGE_GET_USAGE);
 
                     return Command.SINGLE_SUCCESS;
                 })
@@ -132,9 +132,9 @@ class Message {
 
                                 CacheableMessage message = messageCacheService.findMessage(snowflake);
 
-                                VelocityLang.RC_MESSAGE_GET_MESSAGE.send(logger, message);
+                                ProxyLang.RC_MESSAGE_GET_MESSAGE.send(logger, message);
                             } catch (Exception e) {
-                                VelocityLang.RC_MESSAGE_ERROR.send(logger,"There's no saved message with that ID!");
+                                ProxyLang.RC_MESSAGE_ERROR.send(logger,"There's no saved message with that ID!");
                             }
 
                             return Command.SINGLE_SUCCESS;
@@ -147,9 +147,9 @@ class FamilyC {
         return LiteralArgumentBuilder.<CommandSource>literal("family")
                 .executes(context -> {
                     try {
-                        VelocityLang.RC_FAMILY.send(logger);
+                        ProxyLang.RC_FAMILY.send(logger);
                     } catch (Exception e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting the families!\n"+e.getMessage());
+                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting the families!\n"+e.getMessage());
                     }
 
                     return Command.SINGLE_SUCCESS;
@@ -161,13 +161,13 @@ class FamilyC {
                                 group.aelysium.rustyconnector.plugin.velocity.lib.family.Family family = new Family.Reference(familyName).get();
 
                                 if(family instanceof ScalarFamily)
-                                    VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
+                                    ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
                                 if(family instanceof StaticFamily)
-                                    VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
+                                    ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
                             } catch (NoSuchElementException e) {
-                                VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                                ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                             } catch (Exception e) {
-                                VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting that family!\n"+e.getMessage());
+                                ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting that family!\n"+e.getMessage());
                             }
                             return Command.SINGLE_SUCCESS;
                         })
@@ -184,20 +184,20 @@ class FamilyC {
                         String familyName = context.getArgument("familyName", String.class);
                         Family family = new Family.Reference(familyName).get();
                         if(!family.metadata().hasLoadBalancer()) {
-                            VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
+                            ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
                             return Command.SINGLE_SUCCESS;
                         }
 
                         family.loadBalancer().resetIndex();
 
                         if(family instanceof ScalarFamily)
-                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
+                            ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
                         if(family instanceof StaticFamily)
-                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
+                            ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
                     } catch (NoSuchElementException e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                        ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                     } catch (Exception e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
+                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                     }
                     return Command.SINGLE_SUCCESS;
                 });
@@ -210,20 +210,20 @@ class FamilyC {
                         String familyName = context.getArgument("familyName", String.class);
                         Family family = new Family.Reference(familyName).get();
                         if(!family.metadata().hasLoadBalancer()) {
-                            VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
+                            ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
                             return Command.SINGLE_SUCCESS;
                         }
 
                         family.loadBalancer().completeSort();
 
                         if(family instanceof ScalarFamily)
-                            VelocityLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
+                            ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family);
                         if(family instanceof StaticFamily)
-                            VelocityLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
+                            ProxyLang.RC_STATIC_FAMILY_INFO.send(logger, (StaticFamily) family);
                     } catch (NoSuchElementException e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                        ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                     } catch (Exception e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
+                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                     }
                     return 1;
                 });
@@ -237,13 +237,13 @@ class FamilyC {
                         Family family = new Family.Reference(familyName).get();
 
                         if(family instanceof ScalarFamily)
-                            VelocityLang.RC_SCALAR_FAMILY_INFO_LOCKED.send(logger, (ScalarFamily) family);
+                            ProxyLang.RC_SCALAR_FAMILY_INFO_LOCKED.send(logger, (ScalarFamily) family);
                         if(family instanceof StaticFamily)
-                            VelocityLang.RC_STATIC_FAMILY_INFO_LOCKED.send(logger, (StaticFamily) family);
+                            ProxyLang.RC_STATIC_FAMILY_INFO_LOCKED.send(logger, (StaticFamily) family);
                     } catch (NoSuchElementException e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                        ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
                     } catch (Exception e) {
-                        VelocityLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
+                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
                     }
                     return 1;
                 });
@@ -253,7 +253,7 @@ class Send {
     public static ArgumentBuilder<CommandSource, ?> build(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
         return LiteralArgumentBuilder.<CommandSource>literal("send")
                 .executes(context -> {
-                    logger.send(VelocityLang.RC_SEND_USAGE);
+                    logger.send(ProxyLang.RC_SEND_USAGE);
                     return Command.SINGLE_SUCCESS;
                 })
                 .then(defaultSender(flame, logger, messageCacheService))
@@ -263,7 +263,7 @@ class Send {
     private static ArgumentBuilder<CommandSource, ?> defaultSender(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
         return RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                 .executes(context -> {
-                    logger.send(VelocityLang.RC_SEND_USAGE);
+                    logger.send(ProxyLang.RC_SEND_USAGE);
                     return Command.SINGLE_SUCCESS;
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.greedyString())
@@ -274,22 +274,22 @@ class Send {
                             try {
                                 com.velocitypowered.api.proxy.Player fetchedPlayer = Tinder.get().velocityServer().getPlayer(username).orElse(null);
                                 if(fetchedPlayer == null) {
-                                    logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
+                                    logger.send(ProxyLang.RC_SEND_NO_PLAYER.build(username));
                                     return Command.SINGLE_SUCCESS;
                                 }
                                 Player player = Player.from(fetchedPlayer);
 
                                 Family family = new Family.Reference(familyName).get();
                                 if(!family.metadata().hasLoadBalancer()) {
-                                    VelocityLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
+                                    ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
                                     return Command.SINGLE_SUCCESS;
                                 }
 
                                 family.connect(player);
                             } catch (NoSuchElementException e) {
-                                logger.send(VelocityLang.RC_SEND_NO_FAMILY.build(familyName));
+                                logger.send(ProxyLang.RC_SEND_NO_FAMILY.build(familyName));
                             } catch (Exception e) {
-                                logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
+                                logger.send(ProxyLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                             }
                             return Command.SINGLE_SUCCESS;
                         })
@@ -299,12 +299,12 @@ class Send {
     private static ArgumentBuilder<CommandSource, ?> serverSender(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
         return LiteralArgumentBuilder.<CommandSource>literal("server")
                 .executes(context -> {
-                    logger.send(VelocityLang.RC_SEND_USAGE);
+                    logger.send(ProxyLang.RC_SEND_USAGE);
                     return Command.SINGLE_SUCCESS;
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .executes(context -> {
-                            logger.send(VelocityLang.RC_SEND_USAGE);
+                            logger.send(ProxyLang.RC_SEND_USAGE);
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("serverName", StringArgumentType.greedyString())
@@ -315,13 +315,13 @@ class Send {
 
                                         com.velocitypowered.api.proxy.Player player = Tinder.get().velocityServer().getPlayer(username).orElse(null);
                                         if (player == null) {
-                                            logger.send(VelocityLang.RC_SEND_NO_PLAYER.build(username));
+                                            logger.send(ProxyLang.RC_SEND_NO_PLAYER.build(username));
                                             return Command.SINGLE_SUCCESS;
                                         }
 
                                         RegisteredServer registeredServer = Tinder.get().velocityServer().getServer(serverName).orElse(null);
                                         if (registeredServer == null) {
-                                            logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
+                                            logger.send(ProxyLang.RC_SEND_NO_SERVER.build(serverName));
                                             return Command.SINGLE_SUCCESS;
                                         }
 
@@ -329,13 +329,13 @@ class Send {
                                         try {
                                             server = new MCLoader.Reference(registeredServer.getServerInfo()).get();
                                         } catch (Exception ignore) {
-                                            logger.send(VelocityLang.RC_SEND_NO_SERVER.build(serverName));
+                                            logger.send(ProxyLang.RC_SEND_NO_SERVER.build(serverName));
                                             return Command.SINGLE_SUCCESS;
                                         }
 
                                         server.connect(player);
                                     } catch (Exception e) {
-                                        logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
+                                        logger.send(ProxyLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                                     }
 
                                     return Command.SINGLE_SUCCESS;

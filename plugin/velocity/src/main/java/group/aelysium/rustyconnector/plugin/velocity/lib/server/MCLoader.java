@@ -10,7 +10,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 
@@ -212,7 +212,7 @@ public class MCLoader implements IMCLoader {
             try {
                 if(partyService.settings().onlyLeaderCanSwitchServers())
                     if(!party.leader().equals(player)) {
-                        player.sendMessage(VelocityLang.PARTY_ONLY_LEADER_CAN_SWITCH);
+                        player.sendMessage(ProxyLang.PARTY_ONLY_LEADER_CAN_SWITCH);
                         return false;
                     }
 

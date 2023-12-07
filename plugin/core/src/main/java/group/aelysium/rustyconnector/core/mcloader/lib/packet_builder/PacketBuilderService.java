@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.packet_builder;
 
 import group.aelysium.rustyconnector.core.lib.packets.variants.*;
-import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.RankedGameInterfaceService;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.packet_builder.IPacketBuilderService;
@@ -9,7 +8,7 @@ import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -32,7 +31,7 @@ public class PacketBuilderService implements IPacketBuilderService {
                     .buildSendable();
             api.flame().backbone().connection().orElseThrow().publish(message);
         } catch (Exception e) {
-            PluginLang.BOXED_MESSAGE_COLORED.send(api.logger(), e.toString(), NamedTextColor.RED);
+            MCLoaderLang.BOXED_MESSAGE_COLORED.send(api.logger(), e.toString(), NamedTextColor.RED);
         }
     }
 

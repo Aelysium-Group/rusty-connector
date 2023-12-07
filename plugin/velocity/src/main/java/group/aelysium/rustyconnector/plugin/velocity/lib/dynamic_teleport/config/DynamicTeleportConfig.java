@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 
@@ -104,7 +104,7 @@ public class DynamicTeleportConfig extends YAML {
                 String expiration = this.getNode(this.data, "tpa.expiration", String.class);
                 if (expiration.equals("NEVER")) {
                     this.tpa_expiration = LiquidTimestamp.from(5, TimeUnit.MINUTES);
-                    Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes.", NamedTextColor.YELLOW));
+                    Tinder.get().logger().send(ProxyLang.BOXED_MESSAGE_COLORED.build("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes.", NamedTextColor.YELLOW));
                 } else this.tpa_expiration = LiquidTimestamp.from(expiration);
             } catch (ParseException e) {
                 throw new IllegalStateException("You must provide a valid time value for [tpa.expiration] in dynamic_teleport.yml!");

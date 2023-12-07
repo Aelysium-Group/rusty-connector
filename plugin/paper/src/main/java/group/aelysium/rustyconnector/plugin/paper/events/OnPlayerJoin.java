@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.events;
 
-import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.CoordinateRequest;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import org.bukkit.event.EventHandler;
@@ -21,10 +21,10 @@ public class OnPlayerJoin implements Listener {
             try {
                 tpaRequest.teleport();
             } catch (NullPointerException e) {
-                event.getPlayer().sendMessage(PluginLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
+                event.getPlayer().sendMessage(MCLoaderLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
             }
         } catch (Exception e) {
-            event.getPlayer().sendMessage(PluginLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
+            event.getPlayer().sendMessage(MCLoaderLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
         }
 
         if (!((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).isFolia()) return;

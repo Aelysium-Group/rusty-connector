@@ -41,7 +41,7 @@ core:
     no_permission: "<red>You do not have permission to do this.</red>"
     no_player: "<red><username> has never joined the network!</red>"
     internal_error: "<red>There was an internal error while trying to complete your request.</red>"
-velocity:
+proxy:
     server:
         already_connected: "<red>You're already connected to this server.</red>"
     root:
@@ -263,7 +263,7 @@ velocity:
         error: "xxxxx"
         family_balancing: "▲▼▲▼▲"
         ping: "<<<<|"
-paper:
+mcloader:
     send:
         usage: "<gray>Send a player from the current server to another family.</gray>"
     tpa:

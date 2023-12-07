@@ -9,7 +9,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -49,15 +49,15 @@ public class VelocityRustyConnector {
             Tinder.get().logger().log("Failed to register to bstats!");
         }
 
-        VelocityLang.WORDMARK_RUSTY_CONNECTOR.send(Tinder.get().logger(), "v"+Tinder.get().flame().version().toString());
+        ProxyLang.WORDMARK_RUSTY_CONNECTOR.send(Tinder.get().logger(), "v"+Tinder.get().flame().version().toString());
         RustyConnector.Toolkit.register(Tinder.get());
 
         if(!Tinder.get().velocityServer().getConfiguration().isOnlineMode())
-            Tinder.get().logger().send(VelocityLang.BOXED_MESSAGE_COLORED.build("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!", NamedTextColor.RED));
+            Tinder.get().logger().send(ProxyLang.BOXED_MESSAGE_COLORED.build("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!", NamedTextColor.RED));
 
         // Velocity requires that at least one server is always defined in velocity.toml
         if(Tinder.get().velocityServer().getConfiguration().getServers().size() > 1)
-            Tinder.get().logger().send(VelocityLang.BOXED_COMPONENT_COLORED.build(
+            Tinder.get().logger().send(ProxyLang.BOXED_COMPONENT_COLORED.build(
                     Component.join(
                             JoinConfiguration.newlines(),
                             Component.text("Your network is identified as having multiple, pre-defined, non-RC servers, in it!"),

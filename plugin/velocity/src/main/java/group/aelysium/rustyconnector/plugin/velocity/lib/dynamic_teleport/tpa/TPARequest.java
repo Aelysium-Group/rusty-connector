@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAR
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
@@ -46,14 +46,14 @@ public class TPARequest implements ITPARequest {
     }
 
     public void submit() {
-        this.sender().sendMessage(VelocityLang.TPA_REQUEST_SUBMISSION.build(this.target().getUsername()));
-        this.target().sendMessage(VelocityLang.TPA_REQUEST_QUERY.build(this.sender()));
+        this.sender().sendMessage(ProxyLang.TPA_REQUEST_SUBMISSION.build(this.target().getUsername()));
+        this.target().sendMessage(ProxyLang.TPA_REQUEST_QUERY.build(this.sender()));
         this.updateStatus(TPARequestStatus.REQUESTED);
     }
 
     public void deny() {
-        this.sender().sendMessage(VelocityLang.TPA_REQUEST_DENIED_SENDER.build(this.target().getUsername()));
-        this.target().sendMessage(VelocityLang.TPA_REQUEST_DENIED_TARGET.build(this.sender().getUsername()));
+        this.sender().sendMessage(ProxyLang.TPA_REQUEST_DENIED_SENDER.build(this.target().getUsername()));
+        this.target().sendMessage(ProxyLang.TPA_REQUEST_DENIED_TARGET.build(this.sender().getUsername()));
 
         this.updateStatus(TPARequestStatus.DENIED);
     }
@@ -76,12 +76,12 @@ public class TPARequest implements ITPARequest {
 
             tpaService.tpaSendPlayer(this.sender(), this.target(), server);
 
-            this.sender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.target().getUsername()));
-            this.target().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.sender().getUsername()));
+            this.sender().sendMessage(ProxyLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.target().getUsername()));
+            this.target().sendMessage(ProxyLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.sender().getUsername()));
         } catch (Exception e) {
             e.printStackTrace();
-            this.sender().sendMessage(VelocityLang.TPA_FAILURE.build(this.target().getUsername()));
-            this.target().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.sender().getUsername()));
+            this.sender().sendMessage(ProxyLang.TPA_FAILURE.build(this.target().getUsername()));
+            this.target().sendMessage(ProxyLang.TPA_FAILURE_TARGET.build(this.sender().getUsername()));
 
             this.updateStatus(TPARequestStatus.STALE);
         }

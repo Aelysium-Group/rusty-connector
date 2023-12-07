@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -67,13 +67,13 @@ public class DataTransitConfig extends YAML {
 
         this.maxPacketLength = this.getNode(this.data,"max-packet-length",Integer.class);
         if(this.maxPacketLength < 384) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Max message length is to small to be effective! " + this.maxPacketLength + " < 384. Max message length set to 384.", NamedTextColor.YELLOW);
+            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Max message length is to small to be effective! " + this.maxPacketLength + " < 384. Max message length set to 384.", NamedTextColor.YELLOW);
             this.maxPacketLength = 384;
         }
 
         this.cache_size = this.getNode(this.data,"cache.size",Integer.class);
         if(this.cache_size > 500) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Message cache size is to large! " + this.cache_size + " > 500. Message cache size set to 500.", NamedTextColor.YELLOW);
+            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Message cache size is to large! " + this.cache_size + " > 500. Message cache size set to 500.", NamedTextColor.YELLOW);
             this.cache_size = 500;
         }
         try {
@@ -82,7 +82,7 @@ public class DataTransitConfig extends YAML {
                 try {
                     this.cache_ignoredTypes.add(PacketType.mapping(item));
                 } catch (Exception ignore) {
-                    logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There is no packet type of "+item+"! Ignoring...", NamedTextColor.YELLOW));
+                    logger.send(ProxyLang.BOXED_MESSAGE_COLORED.build("There is no packet type of "+item+"! Ignoring...", NamedTextColor.YELLOW));
                 }
             });
         } catch (Exception e) {
@@ -94,7 +94,7 @@ public class DataTransitConfig extends YAML {
                 try {
                     this.cache_ignoredStatuses.add(PacketStatus.valueOf(item));
                 } catch (Exception ignore) {
-                    logger.send(VelocityLang.BOXED_MESSAGE_COLORED.build("There is no packet status type of "+item+"! Ignoring...", NamedTextColor.YELLOW));
+                    logger.send(ProxyLang.BOXED_MESSAGE_COLORED.build("There is no packet status type of "+item+"! Ignoring...", NamedTextColor.YELLOW));
                 }
             });
         } catch (Exception e) {

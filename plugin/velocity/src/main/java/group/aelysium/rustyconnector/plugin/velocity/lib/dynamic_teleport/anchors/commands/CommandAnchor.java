@@ -13,7 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
@@ -39,7 +39,7 @@ public class CommandAnchor {
                         return Command.SINGLE_SUCCESS;
                     }
                     if(!Permission.validate(player, "rustyconnector.command.anchor", "rustyconnector.command.anchor."+anchor)) {
-                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                        player.sendMessage(ProxyLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
@@ -51,13 +51,13 @@ public class CommandAnchor {
                         try {
                             MCLoader server = new MCLoader.Reference(Objects.requireNonNull(player.getCurrentServer().orElse(null)).getServerInfo()).get();
                             if(family.equals(server.family()))
-                                return closeMessage(player, VelocityLang.SERVER_ALREADY_CONNECTED);
+                                return closeMessage(player, ProxyLang.SERVER_ALREADY_CONNECTED);
                         } catch (Exception ignore) {}
 
                         family.connect(Player.from(player));
                     } catch (Exception e) {
                         e.printStackTrace();
-                        return closeMessage(player, VelocityLang.INTERNAL_ERROR);
+                        return closeMessage(player, ProxyLang.INTERNAL_ERROR);
                     }
                     return Command.SINGLE_SUCCESS;
                 })

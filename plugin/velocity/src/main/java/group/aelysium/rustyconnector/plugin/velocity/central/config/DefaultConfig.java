@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
@@ -59,16 +59,16 @@ public class DefaultConfig extends YAML {
         // Hearts
         this.magicLink_serverTimeout = this.getNode(this.data,"magic-link.server-timeout",Integer.class);
         if(this.magicLink_serverTimeout < 5) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Server timeout is set dangerously fast: " + this.magicLink_serverTimeout + "s. Setting to default of 5s.", NamedTextColor.YELLOW);
+            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Server timeout is set dangerously fast: " + this.magicLink_serverTimeout + "s. Setting to default of 5s.", NamedTextColor.YELLOW);
             this.magicLink_serverTimeout = 5;
         }
         this.magicLink_serverPingInterval = this.getNode(this.data,"magic-link.server-ping-interval",Integer.class);
         if(this.magicLink_serverPingInterval < 5) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Server ping interval is set dangerously fast: " + this.magicLink_serverPingInterval + "s. Setting to default of 5s.", NamedTextColor.YELLOW);
+            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Server ping interval is set dangerously fast: " + this.magicLink_serverPingInterval + "s. Setting to default of 5s.", NamedTextColor.YELLOW);
             this.magicLink_serverPingInterval = 5;
         }
         if(this.magicLink_serverTimeout < this.magicLink_serverPingInterval) {
-            VelocityLang.BOXED_MESSAGE_COLORED.send(logger, "Server timeout can't be less than server ping interval!", NamedTextColor.YELLOW);
+            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Server timeout can't be less than server ping interval!", NamedTextColor.YELLOW);
             this.magicLink_serverPingInterval = this.magicLink_serverTimeout - 2;
         }
     }

@@ -45,7 +45,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.Sc
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.MagicLinkPingHandler;
@@ -171,7 +171,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
             return flame;
         } catch (Exception e) {
             logger.send(Component.text("A fatal error occurred! Sending boot output and then the error!").color(NamedTextColor.RED));
-            logger.send(VelocityLang.BORDER.color(NamedTextColor.RED));
+            logger.send(ProxyLang.BORDER.color(NamedTextColor.RED));
 
             initialize.getBootOutput().forEach(logger::send);
 
@@ -555,7 +555,7 @@ class Initialize {
             services.put(PartyService.class, service);
             bootOutput.add(Component.text("Finished building party service.", NamedTextColor.GREEN));
         } catch (Exception e) {
-            bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
+            bootOutput.add(ProxyLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
             bootOutput.add(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
         }
     }
@@ -589,7 +589,7 @@ class Initialize {
             services.put(FriendsService.class, service);
             bootOutput.add(Component.text("Finished building friends service.", NamedTextColor.GREEN));
         } catch (Exception e) {
-            bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
+            bootOutput.add(ProxyLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
             bootOutput.add(Component.text("The friends service wasn't enabled.", NamedTextColor.GRAY));
         }
     }
@@ -650,7 +650,7 @@ class Initialize {
 
             bootOutput.add(Component.text("Finished building dynamic teleport service.", NamedTextColor.GREEN));
         } catch (Exception e) {
-            bootOutput.add(VelocityLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
+            bootOutput.add(ProxyLang.BOXED_MESSAGE_COLORED.build(e.getMessage(), NamedTextColor.RED));
             bootOutput.add(Component.text("The dynamic teleport service wasn't enabled.", NamedTextColor.GRAY));
         }
     }

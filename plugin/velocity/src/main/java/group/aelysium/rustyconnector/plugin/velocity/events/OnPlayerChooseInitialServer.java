@@ -5,14 +5,12 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors.InjectorService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
@@ -85,7 +83,7 @@ public class OnPlayerChooseInitialServer {
 
                 if(requests.size() == 0) throw new NoOutputException();
 
-                eventPlayer.sendMessage(VelocityLang.FRIENDS_JOIN_MESSAGE.build(requests));
+                eventPlayer.sendMessage(ProxyLang.FRIENDS_JOIN_MESSAGE.build(requests));
             } catch (Exception ignore) {}
 
             // Check for online friends
@@ -105,16 +103,16 @@ public class OnPlayerChooseInitialServer {
                 });
 
                 if(friends.size() == 0 || onlineFriends.size() == 0) {
-                    eventPlayer.sendMessage(VelocityLang.NO_ONLINE_FRIENDS);
+                    eventPlayer.sendMessage(ProxyLang.NO_ONLINE_FRIENDS);
                     throw new NoOutputException();
                 }
 
-                eventPlayer.sendMessage(VelocityLang.ONLINE_FRIENDS);
+                eventPlayer.sendMessage(ProxyLang.ONLINE_FRIENDS);
                 final Component[] friendsList = {Component.text("", NamedTextColor.WHITE)};
                 onlineFriends.forEach(friend -> friendsList[0] = friendsList[0].append(Component.text(friend.getUsername())));
                 eventPlayer.sendMessage(Component.join(JoinConfiguration.commas(true), friendsList));
 
-                onlineFriends.forEach(friend -> friend.sendMessage(VelocityLang.FRIEND_JOIN.build(player)));
+                onlineFriends.forEach(friend -> friend.sendMessage(ProxyLang.FRIEND_JOIN.build(player)));
             } catch (Exception ignore) {}
         });
     }

@@ -7,7 +7,7 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
@@ -74,7 +74,7 @@ public class OnPlayerDisconnect {
                     Optional<com.velocitypowered.api.proxy.Player> resolvedPlayer = friend.resolve();
                     if(!resolvedPlayer.isPresent()) return;
 
-                    resolvedPlayer.get().sendMessage(VelocityLang.FRIEND_LEAVE.build(player));
+                    resolvedPlayer.get().sendMessage(ProxyLang.FRIEND_LEAVE.build(player));
                 });
             } catch (Exception ignore) {}
 

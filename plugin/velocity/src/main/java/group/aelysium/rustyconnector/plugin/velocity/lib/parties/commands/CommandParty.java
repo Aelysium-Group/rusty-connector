@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyInvite;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
@@ -39,13 +39,13 @@ public final class CommandParty {
                     }
 
                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                        player.sendMessage(ProxyLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
                     Party party = partyService.find(player).orElse(null);
 
-                    context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
+                    context.getSource().sendMessage(ProxyLang.PARTY_BOARD.build(party, player));
                     return Command.SINGLE_SUCCESS;
                 })
                 .then(LiteralArgumentBuilder.<CommandSource>literal("invites")
@@ -56,11 +56,11 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            context.getSource().sendMessage(VelocityLang.PARTY_USAGE_INVITES);
+                            context.getSource().sendMessage(ProxyLang.PARTY_USAGE_INVITES);
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
@@ -92,11 +92,11 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                                        player.sendMessage(ProxyLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    context.getSource().sendMessage(VelocityLang.PARTY_USAGE_INVITES);
+                                    context.getSource().sendMessage(ProxyLang.PARTY_USAGE_INVITES);
                                     return Command.SINGLE_SUCCESS;
                                 })
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("ignore")
@@ -107,7 +107,7 @@ public final class CommandParty {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
@@ -115,7 +115,7 @@ public final class CommandParty {
                                             com.velocitypowered.api.proxy.Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
 
                                             if(senderPlayer == null)
-                                                return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                                return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
                                             try {
                                                 PartyInvite invite = partyService.findInvite(Player.from(player), Player.from(senderPlayer)).orElse(null);
@@ -127,7 +127,7 @@ public final class CommandParty {
                                                     partyService.closeInvite(invite);
                                                 }
                                             } catch (Exception ignore) {
-                                                return closeMessage(player, VelocityLang.INTERNAL_ERROR);
+                                                return closeMessage(player, ProxyLang.INTERNAL_ERROR);
                                             }
                                             return Command.SINGLE_SUCCESS;
                                         })
@@ -140,28 +140,28 @@ public final class CommandParty {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
                                             if(partyService.find(player).orElse(null) != null)
-                                                return closeMessage(player, VelocityLang.PARTY_INVITE_NO_DOUBLE_DIPPING);
+                                                return closeMessage(player, ProxyLang.PARTY_INVITE_NO_DOUBLE_DIPPING);
 
                                             String username = context.getArgument("username", String.class);
                                             com.velocitypowered.api.proxy.Player senderPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                             if(senderPlayer == null || !senderPlayer.isActive())
-                                                return closeMessage(player, VelocityLang.PARTY_INVITE_TARGET_NOT_ONLINE.build(username));
+                                                return closeMessage(player, ProxyLang.PARTY_INVITE_TARGET_NOT_ONLINE.build(username));
 
                                             PartyInvite invite = partyService.findInvite(Player.from(player), Player.from(senderPlayer)).orElse(null);
                                             if(invite == null)
-                                                return closeMessage(player, VelocityLang.PARTY_INVITE_EXPIRED);
+                                                return closeMessage(player, ProxyLang.PARTY_INVITE_EXPIRED);
 
                                             try {
                                                 invite.accept();
                                             } catch (IllegalStateException e) {
                                                 return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
                                             } catch (Exception ignore) {
-                                                return closeMessage(player, VelocityLang.INTERNAL_ERROR);
+                                                return closeMessage(player, ProxyLang.INTERNAL_ERROR);
                                             }
 
                                             return Command.SINGLE_SUCCESS;
@@ -177,20 +177,20 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
                             if(partyService.find(player).orElse(null) != null)
-                                return closeMessage(player, VelocityLang.PARTY_CREATE_ALREADY_IN_PARTY);
+                                return closeMessage(player, ProxyLang.PARTY_CREATE_ALREADY_IN_PARTY);
 
                             if(player.getCurrentServer().orElse(null) == null)
-                                return closeMessage(player, VelocityLang.PARTY_CREATE_NO_SERVER);
+                                return closeMessage(player, ProxyLang.PARTY_CREATE_NO_SERVER);
 
                             MCLoader server = new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
                             Party party = partyService.create(player, server);
 
-                            context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
+                            context.getSource().sendMessage(ProxyLang.PARTY_BOARD.build(party, player));
 
                             return Command.SINGLE_SUCCESS;
                         })
@@ -203,15 +203,15 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
                             Party party = partyService.find(player).orElse(null);
-                            if(party == null) return closeMessage(player, VelocityLang.NO_PARTY);
+                            if(party == null) return closeMessage(player, ProxyLang.NO_PARTY);
 
                             if(!party.leader().equals(player))
-                                return closeMessage(player, VelocityLang.PARTY_ONLY_LEADER_CAN_DISBAND);
+                                return closeMessage(player, ProxyLang.PARTY_ONLY_LEADER_CAN_DISBAND);
 
                             partyService.disband(party);
                             return Command.SINGLE_SUCCESS;
@@ -225,16 +225,16 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
                             Party party = partyService.find(player).orElse(null);
-                            if(party == null) return closeMessage(player, VelocityLang.NO_PARTY);
+                            if(party == null) return closeMessage(player, ProxyLang.NO_PARTY);
 
                             party.leave(player);
 
-                            return closeMessage(player, VelocityLang.PARTY_LEFT_SELF);
+                            return closeMessage(player, ProxyLang.PARTY_LEFT_SELF);
                         })
                 )
                 .then(LiteralArgumentBuilder.<CommandSource>literal("invite")
@@ -245,11 +245,11 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            context.getSource().sendMessage(VelocityLang.PARTY_USAGE_INVITE);
+                            context.getSource().sendMessage(ProxyLang.PARTY_USAGE_INVITE);
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
@@ -295,25 +295,25 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                                        player.sendMessage(ProxyLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
                                     Party party = partyService.find(player).orElse(null);
                                     if(party == null) {
                                         if(player.getCurrentServer().orElse(null) == null)
-                                            return closeMessage(player, VelocityLang.PARTY_CREATE_NO_SERVER);
+                                            return closeMessage(player, ProxyLang.PARTY_CREATE_NO_SERVER);
 
                                         MCLoader server = new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
                                         Party newParty = partyService.create(player, server);
-                                        player.sendMessage(VelocityLang.PARTY_CREATED);
+                                        player.sendMessage(ProxyLang.PARTY_CREATED);
 
                                         party = newParty;
                                     }
 
                                     if(partyService.settings().onlyLeaderCanInvite())
                                         if(!party.leader().equals(player))
-                                            return closeMessage(player, VelocityLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
+                                            return closeMessage(player, ProxyLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
 
                                     String username = context.getArgument("username", String.class);
                                     Player targetPlayerResolvable;
@@ -321,7 +321,7 @@ public final class CommandParty {
                                         targetPlayerResolvable = new Player.UsernameReference(username).get();
                                         if(targetPlayerResolvable.resolve().isEmpty()) throw new Exception();
                                     } catch (Exception ignore) {
-                                        return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                        return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
                                     }
 
                                     com.velocitypowered.api.proxy.Player targetPlayer = targetPlayerResolvable.resolve().orElseThrow();
@@ -331,7 +331,7 @@ public final class CommandParty {
                                         Collection<com.velocitypowered.api.proxy.Player> connectedPlayers = targetPlayer.getCurrentServer().orElseThrow().getServer().getPlayersConnected();
                                         if (partyService.settings().localOnly())
                                             if (!connectedPlayers.contains(targetPlayer))
-                                                return closeMessage(player, VelocityLang.PARTY_INVITE_NOT_ONLINE);
+                                                return closeMessage(player, ProxyLang.PARTY_INVITE_NOT_ONLINE);
                                     } catch (Exception ignore) {}
                                     try {
                                         if (partyService.settings().friendsOnly())
@@ -339,12 +339,12 @@ public final class CommandParty {
                                                     Player.from(player),
                                                     Player.from(targetPlayer)
                                             ))
-                                                return closeMessage(player, VelocityLang.PARTY_INVITE_FRIENDS_ONLY);
+                                                return closeMessage(player, ProxyLang.PARTY_INVITE_FRIENDS_ONLY);
                                     } catch (Exception ignore) {}
                                     if(targetPlayer.equals(player))
-                                        return closeMessage(player, VelocityLang.PARTY_INVITE_SELF_INVITE);
+                                        return closeMessage(player, ProxyLang.PARTY_INVITE_SELF_INVITE);
                                     if(party.contains(targetPlayer))
-                                        return closeMessage(player, VelocityLang.PARTY_INVITE_ALREADY_A_MEMBER.build(targetPlayer.getUsername()));
+                                        return closeMessage(player, ProxyLang.PARTY_INVITE_ALREADY_A_MEMBER.build(targetPlayer.getUsername()));
 
                                     try {
                                         partyService.invitePlayer(party, player, targetPlayer);
@@ -363,11 +363,11 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            context.getSource().sendMessage(VelocityLang.PARTY_USAGE_KICK);
+                            context.getSource().sendMessage(ProxyLang.PARTY_USAGE_KICK);
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
@@ -399,30 +399,30 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                                        player.sendMessage(ProxyLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
                                     Party party = partyService.find(player).orElse(null);
-                                    if(party == null) return closeMessage(player, VelocityLang.NO_PARTY);
+                                    if(party == null) return closeMessage(player, ProxyLang.NO_PARTY);
 
                                     if(partyService.settings().onlyLeaderCanKick())
                                         if(!party.leader().equals(player))
-                                            return closeMessage(player, VelocityLang.PARTY_ONLY_LEADER_CAN_KICK);
+                                            return closeMessage(player, ProxyLang.PARTY_ONLY_LEADER_CAN_KICK);
 
                                     String username = context.getArgument("username", String.class);
                                     com.velocitypowered.api.proxy.Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null)
-                                        return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                        return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
                                     if(targetPlayer.equals(player))
-                                        return closeMessage(player, VelocityLang.PARTY_SELF_KICK);
+                                        return closeMessage(player, ProxyLang.PARTY_SELF_KICK);
                                     if(!party.contains(targetPlayer))
-                                        return closeMessage(player, VelocityLang.PARTY_NO_MEMBER.build(username));
+                                        return closeMessage(player, ProxyLang.PARTY_NO_MEMBER.build(username));
 
                                     party.leave(targetPlayer);
 
-                                    context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
-                                    targetPlayer.sendMessage(VelocityLang.PARTY_KICKED);
+                                    context.getSource().sendMessage(ProxyLang.PARTY_BOARD.build(party, player));
+                                    targetPlayer.sendMessage(ProxyLang.PARTY_KICKED);
                                     return Command.SINGLE_SUCCESS;
                                 })
                         )
@@ -435,11 +435,11 @@ public final class CommandParty {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            context.getSource().sendMessage(VelocityLang.PARTY_USAGE_PROMOTE);
+                            context.getSource().sendMessage(ProxyLang.PARTY_USAGE_PROMOTE);
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
@@ -471,42 +471,42 @@ public final class CommandParty {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.party")) {
-                                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                                        player.sendMessage(ProxyLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
                                     Party party = partyService.find(player).orElse(null);
-                                    if(party == null) return closeMessage(player, VelocityLang.NO_PARTY);
+                                    if(party == null) return closeMessage(player, ProxyLang.NO_PARTY);
 
                                     if(partyService.settings().onlyLeaderCanKick())
                                         if(!party.leader().equals(player))
-                                            return closeMessage(player, VelocityLang.PARTY_ONLY_LEADER_CAN_PROMOTE);
+                                            return closeMessage(player, ProxyLang.PARTY_ONLY_LEADER_CAN_PROMOTE);
 
                                     String username = context.getArgument("username", String.class);
                                     com.velocitypowered.api.proxy.Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
                                     if(targetPlayer == null)
-                                        return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                        return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
                                     if(targetPlayer.equals(player))
-                                        return closeMessage(player, VelocityLang.PARTY_ALREADY_LEADER);
+                                        return closeMessage(player, ProxyLang.PARTY_ALREADY_LEADER);
                                     if(!party.contains(targetPlayer))
-                                        return closeMessage(player, VelocityLang.PARTY_NO_MEMBER.build(username));
+                                        return closeMessage(player, ProxyLang.PARTY_NO_MEMBER.build(username));
 
                                     try {
                                         party.setLeader(targetPlayer);
-                                        targetPlayer.sendMessage(VelocityLang.PARTY_PROMOTED);
-                                        player.sendMessage(VelocityLang.PARTY_DEMOTED);
+                                        targetPlayer.sendMessage(ProxyLang.PARTY_PROMOTED);
+                                        player.sendMessage(ProxyLang.PARTY_DEMOTED);
                                         party.players().forEach(partyMember -> {
                                             if(partyMember.equals(player)) return;
                                             if(partyMember.equals(targetPlayer)) return;
 
-                                            partyMember.sendMessage(VelocityLang.PARTY_STATUS_PROMOTED.build(targetPlayer));
+                                            partyMember.sendMessage(ProxyLang.PARTY_STATUS_PROMOTED.build(targetPlayer));
                                         });
 
-                                        context.getSource().sendMessage(VelocityLang.PARTY_BOARD.build(party, player));
+                                        context.getSource().sendMessage(ProxyLang.PARTY_BOARD.build(party, player));
                                     } catch (IllegalStateException e) {
-                                        return closeMessage(player, VelocityLang.PARTY_NO_MEMBER.build(targetPlayer.getUsername()));
+                                        return closeMessage(player, ProxyLang.PARTY_NO_MEMBER.build(targetPlayer.getUsername()));
                                     } catch (Exception e) {
-                                        return closeMessage(player, VelocityLang.INTERNAL_ERROR);
+                                        return closeMessage(player, ProxyLang.INTERNAL_ERROR);
                                     }
                                     return Command.SINGLE_SUCCESS;
                                 })

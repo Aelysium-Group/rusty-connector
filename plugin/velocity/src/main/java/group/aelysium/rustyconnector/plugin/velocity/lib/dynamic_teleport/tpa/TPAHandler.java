@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAHandler;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 
 import java.util.List;
 import java.util.Vector;
@@ -48,7 +48,7 @@ public class TPAHandler implements ITPAHandler<TPARequest> {
 
     public void clearExpired() {
         this.requests.stream().filter(TPARequest::expired).forEach(request -> {
-            request.sender().sendMessage(VelocityLang.TPA_REQUEST_EXPIRED.build(request.target().getUsername()));
+            request.sender().sendMessage(ProxyLang.TPA_REQUEST_EXPIRED.build(request.target().getUsername()));
             this.requests.remove(request);
         });
     }

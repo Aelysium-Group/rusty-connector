@@ -14,7 +14,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
@@ -104,7 +104,7 @@ public class TPAService implements ITPAService<TPACleaningService, MCLoader, Pla
         try {
             targetServer.connect(source);
         } catch (Exception e) {
-            source.sendMessage(VelocityLang.TPA_FAILURE.build(target.getUsername()));
+            source.sendMessage(ProxyLang.TPA_FAILURE.build(target.getUsername()));
         }
     }
 

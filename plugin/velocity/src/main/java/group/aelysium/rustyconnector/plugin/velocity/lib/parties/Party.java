@@ -4,7 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -75,8 +75,8 @@ public class Party implements IParty<MCLoader> {
 
         if(this.players.size() > this.maxSize) throw new RuntimeException("The party is already full! Try again later!");
 
-        player.sendMessage(VelocityLang.PARTY_JOINED_SELF);
-        this.players.forEach(partyMember -> partyMember.sendMessage(VelocityLang.PARTY_JOINED.build(partyMember.getUsername())));
+        player.sendMessage(ProxyLang.PARTY_JOINED_SELF);
+        this.players.forEach(partyMember -> partyMember.sendMessage(ProxyLang.PARTY_JOINED.build(partyMember.getUsername())));
         this.players.add(player);
     }
 
@@ -143,7 +143,7 @@ public class Party implements IParty<MCLoader> {
                 }
 
             kickedPlayers.forEach(player -> {
-                player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED);
+                player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED);
                 this.leave(player);
             });
         });

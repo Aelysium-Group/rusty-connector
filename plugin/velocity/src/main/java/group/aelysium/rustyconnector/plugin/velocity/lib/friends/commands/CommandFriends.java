@@ -14,7 +14,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -42,11 +42,11 @@ public final class CommandFriends {
                     Player player = Player.from(eventPlayer);
 
                     if(!Permission.validate(eventPlayer, "rustyconnector.command.friends")) {
-                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                        player.sendMessage(ProxyLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(eventPlayer, VelocityLang.FRIENDS_BOARD.build(player));
+                    return closeMessage(eventPlayer, ProxyLang.FRIENDS_BOARD.build(player));
                 })
                 .then(LiteralArgumentBuilder.<CommandSource>literal("add")
                     .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
@@ -74,7 +74,7 @@ public final class CommandFriends {
                                 }
 
                                 if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                    player.sendMessage(VelocityLang.NO_PERMISSION);
+                                    player.sendMessage(ProxyLang.NO_PERMISSION);
                                     return Command.SINGLE_SUCCESS;
                                 }
 
@@ -82,10 +82,10 @@ public final class CommandFriends {
                                 Player targetPlayer = new Player.UsernameReference(username).get();
 
                                 if(friendsService.areFriends(Player.from(player), targetPlayer))
-                                    return closeMessage(player, VelocityLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
+                                    return closeMessage(player, ProxyLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
 
                                 if(targetPlayer == null)
-                                    return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                    return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
                                 friendsService.sendRequest(player, targetPlayer);
 
@@ -101,11 +101,11 @@ public final class CommandFriends {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            context.getSource().sendMessage(VelocityLang.FRIEND_REQUEST_USAGE.build());
+                            context.getSource().sendMessage(ProxyLang.FRIEND_REQUEST_USAGE.build());
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
@@ -137,11 +137,11 @@ public final class CommandFriends {
                                     }
 
                                     if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                                        player.sendMessage(ProxyLang.NO_PERMISSION);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    context.getSource().sendMessage(VelocityLang.FRIEND_REQUEST_USAGE.build());
+                                    context.getSource().sendMessage(ProxyLang.FRIEND_REQUEST_USAGE.build());
                                     return Command.SINGLE_SUCCESS;
                                 })
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("ignore")
@@ -152,7 +152,7 @@ public final class CommandFriends {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
@@ -160,7 +160,7 @@ public final class CommandFriends {
                                             Player senderPlayer = new Player.UsernameReference(username).get();
 
                                             if(senderPlayer == null)
-                                                return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                                return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
                                             try {
                                                 FriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
@@ -174,10 +174,10 @@ public final class CommandFriends {
                                                     friendsService.closeInvite(invite);
                                                 }
 
-                                                return closeMessage(player, VelocityLang.FRIEND_REQUEST_IGNORE.build(username));
+                                                return closeMessage(player, ProxyLang.FRIEND_REQUEST_IGNORE.build(username));
                                             } catch (Exception e) {
                                                 e.printStackTrace();
-                                                return closeMessage(player, VelocityLang.INTERNAL_ERROR);
+                                                return closeMessage(player, ProxyLang.INTERNAL_ERROR);
                                             }
                                         })
                                 )
@@ -189,7 +189,7 @@ public final class CommandFriends {
                                             }
 
                                             if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
@@ -197,11 +197,11 @@ public final class CommandFriends {
                                             Player senderPlayer = new Player.UsernameReference(username).get();
 
                                             if (senderPlayer == null)
-                                                return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                                return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
                                             FriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
                                             if (invite == null)
-                                                return closeMessage(player, VelocityLang.FRIEND_REQUEST_EXPIRED);
+                                                return closeMessage(player, ProxyLang.FRIEND_REQUEST_EXPIRED);
 
                                             try {
                                                 invite.accept();
@@ -210,7 +210,7 @@ public final class CommandFriends {
                                                 return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
                                             } catch (Exception e) {
                                                 e.printStackTrace();
-                                                return closeMessage(player, VelocityLang.INTERNAL_ERROR);
+                                                return closeMessage(player, ProxyLang.INTERNAL_ERROR);
                                             }
                                         })
                                 )

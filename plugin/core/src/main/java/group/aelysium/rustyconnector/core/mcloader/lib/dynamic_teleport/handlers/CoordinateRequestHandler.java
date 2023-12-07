@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
 import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.CoordinateRequest;
 
 import java.util.UUID;
@@ -35,7 +35,7 @@ public class CoordinateRequestHandler implements PacketHandler {
                 coordinateRequest.teleport();
             } catch (Exception e) {
                 e.printStackTrace();
-                api.sendMessage(coordinateRequest.client().orElseThrow(), PluginLang.TPA_FAILED_TELEPORT.build(TinderAdapterForCore.getTinder().getPlayerName(coordinateRequest.target())));
+                api.sendMessage(coordinateRequest.client().orElseThrow(), MCLoaderLang.TPA_FAILED_TELEPORT.build(TinderAdapterForCore.getTinder().getPlayerName(coordinateRequest.target())));
             }
         } catch (NullPointerException e) {
             e.printStackTrace();

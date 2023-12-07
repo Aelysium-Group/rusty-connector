@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -38,11 +38,11 @@ public final class CommandUnFriend {
                     }
 
                     if(!Permission.validate(player, "rustyconnector.command.unfriend")) {
-                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                        player.sendMessage(ProxyLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(player, VelocityLang.UNFRIEND_USAGE);
+                    return closeMessage(player, ProxyLang.UNFRIEND_USAGE);
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
@@ -71,7 +71,7 @@ public final class CommandUnFriend {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.unfriend")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
@@ -79,20 +79,20 @@ public final class CommandUnFriend {
                             Player targetPlayer = new Player.UsernameReference(username).get();
 
                             if(!friendsService.areFriends(Player.from(player), targetPlayer))
-                                return closeMessage(player, VelocityLang.UNFRIEND_NOT_FRIENDS.build(username));
+                                return closeMessage(player, ProxyLang.UNFRIEND_NOT_FRIENDS.build(username));
 
                             if(targetPlayer == null)
-                                return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
                             try {
                                 friendsService.removeFriends(Player.from(player), targetPlayer);
 
-                                return closeMessage(player, VelocityLang.UNFRIEND_SUCCESS.build(username));
+                                return closeMessage(player, ProxyLang.UNFRIEND_SUCCESS.build(username));
                             } catch (IllegalStateException e) {
                                 return closeMessage(player, Component.text(e.getMessage(), NamedTextColor.RED));
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                return closeMessage(player, VelocityLang.INTERNAL_ERROR);
+                                return closeMessage(player, ProxyLang.INTERNAL_ERROR);
                             }
                         })
                 )

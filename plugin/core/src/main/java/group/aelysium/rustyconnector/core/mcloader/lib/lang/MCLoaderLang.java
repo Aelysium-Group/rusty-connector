@@ -15,7 +15,7 @@ import java.util.List;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
-public class PluginLang extends Lang {
+public class MCLoaderLang extends Lang {
     public static LanguageResolver resolver() {
         return (LanguageResolver) TinderAdapterForCore.getTinder().lang().resolver();
     }
@@ -103,7 +103,7 @@ public class PluginLang extends Lang {
             BORDER,
             SPACING,
             text("/rc send <username> <family name>", RED),
-            resolver().get("paper.send.usage"),
+            resolver().get("mcloader.send.usage"),
             SPACING,
             BORDER
     );
@@ -176,7 +176,7 @@ public class PluginLang extends Lang {
     };
 
     public final static ParameterizedMessage1<String> TPA_FAILED_TELEPORT = username ->
-            resolver().get("paper.tpa.sender_failed_teleport", LanguageResolver.tagHandler("username", username));
+            resolver().get("mcloader.tpa.sender_failed_teleport", LanguageResolver.tagHandler("username", username));
 
     public final static ParameterizedMessage1<Boolean> RCNAME_PAPER_FOLIA = isFolia -> {
         if(isFolia) return text("RustyConnector-Folia");

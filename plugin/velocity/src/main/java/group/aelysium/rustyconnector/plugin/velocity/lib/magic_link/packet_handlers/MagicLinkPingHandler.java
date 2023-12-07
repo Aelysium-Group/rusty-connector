@@ -14,7 +14,7 @@ import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingPacket;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -42,7 +42,7 @@ public class MagicLinkPingHandler implements PacketHandler {
         );
 
         if(api.logger().loggerGate().check(GateKey.PING))
-            api.logger().send(VelocityLang.PING.build(serverInfo));
+            api.logger().send(ProxyLang.PING.build(serverInfo));
 
         if(packet.intent() == ConnectionIntent.CONNECT)
             reviveOrConnectServer(api, serverInfo, packet);

@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 
 import java.lang.ref.WeakReference;
@@ -36,26 +36,26 @@ public class PartyInvite implements IPartyInvite<Player> {
      */
     public synchronized void accept() {
         if(this.isAcknowledged != null)
-            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ACKNOWLEDGED);
+            throw new IllegalStateException(ProxyLang.PARTY_INJECTED_ACKNOWLEDGED);
         try {
             if (this.party.get() == null || Objects.requireNonNull(this.party.get()).isEmpty())
-                throw new IllegalStateException(VelocityLang.PARTY_INJECTED_EXPIRED_INVITE);
+                throw new IllegalStateException(ProxyLang.PARTY_INJECTED_EXPIRED_INVITE);
         } catch (NullPointerException ignore) {
-            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_EXPIRED_INVITE);
+            throw new IllegalStateException(ProxyLang.PARTY_INJECTED_EXPIRED_INVITE);
         }
         if(this.sender.resolve().isEmpty())
-            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_NO_SENDER);
+            throw new IllegalStateException(ProxyLang.PARTY_INJECTED_NO_SENDER);
 
         if(partyService.settings().onlyLeaderCanInvite())
             if(!Objects.requireNonNull(party.get()).leader().equals(sender.resolve().orElse(null)))
-                throw new IllegalStateException(VelocityLang.PARTY_INJECTED_INVALID_LEADER_INVITE);
+                throw new IllegalStateException(ProxyLang.PARTY_INJECTED_INVALID_LEADER_INVITE);
         else
             if(!Objects.requireNonNull(party.get()).players().contains(sender.resolve().orElse(null)) && sender.resolve().isPresent())
-                throw new IllegalStateException(VelocityLang.PARTY_INJECTED_INVALID_MEMBER_INVITE);
+                throw new IllegalStateException(ProxyLang.PARTY_INJECTED_INVALID_MEMBER_INVITE);
 
         Optional<com.velocitypowered.api.proxy.Player> player = this.target.resolve();
         if(player.isEmpty())
-            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_NO_TARGET);
+            throw new IllegalStateException(ProxyLang.PARTY_INJECTED_NO_TARGET);
 
         Objects.requireNonNull(this.party.get()).join(player.orElseThrow());
         partyService.closeInvite(this);
@@ -67,7 +67,7 @@ public class PartyInvite implements IPartyInvite<Player> {
      * This will subsequently decompose the invite and remove it from the PartyService that it belongs to.
      */
     public synchronized void ignore() {
-        if(this.isAcknowledged != null) throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ACKNOWLEDGED);
+        if(this.isAcknowledged != null) throw new IllegalStateException(ProxyLang.PARTY_INJECTED_ACKNOWLEDGED);
 
         partyService.closeInvite(this);
         this.isAcknowledged = true;

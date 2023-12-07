@@ -14,7 +14,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.Hu
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
@@ -46,7 +46,7 @@ public class CommandHub {
                     RootFamily rootFamily = familyService.rootFamily();
 
                     if(!hubService.isEnabled(family.id())) {
-                        context.getSource().sendMessage(VelocityLang.UNKNOWN_COMMAND);
+                        context.getSource().sendMessage(ProxyLang.UNKNOWN_COMMAND);
                         return Command.SINGLE_SUCCESS;
                     }
 
@@ -57,7 +57,7 @@ public class CommandHub {
                             return Command.SINGLE_SUCCESS;
                         } catch (RuntimeException err) {
                             logger.send(Component.text("Failed to connect player to parent family " + rootFamily.id() + "!",NamedTextColor.RED));
-                            context.getSource().sendMessage(VelocityLang.HUB_CONNECTION_FAILED);
+                            context.getSource().sendMessage(ProxyLang.HUB_CONNECTION_FAILED);
                         }
 
                         return Command.SINGLE_SUCCESS;
@@ -74,7 +74,7 @@ public class CommandHub {
                         rootFamily.connect(player);
                     } catch (RuntimeException err) {
                         logger.send(Component.text("Failed to connect player to parent family " + rootFamily.id() + "!",NamedTextColor.RED));
-                        context.getSource().sendMessage(VelocityLang.HUB_CONNECTION_FAILED);
+                        context.getSource().sendMessage(ProxyLang.HUB_CONNECTION_FAILED);
                     }
 
                     return Command.SINGLE_SUCCESS;
