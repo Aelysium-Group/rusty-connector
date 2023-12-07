@@ -5,7 +5,6 @@ compileJava {
 dependencies {
     // Include in jar
     implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
-    implementation "commons-codec:commons-codec:${project.commons_version}"
     implementation "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
     implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
 
