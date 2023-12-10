@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.Magic
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
@@ -23,11 +23,16 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
-public class MagicLinkPingHandler implements PacketHandler {
+public class MagicLinkPingListener implements PacketListener {
     protected Tinder api;
 
-    public MagicLinkPingHandler(Tinder api) {
+    public MagicLinkPingListener(Tinder api) {
         this.api = api;
+    }
+
+    @Override
+    public PacketType.Mapping identifier() {
+        return PacketType.PING;
     }
 
     @Override

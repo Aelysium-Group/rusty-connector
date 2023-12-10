@@ -28,7 +28,7 @@ public class Tinder extends MCLoaderTinder {
 
     private final PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
-    private MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> flame;
+    private MCLoaderFlame<CoreServiceHandler, RedisConnector> flame;
     private final PluginLogger pluginLogger;
     private final LangService lang;
 
@@ -147,7 +147,7 @@ public class Tinder extends MCLoaderTinder {
      * Returns the currently active RustyConnector kernel.
      * @return A {@link MCLoaderFlame}.
      */
-    public MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> flame() {
+    public MCLoaderFlame<CoreServiceHandler, RedisConnector> flame() {
         return this.flame;
     }
 

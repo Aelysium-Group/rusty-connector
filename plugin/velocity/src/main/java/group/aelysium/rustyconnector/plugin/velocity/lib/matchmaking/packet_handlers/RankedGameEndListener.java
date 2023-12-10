@@ -6,13 +6,19 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 
-public class RankedUpdateHandler implements PacketHandler {
+public class RankedGameEndListener implements PacketListener {
     protected Tinder api;
 
-    public RankedUpdateHandler(Tinder api) {
+    public RankedGameEndListener(Tinder api) {
         this.api = api;
+    }
+
+    @Override
+    public PacketType.Mapping identifier() {
+        return PacketType.END_RANKED_GAME;
     }
 
     @Override

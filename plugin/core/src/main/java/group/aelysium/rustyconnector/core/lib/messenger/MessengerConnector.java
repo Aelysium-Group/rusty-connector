@@ -4,13 +4,14 @@ import group.aelysium.rustyconnector.toolkit.core.UserPass;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
-public abstract class MessengerConnector<TMessengerConnection extends IMessengerConnection<MessageCacheService>> {
+public abstract class MessengerConnector<TMessengerConnection extends IMessengerConnection> implements IMessengerConnector<TMessengerConnection> {
     protected final InetSocketAddress address;
     protected final UserPass userPass;
     protected TMessengerConnection connection;

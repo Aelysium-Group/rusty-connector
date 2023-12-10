@@ -4,9 +4,12 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestListener;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.MagicLink_PingResponseListener;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicLinkConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -20,7 +23,7 @@ import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.MemberKeyConfig;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
@@ -48,10 +51,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsC
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.MagicLinkPingHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.LockServerHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.SendPlayerHandler;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.UnlockServerHandler;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.MagicLinkPingListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.LockServerListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.SendPlayerListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.UnlockServerListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.PartyServiceSettings;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.config.PartyConfig;
@@ -77,7 +80,7 @@ import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInje
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link Tinder}.
  */
-public class Flame extends VelocityFlame<CoreServiceHandler> {
+public class Flame extends VelocityFlame<CoreServiceHandler, RedisConnector> {
     private final int configVersion;
     private final Version version;
     private final List<Component> bootOutput;
@@ -311,19 +314,17 @@ class Initialize {
         services.put(RedisConnector.class, messenger);
         bootOutput.add(Component.text("Booting Messenger...", NamedTextColor.DARK_GRAY));
 
-        Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
-        {
-            handlers.put(PacketType.PING, new MagicLinkPingHandler(this.api));
-            handlers.put(PacketType.SEND_PLAYER, new SendPlayerHandler(this.api));
-            handlers.put(PacketType.LOCK_SERVER, new LockServerHandler(this.api));
-            handlers.put(PacketType.UNLOCK_SERVER, new UnlockServerHandler(this.api));
-
-            handlers.put(PacketType.END_RANKED_GAME, new RankedGameEndHandler(this.api));
-        }
-
         messenger.connect();
         RedisConnection connection = messenger.connection().orElseThrow();
-        connection.startListening(dependencies.d2(), dependencies.d3(), handlers, null);
+
+        connection.listen(new MagicLinkPingListener(this.api));
+        connection.listen(new SendPlayerListener(this.api));
+        connection.listen(new LockServerListener(this.api));
+        connection.listen(new UnlockServerListener(this.api));
+
+        connection.listen(new RankedGameEndListener(this.api));
+
+        connection.startListening(dependencies.d2(), dependencies.d3(), null);
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
 
         bootOutput.add(Component.text("Booting MicroStream MariaDB driver...", NamedTextColor.DARK_GRAY));

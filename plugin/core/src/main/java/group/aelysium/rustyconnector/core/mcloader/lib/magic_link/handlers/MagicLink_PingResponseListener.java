@@ -2,20 +2,25 @@ package group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers;
 
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatus;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
-import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class MagicLink_PingResponseHandler implements PacketHandler {
+public class MagicLink_PingResponseListener implements PacketListener {
     protected MCLoaderTinder api;
 
-    public MagicLink_PingResponseHandler(MCLoaderTinder api) {
+    public MagicLink_PingResponseListener(MCLoaderTinder api) {
         this.api = api;
+    }
+
+    @Override
+    public PacketType.Mapping identifier() {
+        return PacketType.PING_RESPONSE;
     }
 
     @Override

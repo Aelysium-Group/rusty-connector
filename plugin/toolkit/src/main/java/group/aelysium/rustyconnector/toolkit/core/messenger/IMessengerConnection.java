@@ -1,28 +1,20 @@
 package group.aelysium.rustyconnector.toolkit.core.messenger;
 
-import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.toolkit.core.message_cache.ICacheableMessage;
-import group.aelysium.rustyconnector.toolkit.core.message_cache.IMessageCacheService;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
-import java.net.InetSocketAddress;
-import java.util.Map;
-
-public interface IMessengerConnection<TMessageCacheService extends IMessageCacheService<? extends ICacheableMessage>> extends Service {
+public interface IMessengerConnection extends Service {
     /**
-     * Start listening on the messenger connection for messages.
+     * Publish a new packet to the {@link IMessengerConnection}.
      *
-     * @throws IllegalStateException If the service is already running.
+     * @param packet The packet to publish.
      */
-    void startListening(TMessageCacheService cache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, InetSocketAddress originAddress);
+    <TPacket extends IPacket> void publish(TPacket packet);
 
     /**
-     * Publish a new message to the {@link IMessengerConnection}.
-     *
-     * @param message The message to publish.
+     * Register a listener to handle particular packets.
+     * @param listener The listener to use.
      */
-    <P extends IPacket> void publish(P message);
+    void listen(PacketListener listener);
 }

@@ -29,7 +29,7 @@ public class Tinder extends MCLoaderTinder {
 
     private final FabricServerCommandManager<CommandSource> commandManager;
     private final FabricRustyConnector plugin;
-    private MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> flame;
+    private MCLoaderFlame<CoreServiceHandler, RedisConnector> flame;
     private final PluginLogger pluginLogger;
     private final LangService lang;
 

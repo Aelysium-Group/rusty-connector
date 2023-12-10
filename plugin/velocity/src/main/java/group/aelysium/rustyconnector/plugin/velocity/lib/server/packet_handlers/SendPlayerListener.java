@@ -3,19 +3,25 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import net.kyori.adventure.text.Component;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
-public class SendPlayerHandler implements PacketHandler {
+public class SendPlayerListener implements PacketListener {
     protected Tinder api;
 
-    public SendPlayerHandler(Tinder api) {
+    public SendPlayerListener(Tinder api) {
         this.api = api;
+    }
+
+    @Override
+    public PacketType.Mapping identifier() {
+        return PacketType.SEND_PLAYER;
     }
     @Override
     public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {

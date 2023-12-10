@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper.central;
 
-import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateListener;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderFlame;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketHandler;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
@@ -21,9 +21,9 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicTeleportService;
-import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.MagicLink_PingResponseHandler;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.MagicLink_PingResponseListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.packet_builder.PacketBuilderService;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
@@ -47,7 +47,7 @@ import java.util.*;
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link MCLoaderTinder}.
  */
-public class Flame extends MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> {
+public class Flame extends MCLoaderFlame<CoreServiceHandler, RedisConnector> {
     private final int configVersion;
     private final String version;
 
@@ -83,7 +83,7 @@ public class Flame extends MCLoaderFlame<CoreServiceHandler, RedisConnection, Re
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link Flame}.
      */
-    public static MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
+    public static MCLoaderFlame<CoreServiceHandler, RedisConnector> fabricateNew(PaperRustyConnector plugin, LangService langService) throws RuntimeException {
         Initialize initialize = new Initialize();
 
         try {
@@ -218,12 +218,11 @@ class Initialize {
         messenger.connect();
         RedisConnection connection = messenger.connection().orElseThrow();
 
-        Map<PacketType.Mapping, PacketHandler> handlers = new HashMap<>();
-        handlers.put(PacketType.PING_RESPONSE, new MagicLink_PingResponseHandler(this.api));
-        handlers.put(PacketType.COORDINATE_REQUEST_QUEUE, new CoordinateRequestHandler(this.api));
+        connection.listen(new MagicLink_PingResponseListener(this.api));
+        connection.listen(new CoordinateRequestListener(this.api));
+        connection.listen(new RankedGameAssociateListener(this.api));
 
-        handlers.put(PacketType.ASSOCIATE_RANKED_GAME, new RankedGameAssociateHandler(this.api));
-        connection.startListening(cacheService, logger, handlers, originAddress);
+        connection.startListening(cacheService, logger, originAddress);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
 
