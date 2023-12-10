@@ -2,29 +2,19 @@ package group.aelysium.rustyconnector.toolkit.mc_loader.central;
 
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.IServiceableService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.Version;
 
-public abstract class MCLoaderFlame<TCoreServiceHandler extends ICoreServiceHandler, TMessengerConnector extends IMessengerConnector<?>> extends ServiceableService<TCoreServiceHandler> {
-
-    public MCLoaderFlame(TCoreServiceHandler services) {
-        super(services);
-    }
-
+public interface MCLoaderFlame<TCoreServiceHandler extends ICoreServiceHandler, TMessengerConnector extends IMessengerConnector<?>> extends IServiceableService<TCoreServiceHandler> {
     /**
      * Gets the current version of RustyConnector
      * @return {@link Version}
      */
-    public abstract String versionAsString();
-
-    /**
-     * Exhaust the current instance of the RustyConnector kernel.
-     * A new Flame can be created using {@link MCLoaderTinder#ignite()}
-     */
-    public abstract void exhaust();
+    String versionAsString();
 
     /**
      * Gets RustyConnector's backbone messenger service.
      * @return {@link TMessengerConnector}
      */
-    public abstract TMessengerConnector backbone();
+    TMessengerConnector backbone();
 }

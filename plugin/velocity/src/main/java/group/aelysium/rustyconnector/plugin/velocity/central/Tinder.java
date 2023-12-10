@@ -4,6 +4,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
@@ -15,6 +16,8 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Vector;
+import java.util.function.Consumer;
 
 /**
  * The root api endpoint for the entire RustyConnector api.
@@ -31,6 +34,8 @@ public class Tinder implements VelocityTinder {
     private final Path dataFolder;
     private final PluginLogger pluginLogger;
     private final LangService lang;
+    private final Vector<Consumer<Flame>> onStart = new Vector<>();
+    private final Vector<Runnable> onStop = new Vector<>();
 
     private Tinder(VelocityRustyConnector plugin, ProxyServer server, PluginLogger logger, @DataDirectory Path dataFolder, LangService lang) {
         instance = this;
@@ -47,6 +52,8 @@ public class Tinder implements VelocityTinder {
      */
     public void ignite() throws RuntimeException {
         this.flame = Flame.fabricateNew(this.plugin, this.lang);
+
+        this.onStart.forEach(callback -> callback.accept(this.flame));
     }
 
     public PluginLogger logger() {
@@ -66,13 +73,25 @@ public class Tinder implements VelocityTinder {
      */
     public void rekindle() {
         try {
-            this.flame.exhaust(this.plugin);
+            this.onStop.forEach(Runnable::run);
+
+            this.exhaust(this.plugin);
             this.flame = null;
 
             this.ignite();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Kill the {@link Flame}.
+     * Typically good for if you want to ignite a new one.
+     */
+    public void exhaust(VelocityRustyConnector plugin) {
+        Tinder.get().velocityServer().getEventManager().unregisterListeners(plugin);
+        if(this.flame == null) return;
+        this.flame.kill();
     }
 
     public CoreServiceHandler services() {
@@ -139,5 +158,15 @@ public class Tinder implements VelocityTinder {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public <TFlame extends VelocityFlame<?, ?>> void onStart(Consumer<TFlame> callback) {
+        this.onStart.add((Consumer<Flame>) callback);
+    }
+
+    @Override
+    public void onStop(Runnable callback) {
+        this.onStop.add(callback);
     }
 }

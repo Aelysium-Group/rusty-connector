@@ -1,51 +1,62 @@
 package group.aelysium.rustyconnector.toolkit.mc_loader.central;
 
+import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.toolkit.core.lang.ILangService;
 import group.aelysium.rustyconnector.toolkit.core.lang.ILanguageResolver;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import net.kyori.adventure.text.Component;
 
 import java.io.InputStream;
 import java.util.UUID;
+import java.util.Vector;
+import java.util.function.Consumer;
 
-public abstract class MCLoaderTinder {
+public interface MCLoaderTinder<TFlame extends MCLoaderFlame<? extends ICoreServiceHandler, ? extends IMessengerConnector<? extends IMessengerConnection>>> {
     /**
      * Gets a resource by name and returns it as a stream.
      * @param filename The name of the resource to get.
      * @return The resource as a stream.
      */
-    public static InputStream resourceAsStream(String filename)  {
+    static InputStream resourceAsStream(String filename)  {
         return MCLoaderTinder.class.getClassLoader().getResourceAsStream(filename);
     }
 
-    //abstract public S scheduler();
+    PluginLogger logger();
 
-    abstract public void ignite();
+    ICoreServiceHandler services();
 
-    //abstract public MCLoaderFlame<ICoreServiceHandler> flame();
+    String dataFolder();
 
-    abstract public PluginLogger logger();
+    ILangService<? extends ILanguageResolver> lang();
 
-    abstract public ICoreServiceHandler services();
+    void setMaxPlayers(int max);
 
-    abstract public String dataFolder();
+    int onlinePlayerCount();
 
-    abstract public ILangService<? extends ILanguageResolver> lang();
+    UUID getPlayerUUID(String name);
 
-    abstract public void setMaxPlayers(int max);
+    String getPlayerName(UUID uuid);
 
-    abstract public int onlinePlayerCount();
+    boolean isOnline(UUID uuid);
 
-    abstract public UUID getPlayerUUID(String name);
+    void teleportPlayer(UUID uuid, UUID target);
 
-    abstract public String getPlayerName(UUID uuid);
+    void sendMessage(UUID uuid, Component component);
 
-    abstract public boolean isOnline(UUID uuid);
+    /**
+     * Schedules a consumer to be executed once a flame has started for RustyConnector.
+     * Specifically, this method will run after the base RustyConnector plugin has fully booted.
+     * @param callback A consumer. The passed input argument is the newly created Flame instance.
+     */
+    void onStart(Consumer<TFlame> callback);
 
-    abstract public void teleportPlayer(UUID uuid, UUID target);
-
-    abstract public void sendMessage(UUID uuid, Component component);
-    abstract public MCLoaderFlame<? extends ICoreServiceHandler, ? extends IMessengerConnector<? extends IMessengerConnection>> flame();
+    /**
+     * Schedules a runnable to be executed once a flame is ready to be killed for RustyConnector.
+     * Specifically, this method will run before the base RustyConnector attempts to start shutting down.
+     * @param callback A runnable.
+     */
+    void onStop(Runnable callback);
 }

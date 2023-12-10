@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.fabric;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.LoggerGate;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
 import net.kyori.adventure.text.Component;
+import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 
 public class PluginLogger implements group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger {
@@ -59,7 +60,7 @@ public class PluginLogger implements group.aelysium.rustyconnector.toolkit.core.
     @Override
     public void send(Component message) {
         try {
-            Tinder.get().fabricServer().sendMessage(message);
+            ((MinecraftServer) Tinder.get().server()).sendMessage(message);
         } catch (Exception ignore) {}
     }
 }

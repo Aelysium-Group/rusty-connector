@@ -70,7 +70,7 @@ public class VelocityRustyConnector {
     public void onUnload(ProxyShutdownEvent event) {
         try {
             RustyConnector.Toolkit.unregister();
-            this.tinder.flame().exhaust(this);
+            this.tinder.exhaust(this);
         } catch (Exception e) {
             Tinder.get().logger().log("RustyConnector: " + e.getMessage());
         }

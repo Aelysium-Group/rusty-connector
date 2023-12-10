@@ -1,35 +1,26 @@
-package group.aelysium.rustyconnector.plugin.fabric.central;
+package group.aelysium.rustyconnector.core.mcloader.central;
 
-import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateListener;
-import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderFlame;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
-import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.MagicLink_PingResponseListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.packet_builder.PacketBuilderService;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
-import group.aelysium.rustyconnector.plugin.fabric.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.fabric.events.OnPlayerJoin;
-import group.aelysium.rustyconnector.plugin.fabric.events.OnPlayerLeave;
-import group.aelysium.rustyconnector.plugin.fabric.events.OnPlayerPreLogin;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -38,51 +29,35 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-/**
- * The core module of RustyConnector.
- * All aspects of the plugin should be accessible from here.
- * If not, check {@link MCLoaderTinder}.
- */
-public class Flame extends MCLoaderFlame<CoreServiceHandler, RedisConnector> {
-    private final int configVersion;
-    private final String version;
-
-    /**
-     * The core message backbone where all RC messages are sent through.
-     */
+public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implements group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderFlame<CoreServiceHandler, RedisConnector> {
+    protected final int configVersion;
+    protected final String version;
     private final RedisConnector backbone;
 
-    public Flame(String version, int configVersion, Map<Class<? extends Service>, Service> services) {
-        super(new CoreServiceHandler(services));
+    public MCLoaderFlame(String version, int configVersion, CoreServiceHandler services, RedisConnector messenger) {
+        super(services);
         this.version = version;
         this.configVersion = configVersion;
-        this.backbone = this.services().messenger();
+        this.backbone = messenger;
     }
 
     public String versionAsString() { return this.version; }
     public int configVersion() { return this.configVersion; }
-
     public RedisConnector backbone() {
-        return this.backbone;
+        return (RedisConnector) this.backbone;
     }
-
-    /**
-     * Kill the {@link Flame}.
-     * Typically good for if you want to ignite a new one.
-     */
-    public void exhaust() {
-        this.kill();
-    }
-
 
     /**
      * Fabricates a new RustyConnector core and returns it.
-     * @return A new RustyConnector {@link Flame}.
+     * @return A new RustyConnector {@link MCLoaderFlame}.
      */
-    public static MCLoaderFlame<CoreServiceHandler, RedisConnector> fabricateNew(LangService langService) throws RuntimeException {
-        Initialize initialize = new Initialize();
+    public static MCLoaderFlame fabricateNew(MCLoaderTinder api, LangService langService, PluginLogger logger) throws RuntimeException {
+        Initialize initialize = new Initialize(api);
 
         try {
             String version = initialize.version();
@@ -92,22 +67,21 @@ public class Flame extends MCLoaderFlame<CoreServiceHandler, RedisConnector> {
             ServerInfoService serverInfoService = initialize.serverInfo(defaultConfig);
 
             MessageCacheService messageCacheService = initialize.messageCache();
-            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, Tinder.get().logger(), langService, AddressUtil.stringToAddress(serverInfoService.address()));
+            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, logger, langService, AddressUtil.stringToAddress(serverInfoService.address()));
 
             initialize.messageCache();
             PacketBuilderService packetBuilderService = initialize.packetBuilder();
             initialize.dynamicTeleport();
             initialize.magicLink(packetBuilderService);
 
-            initialize.events();
-            initialize.commands();
-
-            return new Flame(version, configVersion, initialize.getServices());
+            return new MCLoaderFlame(version, configVersion, new CoreServiceHandler(initialize.getServices()), messenger);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 }
+
+
 
 
 
@@ -119,28 +93,23 @@ public class Flame extends MCLoaderFlame<CoreServiceHandler, RedisConnector> {
  * This class will mutate the provided services and requestedConnectors lists that are provided to it.
  */
 class Initialize {
-    private final Tinder api = Tinder.get();
-    private final PluginLogger logger = api.logger();
+    private final MCLoaderTinder api;
+    private final PluginLogger logger;
     private final Map<Class<? extends Service>, Service> services = new HashMap<>();
     private final List<Component> bootOutput = new ArrayList<>();
+
+    public Initialize(MCLoaderTinder tinder) {
+        this.api = tinder;
+        this.logger = api.logger();
+    }
 
     public Map<Class<? extends Service>, Service> getServices() {
         return this.services;
     }
 
-    public void events() {
-        OnPlayerJoin.register();
-        OnPlayerLeave.register();
-        OnPlayerPreLogin.register();
-    }
-
-    public void commands() {
-        CommandRusty.create(api.commandManager());
-    }
-
     public String version() {
         try {
-            InputStream stream = MCLoaderTinder.resourceAsStream("plugin.yml");
+            InputStream stream = group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()
@@ -194,15 +163,6 @@ class Initialize {
         return defaultConfig;
     }
 
-    /**
-     * Initializes the connectors service.
-     * First returns a {@link Callable} which once run, will return a {@link Runnable}.
-     * <p>
-     * {@link Callable} - Runs linting to only build the connectors actually being referenced by the configs. Returns:
-     * <p>
-     * a {@link Runnable} - Starts up all connectors and connects them to their remote resources.
-     * @return A runnable which will wrap up the connectors' initialization. Should be run after all other initialization logic has run.
-     */
     public RedisConnector connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang, InetSocketAddress originAddress) throws IOException {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
@@ -247,11 +207,17 @@ class Initialize {
     }
 
     public ServerInfoService serverInfo(DefaultConfig defaultConfig) {
+        InetSocketAddress address = null;
+        try {
+            address = AddressUtil.parseAddress(defaultConfig.address());
+        } catch (Exception ignore) {}
+
+        // TODO: Create a port resolver
         ServerInfoService serverInfoService = new ServerInfoService(
-                AddressUtil.parseAddress(defaultConfig.address()),
+                address,
                 defaultConfig.magicConfig(),
                 defaultConfig.magicInterfaceResolver(),
-                api.fabricServer().getServerPort()
+                80 // Bukkit.getPort()
         );
         services.put(ServerInfoService.class, serverInfoService);
 
@@ -275,4 +241,5 @@ class Initialize {
     public void dynamicTeleport() {
         services.put(DynamicTeleportService.class, new DynamicTeleportService());
     }
+
 }

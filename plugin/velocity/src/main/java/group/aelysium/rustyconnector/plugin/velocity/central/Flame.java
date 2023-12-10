@@ -110,14 +110,10 @@ public class Flame extends VelocityFlame<CoreServiceHandler, RedisConnector> {
         return this.services().messenger();
     }
 
-    /**
-     * Kill the {@link Flame}.
-     * Typically good for if you want to ignite a new one.
-     */
-    public void exhaust(VelocityRustyConnector plugin) {
-        Tinder.get().velocityServer().getEventManager().unregisterListeners(plugin);
+    @Override
+    public void kill() {
+        super.kill();
         this.bootOutput.clear();
-        this.kill();
     }
 
     /**

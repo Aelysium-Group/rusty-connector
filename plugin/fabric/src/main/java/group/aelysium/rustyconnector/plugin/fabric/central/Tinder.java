@@ -2,14 +2,14 @@ package group.aelysium.rustyconnector.plugin.fabric.central;
 
 import cloud.commandframework.fabric.FabricServerCommandManager;
 import com.mojang.authlib.GameProfile;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderFlame;
+import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.plugin.fabric.commands.CommandRusty;
+import group.aelysium.rustyconnector.plugin.fabric.events.OnPlayerJoin;
+import group.aelysium.rustyconnector.plugin.fabric.events.OnPlayerLeave;
+import group.aelysium.rustyconnector.plugin.fabric.events.OnPlayerPreLogin;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
-import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
-import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.plugin.fabric.FabricRustyConnector;
 import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.text.Component;
@@ -19,69 +19,30 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 public class Tinder extends MCLoaderTinder {
-    private static Tinder instance;
-
+    protected static Tinder instance;
+    public static Tinder get() {
+        return instance;
+    }
     private final FabricServerCommandManager<CommandSource> commandManager;
     private final FabricRustyConnector plugin;
-    private MCLoaderFlame<CoreServiceHandler, RedisConnector> flame;
-    private final PluginLogger pluginLogger;
-    private final LangService lang;
 
-
-    private Tinder(FabricRustyConnector plugin, PluginLogger logger, LangService lang) throws Exception {
+    protected Tinder(FabricRustyConnector plugin, PluginLogger logger, LangService lang) throws Exception {
+        super(logger, lang);
         this.plugin = plugin;
-        this.pluginLogger = logger;
-        this.lang = lang;
 
         this.commandManager = null;
 
         instance = this;
     }
 
-    public static Tinder get() {
-        return instance;
-    }
-
-    /**
-     * Ignites a {@link MCLoaderFlame} which effectively starts the RustyConnector kernel.
-     */
-    public void ignite() throws RuntimeException {
-        this.flame = group.aelysium.rustyconnector.plugin.fabric.central.Flame.fabricateNew(this.lang);
-    }
-
-    /**
-     * Restarts the entire RustyConnector kernel by exhausting the current {@link MCLoaderFlame} and igniting a new one.
-     */
-    public void rekindle() {
-        this.flame.exhaust();
-        this.flame = null;
-
-        this.ignite();
-    }
-
-    @Override
-    public PluginLogger logger() {
-        return this.pluginLogger;
-    }
-
     @Override
     public String dataFolder() {
         return FabricLoader.getInstance().getGameDir().toString();
-    }
-
-    @Override
-    public LangService lang() {
-        return this.lang;
-    }
-
-    public Path dataFolderPath() {
-        return FabricLoader.getInstance().getGameDir();
     }
 
     @Override
@@ -134,20 +95,24 @@ public class Tinder extends MCLoaderTinder {
         return this.plugin.getServer();
     }
 
-    /**
-     * Returns the currently active RustyConnector kernel.
-     * @return A {@link MCLoaderFlame}.
-     */
-    public MCLoaderFlame flame() {
-        return this.flame;
-    }
-
-    public CoreServiceHandler services() {
-        return this.flame.services();
+    @Override
+    public Object server() {
+        return this.fabricServer();
     }
 
     public FabricServerCommandManager<CommandSource> commandManager() {
         return commandManager;
+    }
+
+    @Override
+    public void ignite() throws RuntimeException {
+        super.ignite();
+
+        CommandRusty.create(this.commandManager());
+
+        OnPlayerJoin.register();
+        OnPlayerLeave.register();
+        OnPlayerPreLogin.register();
     }
 
     /**

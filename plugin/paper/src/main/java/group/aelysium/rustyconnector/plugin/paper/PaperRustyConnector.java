@@ -37,6 +37,6 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         RustyConnector.Toolkit.unregister();
-        Tinder.get().flame().exhaust();
+        Tinder.get().exhaust();
     }
 }

@@ -27,8 +27,7 @@ public final class FabricRustyConnector implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTING.register(server1 -> server = server1);
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            RustyConnector.Toolkit.unregister();
-            Tinder.get().flame().exhaust();
+            Tinder.get().exhaust();
         });
     }
 
