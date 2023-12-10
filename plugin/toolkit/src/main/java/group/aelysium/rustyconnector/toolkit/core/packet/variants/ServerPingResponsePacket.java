@@ -1,10 +1,9 @@
-package group.aelysium.rustyconnector.core.lib.packets.variants;
+package group.aelysium.rustyconnector.toolkit.core.packet.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.velocity.util.ColorMapper;
 import io.lettuce.core.KeyValue;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -36,7 +35,7 @@ public class ServerPingResponsePacket extends GenericPacket {
     public ServerPingResponsePacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(PacketType.PING_RESPONSE, address, origin);
 
-        if(!ServerPingResponsePacket.validateParameters(ValidParameters.toList(), parameters))
+        if(!validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -54,7 +53,7 @@ public class ServerPingResponsePacket extends GenericPacket {
     public ServerPingResponsePacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, PacketType.PING_RESPONSE, address, origin);
 
-        if(!ServerPingResponsePacket.validateParameters(ValidParameters.toList(), parameters))
+        if(!validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {

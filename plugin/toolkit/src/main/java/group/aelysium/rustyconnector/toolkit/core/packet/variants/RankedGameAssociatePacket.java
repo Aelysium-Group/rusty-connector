@@ -1,8 +1,7 @@
-package group.aelysium.rustyconnector.core.lib.packets.variants;
+package group.aelysium.rustyconnector.toolkit.core.packet.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import io.lettuce.core.KeyValue;
@@ -10,7 +9,6 @@ import io.lettuce.core.KeyValue;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class RankedGameAssociatePacket extends GenericPacket {

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers;
 
-import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameAssociatePacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.RankedGameAssociatePacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;

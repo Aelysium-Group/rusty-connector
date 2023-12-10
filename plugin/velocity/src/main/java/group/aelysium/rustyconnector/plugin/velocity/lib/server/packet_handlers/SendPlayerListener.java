@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.core.lib.packets.variants.SendPlayerPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.SendPlayerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import net.kyori.adventure.text.Component;

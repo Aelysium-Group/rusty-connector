@@ -1,11 +1,9 @@
-package group.aelysium.rustyconnector.core.lib.packets.variants;
+package group.aelysium.rustyconnector.toolkit.core.packet.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
@@ -31,7 +29,7 @@ public class RankedGameEndPacket extends GenericPacket {
     public RankedGameEndPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(PacketType.END_RANKED_GAME, address, origin);
 
-        if(!RankedGameEndPacket.validateParameters(ValidParameters.toList(), parameters))
+        if(!validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -48,7 +46,7 @@ public class RankedGameEndPacket extends GenericPacket {
     public RankedGameEndPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, PacketType.END_RANKED_GAME, address, origin);
 
-        if(!RankedGameEndPacket.validateParameters(ValidParameters.toList(), parameters))
+        if(!validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {

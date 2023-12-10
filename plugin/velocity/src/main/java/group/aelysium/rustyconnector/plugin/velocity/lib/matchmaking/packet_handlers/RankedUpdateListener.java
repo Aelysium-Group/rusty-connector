@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameEndPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.RankedGameEndPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;

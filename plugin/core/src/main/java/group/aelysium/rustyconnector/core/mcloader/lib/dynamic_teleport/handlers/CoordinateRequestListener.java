@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.core.lib.packets.variants.CoordinateRequestQueuePacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.CoordinateRequestQueuePacket;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.CoordinateRequest;

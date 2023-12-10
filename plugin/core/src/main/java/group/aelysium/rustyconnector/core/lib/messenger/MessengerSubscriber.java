@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.messenger;
 
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.message_cache.ICacheableMessage;
 import group.aelysium.rustyconnector.toolkit.core.message_cache.IMessageCacheService;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
@@ -11,7 +12,6 @@ import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
-import group.aelysium.rustyconnector.core.lib.packets.*;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 
 import java.net.InetSocketAddress;

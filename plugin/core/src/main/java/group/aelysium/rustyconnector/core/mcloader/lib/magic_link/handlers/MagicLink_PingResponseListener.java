@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatus;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.core.lib.packets.variants.ServerPingResponsePacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.ServerPingResponsePacket;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

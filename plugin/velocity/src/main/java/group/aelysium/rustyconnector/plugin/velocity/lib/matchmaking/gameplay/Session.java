@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay;
 
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
-import group.aelysium.rustyconnector.core.lib.packets.variants.RankedGameAssociatePacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.RankedGameAssociatePacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;

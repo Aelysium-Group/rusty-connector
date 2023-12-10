@@ -1,10 +1,9 @@
-package group.aelysium.rustyconnector.core.lib.packets.variants;
+package group.aelysium.rustyconnector.toolkit.core.packet.variants;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
@@ -26,7 +25,7 @@ public class SendPlayerPacket extends GenericPacket {
     public SendPlayerPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(PacketType.SEND_PLAYER, address, origin);
 
-        if(!SendPlayerPacket.validateParameters(ValidParameters.toList(), parameters))
+        if(!validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {
@@ -42,7 +41,7 @@ public class SendPlayerPacket extends GenericPacket {
     public SendPlayerPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, PacketType.SEND_PLAYER, address, origin);
 
-        if(!SendPlayerPacket.validateParameters(ValidParameters.toList(), parameters))
+        if(!validateParameters(ValidParameters.toList(), parameters))
             throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
 
         parameters.forEach(entry -> {

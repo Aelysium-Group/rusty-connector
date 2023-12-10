@@ -2,9 +2,9 @@ package group.aelysium.rustyconnector.core.mcloader.lib.packet_builder;
 
 import group.aelysium.rustyconnector.core.lib.packets.variants.*;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.*;
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.packet_builder.IPacketBuilderService;
-import group.aelysium.rustyconnector.core.lib.packets.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
