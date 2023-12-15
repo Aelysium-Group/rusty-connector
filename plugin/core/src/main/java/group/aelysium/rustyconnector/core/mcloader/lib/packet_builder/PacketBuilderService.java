@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.packet_builder;
 
-import group.aelysium.rustyconnector.core.lib.packets.variants.*;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.variants.*;
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;

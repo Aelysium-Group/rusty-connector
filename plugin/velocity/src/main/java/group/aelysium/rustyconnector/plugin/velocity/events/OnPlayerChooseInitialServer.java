@@ -18,7 +18,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IInitiallyConnectableFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.InitiallyConnectableFamily;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -53,7 +53,7 @@ public class OnPlayerChooseInitialServer {
                 } catch (Exception ignore) {}
 
                 // Handle family injectors if they exist
-                IInitiallyConnectableFamily<MCLoader, Player, LoadBalancer> family = null;
+                InitiallyConnectableFamily<MCLoader, Player, LoadBalancer> family = null;
                 try {
                     InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
                     String host = eventPlayer.getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);

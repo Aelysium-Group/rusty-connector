@@ -122,11 +122,7 @@ public class Whitelist implements IWhitelist {
 
         bootOutput.add(Component.text(" | Registering whitelist "+whitelistName+"...", NamedTextColor.DARK_GRAY));
 
-        WhitelistConfig whitelistConfig = new WhitelistConfig(new File(String.valueOf(api.dataFolder()), "whitelists/"+whitelistName+".yml"));
-        if(!whitelistConfig.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_WHITELIST_TEMPLATE)) {
-            throw new IllegalStateException("Unable to load or create whitelists/"+whitelistName+".yml!");
-        }
-        whitelistConfig.register();
+        WhitelistConfig whitelistConfig = WhitelistConfig.construct(api.dataFolder(), whitelistName, dependencies.d2());
 
         Whitelist whitelist = new Whitelist(
                 whitelistName,

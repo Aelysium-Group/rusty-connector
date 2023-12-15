@@ -160,7 +160,7 @@ class FamilyC {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                group.aelysium.rustyconnector.plugin.velocity.lib.family.Family family = new Family.Reference(familyName).get();
+                                Family family = (Family) new Family.Reference(familyName).get();
 
                                 if(family instanceof ScalarFamily)
                                     ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family, false);
@@ -186,7 +186,7 @@ class FamilyC {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        Family family = new Family.Reference(familyName).get();
+                        Family family = (Family) new Family.Reference(familyName).get();
                         if(!family.metadata().hasLoadBalancer()) {
                             ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
                             return Command.SINGLE_SUCCESS;
@@ -214,7 +214,7 @@ class FamilyC {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        Family family = new Family.Reference(familyName).get();
+                        Family family = (Family) new Family.Reference(familyName).get();
                         if(!family.metadata().hasLoadBalancer()) {
                             ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
                             return Command.SINGLE_SUCCESS;
@@ -242,7 +242,7 @@ class FamilyC {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        Family family = new Family.Reference(familyName).get();
+                        Family family = (Family) new Family.Reference(familyName).get();
 
                         if(family instanceof ScalarFamily)
                             ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family, true);
@@ -264,7 +264,7 @@ class FamilyC {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        Family family = new Family.Reference(familyName).get();
+                        Family family = (Family) new Family.Reference(familyName).get();
 
                         String playerNames = "";
                         List<com.velocitypowered.api.proxy.Player> players = family.players();
@@ -317,7 +317,7 @@ class Send {
                                 }
                                 Player player = Player.from(fetchedPlayer);
 
-                                Family family = new Family.Reference(familyName).get();
+                                Family family = (Family) new Family.Reference(familyName).get();
                                 if(!family.metadata().hasLoadBalancer()) {
                                     ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
                                     return Command.SINGLE_SUCCESS;
@@ -365,7 +365,7 @@ class Send {
 
                                         MCLoader server;
                                         try {
-                                            server = new MCLoader.Reference(registeredServer.getServerInfo()).get();
+                                            server = (MCLoader) new MCLoader.Reference(registeredServer.getServerInfo()).get();
                                         } catch (Exception ignore) {
                                             logger.send(ProxyLang.RC_SEND_NO_SERVER.build(serverName));
                                             return Command.SINGLE_SUCCESS;

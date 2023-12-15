@@ -1,11 +1,14 @@
 package group.aelysium.rustyconnector.core.lib.messenger.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.core.UserPass;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import io.lettuce.core.protocol.ProtocolVersion;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
 
 public class ConnectorsConfig extends YAML {
     private InetSocketAddress redis_address;
@@ -47,12 +50,12 @@ public class ConnectorsConfig extends YAML {
         return mysql_database;
     }
 
-    public ConnectorsConfig(File configPointer) {
-        super(configPointer);
+    protected ConnectorsConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_CONNECTORS_TEMPLATE);
     }
 
     @SuppressWarnings("unchecked")
-    public void register(boolean loadMessengers, boolean loadStorage) throws IllegalStateException {
+    protected void register(boolean loadMessengers, boolean loadStorage) throws IllegalStateException {
         if(loadMessengers) {
             String host = this.getNode(this.data, "redis.host", String.class);
             if (host.equals("")) throw new IllegalStateException("Please configure your connector settings. `host` cannot be empty.");
@@ -84,5 +87,11 @@ public class ConnectorsConfig extends YAML {
             this.mysql_user = new UserPass(user, password);
             this.mysql_database = this.getNode(this.data, "mariadb.database", String.class);
         }
+    }
+
+    public static ConnectorsConfig construct(Path dataFolder, LangService lang, boolean loadMessengers, boolean loadStorage) {
+        ConnectorsConfig config = new ConnectorsConfig(dataFolder, "connectors.yml", lang);
+        config.register(loadMessengers, loadStorage);
+        return config;
     }
 }

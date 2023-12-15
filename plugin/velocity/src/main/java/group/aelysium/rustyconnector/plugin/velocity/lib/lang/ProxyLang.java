@@ -911,7 +911,7 @@ public class ProxyLang extends Lang {
                     return;
                 }
 
-                MCLoader mcLoader = new MCLoader.Reference(resolvedFriend.getCurrentServer().orElseThrow().getServerInfo()).get();
+                MCLoader mcLoader = (MCLoader) new MCLoader.Reference(resolvedFriend.getCurrentServer().orElseThrow().getServerInfo()).get();
                 if(canSeeFriendFamilies)
                     playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(resolver().get("proxy.friends.panel.currently_playing", LanguageResolver.tagHandler("family_name", mcLoader.family().displayName())))));
                 else

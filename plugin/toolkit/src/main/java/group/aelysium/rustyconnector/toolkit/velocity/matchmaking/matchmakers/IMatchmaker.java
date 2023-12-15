@@ -7,13 +7,13 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRanke
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
 
-public interface IMatchmaker<TPlayer extends IPlayer, TRankedPlayer extends IRankedPlayer<? extends IPlayer, ? extends IPlayerRank<?>>> extends Service {
+public interface IMatchmaker<TPlayer extends Player, TRankedPlayer extends IRankedPlayer<? extends Player, ? extends IPlayerRank<?>>> extends Service {
     /**
      * Using the players contained in the matchmaker, attempt to make a game.
      */
@@ -67,7 +67,7 @@ public interface IMatchmaker<TPlayer extends IPlayer, TRankedPlayer extends IRan
     record Settings (
             IMySQLStorageService storage,
             IScoreCard.IRankSchema.Type<?> algorithm,
-            IRankedGame<? extends IPlayer> game,
+            IRankedGame<? extends Player> game,
             List<ITeam.Settings> teams,
             double variance,
             LiquidTimestamp interval

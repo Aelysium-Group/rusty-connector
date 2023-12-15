@@ -2,11 +2,11 @@ package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay;
 
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
 
 import java.util.List;
 
-public interface ITeam<TPlayer extends IPlayer, TRankedPlayer extends IRankedPlayer<TPlayer, ? extends IPlayerRank<?>>> {
+public interface ITeam<TPlayer extends Player, TRankedPlayer extends IRankedPlayer<TPlayer, ? extends IPlayerRank<?>>> {
     /**
      * Adds a player to the team.
      * @param player The player to add.
@@ -16,7 +16,7 @@ public interface ITeam<TPlayer extends IPlayer, TRankedPlayer extends IRankedPla
 
     /**
      * Gets all the players in this team.
-     * @return {@link List<IPlayer>}
+     * @return {@link List< Player >}
      */
     List<TRankedPlayer> players();
 

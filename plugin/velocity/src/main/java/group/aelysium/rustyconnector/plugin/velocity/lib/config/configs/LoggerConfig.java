@@ -1,13 +1,14 @@
-package group.aelysium.rustyconnector.plugin.velocity.central.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public class LoggerConfig extends YAML {
-    private static LoggerConfig config;
-    public static LoggerConfig getConfig() { return config; }
-
     private boolean saveTrashedMessages = true;
     private boolean messaging_registration = false;
     private boolean messaging_unregistration = false;
@@ -20,10 +21,6 @@ public class LoggerConfig extends YAML {
     private boolean log_playerLeave = false;
     private boolean log_playerMove = false;
     private boolean log_familyBalancing = false;
-
-    private LoggerConfig(File configPointer) {
-        super(configPointer);
-    }
 
     public boolean shouldSaveTrashedMessages() {
         return saveTrashedMessages;
@@ -65,16 +62,11 @@ public class LoggerConfig extends YAML {
         return log_familyBalancing;
     }
 
-    /**
-     * Create a new config for the proxy, this will delete the old config.
-     * @return The newly created config.
-     */
-    public static LoggerConfig newConfig(File configPointer) {
-        config = new LoggerConfig(configPointer);
-        return config;
+    protected LoggerConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_LOGGER_TEMPLATE);
     }
 
-    public void register() throws IllegalStateException {
+    protected void register() throws IllegalStateException {
         this.saveTrashedMessages = this.getNode(this.data,"save-trashed-messages",Boolean.class);
 
         this.messaging_registration = this.getNode(this.data,"messaging.registration",Boolean.class);
@@ -88,5 +80,11 @@ public class LoggerConfig extends YAML {
         this.log_playerLeave = this.getNode(this.data,"log.player-leave",Boolean.class);
         this.log_playerMove = this.getNode(this.data,"log.player-move",Boolean.class);
         this.log_familyBalancing = this.getNode(this.data,"log.family-balancing",Boolean.class);
+    }
+
+    public static LoggerConfig construct(Path dataFolder, LangService lang) {
+        LoggerConfig config = new LoggerConfig(dataFolder, "extras/logger.yml", lang);
+        config.register();
+        return config;
     }
 }

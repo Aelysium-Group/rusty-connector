@@ -1,10 +1,12 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family;
 
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.toolkit.RustyConnector;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.util.Reference;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>> {
+public interface Family<TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>> {
     String id();
     Component displayName();
 
@@ -45,14 +47,14 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, T
      * Get all players in the family.
      * @return A list of players.
      */
-    List<Player> players();
+    List<com.velocitypowered.api.proxy.Player> players();
 
     /**
      * Get all players in the family up to approximately `max`.
      * @param max The approximate max number of players to return.
      * @return A list of players.
      */
-    List<Player> players(int max);
+    List<com.velocitypowered.api.proxy.Player> players(int max);
 
     List<TMCLoader> registeredServers();
 
@@ -84,7 +86,7 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, T
      * If this family is the root family, this method will always return `null`.
      * @return {@link WeakReference <IBaseFamily>}
      */
-    IFamily<TMCLoader, TPlayer, TLoadBalancer> parent();
+    Family<TMCLoader, TPlayer, TLoadBalancer> parent();
 
     /**
      * Returns the metadata for this family.
@@ -92,32 +94,44 @@ public interface IFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, T
      */
     Metadata metadata();
 
-    record Settings<TPlayer extends IPlayer, TMCLoader extends IMCLoader, TFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>, TLoadBalancer extends ILoadBalancer<TMCLoader>, TWhitelist extends IWhitelist>
-            (Component displayName, TLoadBalancer loadBalancer, Reference<TMCLoader, TPlayer, TLoadBalancer, TFamily> parent, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<TWhitelist, String> whitelist) {}
+    record Settings<TMCLoader extends MCLoader, TLoadBalancer extends ILoadBalancer<TMCLoader>, TWhitelist extends IWhitelist>
+            (Component displayName, TLoadBalancer loadBalancer, Reference parent, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<TWhitelist, String> whitelist) {}
 
 
-    abstract class Reference<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>> extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<TFamily, String> {
-        public Reference(String referencer) {
-            super(referencer);
+
+    class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>>, String> {
+        private boolean rootFamily = false;
+
+        public Reference(String name) {
+            super(name);
+        }
+        protected Reference() {
+            super(null);
+            this.rootFamily = true;
         }
 
-        /**
-         * Gets the family referenced.
-         * If the family could not be found, this will throw an exception.
-         * This method is equivalent to calling {@link #get(boolean) .get(false)}
-         * @return {@link TFamily}
-         * @throws java.util.NoSuchElementException If the owner of this reference can't be found.
-         */
-        public abstract TFamily get();
+        public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> get() {
+            VelocityTinder tinder = RustyConnector.Toolkit.proxy().orElseThrow();
 
-        /**
-         * Gets the family referenced.
-         * If no family could be found and {@param fetchRoot} is disabled, will throw an exception.
-         * If {@param fetchRoot} is enabled and the family isn't found, will return the root family instead.
-         * @param fetchRoot Should the root family be returned if the parent family can't be found?
-         * @return {@link TFamily}
-         * @throws java.util.NoSuchElementException If {@param fetchRoot} is disabled and the family can't be found.
-         */
-        public abstract TFamily get(boolean fetchRoot);
+            if(rootFamily) return tinder.services().family().rootFamily();
+            return tinder.services().family().find(this.referencer).orElseThrow();
+        }
+
+        public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> get(boolean fetchRoot) {
+            VelocityTinder tinder = RustyConnector.Toolkit.proxy().orElseThrow();
+
+            if(rootFamily) return tinder.services().family().rootFamily();
+            if(fetchRoot)
+                try {
+                    return tinder.services().family().find(this.referencer).orElseThrow();
+                } catch (Exception ignore) {
+                    return tinder.services().family().rootFamily();
+                }
+            else return tinder.services().family().find(this.referencer).orElseThrow();
+        }
+
+        public static Reference rootFamily() {
+            return new Reference();
+        }
     }
 }

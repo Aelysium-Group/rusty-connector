@@ -24,7 +24,7 @@ public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortab
 
     public Optional<Player> player() {
         try {
-            return Optional.of(new Player.Reference(this.uuid).get());
+            return Optional.of((Player) new Player.Reference(this.uuid).get());
         } catch (Exception ignore) {}
 
         return Optional.empty();

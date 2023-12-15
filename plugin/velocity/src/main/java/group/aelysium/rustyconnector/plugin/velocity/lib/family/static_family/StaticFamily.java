@@ -6,7 +6,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.L
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
-import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
@@ -32,7 +31,7 @@ import java.util.Optional;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.STATIC_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class StaticFamily extends Family implements IStaticFamily<MCLoader, Player, LoadBalancer> {
+public class StaticFamily extends Family implements group.aelysium.rustyconnector.toolkit.velocity.family.static_family.StaticFamily<MCLoader, Player, LoadBalancer> {
 
     protected LiquidTimestamp homeServerExpiration;
     protected UnavailableProtocol unavailableProtocol;
@@ -74,20 +73,12 @@ public class StaticFamily extends Family implements IStaticFamily<MCLoader, Play
         MySQLStorage storage = dependencies.d3();
         WhitelistService whitelistService = dependencies.d4();
 
-        StaticFamilyConfig config = new StaticFamilyConfig(api.dataFolder(), familyName);
-        if (!config.generate(dependencies.d1(), lang, LangFileMappings.VELOCITY_STATIC_FAMILY_TEMPLATE)) {
-            throw new IllegalStateException("Unable to load or create families/" + familyName + ".static.yml!");
-        }
-        config.register();
+        StaticFamilyConfig config = StaticFamilyConfig.construct(api.dataFolder(), familyName, lang);
 
         AlgorithmType loadBalancerAlgorithm;
         LoadBalancer.Settings loadBalancerSettings;
         {
-            LoadBalancerConfig loadBalancerConfig = new LoadBalancerConfig(api.dataFolder(), config.getFirstConnection_loadBalancer());
-            if (!loadBalancerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_LOAD_BALANCER_TEMPLATE)) {
-                throw new IllegalStateException("Unable to load or create load_balancer/" + config.getFirstConnection_loadBalancer() + ".yml!");
-            }
-            loadBalancerConfig.register();
+            LoadBalancerConfig loadBalancerConfig = LoadBalancerConfig.construct(api.dataFolder(), config.getFirstConnection_loadBalancer(), lang);
 
             loadBalancerAlgorithm = loadBalancerConfig.getAlgorithm();
 

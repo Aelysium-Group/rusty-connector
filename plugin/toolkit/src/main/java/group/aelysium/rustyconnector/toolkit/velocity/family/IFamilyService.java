@@ -1,15 +1,15 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family;
 
-import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TRootFamily extends IRootFamily<TMCLoader, TPlayer, TLoadBalancer>, TFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>> extends Service {
+public interface IFamilyService<TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>, TRootFamily extends RootFamily<TMCLoader, TPlayer, TLoadBalancer>, TFamily extends Family<TMCLoader, TPlayer, TLoadBalancer>> extends Service {
     boolean shouldCatchDisconnectingPlayers();
 
     void setRootFamily(TRootFamily family);
@@ -18,7 +18,7 @@ public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPl
      * Get the root family of this FamilyService.
      * If root family hasn't been set, or the family it references has been garbage collected,
      * this will return `null`.
-     * @return A {@link IRootFamily} or `null`
+     * @return A {@link RootFamily} or `null`
      */
     TRootFamily rootFamily();
 
@@ -27,6 +27,14 @@ public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPl
      * @return {@link Integer}
      */
     int size();
+
+    /**
+     * Finds a family based on an id.
+     * An alternate route of getting a family, other than "tinder.services().family().find()", can be to use {@link Family.Reference new Family.Reference(id)}{@link Family.Reference#get() .get()}.
+     * @param id The id to search for.
+     * @return {@link Optional<Family>}
+     */
+    Optional<TFamily> find(String id);
 
     /**
      * Add a family to this manager.
@@ -39,10 +47,6 @@ public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPl
      * @param family The family to remove from this manager.
      */
     void remove(TFamily family);
-
-    void add(IFamilyCategory<TPlayer> category);
-
-    void remove(IFamilyCategory<TPlayer> category);
 
     /**
      * Gets a list of all families in this service.

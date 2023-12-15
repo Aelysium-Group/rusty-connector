@@ -1,19 +1,19 @@
 package group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.anchors;
 
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IAnchorService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>> extends Service {
+public interface IAnchorService<TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>, TFamily extends Family<TMCLoader, TPlayer, TLoadBalancer>> extends Service {
     /**
      * Gets a family which has the anchor which is provided.
      * @param anchor The anchor to find the family of.
-     * @return {@link Optional<IFamily>}
+     * @return {@link Optional< Family >}
      */
     Optional<TFamily> familyOf(String anchor);
 

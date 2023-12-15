@@ -2,12 +2,12 @@ package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay;
 
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
 
 import java.util.*;
 
-public interface ISession<TMCLoader extends IMCLoader> {
+public interface ISession<TMCLoader extends MCLoader> {
     /**
      * Connects the session to a server.
      * @param server The server to connect to.
@@ -24,5 +24,5 @@ public interface ISession<TMCLoader extends IMCLoader> {
      * Gets all the players currently in this team.
      * @return {@link List<IRankedPlayer>}
      */
-    List<? extends IRankedPlayer<? extends IPlayer, ? extends IPlayerRank<?>>> players();
+    List<? extends IRankedPlayer<? extends Player, ? extends IPlayerRank<?>>> players();
 }

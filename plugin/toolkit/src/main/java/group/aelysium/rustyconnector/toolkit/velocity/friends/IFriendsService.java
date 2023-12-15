@@ -1,12 +1,11 @@
 package group.aelysium.rustyconnector.toolkit.velocity.friends;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.*;
 
-public interface IFriendsService<TPlayer extends IPlayer, TFriendRequest extends IFriendRequest> extends Service {
+public interface IFriendsService<TPlayer extends Player, TFriendRequest extends IFriendRequest> extends Service {
     /**
      * Gets the settings that this {@link IFriendsService} abides by.
      * @return {@link IFriendsService}
@@ -33,7 +32,7 @@ public interface IFriendsService<TPlayer extends IPlayer, TFriendRequest extends
     void addFriends(TPlayer player1, TPlayer player2);
     void removeFriends(TPlayer player1, TPlayer player2);
 
-    IFriendMapping<TPlayer> sendRequest(Player sender, TPlayer target);
+    IFriendMapping<TPlayer> sendRequest(com.velocitypowered.api.proxy.Player sender, TPlayer target);
 
     void closeInvite(TFriendRequest request);
 

@@ -3,8 +3,8 @@ package group.aelysium.rustyconnector.toolkit.velocity.central;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.IServiceableService;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.IDynamicTeleportServiceHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsService;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
@@ -12,8 +12,8 @@ import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayerService;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.IServiceHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
@@ -27,14 +27,14 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * Gets the {@link IFamilyService family service} which allows access to server families and other family related logic.
      * @return {@link IFamilyService}
      */
-    <TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TRootFamily extends IRootFamily<TMCLoader, TPlayer, TLoadBalancer>, TBaseFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>>
+    <TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>, TRootFamily extends RootFamily<TMCLoader, TPlayer, TLoadBalancer>, TBaseFamily extends Family<TMCLoader, TPlayer, TLoadBalancer>>
         IFamilyService<TMCLoader, TPlayer, TLoadBalancer, TRootFamily, TBaseFamily> family();
 
     /**
      * Gets the {@link IServerService server service} which allows access to server registration, unregistration, connection, and other server related logic.
      * @return {@link IServerService}
      */
-    <TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TBaseFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>>
+    <TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>, TBaseFamily extends Family<TMCLoader, TPlayer, TLoadBalancer>>
         IServerService<TMCLoader, TPlayer, TLoadBalancer, TBaseFamily> server();
 
     /**
@@ -61,7 +61,7 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * The party module may not always be enabled, hence this returns an {@link Optional<IPartyService>}
      * @return {@link Optional<IPartyService>}
      */
-    <TPlayer extends IPlayer, TMCLoader extends IMCLoader, TParty extends IParty<TMCLoader>, TPartyInvite extends IPartyInvite<TPlayer>>
+    <TPlayer extends Player, TMCLoader extends MCLoader, TParty extends IParty<TMCLoader>, TPartyInvite extends IPartyInvite<TPlayer>>
         Optional<IPartyService<TPlayer, TMCLoader, TParty, TPartyInvite>> party();
 
     /**
@@ -69,7 +69,7 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * The friends module may not always be enabled, hence this returns an {@link Optional<IFriendsService>}
      * @return {@link Optional<IFriendsService>}
      */
-    <TPlayer extends IPlayer, TFriendRequest extends IFriendRequest>
+    <TPlayer extends Player, TFriendRequest extends IFriendRequest>
         Optional<? extends IFriendsService<TPlayer, TFriendRequest>> friends();
 
     /**

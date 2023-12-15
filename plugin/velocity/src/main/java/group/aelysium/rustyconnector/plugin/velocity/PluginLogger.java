@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.LoggerGate;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.central.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoggerConfig;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 

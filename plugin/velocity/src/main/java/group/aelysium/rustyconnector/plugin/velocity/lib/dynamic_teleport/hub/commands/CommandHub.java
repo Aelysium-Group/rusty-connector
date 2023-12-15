@@ -41,7 +41,7 @@ public class CommandHub {
 
                     ServerInfo serverInfo = eventPlayer.getCurrentServer().orElseThrow().getServerInfo();
 
-                    MCLoader sendersServer = new MCLoader.Reference(serverInfo).get();
+                    MCLoader sendersServer = (MCLoader) new MCLoader.Reference(serverInfo).get();
                     Family family = sendersServer.family();
                     RootFamily rootFamily = familyService.rootFamily();
 

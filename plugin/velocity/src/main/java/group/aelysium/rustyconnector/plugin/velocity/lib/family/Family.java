@@ -4,7 +4,6 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
@@ -16,12 +15,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class Family implements IFamily<MCLoader, Player, LoadBalancer> {
+public abstract class Family implements group.aelysium.rustyconnector.toolkit.velocity.family.Family<MCLoader, Player, LoadBalancer> {
     protected final String id;
     protected Metadata metadata;
-    protected Settings<Player, MCLoader, Family, LoadBalancer, Whitelist> settings;
+    protected Settings<MCLoader, LoadBalancer, Whitelist> settings;
 
-    protected Family(String id, Settings<Player, MCLoader, Family, LoadBalancer, Whitelist> settings, Metadata metadata) {
+    protected Family(String id, Settings<MCLoader, LoadBalancer, Whitelist> settings, Metadata metadata) {
         this.id = id;
         this.settings = settings;
         this.metadata = metadata;
@@ -97,7 +96,7 @@ public abstract class Family implements IFamily<MCLoader, Player, LoadBalancer> 
     }
 
     public Family parent() {
-        return this.settings.parent().get(true);
+        return (Family) this.settings.parent().get(true);
     }
 
     public Metadata metadata() {
@@ -110,37 +109,5 @@ public abstract class Family implements IFamily<MCLoader, Player, LoadBalancer> 
         if (o == null || getClass() != o.getClass()) return false;
         Family that = (Family) o;
         return Objects.equals(id, that.id);
-    }
-
-    public static class Reference extends IFamily.Reference<MCLoader, Player, LoadBalancer, Family> {
-        private boolean rootFamily = false;
-
-        public Reference(String name) {
-            super(name);
-        }
-        protected Reference() {
-            super(null);
-            this.rootFamily = true;
-        }
-
-        public Family get() {
-            if(rootFamily) return Tinder.get().services().family().rootFamily();
-            return Tinder.get().services().family().find(this.referencer).orElseThrow();
-        }
-
-        public Family get(boolean fetchRoot) {
-            if(rootFamily) return Tinder.get().services().family().rootFamily();
-            if(fetchRoot)
-                try {
-                    return Tinder.get().services().family().find(this.referencer).orElseThrow();
-                } catch (Exception ignore) {
-                    return Tinder.get().services().family().rootFamily();
-                }
-            else return Tinder.get().services().family().find(this.referencer).orElseThrow();
-        }
-
-        public static Reference rootFamily() {
-            return new Reference();
-        }
     }
 }

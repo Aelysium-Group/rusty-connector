@@ -5,7 +5,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public class PlayerService implements IPlayerService {
@@ -15,7 +14,7 @@ public class PlayerService implements IPlayerService {
         this.storage = storage;
     }
 
-    protected Optional<Player> fetch(UUID uuid) {
+    public Optional<Player> fetch(UUID uuid) {
         try {
             StorageRoot root = this.storage.root();
 
@@ -27,7 +26,7 @@ public class PlayerService implements IPlayerService {
         return Optional.empty();
     }
 
-    protected Optional<Player> fetch(String username) {
+    public Optional<Player> fetch(String username) {
         try {
             StorageRoot root = this.storage.root();
 

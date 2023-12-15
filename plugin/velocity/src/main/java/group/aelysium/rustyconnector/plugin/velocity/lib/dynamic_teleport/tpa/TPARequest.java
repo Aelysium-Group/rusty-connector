@@ -70,7 +70,7 @@ public class TPARequest implements ITPARequest {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
             ServerInfo serverInfo = this.target().getCurrentServer().orElseThrow().getServerInfo();
-            MCLoader server = new MCLoader.Reference(serverInfo).get();
+            MCLoader server = (MCLoader) new MCLoader.Reference(serverInfo).get();
             Family family = server.family();
             if(family == null) throw new NullPointerException();
 

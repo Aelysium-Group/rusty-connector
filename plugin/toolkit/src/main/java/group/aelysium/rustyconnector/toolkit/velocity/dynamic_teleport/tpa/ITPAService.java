@@ -1,15 +1,14 @@
 package group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa;
 
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
 
 import java.util.List;
 
-public interface ITPAService<TTPACleaningService extends ITPACleaningService<?>, TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>, TTPARequest extends ITPARequest, TTPAHandler extends ITPAHandler<TTPARequest>> extends Service {
+public interface ITPAService<TTPACleaningService extends ITPACleaningService<?>, TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>, TFamily extends Family<TMCLoader, TPlayer, TLoadBalancer>, TTPARequest extends ITPARequest, TTPAHandler extends ITPAHandler<TTPARequest>> extends Service {
     /**
      * Gets the settings that this {@link ITPAService} abides by.
      * @return {@link TPAServiceSettings}
@@ -45,5 +44,5 @@ public interface ITPAService<TTPACleaningService extends ITPACleaningService<?>,
      * @param target The player that sent the invite and is going to have `source` teleported to their location.
      * @param targetServer The server that `target` is currently playing on.
      */
-    void tpaSendPlayer(Player source, Player target, TMCLoader targetServer);
+    void tpaSendPlayer(com.velocitypowered.api.proxy.Player source, com.velocitypowered.api.proxy.Player target, TMCLoader targetServer);
 }

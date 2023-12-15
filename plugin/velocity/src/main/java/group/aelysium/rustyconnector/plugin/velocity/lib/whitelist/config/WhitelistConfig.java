@@ -1,12 +1,16 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +26,6 @@ public class WhitelistConfig extends YAML {
     private boolean strict = false;
     private boolean inverted = false;
 
-    public WhitelistConfig(File configPointer) {
-        super(configPointer);
-    }
     public boolean getUse_players() {
         return use_players;
     }
@@ -55,8 +56,11 @@ public class WhitelistConfig extends YAML {
         return inverted;
     }
 
+    protected WhitelistConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_WHITELIST_TEMPLATE);
+    }
     @SuppressWarnings("unchecked")
-    public void register() throws IllegalStateException {
+    protected void register() throws IllegalStateException {
         PluginLogger logger = Tinder.get().logger();
 
         this.use_players = this.getNode(this.data,"use-players",Boolean.class);
@@ -81,5 +85,11 @@ public class WhitelistConfig extends YAML {
         this.strict = this.getNode(data,"strict",Boolean.class);
 
         this.inverted = this.getNode(data,"inverted",Boolean.class);
+    }
+
+    public static WhitelistConfig construct(Path dataFolder, String whitelistName, LangService lang) {
+        WhitelistConfig config = new WhitelistConfig(dataFolder, "whitelists/"+whitelistName+".yml", lang);
+        config.register();
+        return config;
     }
 }

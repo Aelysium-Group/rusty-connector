@@ -1,16 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import ninja.leaping.configurate.ConfigurationNode;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.nio.file.Path;
 
 public class RankedFamilyConfig extends YAML {
     private Component displayName;
@@ -20,8 +19,8 @@ public class RankedFamilyConfig extends YAML {
     private boolean whitelist_enabled;
     private String whitelist_name;
 
-    public RankedFamilyConfig(String dataFolder, String familyName) {
-        super(new File(dataFolder, "families/"+familyName+".ranked.yml"));
+    protected RankedFamilyConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_RANKED_FAMILY_TEMPLATE);
     }
 
     public Component displayName() { return displayName; }
@@ -42,9 +41,9 @@ public class RankedFamilyConfig extends YAML {
         return whitelist_name;
     }
 
-    public void register(String familyName) throws IllegalStateException {
+    protected void register(String familyName) throws IllegalStateException {
         try {
-            String name = this.getNode(this.data, "display-id", String.class);
+            String name = this.getNode(this.data, "display-name", String.class);
             this.displayName = MiniMessage.miniMessage().deserialize(name);
         } catch (Exception ignore) {}
 
@@ -64,5 +63,11 @@ public class RankedFamilyConfig extends YAML {
             throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
+    }
+
+    public static RankedFamilyConfig construct(Path dataFolder, String familyName, LangService lang) {
+        RankedFamilyConfig config = new RankedFamilyConfig(dataFolder, "families/"+familyName+".ranked.yml", lang);
+        config.register(familyName);
+        return config;
     }
 }

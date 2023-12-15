@@ -121,10 +121,7 @@ public class Tinder extends MCLoaderTinder {
     public static Tinder gather(FabricRustyConnector plugin, Logger logger) {
         PluginLogger pluginLogger = new group.aelysium.rustyconnector.plugin.fabric.PluginLogger(logger);
         try {
-            RootLanguageConfig config = new RootLanguageConfig(new File(FabricLoader.getInstance().getConfigDir().toString(), "language.yml"));
-            if (!config.generate(pluginLogger))
-                throw new IllegalStateException("Unable to load or create language.yml!");
-            config.register();
+            RootLanguageConfig config = RootLanguageConfig.construct(FabricLoader.getInstance().getConfigDir());
 
             LangService langService = LangService.resolveLanguageCode(config.getLanguage(), FabricLoader.getInstance().getConfigDir());
 

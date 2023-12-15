@@ -1,17 +1,17 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
 
-public interface IPartyInvite<TPlayer extends IPlayer> {
+public interface IPartyInvite<TPlayer extends Player> {
     /**
-     * Gets the {@link IPlayer} that sent this invite.
-     * @return {@link IPlayer}
+     * Gets the {@link Player} that sent this invite.
+     * @return {@link Player}
      */
     TPlayer sender();
 
     /**
-     * Gets the {@link IPlayer} that was targeted by this invite.
-     * @return {@link IPlayer}
+     * Gets the {@link Player} that was targeted by this invite.
+     * @return {@link Player}
      */
     TPlayer target();
 

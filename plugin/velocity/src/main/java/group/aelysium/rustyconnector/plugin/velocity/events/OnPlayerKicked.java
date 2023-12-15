@@ -31,7 +31,7 @@ public class OnPlayerKicked {
 
                 if (resolvedPlayer.getCurrentServer().isEmpty()) throw new NoOutputException();
 
-                MCLoader oldServer = new MCLoader.Reference(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo()).get();
+                MCLoader oldServer = (MCLoader) new MCLoader.Reference(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo()).get();
                 if (oldServer == null) throw new NoOutputException();
 
                 oldServer.playerLeft();

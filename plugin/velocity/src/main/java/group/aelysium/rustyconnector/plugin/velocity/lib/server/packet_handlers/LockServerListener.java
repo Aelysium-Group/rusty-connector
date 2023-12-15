@@ -25,7 +25,7 @@ public class LockServerListener implements PacketListener {
         LockServerPacket packet = (LockServerPacket) genericPacket;
 
         ServerInfo serverInfo = new ServerInfo(packet.serverName(), packet.address());
-        MCLoader server = new MCLoader.Reference(serverInfo).get();
+        MCLoader server = (MCLoader) new MCLoader.Reference(serverInfo).get();
 
         if (server != null) {
             Family family = server.family();

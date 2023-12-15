@@ -2,13 +2,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import net.kyori.adventure.text.Component;
 
 import java.util.*;
 
-public class Player implements IPlayer {
+public class Player implements group.aelysium.rustyconnector.toolkit.velocity.players.Player {
     protected UUID uuid;
     protected String username;
     protected long firstLogin;
@@ -75,31 +74,5 @@ public class Player implements IPlayer {
     }
     public static Player from(UUID uuid, String username) {
         return new Player(uuid, username);
-    }
-
-    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Player, UUID> {
-        public Reference(UUID uuid) {
-            super(uuid);
-        }
-
-        /**
-         * Gets the family referenced.
-         * If no family could be found, this will throw an exception.
-         * @return {@link Family}
-         * @throws java.util.NoSuchElementException If the family can't be found.
-         */
-        public Player get() {
-            return Tinder.get().services().player().fetch(this.referencer).orElseThrow();
-        }
-    }
-
-    public static class UsernameReference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Player, String> {
-        public UsernameReference(String username) {
-            super(username);
-        }
-
-        public Player get() {
-            return Tinder.get().services().player().fetch(this.referencer).orElseThrow();
-        }
     }
 }

@@ -76,7 +76,7 @@ public final class CommandUnFriend {
                             }
 
                             String username = context.getArgument("username", String.class);
-                            Player targetPlayer = new Player.UsernameReference(username).get();
+                            Player targetPlayer = (Player) new Player.UsernameReference(username).get();
 
                             if(!friendsService.areFriends(Player.from(player), targetPlayer))
                                 return closeMessage(player, ProxyLang.UNFRIEND_NOT_FRIENDS.build(username));

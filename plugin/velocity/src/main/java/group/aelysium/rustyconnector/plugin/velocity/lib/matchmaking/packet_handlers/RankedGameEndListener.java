@@ -25,7 +25,7 @@ public class RankedGameEndListener implements PacketListener {
     public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {
         RankedGameEndPacket packet = (RankedGameEndPacket) genericPacket;
 
-        Family family = new Family.Reference(packet.familyName()).get();
+        Family family = (Family) new Family.Reference(packet.familyName()).get();
         if(!(family instanceof RankedFamily)) return;
 
         ServerInfo serverInfo = new ServerInfo(

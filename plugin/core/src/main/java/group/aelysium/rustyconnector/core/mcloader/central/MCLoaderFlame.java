@@ -28,6 +28,7 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -155,21 +156,13 @@ class Initialize {
     }
 
     public DefaultConfig defaultConfig(LangService lang) throws IOException {
-        DefaultConfig defaultConfig = new DefaultConfig(new File(api.dataFolder(), "config.yml"));
-        if (!defaultConfig.generate(bootOutput, lang, LangFileMappings.PAPER_CONFIG_TEMPLATE))
-            throw new IllegalStateException("Unable to load or create config.yml!");
-        defaultConfig.register(this.configVersion());
-
-        return defaultConfig;
+        return DefaultConfig.construct(Path.of(api.dataFolder()), lang, this.configVersion());
     }
 
     public RedisConnector connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang, InetSocketAddress originAddress) throws IOException {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
-        ConnectorsConfig config = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
-        if (!config.generate(bootOutput, lang, LangFileMappings.PAPER_CONNECTORS_TEMPLATE))
-            throw new IllegalStateException("Unable to load or create connectorsConfig.yml!");
-        config.register(true, false);
+        ConnectorsConfig config = ConnectorsConfig.construct(Path.of(api.dataFolder()), lang, true, false);
 
         RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
                 PacketOrigin.SERVER,

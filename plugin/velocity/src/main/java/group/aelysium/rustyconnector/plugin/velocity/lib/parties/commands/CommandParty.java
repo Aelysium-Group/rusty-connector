@@ -187,7 +187,7 @@ public final class CommandParty {
                             if(player.getCurrentServer().orElse(null) == null)
                                 return closeMessage(player, ProxyLang.PARTY_CREATE_NO_SERVER);
 
-                            MCLoader server = new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
+                            MCLoader server = (MCLoader) new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
                             Party party = partyService.create(player, server);
 
                             context.getSource().sendMessage(ProxyLang.PARTY_BOARD.build(party, player));
@@ -258,7 +258,7 @@ public final class CommandParty {
 
                                     try {
                                         if(!partyService.settings().friendsOnly()) {
-                                            MCLoader server = new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
+                                            MCLoader server = (MCLoader) new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
 
                                             server.registeredServer().getPlayersConnected().forEach(nearbyPlayer -> {
                                                 if(nearbyPlayer.equals(player)) return;
@@ -304,7 +304,7 @@ public final class CommandParty {
                                         if(player.getCurrentServer().orElse(null) == null)
                                             return closeMessage(player, ProxyLang.PARTY_CREATE_NO_SERVER);
 
-                                        MCLoader server = new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
+                                        MCLoader server = (MCLoader) new MCLoader.Reference(player.getCurrentServer().orElseThrow().getServerInfo()).get();
                                         Party newParty = partyService.create(player, server);
                                         player.sendMessage(ProxyLang.PARTY_CREATED);
 
@@ -318,7 +318,7 @@ public final class CommandParty {
                                     String username = context.getArgument("username", String.class);
                                     Player targetPlayerResolvable;
                                     try {
-                                        targetPlayerResolvable = new Player.UsernameReference(username).get();
+                                        targetPlayerResolvable = (Player) new Player.UsernameReference(username).get();
                                         if(targetPlayerResolvable.resolve().isEmpty()) throw new Exception();
                                     } catch (Exception ignore) {
                                         return closeMessage(player, ProxyLang.NO_PLAYER.build(username));

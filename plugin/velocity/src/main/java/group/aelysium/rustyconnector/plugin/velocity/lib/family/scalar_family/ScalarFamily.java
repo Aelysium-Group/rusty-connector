@@ -6,7 +6,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.L
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
-import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IScalarFamily;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
@@ -29,7 +28,7 @@ import java.util.List;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.SCALAR_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class ScalarFamily extends Family implements IScalarFamily<MCLoader, Player, LoadBalancer> {
+public class ScalarFamily extends Family implements group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.ScalarFamily<MCLoader, Player, LoadBalancer> {
 
     public ScalarFamily(Settings settings) {
         super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), SCALAR_FAMILY_META);
@@ -71,20 +70,12 @@ public class ScalarFamily extends Family implements IScalarFamily<MCLoader, Play
         LangService lang = dependencies.d2();
         WhitelistService whitelistService = dependencies.d3();
 
-        ScalarFamilyConfig config = new ScalarFamilyConfig(api.dataFolder(), familyName);
-        if(!config.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
-            throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
-        }
-        config.register();
+        ScalarFamilyConfig config = ScalarFamilyConfig.construct(api.dataFolder(), familyName, lang);
 
         AlgorithmType loadBalancerAlgorithm;
         LoadBalancer.Settings loadBalancerSettings;
         {
-            LoadBalancerConfig loadBalancerConfig = new LoadBalancerConfig(api.dataFolder(), config.loadBalancer());
-            if (!loadBalancerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_LOAD_BALANCER_TEMPLATE)) {
-                throw new IllegalStateException("Unable to load or create load_balancer/" + config.loadBalancer() + ".yml!");
-            }
-            loadBalancerConfig.register();
+            LoadBalancerConfig loadBalancerConfig = LoadBalancerConfig.construct(api.dataFolder(), config.loadBalancer(), lang);
 
             loadBalancerAlgorithm = loadBalancerConfig.getAlgorithm();
 

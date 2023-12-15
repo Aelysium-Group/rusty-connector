@@ -11,7 +11,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
-import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
@@ -28,7 +27,7 @@ import java.util.Optional;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.RANKED_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class RankedFamily extends Family implements IRankedFamily<MCLoader, Player, LoadBalancer> {
+public class RankedFamily extends Family implements group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.RankedFamily<MCLoader, Player, LoadBalancer> {
     protected final Matchmaker<? extends IPlayerRank<?>> matchmaker;
 
     protected RankedFamily(Settings settings) {
@@ -81,19 +80,11 @@ public class RankedFamily extends Family implements IRankedFamily<MCLoader, Play
         MySQLStorage mySQLStorage = dependencies.d3();
         WhitelistService whitelistService = dependencies.d4();
 
-        RankedFamilyConfig config = new RankedFamilyConfig(api.dataFolder(), familyName);
-        if(!config.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_RANKED_FAMILY_TEMPLATE)) {
-            throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
-        }
-        config.register(familyName);
+        RankedFamilyConfig config = RankedFamilyConfig.construct(api.dataFolder(), familyName, lang);
 
         Matchmaker<? extends IPlayerRank<?>> matchmaker;
         {
-            MatchMakerConfig matchMakerConfig = new MatchMakerConfig(api.dataFolder(), config.matchmaker());
-            if (!matchMakerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_MATCHMAKER_TEMPLATE)) {
-                throw new IllegalStateException("Unable to load or create matchmaker/" + config.matchmaker() + ".yml!");
-            }
-            matchMakerConfig.register();
+            MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker(), lang);
 
             Optional<RankedGame> fetched = mySQLStorage.root().getGame(config.getName());
             if(fetched.isEmpty()) {

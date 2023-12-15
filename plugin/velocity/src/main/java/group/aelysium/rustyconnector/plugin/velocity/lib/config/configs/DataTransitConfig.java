@@ -1,6 +1,9 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.data_transit.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketStatus;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
@@ -10,6 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,12 +61,12 @@ public class DataTransitConfig extends YAML {
         return denylist_addresses;
     }
 
-    public DataTransitConfig(File configPointer) {
-        super(configPointer);
+    protected DataTransitConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_DATA_TRANSIT_TEMPLATE);
     }
 
     @SuppressWarnings("unchecked")
-    public void register() throws IllegalStateException, NoOutputException {
+    protected void register() throws IllegalStateException, NoOutputException {
         PluginLogger logger = Tinder.get().logger();
 
         this.maxPacketLength = this.getNode(this.data,"max-packet-length",Integer.class);
@@ -113,5 +117,11 @@ public class DataTransitConfig extends YAML {
         } catch (Exception e) {
             throw new IllegalStateException("The node [denylist.addresses] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
         }
+    }
+
+    public static DataTransitConfig construct(Path dataFolder, LangService lang) {
+        DataTransitConfig config = new DataTransitConfig(dataFolder, "extras/data_transit.yml", lang);
+        config.register();
+        return config;
     }
 }

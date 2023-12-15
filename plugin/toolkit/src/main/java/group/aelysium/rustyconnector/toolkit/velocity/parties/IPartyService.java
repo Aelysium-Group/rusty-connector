@@ -1,14 +1,13 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoader, TParty extends IParty<TMCLoader>, TPartyInvite extends IPartyInvite<TPlayer>> extends Service {
+public interface IPartyService<TPlayer extends Player, TMCLoader extends MCLoader, TParty extends IParty<TMCLoader>, TPartyInvite extends IPartyInvite<TPlayer>> extends Service {
     /**
      * Gets the settings that this {@link IPartyService} abides by.
      * @return {@link PartyServiceSettings}
@@ -21,7 +20,7 @@ public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoa
      * @param server The server that the party is currently residing in.
      * @return {@link IParty}
      */
-    TParty create(Player host, TMCLoader server);
+    TParty create(com.velocitypowered.api.proxy.Player host, TMCLoader server);
 
     /**
      * Deletes an existing {@link IParty}.
@@ -35,7 +34,7 @@ public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoa
      * Find a party based on its member.
      * @return A party.
      */
-    Optional<TParty> find(Player member);
+    Optional<TParty> find(com.velocitypowered.api.proxy.Player member);
 
     /**
      * Gracefully deletes a party.
@@ -52,7 +51,7 @@ public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoa
      * @param target The player receiving the invite.
      * @return {@link IPartyInvite}
      */
-    TPartyInvite invitePlayer(TParty party, Player sender, Player target);
+    TPartyInvite invitePlayer(TParty party, com.velocitypowered.api.proxy.Player sender, com.velocitypowered.api.proxy.Player target);
 
     /**
      * Fetches the party invites which have been made to a specific player.

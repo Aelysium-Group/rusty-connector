@@ -49,7 +49,7 @@ public class CommandAnchor {
                         // If the attempt to check player's family fails, just ignore it and try to connect.
                         // If there's actually an issue it'll be caught further down.
                         try {
-                            MCLoader server = new MCLoader.Reference(Objects.requireNonNull(player.getCurrentServer().orElse(null)).getServerInfo()).get();
+                            MCLoader server = (MCLoader) new MCLoader.Reference(Objects.requireNonNull(player.getCurrentServer().orElse(null)).getServerInfo()).get();
                             if(family.equals(server.family()))
                                 return closeMessage(player, ProxyLang.SERVER_ALREADY_CONNECTED);
                         } catch (Exception ignore) {}

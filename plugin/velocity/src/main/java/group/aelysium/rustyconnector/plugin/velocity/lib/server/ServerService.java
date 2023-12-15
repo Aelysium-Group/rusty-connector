@@ -42,12 +42,7 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
         return this.serverInterval;
     }
 
-    /**
-     * Search for a server.
-     * @param serverInfo The server info to search for.
-     * @return A server or `null`
-     */
-    protected Optional<MCLoader> fetch(ServerInfo serverInfo) {
+    public Optional<MCLoader> fetch(ServerInfo serverInfo) {
         for(Family family : Tinder.get().services().family().dump()) {
             MCLoader server = family.findServer(serverInfo);
             if(server == null) continue;
@@ -81,7 +76,7 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
     }
 
     protected Optional<K8MCLoader> fetchPods(String podName, String familyName) {
-        Family family = new Family.Reference(familyName).get();
+        Family family = (Family) new Family.Reference(familyName).get();
 
 
         try {
@@ -197,7 +192,7 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         try {
-            MCLoader server = new MCLoader.Reference(serverInfo).get();
+            MCLoader server = (MCLoader) new MCLoader.Reference(serverInfo).get();
 
             if (logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
                 ProxyLang.UNREGISTRATION_REQUEST.send(logger, serverInfo, familyName);

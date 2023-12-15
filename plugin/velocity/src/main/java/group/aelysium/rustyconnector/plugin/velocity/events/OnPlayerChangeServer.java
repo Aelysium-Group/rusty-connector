@@ -28,10 +28,10 @@ public class OnPlayerChangeServer {
                     RegisteredServer newRawServer = event.getServer();
                     RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
 
-                    MCLoader newServer = new MCLoader.Reference(newRawServer.getServerInfo()).get();
+                    MCLoader newServer = (MCLoader) new MCLoader.Reference(newRawServer.getServerInfo()).get();
 
                     if(oldRawServer == null) return; // Player just connected to proxy. This isn't a server switch.
-                    MCLoader oldServer = new MCLoader.Reference(oldRawServer.getServerInfo()).get();
+                    MCLoader oldServer = (MCLoader) new MCLoader.Reference(oldRawServer.getServerInfo()).get();
 
                     boolean isTheSameFamily = newServer.family().equals(oldServer.family());
 

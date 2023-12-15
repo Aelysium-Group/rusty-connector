@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.friends;
 
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
 
 public interface IFriendRequest {
     /**
@@ -13,13 +13,13 @@ public interface IFriendRequest {
      * Gets the sender of this {@link IFriendRequest}.
      * @return {@link IFriendRequest}
      */
-    IPlayer sender();
+    Player sender();
 
     /**
      * Gets the target of this {@link IFriendRequest}.
      * @return {@link IFriendRequest}
      */
-    IPlayer target();
+    Player target();
 
     /**
      * Accepts this {@link IFriendRequest}.

@@ -1,11 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.text.ParseException;
 
 public class LoadBalancerConfig extends YAML {
@@ -31,10 +35,11 @@ public class LoadBalancerConfig extends YAML {
         return persistence_attempts;
     }
 
-    public LoadBalancerConfig(String dataFolder, String balancerName) {
-        super(new File(dataFolder, "load_balancers/"+balancerName+".yml"));
+    protected LoadBalancerConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_LOAD_BALANCER_TEMPLATE);
     }
-    public void register() throws IllegalStateException {
+
+    protected void register() throws IllegalStateException {
         this.weighted = this.getNode(this.data,"weighted",Boolean.class);
         this.algorithm = AlgorithmType.valueOf(this.getNode(this.data,"algorithm",String.class));
 
@@ -42,5 +47,11 @@ public class LoadBalancerConfig extends YAML {
         this.persistence_attempts = this.getNode(this.data,"persistence.attempts",Integer.class);
         if(this.persistence_enabled && this.persistence_attempts <= 0)
             throw new IllegalStateException("Load balancing persistence must allow at least 1 attempt.");
+    }
+
+    public static LoadBalancerConfig construct(Path dataFolder, String balancerName, LangService lang) {
+        LoadBalancerConfig config = new LoadBalancerConfig(dataFolder, "load_balancers/"+balancerName+".yml", lang);
+        config.register();
+        return config;
     }
 }

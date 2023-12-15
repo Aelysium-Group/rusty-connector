@@ -2,12 +2,16 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicMCLoaderConfig;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +25,8 @@ public class FamiliesConfig extends YAML {
     private Map<String, Boolean> ranked = new HashMap<>();
     private Map<String, Boolean> versionedFunnels = new HashMap<>();
 
-    public FamiliesConfig(File configPointer) {
-        super(configPointer);
+    protected FamiliesConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_FAMILIES_TEMPLATE);
     }
 
     public String rootFamilyName() {
@@ -46,7 +50,7 @@ public class FamiliesConfig extends YAML {
     }
 
     @SuppressWarnings("unchecked")
-    public void register() throws IllegalStateException, NoOutputException {
+    protected void register() throws IllegalStateException, NoOutputException {
         PluginLogger logger = Tinder.get().logger();
 
         // Families
@@ -116,5 +120,11 @@ public class FamiliesConfig extends YAML {
                     throw new IllegalStateException("You can't have two families with the same id! This rule is regardless of what type the family is! Found duplicate: " + entry.getKey());
             }
         }
+    }
+
+    public static FamiliesConfig construct(Path dataFolder, LangService lang) {
+        FamiliesConfig config = new FamiliesConfig(dataFolder, "families.yml", lang);
+        config.register();
+        return config;
     }
 }

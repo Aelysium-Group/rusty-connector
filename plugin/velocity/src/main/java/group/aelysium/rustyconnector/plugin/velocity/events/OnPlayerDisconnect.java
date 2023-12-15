@@ -34,7 +34,7 @@ public class OnPlayerDisconnect {
             try {
                 com.velocitypowered.api.proxy.Player resolvedPlayer = player.resolve().get();
                 if(resolvedPlayer.getCurrentServer().isPresent()) {
-                    MCLoader server = new MCLoader.Reference(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo()).get();
+                    MCLoader server = (MCLoader) new MCLoader.Reference(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo()).get();
                     server.playerLeft();
 
                     WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.family().id(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));

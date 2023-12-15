@@ -60,8 +60,8 @@ public class Tinder implements VelocityTinder {
         return this.pluginLogger;
     }
 
-    public String dataFolder() {
-        return String.valueOf(this.dataFolder);
+    public Path dataFolder() {
+        return this.dataFolder;
     }
 
     public LangService lang() {
@@ -147,11 +147,7 @@ public class Tinder implements VelocityTinder {
     public static Tinder gather(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
         try {
             PluginLogger pluginLogger = new PluginLogger(logger);
-            RootLanguageConfig config = new RootLanguageConfig(new File(String.valueOf(dataFolder), "language.yml"));
-            if (!config.generate(pluginLogger))
-                throw new IllegalStateException("Unable to load or create language.yml!");
-            config.register();
-
+            RootLanguageConfig config = RootLanguageConfig.construct(dataFolder);
             LangService langService = LangService.resolveLanguageCode(config.getLanguage(), dataFolder);
 
             return new Tinder(plugin, server, pluginLogger, dataFolder, langService);

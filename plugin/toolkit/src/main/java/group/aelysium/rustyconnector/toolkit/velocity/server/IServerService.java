@@ -2,19 +2,28 @@ package group.aelysium.rustyconnector.toolkit.velocity.server;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 import java.util.Vector;
 
-public interface IServerService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>, TBaseFamily extends IFamily<TMCLoader, TPlayer, TLoadBalancer>> extends Service {
+public interface IServerService<TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>, TBaseFamily extends Family<TMCLoader, TPlayer, TLoadBalancer>> extends Service {
     int serverTimeout();
     int serverInterval();
 
     Vector<WeakReference<TMCLoader>> servers();
+
+    /**
+     * Finds an MCLoader based on server info.
+     * An alternate route of getting a family, other than "tinder.services().server().find()", can be to use {@link MCLoader.Reference new MCLoader.Reference(serverInfo)}{@link MCLoader.Reference#get() .get()}.
+     * @param serverInfo The info to search for.
+     * @return {@link Optional <MCLoader>}
+     */
+    Optional<? extends MCLoader> fetch(ServerInfo serverInfo);
 
     /**
      * Checks if a server is contained in this server service.

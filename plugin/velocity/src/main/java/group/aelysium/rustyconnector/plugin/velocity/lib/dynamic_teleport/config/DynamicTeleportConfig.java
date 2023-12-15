@@ -2,6 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.confi
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsConfig;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
@@ -9,6 +12,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -30,8 +34,8 @@ public class DynamicTeleportConfig extends YAML {
     private boolean hub_enabled = false;
     private List<String> hub_enabledFamilies = new ArrayList<>();
 
-    public DynamicTeleportConfig(File configPointer) {
-        super(configPointer);
+    protected DynamicTeleportConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_DYNAMIC_TELEPORT_TEMPLATE);
     }
 
     public boolean isEnabled() {
@@ -83,7 +87,7 @@ public class DynamicTeleportConfig extends YAML {
     }
 
     @SuppressWarnings("unchecked")
-    public void register() throws IllegalStateException, NoOutputException {
+    protected void register() throws IllegalStateException, NoOutputException {
         this.enabled = this.getNode(this.data, "enabled", Boolean.class);
         if(!this.enabled) return;
 
@@ -145,5 +149,11 @@ public class DynamicTeleportConfig extends YAML {
                 throw new IllegalStateException("The node [hub.enabled-families] in " + this.getName() + " is invalid! Make sure you are using the correct type of data!");
             }
         }
+    }
+
+    public static DynamicTeleportConfig construct(Path dataFolder, LangService lang) {
+        DynamicTeleportConfig config = new DynamicTeleportConfig(dataFolder, "extras/dynamic_teleport.yml", lang);
+        config.register();
+        return config;
     }
 }

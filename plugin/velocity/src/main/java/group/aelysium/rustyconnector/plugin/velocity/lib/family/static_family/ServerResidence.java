@@ -22,21 +22,21 @@ public class ServerResidence implements IServerResidence {
     }
 
     public Player player() {
-        return this.player.get();
+        return (Player) this.player.get();
     }
     public Player.Reference rawPlayer() {
         return this.player;
     }
 
     public MCLoader server() {
-        return this.server.get();
+        return (MCLoader) this.server.get();
     }
     public MCLoader.Reference rawServer() {
         return this.server;
     }
 
     public Family family() {
-        return this.family.get();
+        return (Family) this.family.get();
     }
 
     public Long expiration() {

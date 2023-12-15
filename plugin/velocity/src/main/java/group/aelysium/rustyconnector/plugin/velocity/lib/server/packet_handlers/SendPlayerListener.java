@@ -31,7 +31,7 @@ public class SendPlayerListener implements PacketListener {
         if(player == null) return;
 
         try {
-            Family family = new Family.Reference(packet.targetFamilyName()).get();
+            Family family = (Family) new Family.Reference(packet.targetFamilyName()).get();
             if (family == null) throw new InvalidAlgorithmParameterException("A family with the id `"+packet.targetFamilyName()+"` doesn't exist!");
 
             family.connect(Player.from(player));

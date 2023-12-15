@@ -157,10 +157,7 @@ public class Tinder extends MCLoaderTinder {
     public static Tinder gather(PaperRustyConnector plugin, Logger logger) {
         PluginLogger pluginLogger = new PluginLogger(logger);
         try {
-            RootLanguageConfig config = new RootLanguageConfig(new File(plugin.getDataFolder(), "language.yml"));
-            if (!config.generate(pluginLogger))
-                throw new IllegalStateException("Unable to load or create language.yml!");
-            config.register();
+            RootLanguageConfig config = RootLanguageConfig.construct(plugin.getDataFolder().toPath());
 
             LangService langService = LangService.resolveLanguageCode(config.getLanguage(), plugin.getDataFolder().toPath());
 

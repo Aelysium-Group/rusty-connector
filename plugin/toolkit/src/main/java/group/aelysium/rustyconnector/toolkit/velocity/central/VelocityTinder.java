@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 
 /**
@@ -23,7 +24,7 @@ public interface VelocityTinder {
      * Allows access to RustyConnector's data folder.
      * @return {@link String}
      */
-    String dataFolder();
+    Path dataFolder();
 
     ILangService<? extends ILanguageResolver> lang();
 

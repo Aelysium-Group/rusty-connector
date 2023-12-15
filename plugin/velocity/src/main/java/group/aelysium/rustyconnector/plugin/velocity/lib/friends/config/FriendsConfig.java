@@ -2,12 +2,16 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.config.PartyConfig;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public class FriendsConfig extends YAML {
     private boolean enabled = false;
@@ -17,8 +21,8 @@ public class FriendsConfig extends YAML {
 
     private boolean allowMessaging;
 
-    public FriendsConfig(File configPointer) {
-        super(configPointer);
+    protected FriendsConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_FRIENDS_TEMPLATE);
     }
 
     public boolean isEnabled() {
@@ -42,7 +46,7 @@ public class FriendsConfig extends YAML {
     }
 
     @SuppressWarnings("unchecked")
-    public void register() throws IllegalStateException, NoOutputException {
+    protected void register() throws IllegalStateException, NoOutputException {
         PluginLogger logger = Tinder.get().logger();
 
         this.enabled = this.getNode(this.data, "enabled", Boolean.class);
@@ -57,5 +61,11 @@ public class FriendsConfig extends YAML {
         this.sendNotifications = this.getNode(this.data, "send-notifications", Boolean.class);
         this.showFamilies = this.getNode(this.data, "show-families", Boolean.class);
         this.allowMessaging = this.getNode(this.data, "allow-messaging", Boolean.class);
+    }
+
+    public static FriendsConfig construct(Path dataFolder, LangService lang) {
+        FriendsConfig config = new FriendsConfig(dataFolder, "extras/friends.yml", lang);
+        config.register();
+        return config;
     }
 }

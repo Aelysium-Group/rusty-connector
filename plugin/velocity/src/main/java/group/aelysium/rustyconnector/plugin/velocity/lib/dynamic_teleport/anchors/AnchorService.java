@@ -9,7 +9,6 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.commands.CommandAnchor;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
@@ -86,7 +85,7 @@ public class AnchorService implements IAnchorService<MCLoader, Player, LoadBalan
             for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
                 Family family;
                 try {
-                    family = new Family.Reference(entry.getValue()).get();
+                    family = (Family) new Family.Reference(entry.getValue()).get();
                 } catch (Exception ignore) {
                     bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
                     continue;

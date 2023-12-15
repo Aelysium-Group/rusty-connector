@@ -79,7 +79,7 @@ public final class CommandFriends {
                                 }
 
                                 String username = context.getArgument("username", String.class);
-                                Player targetPlayer = new Player.UsernameReference(username).get();
+                                Player targetPlayer = (Player) new Player.UsernameReference(username).get();
 
                                 if(friendsService.areFriends(Player.from(player), targetPlayer))
                                     return closeMessage(player, ProxyLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
@@ -157,7 +157,7 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = new Player.UsernameReference(username).get();
+                                            Player senderPlayer = (Player) new Player.UsernameReference(username).get();
 
                                             if(senderPlayer == null)
                                                 return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
@@ -194,7 +194,7 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = new Player.UsernameReference(username).get();
+                                            Player senderPlayer = (Player) new Player.UsernameReference(username).get();
 
                                             if (senderPlayer == null)
                                                 return closeMessage(player, ProxyLang.NO_PLAYER.build(username));

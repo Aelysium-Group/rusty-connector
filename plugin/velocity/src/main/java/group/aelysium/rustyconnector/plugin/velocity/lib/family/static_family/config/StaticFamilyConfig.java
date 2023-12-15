@@ -1,6 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config;
 
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config.WebhooksConfig;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -8,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.text.ParseException;
 
 public class StaticFamilyConfig extends YAML {
@@ -19,10 +23,6 @@ public class StaticFamilyConfig extends YAML {
     private LiquidTimestamp consecutiveConnections_homeServer_expiration = null;
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
-
-    public StaticFamilyConfig(String dataFolder, String familyName) {
-        super(new File(dataFolder, "families/"+familyName+".static.yml"));
-    }
 
     public Component displayName() { return displayName; }
     public Family.Reference getParent_family() { return parent_family; }
@@ -43,9 +43,13 @@ public class StaticFamilyConfig extends YAML {
         return consecutiveConnections_homeServer_expiration;
     }
 
-    public void register() throws IllegalStateException {
+    protected StaticFamilyConfig(Path dataFolder, String familyName, LangService lang) {
+        super(dataFolder, "families/"+familyName+".static.yml", lang, LangFileMappings.PROXY_STATIC_FAMILY_TEMPLATE);
+    }
+
+    protected void register() throws IllegalStateException {
         try {
-            String name = this.getNode(this.data, "display-id", String.class);
+            String name = this.getNode(this.data, "display-name", String.class);
             this.displayName = MiniMessage.miniMessage().deserialize(name);
         } catch (Exception ignore) {}
 
@@ -79,5 +83,11 @@ public class StaticFamilyConfig extends YAML {
             throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
+    }
+
+    public static StaticFamilyConfig construct(Path dataFolder, String familyName, LangService lang) {
+        StaticFamilyConfig config = new StaticFamilyConfig(dataFolder, familyName, lang);
+        config.register();
+        return config;
     }
 }

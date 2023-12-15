@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
@@ -8,20 +9,23 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhook;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookScope;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config.WhitelistConfig;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class WebhooksConfig extends YAML {
-    public WebhooksConfig(File configPointer) {
-        super(configPointer);
+    protected WebhooksConfig(Path dataFolder, String target, LangService lang) {
+        super(dataFolder, target, lang, LangFileMappings.PROXY_WEBHOOKS_TEMPLATE);
     }
 
     @SuppressWarnings("unchecked")
-    public void register() throws IllegalStateException {
+    protected void register() throws IllegalStateException {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
@@ -68,5 +72,11 @@ public class WebhooksConfig extends YAML {
                 throw new IllegalStateException("`url` in webhooks.yml must be a valid url!");
             }
         });
+    }
+
+    public static WebhooksConfig construct(Path dataFolder, LangService lang) {
+        WebhooksConfig config = new WebhooksConfig(dataFolder, "extras/webhooks.yml", lang);
+        config.register();
+        return config;
     }
 }

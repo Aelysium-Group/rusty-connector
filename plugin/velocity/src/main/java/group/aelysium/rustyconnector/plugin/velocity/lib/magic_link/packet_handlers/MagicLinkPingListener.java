@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicLinkConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicMCLoaderConfig;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
@@ -59,21 +59,18 @@ public class MagicLinkPingListener implements PacketListener {
         ServerService serverService = api.services().server();
         RedisConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
 
-        MagicLinkConfig magicLinkConfig = new MagicLinkConfig(api.dataFolder(), packet.magicConfigName());
-        if(!magicLinkConfig.generate(new ArrayList<>(), Tinder.get().lang(), LangFileMappings.VELOCITY_MAGIC_CONFIG_TEMPLATE))
-            throw new IllegalStateException("Unable to fetch config!");
-        magicLinkConfig.register();
+        MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), packet.magicConfigName(), api.lang());
 
         try {
             MCLoader server = new ServerService.ServerBuilder()
                     .setServerInfo(serverInfo)
-                    .setSoftPlayerCap(magicLinkConfig.playerCap_soft())
-                    .setHardPlayerCap(magicLinkConfig.playerCap_hard())
-                    .setWeight(magicLinkConfig.weight())
+                    .setSoftPlayerCap(magicMCLoaderConfig.playerCap_soft())
+                    .setHardPlayerCap(magicMCLoaderConfig.playerCap_hard())
+                    .setWeight(magicMCLoaderConfig.weight())
                     .setPodName(packet.podName())
                     .build();
 
-            server.register(magicLinkConfig.family());
+            server.register(magicMCLoaderConfig.family());
 
             ServerPingResponsePacket message = (ServerPingResponsePacket) new GenericPacket.Builder()
                     .setType(PacketType.PING_RESPONSE)
@@ -100,18 +97,15 @@ public class MagicLinkPingListener implements PacketListener {
     }
 
     private static void disconnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) throws Exception {
-        MagicLinkConfig magicLinkConfig = new MagicLinkConfig(api.dataFolder(), packet.magicConfigName());
-        if(!magicLinkConfig.generate(new ArrayList<>(), Tinder.get().lang(), LangFileMappings.VELOCITY_MAGIC_CONFIG_TEMPLATE))
-            throw new IllegalStateException("Unable to fetch magic config!");
-        magicLinkConfig.register();
+        MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), packet.magicConfigName(), api.lang());
 
-        api.services().server().unregisterServer(serverInfo, magicLinkConfig.family(), true);
+        api.services().server().unregisterServer(serverInfo, magicMCLoaderConfig.family(), true);
     }
 
     private static void reviveOrConnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) throws IOException {
         ServerService serverService = api.services().server();
 
-        MCLoader server = new MCLoader.Reference(serverInfo).get();
+        MCLoader server = (MCLoader) new MCLoader.Reference(serverInfo).get();
         if (server == null) {
             connectServer(api, serverInfo, packet);
             return;

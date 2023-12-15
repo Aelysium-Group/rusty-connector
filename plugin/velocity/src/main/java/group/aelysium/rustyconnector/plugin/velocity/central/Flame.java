@@ -4,11 +4,8 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
-import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestListener;
-import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.MagicLink_PingResponseListener;
-import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicLinkConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicMCLoaderConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
@@ -23,21 +20,19 @@ import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.MemberKeyConfig;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.central.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DefaultConfig;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.central.config.LoggerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerDisconnect;
 import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerKicked;
-import group.aelysium.rustyconnector.plugin.velocity.lib.data_transit.config.DataTransitConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DataTransitConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
@@ -251,7 +246,7 @@ class Initialize {
     }
 
     public AESCryptor privateKey() {
-        PrivateKeyConfig config = new PrivateKeyConfig(new File(api.dataFolder(), "private.key"));
+        PrivateKeyConfig config = new PrivateKeyConfig(new File(String.valueOf(api.dataFolder()), "private.key"));
         try {
             return config.get(bootOutput);
         } catch (Exception e) {
@@ -260,7 +255,7 @@ class Initialize {
     }
 
     public Optional<char[]> memberKey() {
-        MemberKeyConfig config = new MemberKeyConfig(new File(api.dataFolder(), "member.key"));
+        MemberKeyConfig config = new MemberKeyConfig(new File(String.valueOf(api.dataFolder()), "member.key"));
         if (!config.generateFilestream(bootOutput))
             throw new IllegalStateException("Unable to load or create private.key!");
 
@@ -272,31 +267,21 @@ class Initialize {
     }
 
     public DefaultConfig defaultConfig(LangService lang) throws IOException {
-        DefaultConfig defaultConfig = new DefaultConfig(new File(api.dataFolder(), "config.yml"));
-
-        if (!defaultConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_CONFIG_TEMPLATE))
-            throw new IllegalStateException("Unable to load or create config.yml!");
-        defaultConfig.register(this.configVersion());
+        DefaultConfig defaultConfig = DefaultConfig.construct(api.dataFolder(), lang, this.configVersion());
 
         return defaultConfig;
     }
 
     public void loggerConfig(LangService lang) throws IOException {
-        LoggerConfig loggerConfig = LoggerConfig.newConfig(new File(api.dataFolder(), "logger.yml"));
+        LoggerConfig loggerConfig = LoggerConfig.construct(api.dataFolder(), lang);
 
-        if (!loggerConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_LOGGER_TEMPLATE))
-            throw new IllegalStateException("Unable to load or create logger.yml!");
-        loggerConfig.register();
         PluginLogger.init(loggerConfig);
     }
 
     public DependencyInjector.DI2<RedisConnector, MySQLStorage> connectors(DependencyInjector.DI4<AESCryptor, MessageCacheService, PluginLogger, LangService> dependencies) throws IOException, SQLException {
         bootOutput.add(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
-        ConnectorsConfig config = new ConnectorsConfig(new File(api.dataFolder(), "connectors.yml"));
-        if (!config.generate(bootOutput, dependencies.d4(), LangFileMappings.VELOCITY_CONNECTORS_TEMPLATE))
-            throw new IllegalStateException("Unable to load or create connectors.yml!");
-        config.register(true, true);
+        ConnectorsConfig config = ConnectorsConfig.construct(api.dataFolder(), dependencies.d4(), true, true);
 
 
         RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
@@ -339,10 +324,7 @@ class Initialize {
     public FamilyService families(DependencyInjector.DI3<DefaultConfig, LangService, MySQLStorage> dependencies) throws Exception {
         bootOutput.add(Component.text("Building families service...", NamedTextColor.DARK_GRAY));
 
-        FamiliesConfig familiesConfig = new FamiliesConfig(new File(api.dataFolder(), "families.yml"));
-        if (!familiesConfig.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_FAMILIES_TEMPLATE))
-            throw new IllegalStateException("Unable to load or create families.yml!");
-        familiesConfig.register();
+        FamiliesConfig familiesConfig = FamiliesConfig.construct(api.dataFolder(), dependencies.d2());
 
         bootOutput.add(Component.text(" | Registering family service to the API...", NamedTextColor.DARK_GRAY));
         FamilyService familyService = new FamilyService(familiesConfig.shouldRootFamilyCatchDisconnectingPlayers());
@@ -398,7 +380,7 @@ class Initialize {
     public void magicConfigs(DependencyInjector.DI2<FamilyService, LangService> dependencies) throws Exception {
         bootOutput.add(Component.text("Validating Magic Configs...", NamedTextColor.DARK_GRAY));
 
-        File folder = new File(api.dataFolder(), "/magic_configs");
+        File folder = new File(String.valueOf(api.dataFolder()), "/magic_configs");
         if (!folder.exists() && !folder.isDirectory())
             folder.mkdirs();
         File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
@@ -411,13 +393,10 @@ class Initialize {
         }
 
         for (File file : files) {
-            MagicLinkConfig magicLinkConfig = new MagicLinkConfig(api.dataFolder(), file.getName());
-            if (!magicLinkConfig.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_MAGIC_CONFIG_TEMPLATE))
-                throw new IllegalStateException("Unable to load or create magic_config.yml!");
-            magicLinkConfig.register();
+            MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), file.getName(), dependencies.d2());
 
-            if(dependencies.d1().dump().stream().noneMatch(family -> family.id().equals(magicLinkConfig.family())))
-                throw new NullPointerException("The magic config `" + file.getName() + "` is pointing to a family: `" + magicLinkConfig.family() + "`, which doesn't exist!");
+            if(dependencies.d1().dump().stream().noneMatch(family -> family.id().equals(magicMCLoaderConfig.family())))
+                throw new NullPointerException("The magic config `" + file.getName() + "` is pointing to a family: `" + magicMCLoaderConfig.family() + "`, which doesn't exist!");
         }
 
         bootOutput.add(Component.text("Magic Configs have been validated!", NamedTextColor.GREEN));
@@ -439,13 +418,8 @@ class Initialize {
 
     public MessageCacheService dataTransit(LangService lang) throws IOException {
         bootOutput.add(Component.text("Building data transit service...", NamedTextColor.DARK_GRAY));
-        // Setup Data Transit
-        DataTransitConfig dataTransitConfig = new DataTransitConfig(new File(api.dataFolder(), "data_transit.yml"));
-        if (!dataTransitConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_DATA_TRANSIT_TEMPLATE))
-            throw new IllegalStateException("Unable to load or create data-transit.yml!");
-        dataTransitConfig.register();
 
-
+        DataTransitConfig dataTransitConfig = DataTransitConfig.construct(api.dataFolder(), lang);
 
         bootOutput.add(Component.text(" | Building message cache service...", NamedTextColor.DARK_GRAY));
         MessageCacheService messageCacheService = new MessageCacheService(dataTransitConfig.cache_size(), dataTransitConfig.cache_ignoredStatuses(), dataTransitConfig.cache_ignoredTypes());
@@ -515,19 +489,13 @@ class Initialize {
     }
 
     public void webhooks(LangService lang) throws IOException {
-        WebhooksConfig webhooksConfig = new WebhooksConfig(new File(api.dataFolder(), "webhooks.yml"));
-        if(!webhooksConfig.generate(bootOutput, lang, LangFileMappings.VELOCITY_WEBHOOKS_TEMPLATE))
-            throw new IllegalStateException("Unable to load or create webhooks.yml!");
-        webhooksConfig.register();
+        WebhooksConfig webhooksConfig = WebhooksConfig.construct(api.dataFolder(), lang);
     }
 
     public void partyService(LangService lang) {
         try {
             bootOutput.add(Component.text("Building party service...", NamedTextColor.DARK_GRAY));
-            PartyConfig config = new PartyConfig(new File(api.dataFolder(), "party.yml"));
-            if (!config.generate(bootOutput, lang, LangFileMappings.VELOCITY_PARTY_TEMPLATE))
-                throw new IllegalStateException("Unable to load or create party.yml!");
-            config.register();
+            PartyConfig config = PartyConfig.construct(api.dataFolder(), lang);
 
             if(!config.isEnabled()) {
                 bootOutput.add(Component.text("The party service wasn't enabled.", NamedTextColor.GRAY));
@@ -561,10 +529,7 @@ class Initialize {
         try {
             bootOutput.add(Component.text("Building friends service...", NamedTextColor.DARK_GRAY));
 
-            FriendsConfig config = new FriendsConfig(new File(api.dataFolder(), "friends.yml"));
-            if (!config.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_FRIENDS_TEMPLATE))
-                throw new IllegalStateException("Unable to load or create friends.yml!");
-            config.register();
+            FriendsConfig config = FriendsConfig.construct(api.dataFolder(), dependencies.d2());
 
             if(!config.isEnabled()) {
                 bootOutput.add(Component.text("The friends service wasn't enabled.", NamedTextColor.GRAY));
@@ -602,10 +567,7 @@ class Initialize {
     public void dynamicTeleportService(DependencyInjector.DI3<FamilyService, ServerService, LangService> dependencies) {
         bootOutput.add(Component.text("Building dynamic teleport service...", NamedTextColor.DARK_GRAY));
         try {
-            DynamicTeleportConfig config = new DynamicTeleportConfig(new File(api.dataFolder(), "dynamic_teleport.yml"));
-            if (!config.generate(bootOutput, dependencies.d3(), LangFileMappings.VELOCITY_DYNAMIC_TELEPORT_TEMPLATE))
-                throw new IllegalStateException("Unable to load or create dynamic_teleport.yml!");
-            config.register();
+            DynamicTeleportConfig config = DynamicTeleportConfig.construct(api.dataFolder(), dependencies.d3());
 
             if(!config.isEnabled()) {
                 bootOutput.add(Component.text("The dynamic teleport service wasn't enabled.", NamedTextColor.GRAY));

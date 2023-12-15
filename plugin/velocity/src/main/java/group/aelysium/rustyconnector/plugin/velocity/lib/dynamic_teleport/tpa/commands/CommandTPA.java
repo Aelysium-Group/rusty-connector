@@ -42,7 +42,7 @@ public final class CommandTPA {
                                        .services().tpa().orElseThrow();
 
             ServerInfo serverInfo = sender.getCurrentServer().orElseThrow().getServerInfo();
-            MCLoader targetServer = new MCLoader.Reference(serverInfo).get();
+            MCLoader targetServer = (MCLoader) new MCLoader.Reference(serverInfo).get();
             Family family = targetServer.family();
 
             if(!family.metadata().tpaAllowed()) return false;
@@ -103,7 +103,7 @@ public final class CommandTPA {
 
                                     try {
                                         ServerInfo sendingServer = player.getCurrentServer().orElseThrow().getServerInfo();
-                                        MCLoader server = new MCLoader.Reference(sendingServer).get();
+                                        MCLoader server = (MCLoader) new MCLoader.Reference(sendingServer).get();
 
                                         Family family = server.family();
 
@@ -147,7 +147,7 @@ public final class CommandTPA {
                                         ServerInfo targetServerInfo = player.getCurrentServer().orElseThrow().getServerInfo();
 
                                         try {
-                                            MCLoader targetServer = new MCLoader.Reference(targetServerInfo).get();
+                                            MCLoader targetServer = (MCLoader) new MCLoader.Reference(targetServerInfo).get();
                                             Family family = targetServer.family();
                                             if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
@@ -202,7 +202,7 @@ public final class CommandTPA {
                                     try {
                                         ServerInfo serverInfo = ((com.velocitypowered.api.proxy.Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                        MCLoader targetServer = new MCLoader.Reference(serverInfo).get();
+                                        MCLoader targetServer = (MCLoader) new MCLoader.Reference(serverInfo).get();
                                         Family family = targetServer.family();
                                         if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
@@ -235,7 +235,7 @@ public final class CommandTPA {
                                         ServerInfo targetServerInfo = ((com.velocitypowered.api.proxy.Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
                                         try {
-                                            MCLoader targetServer = new MCLoader.Reference(targetServerInfo).get();
+                                            MCLoader targetServer = (MCLoader) new MCLoader.Reference(targetServerInfo).get();
                                             Family family = targetServer.family();
                                             if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
@@ -270,7 +270,7 @@ public final class CommandTPA {
                             try {
                                 ServerInfo sendingServer = ((com.velocitypowered.api.proxy.Player) context.getSource()).getCurrentServer().orElseThrow().getServerInfo();
 
-                                MCLoader server = new MCLoader.Reference(sendingServer).get();
+                                MCLoader server = (MCLoader) new MCLoader.Reference(sendingServer).get();
                                 Family family = server.family();
                                 if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
@@ -325,14 +325,14 @@ public final class CommandTPA {
 
                                 ServerInfo sendersServerInfo = player.getCurrentServer().orElseThrow().getServerInfo();
                                 try {
-                                    MCLoader sendersServer = new MCLoader.Reference(sendersServerInfo).get();
+                                    MCLoader sendersServer = (MCLoader) new MCLoader.Reference(sendersServerInfo).get();
                                     Family family = sendersServer.family();
                                     if(!family.metadata().tpaAllowed()) throw new NullPointerException();
                                     TPAHandler tpaHandler = tpaService.tpaHandler(family);
 
                                     if (Permission.validate(player, "rustyconnector.command.tpa.bypassRequest")) {
                                         ServerInfo recieverServerInfo = targetPlayer.getCurrentServer().orElseThrow().getServerInfo();
-                                        MCLoader targetServer = new MCLoader.Reference(recieverServerInfo).get();
+                                        MCLoader targetServer = (MCLoader) new MCLoader.Reference(recieverServerInfo).get();
 
                                         tpaService.tpaSendPlayer(player, targetPlayer, targetServer);
                                         player.sendMessage(ProxyLang.TPA_REQUEST_BYPASSED.build(targetPlayer.getUsername()));

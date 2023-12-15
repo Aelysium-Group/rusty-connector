@@ -1,10 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
@@ -17,7 +15,6 @@ import java.util.Optional;
 
 public class FamilyService implements IFamilyService<MCLoader, Player, LoadBalancer, RootFamily, Family> {
     private final Map<String, Family> families = new HashMap<>();
-    private final Map<String, IFamilyCategory<Player>> categories = new HashMap<>();
     private WeakReference<RootFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
 
@@ -38,14 +35,8 @@ public class FamilyService implements IFamilyService<MCLoader, Player, LoadBalan
         return this.rootFamily.get();
     }
 
-    protected Optional<Family> find(String id) {
+    public Optional<Family> find(String id) {
         Family family = this.families.get(id);
-        if(family == null) return Optional.empty();
-        return Optional.of(family);
-    }
-
-    protected Optional<IFamilyCategory<Player>> findCategory(String id) {
-        IFamilyCategory<Player> family = this.categories.get(id);
         if(family == null) return Optional.empty();
         return Optional.of(family);
     }
@@ -56,14 +47,6 @@ public class FamilyService implements IFamilyService<MCLoader, Player, LoadBalan
 
     public void remove(Family family) {
         this.families.remove(family.id());
-    }
-
-    public void add(IFamilyCategory<Player> category) {
-        this.categories.put(category.id(), category);
-    }
-
-    public void remove(IFamilyCategory<Player> category) {
-        this.categories.remove(category.id());
     }
 
     public List<Family> dump() {

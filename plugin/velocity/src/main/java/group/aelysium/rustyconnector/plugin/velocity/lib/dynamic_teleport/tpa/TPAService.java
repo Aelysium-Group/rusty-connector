@@ -97,7 +97,7 @@ public class TPAService implements ITPAService<TPACleaningService, MCLoader, Pla
         backboneMessenger.publish(message);
 
         try {
-            MCLoader senderServer = new MCLoader.Reference(source.getCurrentServer().orElseThrow().getServerInfo()).get();
+            MCLoader senderServer = (MCLoader) new MCLoader.Reference(source.getCurrentServer().orElseThrow().getServerInfo()).get();
 
             if (senderServer.equals(targetServer)) return;
         } catch (Exception ignore) {}

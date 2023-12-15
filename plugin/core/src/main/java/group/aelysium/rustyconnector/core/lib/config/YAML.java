@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,9 +22,44 @@ public abstract class YAML {
 
     public ConfigurationNode getData() { return this.data; }
 
-    public YAML(File configPointer) {
-        this.configPointer = configPointer;
+    protected YAML(Path dataFolder, String target) {
+        this.configPointer = new File(String.valueOf(dataFolder), target);
     }
+
+    protected YAML(Path dataFolder, String target, LangService lang, LangFileMappings.Mapping template) {
+        this.configPointer = new File(String.valueOf(dataFolder), target);
+
+        try {
+            if (!this.configPointer.exists()) {
+                File parent = this.configPointer.getParentFile();
+                if (!parent.exists())
+                    parent.mkdirs();
+
+                InputStream stream;
+                if (lang.isInline())
+                    stream = YAML.getResource(lang.code() + "/" + template.path());
+                else
+                    stream = new FileInputStream(lang.get(template));
+
+                try {
+                    Files.copy(stream, this.configPointer.toPath());
+                } catch (IOException e) {
+                    throw new RuntimeException("Unable to setup " + this.configPointer.getName() + "! No further information.");
+                }
+
+                stream.close();
+            }
+
+            try {
+                this.data = this.loadYAML(this.configPointer);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public String getName() {
         return this.configPointer.getName();
     }
@@ -63,52 +99,11 @@ public abstract class YAML {
         }
     }
 
-    /**
-     * Generate and then load the yaml file.
-     * If it already exists, just load it.
-     * This method also closes the passed {@link InputStream} once it's done.
-     * @return `true` If the file successfully loaded. `false` otherwise.
-     */
-    public boolean generate(List<Component> outputLog, LangService lang, LangFileMappings.Mapping template) throws IOException {
-        outputLog.add(Component.text("Building "+this.configPointer.getName()+"...", NamedTextColor.DARK_GRAY));
-        if (!this.configPointer.exists()) {
-            File parent = this.configPointer.getParentFile();
-            if (!parent.exists())
-                parent.mkdirs();
-
-            InputStream stream;
-            if(lang.isInline())
-                stream = YAML.getResource("en_us/"+template.path());
-            else
-                stream = new FileInputStream(lang.get(template));
-
-            try {
-                Files.copy(stream, this.configPointer.toPath());
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to setup " + this.configPointer.getName() + "! No further information.");
-            }
-
-            stream.close();
-        }
-
-        try {
-            this.data = this.loadYAML(this.configPointer);
-            if(this.data == null) return false;
-            outputLog.add(Component.text("Finished building "+this.configPointer.getName(), NamedTextColor.GREEN));
-
-            return true;
-        } catch (Exception e) {
-            outputLog.add(Component.text("Failed to build "+this.configPointer.getName(), NamedTextColor.RED));
-
-            return false;
-        }
-    }
-
     public static InputStream getResource(String path) {
         return YAML.class.getClassLoader().getResourceAsStream(path);
     }
 
-    public ConfigurationNode loadYAML(File file) throws IOException {
+    protected ConfigurationNode loadYAML(File file) throws IOException {
         return YAMLConfigurationLoader.builder()
                 .setIndent(2)
                 .setPath(file.toPath())

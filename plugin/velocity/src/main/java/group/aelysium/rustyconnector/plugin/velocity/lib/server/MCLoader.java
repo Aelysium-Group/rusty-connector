@@ -6,7 +6,6 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
@@ -20,7 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MCLoader implements IMCLoader {
+public class MCLoader implements group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader {
     private final UUID id = UUID.randomUUID();
     private RegisteredServer registeredServer = null;
     private final ServerInfo serverInfo;
@@ -97,7 +96,7 @@ public class MCLoader implements IMCLoader {
 
         Family family;
         try {
-            family = new Family.Reference(familyName).get();
+            family = (Family) new Family.Reference(familyName).get();
         } catch (Exception ignore) {
             throw new InvalidAlgorithmParameterException("A family with the id `"+familyName+"` doesn't exist!");
         }
@@ -196,7 +195,7 @@ public class MCLoader implements IMCLoader {
 
         Family family;
         try {
-            family = new Family.Reference(this.family.id()).get();
+            family = (Family) new Family.Reference(this.family.id()).get();
         } catch (Exception ignore) {
             throw new NullPointerException("A family with the id `"+this.family.id()+"` doesn't exist!");
         }
@@ -265,15 +264,5 @@ public class MCLoader implements IMCLoader {
 
     public boolean equals(MCLoader server) {
         return this.serverInfo.equals(server.serverInfo());
-    }
-
-    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<MCLoader, ServerInfo> {
-        public Reference(ServerInfo serverInfo) {
-            super(serverInfo);
-        }
-
-        public MCLoader get() {
-            return Tinder.get().services().server().fetch(this.referencer).orElseThrow();
-        }
     }
 }

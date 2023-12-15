@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family;
 
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
 
-public interface IRankedFamily<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TLoadBalancer extends ILoadBalancer<TMCLoader>> extends IFamily<TMCLoader, TPlayer, TLoadBalancer>, Service {
+public interface RankedFamily<TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>> extends Family<TMCLoader, TPlayer, TLoadBalancer>, Service {
     /**
      * Queues a player into this family's matchmaking.
      * The player will be connected once a match has been made.
