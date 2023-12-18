@@ -24,12 +24,6 @@ public abstract class VelocityFlame<TCoreServiceHandler extends ICoreServiceHand
     public abstract Version version();
 
     /**
-     * Gets the current version being used by RustyConnector's config manager.
-     * @return {@link Integer}
-     */
-    public abstract int configVersion();
-
-    /**
      * Gets RustyConnector's boot log.
      * The log represents all the debug messages sent during the boot or reboot of RustyConnector.
      * The log is in the same order of when the logs were sent.

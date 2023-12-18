@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -39,6 +40,9 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
     }
     public PlayerService player() {
         return this.find(PlayerService.class).orElseThrow();
+    }
+    public ConfigService config() {
+        return this.find(ConfigService.class).orElseThrow();
     }
     public DataTransitService dataTransitService() {
         return this.find(DataTransitService.class).orElseThrow();

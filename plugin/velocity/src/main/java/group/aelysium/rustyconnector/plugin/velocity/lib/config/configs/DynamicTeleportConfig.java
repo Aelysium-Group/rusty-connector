@@ -1,9 +1,11 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.config.FriendsConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -11,13 +13,12 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class DynamicTeleportConfig extends YAML {
+public class DynamicTeleportConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.DynamicTeleportConfig {
     private boolean enabled = false;
     private boolean tpa_enabled = false;
     private boolean tpa_friendsOnly = false;
@@ -34,8 +35,13 @@ public class DynamicTeleportConfig extends YAML {
     private boolean hub_enabled = false;
     private List<String> hub_enabledFamilies = new ArrayList<>();
 
-    protected DynamicTeleportConfig(Path dataFolder, String target, LangService lang) {
-        super(dataFolder, target, lang, LangFileMappings.PROXY_DYNAMIC_TELEPORT_TEMPLATE);
+    protected DynamicTeleportConfig(Path dataFolder, String target, String name, LangService lang) {
+        super(dataFolder, target, name, lang, LangFileMappings.PROXY_DYNAMIC_TELEPORT_TEMPLATE);
+    }
+
+    @Override
+    public IConfigService.ConfigKey key() {
+        return IConfigService.ConfigKey.singleton(DynamicTeleportConfig.class);
     }
 
     public boolean isEnabled() {
@@ -88,24 +94,24 @@ public class DynamicTeleportConfig extends YAML {
 
     @SuppressWarnings("unchecked")
     protected void register() throws IllegalStateException, NoOutputException {
-        this.enabled = this.getNode(this.data, "enabled", Boolean.class);
+        this.enabled = IYAML.getValue(this.data, "enabled", Boolean.class);
         if(!this.enabled) return;
 
-        this.tpa_enabled = this.getNode(this.data, "tpa.enabled", Boolean.class);
+        this.tpa_enabled = IYAML.getValue(this.data, "tpa.enabled", Boolean.class);
         if(this.tpa_enabled) {
-            this.tpa_friendsOnly = this.getNode(this.data, "tpa.friends-only", Boolean.class);
+            this.tpa_friendsOnly = IYAML.getValue(this.data, "tpa.friends-only", Boolean.class);
 
             try {
-                this.tpa_enabledFamilies = (List<String>) (this.getNode(this.data, "tpa.enabled-families", List.class));
+                this.tpa_enabledFamilies = (List<String>) (IYAML.getValue(this.data, "tpa.enabled-families", List.class));
             } catch (Exception e) {
-                throw new IllegalStateException("The node [tpa.enabled-families] in " + this.getName() + " is invalid! Make sure you are using the correct type of data!");
+                throw new IllegalStateException("The node [tpa.enabled-families] in " + this.name() + " is invalid! Make sure you are using the correct type of data!");
             }
 
-            this.tpa_ignorePlayerCap = this.getNode(this.data, "tpa.ignore-player-cap", Boolean.class);
+            this.tpa_ignorePlayerCap = IYAML.getValue(this.data, "tpa.ignore-player-cap", Boolean.class);
 
 
             try {
-                String expiration = this.getNode(this.data, "tpa.expiration", String.class);
+                String expiration = IYAML.getValue(this.data, "tpa.expiration", String.class);
                 if (expiration.equals("NEVER")) {
                     this.tpa_expiration = LiquidTimestamp.from(5, TimeUnit.MINUTES);
                     Tinder.get().logger().send(ProxyLang.BOXED_MESSAGE_COLORED.build("\"NEVER\" as a Liquid Timestamp for [tpa.expiration] is not allowed! Set to default of 5 Minutes.", NamedTextColor.YELLOW));
@@ -115,45 +121,46 @@ public class DynamicTeleportConfig extends YAML {
             }
         }
 
-        this.familyAnchor_enabled = this.getNode(this.data, "family-anchor.enabled", Boolean.class);
+        this.familyAnchor_enabled = IYAML.getValue(this.data, "family-anchor.enabled", Boolean.class);
         if(this.familyAnchor_enabled) {
-            List<? extends ConfigurationNode> anchors = get(this.data, "family-anchor.anchors").getChildrenList();
+            List<? extends ConfigurationNode> anchors = IYAML.get(this.data, "family-anchor.anchors").getChildrenList();
 
             this.familyAnchor_anchors = new ArrayList<>();
             if(anchors.size() != 0)
                 for (ConfigurationNode entry: anchors)
                     this.familyAnchor_anchors.add(Map.entry(
-                            this.getNode(entry, "id", String.class),
-                            this.getNode(entry, "family", String.class)
+                            IYAML.getValue(entry, "id", String.class),
+                            IYAML.getValue(entry, "family", String.class)
                     ));
         }
 
-        this.familyInjector_enabled = this.getNode(this.data, "family-injectors.enabled", Boolean.class);
+        this.familyInjector_enabled = IYAML.getValue(this.data, "family-injectors.enabled", Boolean.class);
         if(this.familyInjector_enabled) {
-            List<? extends ConfigurationNode> injectors = get(this.data, "family-injectors.injectors").getChildrenList();
+            List<? extends ConfigurationNode> injectors = IYAML.get(this.data, "family-injectors.injectors").getChildrenList();
 
             this.familyInjector_injectors = new ArrayList<>();
             if(injectors.size() != 0)
                 for (ConfigurationNode entry: injectors)
                     this.familyInjector_injectors.add(Map.entry(
-                            this.getNode(entry, "host", String.class),
-                            this.getNode(entry, "family", String.class)
+                            IYAML.getValue(entry, "host", String.class),
+                            IYAML.getValue(entry, "family", String.class)
                     ));
         }
 
-        this.hub_enabled = this.getNode(this.data, "hub.enabled", Boolean.class);
+        this.hub_enabled = IYAML.getValue(this.data, "hub.enabled", Boolean.class);
         if(this.hub_enabled) {
             try {
-                this.hub_enabledFamilies = (List<String>) (this.getNode(this.data, "hub.enabled-families", List.class));
+                this.hub_enabledFamilies = (List<String>) (IYAML.getValue(this.data, "hub.enabled-families", List.class));
             } catch (Exception e) {
-                throw new IllegalStateException("The node [hub.enabled-families] in " + this.getName() + " is invalid! Make sure you are using the correct type of data!");
+                throw new IllegalStateException("The node [hub.enabled-families] in " + this.name() + " is invalid! Make sure you are using the correct type of data!");
             }
         }
     }
 
-    public static DynamicTeleportConfig construct(Path dataFolder, LangService lang) {
-        DynamicTeleportConfig config = new DynamicTeleportConfig(dataFolder, "extras/dynamic_teleport.yml", lang);
+    public static DynamicTeleportConfig construct(Path dataFolder, LangService lang, ConfigService configService) {
+        DynamicTeleportConfig config = new DynamicTeleportConfig(dataFolder, "extras/dynamic_teleport.yml", "dynamic_teleport", lang);
         config.register();
+        configService.put(config);
         return config;
     }
 }

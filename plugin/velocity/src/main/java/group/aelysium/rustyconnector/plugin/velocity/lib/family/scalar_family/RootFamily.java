@@ -1,14 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
-import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
@@ -30,18 +30,18 @@ public class RootFamily extends ScalarFamily implements group.aelysium.rustyconn
         super(settings, ROOT_FAMILY_META);
     }
 
-    public static RootFamily init(DependencyInjector.DI3<List<Component>, LangService, WhitelistService> dependencies, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+    public static RootFamily init(DependencyInjector.DI4<List<Component>, LangService, WhitelistService, ConfigService> deps, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Tinder api = Tinder.get();
-        List<Component> bootOutput = dependencies.d1();
-        LangService lang = dependencies.d2();
-        WhitelistService whitelistService = dependencies.d3();
+        List<Component> bootOutput = deps.d1();
+        LangService lang = deps.d2();
+        WhitelistService whitelistService = deps.d3();
 
-        ScalarFamilyConfig config = ScalarFamilyConfig.construct(api.dataFolder(), familyName, lang);
+        ScalarFamilyConfig config = ScalarFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d4());
 
         AlgorithmType loadBalancerAlgorithm;
         LoadBalancer.Settings loadBalancerSettings;
         {
-            LoadBalancerConfig loadBalancerConfig = LoadBalancerConfig.construct(api.dataFolder(), config.loadBalancer(), lang);
+            LoadBalancerConfig loadBalancerConfig = LoadBalancerConfig.construct(api.dataFolder(), config.loadBalancer_name(), lang);
 
             loadBalancerAlgorithm = loadBalancerConfig.getAlgorithm();
 
@@ -54,7 +54,7 @@ public class RootFamily extends ScalarFamily implements group.aelysium.rustyconn
 
         Whitelist.Reference whitelist = null;
         if (config.isWhitelist_enabled())
-            whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService), config.getWhitelist_name());
+            whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService, deps.d4()), config.getWhitelist_name());
 
         LoadBalancer loadBalancer;
         switch (loadBalancerAlgorithm) {

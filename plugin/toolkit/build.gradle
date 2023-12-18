@@ -16,4 +16,8 @@ shadowJar {
     minimize()
 }
 
+java {
+    withSourcesJar()
+}
+
 jar.finalizedBy('shadowJar')

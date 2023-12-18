@@ -1,18 +1,18 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
-import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config.StaticFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.StaticFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
@@ -66,14 +66,14 @@ public class StaticFamily extends Family implements group.aelysium.rustyconnecto
      *
      * @return A list of all server families.
      */
-    public static StaticFamily init(DependencyInjector.DI4<List<Component>, LangService, MySQLStorage, WhitelistService> dependencies, String familyName) throws Exception {
+    public static StaticFamily init(DependencyInjector.DI5<List<Component>, LangService, MySQLStorage, WhitelistService, ConfigService> deps, String familyName) throws Exception {
         Tinder api = Tinder.get();
-        List<Component> bootOutput = dependencies.d1();
-        LangService lang = dependencies.d2();
-        MySQLStorage storage = dependencies.d3();
-        WhitelistService whitelistService = dependencies.d4();
+        List<Component> bootOutput = deps.d1();
+        LangService lang = deps.d2();
+        MySQLStorage storage = deps.d3();
+        WhitelistService whitelistService = deps.d4();
 
-        StaticFamilyConfig config = StaticFamilyConfig.construct(api.dataFolder(), familyName, lang);
+        StaticFamilyConfig config = StaticFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d5());
 
         AlgorithmType loadBalancerAlgorithm;
         LoadBalancer.Settings loadBalancerSettings;
@@ -91,7 +91,7 @@ public class StaticFamily extends Family implements group.aelysium.rustyconnecto
 
         Whitelist.Reference whitelist = null;
         if (config.isWhitelist_enabled())
-            whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService), config.getWhitelist_name());
+            whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService, deps.d5()), config.getWhitelist_name());
 
         LoadBalancer loadBalancer;
         switch (loadBalancerAlgorithm) {
@@ -111,7 +111,7 @@ public class StaticFamily extends Family implements group.aelysium.rustyconnecto
                 config.getConsecutiveConnections_homeServer_ifUnavailable(),
                 config.getConsecutiveConnections_homeServer_expiration()
         );
-        StaticFamily family = new StaticFamily(inject(dependencies.d3()), settings);
+        StaticFamily family = new StaticFamily(inject(deps.d3()), settings);
 
         try {
             family.dataEnclave().updateExpirations(config.getConsecutiveConnections_homeServer_expiration(), family);

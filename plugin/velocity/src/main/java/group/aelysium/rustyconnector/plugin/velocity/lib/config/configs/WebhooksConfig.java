@@ -1,27 +1,33 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhook;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookScope;
-import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config.WhitelistConfig;
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WebhooksConfig extends YAML {
-    protected WebhooksConfig(Path dataFolder, String target, LangService lang) {
-        super(dataFolder, target, lang, LangFileMappings.PROXY_WEBHOOKS_TEMPLATE);
+public class WebhooksConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.WebhooksConfig {
+    protected WebhooksConfig(Path dataFolder, String target, String name, LangService lang) {
+        super(dataFolder, target, name, lang, LangFileMappings.PROXY_WEBHOOKS_TEMPLATE);
+    }
+
+    @Override
+    public IConfigService.ConfigKey key() {
+        return IConfigService.ConfigKey.singleton(WebhooksConfig.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -29,17 +35,17 @@ public class WebhooksConfig extends YAML {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        Boolean enabled = this.getNode(this.data, "enabled", Boolean.class);
+        Boolean enabled = IYAML.getValue(this.data, "enabled", Boolean.class);
         if(!enabled) return;
 
-        get(this.data,"webhooks").getChildrenList().forEach(node -> {
-            WebhookScope scope = WebhookScope.valueOf(this.getNode(node, "scope", String.class).toUpperCase());
-            String name = this.getNode(node, "id", String.class);
+        IYAML.get(this.data,"webhooks").getChildrenList().forEach(node -> {
+            WebhookScope scope = WebhookScope.valueOf(IYAML.getValue(node, "scope", String.class).toUpperCase());
+            String name = IYAML.getValue(node, "id", String.class);
             try {
-                URL url = new URL(this.getNode(node, "url", String.class));
+                URL url = new URL(IYAML.getValue(node, "url", String.class));
                 DiscordWebhook webhook = new DiscordWebhook(name, url);
 
-                List<String> flags = this.getNode(node, "flags", List.class);
+                List<String> flags = IYAML.getValue(node, "flags", List.class);
                 List<WebhookAlertFlag> correctFlags = new ArrayList<>();
                 for (String flag : flags) {
                     try {
@@ -54,7 +60,7 @@ public class WebhooksConfig extends YAML {
                     switch (scope) {
                         case PROXY -> WebhookEventManager.on(flag, webhook);
                         case FAMILY -> {
-                            String familyName = this.getNode(node, "target-family", String.class);
+                            String familyName = IYAML.getValue(node, "target-family", String.class);
 
                             try {
                                 new Family.Reference(familyName).get();
@@ -74,9 +80,10 @@ public class WebhooksConfig extends YAML {
         });
     }
 
-    public static WebhooksConfig construct(Path dataFolder, LangService lang) {
-        WebhooksConfig config = new WebhooksConfig(dataFolder, "extras/webhooks.yml", lang);
+    public static WebhooksConfig construct(Path dataFolder, LangService lang, ConfigService configService) {
+        WebhooksConfig config = new WebhooksConfig(dataFolder, "extras/webhooks.yml", "webhooks", lang);
         config.register();
+        configService.put(config);
         return config;
     }
 }

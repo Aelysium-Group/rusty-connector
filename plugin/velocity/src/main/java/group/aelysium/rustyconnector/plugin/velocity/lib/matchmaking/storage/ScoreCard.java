@@ -5,6 +5,8 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScore
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A RankedGame is a representation of all variations of a player's rank within a specific gamemode.
@@ -12,7 +14,7 @@ import java.util.HashMap;
  * ranks are saved here and can be retrieved.
  */
 public class ScoreCard implements IScoreCard<MySQLStorage> {
-    protected final HashMap<Class<? extends IPlayerRank<?>>, IPlayerRank<?>> ranks = new HashMap<>();
+    protected final Map<Class<? extends IPlayerRank<?>>, IPlayerRank<?>> ranks = new ConcurrentHashMap<>();
 
     public <TPlayerRank extends IPlayerRank<?>> void store(MySQLStorage storage, TPlayerRank rank) {
         this.ranks.put(rank.type().get(), rank);
@@ -34,6 +36,21 @@ public class ScoreCard implements IScoreCard<MySQLStorage> {
             }
 
             return rank;
+        } catch (Exception ignore) {
+        }
+
+        throw new IllegalStateException();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void quantize(MySQLStorage storage, IRankSchema.Type<?> schema) {
+        try {
+            IPlayerRank<?> rank = this.ranks.get(schema.get());
+
+            this.ranks.clear();
+            this.ranks.put(schema.get(), rank);
+
+            storage.store(this.ranks);
         } catch (Exception ignore) {
         }
 

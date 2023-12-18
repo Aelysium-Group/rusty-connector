@@ -1,20 +1,25 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.config.WebhooksConfig;
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.velocity.config.IProxyConfigService;
+import group.aelysium.rustyconnector.toolkit.velocity.config.LoadBalancerConfig;
+import group.aelysium.rustyconnector.toolkit.velocity.config.WhitelistConfig;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.text.ParseException;
+import java.util.Optional;
 
-public class StaticFamilyConfig extends YAML {
+public class StaticFamilyConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.StaticFamilyConfig {
     private Component displayName;
     private Family.Reference parent_family = Family.Reference.rootFamily();
     private String firstConnection_loadBalancer = "default";
@@ -43,51 +48,67 @@ public class StaticFamilyConfig extends YAML {
         return consecutiveConnections_homeServer_expiration;
     }
 
-    protected StaticFamilyConfig(Path dataFolder, String familyName, LangService lang) {
-        super(dataFolder, "families/"+familyName+".static.yml", lang, LangFileMappings.PROXY_STATIC_FAMILY_TEMPLATE);
+    @Override
+    public Optional<? extends LoadBalancerConfig> loadBalancer(IProxyConfigService service) {
+        return service.loadBalancer(this.firstConnection_loadBalancer);
+    }
+
+    @Override
+    public Optional<? extends WhitelistConfig> whitelist(IProxyConfigService service) {
+        return service.whitelist(this.whitelist_name);
+    }
+
+    protected StaticFamilyConfig(Path dataFolder, String target, String name, LangService lang) {
+        super(dataFolder, target, name, lang, LangFileMappings.PROXY_STATIC_FAMILY_TEMPLATE);
+    }
+
+    @Override
+    public IConfigService.ConfigKey key() {
+        return new IConfigService.ConfigKey(StaticFamilyConfig.class, name());
     }
 
     protected void register() throws IllegalStateException {
         try {
-            String name = this.getNode(this.data, "display-name", String.class);
+            String name = IYAML.getValue(this.data, "display-name", String.class);
             this.displayName = MiniMessage.miniMessage().deserialize(name);
         } catch (Exception ignore) {}
 
         try {
-            this.parent_family = new Family.Reference(this.getNode(this.data, "parent-family", String.class));
+            this.parent_family = new Family.Reference(IYAML.getValue(this.data, "parent-family", String.class));
         } catch (Exception ignore) {}
 
         try {
-            this.firstConnection_loadBalancer = this.getNode(this.data, "first-connection.load-balancer", String.class);
+            this.firstConnection_loadBalancer = IYAML.getValue(this.data, "first-connection.load-balancer", String.class);
         } catch (Exception ignore) {
             this.firstConnection_loadBalancer = "default";
         }
         this.firstConnection_loadBalancer = this.firstConnection_loadBalancer.replaceFirst("\\.yml$|\\.yaml$","");
 
         try {
-            this.consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.valueOf(this.getNode(this.data,"consecutive-connections.home-server.if-unavailable",String.class));
+            this.consecutiveConnections_homeServer_ifUnavailable = UnavailableProtocol.valueOf(IYAML.getValue(this.data,"consecutive-connections.home-server.if-unavailable",String.class));
         } catch (IllegalArgumentException ignore) {
             throw new IllegalStateException("You must provide a valid option for [consecutive-connections.home-server.if-unavailable] in your static family configs!");
         }
         try {
-            String expiration = this.getNode(this.data, "consecutive-connections.home-server.expiration", String.class);
+            String expiration = IYAML.getValue(this.data, "consecutive-connections.home-server.expiration", String.class);
             if(expiration.equals("NEVER")) this.consecutiveConnections_homeServer_expiration = null;
             else this.consecutiveConnections_homeServer_expiration = LiquidTimestamp.from(expiration);
         } catch (ParseException e) {
             throw new IllegalStateException("You must provide a valid time value for [consecutive-connections.home-server.expiration] in your static family configs!");
         }
 
-        this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
-        this.whitelist_name = this.getNode(this.data,"whitelist.id",String.class);
+        this.whitelist_enabled = IYAML.getValue(this.data,"whitelist.enabled",Boolean.class);
+        this.whitelist_name = IYAML.getValue(this.data,"whitelist.id",String.class);
         if(this.whitelist_enabled && this.whitelist_name.equals(""))
             throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist in a family!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
     }
 
-    public static StaticFamilyConfig construct(Path dataFolder, String familyName, LangService lang) {
-        StaticFamilyConfig config = new StaticFamilyConfig(dataFolder, familyName, lang);
+    public static StaticFamilyConfig construct(Path dataFolder, String familyName, LangService lang, ConfigService configService) {
+        StaticFamilyConfig config = new StaticFamilyConfig(dataFolder, "families/"+familyName+".static.yml", familyName, lang);
         config.register();
+        configService.put(config);
         return config;
     }
 }

@@ -37,4 +37,11 @@ public class StorageRoot implements IStorageRoot<Player, FriendMapping, ServerRe
 
         storage.store(this.games);
     }
+    public boolean deleteGame(MySQLStorage storage, String name) {
+        RankedGame game = games.remove(name);
+
+        storage.store(this.games);
+
+        return game == null;
+    }
 }

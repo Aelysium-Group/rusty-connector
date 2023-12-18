@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.central;
 
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.IServiceableService;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.IDynamicTeleportServiceHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
@@ -36,6 +37,12 @@ public interface ICoreServiceHandler extends IServiceHandler {
      */
     <TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>, TBaseFamily extends Family<TMCLoader, TPlayer, TLoadBalancer>>
         IServerService<TMCLoader, TPlayer, TLoadBalancer, TBaseFamily> server();
+
+    /**
+     * Gets RustyConnector's {@link IConfigService config service} which allows direct access to RC configs.
+     * @return {@link IConfigService}
+     */
+    IConfigService config();
 
     /**
      * Gets RustyConnector's {@link IMySQLStorageService remote storage connector service} which allows direct access to database storage.

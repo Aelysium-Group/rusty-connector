@@ -5,15 +5,16 @@ import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 
-public class DefaultConfig extends YAML {
+public class DefaultConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.DefaultConfig {
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
@@ -36,8 +37,13 @@ public class DefaultConfig extends YAML {
         return magicLink_serverPingInterval;
     }
 
-    protected DefaultConfig(Path dataFolder, String target, LangService lang) {
-        super(dataFolder, target, lang, LangFileMappings.PROXY_CONFIG_TEMPLATE);
+    protected DefaultConfig(Path dataFolder, String target, String name, LangService lang) {
+        super(dataFolder, target, name, lang, LangFileMappings.PROXY_CONFIG_TEMPLATE);
+    }
+
+    @Override
+    public IConfigService.ConfigKey key() {
+        return IConfigService.ConfigKey.singleton(DefaultConfig.class);
     }
 
 
@@ -53,20 +59,20 @@ public class DefaultConfig extends YAML {
 
         // Whitelist
 
-        this.whitelist_enabled = this.getNode(this.data,"whitelist.enabled",Boolean.class);
-        this.whitelist_name = this.getNode(this.data,"whitelist.id",String.class);
+        this.whitelist_enabled = IYAML.getValue(this.data,"whitelist.enabled",Boolean.class);
+        this.whitelist_name = IYAML.getValue(this.data,"whitelist.id",String.class);
         if(this.whitelist_enabled && this.whitelist_name.equals(""))
             throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist on the proxy!");
 
         this.whitelist_name = this.whitelist_name.replaceFirst("\\.yml$|\\.yaml$","");
 
         // Hearts
-        this.magicLink_serverTimeout = this.getNode(this.data,"magic-link.server-timeout",Integer.class);
+        this.magicLink_serverTimeout = IYAML.getValue(this.data,"magic-link.server-timeout",Integer.class);
         if(this.magicLink_serverTimeout < 5) {
             ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Server timeout is set dangerously fast: " + this.magicLink_serverTimeout + "s. Setting to default of 5s.", NamedTextColor.YELLOW);
             this.magicLink_serverTimeout = 5;
         }
-        this.magicLink_serverPingInterval = this.getNode(this.data,"magic-link.server-ping-interval",Integer.class);
+        this.magicLink_serverPingInterval = IYAML.getValue(this.data,"magic-link.server-ping-interval",Integer.class);
         if(this.magicLink_serverPingInterval < 5) {
             ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Server ping interval is set dangerously fast: " + this.magicLink_serverPingInterval + "s. Setting to default of 5s.", NamedTextColor.YELLOW);
             this.magicLink_serverPingInterval = 5;
@@ -77,9 +83,10 @@ public class DefaultConfig extends YAML {
         }
     }
 
-    public static DefaultConfig construct(Path dataFolder, LangService lang, int pluginConfigVersion) {
-        DefaultConfig config = new DefaultConfig(dataFolder, "config.yml", lang);
+    public static DefaultConfig construct(Path dataFolder, LangService lang, int pluginConfigVersion, ConfigService configService) {
+        DefaultConfig config = new DefaultConfig(dataFolder, "config.yml", "config", lang);
         config.register(pluginConfigVersion);
+        configService.put(config);
         return config;
     }
 }

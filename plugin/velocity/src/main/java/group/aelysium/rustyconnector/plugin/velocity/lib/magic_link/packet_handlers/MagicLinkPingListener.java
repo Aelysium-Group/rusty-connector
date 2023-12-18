@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicMCLoaderConfig;
-import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCLoaderConfig;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
@@ -21,7 +20,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 
 public class MagicLinkPingListener implements PacketListener {
     protected Tinder api;
@@ -59,7 +57,7 @@ public class MagicLinkPingListener implements PacketListener {
         ServerService serverService = api.services().server();
         RedisConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
 
-        MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), packet.magicConfigName(), api.lang());
+        MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), packet.magicConfigName(), api.lang(), api.services().config());
 
         try {
             MCLoader server = new ServerService.ServerBuilder()
@@ -97,7 +95,7 @@ public class MagicLinkPingListener implements PacketListener {
     }
 
     private static void disconnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) throws Exception {
-        MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), packet.magicConfigName(), api.lang());
+        MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), packet.magicConfigName(), api.lang(), api.services().config());
 
         api.services().server().unregisterServer(serverInfo, magicMCLoaderConfig.family(), true);
     }

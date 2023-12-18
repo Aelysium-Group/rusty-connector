@@ -1,7 +1,9 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.parties.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
@@ -10,10 +12,9 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.io.File;
 import java.nio.file.Path;
 
-public class PartyConfig extends YAML {
+public class PartyConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.PartyConfig {
     private boolean enabled = false;
     private int maxMembers = 5;
 
@@ -27,8 +28,9 @@ public class PartyConfig extends YAML {
 
     private SwitchPower switchingServers_switchPower = SwitchPower.MODERATE;
 
-    protected PartyConfig(Path dataFolder, String target, LangService lang) {
-        super(dataFolder, target, lang, LangFileMappings.PROXY_PARTY_TEMPLATE);
+    @Override
+    public IConfigService.ConfigKey key() {
+        return IConfigService.ConfigKey.singleton(PartyConfig.class);
     }
 
     public boolean isEnabled() {
@@ -66,38 +68,43 @@ public class PartyConfig extends YAML {
         return switchingServers_switchPower;
     }
 
+    protected PartyConfig(Path dataFolder, String target, String name, LangService lang) {
+        super(dataFolder, target, name, lang, LangFileMappings.PROXY_PARTY_TEMPLATE);
+    }
+
     @SuppressWarnings("unchecked")
     protected void register() throws IllegalStateException, NoOutputException {
-        this.enabled = this.getNode(this.data, "enabled", Boolean.class);
+        this.enabled = IYAML.getValue(this.data, "enabled", Boolean.class);
         if(!this.enabled) return;
 
-        this.maxMembers = this.getNode(this.data, "max-members", Integer.class);
+        this.maxMembers = IYAML.getValue(this.data, "max-members", Integer.class);
 
         try {
-            this.friendsOnly = this.getNode(this.data, "friends-only", Boolean.class);
+            this.friendsOnly = IYAML.getValue(this.data, "friends-only", Boolean.class);
             if(this.friendsOnly)
                 Tinder.get().services().friends().orElseThrow();
         } catch (Exception ignore) {
             Tinder.get().logger().send(ProxyLang.BOXED_MESSAGE_COLORED.build("[friends-only] in `party.yml` is set to true. But the friends module isn't enabled! Ignoring...", NamedTextColor.YELLOW));
             this.friendsOnly = false;
         }
-        this.localOnly = this.getNode(this.data, "local-only", Boolean.class);
+        this.localOnly = IYAML.getValue(this.data, "local-only", Boolean.class);
 
-        this.partyLeader_onlyLeaderCanInvite = this.getNode(this.data, "party-leader.only-leader-can-invite", Boolean.class);
-        this.partyLeader_onlyLeaderCanKick = this.getNode(this.data, "party-leader.only-leader-can-kick", Boolean.class);
-        this.partyLeader_onlyLeaderCanSwitchServers = this.getNode(this.data, "party-leader.only-leader-can-switch-servers", Boolean.class);
-        this.partyLeader_disbandOnLeaderQuit = this.getNode(this.data, "party-leader.disband-on-leader-quit", Boolean.class);
+        this.partyLeader_onlyLeaderCanInvite = IYAML.getValue(this.data, "party-leader.only-leader-can-invite", Boolean.class);
+        this.partyLeader_onlyLeaderCanKick = IYAML.getValue(this.data, "party-leader.only-leader-can-kick", Boolean.class);
+        this.partyLeader_onlyLeaderCanSwitchServers = IYAML.getValue(this.data, "party-leader.only-leader-can-switch-servers", Boolean.class);
+        this.partyLeader_disbandOnLeaderQuit = IYAML.getValue(this.data, "party-leader.disband-on-leader-quit", Boolean.class);
 
         try {
-            this.switchingServers_switchPower = Enum.valueOf(SwitchPower.class, this.getNode(this.data, "switching-servers.switch-power", String.class));
+            this.switchingServers_switchPower = Enum.valueOf(SwitchPower.class, IYAML.getValue(this.data, "switching-servers.switch-power", String.class));
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Switch power: "+this.switchingServers_switchPower+" isn't valid! Please review `party.yml` again!");
         }
     }
 
-    public static PartyConfig construct(Path dataFolder, LangService lang) {
-        PartyConfig config = new PartyConfig(dataFolder, "extras/party.yml", lang);
+    public static PartyConfig construct(Path dataFolder, LangService lang, ConfigService configService) {
+        PartyConfig config = new PartyConfig(dataFolder, "extras/party.yml", "party", lang);
         config.register();
+        configService.put(config);
         return config;
     }
 }

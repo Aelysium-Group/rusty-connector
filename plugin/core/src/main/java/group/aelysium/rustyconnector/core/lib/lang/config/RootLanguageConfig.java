@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.lang.config;
 
-import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
@@ -14,7 +14,7 @@ import java.nio.file.Path;
 
 public class RootLanguageConfig extends YAML {
     protected RootLanguageConfig(Path dataFolder) {
-        super(dataFolder, "language.yml");
+        super(dataFolder, "language.yml", "language");
     }
 
     protected String language;
@@ -37,7 +37,7 @@ public class RootLanguageConfig extends YAML {
             }
 
             try {
-                this.data = this.loadYAML(this.configPointer);
+                this.data = IYAML.loadYAML(this.configPointer);
                 if (this.data == null) throw new NullPointerException();
                 logger.send(Component.text("Finished building " + this.configPointer.getName(), NamedTextColor.GREEN));
             } catch (Exception e) {
@@ -50,7 +50,7 @@ public class RootLanguageConfig extends YAML {
 
     protected void register() throws IllegalStateException, NoOutputException {
         try {
-            this.language = this.getNode(this.data,"language", String.class);
+            this.language = IYAML.getValue(this.data,"language", String.class);
         } catch (Exception e) {
             this.language = "en_us";
         }
@@ -60,5 +60,10 @@ public class RootLanguageConfig extends YAML {
         RootLanguageConfig config = new RootLanguageConfig(dataFolder);
         config.register();
         return config;
+    }
+
+    @Override
+    public IConfigService.ConfigKey key() {
+        return IConfigService.ConfigKey.singleton(RootLanguageConfig.class);
     }
 }

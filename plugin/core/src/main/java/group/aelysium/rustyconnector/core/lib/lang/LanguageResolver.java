@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.lang;
 
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.ILanguageResolver;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
@@ -125,7 +126,7 @@ public class LanguageResolver implements ILanguageResolver {
         InputStream stream = null;
         try {
             if(internal)
-                stream = YAML.getResource("en_us/"+ LangFileMappings.LANGUAGE);
+                stream = IYAML.getResource("en_us/"+ LangFileMappings.LANGUAGE);
             else
                 stream = new FileInputStream(lang.get(LangFileMappings.LANGUAGE));
 

@@ -1,11 +1,10 @@
 package group.aelysium.rustyconnector.core.lib.config;
 
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,21 +12,32 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 
-public abstract class YAML {
+public abstract class YAML implements IYAML {
+    protected String name;
+    protected String target;
     protected File configPointer;
     protected ConfigurationNode data;
 
-    public ConfigurationNode getData() { return this.data; }
+    public ConfigurationNode nodes() { return this.data; }
+    public String name() {
+        return this.name;
+    }
+    public String fileTarget() {
+        return this.target;
+    }
+    public abstract IConfigService.ConfigKey key();
 
-    protected YAML(Path dataFolder, String target) {
+    protected YAML(Path dataFolder, String target, String name) {
         this.configPointer = new File(String.valueOf(dataFolder), target);
+        this.target = target;
+        this.name = name;
     }
 
-    protected YAML(Path dataFolder, String target, LangService lang, LangFileMappings.Mapping template) {
+    protected YAML(Path dataFolder, String target, String name, LangService lang, LangFileMappings.Mapping template) {
         this.configPointer = new File(String.valueOf(dataFolder), target);
+        this.target = target;
+        this.name = name;
 
         try {
             if (!this.configPointer.exists()) {
@@ -37,7 +47,7 @@ public abstract class YAML {
 
                 InputStream stream;
                 if (lang.isInline())
-                    stream = YAML.getResource(lang.code() + "/" + template.path());
+                    stream = IYAML.getResource(lang.code() + "/" + template.path());
                 else
                     stream = new FileInputStream(lang.get(template));
 
@@ -51,63 +61,13 @@ public abstract class YAML {
             }
 
             try {
-                this.data = this.loadYAML(this.configPointer);
+                this.data = IYAML.loadYAML(this.configPointer);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public String getName() {
-        return this.configPointer.getName();
-    }
-    protected static ConfigurationNode get(ConfigurationNode node, String path) {
-        String[] steps = path.split("\\.");
-
-        final ConfigurationNode[] currentNode = {node};
-        Arrays.stream(steps).forEach(step -> {
-            currentNode[0] = currentNode[0].getNode(step);
-        });
-
-        if(currentNode[0] == null) throw new IllegalArgumentException("The called YAML node `"+path+"` was null.");
-
-        return currentNode[0];
-    }
-
-    /**
-     * Retrieve data from a specific configuration node.
-     * @param data The configuration data to search for a specific node.
-     * @param node The node to search for.
-     * @param type The type to convert the retrieved data to.
-     * @return Data with a type matching `type`
-     * @throws IllegalStateException If there was an issue while retrieving the data or converting it to `type`.
-     */
-    protected <T> T getNode(ConfigurationNode data, String node, Class<? extends T> type) throws IllegalStateException {
-        try {
-            Object objectData = YAML.get(data,node).getValue();
-            if(objectData == null) throw new NullPointerException();
-
-            return type.cast(objectData);
-        } catch (NullPointerException e) {
-            throw new IllegalStateException("The node ["+node+"] is missing!");
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("The node ["+node+"] is of the wrong data type! Make sure you are using the correct type of data!");
-        } catch (Exception e) {
-            throw new IllegalStateException("Unable to register the node: "+node);
-        }
-    }
-
-    public static InputStream getResource(String path) {
-        return YAML.class.getClassLoader().getResourceAsStream(path);
-    }
-
-    protected ConfigurationNode loadYAML(File file) throws IOException {
-        return YAMLConfigurationLoader.builder()
-                .setIndent(2)
-                .setPath(file.toPath())
-                .build().load();
     }
 
     /**
@@ -117,7 +77,7 @@ public abstract class YAML {
      */
     public void processVersion(int currentVersion) {
         try {
-            Integer version = this.getNode(this.data, "version", Integer.class);
+            Integer version = IYAML.getValue(this.data, "version", Integer.class);
 
             if(currentVersion > version)
                 throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
@@ -131,12 +91,12 @@ public abstract class YAML {
             return;
         } catch (IllegalStateException e1) {
             try {
-                this.getNode(this.data, "version", String.class);
+                IYAML.getValue(this.data, "version", String.class);
 
                 throw new RuntimeException("You have set the value of `version` in config.yml to be a string! `version` must be an integer!");
             } catch (IllegalStateException e2) {
                 try {
-                    this.getNode(this.data, "config-version", Integer.class);
+                    IYAML.getValue(this.data, "config-version", Integer.class);
 
                     throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
                             "(v1 < v"+ currentVersion +") " +

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.config.DynamicTeleportConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;

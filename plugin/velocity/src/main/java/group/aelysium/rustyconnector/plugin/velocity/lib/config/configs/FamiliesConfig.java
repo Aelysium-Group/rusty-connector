@@ -1,32 +1,37 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.family.config;
+package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.config.MagicMCLoaderConfig;
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FamiliesConfig extends YAML {
+public class FamiliesConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.FamiliesConfig {
     private String rootFamily_name = "lobby";
     private Boolean rootFamily_catchDisconnectingPlayers = false;
     private Map<String, Boolean> scalar = new HashMap<>();
     private Map<String, Boolean> staticF = new HashMap<>();
     private Map<String, Boolean> ranked = new HashMap<>();
-    private Map<String, Boolean> versionedFunnels = new HashMap<>();
 
-    protected FamiliesConfig(Path dataFolder, String target, LangService lang) {
-        super(dataFolder, target, lang, LangFileMappings.PROXY_FAMILIES_TEMPLATE);
+    protected FamiliesConfig(Path dataFolder, String target, String name, LangService lang) {
+        super(dataFolder, target, name, lang, LangFileMappings.PROXY_FAMILIES_TEMPLATE);
+    }
+
+    @Override
+    public IConfigService.ConfigKey key() {
+        return IConfigService.ConfigKey.singleton(FamiliesConfig.class);
     }
 
     public String rootFamilyName() {
@@ -45,9 +50,6 @@ public class FamiliesConfig extends YAML {
     public List<String> rankedFamilies() {
         return this.ranked.keySet().stream().toList();
     }
-    public List<String> versionedFunnels() {
-        return this.versionedFunnels.keySet().stream().toList();
-    }
 
     @SuppressWarnings("unchecked")
     protected void register() throws IllegalStateException, NoOutputException {
@@ -55,31 +57,31 @@ public class FamiliesConfig extends YAML {
 
         // Families
         try {
-            this.rootFamily_name = this.getNode(this.data, "root-family.name", String.class);
+            this.rootFamily_name = IYAML.getValue(this.data, "root-family.name", String.class);
             if (this.rootFamily_name.equals("") || this.rootFamily_name.length() < 1) throw new Exception();
         } catch (Exception ignore) {
             ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Your [root-family.name] is empty or unparseable. It has been set to the default of \"lobby\"", NamedTextColor.YELLOW);
             this.rootFamily_name = "lobby";
         }
 
-        this.rootFamily_catchDisconnectingPlayers = this.getNode(this.data,"root-family.catch-disconnecting-players",Boolean.class);
+        this.rootFamily_catchDisconnectingPlayers = IYAML.getValue(this.data,"root-family.catch-disconnecting-players",Boolean.class);
         try {
-            List<String> array = (List<String>) (this.getNode(this.data,"scalar",List.class));
+            List<String> array = (List<String>) (IYAML.getValue(this.data,"scalar",List.class));
             array.forEach(item -> this.scalar.put(item.toLowerCase(), false));
         } catch (Exception e) {
-            throw new IllegalStateException("The node [scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
+            throw new IllegalStateException("The node [scalar] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }
         try {
-            List<String> array = (List<String>) (this.getNode(this.data,"static",List.class));
+            List<String> array = (List<String>) (IYAML.getValue(this.data,"static",List.class));
             array.forEach(item -> this.staticF.put(item.toLowerCase(), false));
         } catch (Exception e) {
-            throw new IllegalStateException("The node [scalar] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
+            throw new IllegalStateException("The node [scalar] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }
         try {
-            List<String> array = (List<String>) (this.getNode(this.data,"ranked",List.class));
+            List<String> array = (List<String>) (IYAML.getValue(this.data,"ranked",List.class));
             array.forEach(item -> this.ranked.put(item.toLowerCase(), false));
         } catch (Exception e) {
-            throw new IllegalStateException("The node [ranked] in "+this.getName()+" is invalid! Make sure you are using the correct type of data!");
+            throw new IllegalStateException("The node [ranked] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }
 
 
@@ -122,9 +124,10 @@ public class FamiliesConfig extends YAML {
         }
     }
 
-    public static FamiliesConfig construct(Path dataFolder, LangService lang) {
-        FamiliesConfig config = new FamiliesConfig(dataFolder, "families.yml", lang);
+    public static FamiliesConfig construct(Path dataFolder, LangService lang, ConfigService configService) {
+        FamiliesConfig config = new FamiliesConfig(dataFolder, "families.yml", "families", lang);
         config.register();
+        configService.put(config);
         return config;
     }
 }

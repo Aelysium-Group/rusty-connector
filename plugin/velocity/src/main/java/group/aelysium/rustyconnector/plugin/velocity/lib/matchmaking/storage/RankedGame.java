@@ -13,7 +13,7 @@ import java.util.UUID;
 
 /**
  * ScoreCard is a representation of a player's entire ranked game history.
- * All ranks associated with a player should be able to be fetched using their score card.
+ * All ranks associated with a player should be able to be fetched using their scorecard.
  */
 public class RankedGame implements IRankedGame<Player> {
     protected String name;
@@ -72,5 +72,11 @@ public class RankedGame implements IRankedGame<Player> {
         }
 
         return playerRank;
+    }
+
+    public void quantizeRankSchemas(MySQLStorage storage) {
+        for (ScoreCard scorecard : this.scorecards.values()) {
+            scorecard.quantize(storage, this.rankingSchema);
+        }
     }
 }

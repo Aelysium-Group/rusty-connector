@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -15,7 +16,9 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -50,6 +53,7 @@ public final class CommandRusty {
             .then(Debug.build(flame, logger, messageCacheService))
             .then(Reload.build(flame, logger, messageCacheService))
             .then(K8.build(flame, logger, messageCacheService))
+            .then(Database.build(flame, logger, messageCacheService))
             .then(LiteralArgumentBuilder.<CommandSource>literal("hug")
                     .executes(context -> {
                         logger.send(Component.text("Awwwwww! Hug <3", NamedTextColor.LIGHT_PURPLE));
@@ -415,21 +419,21 @@ class K8 {
                                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerName", StringArgumentType.string())
                                         .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerPort", StringArgumentType.string())
                                                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerImage", StringArgumentType.greedyString())
-                                                .executes(context -> {
-                                                    try {
-                                                        String familyName = context.getArgument("familyName", String.class);
-                                                        String containerName = context.getArgument("containerName", String.class);
-                                                        String containerPort = context.getArgument("containerPort", String.class);
-                                                        String containerImage = context.getArgument("containerImage", String.class);
+                                                        .executes(context -> {
+                                                            try {
+                                                                String familyName = context.getArgument("familyName", String.class);
+                                                                String containerName = context.getArgument("containerName", String.class);
+                                                                String containerPort = context.getArgument("containerPort", String.class);
+                                                                String containerImage = context.getArgument("containerImage", String.class);
 
-                                                        K8Service k8 = new K8Service();
-                                                        k8.createServer(familyName, containerName, containerImage);
-                                                    } catch (Exception e) {
-                                                        e.printStackTrace();
-                                                    }
+                                                                K8Service k8 = new K8Service();
+                                                                k8.createServer(familyName, containerName, containerImage);
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
 
-                                                    return Command.SINGLE_SUCCESS;
-                                                })
+                                                            return Command.SINGLE_SUCCESS;
+                                                        })
                                                 )
                                         )
                                 )
@@ -452,5 +456,70 @@ class K8 {
                                         })
                                 )
                         ));
+    }
+}
+class Database {
+    public static ArgumentBuilder<CommandSource, ?> build(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
+        return LiteralArgumentBuilder.<CommandSource>literal("database") // k8 createPod <familyName> <containerName> <containerPort>
+                .then(bulk(flame, logger, messageCacheService))
+                .then(LiteralArgumentBuilder.literal("players"))
+                .then(LiteralArgumentBuilder.literal("residence"))
+                .then(LiteralArgumentBuilder.literal("friends"))
+                ;
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> bulk(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
+        return LiteralArgumentBuilder.<CommandSource>literal("bulk")
+                .then(LiteralArgumentBuilder.<CommandSource>literal("purgeGameRecords")
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameName", StringArgumentType.greedyString())
+                                .executes(context -> {
+                                    String gameName = context.getArgument("gameName", String.class);
+
+                                    MySQLStorage storage = flame.services().storage();
+
+                                    if(storage.root().deleteGame(storage, gameName))
+                                        logger.log("Successfully deleted "+gameName);
+                                    else
+                                        logger.log(gameName+" couldn't be found.");
+                                    return Command.SINGLE_SUCCESS;
+                                })))
+                .then(LiteralArgumentBuilder.<CommandSource>literal("purgeUnusedRanks")
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameName", StringArgumentType.greedyString())
+                                .executes(context -> {
+                                    String gameName = context.getArgument("gameName", String.class);
+
+                                    MySQLStorage storage = flame.services().storage();
+                                    RankedGame game = storage.root().getGame(gameName).orElse(null);
+                                    if(game == null) {
+                                        logger.log(gameName + " couldn't be found.");
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+
+                                    game.quantizeRankSchemas(storage);
+                                    logger.log("Successfully purged unused rank records from "+gameName);
+
+                                    return Command.SINGLE_SUCCESS;
+                                })))
+                .then(LiteralArgumentBuilder.<CommandSource>literal("export")
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameName", StringArgumentType.greedyString())
+                                .executes(context -> {
+                                    String gameName = context.getArgument("gameName", String.class);
+
+                                    MySQLStorage storage = flame.services().storage();
+                                    RankedGame game = storage.root().getGame(gameName).orElse(null);
+                                    if(game == null) {
+                                        logger.log(gameName + " couldn't be found.");
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+
+                                    game.quantizeRankSchemas(storage);
+                                    logger.log("Successfully purged unused rank records from "+gameName);
+
+                                    return Command.SINGLE_SUCCESS;
+                                })))
+                .then(LiteralArgumentBuilder.literal("players"))
+                .then(LiteralArgumentBuilder.literal("residence"))
+                .then(LiteralArgumentBuilder.literal("friends"))
+                ;
     }
 }

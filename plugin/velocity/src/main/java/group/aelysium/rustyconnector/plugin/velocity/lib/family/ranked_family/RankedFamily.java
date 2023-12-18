@@ -1,16 +1,16 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.config.RankedFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.RankedFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.config.MatchMakerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchMakerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
-import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
@@ -73,20 +73,20 @@ public class RankedFamily extends Family implements group.aelysium.rustyconnecto
      * By the time this runs, the configuration file should be able to guarantee that all values are present.
      * @return A list of all server families.
      */
-    public static RankedFamily init(DependencyInjector.DI4<List<Component>, LangService, MySQLStorage, WhitelistService> dependencies, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+    public static RankedFamily init(DependencyInjector.DI5<List<Component>, LangService, MySQLStorage, WhitelistService, ConfigService> deps, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Tinder api = Tinder.get();
-        List<Component> bootOutput = dependencies.d1();
-        LangService lang = dependencies.d2();
-        MySQLStorage mySQLStorage = dependencies.d3();
-        WhitelistService whitelistService = dependencies.d4();
+        List<Component> bootOutput = deps.d1();
+        LangService lang = deps.d2();
+        MySQLStorage mySQLStorage = deps.d3();
+        WhitelistService whitelistService = deps.d4();
 
-        RankedFamilyConfig config = RankedFamilyConfig.construct(api.dataFolder(), familyName, lang);
+        RankedFamilyConfig config = RankedFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d5());
 
         Matchmaker<? extends IPlayerRank<?>> matchmaker;
         {
-            MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker(), lang);
+            MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
 
-            Optional<RankedGame> fetched = mySQLStorage.root().getGame(config.getName());
+            Optional<RankedGame> fetched = mySQLStorage.root().getGame(config.name());
             if(fetched.isEmpty()) {
                 RankedGame game = new RankedGame(config.gamemodeName(), matchMakerConfig.getAlgorithm());
                 mySQLStorage.root().saveGame(mySQLStorage, game);
@@ -100,7 +100,7 @@ public class RankedFamily extends Family implements group.aelysium.rustyconnecto
 
         Whitelist.Reference whitelist = null;
         if (config.isWhitelist_enabled())
-            whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService), config.getWhitelist_name());
+            whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService, deps.d5()), config.getWhitelist_name());
 
         Settings settings = new Settings(familyName, config.displayName(), config.getParent_family(), whitelist, matchmaker);
         return new RankedFamily(settings);
