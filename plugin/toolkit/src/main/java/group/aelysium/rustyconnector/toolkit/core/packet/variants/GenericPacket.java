@@ -5,11 +5,11 @@ import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
-import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class GenericPacket implements IPacket {
     private static final int protocolVersion = 2;
@@ -88,7 +88,7 @@ public class GenericPacket implements IPacket {
      * @param parametersToCheck The parameter list to check.
      * @return `true` if all keys are present. `false` otherwise.
      */
-    public static boolean validateParameters(List<String> requiredParameters, List<KeyValue<String, JsonPrimitive>> parametersToCheck) {
+    public static boolean validateParameters(List<String> requiredParameters, List<Map.Entry<String, JsonPrimitive>> parametersToCheck) {
         List<String> keysToCheck = new ArrayList<>();
         parametersToCheck.forEach(entry -> keysToCheck.add(entry.getKey()));
         List<String> matches = requiredParameters.stream().filter(keysToCheck::contains).toList();
@@ -101,7 +101,7 @@ public class GenericPacket implements IPacket {
         private PacketType.Mapping type;
         private InetSocketAddress address;
         private PacketOrigin origin;
-        private final List<KeyValue<String, JsonPrimitive>> parameters = new ArrayList<>();
+        private final List<Map.Entry<String, JsonPrimitive>> parameters = new ArrayList<>();
 
         public Builder() {}
 
@@ -147,11 +147,11 @@ public class GenericPacket implements IPacket {
         }
 
         public Builder setParameter(String key, String value) {
-            this.parameters.add(KeyValue.just(key, new JsonPrimitive(value)));
+            this.parameters.add(Map.entry(key, new JsonPrimitive(value)));
             return this;
         }
         public Builder setParameter(String key, JsonPrimitive value) {
-            this.parameters.add(KeyValue.just(key, value));
+            this.parameters.add(Map.entry(key, value));
             return this;
         }
 

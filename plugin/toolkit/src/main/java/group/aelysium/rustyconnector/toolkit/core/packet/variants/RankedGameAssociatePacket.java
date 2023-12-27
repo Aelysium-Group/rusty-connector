@@ -4,11 +4,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class RankedGameAssociatePacket extends GenericPacket {
@@ -18,7 +18,7 @@ public class RankedGameAssociatePacket extends GenericPacket {
         return uuid;
     }
 
-    public RankedGameAssociatePacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public RankedGameAssociatePacket(InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(PacketType.ASSOCIATE_RANKED_GAME, address, origin);
 
         if(!RankedGameAssociatePacket.validateParameters(ValidParameters.toList(), parameters))
@@ -36,7 +36,7 @@ public class RankedGameAssociatePacket extends GenericPacket {
             }
         });
     }
-    public RankedGameAssociatePacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public RankedGameAssociatePacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, PacketType.ASSOCIATE_RANKED_GAME, address, origin);
 
         if(!RankedGameAssociatePacket.validateParameters(ValidParameters.toList(), parameters))

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.events;
+package group.aelysium.rustyconnector.plugin.velocity.events.velocity;
 
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;

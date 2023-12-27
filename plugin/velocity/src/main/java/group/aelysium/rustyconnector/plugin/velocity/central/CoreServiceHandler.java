@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.toolkit.core.event_factory.EventFactory;
 import group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -26,6 +27,9 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
         super(services);
     }
 
+    public EventFactory events() {
+        return this.find(EventFactory.class).orElseThrow();
+    }
     public FamilyService family() {
         return this.find(FamilyService.class).orElseThrow();
     }

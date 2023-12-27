@@ -5,11 +5,11 @@ import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ServerPingPacket extends GenericPacket {
     private String serverName;
@@ -34,7 +34,7 @@ public class ServerPingPacket extends GenericPacket {
         return podName;
     }
 
-    public ServerPingPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public ServerPingPacket(InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(PacketType.PING, address, origin);
 
         if(!validateParameters(ValidParameters.toList(), parameters))
@@ -53,7 +53,7 @@ public class ServerPingPacket extends GenericPacket {
             }
         });
     }
-    public ServerPingPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public ServerPingPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, PacketType.PING, address, origin);
 
         if(!validateParameters(ValidParameters.toList(), parameters))

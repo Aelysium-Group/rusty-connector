@@ -28,12 +28,6 @@ allprojects {
 subprojects {
     apply plugin: "java"
     apply plugin: 'com.github.johnrengelman.shadow'
-
-    dependencies {
-        compileOnly "io.lettuce:lettuce-core:${project.lettuce_version}"
-        compileOnly "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
-        compileOnly "com.google.guava:guava:${project.guava_version}"
-    }
 }
 
 configurations {

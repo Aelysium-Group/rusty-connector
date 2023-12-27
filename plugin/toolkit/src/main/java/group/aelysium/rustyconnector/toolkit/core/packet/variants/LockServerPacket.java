@@ -4,17 +4,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Map;
 
 public class LockServerPacket extends GenericPacket {
     private String serverName;
 
     public String serverName() { return this.serverName; }
 
-    public LockServerPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public LockServerPacket(InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(PacketType.LOCK_SERVER, address, origin);
 
         parameters.forEach(entry -> {
@@ -26,7 +26,7 @@ public class LockServerPacket extends GenericPacket {
             }
         });
     }
-    public LockServerPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public LockServerPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, PacketType.LOCK_SERVER, address, origin);
 
         parameters.forEach(entry -> {

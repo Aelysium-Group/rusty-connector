@@ -5,7 +5,7 @@ compileJava {
 dependencies {
     // Include in jar
     implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
-    implementation "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
+    implementation "cloud.commandframework:cloud-paper:${project.cloud_paperfabric_version}"
     implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
 
     // Dev only

@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCLoaderConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
+import group.aelysium.rustyconnector.toolkit.core.event_factory.EventFactory;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -28,10 +29,10 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DefaultConfig;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoggerConfig;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChangeServer;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerChooseInitialServer;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerDisconnect;
-import group.aelysium.rustyconnector.plugin.velocity.events.OnPlayerKicked;
+import group.aelysium.rustyconnector.plugin.velocity.events.velocity.OnPlayerChangeServer;
+import group.aelysium.rustyconnector.plugin.velocity.events.velocity.OnPlayerChooseInitialServer;
+import group.aelysium.rustyconnector.plugin.velocity.events.velocity.OnPlayerDisconnect;
+import group.aelysium.rustyconnector.plugin.velocity.events.velocity.OnPlayerKicked;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DataTransitConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DynamicTeleportConfig;
@@ -218,6 +219,9 @@ class Initialize {
         eventManager.register(plugin, new OnPlayerChangeServer());
         eventManager.register(plugin, new OnPlayerKicked());
         eventManager.register(plugin, new OnPlayerDisconnect());
+
+        EventFactory factory = new EventFactory();
+        services.put(EventFactory.class, factory);
     }
 
     public void commands(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {

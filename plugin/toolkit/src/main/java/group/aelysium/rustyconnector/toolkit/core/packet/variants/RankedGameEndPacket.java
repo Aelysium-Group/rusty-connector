@@ -4,11 +4,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class RankedGameEndPacket extends GenericPacket {
@@ -26,7 +26,7 @@ public class RankedGameEndPacket extends GenericPacket {
         return uuid;
     }
 
-    public RankedGameEndPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public RankedGameEndPacket(InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(PacketType.END_RANKED_GAME, address, origin);
 
         if(!validateParameters(ValidParameters.toList(), parameters))
@@ -43,7 +43,7 @@ public class RankedGameEndPacket extends GenericPacket {
             }
         });
     }
-    public RankedGameEndPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public RankedGameEndPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, PacketType.END_RANKED_GAME, address, origin);
 
         if(!validateParameters(ValidParameters.toList(), parameters))

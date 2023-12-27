@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.toolkit.velocity.central;
 
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.event_factory.EventFactory;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.IServiceableService;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.IDynamicTeleportServiceHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
@@ -24,6 +25,12 @@ import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistServic
 import java.util.Optional;
 
 public interface ICoreServiceHandler extends IServiceHandler {
+    /**
+     * Gets the {@link EventFactory event factory} which allows responsive access to RC logic.
+     * @return {@link EventFactory}
+     */
+    EventFactory events();
+
     /**
      * Gets the {@link IFamilyService family service} which allows access to server families and other family related logic.
      * @return {@link IFamilyService}

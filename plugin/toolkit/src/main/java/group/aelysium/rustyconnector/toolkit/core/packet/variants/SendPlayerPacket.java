@@ -4,11 +4,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SendPlayerPacket extends GenericPacket {
     private String targetFamilyName;
@@ -22,7 +22,7 @@ public class SendPlayerPacket extends GenericPacket {
         return uuid;
     }
 
-    public SendPlayerPacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public SendPlayerPacket(InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(PacketType.SEND_PLAYER, address, origin);
 
         if(!validateParameters(ValidParameters.toList(), parameters))
@@ -38,7 +38,7 @@ public class SendPlayerPacket extends GenericPacket {
             }
         });
     }
-    public SendPlayerPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public SendPlayerPacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, PacketType.SEND_PLAYER, address, origin);
 
         if(!validateParameters(ValidParameters.toList(), parameters))

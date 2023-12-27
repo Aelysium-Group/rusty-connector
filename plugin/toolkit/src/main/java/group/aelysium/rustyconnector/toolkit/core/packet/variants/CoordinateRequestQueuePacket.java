@@ -4,11 +4,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import io.lettuce.core.KeyValue;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CoordinateRequestQueuePacket extends GenericPacket {
     private String targetUsername;
@@ -27,7 +27,7 @@ public class CoordinateRequestQueuePacket extends GenericPacket {
         return targetServer;
     }
 
-    public CoordinateRequestQueuePacket(InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public CoordinateRequestQueuePacket(InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(PacketType.COORDINATE_REQUEST_QUEUE, address, origin);
 
         if(!validateParameters(ValidParameters.toList(), parameters))
@@ -44,7 +44,7 @@ public class CoordinateRequestQueuePacket extends GenericPacket {
             }
         });
     }
-    public CoordinateRequestQueuePacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<KeyValue<String, JsonPrimitive>> parameters) {
+    public CoordinateRequestQueuePacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
         super(messageVersion, rawMessage, PacketType.COORDINATE_REQUEST_QUEUE, address, origin);
 
         if(!validateParameters(ValidParameters.toList(), parameters))
