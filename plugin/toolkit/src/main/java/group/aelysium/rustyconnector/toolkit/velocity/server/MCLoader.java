@@ -40,9 +40,10 @@ public interface MCLoader extends ISortable {
     /**
      * Decrease this {@link MCLoader PlayerServer's} timeout by 1.
      * Once this value equals 0, this server will become stale and player's won't be able to join it anymore.
+     * @param amount The amount to decrease by.
      * @return The new timeout value.
      */
-    int decreaseTimeout();
+    int decreaseTimeout(int amount);
 
     /**
      * Gets {@link MCLoader this server's} address in the form of a string.

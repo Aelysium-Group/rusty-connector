@@ -20,7 +20,7 @@ public class MagicLinkService extends ClockService {
                 // Unregister any stale servers
                 // The removing feature of server#unregister is valid because serverService.servers() creates a new list which isn't bound to the underlying list.
                 serverService.servers().forEach(server -> {
-                    server.decreaseTimeout();
+                    server.decreaseTimeout(3);
 
                     try {
                         if (server.stale()) server.unregister(true);
@@ -29,6 +29,6 @@ public class MagicLinkService extends ClockService {
                     }
                 });
             } catch (Exception ignore) {}
-        }, 1, 5);
+        }, 3, 5); // Period of `3` lets us not loop over the servers as many times with a small hit to how quickly stale servers will be unregistered.
     }
 }

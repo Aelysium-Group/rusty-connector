@@ -468,7 +468,7 @@ class Initialize {
     public void magicLink(DependencyInjector.DI2<DefaultConfig, ServerService> dependencies) {
         bootOutput.add(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-        MagicLinkService magicLinkService = new MagicLinkService(3, dependencies.d1().magicLink_serverPingInterval());
+        MagicLinkService magicLinkService = new MagicLinkService(2, dependencies.d1().magicLink_serverPingInterval());
         services.put(MagicLinkService.class, magicLinkService);
 
         bootOutput.add(Component.text("Finished building magic link service.", NamedTextColor.GREEN));

@@ -66,8 +66,9 @@ public class MCLoader implements group.aelysium.rustyconnector.toolkit.velocity.
         return this.id;
     }
 
-    public int decreaseTimeout() {
-        this.timeout.decrementAndGet();
+    public int decreaseTimeout(int amount) {
+        if(amount > 0) amount = amount * -1;
+        this.timeout.addAndGet(amount);
         if(this.timeout.get() < 0) this.timeout.set(0);
 
         return this.timeout.get();

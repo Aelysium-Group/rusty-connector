@@ -74,11 +74,11 @@ public class DefaultConfig extends YAML implements group.aelysium.rustyconnector
         }
         this.magicLink_serverPingInterval = IYAML.getValue(this.data,"magic-link.server-ping-interval",Integer.class);
         if(this.magicLink_serverPingInterval < 5) {
-            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Server ping interval is set dangerously fast: " + this.magicLink_serverPingInterval + "s. Setting to default of 5s.", NamedTextColor.YELLOW);
+            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Server ping interval is set dangerously fast: " + this.magicLink_serverPingInterval + "s. Setting to minimum of 5s.", NamedTextColor.YELLOW);
             this.magicLink_serverPingInterval = 5;
         }
-        if(this.magicLink_serverTimeout < this.magicLink_serverPingInterval) {
-            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Server timeout can't be less than server ping interval!", NamedTextColor.YELLOW);
+        if(this.magicLink_serverTimeout <= this.magicLink_serverPingInterval) {
+            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Server timeout must be more than server ping interval!", NamedTextColor.YELLOW);
             this.magicLink_serverPingInterval = this.magicLink_serverTimeout - 2;
         }
     }
