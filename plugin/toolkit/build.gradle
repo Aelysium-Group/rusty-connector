@@ -18,6 +18,7 @@ shadowJar {
 }
 
 java {
+    withJavadocJar()
     withSourcesJar()
 }
 

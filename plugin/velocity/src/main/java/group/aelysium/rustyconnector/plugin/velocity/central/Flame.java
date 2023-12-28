@@ -4,7 +4,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
-import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnMCLoaderRegister;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCLoaderConfig;
@@ -224,6 +224,11 @@ class Initialize {
         services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, factory);
 
         factory.on(new OnMCLoaderRegister());
+        factory.on(new OnFamilyLeave());
+        factory.on(new OnFamilySwitch());
+        factory.on(new OnMCLoaderRegister());
+        factory.on(new OnMCLoaderUnregister());
+        factory.on(new OnMCLoaderSwitch());
     }
 
     public void commands(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
