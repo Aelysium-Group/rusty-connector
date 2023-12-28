@@ -94,6 +94,13 @@ public interface Family<TMCLoader extends MCLoader, TPlayer extends Player, TLoa
      */
     Metadata metadata();
 
+    /**
+     * Causes the family to balance itself based on it's {@link ILoadBalancer}.
+     * If your network has lots of servers in its families, using this method foolishly will greatly impact performance.
+     * Be sure to read how RC uses this method before implementing it yourself.
+     */
+    void balance();
+
     record Settings<TMCLoader extends MCLoader, TLoadBalancer extends ILoadBalancer<TMCLoader>, TWhitelist extends IWhitelist>
             (Component displayName, TLoadBalancer loadBalancer, Reference parent, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<TWhitelist, String> whitelist) {}
 

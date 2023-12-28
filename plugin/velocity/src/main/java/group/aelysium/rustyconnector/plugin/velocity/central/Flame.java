@@ -4,11 +4,11 @@ import com.velocitypowered.api.command.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnMCLoaderRegister;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCLoaderConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
-import group.aelysium.rustyconnector.toolkit.core.event_factory.EventFactory;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -29,10 +29,10 @@ import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DefaultConfig;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoggerConfig;
-import group.aelysium.rustyconnector.plugin.velocity.events.velocity.OnPlayerChangeServer;
-import group.aelysium.rustyconnector.plugin.velocity.events.velocity.OnPlayerChooseInitialServer;
-import group.aelysium.rustyconnector.plugin.velocity.events.velocity.OnPlayerDisconnect;
-import group.aelysium.rustyconnector.plugin.velocity.events.velocity.OnPlayerKicked;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.OnPlayerChangeServer;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.OnPlayerChooseInitialServer;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.OnPlayerDisconnect;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.OnPlayerKicked;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DataTransitConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DynamicTeleportConfig;
@@ -56,7 +56,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.parties.PartyServiceSettin
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.PartyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.WebhooksConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
@@ -132,7 +132,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler, RedisConnector> {
             MessageCacheService messageCacheService = initialize.dataTransit(inject(langService, configService));
 
             logger.send(Component.text("Initializing 20%...", NamedTextColor.DARK_GRAY));
-            DependencyInjector.DI2<RedisConnector, MySQLStorage> connectors = initialize.connectors(inject(cryptor, messageCacheService, Tinder.get().logger(), langService));
+            DependencyInjector.DI2<RedisConnector, StorageService> connectors = initialize.connectors(inject(cryptor, messageCacheService, Tinder.get().logger(), langService));
 
             logger.send(Component.text("Initializing 30%...", NamedTextColor.DARK_GRAY));
             FamilyService familyService = initialize.families(inject(defaultConfig, langService, connectors.d2(), configService));
@@ -220,8 +220,10 @@ class Initialize {
         eventManager.register(plugin, new OnPlayerKicked());
         eventManager.register(plugin, new OnPlayerDisconnect());
 
-        EventFactory factory = new EventFactory();
-        services.put(EventFactory.class, factory);
+        group.aelysium.rustyconnector.core.lib.events.EventManager factory = new group.aelysium.rustyconnector.core.lib.events.EventManager();
+        services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, factory);
+
+        factory.on(new OnMCLoaderRegister());
     }
 
     public void commands(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
@@ -283,11 +285,10 @@ class Initialize {
         PluginLogger.init(loggerConfig);
     }
 
-    public DependencyInjector.DI2<RedisConnector, MySQLStorage> connectors(DependencyInjector.DI4<AESCryptor, MessageCacheService, PluginLogger, LangService> dependencies) throws IOException, SQLException {
+    public DependencyInjector.DI2<RedisConnector, StorageService> connectors(DependencyInjector.DI4<AESCryptor, MessageCacheService, PluginLogger, LangService> dependencies) throws IOException, SQLException {
         bootOutput.add(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
         ConnectorsConfig config = ConnectorsConfig.construct(api.dataFolder(), dependencies.d4(), true, true);
-
 
         RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
                 PacketOrigin.PROXY,
@@ -314,19 +315,19 @@ class Initialize {
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
 
         bootOutput.add(Component.text("Booting MicroStream MariaDB driver...", NamedTextColor.DARK_GRAY));
-        MySQLStorage storage = MySQLStorage.create(
+        StorageService storage = StorageService.create(
                 config.getMysql_address(),
                 config.getMysql_user(),
                 config.getMysql_database()
         );
-        services.put(MySQLStorage.class, storage);
+        services.put(StorageService.class, storage);
         bootOutput.add(Component.text("Finished booting MariaDB driver.", NamedTextColor.GREEN));
 
         bootOutput.add(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
         return DependencyInjector.inject(messenger, storage);
     }
 
-    public FamilyService families(DependencyInjector.DI4<DefaultConfig, LangService, MySQLStorage, ConfigService> deps) throws Exception {
+    public FamilyService families(DependencyInjector.DI4<DefaultConfig, LangService, StorageService, ConfigService> deps) throws Exception {
         bootOutput.add(Component.text("Building families service...", NamedTextColor.DARK_GRAY));
 
         FamiliesConfig familiesConfig = FamiliesConfig.construct(api.dataFolder(), deps.d2(), deps.d4());
@@ -530,7 +531,7 @@ class Initialize {
         }
     }
 
-    public void friendsService(DependencyInjector.DI3<MySQLStorage, LangService, ConfigService> deps) {
+    public void friendsService(DependencyInjector.DI3<StorageService, LangService, ConfigService> deps) {
         try {
             bootOutput.add(Component.text("Building friends service...", NamedTextColor.DARK_GRAY));
 
@@ -561,7 +562,7 @@ class Initialize {
         }
     }
 
-    public void playerService(DependencyInjector.DI2<MySQLStorage, LangService> dependencies) throws Exception {
+    public void playerService(DependencyInjector.DI2<StorageService, LangService> dependencies) throws Exception {
         bootOutput.add(Component.text(" | Building player logging service...", NamedTextColor.DARK_GRAY));
 
         services.put(PlayerService.class, new PlayerService(dependencies.d1()));

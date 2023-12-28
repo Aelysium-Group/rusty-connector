@@ -1,11 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family;
 
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
@@ -19,7 +21,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBala
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -37,7 +39,7 @@ public class StaticFamily extends Family implements group.aelysium.rustyconnecto
     protected UnavailableProtocol unavailableProtocol;
     protected ResidenceDataEnclave dataEnclave;
 
-    private StaticFamily(DependencyInjector.DI1<MySQLStorage> deps, Settings settings) {
+    private StaticFamily(DependencyInjector.DI1<StorageService> deps, Settings settings) {
         super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), STATIC_FAMILY_META);
         this.unavailableProtocol = settings.unavailableProtocol();
         this.homeServerExpiration = settings.homeServerExpiration();
@@ -56,6 +58,8 @@ public class StaticFamily extends Family implements group.aelysium.rustyconnecto
     }
 
     public MCLoader connect(Player player) throws RuntimeException {
+        EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
+
         StaticFamilyConnector connector = new StaticFamilyConnector(this, player.resolve().orElseThrow());
         return connector.connect();
     }
@@ -66,11 +70,11 @@ public class StaticFamily extends Family implements group.aelysium.rustyconnecto
      *
      * @return A list of all server families.
      */
-    public static StaticFamily init(DependencyInjector.DI5<List<Component>, LangService, MySQLStorage, WhitelistService, ConfigService> deps, String familyName) throws Exception {
+    public static StaticFamily init(DependencyInjector.DI5<List<Component>, LangService, StorageService, WhitelistService, ConfigService> deps, String familyName) throws Exception {
         Tinder api = Tinder.get();
         List<Component> bootOutput = deps.d1();
         LangService lang = deps.d2();
-        MySQLStorage storage = deps.d3();
+        StorageService storage = deps.d3();
         WhitelistService whitelistService = deps.d4();
 
         StaticFamilyConfig config = StaticFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d5());
@@ -134,7 +138,7 @@ public class StaticFamily extends Family implements group.aelysium.rustyconnecto
             LoadBalancer loadBalancer,
             Family.Reference parentFamily,
             Whitelist.Reference whitelist,
-            MySQLStorage mySQLStorage,
+            StorageService storageService,
             UnavailableProtocol unavailableProtocol,
             LiquidTimestamp homeServerExpiration
     ) {}

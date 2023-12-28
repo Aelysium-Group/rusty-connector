@@ -6,15 +6,24 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
+import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
+import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.UnregisterEvent;
+import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.WeakReference;
 import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -91,19 +100,66 @@ public class MCLoader implements group.aelysium.rustyconnector.toolkit.velocity.
      * @throws DuplicateRequestException If the server has already been registered to the proxy.
      * @throws InvalidAlgorithmParameterException If the family doesn't exist.
      */
-    public void register(String familyName) throws Exception {
+    public void register(@NotNull String familyName) throws Exception {
         Tinder api = Tinder.get();
+        PluginLogger logger = api.logger();
 
-        Family family;
         try {
-            family = (Family) new Family.Reference(familyName).get();
+            this.family = (Family) new Family.Reference(familyName).get();
         } catch (Exception ignore) {
             throw new InvalidAlgorithmParameterException("A family with the id `"+familyName+"` doesn't exist!");
         }
 
-        this.registeredServer = api.services().server().registerServer(this, family);
+        try {
+            if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
+                ProxyLang.REGISTRATION_REQUEST.send(logger, serverInfo, family.id());
 
-        this.family = family;
+            if(api.services().server().contains(serverInfo)) throw new DuplicateRequestException("Server ["+serverInfo.getName()+"]("+serverInfo.getAddress()+":"+serverInfo.getAddress().getPort()+") can't be registered twice!");
+
+            this.registeredServer = api.velocityServer().registerServer(serverInfo);
+            if(this.registeredServer == null) throw new NullPointerException("Unable to register the server to the proxy.");
+
+            api.services().server().add(this);
+            family.addServer(this);
+        } catch (Exception error) {
+            if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
+                ProxyLang.ERROR.send(logger, serverInfo, family.id());
+            throw new Exception(error.getMessage());
+        }
+
+        EventDispatch.Safe.fireAndForget(new RegisterEvent(family, this));
+    }
+
+    public void unregister(boolean removeFromFamily) throws Exception {
+        Tinder api = Tinder.get();
+        PluginLogger logger = api.logger();
+        try {
+            MCLoader server = (MCLoader) new MCLoader.Reference(serverInfo).get();
+
+            if (logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
+                ProxyLang.UNREGISTRATION_REQUEST.send(logger, serverInfo, family.id());
+
+            Family family = server.family();
+
+            api.velocityServer().unregisterServer(server.serverInfo());
+            api.services().server().remove(this);
+            if (removeFromFamily)
+                family.removeServer(server);
+
+            EventDispatch.Safe.fireAndForget(new UnregisterEvent(family, server));
+        } catch (NullPointerException e) {
+            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
+                ProxyLang.ERROR.send(logger, serverInfo, family.id());
+            throw new NullPointerException(e.getMessage());
+        } catch (NoSuchElementException ignore) {
+            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
+                ProxyLang.ERROR.send(logger, serverInfo, family.id());
+            throw new NullPointerException("Server ["+serverInfo.getName()+"]("+serverInfo.getAddress()+":"+serverInfo.getAddress().getPort()+") doesn't exist! It can't be unregistered!");
+        } catch (Exception e) {
+            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
+                ProxyLang.ERROR.send(logger, serverInfo, family.id());
+            throw new Exception(e);
+        }
     }
 
     /**
@@ -262,7 +318,16 @@ public class MCLoader implements group.aelysium.rustyconnector.toolkit.velocity.
                "{"+ this.family.id() +"}";
     }
 
-    public boolean equals(MCLoader server) {
-        return this.serverInfo.equals(server.serverInfo());
+    @Override
+    public int hashCode() {
+        return this.serverInfo.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MCLoader mcLoader = (MCLoader) o;
+        return Objects.equals(serverInfo, mcLoader.serverInfo);
     }
 }

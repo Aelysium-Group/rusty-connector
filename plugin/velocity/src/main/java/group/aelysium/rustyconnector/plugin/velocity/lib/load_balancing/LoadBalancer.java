@@ -1,8 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
+import group.aelysium.rustyconnector.toolkit.velocity.events.family.MCLoaderLockedEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.family.MCLoaderUnlockedEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,11 +128,15 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
     public void lock(MCLoader server) {
         if(!this.servers.remove(server)) return;
         this.lockedServers.add(server);
+
+        EventDispatch.Safe.fireAndForget(new MCLoaderLockedEvent(server.family(), server));
     }
 
     public void unlock(MCLoader server) {
         if(!this.lockedServers.remove(server)) return;
         this.servers.add(server);
+
+        EventDispatch.Safe.fireAndForget(new MCLoaderUnlockedEvent(server.family(), server));
     }
 
     public boolean joinable(MCLoader server) {

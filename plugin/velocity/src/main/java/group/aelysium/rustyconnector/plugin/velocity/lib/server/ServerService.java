@@ -1,31 +1,21 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
-import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Vector;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerService implements IServerService<MCLoader, Player, LoadBalancer, Family> {
-    private final Vector<WeakReference<MCLoader>> servers =  new Vector<>();
-
+    protected final Map<ServerInfo, MCLoader> servers = new ConcurrentHashMap<>(); // Should be used exclusively for serverInfo based lookups.
     private final int serverTimeout;
     private final int serverInterval;
 
@@ -42,14 +32,17 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
         return this.serverInterval;
     }
 
-    public Optional<MCLoader> fetch(ServerInfo serverInfo) {
-        for(Family family : Tinder.get().services().family().dump()) {
-            MCLoader server = family.findServer(serverInfo);
-            if(server == null) continue;
+    public void add(MCLoader mcLoader) {
+        this.servers.put(mcLoader.serverInfo(), mcLoader);
+    }
+    public void remove(MCLoader mcLoader) {
+        this.servers.remove(mcLoader.serverInfo());
+    }
 
-            return Optional.of(server);
-        }
-        return Optional.empty();
+    public Optional<MCLoader> fetch(ServerInfo serverInfo) {
+        MCLoader loader = this.servers.get(serverInfo);
+        if(loader == null) return Optional.empty();
+        return Optional.of(loader);
     }
 
     protected Optional<K8MCLoader> fetchPods(String podName) {
@@ -78,7 +71,6 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
     protected Optional<K8MCLoader> fetchPods(String podName, String familyName) {
         Family family = (Family) new Family.Reference(familyName).get();
 
-
         try {
             K8MCLoader found = (K8MCLoader) family.loadBalancer().servers().stream().filter(s -> {
                 if (!(s instanceof K8MCLoader)) return false;
@@ -105,15 +97,12 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
         return Optional.empty();
     }
 
-    public Vector<WeakReference<MCLoader>> servers() {
-        return this.servers;
+    public List<MCLoader> servers() {
+        return this.servers.values().stream().toList();
     }
 
     public boolean contains(ServerInfo serverInfo) {
-        for(Family family : Tinder.get().services().family().dump()) {
-            if(family.containsServer(serverInfo)) return true;
-        }
-        return false;
+        return this.servers.containsKey(serverInfo);
     }
 
     /**
@@ -146,85 +135,7 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
         }
     }
 
-    /**
-     * Register a server to the proxy.
-     * @param server The server to be registered.
-     * @param family The family to register the server into.
-     * @return A RegisteredServer node.
-     */
-    public RegisteredServer registerServer(MCLoader server, Family family) throws Exception {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-
-        try {
-            if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
-                ProxyLang.REGISTRATION_REQUEST.send(logger, server.serverInfo(), family.id());
-
-            if(this.contains(server.serverInfo())) throw new DuplicateRequestException("Server ["+server.serverInfo().getName()+"]("+server.serverInfo().getAddress()+":"+server.serverInfo().getAddress().getPort()+") can't be registered twice!");
-
-            RegisteredServer registeredServer = api.registerServer(server.serverInfo());
-            if(registeredServer == null) throw new NullPointerException("Unable to register the server to the proxy.");
-
-            family.addServer(server);
-
-            this.servers.add(new WeakReference<>(server));
-
-            if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
-                ProxyLang.REGISTERED.send(logger, server.serverInfo(), family.id());
-
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, DiscordWebhookMessage.PROXY__SERVER_REGISTER.build(server, family.id()));
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, family.id(), DiscordWebhookMessage.FAMILY__SERVER_REGISTER.build(server, family.id()));
-            return registeredServer;
-        } catch (Exception error) {
-            if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
-                ProxyLang.ERROR.send(logger, server.serverInfo(), family.id());
-            throw new Exception(error.getMessage());
-        }
-    }
-
-    /**
-     * Unregister a server from the proxy.
-     * @param serverInfo The server to be unregistered.
-     * @param familyName The id of the family associated with the server.
-     * @param removeFromFamily Should the server be removed from it's associated family?
-     */
-    public void unregisterServer(ServerInfo serverInfo, String familyName, Boolean removeFromFamily) throws Exception {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-        try {
-            MCLoader server = (MCLoader) new MCLoader.Reference(serverInfo).get();
-
-            if (logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                ProxyLang.UNREGISTRATION_REQUEST.send(logger, serverInfo, familyName);
-
-            Family family = server.family();
-
-            api.unregisterServer(server.serverInfo());
-            if (removeFromFamily)
-                family.removeServer(server);
-
-            if (logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                ProxyLang.UNREGISTERED.send(logger, serverInfo, familyName);
-
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, DiscordWebhookMessage.PROXY__SERVER_UNREGISTER.build(server));
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, familyName, DiscordWebhookMessage.FAMILY__SERVER_UNREGISTER.build(server));
-        } catch (NullPointerException e) {
-            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                ProxyLang.ERROR.send(logger, serverInfo, familyName);
-            throw new NullPointerException(e.getMessage());
-        } catch (NoSuchElementException ignore) {
-            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                ProxyLang.ERROR.send(logger, serverInfo, familyName);
-            throw new NullPointerException("Server ["+serverInfo.getName()+"]("+serverInfo.getAddress()+":"+serverInfo.getAddress().getPort()+") doesn't exist! It can't be unregistered!");
-        } catch (Exception e) {
-            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                ProxyLang.ERROR.send(logger, serverInfo, familyName);
-            throw new Exception(e);
-        }
-    }
-
     public void kill() {
-        this.servers.forEach(Reference::clear);
         this.servers.clear();
     }
 

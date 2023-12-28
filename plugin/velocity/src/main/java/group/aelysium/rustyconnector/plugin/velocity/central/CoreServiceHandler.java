@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
+import group.aelysium.rustyconnector.core.lib.events.EventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
-import group.aelysium.rustyconnector.toolkit.core.event_factory.EventFactory;
 import group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -16,7 +16,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkSer
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 
 import java.util.Map;
@@ -27,8 +27,8 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
         super(services);
     }
 
-    public EventFactory events() {
-        return this.find(EventFactory.class).orElseThrow();
+    public EventManager events() {
+        return this.find(EventManager.class).orElseThrow();
     }
     public FamilyService family() {
         return this.find(FamilyService.class).orElseThrow();
@@ -39,8 +39,8 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
     public RedisConnector messenger() {
         return this.find(RedisConnector.class).orElseThrow();
     }
-    public MySQLStorage storage() {
-        return this.find(MySQLStorage.class).orElseThrow();
+    public StorageService storage() {
+        return this.find(StorageService.class).orElseThrow();
     }
     public PlayerService player() {
         return this.find(PlayerService.class).orElseThrow();

@@ -1,9 +1,10 @@
-package group.aelysium.rustyconnector.plugin.velocity.events.velocity;
+package group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity;
 
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors.InjectorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
@@ -18,6 +19,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPostJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.InitiallyConnectableFamily;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -69,9 +71,7 @@ public class OnPlayerChooseInitialServer {
 
                 MCLoader server = family.connect(event);
 
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, DiscordWebhookMessage.PROXY__PLAYER_JOIN.build(player, server));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, server));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, server.family().id(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, server));
+                EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(server.family(), server, player));
             } catch (Exception e) {
                 eventPlayer.disconnect(Component.text("Disconnected. "+e.getMessage()));
                 e.printStackTrace();

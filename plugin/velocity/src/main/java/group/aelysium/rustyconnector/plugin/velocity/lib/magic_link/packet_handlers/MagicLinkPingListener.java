@@ -20,6 +20,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Optional;
 
 public class MagicLinkPingListener implements PacketListener {
     protected Tinder api;
@@ -95,9 +96,8 @@ public class MagicLinkPingListener implements PacketListener {
     }
 
     private static void disconnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) throws Exception {
-        MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), packet.magicConfigName(), api.lang(), api.services().config());
-
-        api.services().server().unregisterServer(serverInfo, magicMCLoaderConfig.family(), true);
+        Optional<MCLoader> mcLoader = api.services().server().fetch(serverInfo);
+        mcLoader.orElseThrow().unregister(true);
     }
 
     private static void reviveOrConnectServer(Tinder api, ServerInfo serverInfo, ServerPingPacket packet) throws IOException {

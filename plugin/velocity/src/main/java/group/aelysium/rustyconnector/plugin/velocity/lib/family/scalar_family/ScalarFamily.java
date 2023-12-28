@@ -1,11 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
@@ -41,10 +43,10 @@ public class ScalarFamily extends Family implements group.aelysium.rustyconnecto
         super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), metadata);
     }
 
-    public MCLoader connect(Player rustyPlayer) throws RuntimeException {
-        com.velocitypowered.api.proxy.Player player = rustyPlayer.resolve().orElseThrow();
+    public MCLoader connect(Player player) throws RuntimeException {
+        EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
 
-        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
+        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player.resolve().orElseThrow());
         return connector.connect();
     }
     public MCLoader connect(PlayerChooseInitialServerEvent event) throws RuntimeException {

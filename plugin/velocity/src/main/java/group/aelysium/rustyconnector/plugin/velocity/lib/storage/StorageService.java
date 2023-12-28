@@ -2,24 +2,23 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.toolkit.core.UserPass;
-import one.microstream.afs.sql.types.SqlConnector;
-import one.microstream.afs.sql.types.SqlFileSystem;
-import one.microstream.afs.sql.types.SqlProviderMariaDb;
-import one.microstream.concurrency.XThreads;
-import one.microstream.storage.embedded.types.EmbeddedStorage;
-import one.microstream.storage.embedded.types.EmbeddedStorageManager;
+import org.eclipse.store.afs.sql.types.SqlConnector;
+import org.eclipse.store.afs.sql.types.SqlFileSystem;
+import org.eclipse.store.afs.sql.types.SqlProviderMariaDb;
+import org.eclipse.store.storage.embedded.types.EmbeddedStorage;
+import org.eclipse.store.storage.embedded.types.EmbeddedStorageManager;
 import org.mariadb.jdbc.MariaDbDataSource;
 
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 
-public class MySQLStorage implements IMySQLStorageService {
+public class StorageService implements IMySQLStorageService {
     protected InetSocketAddress address;
     protected UserPass userPass;
     protected String database;
     protected EmbeddedStorageManager storageManager;
 
-    protected MySQLStorage(InetSocketAddress address, UserPass userPass, String database) throws SQLException {
+    protected StorageService(InetSocketAddress address, UserPass userPass, String database) throws SQLException {
         this.address = address;
         this.userPass = userPass;
         this.database = database;
@@ -36,7 +35,7 @@ public class MySQLStorage implements IMySQLStorageService {
         );
 
         final EmbeddedStorageManager storageManager = EmbeddedStorage.start(
-                new StorageRoot(),
+                new Database(),
                 fileSystem.ensureDirectoryPath("storage")
         );
 
@@ -45,14 +44,12 @@ public class MySQLStorage implements IMySQLStorageService {
         this.storageManager = storageManager;
     }
 
-    public StorageRoot root() {
-        return (StorageRoot) this.storageManager.root();
+    public Database root() {
+        return (Database) this.storageManager.root();
     }
 
     public void store(Object object) {
-        XThreads.executeSynchronized(() -> {
-            storageManager.store(object);
-        });
+        storageManager.store(object);
     }
 
     @Override
@@ -60,7 +57,7 @@ public class MySQLStorage implements IMySQLStorageService {
         this.storageManager.shutdown();
     }
 
-    public static MySQLStorage create(InetSocketAddress address, UserPass userPass, String database) throws SQLException {
-        return new MySQLStorage(address, userPass, database);
+    public static StorageService create(InetSocketAddress address, UserPass userPass, String database) throws SQLException {
+        return new StorageService(address, userPass, database);
     }
 }

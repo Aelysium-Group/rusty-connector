@@ -2,10 +2,12 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.events.family.RebalanceEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -35,21 +37,35 @@ public abstract class Family implements group.aelysium.rustyconnector.toolkit.ve
     }
 
     public MCLoader findServer(@NotNull ServerInfo serverInfo) {
+        // Using MCLoader.Reference should be faster since it uses ServerService#fetch which is backed by HashMap.
+        try {
+            MCLoader mcLoader = (MCLoader) new group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader.Reference(serverInfo).get();
+            if(mcLoader.family().equals(this)) return mcLoader;
+            else return null;
+        } catch (Exception ignore) {}
+
+        // If the MCLoader can't be found via MCLoader.Reference, try searching the family itself.
         return this.registeredServers().stream()
                 .filter(server -> server.serverInfo().equals(serverInfo)
                 ).findFirst().orElse(null);
     }
 
-    public void addServer(MCLoader server) {
+    public void addServer(@NotNull MCLoader server) {
         this.settings.loadBalancer().add(server);
     }
 
-    public void removeServer(MCLoader server) {
+    public void removeServer(@NotNull MCLoader server) {
         this.settings.loadBalancer().remove(server);
     }
 
     public Whitelist whitelist() {
-        return (Whitelist) this.settings.whitelist().get();
+        return this.settings.whitelist().get();
+    }
+
+    public void balance() {
+        this.settings.loadBalancer().completeSort();
+
+        EventDispatch.Safe.fireAndForget(new RebalanceEvent(this));
     }
 
     public List<com.velocitypowered.api.proxy.Player> players(int max) {
@@ -75,10 +91,7 @@ public abstract class Family implements group.aelysium.rustyconnector.toolkit.ve
     }
 
     public List<MCLoader> registeredServers() {
-        List<MCLoader> servers = new ArrayList<>();
-        servers.addAll(this.settings.loadBalancer().servers());
-        servers.addAll(this.settings.loadBalancer().lockedServers());
-        return servers;
+        return this.loadBalancer().servers();
     }
     public boolean containsServer(ServerInfo serverInfo) {
         return !(this.findServer(serverInfo) == null);

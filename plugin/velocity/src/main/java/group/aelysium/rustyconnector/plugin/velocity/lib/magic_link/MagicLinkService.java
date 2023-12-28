@@ -17,30 +17,16 @@ public class MagicLinkService extends ClockService {
     public void startHeartbeat(ServerService serverService) {
         this.scheduleRecurring(() -> {
             try {
-                serverService.servers().forEach(serverReference -> {
-                    MCLoader server = serverReference.get();
-                    if (server == null) return;
-
+                // Unregister any stale servers
+                // The removing feature of server#unregister is valid because serverService.servers() creates a new list which isn't bound to the underlying list.
+                serverService.servers().forEach(server -> {
                     server.decreaseTimeout();
 
                     try {
-                        if (server.stale()) {
-                            serverService.unregisterServer(server.serverInfo(), server.family().id(), true);
-                            serverService.servers().remove(serverReference);
-                        }
-                    } catch (NullPointerException ignore) {}
-                    catch (Exception e) {
+                        if (server.stale()) server.unregister(true);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
-                });
-
-                serverService.servers().removeIf(server -> {
-                    if(server.get() == null) return true;
-                    try {
-                        if (Objects.requireNonNull(server.get()).stale()) return true;
-                    } catch (Exception ignore) {}
-
-                    return false;
                 });
             } catch (Exception ignore) {}
         }, 1, 5);

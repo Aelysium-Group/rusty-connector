@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
@@ -40,7 +40,7 @@ public class RankedGame implements IRankedGame<Player> {
             scorecard = newScorecard;
         }
 
-        TPlayerRank rank = scorecard.fetch((MySQLStorage) storage, this.rankingSchema);
+        TPlayerRank rank = scorecard.fetch((StorageService) storage, this.rankingSchema);
 
         return (TPlayerRank) RankedPlayer.from(uuid, rank);
     }
@@ -58,12 +58,12 @@ public class RankedGame implements IRankedGame<Player> {
             scorecard = fresh;
         }
 
-        TPlayerRank playerRank = scorecard.fetch((MySQLStorage) storage, this.rankingSchema);
+        TPlayerRank playerRank = scorecard.fetch((StorageService) storage, this.rankingSchema);
         if(playerRank == null) {
             try {
                 TPlayerRank fresh = (TPlayerRank) this.rankingSchema.get().getDeclaredConstructor().newInstance();
 
-                scorecard.store((MySQLStorage) storage, fresh);
+                scorecard.store((StorageService) storage, fresh);
 
                 playerRank = fresh;
             } catch (Exception e) {
@@ -74,7 +74,7 @@ public class RankedGame implements IRankedGame<Player> {
         return playerRank;
     }
 
-    public void quantizeRankSchemas(MySQLStorage storage) {
+    public void quantizeRankSchemas(StorageService storage) {
         for (ScoreCard scorecard : this.scorecards.values()) {
             scorecard.quantize(storage, this.rankingSchema);
         }

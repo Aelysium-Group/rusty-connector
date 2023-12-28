@@ -1,8 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 
 import group.aelysium.rustyconnector.toolkit.core.UserPass;
-import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
@@ -11,7 +9,6 @@ import io.lettuce.core.resource.ClientResources;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
-import java.util.Optional;
 
 public class RedisConnector extends MessengerConnector<RedisConnection> {
     private static final ClientResources resources = ClientResources.create();
@@ -53,10 +50,10 @@ public class RedisConnector extends MessengerConnector<RedisConnection> {
      * @return A {@link RedisConnector}.
      */
     public static RedisConnector create(AESCryptor cryptor, RedisConnectorSpec spec) {
-        return new RedisConnector(cryptor, spec.origin(), spec.address(), spec.userPass(), spec.protocolVersion(), spec.dataChannel());
+        return new RedisConnector(cryptor, spec.origin(), spec.address(), spec.userPass(), ProtocolVersion.valueOf(spec.protocolVersion()), spec.dataChannel());
     }
 
-    public record RedisConnectorSpec(PacketOrigin origin, InetSocketAddress address, UserPass userPass, ProtocolVersion protocolVersion, String dataChannel) { }
+    public record RedisConnectorSpec(PacketOrigin origin, InetSocketAddress address, UserPass userPass, String protocolVersion, String dataChannel) { }
 
 
     @Override

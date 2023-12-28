@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import net.kyori.adventure.text.Component;
 
@@ -61,12 +60,12 @@ public class Player implements group.aelysium.rustyconnector.toolkit.velocity.pl
      * @return {@link Player}
      */
     public static Player from(com.velocitypowered.api.proxy.Player player) {
-        MySQLStorage mySQLStorage = Tinder.get().services().storage();
+        StorageService storageService = Tinder.get().services().storage();
         Player tempPlayer = new Player(player.getUniqueId(), player.getUsername());
 
-        Set<Player> players = mySQLStorage.root().players();
+        Set<Player> players = storageService.root().players();
         if(players.add(tempPlayer)) {
-            mySQLStorage.store(players);
+            storageService.store(players);
             return tempPlayer;
         }
 

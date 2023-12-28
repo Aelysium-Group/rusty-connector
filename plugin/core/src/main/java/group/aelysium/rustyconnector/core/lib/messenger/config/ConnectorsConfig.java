@@ -30,8 +30,8 @@ public class ConnectorsConfig extends YAML {
         return redis_user;
     }
 
-    public ProtocolVersion getRedis_protocol() {
-        return redis_protocol;
+    public String getRedis_protocol() {
+        return redis_protocol.toString();
     }
 
     public String getRedis_dataChannel() {

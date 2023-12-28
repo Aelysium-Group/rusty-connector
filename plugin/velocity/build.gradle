@@ -5,9 +5,11 @@ compileJava {
 dependencies {
     // Include in jar
     implementation "club.minnced:discord-webhooks:${project.discord_version}"
-    implementation "one.microstream:microstream-storage-embedded:${project.microstream_version}"
-    implementation "one.microstream:microstream-afs-sql:${project.microstream_sql_version}"
+
+    implementation "org.eclipse.store:storage-embedded:${project.eclipsestore_version}"
+    implementation "org.eclipse.store:afs-sql:${project.eclipsestore_sql_version}"
     implementation "org.mariadb.jdbc:mariadb-java-client:${project.mariadb_version}"
+
     implementation "io.fabric8:kubernetes-client:${project.kubernetes_version}"
 
     // Dev Only

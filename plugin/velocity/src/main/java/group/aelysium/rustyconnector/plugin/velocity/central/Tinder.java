@@ -123,25 +123,6 @@ public class Tinder implements VelocityTinder {
     }
 
     /**
-     * Registers a server with this proxy.` A server with this id should not already exist.
-     *
-     * @param serverInfo the server to register
-     * @return the newly registered server
-     */
-    public RegisteredServer registerServer(ServerInfo serverInfo) {
-        return velocityServer().registerServer(serverInfo);
-    }
-
-    /**
-     * Unregisters this server from the proxy.
-     *
-     * @param serverInfo the server to unregister
-     */
-    public void unregisterServer(ServerInfo serverInfo) {
-        velocityServer().unregisterServer(serverInfo);
-    }
-
-    /**
      * Creates new {@link Tinder} based on the gathered resources.
      */
     public static Tinder gather(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {

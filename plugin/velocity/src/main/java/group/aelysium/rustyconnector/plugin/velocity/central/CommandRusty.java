@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -18,7 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -30,7 +29,6 @@ import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -224,7 +222,7 @@ class FamilyC {
                             return Command.SINGLE_SUCCESS;
                         }
 
-                        family.loadBalancer().completeSort();
+                        family.balance();
 
                         if(family instanceof ScalarFamily)
                             ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family, false);
@@ -475,7 +473,7 @@ class Database {
                                 .executes(context -> {
                                     String gameName = context.getArgument("gameName", String.class);
 
-                                    MySQLStorage storage = flame.services().storage();
+                                    StorageService storage = flame.services().storage();
 
                                     if(storage.root().deleteGame(storage, gameName))
                                         logger.log("Successfully deleted "+gameName);
@@ -488,7 +486,7 @@ class Database {
                                 .executes(context -> {
                                     String gameName = context.getArgument("gameName", String.class);
 
-                                    MySQLStorage storage = flame.services().storage();
+                                    StorageService storage = flame.services().storage();
                                     RankedGame game = storage.root().getGame(gameName).orElse(null);
                                     if(game == null) {
                                         logger.log(gameName + " couldn't be found.");
@@ -505,7 +503,7 @@ class Database {
                                 .executes(context -> {
                                     String gameName = context.getArgument("gameName", String.class);
 
-                                    MySQLStorage storage = flame.services().storage();
+                                    StorageService storage = flame.services().storage();
                                     RankedGame game = storage.root().getGame(gameName).orElse(null);
                                     if(game == null) {
                                         logger.log(gameName + " couldn't be found.");

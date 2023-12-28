@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.events.velocity;
+package group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity;
 
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
@@ -6,6 +6,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -15,6 +16,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.NetworkJoinEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.NetworkLeaveEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,8 +42,9 @@ public class OnPlayerDisconnect {
                     MCLoader server = (MCLoader) new MCLoader.Reference(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo()).get();
                     server.playerLeft();
 
-                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, server.family().id(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, server));
-                    WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, server));
+                    EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(server.family(), server, player, true));
+                    EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(server, player, true));
+                    EventDispatch.Safe.fireAndForget(new NetworkLeaveEvent(server.family(), server, player));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
