@@ -19,7 +19,7 @@ public interface IAnchorService<TMCLoader extends MCLoader, TPlayer extends Play
 
     /**
      * Creates a new anchor, which points to a family.
-     * @param name The name of the anchor to register. Anchors can be referenced using `/<anchor name>`
+     * @param name The name of the anchor to register. Anchors can be referenced using `/anchor-name`
      * @param target The family that this anchor will teleport players to.
      */
     void create(String name, TFamily target);

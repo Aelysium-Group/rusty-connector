@@ -19,7 +19,7 @@ public interface IServerService<TMCLoader extends MCLoader, TPlayer extends Play
      * Finds an MCLoader based on server info.
      * An alternate route of getting a family, other than "tinder.services().server().find()", can be to use {@link MCLoader.Reference new MCLoader.Reference(serverInfo)}{@link MCLoader.Reference#get() .get()}.
      * @param serverInfo The info to search for.
-     * @return {@link Optional <MCLoader>}
+     * @return {@link Optional<MCLoader>}
      */
     Optional<? extends MCLoader> fetch(ServerInfo serverInfo);
 

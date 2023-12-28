@@ -84,7 +84,7 @@ public interface Family<TMCLoader extends MCLoader, TPlayer extends Player, TLoa
      * Fetches a reference to the parent of this family.
      * The parent of this family should always be either another family, or the root family.
      * If this family is the root family, this method will always return `null`.
-     * @return {@link WeakReference <IBaseFamily>}
+     * @return {@link Family}
      */
     Family<TMCLoader, TPlayer, TLoadBalancer> parent();
 
