@@ -1,17 +1,10 @@
 package group.aelysium.rustyconnector.toolkit.mc_loader.packet_builder;
 
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 
 import java.util.UUID;
 
 public interface IPacketBuilderService extends Service {
-    /**
-     * Issues a ping request to the proxy.
-     * @param intent The intention of the ping.
-     */
-    void pingProxy(ConnectionIntent intent);
-
     /**
      * Issues a request to send a player to a different family.
      * @param player The player to send.

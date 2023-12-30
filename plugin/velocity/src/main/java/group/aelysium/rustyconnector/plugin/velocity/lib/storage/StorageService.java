@@ -44,7 +44,7 @@ public class StorageService implements IMySQLStorageService {
         this.storageManager = storageManager;
     }
 
-    public Database root() {
+    public Database database() {
         return (Database) this.storageManager.root();
     }
 

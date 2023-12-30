@@ -23,36 +23,10 @@ magic-config: "default"
 address: ""
 
 #
-# Magic interface resolver will attempt to find the address that your server is currently running and forward it to RustyConnector.
-# This option will override `address`. Make sure you test it before implementing it!
-# This option's ability to work heavily relies on your MCLoader's operating environment.
+# An optional display name that can be used to represent this MCLoader in the console.
+# If you do not provide a display name, this MCLoader's UUID will be shown instead.
+# Please keep in mind that an MCLoader's UUID will change each time you restart it.
 #
-magic-interface-resolver: false
-
-
-
-
-
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                        Kubernetes                        #
-#                                                          #
-#               ---------------------------                #
-# | If your network is utilizing Kubernetes, the following #
-# | items should be configured.                            #
-#                                                          #
-# | If your network doesn't use Kubernetes at all, you can #
-# | ignore this section of the config.                     #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
+# Display names can't be longer than 16 characters.
 #
-# The pod's name, assigned by Kubernetes.
-#
-# You should utilize a Kubernetes environment variable to dynamically replace this value.
-#
-# Read how here: https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/
-#
-pod-name: "KUBERNETES_POD_NAME"
+display-name: ""

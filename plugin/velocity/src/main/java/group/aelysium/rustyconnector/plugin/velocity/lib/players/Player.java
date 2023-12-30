@@ -1,12 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import net.kyori.adventure.text.Component;
 
 import java.util.*;
 
-public class Player implements group.aelysium.rustyconnector.toolkit.velocity.players.Player {
+public class Player implements IPlayer {
     protected UUID uuid;
     protected String username;
     protected long firstLogin;
@@ -37,6 +39,23 @@ public class Player implements group.aelysium.rustyconnector.toolkit.velocity.pl
     }
 
     @Override
+    public boolean online() {
+        return resolve().isPresent();
+    }
+
+    public Optional<MCLoader> server() {
+        try {
+            com.velocitypowered.api.proxy.Player resolvedPlayer = this.resolve().orElseThrow();
+            UUID mcLoaderUUID = UUID.fromString(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo().getName());
+
+            MCLoader mcLoader = new MCLoader.Reference(mcLoaderUUID).get();
+
+            return Optional.of(mcLoader);
+        } catch (Exception ignore) {}
+        return Optional.empty();
+    }
+
+    @Override
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
@@ -51,27 +70,31 @@ public class Player implements group.aelysium.rustyconnector.toolkit.velocity.pl
     }
 
     /**
-     * Get a resolvable player from the provided player.
+     * Fetches a RustyConnector player from the provided Velocity player.
      * If no player is stored in storage, the player will be stored.
      * If a player was already stored in the storage, that player will be returned.
      *
-     * This method really only every needs to be used the first time a player connects to the proxy.
-     * @param player The player to convert.
+     * This method will also update the player's username if it has been changed.
+     * @param velocityPlayer The player to fetch.
      * @return {@link Player}
      */
-    public static Player from(com.velocitypowered.api.proxy.Player player) {
+    public static Player from(com.velocitypowered.api.proxy.Player velocityPlayer) {
+        // If player doesn't exist, we need to make one and store it.
         StorageService storageService = Tinder.get().services().storage();
-        Player tempPlayer = new Player(player.getUniqueId(), player.getUsername());
 
-        Set<Player> players = storageService.root().players();
-        if(players.add(tempPlayer)) {
-            storageService.store(players);
-            return tempPlayer;
-        }
+        try {
+            Player player = new Reference(velocityPlayer.getUniqueId()).get();
+            if(!player.username().equals(velocityPlayer.getUsername())) {
+                player.username = velocityPlayer.getUsername();
+                storageService.store(player);
+                return player;
+            }
+        } catch (Exception ignore) {}
 
-        return players.stream().filter(player1 -> player1.equals(tempPlayer)).findAny().orElseThrow();
-    }
-    public static Player from(UUID uuid, String username) {
-        return new Player(uuid, username);
+        Player player = new Player(velocityPlayer.getUniqueId(), velocityPlayer.getUsername());
+
+        storageService.database().savePlayer(storageService, player);
+
+        return player;
     }
 }

@@ -6,6 +6,7 @@ dependencies {
     shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
     shadow "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
     shadow "net.engio:mbassador:${project.mbassador_version}"
+    shadow "com.google.code.gson:gson:${project.gson_version}"
 }
 
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/

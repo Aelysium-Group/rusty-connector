@@ -10,7 +10,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistServ
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IScalarFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.ScalarFamilyConfig;
@@ -18,7 +21,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastCon
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 
@@ -30,7 +32,7 @@ import java.util.List;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.SCALAR_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class ScalarFamily extends Family implements group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.ScalarFamily<MCLoader, Player, LoadBalancer> {
+public class ScalarFamily extends Family implements IScalarFamily {
 
     public ScalarFamily(Settings settings) {
         super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), SCALAR_FAMILY_META);
@@ -43,20 +45,18 @@ public class ScalarFamily extends Family implements group.aelysium.rustyconnecto
         super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), metadata);
     }
 
-    public MCLoader connect(Player player) throws RuntimeException {
+    public IMCLoader connect(IPlayer player) throws RuntimeException {
         EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
 
-        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player.resolve().orElseThrow());
+        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
         return connector.connect();
     }
-    public MCLoader connect(PlayerChooseInitialServerEvent event) throws RuntimeException {
+    public IMCLoader connect(PlayerChooseInitialServerEvent event) throws RuntimeException {
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, event);
         return connector.connect();
     }
 
-    public MCLoader fetchAny(Player rustyPlayer) throws RuntimeException {
-        com.velocitypowered.api.proxy.Player player = rustyPlayer.resolve().orElseThrow();
-
+    public IMCLoader fetchAny(IPlayer player) throws RuntimeException {
         ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
         return connector.fetchAny();
     }
@@ -115,21 +115,21 @@ public class ScalarFamily extends Family implements group.aelysium.rustyconnecto
 
 class ScalarFamilyConnector {
     private final ScalarFamily family;
-    private final com.velocitypowered.api.proxy.Player player;
+    private final IPlayer player;
     private final PlayerChooseInitialServerEvent event;
 
-    public ScalarFamilyConnector(ScalarFamily family, com.velocitypowered.api.proxy.Player player) {
+    public ScalarFamilyConnector(ScalarFamily family, IPlayer player) {
         this.family = family;
         this.player = player;
         this.event = null;
     }
     public ScalarFamilyConnector(ScalarFamily family, PlayerChooseInitialServerEvent event) {
         this.family = family;
-        this.player = event.getPlayer();
+        this.player = Player.from(event.getPlayer());
         this.event = event;
     }
 
-    public MCLoader connect() throws RuntimeException {
+    public IMCLoader connect() throws RuntimeException {
         if(this.family.loadBalancer().size() == 0)
             throw new RuntimeException("There are no servers for you to connect to!");
 
@@ -138,7 +138,7 @@ class ScalarFamilyConnector {
         return this.establishAnyConnection();
     }
 
-    public MCLoader fetchAny() throws RuntimeException {
+    public IMCLoader fetchAny() throws RuntimeException {
         if(this.family.loadBalancer().size() == 0)
             throw new RuntimeException("There are no servers for you to connect to!");
 
@@ -156,8 +156,8 @@ class ScalarFamilyConnector {
         }
     }
 
-    public MCLoader establishAnyConnection() {
-        MCLoader server;
+    public IMCLoader establishAnyConnection() {
+        IMCLoader server;
         if(this.family.loadBalancer().persistent() && this.family.loadBalancer().attempts() > 1)
             server = this.connectPersistent();
         else
@@ -166,8 +166,8 @@ class ScalarFamilyConnector {
         return server;
     }
 
-    private MCLoader connectSingleton() {
-        MCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
+    private IMCLoader connectSingleton() {
+        IMCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
         try {
             if(!server.validatePlayer(player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
@@ -188,12 +188,12 @@ class ScalarFamilyConnector {
         }
     }
 
-    private MCLoader connectPersistent() {
+    private IMCLoader connectPersistent() {
         int attemptsLeft = this.family.loadBalancer().attempts();
 
         for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
             boolean isFinal = (attempt == attemptsLeft);
-            MCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
+            IMCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
 
             try {
                 if(!server.validatePlayer(player))

@@ -12,16 +12,19 @@ public class DefaultConfig extends YAML {
     private String address;
     private String magicConfig;
     private boolean magicInterfaceResolver;
+    private String displayName = null;
 
     public String address() {
         return address;
     }
-
     public String magicConfig() {
         return magicConfig;
     }
     public boolean magicInterfaceResolver() {
         return magicInterfaceResolver;
+    }
+    public String displayName() {
+        return this.displayName;
     }
 
     protected DefaultConfig(Path dataFolder, String target, String name, LangService lang) {
@@ -42,6 +45,14 @@ public class DefaultConfig extends YAML {
 
         this.magicInterfaceResolver = IYAML.getValue(this.data,"magic-interface-resolver",Boolean.class);
         if(this.address.equals("")) this.magicInterfaceResolver = true;
+
+        try {
+            this.displayName = IYAML.getValue(this.data,"display-name",String.class);
+            if(this.displayName.isEmpty()) throw new Exception();
+            if(this.displayName.length() > 16) this.displayName = this.displayName.substring(0, 16);
+        } catch (Exception ignore) {
+            this.displayName = null;
+        }
     }
 
     public static DefaultConfig construct(Path dataFolder, LangService lang, int pluginConfigVersion) {

@@ -2,18 +2,18 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.util.NoSuchElementException;
 
 public class FriendRequest implements IFriendRequest {
     private final FriendsService friendsService;
     private long id;
-    private Player sender;
-    private Player target;
+    private IPlayer sender;
+    private IPlayer target;
     private Boolean isAcknowledged = null;
 
-    public FriendRequest(FriendsService friendsService, long id, Player sender, Player target) {
+    public FriendRequest(FriendsService friendsService, long id, IPlayer sender, IPlayer target) {
         this.friendsService = friendsService;
         this.id = id;
         this.sender = sender;
@@ -23,10 +23,10 @@ public class FriendRequest implements IFriendRequest {
     public long id() {
         return this.id;
     }
-    public Player sender() {
+    public IPlayer sender() {
         return this.sender;
     }
-    public Player target() {
+    public IPlayer target() {
         return this.target;
     }
 

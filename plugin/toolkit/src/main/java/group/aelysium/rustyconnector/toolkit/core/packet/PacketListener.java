@@ -1,12 +1,18 @@
 package group.aelysium.rustyconnector.toolkit.core.packet;
 
-public interface PacketListener {
+public abstract class PacketListener<TPacket extends GenericPacket> {
     /**
-     * The identifier that will be used to decide if this listener should
-     * be executed for the passed packet.
-     * @return {@link PacketType.Mapping}
+     * The target will be used to decide if this listener should be executed for the passed packet.
+     * @return {@link PacketIdentification}
      */
-    PacketType.Mapping identifier();
+    public abstract PacketIdentification target();
 
-    <TPacket extends IPacket> void execute(TPacket packet) throws Exception;
+    public abstract void execute(TPacket packet) throws Exception;
+
+    /**
+     * Used by RC internals.
+     */
+    public void genericExecute(GenericPacket packet) throws Exception {
+        this.execute((TPacket) packet);
+    }
 }

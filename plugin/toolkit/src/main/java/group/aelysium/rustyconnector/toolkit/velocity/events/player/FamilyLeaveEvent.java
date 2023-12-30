@@ -1,10 +1,10 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
 import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
-import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 /**
  * Represents a player leaving a family.
@@ -13,25 +13,25 @@ import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
  * This event will also fire if a player leaves the family by logging out of the network.
  */
 public class FamilyLeaveEvent extends Cancelable {
-    protected final Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family;
-    protected final MCLoader mcLoader;
-    protected final Player player;
+    protected final IFamily family;
+    protected final IMCLoader mcLoader;
+    protected final IPlayer player;
     protected final boolean disconnected;
 
-    public FamilyLeaveEvent(Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family, MCLoader mcLoader, Player player, boolean disconnected) {
+    public FamilyLeaveEvent(IFamily family, IMCLoader mcLoader, IPlayer player, boolean disconnected) {
         this.family = family;
         this.mcLoader = mcLoader;
         this.player = player;
         this.disconnected = disconnected;
     }
 
-    public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family() {
+    public IFamily family() {
         return family;
     }
-    public MCLoader mcLoader() {
+    public IMCLoader mcLoader() {
         return mcLoader;
     }
-    public Player player() {
+    public IPlayer player() {
         return player;
     }
     public boolean disconnected() {

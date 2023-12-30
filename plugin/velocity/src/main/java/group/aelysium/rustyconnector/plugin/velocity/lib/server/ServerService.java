@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -14,8 +14,8 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ServerService implements IServerService<MCLoader, Player, LoadBalancer, Family> {
-    protected final Map<ServerInfo, MCLoader> servers = new ConcurrentHashMap<>(); // Should be used exclusively for serverInfo based lookups.
+public class ServerService implements IServerService {
+    protected final Map<UUID, IMCLoader> servers = new ConcurrentHashMap<>(); // Should be used exclusively for serverInfo based lookups.
     private final int serverTimeout;
     private final int serverInterval;
 
@@ -32,15 +32,15 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
         return this.serverInterval;
     }
 
-    public void add(MCLoader mcLoader) {
-        this.servers.put(mcLoader.serverInfo(), mcLoader);
+    public void add(IMCLoader mcLoader) {
+        this.servers.put(mcLoader.uuid(), mcLoader);
     }
-    public void remove(MCLoader mcLoader) {
-        this.servers.remove(mcLoader.serverInfo());
+    public void remove(IMCLoader mcLoader) {
+        this.servers.remove(mcLoader.uuid());
     }
 
-    public Optional<MCLoader> fetch(ServerInfo serverInfo) {
-        MCLoader loader = this.servers.get(serverInfo);
+    public Optional<IMCLoader> fetch(UUID uuid) {
+        IMCLoader loader = this.servers.get(uuid);
         if(loader == null) return Optional.empty();
         return Optional.of(loader);
     }
@@ -69,7 +69,7 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
     }
 
     protected Optional<K8MCLoader> fetchPods(String podName, String familyName) {
-        Family family = (Family) new Family.Reference(familyName).get();
+        Family family = new Family.Reference(familyName).get();
 
         try {
             K8MCLoader found = (K8MCLoader) family.loadBalancer().servers().stream().filter(s -> {
@@ -97,12 +97,12 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
         return Optional.empty();
     }
 
-    public List<MCLoader> servers() {
+    public List<IMCLoader> servers() {
         return this.servers.values().stream().toList();
     }
 
-    public boolean contains(ServerInfo serverInfo) {
-        return this.servers.containsKey(serverInfo);
+    public boolean contains(UUID uuid) {
+        return this.servers.containsKey(uuid);
     }
 
     /**
@@ -117,15 +117,14 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
             // Register 1000 servers into each family
             for (int i = 0; i < 1000; i++) {
                 InetSocketAddress address = AddressUtil.stringToAddress("localhost:"+i);
-                String name = "server"+i;
+                String name = "fakeSRV-"+i;
 
-                ServerInfo info = new ServerInfo(name, address);
-                MCLoader server = new MCLoader(info, 40, 50, 0, this.serverTimeout);
+                MCLoader server = new MCLoader(UUID.randomUUID(), address, name, 40, 50, 0, this.serverTimeout);
                 server.setPlayerCount((int) (Math.random() * 50));
 
                 try {
                     RegisteredServer registeredServer = api.velocityServer().registerServer(server.serverInfo());
-                    server.setRegisteredServer(registeredServer);
+                    server.registeredServer(registeredServer);
 
                     family.addServer(server);
 
@@ -155,48 +154,6 @@ public class ServerService implements IServerService<MCLoader, Player, LoadBalan
 
         public ServerService build() {
             return new ServerService(timeout, interval);
-        }
-    }
-
-    public static class ServerBuilder {
-        private ServerInfo serverInfo;
-        private String podName;
-        private int weight;
-        private int softPlayerCap;
-        private int hardPlayerCap;
-
-        protected int initialTimeout = 15;
-
-        public ServerService.ServerBuilder setServerInfo(ServerInfo serverInfo) {
-            this.serverInfo = serverInfo;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setWeight(int weight) {
-            this.weight = weight;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setSoftPlayerCap(int softPlayerCap) {
-            this.softPlayerCap = softPlayerCap;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setHardPlayerCap(int hardPlayerCap) {
-            this.hardPlayerCap = hardPlayerCap;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setPodName(String podName) {
-            this.podName = podName;
-            return this;
-        }
-
-        public MCLoader build() {
-            this.initialTimeout = Tinder.get().services().server().serverTimeout();
-
-            if(this.podName.equals("")) return new MCLoader(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
-            return new K8MCLoader(this.podName, serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
         }
     }
 }

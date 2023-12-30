@@ -13,8 +13,11 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -29,22 +32,22 @@ import java.util.Optional;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.RANKED_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class RankedFamily extends Family implements group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.RankedFamily<MCLoader, Player, LoadBalancer> {
-    protected final Matchmaker<? extends IPlayerRank<?>> matchmaker;
+public class RankedFamily extends Family implements IRankedFamily {
+    protected final Matchmaker matchmaker;
 
     protected RankedFamily(Settings settings) {
         super(settings.id(), new Family.Settings(settings.displayName(), null, settings.parentFamily(), settings.whitelist()), RANKED_FAMILY_META);
         this.matchmaker = settings.matchmaker();
     }
 
-    public MCLoader connect(Player player) {
+    public IMCLoader connect(IPlayer player) {
         EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
 
         this.matchmaker.add(player);
         return null;
     }
 
-    public void dequeue(Player player) {
+    public void dequeue(IPlayer player) {
         this.matchmaker.remove(player);
     }
 
@@ -60,7 +63,7 @@ public class RankedFamily extends Family implements group.aelysium.rustyconnecto
         return super.playerCount() + this.waitingPlayers();
     }
 
-    public Matchmaker<? extends IPlayerRank<?>> matchmaker() {
+    public Matchmaker matchmaker() {
         return this.matchmaker;
     }
 
@@ -86,14 +89,14 @@ public class RankedFamily extends Family implements group.aelysium.rustyconnecto
 
         RankedFamilyConfig config = RankedFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d5());
 
-        Matchmaker<? extends IPlayerRank<?>> matchmaker;
+        Matchmaker matchmaker;
         {
             MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
 
-            Optional<RankedGame> fetched = mySQLStorage.root().getGame(config.name());
+            Optional<RankedGame> fetched = mySQLStorage.database().getGame(config.name());
             if(fetched.isEmpty()) {
                 RankedGame game = new RankedGame(config.gamemodeName(), matchMakerConfig.getAlgorithm());
-                mySQLStorage.root().saveGame(mySQLStorage, game);
+                mySQLStorage.database().saveGame(mySQLStorage, game);
 
                 fetched = Optional.of(game);
             }
@@ -120,6 +123,6 @@ public class RankedFamily extends Family implements group.aelysium.rustyconnecto
             Component displayName,
             Family.Reference parentFamily,
             Whitelist.Reference whitelist,
-            Matchmaker<? extends IPlayerRank<?>> matchmaker
+            Matchmaker matchmaker
     ) {}
 }

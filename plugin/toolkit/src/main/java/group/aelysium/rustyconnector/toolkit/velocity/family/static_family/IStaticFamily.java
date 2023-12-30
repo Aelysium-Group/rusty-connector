@@ -1,16 +1,14 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family.static_family;
 
-import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.InitiallyConnectableFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
-import java.util.UUID;
-
-public interface StaticFamily<TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>> extends Family<TMCLoader, TPlayer, TLoadBalancer>, InitiallyConnectableFamily<TMCLoader, TPlayer, TLoadBalancer> {
+public interface IStaticFamily extends IFamily, InitiallyConnectableFamily {
     /**
      * Gets the {@link UnavailableProtocol} for this family. {@link UnavailableProtocol} governs what happens when a player's resident server is unavailable.
      * @return {@link UnavailableProtocol}
@@ -27,9 +25,9 @@ public interface StaticFamily<TMCLoader extends MCLoader, TPlayer extends Player
     LiquidTimestamp homeServerExpiration();
 
     /**
-     * Gets the {@link IResidenceDataEnclave} for this {@link StaticFamily}.
+     * Gets the {@link IResidenceDataEnclave} for this {@link IStaticFamily}.
      * Data enclave gives you an interface between this family and the remote storage connector that this family uses.
      * @return {@link IResidenceDataEnclave}
      */
-    <TResidenceDataEnclave extends IResidenceDataEnclave<TMCLoader, TPlayer, StaticFamily<TMCLoader, TPlayer, TLoadBalancer>>> TResidenceDataEnclave dataEnclave();
+    IResidenceDataEnclave dataEnclave();
 }

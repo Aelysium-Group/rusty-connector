@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketStatus;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -22,7 +22,7 @@ public class DataTransitConfig extends YAML implements group.aelysium.rustyconne
     private int maxPacketLength = 512;
 
     private int cache_size = 100;
-    private final List<PacketType.Mapping> cache_ignoredTypes = new ArrayList<>();
+    private final List<PacketIdentification> cache_ignoredTypes = new ArrayList<>();
     private final List<PacketStatus> cache_ignoredStatuses = new ArrayList<>();
 
     private boolean whitelist_enabled = false;
@@ -38,7 +38,7 @@ public class DataTransitConfig extends YAML implements group.aelysium.rustyconne
         return cache_size;
     }
 
-    public List<PacketType.Mapping> cache_ignoredTypes() {
+    public List<PacketIdentification> cache_ignoredTypes() {
         return cache_ignoredTypes;
     }
 
@@ -90,7 +90,7 @@ public class DataTransitConfig extends YAML implements group.aelysium.rustyconne
             List<String> stringTypes = (List<String>) IYAML.getValue(this.data,"cache.ignored-types",List.class);
             stringTypes.forEach(item -> {
                 try {
-                    this.cache_ignoredTypes.add(PacketType.mapping(item));
+                    this.cache_ignoredTypes.add(PacketIdentification.mapping(item));
                 } catch (Exception ignore) {
                     logger.send(ProxyLang.BOXED_MESSAGE_COLORED.build("There is no packet type of "+item+"! Ignoring...", NamedTextColor.YELLOW));
                 }

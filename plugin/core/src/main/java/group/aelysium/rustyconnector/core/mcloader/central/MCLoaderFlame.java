@@ -11,15 +11,17 @@ import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.MagicLink_PingResponseListener;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeFailureListener;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeSuccessListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.packet_builder.PacketBuilderService;
 import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
-import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -30,12 +32,9 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implements group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderFlame<CoreServiceHandler, RedisConnector> {
+public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implements IMCLoaderFlame<CoreServiceHandler> {
     protected final int configVersion;
     protected final String version;
     private final RedisConnector backbone;
@@ -68,7 +67,7 @@ public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implem
             ServerInfoService serverInfoService = initialize.serverInfo(defaultConfig);
 
             MessageCacheService messageCacheService = initialize.messageCache();
-            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, logger, langService, AddressUtil.stringToAddress(serverInfoService.address()));
+            RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, logger, langService, serverInfoService.uuid());
 
             initialize.messageCache();
             PacketBuilderService packetBuilderService = initialize.packetBuilder();
@@ -110,7 +109,7 @@ class Initialize {
 
     public String version() {
         try {
-            InputStream stream = group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder.resourceAsStream("plugin.yml");
+            InputStream stream = IMCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
             ConfigurationNode node = YAMLConfigurationLoader.builder()
@@ -159,13 +158,12 @@ class Initialize {
         return DefaultConfig.construct(Path.of(api.dataFolder()), lang, this.configVersion());
     }
 
-    public RedisConnector connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang, InetSocketAddress originAddress) throws IOException {
+    public RedisConnector connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang, UUID senderUUID) throws IOException {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
         ConnectorsConfig config = ConnectorsConfig.construct(Path.of(api.dataFolder()), lang, true, false);
 
         RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
-                PacketOrigin.SERVER,
                 config.getRedis_address(),
                 config.getRedis_user(),
                 config.getRedis_protocol(),
@@ -176,13 +174,14 @@ class Initialize {
 
 
         messenger.connect();
-        RedisConnection connection = messenger.connection().orElseThrow();
+        IMessengerConnection connection = messenger.connection().orElseThrow();
 
-        connection.listen(new MagicLink_PingResponseListener(this.api));
+        connection.listen(new HandshakeSuccessListener(this.api));
+        connection.listen(new HandshakeFailureListener(this.api));
         connection.listen(new CoordinateRequestListener(this.api));
         connection.listen(new RankedGameAssociateListener(this.api));
 
-        connection.startListening(cacheService, logger, originAddress);
+        ((RedisConnection) connection).startListening(cacheService, logger, senderUUID);
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
 
@@ -208,9 +207,10 @@ class Initialize {
         // TODO: Create a port resolver
         ServerInfoService serverInfoService = new ServerInfoService(
                 address,
+                defaultConfig.displayName(),
                 defaultConfig.magicConfig(),
-                defaultConfig.magicInterfaceResolver(),
-                80 // Bukkit.getPort()
+                false,
+                25565
         );
         services.put(ServerInfoService.class, serverInfoService);
 

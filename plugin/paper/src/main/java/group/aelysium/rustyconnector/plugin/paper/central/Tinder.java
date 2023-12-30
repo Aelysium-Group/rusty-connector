@@ -21,8 +21,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.slf4j.Logger;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;

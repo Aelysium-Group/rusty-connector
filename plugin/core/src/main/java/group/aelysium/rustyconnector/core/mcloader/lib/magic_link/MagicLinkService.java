@@ -1,12 +1,10 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link;
 
-import group.aelysium.rustyconnector.toolkit.mc_loader.connection_intent.ConnectionIntent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.IMagicLinkService;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatus;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.core.mcloader.lib.packet_builder.PacketBuilderService;
 
 import java.util.concurrent.TimeUnit;
@@ -31,7 +29,7 @@ public class MagicLinkService extends ClockService implements IMagicLinkService<
     private void scheduleNextPing(PacketBuilderService packetBuilderService) {
         this.scheduleDelayed(() -> {
             try {
-                packetBuilderService.pingProxy(ConnectionIntent.CONNECT);
+                packetBuilderService.magicLinkHandshake();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -45,8 +43,8 @@ public class MagicLinkService extends ClockService implements IMagicLinkService<
     }
 
     public void disconnect() {
-        PacketBuilderService service = ((CoreServiceHandler) TinderAdapterForCore.getTinder().services()).packetBuilder();
-        service.pingProxy(ConnectionIntent.DISCONNECT);
+        PacketBuilderService service = TinderAdapterForCore.getTinder().services().packetBuilder();
+        service.magicLinkKill();
     }
 
     @Override

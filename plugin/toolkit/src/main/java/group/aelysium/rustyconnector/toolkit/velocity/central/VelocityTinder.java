@@ -55,7 +55,7 @@ public interface VelocityTinder {
      * Specifically, this method will run after the base RustyConnector plugin has fully booted.
      * @param callback A consumer. The passed input argument is the newly created Flame instance.
      */
-    <TFlame extends VelocityFlame<?, ?>> void onStart(Consumer<TFlame> callback);
+    <TFlame extends VelocityFlame<?>> void onStart(Consumer<TFlame> callback);
 
     /**
      * Schedules a runnable to be executed once a flame is ready to be killed for RustyConnector.

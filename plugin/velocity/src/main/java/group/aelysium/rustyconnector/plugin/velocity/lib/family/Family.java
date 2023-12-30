@@ -1,28 +1,27 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
-import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.events.family.RebalanceEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class Family implements group.aelysium.rustyconnector.toolkit.velocity.family.Family<MCLoader, Player, LoadBalancer> {
+public abstract class Family implements IFamily {
     protected final String id;
     protected Metadata metadata;
-    protected Settings<MCLoader, LoadBalancer, Whitelist> settings;
+    protected Settings settings;
 
-    protected Family(String id, Settings<MCLoader, LoadBalancer, Whitelist> settings, Metadata metadata) {
+    protected Family(String id, Settings settings, Metadata metadata) {
         this.id = id;
         this.settings = settings;
         this.metadata = metadata;
@@ -36,25 +35,25 @@ public abstract class Family implements group.aelysium.rustyconnector.toolkit.ve
         return this.settings.displayName();
     }
 
-    public MCLoader findServer(@NotNull ServerInfo serverInfo) {
+    public IMCLoader findServer(@NotNull UUID uuid) {
         // Using MCLoader.Reference should be faster since it uses ServerService#fetch which is backed by HashMap.
         try {
-            MCLoader mcLoader = (MCLoader) new group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader.Reference(serverInfo).get();
+            IMCLoader mcLoader = new IMCLoader.Reference(uuid).get();
             if(mcLoader.family().equals(this)) return mcLoader;
             else return null;
         } catch (Exception ignore) {}
 
         // If the MCLoader can't be found via MCLoader.Reference, try searching the family itself.
         return this.registeredServers().stream()
-                .filter(server -> server.serverInfo().equals(serverInfo)
+                .filter(server -> server.uuid().equals(uuid)
                 ).findFirst().orElse(null);
     }
 
-    public void addServer(@NotNull MCLoader server) {
+    public void addServer(@NotNull IMCLoader server) {
         this.settings.loadBalancer().add(server);
     }
 
-    public void removeServer(@NotNull MCLoader server) {
+    public void removeServer(@NotNull IMCLoader server) {
         this.settings.loadBalancer().remove(server);
     }
 
@@ -71,7 +70,7 @@ public abstract class Family implements group.aelysium.rustyconnector.toolkit.ve
     public List<com.velocitypowered.api.proxy.Player> players(int max) {
         List<com.velocitypowered.api.proxy.Player> players = new ArrayList<>();
 
-        for (MCLoader server : this.registeredServers()) {
+        for (IMCLoader server : this.registeredServers()) {
             if(players.size() > max) break;
 
             players.addAll(server.registeredServer().getPlayersConnected());
@@ -83,18 +82,23 @@ public abstract class Family implements group.aelysium.rustyconnector.toolkit.ve
     public List<com.velocitypowered.api.proxy.Player> players() {
         List<com.velocitypowered.api.proxy.Player> players = new ArrayList<>();
 
-        for (MCLoader server : this.registeredServers()) {
+        for (IMCLoader server : this.registeredServers()) {
             players.addAll(server.registeredServer().getPlayersConnected());
         }
 
         return players;
     }
 
-    public List<MCLoader> registeredServers() {
+    public List<IMCLoader> registeredServers() {
         return this.loadBalancer().servers();
     }
-    public boolean containsServer(ServerInfo serverInfo) {
-        return !(this.findServer(serverInfo) == null);
+    public boolean containsServer(UUID uuid) {
+        try {
+            return new IMCLoader.Reference(uuid).get().family().equals(this);
+        } catch (Exception ignore) {}
+
+        // If the MCLoader can't be found via MCLoader.Reference, try searching the family itself.
+        return this.registeredServers().stream().anyMatch(server -> server.uuid().equals(uuid));
     }
 
     public long playerCount() {
@@ -104,12 +108,12 @@ public abstract class Family implements group.aelysium.rustyconnector.toolkit.ve
         return newPlayerCount.get();
     }
 
-    public LoadBalancer loadBalancer() {
+    public ILoadBalancer<IMCLoader> loadBalancer() {
         return this.settings.loadBalancer();
     }
 
     public Family parent() {
-        return (Family) this.settings.parent().get(true);
+        return this.settings.parent().get(true);
     }
 
     public Metadata metadata() {

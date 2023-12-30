@@ -31,6 +31,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 public final class CommandRusty {
     public static BrigadierCommand create(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
@@ -162,7 +163,7 @@ class FamilyC {
                         .executes(context -> {
                             try {
                                 String familyName = context.getArgument("familyName", String.class);
-                                Family family = (Family) new Family.Reference(familyName).get();
+                                Family family = new Family.Reference(familyName).get();
 
                                 if(family instanceof ScalarFamily)
                                     ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family, false);
@@ -188,7 +189,7 @@ class FamilyC {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        Family family = (Family) new Family.Reference(familyName).get();
+                        Family family = new Family.Reference(familyName).get();
                         if(!family.metadata().hasLoadBalancer()) {
                             ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
                             return Command.SINGLE_SUCCESS;
@@ -216,7 +217,7 @@ class FamilyC {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        Family family = (Family) new Family.Reference(familyName).get();
+                        Family family = new Family.Reference(familyName).get();
                         if(!family.metadata().hasLoadBalancer()) {
                             ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
                             return Command.SINGLE_SUCCESS;
@@ -244,7 +245,7 @@ class FamilyC {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        Family family = (Family) new Family.Reference(familyName).get();
+                        Family family = new Family.Reference(familyName).get();
 
                         if(family instanceof ScalarFamily)
                             ProxyLang.RC_SCALAR_FAMILY_INFO.send(logger, (ScalarFamily) family, true);
@@ -266,7 +267,7 @@ class FamilyC {
                 .executes(context -> {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
-                        Family family = (Family) new Family.Reference(familyName).get();
+                        Family family = new Family.Reference(familyName).get();
 
                         String playerNames = "";
                         List<com.velocitypowered.api.proxy.Player> players = family.players();
@@ -319,7 +320,7 @@ class Send {
                                 }
                                 Player player = Player.from(fetchedPlayer);
 
-                                Family family = (Family) new Family.Reference(familyName).get();
+                                Family family = new Family.Reference(familyName).get();
                                 if(!family.metadata().hasLoadBalancer()) {
                                     ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
                                     return Command.SINGLE_SUCCESS;
@@ -347,29 +348,25 @@ class Send {
                             logger.send(ProxyLang.RC_SEND_USAGE);
                             return Command.SINGLE_SUCCESS;
                         })
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("serverName", StringArgumentType.greedyString())
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("serverUUID", StringArgumentType.greedyString())
                                 .executes(context -> {
                                     try {
-                                        String serverName = context.getArgument("serverName", String.class);
+                                        UUID serverUUID = UUID.fromString(context.getArgument("serverUUID", String.class));
                                         String username = context.getArgument("username", String.class);
 
-                                        com.velocitypowered.api.proxy.Player player = Tinder.get().velocityServer().getPlayer(username).orElse(null);
-                                        if (player == null) {
+                                        com.velocitypowered.api.proxy.Player velocityPlayer = Tinder.get().velocityServer().getPlayer(username).orElse(null);
+                                        if (velocityPlayer == null) {
                                             logger.send(ProxyLang.RC_SEND_NO_PLAYER.build(username));
                                             return Command.SINGLE_SUCCESS;
                                         }
-
-                                        RegisteredServer registeredServer = Tinder.get().velocityServer().getServer(serverName).orElse(null);
-                                        if (registeredServer == null) {
-                                            logger.send(ProxyLang.RC_SEND_NO_SERVER.build(serverName));
-                                            return Command.SINGLE_SUCCESS;
-                                        }
+                                        
+                                        Player player = Player.from(velocityPlayer);
 
                                         MCLoader server;
                                         try {
-                                            server = (MCLoader) new MCLoader.Reference(registeredServer.getServerInfo()).get();
+                                            server = new MCLoader.Reference(serverUUID).get();
                                         } catch (Exception ignore) {
-                                            logger.send(ProxyLang.RC_SEND_NO_SERVER.build(serverName));
+                                            logger.send(ProxyLang.RC_SEND_NO_SERVER.build(serverUUID.toString()));
                                             return Command.SINGLE_SUCCESS;
                                         }
 
@@ -475,7 +472,7 @@ class Database {
 
                                     StorageService storage = flame.services().storage();
 
-                                    if(storage.root().deleteGame(storage, gameName))
+                                    if(storage.database().deleteGame(storage, gameName))
                                         logger.log("Successfully deleted "+gameName);
                                     else
                                         logger.log(gameName+" couldn't be found.");
@@ -487,7 +484,7 @@ class Database {
                                     String gameName = context.getArgument("gameName", String.class);
 
                                     StorageService storage = flame.services().storage();
-                                    RankedGame game = storage.root().getGame(gameName).orElse(null);
+                                    RankedGame game = storage.database().getGame(gameName).orElse(null);
                                     if(game == null) {
                                         logger.log(gameName + " couldn't be found.");
                                         return Command.SINGLE_SUCCESS;
@@ -504,7 +501,7 @@ class Database {
                                     String gameName = context.getArgument("gameName", String.class);
 
                                     StorageService storage = flame.services().storage();
-                                    RankedGame game = storage.root().getGame(gameName).orElse(null);
+                                    RankedGame game = storage.database().getGame(gameName).orElse(null);
                                     if(game == null) {
                                         logger.log(gameName + " couldn't be found.");
                                         return Command.SINGLE_SUCCESS;

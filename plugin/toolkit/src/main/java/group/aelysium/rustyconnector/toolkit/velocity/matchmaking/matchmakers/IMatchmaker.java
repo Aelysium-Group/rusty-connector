@@ -7,13 +7,13 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRanke
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
-import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
 
-public interface IMatchmaker<TPlayer extends Player, TRankedPlayer extends IRankedPlayer<? extends Player, ? extends IPlayerRank<?>>> extends Service {
+public interface IMatchmaker extends Service {
     /**
      * Using the players contained in the matchmaker, attempt to make a game.
      */
@@ -40,7 +40,7 @@ public interface IMatchmaker<TPlayer extends Player, TRankedPlayer extends IRank
      * @param player The player to add.
      * @throws RuntimeException If there was an issue while adding the player to this matchmaker.
      */
-    void add(TPlayer player);
+    void add(IPlayer player);
 
     /**
      * Removes the player from the matchmaker.
@@ -49,25 +49,25 @@ public interface IMatchmaker<TPlayer extends Player, TRankedPlayer extends IRank
      * If this player has already leaded into a session, you'll have to find their session and remove them from it.
      * @param player The player to remove.
      */
-    void remove(TPlayer player);
+    void remove(IPlayer player);
 
     /**
      * Gets The number of players currently waiting in the matchmaker.
      * @return The number of players waiting.
      */
-    List<TRankedPlayer> waitingPlayers();
+    List<IRankedPlayer> waitingPlayers();
 
     /**
      * Checks if a player is currently waiting in the matchmaker.
      * @param player The player to look for.
      * @return `true` if the player is waiting in the matchmaker. `false` otherwise.
      */
-    boolean contains(TRankedPlayer player);
+    boolean contains(IRankedPlayer player);
 
     record Settings (
             IMySQLStorageService storage,
             IScoreCard.IRankSchema.Type<?> algorithm,
-            IRankedGame<? extends Player> game,
+            IRankedGame<? extends IPlayer> game,
             List<ITeam.Settings> teams,
             double variance,
             LiquidTimestamp interval

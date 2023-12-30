@@ -1,19 +1,24 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay;
 
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.GenericPacket;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.variants.RankedGameAssociatePacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.rmi.ConnectException;
 import java.util.*;
 
-public class Session implements ISession<MCLoader> {
+public class Session implements ISession {
     protected final UUID uuid = UUID.randomUUID();
     protected final List<Team> teams;
     protected MCLoader.Reference server = null;
@@ -22,12 +27,12 @@ public class Session implements ISession<MCLoader> {
         this.teams = teams;
     }
 
-    public void connect(MCLoader server) {
-        List<com.velocitypowered.api.proxy.Player> kickedPlayers = new Vector<>();
+    public void connect(IMCLoader server) {
+        List<Player> kickedPlayers = new Vector<>();
 
-        for (RankedPlayer<?> rankedPlayer : this.players()) {
+        for (IRankedPlayer rankedPlayer : this.players()) {
             try {
-                com.velocitypowered.api.proxy.Player player = new Player.Reference(rankedPlayer.uuid()).get().resolve().orElseThrow();
+                Player player = new Player.Reference(rankedPlayer.uuid()).get();
                 try {
                     server.directConnect(player);
                 } catch (ConnectException e) {
@@ -41,20 +46,24 @@ public class Session implements ISession<MCLoader> {
             // player.sendMessage(VelocityLang.GAME_FOLLOW_KICKED);
         });
 
-        RankedGameAssociatePacket message = (RankedGameAssociatePacket) new GenericPacket.Builder()
-                .setType(PacketType.ASSOCIATE_RANKED_GAME)
-                .setAddress(server.address())
-                .setOrigin(PacketOrigin.PROXY)
-                .setParameter(RankedGameAssociatePacket.ValidParameters.GAME_UUID, uuid.toString())
-                .buildSendable();
-        Tinder.get().services().messenger().connection().orElseThrow().publish(message);
+        RankedGameAssociatePacket message = new GenericPacket.Builder()
+                .identification(PacketIdentification.Predefined.REQUEST_TO_START_RANKED_GAME)
+                .toMCLoader(server.uuid())
+                .parameter(RankedGameAssociatePacket.ValidParameters.GAME_UUID, uuid.toString())
+                .build();
+        Tinder.get().services().magicLink().connection().orElseThrow().publish(message);
 
-        this.server = new MCLoader.Reference(server.serverInfo());
+        this.server = new MCLoader.Reference(server.uuid());
     }
 
 
 
     public void end() {
+        for (Team team : teams) {
+            for(IRankedPlayer player : team.players()) {
+
+            }
+        }
         /*
         Tinder api = Tinder.get();
 
@@ -81,12 +90,24 @@ public class Session implements ISession<MCLoader> {
         this.ended = true;*/
     }
 
-    public List<RankedPlayer<?>> players() {
-        List<RankedPlayer<?>> players = new ArrayList<>();
+    public List<IRankedPlayer> players() {
+        List<IRankedPlayer> players = new ArrayList<>();
 
         this.teams.forEach(team -> players.addAll(team.players()));
 
         return players;
+    }
+
+    public JsonObject toJSON() {
+        JsonObject object = new JsonObject();
+
+        object.add("uuid", new JsonPrimitive(uuid.toString()));
+
+        JsonArray teams = new JsonArray();
+        this.teams.forEach(team -> teams.add(team.toJSON()));
+        object.add("teams", teams);
+
+        return object;
     }
 
     public static class Builder {
@@ -103,7 +124,7 @@ public class Session implements ISession<MCLoader> {
          * @param player The player to add.
          * @return `true` if the player was added successfully. `false` otherwise.
          */
-        public boolean addPlayer(RankedPlayer player) {
+        public boolean addPlayer(IRankedPlayer player) {
             for (Team team : teams)
                 if(team.add(player)) return true;
 

@@ -1,41 +1,39 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family;
 
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
-import group.aelysium.rustyconnector.toolkit.velocity.util.Reference;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.UUID;
 
-public interface Family<TMCLoader extends MCLoader, TPlayer extends Player, TLoadBalancer extends ILoadBalancer<TMCLoader>> {
+public interface IFamily {
     String id();
     Component displayName();
 
     /**
      * Get a server that is a part of the family.
-     * @param serverInfo The info matching the server to get.
+     * @param uuid The uuid of the server to get.
      * @return A found server or `null` if there's no match.
      */
-    TMCLoader findServer(@NotNull ServerInfo serverInfo);
+    IMCLoader findServer(@NotNull UUID uuid);
 
     /**
      * Add a server to the family.
      * @param server The server to add.
      */
-    void addServer(TMCLoader server);
+    void addServer(IMCLoader server);
 
     /**
      * Remove a server from this family.
      * @param server The server to remove.
      */
-    void removeServer(TMCLoader server);
+    void removeServer(IMCLoader server);
 
     /**
      * Get the whitelist for this family, or `null` if there isn't one.
@@ -56,9 +54,9 @@ public interface Family<TMCLoader extends MCLoader, TPlayer extends Player, TLoa
      */
     List<com.velocitypowered.api.proxy.Player> players(int max);
 
-    List<TMCLoader> registeredServers();
+    List<? extends IMCLoader> registeredServers();
 
-    boolean containsServer(ServerInfo serverInfo);
+    boolean containsServer(UUID uuid);
 
     /**
      * Method added for convenience.
@@ -66,7 +64,7 @@ public interface Family<TMCLoader extends MCLoader, TPlayer extends Player, TLoa
      * @param player The player to ultimately connect to the family
      * @return The server that the player was connected to.
      */
-    TMCLoader connect(TPlayer player);
+    IMCLoader connect(IPlayer player);
 
     /**
      * Gets the aggregate player count across all servers in this family
@@ -78,15 +76,15 @@ public interface Family<TMCLoader extends MCLoader, TPlayer extends Player, TLoa
      * Returns this family's {@link ILoadBalancer}.
      * @return {@link ILoadBalancer}
      */
-    TLoadBalancer loadBalancer();
+    ILoadBalancer<IMCLoader> loadBalancer();
 
     /**
      * Fetches a reference to the parent of this family.
      * The parent of this family should always be either another family, or the root family.
      * If this family is the root family, this method will always return `null`.
-     * @return {@link Family}
+     * @return {@link IFamily}
      */
-    Family<TMCLoader, TPlayer, TLoadBalancer> parent();
+    IFamily parent();
 
     /**
      * Returns the metadata for this family.
@@ -101,12 +99,11 @@ public interface Family<TMCLoader extends MCLoader, TPlayer extends Player, TLoa
      */
     void balance();
 
-    record Settings<TMCLoader extends MCLoader, TLoadBalancer extends ILoadBalancer<TMCLoader>, TWhitelist extends IWhitelist>
-            (Component displayName, TLoadBalancer loadBalancer, Reference parent, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<TWhitelist, String> whitelist) {}
+    record Settings(Component displayName, ILoadBalancer<IMCLoader> loadBalancer, Reference parent, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IWhitelist, String> whitelist) {}
 
 
 
-    class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>>, String> {
+    class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IFamily, String> {
         private boolean rootFamily = false;
 
         public Reference(String name) {
@@ -117,24 +114,24 @@ public interface Family<TMCLoader extends MCLoader, TPlayer extends Player, TLoa
             this.rootFamily = true;
         }
 
-        public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> get() {
+        public <TFamily extends IFamily> TFamily get() {
             VelocityTinder tinder = RustyConnector.Toolkit.proxy().orElseThrow();
 
-            if(rootFamily) return tinder.services().family().rootFamily();
-            return tinder.services().family().find(this.referencer).orElseThrow();
+            if(rootFamily) return (TFamily) tinder.services().family().rootFamily();
+            return (TFamily) tinder.services().family().find(this.referencer).orElseThrow();
         }
 
-        public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> get(boolean fetchRoot) {
+        public <TFamily extends IFamily> TFamily get(boolean fetchRoot) {
             VelocityTinder tinder = RustyConnector.Toolkit.proxy().orElseThrow();
 
-            if(rootFamily) return tinder.services().family().rootFamily();
+            if(rootFamily) return (TFamily) tinder.services().family().rootFamily();
             if(fetchRoot)
                 try {
-                    return tinder.services().family().find(this.referencer).orElseThrow();
+                    return (TFamily) tinder.services().family().find(this.referencer).orElseThrow();
                 } catch (Exception ignore) {
-                    return tinder.services().family().rootFamily();
+                    return (TFamily) tinder.services().family().rootFamily();
                 }
-            else return tinder.services().family().find(this.referencer).orElseThrow();
+            else return (TFamily) tinder.services().family().find(this.referencer).orElseThrow();
         }
 
         public static Reference rootFamily() {

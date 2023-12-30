@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.data_transit;
 
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
@@ -45,11 +45,11 @@ public class DataTransitService implements Service {
             throw new BlockedMessageException("The message is to long!");
 
         if(hasBlacklist)
-            if(this.blacklist.contains(message.address()))
+            if(this.blacklist.contains(message.sender()))
                 throw new BlockedMessageException("The message was sent from a blacklisted IP Address!");
 
         if(hasWhitelist)
-            if(!this.whitelist.contains(message.address()))
+            if(!this.whitelist.contains(message.sender()))
                 throw new BlockedMessageException("The message was sent from an IP Address that isn't whitelisted!");
     }
 

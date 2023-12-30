@@ -5,15 +5,15 @@ import group.aelysium.rustyconnector.toolkit.core.message_cache.IMessageCacheSer
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.model.FailService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 
 import java.net.InetSocketAddress;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.Vector;
 
 import java.util.concurrent.ExecutorService;
@@ -29,8 +29,8 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
     private final FailService failService;
     private AESCryptor cryptor;
 
-    public RedisConnection(PacketOrigin origin, RedisClient.Builder clientBuilder, AESCryptor cryptor) {
-        super(origin);
+    public RedisConnection(RedisClient.Builder clientBuilder, AESCryptor cryptor) {
+        super();
         this.clientBuilder = clientBuilder;
 
         this.publisher = new RedisPublisher(this.clientBuilder.build(), cryptor);
@@ -38,12 +38,12 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
         this.cryptor = cryptor;
     }
 
-    protected void subscribe(IMessageCacheService<?> cache, PluginLogger logger, InetSocketAddress originAddress) {
+    protected void subscribe(IMessageCacheService<?> cache, PluginLogger logger, UUID senderUUID) {
         if(!this.isAlive) return;
 
         this.executorService.submit(() -> {
             try {
-                RedisSubscriber redis = new RedisSubscriber(this.cryptor, RedisConnection.this.clientBuilder.build(), cache, logger, this.origin, originAddress);
+                RedisSubscriber redis = new RedisSubscriber(this.cryptor, RedisConnection.this.clientBuilder.build(), cache, logger, senderUUID);
                 RedisConnection.this.subscribers.add(redis);
 
                 redis.subscribeToChannel(RedisConnection.this.failService);
@@ -59,17 +59,17 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
                 }
             }
 
-            RedisConnection.this.subscribe(cache, logger, originAddress);
+            RedisConnection.this.subscribe(cache, logger, senderUUID);
         });
     }
 
-    public void startListening(IMessageCacheService<?> cache, PluginLogger logger, InetSocketAddress originAddress) {
+    public void startListening(IMessageCacheService<?> cache, PluginLogger logger, UUID senderUUID) {
         if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
         this.executorService = Executors.newFixedThreadPool(3);
 
         this.isAlive = true;
 
-        this.subscribe(cache, logger, originAddress);
+        this.subscribe(cache, logger, senderUUID);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
     }
 
     @Override
-    public void listen(PacketListener listener) {
+    public <TPacketListener extends PacketListener<? extends GenericPacket>> void listen(TPacketListener listener) {
         this.subscribers.forEach(subscribers -> subscribers.listen(listener));
     }
 }

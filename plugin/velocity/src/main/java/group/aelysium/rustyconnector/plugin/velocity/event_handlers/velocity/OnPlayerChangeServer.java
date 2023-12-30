@@ -15,6 +15,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventMan
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.*;
 
+import java.util.UUID;
+
 public class OnPlayerChangeServer {
     /**
      * Also runs when a player first joins the proxy
@@ -22,21 +24,19 @@ public class OnPlayerChangeServer {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerChangeServer(ServerConnectedEvent event) {
             return EventTask.async(() -> {
-                Tinder api = Tinder.get();
-                PluginLogger logger = api.logger();
                 Player player = Player.from(event.getPlayer());
 
                 try {
                     RegisteredServer newRawServer = event.getServer();
                     RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
 
-                    MCLoader newServer = (MCLoader) new MCLoader.Reference(newRawServer.getServerInfo()).get();
+                    MCLoader newServer = new MCLoader.Reference(UUID.fromString(newRawServer.getServerInfo().getName())).get();
 
                     if (oldRawServer == null) { // Player just connected to proxy. This isn't a server switch.
                         proxyJoin(newServer, player);
                         return;
                     }
-                    MCLoader oldServer = (MCLoader) new MCLoader.Reference(oldRawServer.getServerInfo()).get();
+                    MCLoader oldServer = new MCLoader.Reference(UUID.fromString(oldRawServer.getServerInfo().getName())).get();
 
                     serverSwitch(oldServer, newServer, player);
                 } catch (Exception e) {

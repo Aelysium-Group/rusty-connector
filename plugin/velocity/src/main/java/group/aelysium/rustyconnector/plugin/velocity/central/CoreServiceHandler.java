@@ -36,8 +36,8 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
     public ServerService server() {
         return this.find(ServerService.class).orElseThrow();
     }
-    public RedisConnector messenger() {
-        return this.find(RedisConnector.class).orElseThrow();
+    public MagicLinkService magicLink() {
+        return this.find(MagicLinkService.class).orElseThrow();
     }
     public StorageService storage() {
         return this.find(StorageService.class).orElseThrow();
@@ -59,9 +59,6 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
     }
     public LoadBalancingService loadBalancingService() {
         return this.find(LoadBalancingService.class).orElseThrow();
-    }
-    public MagicLinkService magicLinkService() {
-        return this.find(MagicLinkService.class).orElseThrow();
     }
     public Optional<PartyService> party() {
         return this.find(PartyService.class);

@@ -1,71 +1,17 @@
 package group.aelysium.rustyconnector.toolkit.core.packet.variants;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class RankedGameAssociatePacket extends GenericPacket {
-    private UUID uuid;
-
     public UUID uuid() {
-        return uuid;
+        return UUID.fromString(this.parameters.get(ValidParameters.GAME_UUID).getAsString());
     }
 
-    public RankedGameAssociatePacket(InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
-        super(PacketType.ASSOCIATE_RANKED_GAME, address, origin);
-
-        if(!RankedGameAssociatePacket.validateParameters(ValidParameters.toList(), parameters))
-            throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
-
-        parameters.forEach(entry -> {
-            String key = entry.getKey();
-            JsonPrimitive value = entry.getValue();
-
-            switch (key) {
-                case ValidParameters.GAME_UUID -> {
-                    if(value.getAsString().equals("null")) this.uuid = null;
-                    this.uuid = UUID.fromString(value.getAsString());
-                }
-            }
-        });
-    }
-    public RankedGameAssociatePacket(int messageVersion, String rawMessage, InetSocketAddress address, PacketOrigin origin, List<Map.Entry<String, JsonPrimitive>> parameters) {
-        super(messageVersion, rawMessage, PacketType.ASSOCIATE_RANKED_GAME, address, origin);
-
-        if(!RankedGameAssociatePacket.validateParameters(ValidParameters.toList(), parameters))
-            throw new IllegalStateException("Unable to construct Redis message! There are missing parameters!");
-
-        parameters.forEach(entry -> {
-            String key = entry.getKey();
-            JsonPrimitive value = entry.getValue();
-
-            switch (key) {
-                case ValidParameters.GAME_UUID -> {
-                    if(value.getAsString().equals("null")) this.uuid = null;
-                    this.uuid = UUID.fromString(value.getAsString());
-                }
-            }
-        });
-    }
-
-    @Override
-    public JsonObject toJSON() {
-        JsonObject object = super.toJSON();
-        JsonObject parameters = new JsonObject();
-
-        parameters.add(ValidParameters.GAME_UUID, new JsonPrimitive(this.uuid().toString()));
-
-        object.add(MasterValidParameters.PARAMETERS, parameters);
-
-        return object;
-    }
+    private RankedGameAssociatePacket() { super(); }
 
     public interface ValidParameters {
         String GAME_UUID = "id";

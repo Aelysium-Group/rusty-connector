@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
 import com.google.gson.Gson;
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import group.aelysium.rustyconnector.core.lib.Callable;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
@@ -62,7 +62,7 @@ public class Whitelist implements IWhitelist {
      * @param player The player to validate.
      * @return `true` if the player is whitelisted. `false` otherwise.
      */
-    public boolean validate(Player player) {
+    public boolean validate(IPlayer player) {
         Callable<Boolean> validate = () -> {
             if (Whitelist.this.strict)
                 return validateStrict(player);
@@ -76,7 +76,7 @@ public class Whitelist implements IWhitelist {
             return validate.execute();
     }
 
-    private boolean validateStrict(Player player) {
+    private boolean validateStrict(IPlayer player) {
         boolean playersValid = true;
         boolean countryValid = true;
         boolean permissionValid = true;
@@ -86,27 +86,21 @@ public class Whitelist implements IWhitelist {
             if (!WhitelistPlayerFilter.validate(this, player))
                 playersValid = false;
 
-
-        // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
-
-
         if (this.usesPermission())
-            if (!Permission.validate(player, this.permission))
+            if (!Permission.validate(player.resolve().orElse(null), this.permission))
                 permissionValid = false;
 
 
         return (playersValid && countryValid && permissionValid);
     }
 
-    private boolean validateSoft(Player player) {
+    private boolean validateSoft(IPlayer player) {
         if (this.usesPlayers())
             if (WhitelistPlayerFilter.validate(this, player))
                 return true;
 
-        // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
-
         if (this.usesPermission())
-            return Permission.validate(player, this.permission);
+            return Permission.validate(player.resolve().orElse(null), this.permission);
 
         return false;
     }
@@ -146,15 +140,5 @@ public class Whitelist implements IWhitelist {
 
         deps.d3().add(whitelist);
         return new Whitelist.Reference(whitelistName);
-    }
-
-    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Whitelist, String> {
-        public Reference(String name) {
-            super(name);
-        }
-
-        public Whitelist get() {
-            return Tinder.get().services().whitelist().find(this.referencer).orElseThrow();
-        }
     }
 }

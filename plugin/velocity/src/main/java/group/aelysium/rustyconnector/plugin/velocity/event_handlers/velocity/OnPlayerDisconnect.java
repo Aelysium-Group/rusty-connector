@@ -9,7 +9,6 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
@@ -18,8 +17,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventMan
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
-import group.aelysium.rustyconnector.toolkit.velocity.events.player.NetworkJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.NetworkLeaveEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,25 +37,21 @@ public class OnPlayerDisconnect {
         return EventTask.async(() -> {
             // Handle servers when player leaves
             try {
-                com.velocitypowered.api.proxy.Player resolvedPlayer = player.resolve().get();
-                if(resolvedPlayer.getCurrentServer().isPresent()) {
-                    MCLoader server = (MCLoader) new MCLoader.Reference(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo()).get();
-                    server.playerLeft();
+                MCLoader server = (MCLoader) player.server().orElseThrow();
 
-                    EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(server.family(), server, player, true));
-                    EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(server, player, true));
-                    EventDispatch.Safe.fireAndForget(new NetworkLeaveEvent(server.family(), server, player));
-                }
+                server.playerLeft();
+
+                EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(server.family(), server, player, true));
+                EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(server, player, true));
+                EventDispatch.Safe.fireAndForget(new NetworkLeaveEvent(server.family(), server, player));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
             // Handle party when player leaves
             try {
-                com.velocitypowered.api.proxy.Player resolvedPlayer = player.resolve().get();
-
                 PartyService partyService = api.services().party().orElseThrow();
-                Party party = partyService.find(resolvedPlayer).orElseThrow();
+                IParty party = partyService.find(player).orElseThrow();
                 try {
                     boolean wasPartyLeader = party.leader().equals(player);
 
@@ -63,7 +59,7 @@ public class OnPlayerDisconnect {
                         if(partyService.settings().disbandOnLeaderQuit())
                             partyService.disband(party);
 
-                    party.leave(resolvedPlayer);
+                    party.leave(player);
                 } catch (Exception e) {}
             } catch (Exception ignore) {}
 
@@ -72,7 +68,7 @@ public class OnPlayerDisconnect {
                 FriendsService friendsService = api.services().friends().orElseThrow();
                 if(!friendsService.settings().allowMessaging()) throw new NoOutputException();
 
-                List<Player> friends = friendsService.findFriends(player).orElseThrow();
+                List<IPlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 

@@ -1,23 +1,23 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
 import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
-import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 /**
  * Represents a player switching from one family to another family.
  * Specifically, this event will fire after {@link FamilyLeaveEvent} is fired on the previous family, and after {@link FamilyPostJoinEvent} fires on the new family.
  */
 public class FamilySwitchEvent extends Cancelable {
-    protected final Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> oldFamily;
-    protected final Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> newFamily;
-    protected final MCLoader oldMCLoader;
-    protected final MCLoader newMCLoader;
-    protected final Player player;
+    protected final IFamily oldFamily;
+    protected final IFamily newFamily;
+    protected final IMCLoader oldMCLoader;
+    protected final IMCLoader newMCLoader;
+    protected final IPlayer player;
 
-    public FamilySwitchEvent(Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> oldFamily, Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> newFamily, MCLoader oldMCLoader, MCLoader newMCLoader, Player player) {
+    public FamilySwitchEvent(IFamily oldFamily, IFamily newFamily, IMCLoader oldMCLoader, IMCLoader newMCLoader, IPlayer player) {
         this.oldFamily = oldFamily;
         this.newFamily = newFamily;
         this.oldMCLoader = oldMCLoader;
@@ -25,19 +25,19 @@ public class FamilySwitchEvent extends Cancelable {
         this.player = player;
     }
 
-    public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> oldFamily() {
+    public IFamily oldFamily() {
         return oldFamily;
     }
-    public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> newFamily() {
+    public IFamily newFamily() {
         return newFamily;
     }
-    public MCLoader oldMCLoader() {
+    public IMCLoader oldMCLoader() {
         return oldMCLoader;
     }
-    public MCLoader newMCLoader() {
+    public IMCLoader newMCLoader() {
         return newMCLoader;
     }
-    public Player player() {
+    public IPlayer player() {
         return player;
     }
 }

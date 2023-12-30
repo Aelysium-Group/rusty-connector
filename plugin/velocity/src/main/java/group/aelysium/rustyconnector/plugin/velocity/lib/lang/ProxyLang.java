@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.lang;
 
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.lang.ASCIIAlphabet;
 import group.aelysium.rustyconnector.core.lib.lang.Lang;
@@ -9,17 +8,18 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.Ra
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.WinLoss;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.WinRate;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import net.kyori.adventure.text.Component;
@@ -31,6 +31,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.kyori.adventure.text.Component.*;
@@ -386,13 +387,13 @@ public class ProxyLang extends Lang {
         else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_registered_servers");
         else if(family.loadBalancer().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_unlocked_servers");
         else {
-            List<MCLoader> serverList;
+            List<IMCLoader> serverList;
             if(locked)
                 serverList = family.loadBalancer().lockedServers();
             else
                 serverList = family.loadBalancer().openServers();
 
-            for (MCLoader server : serverList) {
+            for (IMCLoader server : serverList) {
                 Component serverEntry = resolver().get(
                         "proxy.family.generic.servers.details",
                         LanguageResolver.tagHandler("index_number", i + 1),
@@ -415,7 +416,7 @@ public class ProxyLang extends Lang {
             }
         }
 
-        RootFamily rootFamily = Tinder.get().services().family().rootFamily();
+        IRootFamily rootFamily = Tinder.get().services().family().rootFamily();
         String parentFamilyName = rootFamily.id();
         try {
             parentFamilyName = Objects.requireNonNull(family.parent()).id();
@@ -476,13 +477,13 @@ public class ProxyLang extends Lang {
         else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_registered_servers");
         else if(family.loadBalancer().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_unlocked_servers");
         else {
-            List<MCLoader> serverList;
+            List<IMCLoader> serverList;
             if(locked)
                 serverList = family.loadBalancer().lockedServers();
             else
                 serverList = family.loadBalancer().openServers();
 
-            for (MCLoader server : serverList) {
+            for (IMCLoader server : serverList) {
                 Component serverEntry = resolver().get(
                         "proxy.family.generic.servers.details",
                         LanguageResolver.tagHandler("index_number", i + 1),
@@ -566,13 +567,13 @@ public class ProxyLang extends Lang {
         else if(family.registeredServers().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_registered_servers");
         else if(family.loadBalancer().size() == 0) servers = resolver().get("proxy.family.generic.servers.no_unlocked_servers");
         else {
-            List<MCLoader> serverList;
+            List<IMCLoader> serverList;
             if(locked)
                 serverList = family.loadBalancer().lockedServers();
             else
                 serverList = family.loadBalancer().openServers();
 
-            for (MCLoader server : serverList) {
+            for (IMCLoader server : serverList) {
                 Component serverEntry = resolver().get(
                         "proxy.family.generic.servers.details",
                         LanguageResolver.tagHandler("index_number", i + 1),
@@ -596,7 +597,7 @@ public class ProxyLang extends Lang {
         }
 
         String algorithm = "RANDOMIZE";
-        Matchmaker<? extends IPlayerRank<?>> matchmaker = family.matchmaker();
+        Matchmaker matchmaker = family.matchmaker();
         if(matchmaker instanceof WinLoss) algorithm = "WIN_LOSS";
         if(matchmaker instanceof WinRate) algorithm = "WIN_RATE";
 
@@ -670,13 +671,13 @@ public class ProxyLang extends Lang {
     public final static ParameterizedMessage1<String> TPA_FAILURE_NO_REQUEST = username -> resolver().get("proxy.tpa.no_requests", LanguageResolver.tagHandler("username", username));
     public final static ParameterizedMessage1<String> TPA_REQUEST_DUPLICATE = username -> resolver().get("proxy.tpa.pending_request", LanguageResolver.tagHandler("username", username));
 
-    public final static ParameterizedMessage1<com.velocitypowered.api.proxy.Player> TPA_REQUEST_QUERY = (sender) -> join(
+    public final static ParameterizedMessage1<IPlayer> TPA_REQUEST_QUERY = (sender) -> join(
             newlines(),
-            resolver().get("proxy.tpa.target_query.query", LanguageResolver.tagHandler("username", sender.getUsername())),
+            resolver().get("proxy.tpa.target_query.query", LanguageResolver.tagHandler("username", sender.username())),
             join(
                     JoinConfiguration.separator(space()),
-                    text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("proxy.tpa.target_query.accept_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/tpa accept "+sender.getUsername())),
-                    text("["+DENY+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("proxy.tpa.target_query.deny_tooltip", LanguageResolver.tagHandler("username", sender.getUsername())))).clickEvent(ClickEvent.runCommand("/tpa deny "+sender.getUsername()))
+                    text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("proxy.tpa.target_query.accept_tooltip", LanguageResolver.tagHandler("username", sender.username())))).clickEvent(ClickEvent.runCommand("/tpa accept "+sender.username())),
+                    text("["+DENY+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("proxy.tpa.target_query.deny_tooltip", LanguageResolver.tagHandler("username", sender.username())))).clickEvent(ClickEvent.runCommand("/tpa deny "+sender.username()))
             )
     );
     public final static ParameterizedMessage1<String> TPA_REQUEST_SUBMISSION = username -> resolver().get("proxy.tpa.request_confirmation", LanguageResolver.tagHandler("username", username));
@@ -690,7 +691,7 @@ public class ProxyLang extends Lang {
 
     public final static Component HUB_CONNECTION_FAILED = resolver().get("proxy.hub.connection_failed");
 
-    public final static ParameterizedMessage2<Party, com.velocitypowered.api.proxy.Player> PARTY_BOARD = (party, member) -> {
+    public final static ParameterizedMessage2<IParty, IPlayer> PARTY_BOARD = (party, member) -> {
         boolean hasParty = party != null;
 
         if(hasParty) {
@@ -715,7 +716,7 @@ public class ProxyLang extends Lang {
                                         JoinConfiguration.separator(text(" ")),
                                         text("[x]", RED).hoverEvent(HoverEvent.showText(resolver().get("proxy.party.leave"))).clickEvent(ClickEvent.runCommand("/party leave")),
                                         text("[^]", GRAY),
-                                        text(partyMember.getUsername(), WHITE),
+                                        text(partyMember.username(), WHITE),
                                         text("["+LEADER+"]", BLUE)
                                 )
                         );
@@ -723,9 +724,9 @@ public class ProxyLang extends Lang {
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
-                                        text("[x]", RED).hoverEvent(HoverEvent.showText(resolver().get("proxy.party.kick"))).clickEvent(ClickEvent.runCommand("/party kick " + partyMember.getUsername())),
-                                        text("[^]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("proxy.party.promote"))).clickEvent(ClickEvent.runCommand("/party promote " + partyMember.getUsername())),
-                                        text(partyMember.getUsername(), WHITE)
+                                        text("[x]", RED).hoverEvent(HoverEvent.showText(resolver().get("proxy.party.kick"))).clickEvent(ClickEvent.runCommand("/party kick " + partyMember.username())),
+                                        text("[^]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("proxy.party.promote"))).clickEvent(ClickEvent.runCommand("/party promote " + partyMember.username())),
+                                        text(partyMember.username(), WHITE)
                                 )
                         );
                 });
@@ -736,7 +737,7 @@ public class ProxyLang extends Lang {
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
-                                        text(partyMember.getUsername(), WHITE),
+                                        text(partyMember.username(), WHITE),
                                         text("["+LEADER+"]", BLUE)
                                 )
                         );
@@ -744,7 +745,7 @@ public class ProxyLang extends Lang {
                         playersList[0] = playersList[0].append(
                                 join(
                                         JoinConfiguration.separator(text(" ")),
-                                        text(partyMember.getUsername(), WHITE)
+                                        text(partyMember.username(), WHITE)
                                 )
                         );
                 });
@@ -861,7 +862,7 @@ public class ProxyLang extends Lang {
     public final static String PARTY_INJECTED_INVALID_LEADER_INVITE = resolver().getRaw("proxy.party.injected_error.invalid_leader_invite");
     public final static String PARTY_INJECTED_INVALID_MEMBER_INVITE = resolver().getRaw("proxy.party.injected_error.invalid_member_invite");
 
-    public final static ParameterizedMessage1<Player> FRIENDS_BOARD = (player) -> {
+    public final static ParameterizedMessage1<IPlayer> FRIENDS_BOARD = (player) -> {
         Tinder api = Tinder.get();
         FriendsService friendsService = api.services().friends().orElseThrow();
         int maxFriends = friendsService.settings().maxFriends();
@@ -877,7 +878,7 @@ public class ProxyLang extends Lang {
         boolean isFriendMessagingEnabled = friendsService.settings().allowMessaging();
         boolean canSeeFriendFamilies = friendsService.settings().showFamilies();
 
-        List<Player> friends = friendsService.findFriends(player).orElse(null);
+        List<IPlayer> friends = friendsService.findFriends(player).orElse(null);
 
         if(friends != null && friends.size() != 0) {
             final Component[] playersList = {text("")};
@@ -911,7 +912,7 @@ public class ProxyLang extends Lang {
                     return;
                 }
 
-                MCLoader mcLoader = (MCLoader) new MCLoader.Reference(resolvedFriend.getCurrentServer().orElseThrow().getServerInfo()).get();
+                MCLoader mcLoader = new MCLoader.Reference(UUID.fromString(resolvedFriend.getCurrentServer().orElseThrow().getServerInfo().getName())).get();
                 if(canSeeFriendFamilies)
                     playersList[0] = playersList[0].append(text(friend.username(), WHITE).hoverEvent(HoverEvent.showText(resolver().get("proxy.friends.panel.currently_playing", LanguageResolver.tagHandler("family_name", mcLoader.family().displayName())))));
                 else
@@ -936,16 +937,16 @@ public class ProxyLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<com.velocitypowered.api.proxy.Player> FRIEND_REQUEST = (sender) -> join(
+    public final static ParameterizedMessage1<IPlayer> FRIEND_REQUEST = (sender) -> join(
             newlines(),
-            resolver().get("proxy.friends.friend_request_query.query", LanguageResolver.tagHandler("username", sender.getUsername())),
+            resolver().get("proxy.friends.friend_request_query.query", LanguageResolver.tagHandler("username", sender.username())),
             join(
                     JoinConfiguration.separator(space()),
-                    text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("proxy.friends.friend_request_query.hover.accept"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.getUsername()+" accept")),
-                    text("["+IGNORE+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("proxy.friends.friend_request_query.hover.ignore"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.getUsername()+" ignore"))
+                    text("["+ACCEPT+"]", GREEN).hoverEvent(HoverEvent.showText(resolver().get("proxy.friends.friend_request_query.hover.accept"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.username()+" accept")),
+                    text("["+IGNORE+"]", RED).hoverEvent(HoverEvent.showText(resolver().get("proxy.friends.friend_request_query.hover.ignore"))).clickEvent(ClickEvent.runCommand("/friends requests "+sender.username()+" ignore"))
             )
     );
-    public final static ParameterizedMessage1<Player> FRIEND_JOIN = (player) -> {
+    public final static ParameterizedMessage1<IPlayer> FRIEND_JOIN = (player) -> {
         FriendsService friendsService = Tinder.get().services().friends().orElseThrow();
 
         if(friendsService.settings().allowMessaging())
@@ -953,7 +954,7 @@ public class ProxyLang extends Lang {
         else
             return resolver().get("proxy.friends.friend_joined.regular", LanguageResolver.tagHandler("username", player.username()));
     };
-    public final static ParameterizedMessage1<Player> FRIEND_LEAVE = (player) ->
+    public final static ParameterizedMessage1<IPlayer> FRIEND_LEAVE = (player) ->
             resolver().get("proxy.friends.friend_leaves", LanguageResolver.tagHandler("username", player.username()));
     public final static Message FRIEND_REQUEST_USAGE = () -> text(USAGE+": /friend requests <username> <accept / ignore>",RED);
     public final static ParameterizedMessage1<String> BECOME_FRIENDS = (username) ->
@@ -982,7 +983,7 @@ public class ProxyLang extends Lang {
                     LanguageResolver.tagHandler("friend_count", friend_count)
             )
     );
-    public final static ParameterizedMessage1<List<FriendRequest>> FRIENDS_JOIN_MESSAGE = (requests) -> {
+    public final static ParameterizedMessage1<List<IFriendRequest>> FRIENDS_JOIN_MESSAGE = (requests) -> {
         if(requests.size() > 8)
             return FRIENDS_JOIN_MESSAGE_EMPTY.build(requests.size());
 
@@ -1016,40 +1017,28 @@ public class ProxyLang extends Lang {
     public final static Component UNFRIEND_USAGE = text(USAGE+": /unfriend <username>",RED);
     public final static Component FM_USAGE = text(USAGE+": /fm <username> <message>",RED);
 
-    public final static ParameterizedMessage1<ServerInfo> PING = serverInfo -> text(
-            resolver().get("proxy.console_icons.ping") + " " +
-                    "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")"
+    public final static ParameterizedMessage1<String> PING = uuidOrDisplayName -> text(
+            resolver().get("proxy.console_icons.ping") + " " + uuidOrDisplayName
     );
 
-    public final static ParameterizedMessage2<ServerInfo, String> REGISTRATION_REQUEST = (serverInfo, familyName) -> text(
-            "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                    " "+ resolver().get("proxy.console_icons.attempting_registration") +" "+familyName
+    public final static ParameterizedMessage2<String, String> REGISTRATION_REQUEST = (uuidOrDisplayName, familyName) -> text(
+            uuidOrDisplayName + " " + resolver().get("proxy.console_icons.attempting_registration") +" "+familyName
     );
 
-    public final static ParameterizedMessage2<ServerInfo, String> REGISTERED = (serverInfo, familyName) -> text(
-            "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                    " "+ resolver().get("proxy.console_icons.registered") +" "+familyName
+    public final static ParameterizedMessage2<String, String> REGISTERED = (uuidOrDisplayName, familyName) -> text(
+            uuidOrDisplayName + " " + resolver().get("proxy.console_icons.registered") +" "+familyName
     );
 
-    public final static ParameterizedMessage2<ServerInfo, String> ERROR = (serverInfo, familyName) -> text(
-            "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                    " "+ resolver().get("proxy.console_icons.error") +" "+familyName
+    public final static ParameterizedMessage2<String, String> ERROR = (uuidOrDisplayName, familyName) -> text(
+            uuidOrDisplayName + " " + resolver().get("proxy.console_icons.error") +" "+familyName
     );
 
-    public final static ParameterizedMessage2<ServerInfo, String> UNREGISTRATION_REQUEST = (serverInfo, familyName) -> text(
-            "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                    " "+ resolver().get("proxy.console_icons.attempting_unregistration") +" "+familyName
+    public final static ParameterizedMessage2<String, String> UNREGISTRATION_REQUEST = (uuidOrDisplayName, familyName) -> text(
+            uuidOrDisplayName + " " + resolver().get("proxy.console_icons.attempting_unregistration") +" "+familyName
     );
 
-    public final static ParameterizedMessage2<ServerInfo, String> UNREGISTERED = (serverInfo, familyName) -> text(
-            "["+serverInfo.getName()+"]" +
-                    "("+serverInfo.getAddress().getHostName()+":"+serverInfo.getAddress().getPort()+")" +
-                    " "+ resolver().get("proxy.console_icons.unregistered") +" "+familyName
+    public final static ParameterizedMessage2<String, String> UNREGISTERED = (uuidOrDisplayName, familyName) -> text(
+            uuidOrDisplayName + " " + resolver().get("proxy.console_icons.unregistered") +" "+familyName
     );
 
     public final static ParameterizedMessage1<Family> FAMILY_BALANCING = family -> text(

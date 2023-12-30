@@ -1,32 +1,32 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
 import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
-import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 /**
  * Represents a player successfully connecting to a family.
  */
 public class FamilyPostJoinEvent extends Cancelable {
-    protected final Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family;
-    protected final MCLoader mcLoader;
-    protected final Player player;
+    protected final IFamily family;
+    protected final IMCLoader mcLoader;
+    protected final IPlayer player;
 
-    public FamilyPostJoinEvent(Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family, MCLoader mcLoader, Player player) {
+    public FamilyPostJoinEvent(IFamily family, IMCLoader mcLoader, IPlayer player) {
         this.family = family;
         this.mcLoader = mcLoader;
         this.player = player;
     }
 
-    public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family() {
+    public IFamily family() {
         return family;
     }
-    public MCLoader mcLoader() {
+    public IMCLoader mcLoader() {
         return mcLoader;
     }
-    public Player player() {
+    public IPlayer player() {
         return player;
     }
 }

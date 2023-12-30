@@ -1,19 +1,19 @@
 package group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa;
 
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 public interface ITPARequest {
     /**
      * Gets the plauer which sent this tpa request.
-     * @return {@link Player}
+     * @return {@link IPlayer}
      */
-    Player sender();
+    IPlayer sender();
 
     /**
      * Gets the player which received this tpa request.
-     * @return {@link Player}
+     * @return {@link IPlayer}
      */
-    Player target();
+    IPlayer target();
 
     /**
      * Checks whether or not this tpa request has expired.

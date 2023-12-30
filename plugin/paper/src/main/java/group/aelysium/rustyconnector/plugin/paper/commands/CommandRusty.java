@@ -26,6 +26,7 @@ public final class CommandRusty {
         manager.command(unlock(manager));
         manager.command(lock(manager));
         manager.command(game(manager));
+        manager.command(uuid(manager));
     }
 
     private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager) {
@@ -111,6 +112,23 @@ public final class CommandRusty {
                                 api.services().packetBuilder().sendToOtherFamily(player.getUniqueId(), familyName);
                             } catch (NullPointerException e) {
                                 MCLoaderLang.RC_SEND_USAGE.send(logger);
+                            } catch (Exception e) {
+                                logger.log("An error stopped us from processing the request!", e);
+                            }
+                        }).execute());
+    }
+
+    private static Command.Builder<CommandSender> uuid(PaperCommandManager<CommandSender> manager) {
+        Tinder api = Tinder.get();
+        PluginLogger logger = api.logger();
+        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
+
+        return builder.literal("uuid")
+                .senderType(ConsoleCommandSender.class)
+                .handler(context -> manager.taskRecipe().begin(context)
+                        .asynchronous(commandContext -> {
+                            try {
+                                logger.log("This MCLoader's UUID is: "+api.services().serverInfo().uuid());
                             } catch (Exception e) {
                                 logger.log("An error stopped us from processing the request!", e);
                             }

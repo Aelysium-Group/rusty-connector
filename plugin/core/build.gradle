@@ -5,12 +5,11 @@ compileJava {
 dependencies {
     // Include in jar
     implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
-    implementation "cloud.commandframework:cloud-paper:${project.cloud_paperfabric_version}"
     implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
 
     // Dev only
     shadow project(path: ':toolkit', configuration: 'shadow')
-    shadow "com.google.code.gson:gson:${project.gson_version}"
+    shadow "cloud.commandframework:cloud-paper:${project.cloud_paperfabric_version}"
     shadow "org.yaml:snakeyaml:${project.snakeyaml_version}"
 }
 

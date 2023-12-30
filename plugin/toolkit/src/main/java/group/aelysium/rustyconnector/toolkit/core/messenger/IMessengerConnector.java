@@ -5,12 +5,12 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service
 import java.net.ConnectException;
 import java.util.Optional;
 
-public interface IMessengerConnector<TMessengerConnection extends IMessengerConnection> extends Service {
+public interface IMessengerConnector extends Service {
     /**
      * Gets the connection to the remote resource.
      * @return {@link IMessengerConnection}
      */
-    Optional<TMessengerConnection> connection();
+    Optional<IMessengerConnection> connection();
 
     /**
      * Connect to the remote resource.
@@ -18,5 +18,5 @@ public interface IMessengerConnector<TMessengerConnection extends IMessengerConn
      * @return A {@link IMessengerConnection}.
      * @throws ConnectException If there was an issue connecting to the remote resource.
      */
-    TMessengerConnection connect() throws ConnectException;
+    IMessengerConnection connect() throws ConnectException;
 }

@@ -12,7 +12,7 @@ import java.util.*;
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link VelocityTinder}.
  */
-public abstract class VelocityFlame<TCoreServiceHandler extends ICoreServiceHandler, TMessengerConnector extends IMessengerConnector<?>> extends ServiceableService<TCoreServiceHandler> {
+public abstract class VelocityFlame<TCoreServiceHandler extends ICoreServiceHandler> extends ServiceableService<TCoreServiceHandler> {
     public VelocityFlame(TCoreServiceHandler services) {
         super(services);
     }
@@ -30,10 +30,4 @@ public abstract class VelocityFlame<TCoreServiceHandler extends ICoreServiceHand
      * @return {@link List<Component>}
      */
     public abstract List<Component> bootLog();
-
-    /**
-     * Gets RustyConnector's backbone messenger service.
-     * @return {@link TMessengerConnector}
-     */
-    public abstract TMessengerConnector backbone();
 }

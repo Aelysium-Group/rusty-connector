@@ -12,17 +12,17 @@ import java.util.UUID;
 public interface IPlayerService extends Service {
     /**
      * Finds a player based on a uuid.
-     * An alternate route of getting a player, other than "tinder.services().player().fetch()", can be to use {@link Player.Reference new Family.Reference(uuid)}{@link Player.Reference#get() .get()}.
+     * An alternate route of getting a player, other than "tinder.services().player().fetch()", can be to use {@link IPlayer.Reference new Family.Reference(uuid)}{@link IPlayer.Reference#get() .get()}.
      * @param uuid The uuid to search for.
-     * @return {@link Optional<Player>}
+     * @return {@link Optional< IPlayer >}
      */
-    Optional<? extends Player> fetch(UUID uuid);
+    Optional<? extends IPlayer> fetch(UUID uuid);
 
     /**
      * Finds a player based on a username.
-     * An alternate route of getting a player, other than "tinder.services().player().fetch()", can be to use {@link Player.UsernameReference new Family.UsernameReference(username)}{@link Player.Reference#get() .get()}.
+     * An alternate route of getting a player, other than "tinder.services().player().fetch()", can be to use {@link IPlayer.UsernameReference new Family.UsernameReference(username)}{@link IPlayer.Reference#get() .get()}.
      * @param username The username to search for.
-     * @return {@link Optional<Player>}
+     * @return {@link Optional< IPlayer >}
      */
-    Optional<? extends Player> fetch(String username);
+    Optional<? extends IPlayer> fetch(String username);
 }

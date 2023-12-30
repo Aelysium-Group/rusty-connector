@@ -10,7 +10,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistServ
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -33,7 +36,7 @@ import java.util.Optional;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.STATIC_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class StaticFamily extends Family implements group.aelysium.rustyconnector.toolkit.velocity.family.static_family.StaticFamily<MCLoader, Player, LoadBalancer> {
+public class StaticFamily extends Family implements IStaticFamily {
 
     protected LiquidTimestamp homeServerExpiration;
     protected UnavailableProtocol unavailableProtocol;
@@ -57,10 +60,10 @@ public class StaticFamily extends Family implements group.aelysium.rustyconnecto
         return this.dataEnclave;
     }
 
-    public MCLoader connect(Player player) throws RuntimeException {
+    public IMCLoader connect(IPlayer player) throws RuntimeException {
         EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
 
-        StaticFamilyConnector connector = new StaticFamilyConnector(this, player.resolve().orElseThrow());
+        StaticFamilyConnector connector = new StaticFamilyConnector(this, player);
         return connector.connect();
     }
 
@@ -146,30 +149,21 @@ public class StaticFamily extends Family implements group.aelysium.rustyconnecto
 
 class StaticFamilyConnector {
     private final StaticFamily family;
-    private final com.velocitypowered.api.proxy.Player player;
+    private final IPlayer player;
     private Component postConnectionError = null;
-    private final PlayerChooseInitialServerEvent event;
 
-    public StaticFamilyConnector(StaticFamily family, com.velocitypowered.api.proxy.Player player) {
+    public StaticFamilyConnector(StaticFamily family, IPlayer player) {
         this.family = family;
         this.player = player;
-        this.event = null;
-    }
-    public StaticFamilyConnector(StaticFamily family, PlayerChooseInitialServerEvent event) {
-        this.family = family;
-        this.player = event.getPlayer();
-        this.event = event;
     }
 
-    public MCLoader connect() throws RuntimeException {
+    public IMCLoader connect() throws RuntimeException {
         if(this.family.loadBalancer().size() == 0)
             throw new RuntimeException("There are no servers for you to connect to!");
 
         this.validateWhitelist();
 
-        MCLoader server = this.establishAnyConnection();
-
-        return server;
+        return this.establishAnyConnection();
     }
 
     public void validateWhitelist() throws RuntimeException {
@@ -187,15 +181,12 @@ class StaticFamilyConnector {
      * If not, check the load balancer and route the player into the proper server.
      * @return The player server that this player was connected to.
      */
-    public MCLoader establishAnyConnection() {
-        MCLoader server;
+    public IMCLoader establishAnyConnection() {
         try {
-            server = this.connectHomeServer();
-        } catch (Exception ignore) {
-            server = establishNewConnection(true);
-        }
+            return this.connectHomeServer();
+        } catch (Exception ignore) {}
 
-        return server;
+        return establishNewConnection(true);
     }
 
     /**
@@ -205,8 +196,8 @@ class StaticFamilyConnector {
      * After a connection is established, the player's home family will be set or updated.
      * @return The player server that this player was connected to.
      */
-    public MCLoader establishNewConnection(boolean shouldRegisterNew) {
-        MCLoader server;
+    public IMCLoader establishNewConnection(boolean shouldRegisterNew) {
+        IMCLoader server;
         if(this.family.loadBalancer().persistent() && this.family.loadBalancer().attempts() > 1)
             server = this.connectPersistent();
         else
@@ -217,9 +208,9 @@ class StaticFamilyConnector {
         if(!shouldRegisterNew) return server;
 
         try {
-            this.family.dataEnclave().save(new Player.Reference(player.getUniqueId()), server, this.family);
+            this.family.dataEnclave().save(new Player.Reference(player.uuid()), server, this.family);
         } catch (Exception e) {
-            Tinder.get().logger().send(Component.text("Unable to save "+ this.player.getUsername() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
+            Tinder.get().logger().send(Component.text("Unable to save "+ this.player.username() +" home server into MySQL! Their home server will only be saved until the server shuts down, or they log out!", NamedTextColor.RED));
             e.printStackTrace();
         }
 
@@ -233,26 +224,21 @@ class StaticFamilyConnector {
      * @return The player server that this player was connected to.
      * @throws RuntimeException If no server could be connected to.
      */
-    public MCLoader connectHomeServer() throws RuntimeException {
+    public IMCLoader connectHomeServer() throws RuntimeException {
         try {
-            Optional<ServerResidence> residence = this.family.dataEnclave().fetch(new Player.Reference(player.getUniqueId()), this.family);
+            Optional<ServerResidence> residence = this.family.dataEnclave().fetch(new Player.Reference(player.uuid()), this.family);
 
             if(residence.isPresent()) {
                 try {
-                    if(this.event == null) {
-                        if (!residence.orElseThrow().server().connect(this.player))
-                            throw new RuntimeException("There was an issue connecting you to the server!");
-                    } else {
-                        if (!residence.orElseThrow().server().directConnect(this.event))
-                            throw new RuntimeException("There was an issue connecting you to the server!");
-                    }
+                    if (!residence.orElseThrow().server().connect(this.player))
+                        throw new RuntimeException("There was an issue connecting you to the server!");
 
                     return residence.orElseThrow().server();
                 } catch (Exception ignore) {}
             }
             switch (this.family.unavailableProtocol()) {
                 case ASSIGN_NEW_HOME -> {
-                    this.family.dataEnclave().delete(new Player.Reference(player.getUniqueId()), this.family);
+                    this.family.dataEnclave().delete(new Player.Reference(player.uuid()), this.family);
                     return this.establishNewConnection(true);
                 }
                 case CONNECT_WITH_ERROR -> {
@@ -270,20 +256,15 @@ class StaticFamilyConnector {
         throw new RuntimeException("There was an issue connecting you to the server!");
     }
 
-    private MCLoader connectSingleton() {
-        MCLoader server = this.family.loadBalancer().current();
+    private IMCLoader connectSingleton() {
+        IMCLoader server = this.family.loadBalancer().current();
         try {
             if(!server.validatePlayer(this.player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
 
 
-            if(this.event == null) {
-                if (!server.connect(this.player))
-                    throw new RuntimeException("There was an issue connecting you to the server!");
-            } else {
-                if (!server.directConnect(this.event))
-                    throw new RuntimeException("There was an issue connecting you to the server!");
-            }
+            if (!server.connect(this.player))
+                throw new RuntimeException("There was an issue connecting you to the server!");
 
             this.family.loadBalancer().iterate();
 
@@ -293,25 +274,19 @@ class StaticFamilyConnector {
         }
     }
 
-    private MCLoader connectPersistent() {
+    private IMCLoader connectPersistent() {
         int attemptsLeft = this.family.loadBalancer().attempts();
 
         for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
             boolean isFinal = (attempt == attemptsLeft);
-            MCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
+            IMCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
 
             try {
                 if (!server.validatePlayer(this.player))
                     throw new RuntimeException("The server you're trying to connect to is full!");
 
-
-                if(this.event == null) {
-                    if (!server.connect(this.player))
-                        throw new RuntimeException("There was an issue connecting you to the server!");
-                } else {
-                    if (!server.directConnect(this.event))
-                        throw new RuntimeException("There was an issue connecting you to the server!");
-                }
+                if (!server.connect(this.player))
+                    throw new RuntimeException("There was an issue connecting you to the server!");
 
                 this.family.loadBalancer().forceIterate();
 

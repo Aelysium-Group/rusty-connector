@@ -1,11 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -14,13 +13,13 @@ import java.rmi.ConnectException;
 import java.util.Random;
 import java.util.Vector;
 
-public class Party implements IParty<MCLoader> {
-    private final Vector<Player> players;
+public class Party implements group.aelysium.rustyconnector.toolkit.velocity.parties.IParty {
+    private final Vector<IPlayer> players;
     private final int maxSize;
-    private Player leader;
-    private WeakReference<MCLoader> server;
+    private IPlayer leader;
+    private WeakReference<IMCLoader> server;
 
-    public Party(int maxSize, Player host, MCLoader server) {
+    public Party(int maxSize, IPlayer host, IMCLoader server) {
         this.players = new Vector<>(maxSize);
         this.maxSize = maxSize;
         this.leader = host;
@@ -28,28 +27,28 @@ public class Party implements IParty<MCLoader> {
         this.server = new WeakReference<>(server);
     }
 
-    public void setServer(MCLoader server) {
+    public void setServer(IMCLoader server) {
         if(server.equals(server())) return;
 
         this.server = new WeakReference<>(server);
     }
-    public MCLoader server() {
+    public IMCLoader server() {
         return this.server.get();
     }
 
-    public synchronized Player leader() {
+    public synchronized IPlayer leader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
-        if(!this.players.contains(this.leader) || !this.leader.isActive()) {
+        if(!this.players.contains(this.leader) || this.leader.online()) {
             this.newRandomLeader();
-            this.broadcast(Component.text("The old party leader is no-longer available! "+this.leader.getUsername()+" is the new leader!", NamedTextColor.YELLOW));
+            this.broadcast(Component.text("The old party leader is no-longer available! "+this.leader.username()+" is the new leader!", NamedTextColor.YELLOW));
         }
 
         return this.leader;
     }
 
-    public void setLeader(Player player) {
+    public void setLeader(IPlayer player) {
         if(!this.players.contains(player))
-            throw new IllegalStateException(player.getUsername() + " isn't in this party, they can't be made leader!");
+            throw new IllegalStateException(player.username() + " isn't in this party, they can't be made leader!");
         this.leader = player;
     }
 
@@ -66,21 +65,21 @@ public class Party implements IParty<MCLoader> {
         return this.players().isEmpty();
     }
 
-    public Vector<Player> players() {
+    public Vector<IPlayer> players() {
         return this.players;
     }
 
-    public synchronized void join(Player player) {
+    public synchronized void join(IPlayer player) {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
 
         if(this.players.size() > this.maxSize) throw new RuntimeException("The party is already full! Try again later!");
 
         player.sendMessage(ProxyLang.PARTY_JOINED_SELF);
-        this.players.forEach(partyMember -> partyMember.sendMessage(ProxyLang.PARTY_JOINED.build(partyMember.getUsername())));
+        this.players.forEach(partyMember -> partyMember.sendMessage(ProxyLang.PARTY_JOINED.build(partyMember.username())));
         this.players.add(player);
     }
 
-    public synchronized void leave(Player player) {
+    public synchronized void leave(IPlayer player) {
         if(this.isEmpty()) return;
         this.players.remove(player);
 
@@ -89,11 +88,11 @@ public class Party implements IParty<MCLoader> {
             return;
         }
 
-        this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
+        this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.username() + " left the party.", NamedTextColor.YELLOW)));
 
         if(player.equals(this.leader)) {
             newRandomLeader();
-            this.broadcast(Component.text(this.leader.getUsername()+" is the new party leader!", NamedTextColor.YELLOW));
+            this.broadcast(Component.text(this.leader.username()+" is the new party leader!", NamedTextColor.YELLOW));
         }
 
         if(this.isEmpty())
@@ -104,7 +103,7 @@ public class Party implements IParty<MCLoader> {
         this.players.forEach(player -> player.sendMessage(message));
     }
 
-    public boolean contains(Player player) {
+    public boolean contains(IPlayer player) {
         return this.players.contains(player);
     }
 
@@ -113,13 +112,13 @@ public class Party implements IParty<MCLoader> {
         this.leader = null;
     }
 
-    public synchronized void connect(MCLoader server) {
+    public synchronized void connect(IMCLoader server) {
         SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
         this.setServer(server);
-        Vector<Player> kickedPlayers = new Vector<>();
+        Vector<IPlayer> kickedPlayers = new Vector<>();
 
         Tinder.get().services().party().orElseThrow().queueConnector(() -> {
-            for (Player player : this.players)
+            for (IPlayer player : this.players)
                 try {
                     switch (switchPower) {
                         case MINIMAL -> {
@@ -152,7 +151,7 @@ public class Party implements IParty<MCLoader> {
     @Override
     public String toString() {
         try {
-            return "<Party players=" + this.players.size() + " leader=" + this.leader.getUsername() + ">";
+            return "<Party players=" + this.players.size() + " leader=" + this.leader.username() + ">";
         } catch (Exception ignore) {
             return "<Party players=" + this.players.size() + " leader=null>";
         }

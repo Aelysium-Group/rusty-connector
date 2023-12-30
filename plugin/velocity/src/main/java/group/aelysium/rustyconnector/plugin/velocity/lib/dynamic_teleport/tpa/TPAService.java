@@ -1,32 +1,31 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
 import com.velocitypowered.api.command.CommandManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPACleaningService;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAService;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.TPAServiceSettings;
-import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.GenericPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.CoordinateRequestQueuePacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.QueueTPAPacket;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.commands.CommandTPA;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 
-public class TPAService implements ITPAService<TPACleaningService, MCLoader, Player, LoadBalancer, Family, TPARequest, TPAHandler> {
+public class TPAService implements ITPAService {
     private final TPACleaningService cleaningService;
     private final TPAServiceSettings settings;
-    private final Map<Family, TPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<IFamily, ITPAHandler> tpaHandlers = Collections.synchronizedMap(new WeakHashMap<>());
 
     public TPAService(TPAServiceSettings settings) {
         this.cleaningService = new TPACleaningService(settings.expiration());
@@ -56,12 +55,12 @@ public class TPAService implements ITPAService<TPACleaningService, MCLoader, Pla
     public TPAServiceSettings settings() {
         return this.settings;
     }
-    public TPACleaningService cleaner() {
+    public ITPACleaningService cleaner() {
         return this.cleaningService;
     }
 
-    public TPAHandler tpaHandler(Family family) {
-        TPAHandler tpaHandler = this.tpaHandlers.get(family);
+    public ITPAHandler tpaHandler(IFamily family) {
+        ITPAHandler tpaHandler = this.tpaHandlers.get(family);
         if(tpaHandler == null) {
             TPAHandler newTPAHandler = new TPAHandler();
             this.tpaHandlers.put(family, newTPAHandler);
@@ -70,7 +69,7 @@ public class TPAService implements ITPAService<TPACleaningService, MCLoader, Pla
 
         return tpaHandler;
     }
-    public List<TPAHandler> allTPAHandlers() {
+    public List<ITPAHandler> allTPAHandlers() {
         return this.tpaHandlers.values().stream().toList();
     }
 
@@ -81,36 +80,31 @@ public class TPAService implements ITPAService<TPACleaningService, MCLoader, Pla
      * @param targetServer The server to send the player to.
      * @throws NullPointerException If the server doesn't exist in the family.
      */
-    public void tpaSendPlayer(com.velocitypowered.api.proxy.Player source, com.velocitypowered.api.proxy.Player target, MCLoader targetServer) {
+    public void tpaSendPlayer(IPlayer source, IPlayer target, IMCLoader targetServer) {
         Tinder api = Tinder.get();
 
-        CoordinateRequestQueuePacket message = (CoordinateRequestQueuePacket) new GenericPacket.Builder()
-                .setType(PacketType.COORDINATE_REQUEST_QUEUE)
-                .setOrigin(PacketOrigin.PROXY)
-                .setAddress(targetServer.address())
-                .setParameter(CoordinateRequestQueuePacket.ValidParameters.TARGET_SERVER, targetServer.address())
-                .setParameter(CoordinateRequestQueuePacket.ValidParameters.TARGET_USERNAME, target.getUsername())
-                .setParameter(CoordinateRequestQueuePacket.ValidParameters.SOURCE_USERNAME, source.getUsername())
-                .buildSendable();
+        QueueTPAPacket message = new GenericPacket.Builder()
+                .identification(PacketIdentification.Predefined.QUEUE_TPA)
+                .toMCLoader(targetServer.uuid())
+                .parameter(QueueTPAPacket.ValidParameters.TARGET_USERNAME, target.username())
+                .parameter(QueueTPAPacket.ValidParameters.SOURCE_USERNAME, source.username())
+                .build();
 
-        RedisConnection backboneMessenger = api.flame().backbone().connection().orElseThrow();
-        backboneMessenger.publish(message);
+        api.services().magicLink().connection().orElseThrow().publish(message);
 
         try {
-            MCLoader senderServer = (MCLoader) new MCLoader.Reference(source.getCurrentServer().orElseThrow().getServerInfo()).get();
-
-            if (senderServer.equals(targetServer)) return;
+            if (source.server().orElseThrow().equals(targetServer)) return;
         } catch (Exception ignore) {}
 
         try {
             targetServer.connect(source);
         } catch (Exception e) {
-            source.sendMessage(ProxyLang.TPA_FAILURE.build(target.getUsername()));
+            source.sendMessage(ProxyLang.TPA_FAILURE.build(target.username()));
         }
     }
 
     public void kill() {
-        this.allTPAHandlers().forEach(TPAHandler::decompose);
+        this.allTPAHandlers().forEach(ITPAHandler::decompose);
         this.tpaHandlers.clear();
         this.cleaningService.kill();
 

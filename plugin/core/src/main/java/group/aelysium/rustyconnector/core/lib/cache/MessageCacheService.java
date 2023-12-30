@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.core.lib.cache;
 import group.aelysium.rustyconnector.toolkit.core.message_cache.IMessageCacheService;
 import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketStatus;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.core.lib.crypt.Snowflake;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class MessageCacheService implements IMessageCacheService<CacheableMessage> {
     private final Snowflake snowflakeGenerator = new Snowflake();
     private final List<PacketStatus> ignoredStatuses;
-    private final List<PacketType.Mapping> ignoredTypes;
+    private final List<PacketIdentification> ignoredTypes;
     private int max = 25;
 
     public MessageCacheService(Integer max) {
@@ -25,7 +25,7 @@ public class MessageCacheService implements IMessageCacheService<CacheableMessag
         this.ignoredStatuses = new ArrayList<>(0);
         this.ignoredTypes = new ArrayList<>(0);
     }
-    public MessageCacheService(Integer max, List<PacketStatus> ignoredStatuses, List<PacketType.Mapping> ignoredTypes) {
+    public MessageCacheService(Integer max, List<PacketStatus> ignoredStatuses, List<PacketIdentification> ignoredTypes) {
         if(max <= 0) max = 0;
         if(max > 500) max = 500;
 
@@ -59,7 +59,7 @@ public class MessageCacheService implements IMessageCacheService<CacheableMessag
     }
 
     public <TPacket extends IPacket> boolean ignoredType(TPacket message) {
-        return this.ignoredTypes.contains(message.type());
+        return this.ignoredTypes.contains(message.identification());
     }
 
     /**

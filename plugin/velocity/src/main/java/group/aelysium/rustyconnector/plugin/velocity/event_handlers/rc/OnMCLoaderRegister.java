@@ -19,7 +19,7 @@ public class OnMCLoaderRegister extends Listener<RegisterEvent> {
 
         // Fire console message
         if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
-            ProxyLang.REGISTERED.send(logger, event.mcLoader().serverInfo(), event.family().id());
+            ProxyLang.REGISTERED.send(logger, event.mcLoader().uuidOrDisplayName(), event.family().id());
 
         // Fire discord webhook
         WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, DiscordWebhookMessage.PROXY__SERVER_REGISTER.build(event.mcLoader(), event.family().id()));

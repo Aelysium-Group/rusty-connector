@@ -1,14 +1,14 @@
 package group.aelysium.rustyconnector.toolkit.velocity.config;
 
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketStatus;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 
 import java.util.List;
 
 public interface DataTransitConfig {
     int maxPacketLength();
     int cache_size();
-    List<PacketType.Mapping> cache_ignoredTypes();
+    List<PacketIdentification> cache_ignoredTypes();
     List<PacketStatus> cache_ignoredStatuses();
     boolean whitelist_enabled();
     List<String> whitelist_addresses();

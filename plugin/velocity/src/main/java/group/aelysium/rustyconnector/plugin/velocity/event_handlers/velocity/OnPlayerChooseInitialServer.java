@@ -6,21 +6,18 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injectors.InjectorService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPostJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.InitiallyConnectableFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -46,8 +43,8 @@ public class OnPlayerChooseInitialServer {
             try {
                 // Check for network whitelist
                 try {
-                    Whitelist whitelist = api.services().whitelist().proxyWhitelist();
-                    if (!whitelist.validate(eventPlayer)) {
+                    IWhitelist whitelist = api.services().whitelist().proxyWhitelist();
+                    if (!whitelist.validate(player)) {
                         logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
                         eventPlayer.disconnect(Component.text(whitelist.message()));
                         return;
@@ -55,7 +52,7 @@ public class OnPlayerChooseInitialServer {
                 } catch (Exception ignore) {}
 
                 // Handle family injectors if they exist
-                InitiallyConnectableFamily<MCLoader, Player, LoadBalancer> family = null;
+                InitiallyConnectableFamily family = null;
                 try {
                     InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
                     String host = eventPlayer.getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
@@ -69,7 +66,7 @@ public class OnPlayerChooseInitialServer {
                 }
                 if(family == null) throw new RuntimeException("Unable to fetch a server to connect to.");
 
-                MCLoader server = family.connect(event);
+                IMCLoader server = family.connect(event);
 
                 EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(server.family(), server, player));
             } catch (Exception e) {
@@ -80,7 +77,7 @@ public class OnPlayerChooseInitialServer {
             // Check for active friend requests
             try {
                 FriendsService friendsService = api.services().friends().orElseThrow();
-                List<FriendRequest> requests = friendsService.findRequestsToTarget(player);
+                List<IFriendRequest> requests = friendsService.findRequestsToTarget(player);
 
                 if(requests.size() == 0) throw new NoOutputException();
 
@@ -90,7 +87,7 @@ public class OnPlayerChooseInitialServer {
             // Check for online friends
             try {
                 FriendsService friendsService = api.services().friends().orElseThrow();
-                List<Player> friends = friendsService.findFriends(player).orElseThrow();
+                List<IPlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 

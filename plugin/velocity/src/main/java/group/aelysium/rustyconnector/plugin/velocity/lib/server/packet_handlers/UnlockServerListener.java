@@ -1,15 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers;
 
-import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.variants.UnlockServerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 
-public class UnlockServerListener implements PacketListener {
+public class UnlockServerListener extends PacketListener<UnlockServerPacket> {
     protected Tinder api;
 
     public UnlockServerListener(Tinder api) {
@@ -17,20 +14,12 @@ public class UnlockServerListener implements PacketListener {
     }
 
     @Override
-    public PacketType.Mapping identifier() {
-        return PacketType.UNLOCK_SERVER;
+    public PacketIdentification target() {
+        return PacketIdentification.Predefined.UNLOCK_SERVER;
     }
 
     @Override
-    public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {
-        UnlockServerPacket packet = (UnlockServerPacket) genericPacket;
-
-        ServerInfo serverInfo = new ServerInfo(packet.serverName(), packet.address());
-        MCLoader server = (MCLoader) new MCLoader.Reference(serverInfo).get();
-
-        if (server != null) {
-            Family family = server.family();
-            family.loadBalancer().unlock(server);
-        }
+    public void execute(UnlockServerPacket packet) throws Exception {
+        new MCLoader.Reference(packet.sender()).get().unlock();
     }
 }

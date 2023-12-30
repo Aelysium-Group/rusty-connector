@@ -12,6 +12,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
 public class OnPlayerKicked {
@@ -27,12 +29,7 @@ public class OnPlayerKicked {
             boolean isFromRootFamily = false;
 
             try {
-                com.velocitypowered.api.proxy.Player resolvedPlayer = player.resolve().get();
-
-                if (resolvedPlayer.getCurrentServer().isEmpty()) throw new NoOutputException();
-
-                MCLoader oldServer = (MCLoader) new MCLoader.Reference(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo()).get();
-                if (oldServer == null) throw new NoOutputException();
+                MCLoader oldServer = (MCLoader) player.server().orElseThrow();
 
                 oldServer.playerLeft();
 
@@ -45,11 +42,11 @@ public class OnPlayerKicked {
             try {
                 if (!api.services().family().shouldCatchDisconnectingPlayers()) throw new NoOutputException();
 
-                RootFamily rootFamily = api.services().family().rootFamily();
+                IRootFamily rootFamily = api.services().family().rootFamily();
                 if(rootFamily.registeredServers().isEmpty()) throw new RuntimeException("There are no available servers for you to connect to!");
                 if(isFromRootFamily) throw new NoOutputException();
 
-                MCLoader newServer = rootFamily.fetchAny(player);
+                IMCLoader newServer = rootFamily.fetchAny(player);
                 if(newServer == null) throw new RuntimeException("Server closed.");
 
                 try {

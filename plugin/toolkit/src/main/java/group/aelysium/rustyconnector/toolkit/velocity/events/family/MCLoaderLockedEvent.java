@@ -1,28 +1,25 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.family;
 
 import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
-import group.aelysium.rustyconnector.toolkit.core.events.Event;
-import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 /**
  * Represents an MCLoader being locked on this family.
  */
 public class MCLoaderLockedEvent extends Cancelable {
-    protected final Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family;
-    protected final MCLoader mcLoader;
+    protected final IFamily family;
+    protected final IMCLoader mcLoader;
 
-    public MCLoaderLockedEvent(Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family, MCLoader mcLoader) {
+    public MCLoaderLockedEvent(IFamily family, IMCLoader mcLoader) {
         this.family = family;
         this.mcLoader = mcLoader;
     }
 
-    public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family() {
+    public IFamily family() {
         return family;
     }
-    public MCLoader mcLoader() {
+    public IMCLoader mcLoader() {
         return mcLoader;
     }
 }

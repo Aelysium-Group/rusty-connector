@@ -1,44 +1,49 @@
 package group.aelysium.rustyconnector.toolkit.velocity.server;
 
-
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
-import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
-public interface MCLoader extends ISortable {
+public interface IMCLoader extends ISortable {
     /**
-     * Checks if the {@link MCLoader} is stale.
+     * Checks if the {@link IMCLoader} is stale.
      * @return {@link Boolean}
      */
     boolean stale();
 
     /**
-     * Set's the {@link MCLoader PlayerServer's} new timeout.
+     * Set's the {@link IMCLoader PlayerServer's} new timeout.
      * @param newTimeout The new timeout.
      */
     void setTimeout(int newTimeout);
 
     /**
-     * The {@link UUID} of this {@link MCLoader}.
+     * The {@link UUID} of this {@link IMCLoader}.
      * This {@link UUID} will always be different between servers.
      * If this server unregisters and then re-registers into the proxy, this ID will be different.
      * @return {@link UUID}
      */
-    UUID id();
+    UUID uuid();
 
     /**
-     * Decrease this {@link MCLoader PlayerServer's} timeout by 1.
+     * Convenience method to return the MCLoader's display name if it exists.
+     * If none exists, it will return the MCLoader's UUID in string format.
+     */
+    String uuidOrDisplayName();
+
+    /**
+     * Decrease this {@link IMCLoader PlayerServer's} timeout by 1.
      * Once this value equals 0, this server will become stale and player's won't be able to join it anymore.
      * @param amount The amount to decrease by.
      * @return The new timeout value.
@@ -46,21 +51,21 @@ public interface MCLoader extends ISortable {
     int decreaseTimeout(int amount);
 
     /**
-     * Gets {@link MCLoader this server's} address in the form of a string.
+     * Gets {@link IMCLoader this server's} address in the form of a string.
      * @return {@link String}
      */
     String address();
 
     /**
-     * Gets {@link MCLoader this server's} associated {@link RegisteredServer}.
-     * {@link RegisteredServer} is Velocity's version of RustyConnector's {@link MCLoader}.
+     * Gets {@link IMCLoader this server's} associated {@link RegisteredServer}.
+     * {@link RegisteredServer} is Velocity's version of RustyConnector's {@link IMCLoader}.
      * This method give you easy access to this object.
      * @return {@link RegisteredServer}
      */
     RegisteredServer registeredServer();
 
     /**
-     * Gets {@link MCLoader this server's} associated {@link ServerInfo}.
+     * Gets {@link IMCLoader this server's} associated {@link ServerInfo}.
      * @return {@link ServerInfo}
      */
     ServerInfo serverInfo();
@@ -74,6 +79,12 @@ public interface MCLoader extends ISortable {
      * @throws InvalidAlgorithmParameterException If the family doesn't exist.
      */
     void register(String familyName) throws Exception;
+
+    /**
+     * Unregisters the MCLoader from the proxy.
+     * @param removeFromFamily Should the MCLoader also be removed from it's family.
+     */
+    void unregister(boolean removeFromFamily) throws Exception;
 
     /**
      * Is the server full? Will return `true` if and only if `soft-player-cap` has been reached or surpassed.
@@ -94,7 +105,7 @@ public interface MCLoader extends ISortable {
      * @param player The player to validate
      * @return `true` if the player is able to join. `false` otherwise.
      */
-    boolean validatePlayer(Player player);
+    boolean validatePlayer(IPlayer player);
 
     /**
      * Lazily gets the player count for this server.
@@ -140,7 +151,7 @@ public interface MCLoader extends ISortable {
 
     /**
      * The soft player cap of this server.
-     * If this value is reached by {@link MCLoader#playerCount()}, {@link MCLoader#full()} will evaluate to true.
+     * If this value is reached by {@link IMCLoader#playerCount()}, {@link IMCLoader#full()} will evaluate to true.
      * The only way for new players to continue to join this server once it's full is by giving them the soft cap bypass permission.
      * @return {@link Integer}
      */
@@ -148,29 +159,29 @@ public interface MCLoader extends ISortable {
 
     /**
      * The hard player cap of this server.
-     * If this value is reached by {@link MCLoader#playerCount()}, {@link MCLoader#maxed()} will evaluate to true.
+     * If this value is reached by {@link IMCLoader#playerCount()}, {@link IMCLoader#maxed()} will evaluate to true.
      * The only way for new players to continue to join this server once it's maxed is by giving them the hard cap bypass permission.
      *
-     * If this value is reached by {@link MCLoader#playerCount()}, it can be assumed that {@link MCLoader#full()} is also true, because this value cannot be less than {@link MCLoader#softPlayerCap()}.
+     * If this value is reached by {@link IMCLoader#playerCount()}, it can be assumed that {@link IMCLoader#full()} is also true, because this value cannot be less than {@link IMCLoader#softPlayerCap()}.
      * @return {@link Integer}
      */
     int hardPlayerCap();
 
     /**
      * Get the family this server is associated with.
-     * @return {@link Family}
+     * @return {@link IFamily}
      * @throws IllegalStateException If the server hasn't been registered yet.
      * @throws NullPointerException If the family associated with this server doesn't exist.
      */
-    Family family() throws IllegalStateException, NullPointerException;
+    IFamily family() throws IllegalStateException, NullPointerException;
 
     /**
      * Connect a player to this server.
      * This method respects {@link IParty parties} and will attempt to connect the entire party to this server if the player is in one and has the proper permissions.
-     * @param player The {@link Player} to connect.
+     * @param player The {@link IPlayer} to connect.
      * @return `true` if the connection was successful. `false` otherwise.
      */
-    boolean connect(Player player) throws ConnectException;
+    boolean connect(IPlayer player) throws ConnectException;
 
     /**
      * Set's a connections initial server to the server.
@@ -183,18 +194,30 @@ public interface MCLoader extends ISortable {
     /**
      * Connect a player directly to this server.
      * This method is disrespectful of {@link IParty parties} and makes no attempt to accommodate them.
-     * @param player The {@link Player} to connect.
+     * @param player The {@link IPlayer} to connect.
      * @return `true` if the connection was successful. `false` otherwise.
      */
-    boolean directConnect(Player player) throws ConnectException;
+    boolean directConnect(IPlayer player) throws ConnectException;
 
-    class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<MCLoader, ServerInfo> {
-        public Reference(ServerInfo serverInfo) {
-            super(serverInfo);
+    /**
+     * Locks the specific server in its respective family so that the load balancer won't return it for players to connect to.
+     * If the server is already locked, or doesn't exist in the load balancer, nothing will happen.
+     */
+    void lock();
+
+    /**
+     * Unlocks the specific server in its respective family so that the load balancer can return it for players to connect to.
+     * If the server is already unlocked, or doesn't exist in the load balancer, nothing will happen.
+     */
+    void unlock();
+
+    class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IMCLoader, UUID> {
+        public Reference(UUID uuid) {
+            super(uuid);
         }
 
-        public MCLoader get() {
-            return RustyConnector.Toolkit.proxy().orElseThrow().services().server().fetch(this.referencer).orElseThrow();
+        public <TMCLoader extends IMCLoader> TMCLoader get() {
+            return (TMCLoader) RustyConnector.Toolkit.proxy().orElseThrow().services().server().fetch(this.referencer).orElseThrow();
         }
     }
 }

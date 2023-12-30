@@ -6,11 +6,12 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
+import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.IDynamicTeleportServiceHandler;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class DynamicTeleportServiceHandler extends ServiceHandler {
+public class DynamicTeleportServiceHandler extends ServiceHandler implements IDynamicTeleportServiceHandler {
     public DynamicTeleportServiceHandler(Map<Class<? extends Service>, Service> services) {
         super(services);
     }

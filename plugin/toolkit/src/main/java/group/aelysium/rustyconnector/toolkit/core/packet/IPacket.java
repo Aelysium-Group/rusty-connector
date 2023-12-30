@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.toolkit.core.packet;
 
 import com.google.gson.JsonObject;
 
-import java.net.InetSocketAddress;
+import java.util.UUID;
 
 public interface IPacket {
     /**
@@ -12,35 +12,22 @@ public interface IPacket {
     int messageVersion();
 
     /**
-     * Check if this message is sendable.
-     * If not, it can be considered "received"
-     * @return {@link Boolean}
+     * Gets the UUID that this message was sent from.
+     * @return {@link UUID}
      */
-    boolean sendable();
+    UUID sender();
 
     /**
-     * Gets the raw message that was parsed into this instance of {@link IPacket}.
-     * @return {@link String}
+     * Gets the UUID that this packet was sent to.
+     * @return {@link UUID}
      */
-    String rawMessage();
-
-    /**
-     * Gets the address that this message was sent with.
-     * @return {@link InetSocketAddress}
-     */
-    InetSocketAddress address();
+    UUID target();
 
     /**
      * Gets the type of message this is.
-     * @return {@link PacketType.Mapping}
+     * @return {@link PacketIdentification}
      */
-    PacketType.Mapping type();
-
-    /**
-     * Gets the origin of this packet.
-     * @return {@link PacketOrigin}
-     */
-    PacketOrigin origin();
+    PacketIdentification identification();
 
     JsonObject toJSON();
 }

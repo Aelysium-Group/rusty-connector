@@ -1,33 +1,31 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
 import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
-import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 /**
  * Represents a player switching from one mcloader to another.
  * This event doesn't care about what family the mcloaders are a part of.
  */
 public class MCLoaderSwitchEvent extends Cancelable {
-    protected final MCLoader oldMCLoader;
-    protected final MCLoader newMCLoader;
-    protected final Player player;
+    protected final IMCLoader oldMCLoader;
+    protected final IMCLoader newMCLoader;
+    protected final IPlayer player;
 
-    public MCLoaderSwitchEvent(MCLoader oldMCLoader, MCLoader newMCLoader, Player player) {
+    public MCLoaderSwitchEvent(IMCLoader oldMCLoader, IMCLoader newMCLoader, IPlayer player) {
         this.oldMCLoader = oldMCLoader;
         this.newMCLoader = newMCLoader;
         this.player = player;
     }
 
-    public MCLoader oldMCLoader() {
+    public IMCLoader oldMCLoader() {
         return oldMCLoader;
     }
-    public MCLoader newMCLoader() {
+    public IMCLoader newMCLoader() {
         return newMCLoader;
     }
-    public Player player() {
+    public IPlayer player() {
         return player;
     }
 }

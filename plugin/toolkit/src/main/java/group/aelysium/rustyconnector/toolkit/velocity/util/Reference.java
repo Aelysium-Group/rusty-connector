@@ -13,7 +13,7 @@ public abstract class Reference<T, R> {
      * @return {@link T}
      * @throws java.util.NoSuchElementException If the owner of this reference can't be found.
      */
-    public abstract T get();
+    public abstract <TT extends T> TT get();
 
     public R referencer() {
         return this.referencer;

@@ -16,6 +16,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -68,24 +69,26 @@ public final class CommandFriends {
                                 return builder.buildFuture();
                             })
                             .executes(context -> {
-                                if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
+                                if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player velocityPlayer)) {
                                     logger.log("/friends must be sent as a player!");
                                     return Command.SINGLE_SUCCESS;
                                 }
 
-                                if(!Permission.validate(player, "rustyconnector.command.friends")) {
-                                    player.sendMessage(ProxyLang.NO_PERMISSION);
+                                if(!Permission.validate(velocityPlayer, "rustyconnector.command.friends")) {
+                                    velocityPlayer.sendMessage(ProxyLang.NO_PERMISSION);
                                     return Command.SINGLE_SUCCESS;
                                 }
+
+                                Player player = Player.from(velocityPlayer);
 
                                 String username = context.getArgument("username", String.class);
                                 Player targetPlayer = (Player) new Player.UsernameReference(username).get();
 
-                                if(friendsService.areFriends(Player.from(player), targetPlayer))
-                                    return closeMessage(player, ProxyLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
+                                if(friendsService.areFriends(player, targetPlayer))
+                                    return closeMessage(velocityPlayer, ProxyLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
 
                                 if(targetPlayer == null)
-                                    return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
+                                    return closeMessage(velocityPlayer, ProxyLang.NO_PLAYER.build(username));
 
                                 friendsService.sendRequest(player, targetPlayer);
 
@@ -113,7 +116,7 @@ public final class CommandFriends {
                                     if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) return builder.buildFuture();
 
                                     try {
-                                        List<FriendRequest> requests = friendsService.findRequestsToTarget(Player.from(player));
+                                        List<IFriendRequest> requests = friendsService.findRequestsToTarget(Player.from(player));
 
                                         if(requests.size() == 0) {
                                             builder.suggest("You have no pending friend requests!");
@@ -163,7 +166,7 @@ public final class CommandFriends {
                                                 return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
                                             try {
-                                                FriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
+                                                IFriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
                                                 if (invite == null) throw new NoOutputException();
 
                                                 try {
@@ -199,7 +202,7 @@ public final class CommandFriends {
                                             if (senderPlayer == null)
                                                 return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
-                                            FriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
+                                            IFriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
                                             if (invite == null)
                                                 return closeMessage(player, ProxyLang.FRIEND_REQUEST_EXPIRED);
 

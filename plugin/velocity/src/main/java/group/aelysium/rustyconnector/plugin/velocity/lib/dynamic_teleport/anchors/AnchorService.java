@@ -4,6 +4,7 @@ import com.velocitypowered.api.command.CommandManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.anchors.IAnchorService;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
@@ -17,10 +18,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 
-public class AnchorService implements IAnchorService<MCLoader, Player, LoadBalancer, Family> {
-    private final Map<String, Family> anchors;
+public class AnchorService implements IAnchorService {
+    private final Map<String, IFamily> anchors;
 
-    protected AnchorService(Map<String, Family> anchors) {
+    protected AnchorService(Map<String, IFamily> anchors) {
         this.anchors = anchors;
     }
 
@@ -50,9 +51,9 @@ public class AnchorService implements IAnchorService<MCLoader, Player, LoadBalan
         bootOutput.add(Component.text("Finished building anchor service commands.", NamedTextColor.GREEN));
     }
 
-    public Optional<Family> familyOf(String anchor) {
+    public Optional<IFamily> familyOf(String anchor) {
         try {
-            Family family = this.anchors.get(anchor);
+            IFamily family = this.anchors.get(anchor);
             if(family == null) return Optional.empty();
 
             return Optional.of(family);
@@ -61,7 +62,7 @@ public class AnchorService implements IAnchorService<MCLoader, Player, LoadBalan
         return Optional.empty();
     }
 
-    public void create(String name, Family target) {
+    public void create(String name, IFamily target) {
         this.anchors.put(name, target);
     }
 
@@ -69,7 +70,7 @@ public class AnchorService implements IAnchorService<MCLoader, Player, LoadBalan
         this.anchors.remove(name);
     }
 
-    public List<String> anchorsFor(Family target) {
+    public List<String> anchorsFor(IFamily target) {
         List<String> anchors = new ArrayList<>();
         this.anchors.entrySet().stream().filter(anchor -> anchor.getValue().equals(target)).forEach(item -> anchors.add(item.getKey()));
         return anchors;
@@ -81,11 +82,11 @@ public class AnchorService implements IAnchorService<MCLoader, Player, LoadBalan
         try {
             if(!config.isFamilyAnchor_enabled()) return Optional.empty();
 
-            Map<String, Family> anchors = new HashMap<>();
+            Map<String, IFamily> anchors = new HashMap<>();
             for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
                 Family family;
                 try {
-                    family = (Family) new Family.Reference(entry.getValue()).get();
+                    family = new Family.Reference(entry.getValue()).get();
                 } catch (Exception ignore) {
                     bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
                     continue;

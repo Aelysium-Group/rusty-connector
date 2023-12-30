@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.RedisConnectionStateAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
@@ -35,8 +35,6 @@ public class RedisPublisher {
      * @throws IllegalStateException If you attempt to send a received RedisMessage.
      */
     public void publish(GenericPacket message) {
-        if(!message.sendable()) throw new IllegalStateException("Attempted to send a RedisMessage that isn't sendable!");
-
         String signedPacket;
         try {
             signedPacket = this.cryptor.encrypt(message.toString());

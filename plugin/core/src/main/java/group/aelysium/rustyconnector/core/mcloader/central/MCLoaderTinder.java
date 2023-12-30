@@ -1,14 +1,11 @@
 package group.aelysium.rustyconnector.core.mcloader.central;
 
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
-import group.aelysium.rustyconnector.toolkit.core.lang.ILangService;
-import group.aelysium.rustyconnector.toolkit.core.lang.ILanguageResolver;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
-import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandler;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
 import net.kyori.adventure.text.Component;
 
 import java.io.InputStream;
@@ -16,11 +13,11 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.function.Consumer;
 
-public abstract class MCLoaderTinder implements group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder<MCLoaderFlame> {
+public abstract class MCLoaderTinder implements IMCLoaderTinder {
     protected MCLoaderFlame flame;
     protected final LangService lang;
     protected final PluginLogger pluginLogger;
-    protected final Vector<Consumer<MCLoaderFlame>> onStart = new Vector<>();
+    protected final Vector<Consumer<? extends IMCLoaderFlame<? extends ICoreServiceHandler>>> onStart = new Vector<>();
     protected final Vector<Runnable> onStop = new Vector<>();
 
     protected MCLoaderTinder(PluginLogger logger, LangService lang) throws Exception {
@@ -110,8 +107,9 @@ public abstract class MCLoaderTinder implements group.aelysium.rustyconnector.to
      * Specifically, this method will run after the base RustyConnector plugin has fully booted.
      * @param callback A consumer. The passed input argument is the newly created Flame instance.
      */
-    public void onStart(Consumer<MCLoaderFlame> callback) {
+    public void onStart(Consumer<IMCLoaderFlame<?>> callback) {
         this.onStart.add(callback);
+        if(this.flame != null) callback.accept(this.flame);
     }
 
     /**

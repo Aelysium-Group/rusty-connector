@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.lib.algorithm.QuickSort;
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.core.lib.algorithm.WeightedQuickSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 public class LeastConnection extends LoadBalancer {
 
@@ -14,8 +15,8 @@ public class LeastConnection extends LoadBalancer {
     @Override
     public void iterate() {
         try {
-            MCLoader thisItem = this.servers.get(this.index);
-            MCLoader theNextItem = this.servers.get(this.index + 1);
+            IMCLoader thisItem = this.unlockedServers.get(this.index);
+            IMCLoader theNextItem = this.unlockedServers.get(this.index + 1);
 
             if(thisItem.playerCount() >= theNextItem.playerCount()) this.index++;
         } catch (IndexOutOfBoundsException ignore) {}
@@ -24,14 +25,14 @@ public class LeastConnection extends LoadBalancer {
     @Override
     public void completeSort() {
         this.index = 0;
-        if(this.weighted()) WeightedQuickSort.sort(this.servers);
-        else QuickSort.sort(this.servers);
+        if(this.weighted()) WeightedQuickSort.sort(this.unlockedServers);
+        else QuickSort.sort(this.unlockedServers);
     }
 
     @Override
     public void singleSort() {
         this.index = 0;
-        SingleSort.sort(this.servers, this.index);
+        SingleSort.sort(this.unlockedServers, this.index);
     }
 
     @Override

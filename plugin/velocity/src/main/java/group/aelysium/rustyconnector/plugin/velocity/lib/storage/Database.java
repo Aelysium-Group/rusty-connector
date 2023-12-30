@@ -8,18 +8,20 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import org.eclipse.serializer.collections.lazy.LazyHashMap;
 import org.eclipse.serializer.collections.lazy.LazyHashSet;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class Database implements IStorageRoot<Player, FriendMapping, ServerResidence> {
-    private final LazyHashSet<Player> players = new LazyHashSet<>();
-    private final LazyHashSet<FriendMapping> friends = new LazyHashSet<>();
-    private final LazyHashSet<ServerResidence> residence = new LazyHashSet<>();
-    private final LazyHashMap<String, RankedGame> games = new LazyHashMap<>();
+    private final Map<UUID, Player> players = new LazyHashMap<>();
+    private final Set<FriendMapping> friends = new LazyHashSet<>();
+    private final Set<ServerResidence> residence = new LazyHashSet<>();
+    private final Map<String, RankedGame> games = new LazyHashMap<>();
 
-    public Set<Player> players() {
+    public void savePlayer(StorageService storage, Player player) {
+        this.players.put(player.uuid(), player);
+
+        storage.store(this.players);
+    }
+    public Map<UUID, Player> players() {
         return players;
     }
 

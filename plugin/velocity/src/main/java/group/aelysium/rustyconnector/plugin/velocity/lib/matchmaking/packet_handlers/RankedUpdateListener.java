@@ -5,11 +5,10 @@ import group.aelysium.rustyconnector.toolkit.core.packet.variants.RankedGameEndP
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
-import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 
-public class RankedUpdateListener implements PacketListener {
+public class RankedUpdateListener extends PacketListener<RankedGameEndPacket> {
     protected Tinder api;
 
     public RankedUpdateListener(Tinder api) {
@@ -17,22 +16,16 @@ public class RankedUpdateListener implements PacketListener {
     }
 
     @Override
-    public PacketType.Mapping identifier() {
+    public PacketIdentification target() {
         return null; // TODO fix this
     }
 
     @Override
-    public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {
-        RankedGameEndPacket packet = (RankedGameEndPacket) genericPacket;
-
-        Family family = (Family) new Family.Reference(packet.familyName()).get();
+    public void execute(RankedGameEndPacket packet) throws Exception {
+        Family family = new Family.Reference(packet.familyName()).get();
         if(!(family instanceof RankedFamily)) return;
 
-        ServerInfo serverInfo = new ServerInfo(
-                packet.serverName(),
-                packet.address()
-        );
-        if(!family.containsServer(serverInfo)) return;
+        if(!family.containsServer(packet.uuid())) return;
 
         //((RankedFamily) family).gameManager().end(packet.uuid());
     }

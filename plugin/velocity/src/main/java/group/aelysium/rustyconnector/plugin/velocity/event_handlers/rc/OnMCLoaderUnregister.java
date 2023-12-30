@@ -20,7 +20,7 @@ public class OnMCLoaderUnregister extends Listener<UnregisterEvent> {
 
         // Fire console message
         if (logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-            ProxyLang.UNREGISTERED.send(logger, event.mcLoader().serverInfo(), event.family().id());
+            ProxyLang.UNREGISTERED.send(logger, event.mcLoader().uuidOrDisplayName(), event.family().id());
 
         // Fire discord webhook
         WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, DiscordWebhookMessage.PROXY__SERVER_UNREGISTER.build(event.mcLoader()));

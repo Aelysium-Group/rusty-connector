@@ -1,32 +1,30 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
 import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
-import group.aelysium.rustyconnector.toolkit.velocity.family.Family;
-import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.RankedFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.Player;
-import group.aelysium.rustyconnector.toolkit.velocity.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 /**
  * Represents a player attempting to connect to a family.
  * <p>
- * Please note, if the family that fires this is a {@link RankedFamily}, this will fire
+ * Please note, if the family that fires this is a {@link IRankedFamily}, this will fire
  * when the player is added to the matchmaker.
  * In such a case, {@link FamilyPostJoinEvent} won't be called until the player actually joins a game.
  */
 public class FamilyPreJoinEvent extends Cancelable {
-    protected Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family;
-    protected Player player;
+    protected IFamily family;
+    protected IPlayer player;
 
-    public FamilyPreJoinEvent(Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family, Player player) {
+    public FamilyPreJoinEvent(IFamily family, IPlayer player) {
         this.family = family;
         this.player = player;
     }
 
-    public Family<? extends MCLoader, ? extends Player, ? extends ILoadBalancer<? extends MCLoader>> family() {
+    public IFamily family() {
         return family;
     }
-    public Player player() {
+    public IPlayer player() {
         return player;
     }
 }

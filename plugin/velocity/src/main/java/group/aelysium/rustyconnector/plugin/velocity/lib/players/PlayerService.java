@@ -16,9 +16,13 @@ public class PlayerService implements IPlayerService {
 
     public Optional<Player> fetch(UUID uuid) {
         try {
-            Database root = this.storage.root();
+            Database root = this.storage.database();
 
-            return root.players().stream().filter(fakePlayer -> fakePlayer.uuid().equals(uuid)).findAny();
+            Player player = root.players().get(uuid);
+
+            if(player == null) return Optional.empty();
+
+            return Optional.of(player);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -28,9 +32,9 @@ public class PlayerService implements IPlayerService {
 
     public Optional<Player> fetch(String username) {
         try {
-            Database root = this.storage.root();
+            Database root = this.storage.database();
 
-            return root.players().stream().filter(fakePlayer -> fakePlayer.username().equals(username)).findAny();
+            return root.players().values().stream().filter(fakePlayer -> fakePlayer.username().equals(username)).findAny();
         } catch (Exception e) {
             e.printStackTrace();
         }

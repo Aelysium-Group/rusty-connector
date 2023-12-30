@@ -4,23 +4,24 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.velocitypowered.api.command.CommandManager;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsService;
 import group.aelysium.rustyconnector.core.lib.crypt.Snowflake;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class FriendsService implements IFriendsService<Player, FriendRequest> {
-    private final Cache<Long, FriendRequest> friendRequests;
+public class FriendsService implements IFriendsService {
+    private final Cache<Long, IFriendRequest> friendRequests;
     private final FriendsServiceSettings settings;
     private final Snowflake snowflakeGenerator = new Snowflake();
     private final FriendsDataEnclave dataEnclave;
@@ -83,22 +84,22 @@ public class FriendsService implements IFriendsService<Player, FriendRequest> {
         return this.settings;
     }
 
-    public List<FriendRequest> findRequestsToTarget(Player target) {
-        List<Map.Entry<Long, FriendRequest>> entries = this.friendRequests.asMap().entrySet().stream().filter(request -> request.getValue().target().equals(target)).findAny().stream().toList();
+    public List<IFriendRequest> findRequestsToTarget(IPlayer target) {
+        List<Map.Entry<Long, IFriendRequest>> entries = this.friendRequests.asMap().entrySet().stream().filter(request -> request.getValue().target().equals(target)).findAny().stream().toList();
 
-        List<FriendRequest> requests = new ArrayList<>();
-        for (Map.Entry<Long, FriendRequest> entry : entries)
+        List<IFriendRequest> requests = new ArrayList<>();
+        for (Map.Entry<Long, IFriendRequest> entry : entries)
             requests.add(entry.getValue());
 
         return requests;
     }
-    public Optional<FriendRequest> findRequest(Player target, Player sender) {
-        Optional<Map.Entry<Long, FriendRequest>> entry = this.friendRequests.asMap().entrySet().stream().filter(invite -> invite.getValue().target().equals(target) && invite.getValue().sender().equals(sender)).findFirst();
+    public Optional<IFriendRequest> findRequest(IPlayer target, IPlayer sender) {
+        Optional<Map.Entry<Long, IFriendRequest>> entry = this.friendRequests.asMap().entrySet().stream().filter(invite -> invite.getValue().target().equals(target) && invite.getValue().sender().equals(sender)).findFirst();
         return entry.map(Map.Entry::getValue);
     }
 
-    public Optional<List<Player>> findFriends(Player player) {
-        List<Player> friends = new ArrayList<>();
+    public Optional<List<IPlayer>> findFriends(IPlayer player) {
+        List<IPlayer> friends = new ArrayList<>();
         List<FriendMapping> friendMappings = this.dataEnclave.findFriends(player).orElse(null);
         if(friendMappings == null) return Optional.empty();
 
@@ -111,22 +112,21 @@ public class FriendsService implements IFriendsService<Player, FriendRequest> {
         return Optional.of(friends);
     }
 
-    public boolean areFriends(Player player1, Player player2) {
+    public boolean areFriends(IPlayer player1, IPlayer player2) {
         return this.dataEnclave.areFriends(player1, player2);
     }
-    public void addFriends(Player player1, Player player2) {
+    public void addFriends(IPlayer player1, IPlayer player2) {
         this.dataEnclave.addFriend(player1, player2);
     }
-    public void removeFriends(Player player1, Player player2) {
+    public void removeFriends(IPlayer player1, IPlayer player2) {
         this.dataEnclave.removeFriend(player1, player2);
     }
 
-    public FriendMapping sendRequest(com.velocitypowered.api.proxy.Player sender, Player target) {
-        if(this.friendCount(Player.from(sender)).orElseThrow() > this.settings().maxFriends())
+    public FriendMapping sendRequest(IPlayer sender, IPlayer target) {
+        if(this.friendCount(sender).orElseThrow() > this.settings().maxFriends())
             sender.sendMessage(ProxyLang.MAX_FRIENDS_REACHED);
 
-        Player fakeSender = Player.from(sender);
-        FriendRequest friendRequest = new FriendRequest(this, snowflakeGenerator.nextId(), fakeSender, target);
+        IFriendRequest friendRequest = new FriendRequest(this, snowflakeGenerator.nextId(), sender, target);
         this.friendRequests.put(friendRequest.id(), friendRequest);
 
 
@@ -137,15 +137,15 @@ public class FriendsService implements IFriendsService<Player, FriendRequest> {
             sender.sendMessage(ProxyLang.FRIEND_REQUEST_TARGET_NOT_ONLINE.build(target.username()));
         }
 
-        return FriendMapping.from(fakeSender, target);
+        return FriendMapping.from(sender, target);
     }
 
-    public void closeInvite(FriendRequest request) {
+    public void closeInvite(IFriendRequest request) {
         this.friendRequests.invalidate(request.id());
         request.decompose();
     }
 
-    public Optional<Long> friendCount(Player player) {
+    public Optional<Long> friendCount(IPlayer player) {
         return this.dataEnclave.getFriendCount(player);
     }
 

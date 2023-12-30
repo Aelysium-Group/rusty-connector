@@ -14,6 +14,8 @@ public class Permission {
      * @return `true` If the player has any one of the defined permissions. `false` If the player has none of them.
      */
     public static boolean validate(Player player, String... nodes) {
+        if(player == null) return false;
+
         for (String node : nodes) {
             String nodeToLower = node.toLowerCase(Locale.ROOT);
 

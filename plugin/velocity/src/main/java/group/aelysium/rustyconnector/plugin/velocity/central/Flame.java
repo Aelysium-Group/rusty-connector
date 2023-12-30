@@ -8,7 +8,10 @@ import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCLoaderConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeKillListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -21,7 +24,6 @@ import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.MemberKeyConfig;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketOrigin;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -47,7 +49,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.FriendsC
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.MagicLinkPingListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.LockServerListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.SendPlayerListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.UnlockServerListener;
@@ -76,7 +78,7 @@ import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInje
  * All aspects of the plugin should be accessible from here.
  * If not, check {@link Tinder}.
  */
-public class Flame extends VelocityFlame<CoreServiceHandler, RedisConnector> {
+public class Flame extends VelocityFlame<CoreServiceHandler> {
     private final Version version;
     private final List<Component> bootOutput;
     private final char[] memberKey;
@@ -98,10 +100,6 @@ public class Flame extends VelocityFlame<CoreServiceHandler, RedisConnector> {
         return Optional.of(this.memberKey);
     }
     public List<Component> bootLog() { return this.bootOutput; }
-
-    public RedisConnector backbone() {
-        return this.services().messenger();
-    }
 
     @Override
     public void kill() {
@@ -132,7 +130,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler, RedisConnector> {
             MessageCacheService messageCacheService = initialize.dataTransit(inject(langService, configService));
 
             logger.send(Component.text("Initializing 20%...", NamedTextColor.DARK_GRAY));
-            DependencyInjector.DI2<RedisConnector, StorageService> connectors = initialize.connectors(inject(cryptor, messageCacheService, Tinder.get().logger(), langService));
+            DependencyInjector.DI2<IMessengerConnector, StorageService> connectors = initialize.connectors(inject(cryptor, messageCacheService, Tinder.get().logger(), langService));
 
             logger.send(Component.text("Initializing 30%...", NamedTextColor.DARK_GRAY));
             FamilyService familyService = initialize.families(inject(defaultConfig, langService, connectors.d2(), configService));
@@ -142,7 +140,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler, RedisConnector> {
             logger.send(Component.text("Initializing 50%...", NamedTextColor.DARK_GRAY));
             initialize.networkWhitelist(inject(defaultConfig, langService, configService));
             logger.send(Component.text("Initializing 60%...", NamedTextColor.DARK_GRAY));
-            initialize.magicLink(inject(defaultConfig, serverService));
+            initialize.magicLink(inject(defaultConfig, serverService, connectors.d1()));
             initialize.webhooks(inject(langService, configService));
 
             logger.send(Component.text("Initializing 70%...", NamedTextColor.DARK_GRAY));
@@ -290,33 +288,34 @@ class Initialize {
         PluginLogger.init(loggerConfig);
     }
 
-    public DependencyInjector.DI2<RedisConnector, StorageService> connectors(DependencyInjector.DI4<AESCryptor, MessageCacheService, PluginLogger, LangService> dependencies) throws IOException, SQLException {
+    public DependencyInjector.DI2<IMessengerConnector, StorageService> connectors(DependencyInjector.DI4<AESCryptor, MessageCacheService, PluginLogger, LangService> dependencies) throws IOException, SQLException {
         bootOutput.add(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
         ConnectorsConfig config = ConnectorsConfig.construct(api.dataFolder(), dependencies.d4(), true, true);
 
         RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
-                PacketOrigin.PROXY,
                 config.getRedis_address(),
                 config.getRedis_user(),
                 config.getRedis_protocol(),
                 config.getRedis_dataChannel()
         );
-        RedisConnector messenger = RedisConnector.create(dependencies.d1(), spec);
+        IMessengerConnector messenger = RedisConnector.create(dependencies.d1(), spec);
         services.put(RedisConnector.class, messenger);
         bootOutput.add(Component.text("Booting Messenger...", NamedTextColor.DARK_GRAY));
 
         messenger.connect();
-        RedisConnection connection = messenger.connection().orElseThrow();
+        IMessengerConnection connection = messenger.connection().orElseThrow();
 
-        connection.listen(new MagicLinkPingListener(this.api));
+        connection.listen(new HandshakeListener(this.api));
+        connection.listen(new HandshakeKillListener(this.api));
+
         connection.listen(new SendPlayerListener(this.api));
         connection.listen(new LockServerListener(this.api));
         connection.listen(new UnlockServerListener(this.api));
 
         connection.listen(new RankedGameEndListener(this.api));
 
-        connection.startListening(dependencies.d2(), dependencies.d3(), null);
+        ((RedisConnection) connection).startListening(dependencies.d2(), dependencies.d3(), null);
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
 
         bootOutput.add(Component.text("Booting MicroStream MariaDB driver...", NamedTextColor.DARK_GRAY));
@@ -470,10 +469,10 @@ class Initialize {
         return messageCacheService;
     }
 
-    public void magicLink(DependencyInjector.DI2<DefaultConfig, ServerService> dependencies) {
+    public void magicLink(DependencyInjector.DI3<DefaultConfig, ServerService, IMessengerConnector> dependencies) {
         bootOutput.add(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-        MagicLinkService magicLinkService = new MagicLinkService(2, dependencies.d1().magicLink_serverPingInterval());
+        MagicLinkService magicLinkService = new MagicLinkService(dependencies.d1().magicLink_serverPingInterval(), dependencies.d3());
         services.put(MagicLinkService.class, magicLinkService);
 
         bootOutput.add(Component.text("Finished building magic link service.", NamedTextColor.GREEN));

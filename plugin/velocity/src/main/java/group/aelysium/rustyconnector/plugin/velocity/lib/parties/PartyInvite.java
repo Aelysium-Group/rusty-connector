@@ -1,31 +1,31 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
-import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
-import java.util.Optional;
 
-public class PartyInvite implements IPartyInvite<Player> {
+public class PartyInvite implements group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite {
     private final PartyService partyService;
-    private final WeakReference<Party> party;
-    private Player sender;
-    private Player target;
+    private final WeakReference<IParty> party;
+    private IPlayer sender;
+    private IPlayer target;
     private Boolean isAcknowledged = null;
 
-    public PartyInvite(PartyService partyService, Party party, com.velocitypowered.api.proxy.Player sender, com.velocitypowered.api.proxy.Player target) {
+    public PartyInvite(PartyService partyService, IParty party, IPlayer sender, IPlayer target) {
         this.partyService = partyService;
         this.party = new WeakReference<>(party);
-        this.sender = Player.from(sender);
-        this.target = Player.from(target);
+        this.sender = sender;
+        this.target = target;
     }
 
-    public Player sender() {
+    public IPlayer sender() {
         return this.sender;
     }
-    public Player target() {
+    public IPlayer target() {
         return this.target;
     }
 
@@ -47,17 +47,13 @@ public class PartyInvite implements IPartyInvite<Player> {
             throw new IllegalStateException(ProxyLang.PARTY_INJECTED_NO_SENDER);
 
         if(partyService.settings().onlyLeaderCanInvite())
-            if(!Objects.requireNonNull(party.get()).leader().equals(sender.resolve().orElse(null)))
+            if(!Objects.requireNonNull(party.get()).leader().equals(sender))
                 throw new IllegalStateException(ProxyLang.PARTY_INJECTED_INVALID_LEADER_INVITE);
         else
-            if(!Objects.requireNonNull(party.get()).players().contains(sender.resolve().orElse(null)) && sender.resolve().isPresent())
+            if(!Objects.requireNonNull(party.get()).players().contains(sender) && sender.resolve().isPresent())
                 throw new IllegalStateException(ProxyLang.PARTY_INJECTED_INVALID_MEMBER_INVITE);
 
-        Optional<com.velocitypowered.api.proxy.Player> player = this.target.resolve();
-        if(player.isEmpty())
-            throw new IllegalStateException(ProxyLang.PARTY_INJECTED_NO_TARGET);
-
-        Objects.requireNonNull(this.party.get()).join(player.orElseThrow());
+        Objects.requireNonNull(this.party.get()).join(this.target);
         partyService.closeInvite(this);
         this.isAcknowledged = true;
     }

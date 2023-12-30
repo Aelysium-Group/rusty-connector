@@ -12,10 +12,10 @@ public class ServerResidence implements IServerResidence {
     protected Family.Reference family;
     protected Long expiration;
 
-    public ServerResidence(Player.Reference player, MCLoader server, StaticFamily family, LiquidTimestamp expiration) {
+    public ServerResidence(Player.Reference player, MCLoader.Reference server, Family.Reference family, LiquidTimestamp expiration) {
         this.player = player;
-        this.server = new MCLoader.Reference(server.serverInfo());
-        this.family = new Family.Reference(family.id());
+        this.server = server;
+        this.family = family;
 
         if(expiration == null) this.expiration = null;
         else this.expiration = expiration.epochFromNow();

@@ -2,18 +2,15 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import org.slf4j.Logger;
 
-import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Vector;
@@ -112,7 +109,7 @@ public class Tinder implements VelocityTinder {
      * @return The resource as a stream.
      */
     public static InputStream resourceAsStream(String filename)  {
-        return MCLoaderTinder.class.getClassLoader().getResourceAsStream(filename);
+        return IMCLoaderTinder.class.getClassLoader().getResourceAsStream(filename);
     }
 
     /**
@@ -138,8 +135,9 @@ public class Tinder implements VelocityTinder {
     }
 
     @Override
-    public <TFlame extends VelocityFlame<?, ?>> void onStart(Consumer<TFlame> callback) {
+    public <TFlame extends VelocityFlame<?>> void onStart(Consumer<TFlame> callback) {
         this.onStart.add((Consumer<Flame>) callback);
+        if(this.flame != null) callback.accept((TFlame) this.flame);
     }
 
     @Override

@@ -1,6 +1,6 @@
 #
 # MCLoader configs are loaded by setting `magic-config` in your MCLoader to be the same name as this file's name.
-# Any MCLoaders pointing to this config will load it's values.
+# Any MCLoaders pointing to this config will load its values.
 #
 
 #

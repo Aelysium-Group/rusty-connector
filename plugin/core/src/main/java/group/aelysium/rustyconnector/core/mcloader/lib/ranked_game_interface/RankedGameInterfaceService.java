@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface;
 
 
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.mc_loader.ranked_game_interface.IRankedGameInterfaceService;
 
 import java.util.UUID;
@@ -17,7 +17,7 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
 
     @Override
     public void endGame() {
-        MCLoaderTinder api = TinderAdapterForCore.getTinder();
+        IMCLoaderTinder api = TinderAdapterForCore.getTinder();
         api.services().packetBuilder().endRankedGame(this.uuid);
     }
 

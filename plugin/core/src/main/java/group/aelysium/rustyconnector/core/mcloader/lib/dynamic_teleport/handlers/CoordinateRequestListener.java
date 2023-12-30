@@ -1,31 +1,28 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers;
 
-import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketType;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.CoordinateRequestQueuePacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.QueueTPAPacket;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.CoordinateRequest;
 
 import java.util.UUID;
 
-public class CoordinateRequestListener implements PacketListener {
-    protected MCLoaderTinder api;
+public class CoordinateRequestListener extends PacketListener<QueueTPAPacket> {
+    protected IMCLoaderTinder api;
 
-    public CoordinateRequestListener(MCLoaderTinder api) {
+    public CoordinateRequestListener(IMCLoaderTinder api) {
         this.api = api;
     }
 
-    public PacketType.Mapping identifier() {
-        return PacketType.COORDINATE_REQUEST_QUEUE;
+    public PacketIdentification target() {
+        return PacketIdentification.Predefined.QUEUE_TPA;
     }
 
     @Override
-    public <TPacket extends IPacket> void execute(TPacket genericPacket) throws Exception {
-        CoordinateRequestQueuePacket packet = (CoordinateRequestQueuePacket) genericPacket;
-
+    public void execute(QueueTPAPacket packet) throws Exception {
         UUID target = api.getPlayerUUID(packet.targetUsername());
         if(target == null) return;
         if(!api.isOnline(target)) return;

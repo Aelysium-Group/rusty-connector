@@ -1,11 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -13,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class FamilyService implements IFamilyService<MCLoader, Player, LoadBalancer, RootFamily, Family> {
+public class FamilyService implements IFamilyService {
     private final Map<String, Family> families = new HashMap<>();
-    private WeakReference<RootFamily> rootFamily;
+    private WeakReference<IRootFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
 
     public FamilyService(boolean catchDisconnectingPlayers) {
@@ -26,12 +24,12 @@ public class FamilyService implements IFamilyService<MCLoader, Player, LoadBalan
         return this.catchDisconnectingPlayers;
     }
 
-    public void setRootFamily(RootFamily family) {
-        this.families.put(family.id(), family);
+    public void setRootFamily(IRootFamily family) {
+        this.families.put(family.id(), (Family) family);
         this.rootFamily = new WeakReference<>(family);
     }
 
-    public RootFamily rootFamily() {
+    public IRootFamily rootFamily() {
         return this.rootFamily.get();
     }
 
@@ -41,11 +39,11 @@ public class FamilyService implements IFamilyService<MCLoader, Player, LoadBalan
         return Optional.of(family);
     }
 
-    public void add(Family family) {
-        this.families.put(family.id(),family);
+    public void add(IFamily family) {
+        this.families.put(family.id(), (Family) family);
     }
 
-    public void remove(Family family) {
+    public void remove(IFamily family) {
         this.families.remove(family.id());
     }
 
