@@ -61,9 +61,9 @@ public class HandshakeListener extends PacketListener<HandshakePacket> {
             ServerAssignment assignment = ServerAssignment.GENERIC;
             if(family instanceof RankedFamily) assignment = ServerAssignment.RANKED_GAME_SERVER;
 
-            HandshakeSuccessPacket message = new GenericPacket.Builder()
+            HandshakeSuccessPacket message = new GenericPacket.MCLoaderPacketBuilder()
                     .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_SUCCESS)
-                    .toMCLoader(packet.sender())
+                    .sendingToAnotherMCLoader(packet.sender())
                     .parameter(HandshakeSuccessPacket.Parameters.MESSAGE, "Connected to the proxy! Registered as `"+server.serverInfo().getName()+"` into the family `"+server.family().id()+"`. Loaded using the magic config `"+packet.magicConfigName()+"`.")
                     .parameter(HandshakeSuccessPacket.Parameters.COLOR, NamedTextColor.GREEN.toString())
                     .parameter(HandshakeSuccessPacket.Parameters.INTERVAL, String.valueOf(serverService.serverInterval()))

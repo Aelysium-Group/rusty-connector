@@ -1,22 +1,22 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers;
 
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard.IRankSchema.*;
@@ -27,25 +27,18 @@ public abstract class Matchmaker implements IMatchmaker {
     protected final Settings settings;
     protected final int minPlayersPerGame;
     protected final int maxPlayersPerGame;
-    protected Vector<ISession> waitingSessions = new Vector<>();
-    protected Vector<ISession> runningSessions = new Vector<>();
+    protected Map<UUID, ISession.IWaiting> waitingSessions = new ConcurrentHashMap<>();
+    protected Map<UUID, ISession> runningSessions = new ConcurrentHashMap<>();
     protected Vector<IRankedPlayer> waitingPlayers = new Vector<>();
 
     public Matchmaker(Settings settings) {
         this.settings = settings;
 
-        final int[] min = {0};
-        final int[] max = {0};
-        settings.teams().forEach(team -> {
-            min[0] = min[0] + team.min();
-            max[0] = max[0] + team.max();
-        });
-
-        this.minPlayersPerGame = min[0];
-        this.maxPlayersPerGame = max[0];
+        this.minPlayersPerGame = settings.min();
+        this.maxPlayersPerGame = settings.max();
     }
 
-    public abstract Session make();
+    public abstract group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session.Waiting make();
     public boolean minimumPlayersExist() {
         return this.waitingPlayers.size() > minPlayersPerGame;
     }
@@ -92,10 +85,10 @@ public abstract class Matchmaker implements IMatchmaker {
 
             for (int i = 0; i < approximateNumberOfGamesToRun; i++) {
                 try {
-                    Session session = this.make();
+                    Session.Waiting session = this.make();
                     if(session == null) continue;
 
-                    this.waitingSessions.add(session);
+                    this.waitingSessions.put(session.uuid(), session);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -107,17 +100,14 @@ public abstract class Matchmaker implements IMatchmaker {
         this.supervisor.scheduleRecurring(() -> {
             if(loadBalancer.size(false) == 0) return;
 
-            List<ISession> sessionsForLooping = this.waitingSessions.stream().toList();
-            for (ISession session : sessionsForLooping) {
+            for (ISession.IWaiting waitingSession : this.waitingSessions.values().stream().toList()) {
                 if(loadBalancer.size(false) == 0) break;
                 try {
-                    IMCLoader server = loadBalancer.current();
-                    session.connect(server);
+                    RankedMCLoader server = (RankedMCLoader) loadBalancer.current();
+                    ISession session = waitingSession.start(server);
 
-                    loadBalancer.lock(server);
-
-                    this.waitingSessions.remove(session);
-                    this.runningSessions.add(session);
+                    this.waitingSessions.remove(waitingSession.uuid());
+                    this.runningSessions.put(session.uuid(), session);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -132,12 +122,16 @@ public abstract class Matchmaker implements IMatchmaker {
         return new Randomized(settings);
     }
 
+    public void remove(ISession session) {
+        this.waitingSessions.remove(session.uuid());
+        this.runningSessions.remove(session.uuid());
+    }
+
     public void kill() {
         this.supervisor.kill();
-        this.waitingSessions.forEach(ISession::end);
         this.waitingSessions.clear();
 
-        this.runningSessions.forEach(ISession::end);
+        this.runningSessions.values().forEach(ISession::end);
         this.runningSessions.clear();
     }
 }

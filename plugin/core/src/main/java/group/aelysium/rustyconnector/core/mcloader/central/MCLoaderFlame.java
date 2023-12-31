@@ -8,16 +8,18 @@ import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
+import group.aelysium.rustyconnector.core.mcloader.events.OnRankedGameEnd;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeFailureListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeSuccessListener;
-import group.aelysium.rustyconnector.core.mcloader.lib.packet_builder.PacketBuilderService;
-import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameAssociateListener;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.StartRankedGameListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
+import group.aelysium.rustyconnector.toolkit.core.packet.MCLoaderPacketBuilder;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
@@ -37,20 +39,15 @@ import java.util.*;
 public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implements IMCLoaderFlame<CoreServiceHandler> {
     protected final int configVersion;
     protected final String version;
-    private final RedisConnector backbone;
 
-    public MCLoaderFlame(String version, int configVersion, CoreServiceHandler services, RedisConnector messenger) {
+    public MCLoaderFlame(String version, int configVersion, CoreServiceHandler services) {
         super(services);
         this.version = version;
         this.configVersion = configVersion;
-        this.backbone = messenger;
     }
 
     public String versionAsString() { return this.version; }
     public int configVersion() { return this.configVersion; }
-    public RedisConnector backbone() {
-        return (RedisConnector) this.backbone;
-    }
 
     /**
      * Fabricates a new RustyConnector core and returns it.
@@ -70,11 +67,15 @@ public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implem
             RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, logger, langService, serverInfoService.uuid());
 
             initialize.messageCache();
-            PacketBuilderService packetBuilderService = initialize.packetBuilder();
             initialize.dynamicTeleport();
-            initialize.magicLink(packetBuilderService);
+            initialize.magicLink(messenger);
+            initialize.eventManager();
 
-            return new MCLoaderFlame(version, configVersion, new CoreServiceHandler(initialize.getServices()), messenger);
+            MCLoaderFlame flame = new MCLoaderFlame(version, configVersion, new CoreServiceHandler(initialize.getServices()));
+
+            flame.services().add(new MCLoaderPacketBuilder(flame));
+
+            return flame;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -179,7 +180,7 @@ class Initialize {
         connection.listen(new HandshakeSuccessListener(this.api));
         connection.listen(new HandshakeFailureListener(this.api));
         connection.listen(new CoordinateRequestListener(this.api));
-        connection.listen(new RankedGameAssociateListener(this.api));
+        connection.listen(new StartRankedGameListener(this.api));
 
         ((RedisConnection) connection).startListening(cacheService, logger, senderUUID);
 
@@ -188,12 +189,12 @@ class Initialize {
         return messenger;
     }
 
-    public void magicLink(PacketBuilderService packetBuilderService) {
+    public void magicLink(IMessengerConnector messenger) {
         logger.send(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-        MagicLinkService magicLinkService = new MagicLinkService(3);
+        MagicLinkService magicLinkService = new MagicLinkService(messenger);
         services.put(MagicLinkService.class, magicLinkService);
-        magicLinkService.startHeartbeat(packetBuilderService);
+        magicLinkService.startHeartbeat();
 
         logger.send(Component.text("Finished booting magic link service.", NamedTextColor.GREEN));
     }
@@ -225,10 +226,11 @@ class Initialize {
         return service;
     }
 
-    public PacketBuilderService packetBuilder() {
-        PacketBuilderService service = new PacketBuilderService();
-        services.put(PacketBuilderService.class, service);
-        return service;
+    public void eventManager() {
+        group.aelysium.rustyconnector.core.lib.events.EventManager factory = new group.aelysium.rustyconnector.core.lib.events.EventManager();
+        services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, factory);
+
+        factory.on(new OnRankedGameEnd());
     }
 
     public void dynamicTeleport() {

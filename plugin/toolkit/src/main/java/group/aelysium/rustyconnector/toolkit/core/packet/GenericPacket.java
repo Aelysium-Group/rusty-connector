@@ -1,10 +1,14 @@
 package group.aelysium.rustyconnector.toolkit.core.packet;
 
 import com.google.gson.*;
+import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandler;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 
 import java.util.*;
 
-public class GenericPacket implements IPacket {
+public class GenericPacket implements IPacket, JSONParseable {
     private static final int protocolVersion = 2;
 
     public static int protocolVersion() {
@@ -121,7 +125,73 @@ public class GenericPacket implements IPacket {
     }
 
     // This implementation feels chunky. That's intentional, it's specifically written so that `.build()` isn't available until all the required params are filled in.
-    public static class Builder {
+    public static class MCLoaderPacketBuilder {
+        private final IMCLoaderFlame<? extends ICoreServiceHandler> flame;
+
+        public MCLoaderPacketBuilder(IMCLoaderFlame<? extends ICoreServiceHandler> flame) {
+            this.flame = flame;
+        }
+
+        public static class ReadyForTargetingAssignment {
+            private final IMCLoaderFlame<? extends ICoreServiceHandler> flame;
+            private final NakedBuilder builder;
+
+            protected ReadyForTargetingAssignment(IMCLoaderFlame<? extends ICoreServiceHandler> flame, NakedBuilder builder) {
+                this.flame = flame;
+                this.builder = builder;
+            }
+
+            /**
+             * Packet is being sent from an MCLoader to the Proxy.
+             */
+            public ReadyForParameters sendingToProxy() {
+                this.builder.sender(flame.services().serverInfo().uuid());
+                this.builder.target(null);
+                return new ReadyForParameters(builder);
+            }
+
+            /**
+             * Packet is being sent from one MCLoader to another MCLoader
+             * @param targetMCLoader The UUID of the MCLoader that the packet is being sent to.
+             */
+            public ReadyForParameters sendingToAnotherMCLoader(UUID targetMCLoader) {
+                this.builder.sender(flame.services().serverInfo().uuid());
+                this.builder.target(targetMCLoader);
+                return new ReadyForParameters(builder);
+            }
+        }
+        public static class ReadyForParameters {
+            private final NakedBuilder builder;
+
+            protected ReadyForParameters(NakedBuilder builder) {
+                this.builder = builder;
+            }
+
+            public ReadyForParameters parameter(String key, String value) {
+                this.builder.parameter(key, new PacketParameter(value));
+                return this;
+            }
+            public ReadyForParameters parameter(String key, PacketParameter value) {
+                this.builder.parameter(key, value);
+                return this;
+            }
+
+            public <TPacket extends GenericPacket> TPacket build() {
+                return this.builder.build();
+            }
+        }
+
+        /**
+         * The identification of this packet.
+         * Identification is what differentiates a "Server ping packet" from a "Teleport player packet"
+         */
+        public ReadyForTargetingAssignment identification(PacketIdentification id) {
+            return new ReadyForTargetingAssignment(flame, new NakedBuilder().identification(id));
+        }
+    }
+    public static class ProxyPacketBuilder {
+        public ProxyPacketBuilder(VelocityFlame<? extends group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler> flame) {}
+
         public static class ReadyForTargetingAssignment {
             private final NakedBuilder builder;
 
@@ -130,31 +200,11 @@ public class GenericPacket implements IPacket {
             }
 
             /**
-             * Packet is being sent from an MCLoader to the Proxy.
-             * @param sendingMCLoader The UUID of the MCLoader that is sending the packet.
-             */
-            public ReadyForParameters toProxy(UUID sendingMCLoader) {
-                this.builder.sender(sendingMCLoader);
-                this.builder.target(null);
-                return new ReadyForParameters(builder);
-            }
-
-            /**
              * Packet is being sent from the Proxy to an MCLoader
              * @param targetMCLoader The UUID of the MCLoader that the packet is being sent to.
              */
-            public ReadyForParameters toMCLoader(UUID targetMCLoader) {
+            public ReadyForParameters sendingToMCLoader(UUID targetMCLoader) {
                 this.builder.sender(null);
-                this.builder.target(targetMCLoader);
-                return new ReadyForParameters(builder);
-            }
-
-            /**
-             * Packet is being sent from one MCLoader to another MCLoader
-             * @param targetMCLoader The UUID of the MCLoader that the packet is being sent to.
-             */
-            public ReadyForParameters toMCLoader(UUID sendingMCLoader, UUID targetMCLoader) {
-                this.builder.sender(sendingMCLoader);
                 this.builder.target(targetMCLoader);
                 return new ReadyForParameters(builder);
             }
@@ -195,7 +245,7 @@ public class GenericPacket implements IPacket {
          * @param rawMessage The raw message to parse.
          * @return A received RedisMessage.
          */
-        public GenericPacket parseReceived(String rawMessage) {
+        public static GenericPacket parseReceived(String rawMessage) {
             Gson gson = new Gson();
             JsonObject messageObject = gson.fromJson(rawMessage, JsonObject.class);
 
@@ -231,7 +281,7 @@ public class GenericPacket implements IPacket {
             return builder.build();
         }
 
-        private void parseParams(JsonObject object, NakedBuilder builder) {
+        private static void parseParams(JsonObject object, NakedBuilder builder) {
             object.entrySet().forEach(entry -> {
                 String key = entry.getKey();
                 PacketParameter value = new PacketParameter(entry.getValue().getAsJsonPrimitive());

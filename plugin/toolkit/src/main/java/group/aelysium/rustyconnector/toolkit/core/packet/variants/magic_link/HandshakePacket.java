@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link;
 import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -34,16 +35,5 @@ public class HandshakePacket extends GenericPacket {
         String MAGIC_CONFIG_NAME = "c";
         String PLAYER_COUNT = "pc";
         String POD_NAME = "k8";
-    }
-
-    public static HandshakePacket create(UUID uuid, String address, String displayName, String magicConfigName, int playerCount) {
-        return new GenericPacket.Builder()
-                .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE)
-                .toProxy(uuid)
-                .parameter(Parameters.ADDRESS, address)
-                .parameter(Parameters.DISPLAY_NAME, displayName)
-                .parameter(Parameters.MAGIC_CONFIG_NAME, magicConfigName)
-                .parameter(Parameters.PLAYER_COUNT, new PacketParameter(playerCount))
-                .build();
     }
 }

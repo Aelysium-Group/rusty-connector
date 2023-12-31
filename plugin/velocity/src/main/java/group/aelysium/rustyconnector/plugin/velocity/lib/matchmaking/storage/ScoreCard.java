@@ -8,9 +8,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A RankedGame is a representation of all variations of a player's rank within a specific gamemode.
- * If, over the time of this game existing, it has ranked players based on both ELO and WIN_RATE, both of those
- * ranks are saved here and can be retrieved.
+ * ScoreCard is a representation of a player's entire ranked game history.
+ * All ranks associated with a player should be able to be fetched using their scorecard.
  */
 public class ScoreCard implements IScoreCard<StorageService> {
     protected final Map<Class<? extends IPlayerRank<?>>, IPlayerRank<?>> ranks = new ConcurrentHashMap<>();

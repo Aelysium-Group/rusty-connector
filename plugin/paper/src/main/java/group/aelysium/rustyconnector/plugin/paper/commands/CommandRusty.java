@@ -9,9 +9,15 @@ import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.LockServerPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.SendPlayerPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.UnlockServerPacket;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -25,7 +31,6 @@ public final class CommandRusty {
         manager.command(send(manager));
         manager.command(unlock(manager));
         manager.command(lock(manager));
-        manager.command(game(manager));
         manager.command(uuid(manager));
     }
 
@@ -109,7 +114,16 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                api.services().packetBuilder().sendToOtherFamily(player.getUniqueId(), familyName);
+                                ServerInfoService serverInfoService = api.services().serverInfo();
+
+                                SendPlayerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                                        .identification(PacketIdentification.Predefined.SEND_PLAYER)
+                                        .sendingToProxy(serverInfoService.uuid())
+                                        .parameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
+                                        .parameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
+                                        .build();
+
+                                api.services().magicLink().connection().orElseThrow().publish(message);
                             } catch (NullPointerException e) {
                                 MCLoaderLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
@@ -146,7 +160,14 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                     try {
-                        api.services().packetBuilder().unlockServer();
+                        ServerInfoService serverInfoService = api.services().serverInfo();
+
+                        UnlockServerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                                .identification(PacketIdentification.Predefined.UNLOCK_SERVER)
+                                .sendingToProxy(serverInfoService.uuid())
+                                .build();
+
+                        api.services().magicLink().connection().orElseThrow().publish(message);
                         logger.log("Unlocking server.");
                     } catch (NullPointerException e) {
                         MCLoaderLang.RC_SEND_USAGE.send(logger);
@@ -167,31 +188,19 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                             try {
-                                api.services().packetBuilder().lockServer();
+                                ServerInfoService serverInfoService = api.services().serverInfo();
+
+                                LockServerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                                        .identification(PacketIdentification.Predefined.LOCK_SERVER)
+                                        .sendingToProxy(serverInfoService.uuid())
+                                        .build();
+
+                                api.services().magicLink().connection().orElseThrow().publish(message);
                                 logger.log("Locking server.");
                             } catch (NullPointerException e) {
                                 MCLoaderLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from processing the request!", e);
-                            }
-                        }).execute());
-    }
-
-    private static Command.Builder<CommandSender> game(PaperCommandManager<CommandSender> manager) {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-
-        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
-
-        return builder.literal("game")
-                .senderType(ConsoleCommandSender.class)
-                .argument(StaticArgument.of("end"))
-                .handler(context -> manager.taskRecipe().begin(context)
-                        .asynchronous(commandContext -> {
-                            try {
-                                api.services().rankedGameInterface().endGame();
-                            } catch (Exception e) {
-                                logger.log("An error stopped us from processing that request!", e);
                             }
                         }).execute());
     }

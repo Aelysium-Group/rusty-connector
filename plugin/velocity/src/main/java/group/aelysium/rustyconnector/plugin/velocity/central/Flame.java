@@ -12,6 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handl
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
+import group.aelysium.rustyconnector.toolkit.core.packet.VelocityPacketBuilder;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -153,6 +154,8 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
             logger.send(Component.text("Initializing 90%...", NamedTextColor.DARK_GRAY));
 
             Flame flame = new Flame(new Version(version), memberKey.orElse(new char[0]), initialize.getServices(), initialize.getBootOutput());
+
+            flame.services().add(new VelocityPacketBuilder(flame));
 
             initialize.events(plugin);
             initialize.commands(inject(flame, logger, messageCacheService));

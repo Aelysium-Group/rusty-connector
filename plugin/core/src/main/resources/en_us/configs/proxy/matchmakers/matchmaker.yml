@@ -51,19 +51,16 @@ algorithm: RANDOMIZED
 
 
 #
-# The teams to use for this gamemode.
-# If you want the matchmaker to load exactly n number of players into a team,
-# set `min-players` and `max-player` to the same number.
+# The minimum number of players that must be in a game session.
 #
-# Teams are not allowed to have the same name.
+min: 8
+
+
+
 #
-teams:
-    - name: "red_team"
-      min-players: 9
-      max-players: 10
-    - name: "blue_team"
-      min-players: 9
-      max-players: 10
+# The maximum number of players that can be in a game session.
+#
+max: 10
 
 
 

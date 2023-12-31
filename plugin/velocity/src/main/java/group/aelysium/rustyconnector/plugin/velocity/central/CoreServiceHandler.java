@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import group.aelysium.rustyconnector.core.lib.events.EventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.toolkit.core.packet.VelocityPacketBuilder;
 import group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -59,6 +60,9 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
     }
     public LoadBalancingService loadBalancingService() {
         return this.find(LoadBalancingService.class).orElseThrow();
+    }
+    public VelocityPacketBuilder packetBuilder() {
+        return this.find(VelocityPacketBuilder.class).orElseThrow();
     }
     public Optional<PartyService> party() {
         return this.find(PartyService.class);

@@ -3,7 +3,6 @@ package group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link;
 import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,9 +25,9 @@ public class HandshakeFailurePacket extends GenericPacket {
         }
     }
     public static HandshakeFailurePacket create(UUID targetMCLoader, String message) {
-        return new GenericPacket.Builder()
+        return new MCLoaderPacketBuilder()
                 .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_FAIL)
-                .toMCLoader(targetMCLoader)
+                .sendingToAnotherMCLoader(targetMCLoader)
                 .parameter(Parameters.REASON, message)
                 .build();
     }

@@ -10,10 +10,4 @@ public interface IMCLoaderFlame<TCoreServiceHandler extends ICoreServiceHandler>
      * @return {@link Version}
      */
     String versionAsString();
-
-    /**
-     * Gets RustyConnector's backbone messenger service.
-     * @return {@link IMessengerConnector}
-     */
-    IMessengerConnector backbone();
 }

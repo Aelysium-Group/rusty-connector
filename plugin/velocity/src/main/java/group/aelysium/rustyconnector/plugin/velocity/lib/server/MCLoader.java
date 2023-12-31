@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -279,6 +280,22 @@ public class MCLoader implements IMCLoader {
 
     public boolean directConnect(IPlayer player) throws ConnectException {
         ConnectionRequestBuilder connection = player.resolve().orElseThrow().createConnectionRequest(this.registeredServer());
+        try {
+            ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
+
+            if(result.isSuccessful()) {
+                this.playerJoined();
+                return true;
+            }
+        } catch (Exception e) {
+            throw new ConnectException("Unable to connect to that server!", e);
+        }
+
+        return false;
+    }
+
+    public boolean directConnect(Player player) throws ConnectException {
+        ConnectionRequestBuilder connection = player.createConnectionRequest(this.registeredServer());
         try {
             ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
 

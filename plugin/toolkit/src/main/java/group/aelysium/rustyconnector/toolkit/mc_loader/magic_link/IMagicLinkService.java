@@ -1,9 +1,12 @@
 package group.aelysium.rustyconnector.toolkit.mc_loader.magic_link;
 
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.mc_loader.packet_builder.IPacketBuilderService;
 
-public interface IMagicLinkService<TPacketBuilderService extends IPacketBuilderService> extends Service {
+import java.net.ConnectException;
+import java.util.Optional;
+
+public interface IMagicLinkService extends Service {
     /**
      * Sets the status of this server's magic link.
      * Depending on the status this server may make requests to the proxy in different ways.
@@ -19,12 +22,20 @@ public interface IMagicLinkService<TPacketBuilderService extends IPacketBuilderS
 
     /**
      * Starts the heartbeat that this server's magic link uses.
-     * @param packetBuilderService The service used for issuing packets.
      */
-    void startHeartbeat(TPacketBuilderService packetBuilderService);
+    void startHeartbeat();
 
     /**
-     * Disconnects this server's magic link with the proxy.
+     * Gets the connection to the remote resource.
+     * @return {@link IMessengerConnection}
      */
-    void disconnect();
+    Optional<IMessengerConnection> connection();
+
+    /**
+     * Connect to the remote resource.
+     *
+     * @return A {@link IMessengerConnection}.
+     * @throws ConnectException If there was an issue connecting to the remote resource.
+     */
+    IMessengerConnection connect() throws ConnectException;
 }

@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.toolkit.velocity.players;
 
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
@@ -42,6 +43,12 @@ public interface IPlayer {
      * Convenience method that will resolve the player and then return their MCLoader if there is one.
      */
     Optional<? extends IMCLoader> server();
+
+    /**
+     * Gets the ranked verison of this player.
+     * @param game The game to fetch the rank from.
+     */
+    Optional<IRankedPlayer> rank(String game);
 
     class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IPlayer, UUID> {
         public Reference(UUID uuid) {

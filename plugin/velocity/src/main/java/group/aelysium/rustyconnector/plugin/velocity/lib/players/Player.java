@@ -1,9 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 import net.kyori.adventure.text.Component;
 
 import java.util.*;
@@ -53,6 +56,11 @@ public class Player implements IPlayer {
             return Optional.of(mcLoader);
         } catch (Exception ignore) {}
         return Optional.empty();
+    }
+
+    public Optional<IRankedPlayer> rank(String gamemode) {
+        StorageService storage = Tinder.get().services().storage();
+        return storage.database().getGame(gamemode).orElseThrow().rankedPlayer(storage, this.uuid);
     }
 
     @Override

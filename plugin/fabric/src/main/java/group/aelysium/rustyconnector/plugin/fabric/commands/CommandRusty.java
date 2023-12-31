@@ -7,11 +7,17 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.fabric.FabricServerCommandManager;
+import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.LockServerPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.SendPlayerPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.UnlockServerPacket;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -113,7 +119,16 @@ public final class CommandRusty {
 
                         UUID playerUUID = Tinder.get().getPlayerUUID(username);
 
-                        api.services().packetBuilder().sendToOtherFamily(playerUUID, familyName);
+                        ServerInfoService serverInfoService = api.services().serverInfo();
+
+                        SendPlayerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                                .identification(PacketIdentification.Predefined.SEND_PLAYER)
+                                .sendingToProxy(serverInfoService.uuid())
+                                .parameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
+                                .parameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, playerUUID.toString())
+                                .build();
+
+                        api.services().magicLink().connection().orElseThrow().publish(message);
                     } catch (NullPointerException e) {
                         MCLoaderLang.RC_SEND_USAGE.send(logger);
                     } catch (Exception e) {
@@ -131,7 +146,14 @@ public final class CommandRusty {
         return builder.literal("unlock")
                 .handler(context -> {
                     try {
-                        api.services().packetBuilder().unlockServer();
+                        ServerInfoService serverInfoService = api.services().serverInfo();
+
+                        UnlockServerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                                .identification(PacketIdentification.Predefined.UNLOCK_SERVER)
+                                .sendingToProxy(serverInfoService.uuid())
+                                .build();
+
+                        api.services().magicLink().connection().orElseThrow().publish(message);
                         logger.log("Unlocking server.");
                     } catch (NullPointerException e) {
                         MCLoaderLang.RC_SEND_USAGE.send(logger);
@@ -150,7 +172,14 @@ public final class CommandRusty {
         return builder.literal("lock")
                 .handler(context -> {
                     try {
-                        api.services().packetBuilder().lockServer();
+                        ServerInfoService serverInfoService = api.services().serverInfo();
+
+                        LockServerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                                .identification(PacketIdentification.Predefined.LOCK_SERVER)
+                                .sendingToProxy(serverInfoService.uuid())
+                                .build();
+
+                        api.services().magicLink().connection().orElseThrow().publish(message);
                         logger.log("Locking server.");
                     } catch (NullPointerException e) {
                         MCLoaderLang.RC_SEND_USAGE.send(logger);

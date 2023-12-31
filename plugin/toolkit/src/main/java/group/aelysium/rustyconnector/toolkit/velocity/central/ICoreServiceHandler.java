@@ -3,6 +3,8 @@ package group.aelysium.rustyconnector.toolkit.velocity.central;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.events.EventManager;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
+import group.aelysium.rustyconnector.toolkit.core.packet.MCLoaderPacketBuilder;
+import group.aelysium.rustyconnector.toolkit.core.packet.VelocityPacketBuilder;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.IServiceableService;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.IDynamicTeleportServiceHandler;
@@ -74,6 +76,8 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * @return {@link Optional<IServiceableService>}
      */
     IMagicLink magicLink();
+
+    VelocityPacketBuilder packetBuilder();
 
     /**
      * Gets the {@link IPartyService party service}.

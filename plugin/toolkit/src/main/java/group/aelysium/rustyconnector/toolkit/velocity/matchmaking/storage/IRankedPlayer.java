@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage;
 
+import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
@@ -16,7 +17,7 @@ public interface IRankedPlayer extends ISortable {
 
     /**
      * A convenience method which attempts to resolve {@link #uuid()} into an actual player.
-     * @return {@link java.util.Optional<  IPlayer  >}
+     * @return {@link java.util.Optional<IPlayer>}
      */
     Optional<IPlayer> player();
 

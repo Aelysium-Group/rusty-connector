@@ -1,8 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 
 import java.util.ArrayList;
@@ -14,15 +12,15 @@ public class Randomized extends Matchmaker {
     }
 
     @Override
-    public Session make() {
+    public Session.Waiting make() {
         if(!minimumPlayersExist()) return null;
         boolean enoughForFullGame = this.waitingPlayers.size() > maxPlayersPerGame;
 
-        Session.Builder builder = new Session.Builder().teams(settings.teams());
+        Session.Builder builder = new Session.Builder();
 
         List<IRankedPlayer> playersToUse = new ArrayList<>();
         for(IRankedPlayer player : this.waitingPlayers) {
-            if (!builder.addPlayer(player)) break;
+            builder.addPlayer(player);
             playersToUse.add(player);
         }
 

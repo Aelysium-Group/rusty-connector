@@ -47,9 +47,9 @@ public class HandshakeSuccessPacket extends GenericPacket {
     }
 
     public static HandshakeFailurePacket create(UUID uuid) {
-        return new GenericPacket.Builder()
+        return new MCLoaderPacketBuilder()
                 .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_FAIL)
-                .toMCLoader(uuid)
+                .sendingToAnotherMCLoader(uuid)
                 .build();
     }
 }

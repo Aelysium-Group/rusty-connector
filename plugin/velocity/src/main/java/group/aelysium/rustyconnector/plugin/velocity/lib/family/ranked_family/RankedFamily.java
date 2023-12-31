@@ -6,23 +6,23 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.RankedFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchMakerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -36,7 +36,7 @@ public class RankedFamily extends Family implements IRankedFamily {
     protected final Matchmaker matchmaker;
 
     protected RankedFamily(Settings settings) {
-        super(settings.id(), new Family.Settings(settings.displayName(), null, settings.parentFamily(), settings.whitelist()), RANKED_FAMILY_META);
+        super(settings.id(), new Family.Settings(settings.displayName(), new RoundRobin(new LoadBalancer.Settings(false, false, 0)), settings.parentFamily(), settings.whitelist()), RANKED_FAMILY_META);
         this.matchmaker = settings.matchmaker();
     }
 
@@ -56,6 +56,16 @@ public class RankedFamily extends Family implements IRankedFamily {
      */
     public void start() {
         this.matchmaker.start(this.loadBalancer());
+    }
+
+    public void addServer(@NotNull IMCLoader server) {
+        if(!(server instanceof IRankedMCLoader)) throw new IllegalArgumentException();
+        this.settings.loadBalancer().add(server);
+    }
+
+    public void removeServer(@NotNull IMCLoader server) {
+        if(!(server instanceof IRankedMCLoader)) throw new IllegalArgumentException();
+        this.settings.loadBalancer().remove(server);
     }
 
     @Override
@@ -100,7 +110,7 @@ public class RankedFamily extends Family implements IRankedFamily {
 
                 fetched = Optional.of(game);
             }
-            IMatchmaker.Settings matchmakerSettings = new IMatchmaker.Settings(mySQLStorage, matchMakerConfig.getAlgorithm(), fetched.orElseThrow(), matchMakerConfig.getTeams(), matchMakerConfig.getVariance(), matchMakerConfig.getMatchmakingInterval());
+            IMatchmaker.Settings matchmakerSettings = new IMatchmaker.Settings(mySQLStorage, matchMakerConfig.getAlgorithm(), fetched.orElseThrow(), matchMakerConfig.min(), matchMakerConfig.max(), matchMakerConfig.getVariance(), matchMakerConfig.getMatchmakingInterval());
 
             matchmaker = Matchmaker.from(matchmakerSettings);
         }

@@ -125,12 +125,13 @@ public class PacketIdentification {
         PacketIdentification LOCK_SERVER = new PacketIdentification("RC-LS");
 
         /**
-         * `MCLoader > Proxy` | Tells the proxy to end a game with the currently saved UUID.
+         * `MCLoader > Proxy` | Tells the proxy to end a game.
          */
         PacketIdentification END_RANKED_GAME = new PacketIdentification("RC-ERG");
+
         /**
-         * `Proxy > MCLoader` | Tells the MCLoader to save the UUID of a game.
+         * `Proxy > MCLoader` | Tells the MCLoader to start a game.
          */
-        PacketIdentification REQUEST_TO_START_RANKED_GAME = new PacketIdentification("RC-ARG");
+        PacketIdentification START_RANKED_GAME = new PacketIdentification("RC-SRG");
     }
 }

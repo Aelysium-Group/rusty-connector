@@ -7,18 +7,21 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRanke
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
+import org.eclipse.serializer.collections.lazy.LazyHashMap;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
- * ScoreCard is a representation of a player's entire ranked game history.
- * All ranks associated with a player should be able to be fetched using their scorecard.
+ * A RankedGame is a representation of all variations of a player's rank within a specific gamemode.
+ * If, over the time of this game existing, it has ranked players based on both ELO and WIN_RATE, both of those
+ * ranks are saved here and can be retrieved.
  */
 public class RankedGame implements IRankedGame<Player> {
     protected String name;
     protected IScoreCard.IRankSchema.Type<?> rankingSchema;
-    protected HashMap<UUID, ScoreCard> scorecards = new HashMap<>();
+    protected Map<UUID, ScoreCard> scorecards = new LazyHashMap<>();
 
     public RankedGame(String name, IScoreCard.IRankSchema.Type<?> schema) {
         this.name = name;

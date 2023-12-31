@@ -83,9 +83,9 @@ public class TPAService implements ITPAService {
     public void tpaSendPlayer(IPlayer source, IPlayer target, IMCLoader targetServer) {
         Tinder api = Tinder.get();
 
-        QueueTPAPacket message = new GenericPacket.Builder()
+        QueueTPAPacket message = new GenericPacket.MCLoaderPacketBuilder()
                 .identification(PacketIdentification.Predefined.QUEUE_TPA)
-                .toMCLoader(targetServer.uuid())
+                .sendingToAnotherMCLoader(targetServer.uuid())
                 .parameter(QueueTPAPacket.ValidParameters.TARGET_USERNAME, target.username())
                 .parameter(QueueTPAPacket.ValidParameters.SOURCE_USERNAME, source.username())
                 .build();

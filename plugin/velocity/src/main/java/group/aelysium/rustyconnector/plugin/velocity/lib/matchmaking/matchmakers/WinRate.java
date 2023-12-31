@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmaker
 
 import group.aelysium.rustyconnector.core.lib.algorithm.WeightedQuickSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.WinRatePlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 
@@ -17,7 +16,7 @@ public class WinRate extends Matchmaker {
         super(settings);
     }
 
-    private Session attemptBuild(int playerCount, double variance) {
+    private Session.Waiting attemptBuild(int playerCount, double variance) {
         // Randomly selects a player index to use as our pivot
         int randomIndex = random.nextInt(playerCount);
         IRankedPlayer pivot = this.waitingPlayers.get(randomIndex);
@@ -33,11 +32,11 @@ public class WinRate extends Matchmaker {
         if(validPlayers.size() < minPlayersPerGame) return null;
 
         // Start building game
-        Session.Builder builder = new Session.Builder().teams(settings.teams());
+        Session.Builder builder = new Session.Builder();
 
         List<IRankedPlayer> playersToUse = new ArrayList<>();
         for(IRankedPlayer player : validPlayers) {
-            if (!builder.addPlayer(player)) break;
+            builder.addPlayer(player);
             playersToUse.add(player);
         }
 
@@ -47,7 +46,7 @@ public class WinRate extends Matchmaker {
     }
 
     @Override
-    public Session make() {
+    public Session.Waiting make() {
         if(!minimumPlayersExist()) return null;
         int playerCount = this.waitingPlayers.size(); // Calculate once so we don't keep calling it.
         boolean enoughForFullGame = playerCount > maxPlayersPerGame;
@@ -58,7 +57,7 @@ public class WinRate extends Matchmaker {
 
         // Attempt to build a game 5 times. If one of the attempts succeeds, we return that and break the loop.
         for (int i = 0; i < 5; i++) {
-            Session game = attemptBuild(playerCount, variance);
+            Session.Waiting game = attemptBuild(playerCount, variance);
             if(game != null) return game;
         }
 

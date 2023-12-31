@@ -2,11 +2,9 @@ package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers;
 
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ITeam;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -17,7 +15,7 @@ public interface IMatchmaker extends Service {
     /**
      * Using the players contained in the matchmaker, attempt to make a game.
      */
-    ISession make();
+    ISession.IWaiting make();
 
     /**
      * Checks if there is the bare minimum worth of players in the matchmaker necessary to create at least one game.
@@ -64,11 +62,19 @@ public interface IMatchmaker extends Service {
      */
     boolean contains(IRankedPlayer player);
 
+    /**
+     * Ends a session.
+     * This method will close the session, connect all players to the parent family, and unlock the MCLoader.
+     * @param session The session to end.
+     */
+    void remove(ISession session);
+
     record Settings (
             IMySQLStorageService storage,
             IScoreCard.IRankSchema.Type<?> algorithm,
             IRankedGame<? extends IPlayer> game,
-            List<ITeam.Settings> teams,
+            int min,
+            int max,
             double variance,
             LiquidTimestamp interval
     ) {}

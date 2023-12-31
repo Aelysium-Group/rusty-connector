@@ -54,8 +54,7 @@ public abstract class MessengerSubscriber {
                 return;
             }
 
-            GenericPacket.Serializer serializer = new GenericPacket.Serializer();
-            GenericPacket message = serializer.parseReceived(decryptedMessage);
+            GenericPacket message = GenericPacket.Serializer.parseReceived(decryptedMessage);
 
             if (messageCache.ignoredType(message)) messageCache.removeMessage(cachedMessage.getSnowflake());
 

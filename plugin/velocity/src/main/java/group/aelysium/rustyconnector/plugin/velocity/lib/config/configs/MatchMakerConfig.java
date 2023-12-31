@@ -6,28 +6,29 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ITeam;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.eclipse.serializer.math.XMath.round;
 
 public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.MatchMakerConfig {
     private IScoreCard.IRankSchema.Type<?> algorithm = IScoreCard.IRankSchema.RANDOMIZED;
-    private final List<ITeam.Settings> teams = new ArrayList<>();
+    private int min;
+    private int max;
     private LiquidTimestamp matchmakingInterval;
     private double variance;
 
     public IScoreCard.IRankSchema.Type<?> getAlgorithm() {
         return algorithm;
     }
-    public List<ITeam.Settings> getTeams() {
-        return teams;
+    public int min() {
+        return this.min;
+    }
+    public int max() {
+        return this.max;
     }
     public LiquidTimestamp getMatchmakingInterval() {
         return matchmakingInterval;
@@ -51,12 +52,8 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         this.variance = IYAML.getValue(this.data,"variance",Double.class);
         this.variance = round(this.variance, 2);
 
-        IYAML.get(this.data,"teams").getChildrenList().forEach(node -> {
-            String name = IYAML.getValue(node, "name", String.class);
-            int min = IYAML.getValue(node, "min-players", Integer.class);
-            int max = IYAML.getValue(node, "max-players", Integer.class);
-            this.teams.add(new ITeam.Settings(name, min, max));
-        });
+        this.min = IYAML.getValue(this.data,"min",Integer.class);
+        this.max = IYAML.getValue(this.data,"max",Integer.class);
 
         try {
             this.matchmakingInterval = LiquidTimestamp.from(IYAML.getValue(this.data, "matchmaking-interval", String.class));
