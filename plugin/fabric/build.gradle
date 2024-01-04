@@ -24,7 +24,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     modImplementation "net.kyori:adventure-platform-fabric:${project.adventure_fabric_version}"
-    implementation "cloud.commandframework:cloud-fabric:${project.cloud_paperfabric_version}"
+    modImplementation "cloud.commandframework:cloud-fabric:${project.cloud_paperfabric_version}"
 }
 
 tasks.withType(JavaCompile).configureEach {

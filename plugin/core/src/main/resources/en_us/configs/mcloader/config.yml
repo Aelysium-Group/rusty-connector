@@ -14,9 +14,11 @@ version: 6
 magic-config: "default"
 
 #
-# This field is required if you don't enable Magic Interface Resolver.
-# Enter the address of this server! This address should match what a player would enter if they were trying to
-# connect directly to this server. Make sure you also include the port number!
+# The address used to connect to this server.
+# This address should match what a player would enter if they were trying to connect directly to this server.
+# Make sure you also include the port number!
+#
+# If you leave this empty, RustyConnector will grab this server's port number and attempt to resolve your server's address from that.
 #
 # Example: 127.0.0.1:25565
 #

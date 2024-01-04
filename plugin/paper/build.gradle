@@ -7,8 +7,9 @@ compileJava {
 dependencies {
     // Dev only
     shadow project(path: ':core', configuration: 'shadow')
-    shadow "io.papermc.paper:paper-api:${project.paper_version}"
+    compileOnly "io.papermc.paper:paper-api:${project.paper_version}"
     shadow "dev.folia:folia-api:${project.folia_version}"
+    implementation "cloud.commandframework:cloud-paper:${project.cloud_paperfabric_version}"
 }
 
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/

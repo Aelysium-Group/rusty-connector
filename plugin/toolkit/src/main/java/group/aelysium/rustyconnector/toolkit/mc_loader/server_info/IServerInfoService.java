@@ -1,17 +1,12 @@
 package group.aelysium.rustyconnector.toolkit.mc_loader.server_info;
 
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.core.server.ServerAssignment;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.UUID;
 
 public interface IServerInfoService extends Service {
-    /**
-     * Gets the info of this server.
-     * @return {@link ServerInfo}
-     */
-    ServerInfo serverInfo();
+    String displayName();
 
     /**
      * Gets the address of this server.

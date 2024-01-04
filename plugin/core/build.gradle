@@ -9,7 +9,7 @@ dependencies {
 
     // Dev only
     shadow project(path: ':toolkit', configuration: 'shadow')
-    shadow "cloud.commandframework:cloud-paper:${project.cloud_paperfabric_version}"
+    shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
     shadow "org.yaml:snakeyaml:${project.snakeyaml_version}"
     shadow "net.engio:mbassador:${project.mbassador_version}"
 }
@@ -18,10 +18,6 @@ dependencies {
 shadowJar {
     archiveClassifier.set('')
     archiveVersion.set('')
-
-    minimize {
-        exclude(dependency('cloud.commandframework:cloud-paper:.*'))
-    }
 
     mergeServiceFiles()
     minimize()

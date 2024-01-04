@@ -22,18 +22,14 @@ public class ServerInfoService implements IServerInfoService {
     private final String magicConfigPointer;
     private ServerAssignment assignment = ServerAssignment.GENERIC;
 
-    public ServerInfoService(InetSocketAddress address, String displayName, String magicConfigPointer, boolean magicInterfaceResolver, int port) {
+    public ServerInfoService(String address, String displayName, String magicConfigPointer, int port) {
         this.magicConfigPointer = magicConfigPointer;
         this.displayName = displayName;
 
-        this.address = address;
-        /*
-        if(magicInterfaceResolver)
-            this.address = convertPortToAddress(port);
-        else if(address == null)
+        if(address.isEmpty())
             this.address = convertPortToAddress(port);
         else
-            this.address = address;*/
+            this.address = AddressUtil.parseAddress(address);
     }
     public ServerInfo serverInfo() {
         return new ServerInfo(this.uuid.toString(), address);

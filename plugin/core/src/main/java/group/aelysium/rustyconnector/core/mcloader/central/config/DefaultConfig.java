@@ -11,7 +11,6 @@ import java.nio.file.Path;
 public class DefaultConfig extends YAML {
     private String address;
     private String magicConfig;
-    private boolean magicInterfaceResolver;
     private String displayName = null;
 
     public String address() {
@@ -19,9 +18,6 @@ public class DefaultConfig extends YAML {
     }
     public String magicConfig() {
         return magicConfig;
-    }
-    public boolean magicInterfaceResolver() {
-        return magicInterfaceResolver;
     }
     public String displayName() {
         return this.displayName;
@@ -42,9 +38,6 @@ public class DefaultConfig extends YAML {
         if(this.magicConfig.equals("")) throw new IllegalStateException("You must provide a magic config name name in order for RustyConnector to work! The config name must correspond to a config on your proxy.");
 
         this.address = IYAML.getValue(this.data,"address",String.class);
-
-        this.magicInterfaceResolver = IYAML.getValue(this.data,"magic-interface-resolver",Boolean.class);
-        if(this.address.equals("")) this.magicInterfaceResolver = true;
 
         try {
             this.displayName = IYAML.getValue(this.data,"display-name",String.class);

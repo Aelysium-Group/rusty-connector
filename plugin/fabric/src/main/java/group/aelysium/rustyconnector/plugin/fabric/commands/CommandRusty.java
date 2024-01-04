@@ -124,7 +124,7 @@ public final class CommandRusty {
                                 .sendingToProxy()
                                 .parameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
                                 .parameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, playerUUID.toString())
-                                .build();
+                                .build(SendPlayerPacket.class);
 
                         api.services().magicLink().connection().orElseThrow().publish(message);
                     } catch (NullPointerException e) {
@@ -147,7 +147,7 @@ public final class CommandRusty {
                         UnlockServerPacket message = api.services().packetBuilder().startNew()
                                 .identification(PacketIdentification.Predefined.UNLOCK_SERVER)
                                 .sendingToProxy()
-                                .build();
+                                .build(UnlockServerPacket.class);
 
                         api.services().magicLink().connection().orElseThrow().publish(message);
                         logger.log("Unlocking server.");
@@ -171,7 +171,7 @@ public final class CommandRusty {
                         LockServerPacket message = api.services().packetBuilder().startNew()
                                 .identification(PacketIdentification.Predefined.LOCK_SERVER)
                                 .sendingToProxy()
-                                .build();
+                                .build(LockServerPacket.class);
 
                         api.services().magicLink().connection().orElseThrow().publish(message);
                         logger.log("Locking server.");

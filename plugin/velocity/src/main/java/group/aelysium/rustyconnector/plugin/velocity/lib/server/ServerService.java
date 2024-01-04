@@ -108,7 +108,7 @@ public class ServerService implements IServerService {
     /**
      * Registers fake servers into the proxy to help with testing systems.
      */
-    public void registerFakeServers() {
+    /*public void registerFakeServers() {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
@@ -132,7 +132,7 @@ public class ServerService implements IServerService {
                 } catch (Exception ignore) {}
             }
         }
-    }
+    }*/
 
     public void kill() {
         this.servers.clear();

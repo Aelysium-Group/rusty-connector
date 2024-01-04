@@ -16,26 +16,21 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import java.util.*;
 
 public abstract class MessengerSubscriber {
+    private final Map<PacketIdentification, List<PacketListener<?>>> listeners;
     private final AESCryptor cryptor;
     private final PluginLogger logger;
     private IMessageCacheService<? extends ICacheableMessage> messageCache;
-    private final Map<PacketIdentification, List<PacketListener<?>>> listeners = new HashMap<>();
     private final UUID senderUUID;
 
-    public MessengerSubscriber(AESCryptor cryptor, IMessageCacheService<? extends ICacheableMessage> messageCache, PluginLogger logger, UUID senderUUID) {
+    public MessengerSubscriber(AESCryptor cryptor, IMessageCacheService<? extends ICacheableMessage> messageCache, PluginLogger logger, UUID senderUUID, Map<PacketIdentification, List<PacketListener<?>>> listeners) {
         this.cryptor = cryptor;
         this.messageCache = messageCache;
         this.logger = logger;
         this.senderUUID = senderUUID;
+        this.listeners = listeners;
     }
 
     public AESCryptor cryptor() { return this.cryptor; }
-
-    public <TPacketListener extends PacketListener<? extends GenericPacket>> void listen(TPacketListener listener) {
-        this.listeners.computeIfAbsent(listener.target(), s -> new ArrayList<>());
-
-        this.listeners.get(listener.target()).add(listener);
-    }
 
     protected void onMessage(String rawMessage) {
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
@@ -69,6 +64,7 @@ public abstract class MessengerSubscriber {
                 cachedMessage.sentenceMessage(PacketStatus.ACCEPTED);
 
                 List<PacketListener<? extends GenericPacket>> listeners = this.listeners.get(message.identification());
+                if(listeners == null) throw new NullPointerException("No packet handler with the type "+message.identification()+" exists!");
                 if(listeners.isEmpty()) throw new NullPointerException("No packet handler with the type "+message.identification()+" exists!");
 
                 listeners.forEach(listener -> {

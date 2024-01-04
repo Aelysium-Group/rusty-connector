@@ -74,18 +74,19 @@ public abstract class MCLoaderTinder implements IMCLoaderTinder {
 
     /**
      * Ignites a {@link MCLoaderFlame} which effectively starts the RustyConnector kernel.
+     * @param port The port that this MCLoader is running on.
      */
-    public void ignite() throws RuntimeException {
-        this.flame = MCLoaderFlame.fabricateNew(this, this.lang(), this.logger());
+    public void ignite(int port) throws RuntimeException {
+        this.flame = MCLoaderFlame.fabricateNew(this, this.lang(), this.logger(), port);
     }
 
     /**
      * Restarts the entire RustyConnector kernel by exhausting the current {@link MCLoaderFlame} and igniting a new one.
      */
-    public void rekindle() {
+    public void rekindle(int port) {
         this.exhaust();
 
-        this.ignite();
+        this.ignite(port);
     }
 
     /**

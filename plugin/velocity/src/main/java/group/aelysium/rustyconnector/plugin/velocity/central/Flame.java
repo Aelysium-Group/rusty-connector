@@ -317,6 +317,7 @@ class Initialize {
         connection.listen(new UnlockServerListener(this.api));
 
         connection.listen(new RankedGameEndListener(this.api));
+        System.out.println("done setting up listeners");
 
         ((RedisConnection) connection).startListening(dependencies.d2(), dependencies.d3(), null);
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
@@ -406,7 +407,7 @@ class Initialize {
         }
 
         for (File file : files) {
-            MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), file.getName(), deps.d2(), deps.d3());
+            MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), file.getName().replaceAll("\\.yml",""), deps.d2(), deps.d3());
 
             if(deps.d1().dump().stream().noneMatch(family -> family.id().equals(magicMCLoaderConfig.family())))
                 throw new NullPointerException("The magic config `" + file.getName() + "` is pointing to a family: `" + magicMCLoaderConfig.family() + "`, which doesn't exist!");

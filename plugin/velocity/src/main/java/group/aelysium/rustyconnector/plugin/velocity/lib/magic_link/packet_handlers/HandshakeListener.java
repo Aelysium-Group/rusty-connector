@@ -50,7 +50,7 @@ public class HandshakeListener extends PacketListener<HandshakePacket> {
 
             MCLoader server = new MCLoader.Builder()
                     .uuid(packet.sender())
-                    .address(AddressUtil.parseAndResolveAddress(packet.address()))
+                    .address(AddressUtil.parseAddress(packet.address()))
                     .softPlayerCap(magicMCLoaderConfig.playerCap_soft())
                     .hardPlayerCap(magicMCLoaderConfig.playerCap_hard())
                     .weight(magicMCLoaderConfig.weight())
@@ -68,7 +68,7 @@ public class HandshakeListener extends PacketListener<HandshakePacket> {
                     .parameter(HandshakeSuccessPacket.Parameters.COLOR, NamedTextColor.GREEN.toString())
                     .parameter(HandshakeSuccessPacket.Parameters.INTERVAL, String.valueOf(serverService.serverInterval()))
                     .parameter(HandshakeSuccessPacket.Parameters.ASSIGNMENT, assignment.toString())
-                    .build();
+                    .build(HandshakeSuccessPacket.class);
             backboneMessenger.publish(message);
 
         } catch(Exception e) {

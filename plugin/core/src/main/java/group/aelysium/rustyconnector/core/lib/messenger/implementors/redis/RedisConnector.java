@@ -24,10 +24,12 @@ public class RedisConnector extends MessengerConnector {
 
     @Override
     public IMessengerConnection connect() throws ConnectException {
+
         this.connection = new RedisConnection(
             this.toClientBuilder(),
             this.cryptor
         );
+        System.out.println("Finished building connection");
 
         return this.connection;
     }

@@ -105,8 +105,8 @@ public class Tinder extends MCLoaderTinder {
     }
 
     @Override
-    public void ignite() throws RuntimeException {
-        super.ignite();
+    public void ignite(int port) throws RuntimeException {
+        super.ignite(port);
 
         CommandRusty.create(this.commandManager());
 

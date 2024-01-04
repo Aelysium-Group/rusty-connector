@@ -53,7 +53,7 @@ public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implem
      * Fabricates a new RustyConnector core and returns it.
      * @return A new RustyConnector {@link MCLoaderFlame}.
      */
-    public static MCLoaderFlame fabricateNew(MCLoaderTinder api, LangService langService, PluginLogger logger) throws RuntimeException {
+    public static MCLoaderFlame fabricateNew(MCLoaderTinder api, LangService langService, PluginLogger logger, int port) throws RuntimeException {
         Initialize initialize = new Initialize(api);
 
         try {
@@ -61,19 +61,20 @@ public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implem
             int configVersion = initialize.configVersion();
             AESCryptor cryptor = initialize.privateKey();
             DefaultConfig defaultConfig = initialize.defaultConfig(langService);
-            ServerInfoService serverInfoService = initialize.serverInfo(defaultConfig);
+            ServerInfoService serverInfoService = initialize.serverInfo(defaultConfig, port);
 
             MessageCacheService messageCacheService = initialize.messageCache();
             RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, logger, langService, serverInfoService.uuid());
 
             initialize.messageCache();
             initialize.dynamicTeleport();
-            initialize.magicLink(messenger);
+            MagicLinkService magicLinkService = initialize.magicLink(messenger);
             initialize.eventManager();
 
             MCLoaderFlame flame = new MCLoaderFlame(version, configVersion, new CoreServiceHandler(initialize.getServices()));
 
             flame.services().add(new MCLoaderPacketBuilder(flame));
+            magicLinkService.startHeartbeat(flame);
 
             return flame;
         } catch (Exception e) {
@@ -189,29 +190,23 @@ class Initialize {
         return messenger;
     }
 
-    public void magicLink(IMessengerConnector messenger) {
+    public MagicLinkService magicLink(IMessengerConnector messenger) {
         logger.send(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-        MagicLinkService magicLinkService = new MagicLinkService(messenger);
-        services.put(MagicLinkService.class, magicLinkService);
-        magicLinkService.startHeartbeat();
+        MagicLinkService service = new MagicLinkService(messenger);
+        services.put(MagicLinkService.class, service);
 
         logger.send(Component.text("Finished booting magic link service.", NamedTextColor.GREEN));
+
+        return service;
     }
 
-    public ServerInfoService serverInfo(DefaultConfig defaultConfig) {
-        InetSocketAddress address = null;
-        try {
-            address = AddressUtil.parseAddress(defaultConfig.address());
-        } catch (Exception ignore) {}
-
-        // TODO: Create a port resolver
+    public ServerInfoService serverInfo(DefaultConfig defaultConfig, int port) {
         ServerInfoService serverInfoService = new ServerInfoService(
-                address,
+                defaultConfig.address(),
                 defaultConfig.displayName(),
                 defaultConfig.magicConfig(),
-                false,
-                25565
+                port
         );
         services.put(ServerInfoService.class, serverInfoService);
 

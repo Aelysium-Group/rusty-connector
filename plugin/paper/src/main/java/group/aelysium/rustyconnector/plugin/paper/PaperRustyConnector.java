@@ -18,7 +18,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener {
             TinderAdapterForCore.init(api);
 
             api.logger().log("Initializing RustyConnector...");
-            api.ignite();
+            api.ignite(Bukkit.getPort());
             MCLoaderLang.WORDMARK_RUSTY_CONNECTOR.send(api.logger(), api.flame().versionAsString());
 
             RustyConnector.Toolkit.register(api);

@@ -3,9 +3,9 @@ compileJava {
 }
 
 dependencies {
-    shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
     shadow "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
     shadow "com.google.code.gson:gson:${project.gson_version}"
+    implementation "com.velocitypowered:velocity-api:${project.velocity_version}"
     implementation "net.engio:mbassador:${project.mbassador_version}"
 }
 

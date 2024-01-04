@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.toolkit.mc_loader.magic_link;
 
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandler;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 
 import java.net.ConnectException;
 import java.util.Optional;
@@ -23,7 +25,7 @@ public interface IMagicLinkService extends Service {
     /**
      * Starts the heartbeat that this server's magic link uses.
      */
-    void startHeartbeat();
+    void startHeartbeat(IMCLoaderFlame<? extends ICoreServiceHandler> api);
 
     /**
      * Gets the connection to the remote resource.

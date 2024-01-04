@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandl
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class GenericPacket implements IPacket, JSONParseable {
@@ -26,6 +27,10 @@ public class GenericPacket implements IPacket, JSONParseable {
     public UUID target() { return this.target; }
     public PacketIdentification identification() { return this.identification; }
     public Map<String, PacketParameter> parameters() { return parameters; }
+    public <TPacket extends GenericPacket> TPacket convert(Class<TPacket> convertTo) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        return convertTo.getDeclaredConstructor(Integer.class, PacketIdentification.class, UUID.class, UUID.class, Map.class)
+                .newInstance(this.messageVersion, this.identification, this.sender, this.target, this.parameters);
+    }
 
     // Only exists so that inheriting packets don't have to define constructors.
     protected GenericPacket() {
@@ -36,7 +41,7 @@ public class GenericPacket implements IPacket, JSONParseable {
         parameters = new HashMap<>();
     }
 
-    protected GenericPacket(int messageVersion, PacketIdentification identification, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
+    protected GenericPacket(Integer messageVersion, PacketIdentification identification, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
         this.messageVersion = messageVersion;
         this.identification = identification;
         this.sender = sender;
@@ -75,7 +80,7 @@ public class GenericPacket implements IPacket, JSONParseable {
         return object;
     }
 
-    private static class NakedBuilder {
+    protected static class NakedBuilder {
         private Integer protocolVersion = GenericPacket.protocolVersion();
         private PacketIdentification id;
         private UUID sender;
@@ -119,8 +124,13 @@ public class GenericPacket implements IPacket, JSONParseable {
             return this;
         }
 
-        public <TPacket extends GenericPacket> TPacket build() {
-            return (TPacket) new GenericPacket(this.protocolVersion, this.id, this.sender, this.target, this.parameters);
+        public <TPacket extends GenericPacket> TPacket build(Class<TPacket> packetClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+            return packetClass.getDeclaredConstructor(Integer.class, PacketIdentification.class, UUID.class, UUID.class, Map.class)
+                    .newInstance(this.protocolVersion, this.id, this.sender, this.target, this.parameters);
+        }
+
+        public GenericPacket build() {
+            return new GenericPacket(this.protocolVersion, this.id, this.sender, this.target, this.parameters);
         }
     }
 
@@ -177,7 +187,11 @@ public class GenericPacket implements IPacket, JSONParseable {
                 return this;
             }
 
-            public <TPacket extends GenericPacket> TPacket build() {
+            public <TPacket extends GenericPacket> TPacket build(Class<TPacket> packetClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+                return this.builder.build(packetClass);
+            }
+
+            public GenericPacket build() {
                 return this.builder.build();
             }
         }
@@ -227,7 +241,11 @@ public class GenericPacket implements IPacket, JSONParseable {
                 return this;
             }
 
-            public <TPacket extends GenericPacket> TPacket build() {
+            public <TPacket extends GenericPacket> TPacket build(Class<TPacket> packetClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+                return this.builder.build(packetClass);
+            }
+
+            public GenericPacket build() {
                 return this.builder.build();
             }
         }
@@ -247,7 +265,7 @@ public class GenericPacket implements IPacket, JSONParseable {
          * @param rawMessage The raw message to parse.
          * @return A received RedisMessage.
          */
-        public static GenericPacket parseReceived(String rawMessage) {
+        public static GenericPacket parseReceived(String rawMessage) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
             Gson gson = new Gson();
             JsonObject messageObject = gson.fromJson(rawMessage, JsonObject.class);
 
@@ -280,7 +298,7 @@ public class GenericPacket implements IPacket, JSONParseable {
                 }
             });
 
-            return builder.build();
+            return builder.build(GenericPacket.class);
         }
 
         private static void parseParams(JsonObject object, NakedBuilder builder) {

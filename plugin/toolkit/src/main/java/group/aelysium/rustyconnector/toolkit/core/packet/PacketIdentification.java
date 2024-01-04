@@ -14,7 +14,7 @@ public class PacketIdentification {
     }
 
     public String get() {
-        return this.toString();
+        return this.id;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class PacketIdentification {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PacketIdentification mapping = (PacketIdentification) o;
-        return Objects.equals(get(), mapping.get());
+        return Objects.equals(this.get(), mapping.get());
     }
 
     @Override

@@ -16,16 +16,18 @@ public final class FabricRustyConnector implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        Tinder api = Tinder.gather(this, (Logger) LogManager.getLogger());
-        TinderAdapterForCore.init(api);
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            this.server = server;
 
-        api.logger().log("Initializing RustyConnector...");
-        api.ignite();
-        MCLoaderLang.WORDMARK_RUSTY_CONNECTOR.send(api.logger(), api.flame().versionAsString());
+            Tinder api = Tinder.gather(this, (Logger) LogManager.getLogger());
+            TinderAdapterForCore.init(api);
 
-        RustyConnector.Toolkit.register(api);
+            api.logger().log("Initializing RustyConnector...");
+            api.ignite(server.getServerPort());
+            MCLoaderLang.WORDMARK_RUSTY_CONNECTOR.send(api.logger(), api.flame().versionAsString());
 
-        ServerLifecycleEvents.SERVER_STARTING.register(server1 -> server = server1);
+            RustyConnector.Toolkit.register(api);
+        });
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             Tinder.get().exhaust();
         });
