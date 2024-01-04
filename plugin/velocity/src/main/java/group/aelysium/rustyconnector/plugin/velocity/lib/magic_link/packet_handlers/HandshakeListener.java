@@ -61,9 +61,9 @@ public class HandshakeListener extends PacketListener<HandshakePacket> {
             ServerAssignment assignment = ServerAssignment.GENERIC;
             if(family instanceof RankedFamily) assignment = ServerAssignment.RANKED_GAME_SERVER;
 
-            HandshakeSuccessPacket message = new GenericPacket.MCLoaderPacketBuilder()
+            HandshakeSuccessPacket message = api.services().packetBuilder().startNew()
                     .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_SUCCESS)
-                    .sendingToAnotherMCLoader(packet.sender())
+                    .sendingToMCLoader(packet.sender())
                     .parameter(HandshakeSuccessPacket.Parameters.MESSAGE, "Connected to the proxy! Registered as `"+server.serverInfo().getName()+"` into the family `"+server.family().id()+"`. Loaded using the magic config `"+packet.magicConfigName()+"`.")
                     .parameter(HandshakeSuccessPacket.Parameters.COLOR, NamedTextColor.GREEN.toString())
                     .parameter(HandshakeSuccessPacket.Parameters.INTERVAL, String.valueOf(serverService.serverInterval()))
@@ -72,7 +72,11 @@ public class HandshakeListener extends PacketListener<HandshakePacket> {
             backboneMessenger.publish(message);
 
         } catch(Exception e) {
-            backboneMessenger.publish(HandshakeFailurePacket.create(packet.sender(), "Attempt to connect to proxy failed! " + e.getMessage()));
+            api.services().packetBuilder().startNew()
+                .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_FAIL)
+                .sendingToMCLoader(packet.sender())
+                .parameter(HandshakeFailurePacket.Parameters.REASON, "Attempt to connect to proxy failed! " + e.getMessage())
+                .build();
         }
     }
 

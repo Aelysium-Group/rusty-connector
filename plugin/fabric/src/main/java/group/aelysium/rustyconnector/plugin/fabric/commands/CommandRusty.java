@@ -119,11 +119,9 @@ public final class CommandRusty {
 
                         UUID playerUUID = Tinder.get().getPlayerUUID(username);
 
-                        ServerInfoService serverInfoService = api.services().serverInfo();
-
-                        SendPlayerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                        SendPlayerPacket message = api.services().packetBuilder().startNew()
                                 .identification(PacketIdentification.Predefined.SEND_PLAYER)
-                                .sendingToProxy(serverInfoService.uuid())
+                                .sendingToProxy()
                                 .parameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
                                 .parameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, playerUUID.toString())
                                 .build();
@@ -146,11 +144,9 @@ public final class CommandRusty {
         return builder.literal("unlock")
                 .handler(context -> {
                     try {
-                        ServerInfoService serverInfoService = api.services().serverInfo();
-
-                        UnlockServerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                        UnlockServerPacket message = api.services().packetBuilder().startNew()
                                 .identification(PacketIdentification.Predefined.UNLOCK_SERVER)
-                                .sendingToProxy(serverInfoService.uuid())
+                                .sendingToProxy()
                                 .build();
 
                         api.services().magicLink().connection().orElseThrow().publish(message);
@@ -172,11 +168,9 @@ public final class CommandRusty {
         return builder.literal("lock")
                 .handler(context -> {
                     try {
-                        ServerInfoService serverInfoService = api.services().serverInfo();
-
-                        LockServerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                        LockServerPacket message = api.services().packetBuilder().startNew()
                                 .identification(PacketIdentification.Predefined.LOCK_SERVER)
-                                .sendingToProxy(serverInfoService.uuid())
+                                .sendingToProxy()
                                 .build();
 
                         api.services().magicLink().connection().orElseThrow().publish(message);

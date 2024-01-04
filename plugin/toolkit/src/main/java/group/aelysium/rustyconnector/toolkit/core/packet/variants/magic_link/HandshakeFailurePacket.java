@@ -24,11 +24,4 @@ public class HandshakeFailurePacket extends GenericPacket {
             return list;
         }
     }
-    public static HandshakeFailurePacket create(UUID targetMCLoader, String message) {
-        return new MCLoaderPacketBuilder()
-                .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_FAIL)
-                .sendingToAnotherMCLoader(targetMCLoader)
-                .parameter(Parameters.REASON, message)
-                .build();
-    }
 }

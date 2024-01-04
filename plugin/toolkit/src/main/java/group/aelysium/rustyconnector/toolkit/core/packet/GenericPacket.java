@@ -171,6 +171,7 @@ public class GenericPacket implements IPacket, JSONParseable {
                 this.builder.parameter(key, new PacketParameter(value));
                 return this;
             }
+
             public ReadyForParameters parameter(String key, PacketParameter value) {
                 this.builder.parameter(key, value);
                 return this;
@@ -209,6 +210,7 @@ public class GenericPacket implements IPacket, JSONParseable {
                 return new ReadyForParameters(builder);
             }
         }
+
         public static class ReadyForParameters {
             private final NakedBuilder builder;
 

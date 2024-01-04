@@ -45,9 +45,9 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
             // player.sendMessage(VelocityLang.GAME_FOLLOW_KICKED);
         });
 
-        GenericPacket packet = new GenericPacket.MCLoaderPacketBuilder()
+        GenericPacket packet = Tinder.get().services().packetBuilder().startNew()
                 .identification(PacketIdentification.Predefined.START_RANKED_GAME)
-                .sendingToAnotherMCLoader(this.uuid())
+                .sendingToMCLoader(this.uuid())
                 .parameter("session", session.toJSON().toString())
                 .build();
         Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);

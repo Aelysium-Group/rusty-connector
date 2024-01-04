@@ -7,10 +7,4 @@ import java.util.UUID;
 
 public class HandshakeKillPacket extends GenericPacket {
     private HandshakeKillPacket() { super(); }
-    public static HandshakeKillPacket create(UUID uuid) {
-        return new MCLoaderPacketBuilder()
-                .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_KILL)
-                .sendingToProxy(uuid)
-                .build();
-    }
 }

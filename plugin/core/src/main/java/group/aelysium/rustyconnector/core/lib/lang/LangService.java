@@ -90,7 +90,7 @@ public class LangService implements ILangService<LanguageResolver> {
     }
 
     public static LangService loadInternal(String internal) throws NoSuchElementException {
-        if(InternalLangConfigurations.internalCodes().contains(internal)) throw new NoSuchElementException();
+        if(!InternalLangConfigurations.internalCodes().contains(internal)) throw new NoSuchElementException();
 
         List<LangFileMappings.Mapping> mappings = LangFileMappings.toList();
 

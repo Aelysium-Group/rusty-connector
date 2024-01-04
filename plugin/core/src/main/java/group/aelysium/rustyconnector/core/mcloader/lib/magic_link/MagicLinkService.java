@@ -73,8 +73,12 @@ public class MagicLinkService implements IMagicLinkService {
     @Override
     public void kill() {
         MCLoaderFlame api = TinderAdapterForCore.getTinder().flame();
-        ServerInfoService serverInfoService = api.services().serverInfo();
-        api.services().magicLink().connection().orElseThrow().publish(HandshakeKillPacket.create(serverInfoService.uuid()));
+
+        HandshakeKillPacket packet = api.services().packetBuilder().startNew()
+                .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_KILL)
+                .sendingToProxy()
+                .build();
+        api.services().magicLink().connection().orElseThrow().publish(packet);
 
         this.heartbeat.kill();
         this.messenger.kill();

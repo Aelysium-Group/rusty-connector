@@ -72,7 +72,7 @@ public class ScalarFamilyConfig extends YAML implements group.aelysium.rustyconn
         this.loadBalancer = this.loadBalancer.replaceFirst("\\.yml$|\\.yaml$","");
 
         this.whitelist_enabled = IYAML.getValue(this.data,"whitelist.enabled",Boolean.class);
-        this.whitelist_name = IYAML.getValue(this.data,"whitelist.id",String.class);
+        this.whitelist_name = IYAML.getValue(this.data,"whitelist.name",String.class);
         if(this.whitelist_enabled && this.whitelist_name.equals(""))
             throw new IllegalStateException("whitelist.id cannot be empty in order to use a whitelist in a family!");
 

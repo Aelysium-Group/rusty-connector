@@ -114,11 +114,9 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                ServerInfoService serverInfoService = api.services().serverInfo();
-
-                                SendPlayerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                                SendPlayerPacket message = api.services().packetBuilder().startNew()
                                         .identification(PacketIdentification.Predefined.SEND_PLAYER)
-                                        .sendingToProxy(serverInfoService.uuid())
+                                        .sendingToProxy()
                                         .parameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
                                         .parameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
                                         .build();
@@ -160,11 +158,9 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                     try {
-                        ServerInfoService serverInfoService = api.services().serverInfo();
-
-                        UnlockServerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                        UnlockServerPacket message = api.services().packetBuilder().startNew()
                                 .identification(PacketIdentification.Predefined.UNLOCK_SERVER)
-                                .sendingToProxy(serverInfoService.uuid())
+                                .sendingToProxy()
                                 .build();
 
                         api.services().magicLink().connection().orElseThrow().publish(message);
@@ -188,11 +184,9 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                             try {
-                                ServerInfoService serverInfoService = api.services().serverInfo();
-
-                                LockServerPacket message = new GenericPacket.MCLoaderPacketBuilder()
+                                LockServerPacket message = api.services().packetBuilder().startNew()
                                         .identification(PacketIdentification.Predefined.LOCK_SERVER)
-                                        .sendingToProxy(serverInfoService.uuid())
+                                        .sendingToProxy()
                                         .build();
 
                                 api.services().magicLink().connection().orElseThrow().publish(message);
