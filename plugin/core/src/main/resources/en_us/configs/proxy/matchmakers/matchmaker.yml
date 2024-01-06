@@ -34,7 +34,7 @@
 # | Your options are:                                      #
 #  ⚫ RANDOMIZED -                                         #
 #           Randomly select players for a game.            #
-#            Player skill levels are totally ignored.      #
+#           Player skill levels are totally ignored.       #
 #  ⚫ WIN_LOSS -                                           #
 #           Ranks player based on their win/loss ratio.    #
 #  ⚫ WIN_RATE -                                           #
@@ -86,6 +86,7 @@ variance: 0.2
 # A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to build a match.
 # This should be set relatively low depending on what you expect player influxes to be.
 # Can't be set lower than `3 SECONDS`.
+# Wiki: https://wiki.aelysium.group/rusty-connector/docs/concepts/liquid_timestamps
 #
 # Keep in mind that this setting doesn't necessarily mean that new matches will be made every interval.
 # Matches will only be made if there is a satisfactory number of players with the proper ranks.

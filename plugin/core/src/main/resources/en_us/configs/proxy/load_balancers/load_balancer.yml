@@ -54,7 +54,9 @@ algorithm: ROUND_ROBIN
 # | If set to `true` the load balancer will attempt to     #
 # | put players into the servers with the highest `weight` #
 #                                                          #
-# | `weight` is defined in your individual server configs. #
+# | `weight` Configured in magic_configs folder.           #
+# | To assign different weights to different MCLoaders     #
+# | you have to assign them different Magic Configs.       #
 #                                                          #
 # | If multiple servers are set to be the same weight      #
 # | level, the load balancer will use `algorithm` on those #
@@ -65,8 +67,9 @@ algorithm: ROUND_ROBIN
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 #
-# If set to `true`. the load balancer will attempt to put players into the servers with the highest `weight`
-# `weight` is defined in the individual server configs on RustyConnector-paper.
+# Set to `true` to enable this option.
+# `weight` can be set in your magic_configs folder. 
+# To assign different weights to different MCLoaders you have to assign them different Magic Configs.
 #
 # If multiple server are set to be the same weight level, the load balancer will use `algorithm` on those servers
 # until they have been filled. It will then step to the next, lower, weight level and continue.
