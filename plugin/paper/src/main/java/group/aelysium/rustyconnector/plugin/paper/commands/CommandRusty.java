@@ -9,15 +9,13 @@ import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.LockServerPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.SendPlayerPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.UnlockServerPacket;
+import group.aelysium.rustyconnector.core.lib.packets.LockServerPacket;
+import group.aelysium.rustyconnector.core.lib.packets.SendPlayerPacket;
+import group.aelysium.rustyconnector.core.lib.packets.UnlockServerPacket;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -117,8 +115,8 @@ public final class CommandRusty {
                                 SendPlayerPacket message = api.services().packetBuilder().startNew()
                                         .identification(PacketIdentification.Predefined.SEND_PLAYER)
                                         .sendingToProxy()
-                                        .parameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
-                                        .parameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
+                                        .parameter(SendPlayerPacket.Parameters.TARGET_FAMILY_NAME, familyName)
+                                        .parameter(SendPlayerPacket.Parameters.PLAYER_UUID, player.getUniqueId().toString())
                                         .build(SendPlayerPacket.class);
 
                                 api.services().magicLink().connection().orElseThrow().publish(message);

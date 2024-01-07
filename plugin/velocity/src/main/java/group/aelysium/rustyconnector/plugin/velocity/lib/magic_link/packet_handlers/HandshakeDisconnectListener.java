@@ -1,18 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers;
 
+import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link.HandshakeKillPacket;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.Optional;
 
-public class HandshakeKillListener extends PacketListener<HandshakeKillPacket> {
+public class HandshakeDisconnectListener extends PacketListener<MagicLink.Disconnect> {
     protected Tinder api;
 
-    public HandshakeKillListener(Tinder api) {
+    public HandshakeDisconnectListener(Tinder api) {
         this.api = api;
     }
 
@@ -22,7 +21,7 @@ public class HandshakeKillListener extends PacketListener<HandshakeKillPacket> {
     }
 
     @Override
-    public void execute(HandshakeKillPacket packet) throws Exception {
+    public void execute(MagicLink.Disconnect packet) throws Exception {
         Optional<IMCLoader> mcLoader = api.services().server().fetch(packet.sender());
         mcLoader.orElseThrow().unregister(true);
     }

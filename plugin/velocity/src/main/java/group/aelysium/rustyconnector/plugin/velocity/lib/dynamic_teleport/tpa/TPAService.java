@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAS
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.TPAServiceSettings;
 import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.QueueTPAPacket;
+import group.aelysium.rustyconnector.core.lib.packets.QueueTPAPacket;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
@@ -86,8 +86,8 @@ public class TPAService implements ITPAService {
         GenericPacket message = api.services().packetBuilder().startNew()
                 .identification(PacketIdentification.Predefined.QUEUE_TPA)
                 .sendingToMCLoader(targetServer.uuid())
-                .parameter(QueueTPAPacket.ValidParameters.TARGET_USERNAME, target.username())
-                .parameter(QueueTPAPacket.ValidParameters.SOURCE_USERNAME, source.username())
+                .parameter(QueueTPAPacket.Parameters.TARGET_USERNAME, target.username())
+                .parameter(QueueTPAPacket.Parameters.SOURCE_USERNAME, source.username())
                 .build();
 
         api.services().magicLink().connection().orElseThrow().publish(message);

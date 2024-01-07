@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.toolkit.core.packet.variants;
+package group.aelysium.rustyconnector.core.lib.packets;
 
 import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
@@ -11,18 +11,18 @@ import java.util.UUID;
 
 public class QueueTPAPacket extends GenericPacket {
     public String targetUsername() {
-        return this.parameters.get(ValidParameters.TARGET_USERNAME).getAsString();
+        return this.parameters.get(Parameters.TARGET_USERNAME).getAsString();
     }
 
     public String sourceUsername() {
-        return this.parameters.get(ValidParameters.SOURCE_USERNAME).getAsString();
+        return this.parameters.get(Parameters.SOURCE_USERNAME).getAsString();
     }
 
-    protected QueueTPAPacket(Integer messageVersion, PacketIdentification identification, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
-        super(messageVersion, identification, sender, target, parameters);
+    public QueueTPAPacket(Integer messageVersion, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
+        super(messageVersion, PacketIdentification.Predefined.QUEUE_TPA, sender, target, parameters);
     }
 
-    public interface ValidParameters {
+    public interface Parameters {
         String TARGET_USERNAME = "tp";
         String SOURCE_USERNAME = "sp";
 

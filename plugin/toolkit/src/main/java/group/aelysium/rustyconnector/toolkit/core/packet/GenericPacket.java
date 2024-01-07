@@ -28,16 +28,8 @@ public class GenericPacket implements IPacket, JSONParseable {
     public PacketIdentification identification() { return this.identification; }
     public Map<String, PacketParameter> parameters() { return parameters; }
     public <TPacket extends GenericPacket> TPacket convert(Class<TPacket> convertTo) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        return convertTo.getDeclaredConstructor(Integer.class, PacketIdentification.class, UUID.class, UUID.class, Map.class)
-                .newInstance(this.messageVersion, this.identification, this.sender, this.target, this.parameters);
-    }
-
-    private GenericPacket() {
-        messageVersion = 0;
-        identification = null;
-        sender = null;
-        target = null;
-        parameters = new HashMap<>();
+        return convertTo.getDeclaredConstructor(Integer.class, UUID.class, UUID.class, Map.class)
+                .newInstance(this.messageVersion, this.sender, this.target, this.parameters);
     }
 
     protected GenericPacket(Integer version, PacketIdentification identification, UUID sender, UUID target, Map<String, PacketParameter> parameters) {

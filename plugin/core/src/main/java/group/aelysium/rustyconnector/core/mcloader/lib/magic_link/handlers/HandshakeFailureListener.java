@@ -1,16 +1,16 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers;
 
+import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link.HandshakeFailurePacket;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatus;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class HandshakeFailureListener extends PacketListener<HandshakeFailurePacket> {
+public class HandshakeFailureListener extends PacketListener<MagicLink.Handshake.Failure> {
     protected IMCLoaderTinder api;
 
     public HandshakeFailureListener(IMCLoaderTinder api) {
@@ -23,7 +23,7 @@ public class HandshakeFailureListener extends PacketListener<HandshakeFailurePac
     }
 
     @Override
-    public void execute(HandshakeFailurePacket packet) {
+    public void execute(MagicLink.Handshake.Failure packet) {
         PluginLogger logger = api.logger();
         MagicLinkService service = (MagicLinkService) api.services().magicLink();
 

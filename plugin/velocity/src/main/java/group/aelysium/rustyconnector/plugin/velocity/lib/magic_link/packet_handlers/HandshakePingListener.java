@@ -4,12 +4,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCL
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link.HandshakeFailurePacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link.HandshakePacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link.HandshakeSuccessPacket;
+import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
@@ -19,10 +16,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.IOException;
 
-public class HandshakeListener extends PacketListener<HandshakePacket> {
+public class HandshakePingListener extends PacketListener<MagicLink.Handshake.Ping> {
     protected Tinder api;
 
-    public HandshakeListener(Tinder api) {
+    public HandshakePingListener(Tinder api) {
         this.api = api;
     }
 
@@ -32,14 +29,14 @@ public class HandshakeListener extends PacketListener<HandshakePacket> {
     }
 
     @Override
-    public void execute(HandshakePacket packet) throws Exception {
+    public void execute(MagicLink.Handshake.Ping packet) throws Exception {
         //if(api.logger().loggerGate().check(GateKey.PING))
         //    api.logger().send(ProxyLang.PING.build(serverInfo));
 
         reviveOrConnectServer(api, packet);
     }
 
-    private static void connectServer(Tinder api, HandshakePacket packet) {
+    private static void connectServer(Tinder api, MagicLink.Handshake.Ping packet) {
         ServerService serverService = api.services().server();
         IMessengerConnection backboneMessenger = api.services().magicLink().connection().orElseThrow();
 
@@ -61,26 +58,26 @@ public class HandshakeListener extends PacketListener<HandshakePacket> {
             ServerAssignment assignment = ServerAssignment.GENERIC;
             if(family instanceof RankedFamily) assignment = ServerAssignment.RANKED_GAME_SERVER;
 
-            HandshakeSuccessPacket message = api.services().packetBuilder().startNew()
+            MagicLink.Handshake.Success message = api.services().packetBuilder().startNew()
                     .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_SUCCESS)
                     .sendingToMCLoader(packet.sender())
-                    .parameter(HandshakeSuccessPacket.Parameters.MESSAGE, "Connected to the proxy! Registered as `"+server.serverInfo().getName()+"` into the family `"+server.family().id()+"`. Loaded using the magic config `"+packet.magicConfigName()+"`.")
-                    .parameter(HandshakeSuccessPacket.Parameters.COLOR, NamedTextColor.GREEN.toString())
-                    .parameter(HandshakeSuccessPacket.Parameters.INTERVAL, String.valueOf(serverService.serverInterval()))
-                    .parameter(HandshakeSuccessPacket.Parameters.ASSIGNMENT, assignment.toString())
-                    .build(HandshakeSuccessPacket.class);
+                    .parameter(MagicLink.Handshake.Success.Parameters.MESSAGE, "Connected to the proxy! Registered as `"+server.serverInfo().getName()+"` into the family `"+server.family().id()+"`. Loaded using the magic config `"+packet.magicConfigName()+"`.")
+                    .parameter(MagicLink.Handshake.Success.Parameters.COLOR, NamedTextColor.GREEN.toString())
+                    .parameter(MagicLink.Handshake.Success.Parameters.INTERVAL, String.valueOf(serverService.serverInterval()))
+                    .parameter(MagicLink.Handshake.Success.Parameters.ASSIGNMENT, assignment.toString())
+                    .build(MagicLink.Handshake.Success.class);
             backboneMessenger.publish(message);
 
         } catch(Exception e) {
             api.services().packetBuilder().startNew()
                 .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_FAIL)
                 .sendingToMCLoader(packet.sender())
-                .parameter(HandshakeFailurePacket.Parameters.REASON, "Attempt to connect to proxy failed! " + e.getMessage())
+                .parameter(MagicLink.Handshake.Failure.Parameters.REASON, "Attempt to connect to proxy failed! " + e.getMessage())
                 .build();
         }
     }
 
-    private static void reviveOrConnectServer(Tinder api, HandshakePacket packet) throws IOException {
+    private static void reviveOrConnectServer(Tinder api, MagicLink.Handshake.Ping packet) throws IOException {
         ServerService serverService = api.services().server();
 
         try {

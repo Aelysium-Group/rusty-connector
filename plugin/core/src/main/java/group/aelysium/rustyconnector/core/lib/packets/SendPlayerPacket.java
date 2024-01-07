@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.toolkit.core.packet.variants;
+package group.aelysium.rustyconnector.core.lib.packets;
 
 import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
@@ -11,18 +11,18 @@ import java.util.UUID;
 
 public class SendPlayerPacket extends GenericPacket {
     public String targetFamilyName() {
-        return this.parameters.get(ValidParameters.TARGET_FAMILY_NAME).getAsString();
+        return this.parameters.get(Parameters.TARGET_FAMILY_NAME).getAsString();
     }
 
     public UUID uuid() {
-        return UUID.fromString(this.parameters.get(ValidParameters.PLAYER_UUID).getAsString());
+        return UUID.fromString(this.parameters.get(Parameters.PLAYER_UUID).getAsString());
     }
 
-    protected SendPlayerPacket(Integer messageVersion, PacketIdentification identification, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
-        super(messageVersion, identification, sender, target, parameters);
+    public SendPlayerPacket(Integer messageVersion, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
+        super(messageVersion, PacketIdentification.Predefined.SEND_PLAYER, sender, target, parameters);
     }
 
-    public interface ValidParameters {
+    public interface Parameters {
         String TARGET_FAMILY_NAME = "f";
         String PLAYER_UUID = "p";
 

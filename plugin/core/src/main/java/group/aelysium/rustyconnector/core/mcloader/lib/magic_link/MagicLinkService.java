@@ -1,14 +1,12 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link;
 
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderFlame;
-import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link.HandshakeKillPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link.HandshakePacket;
+import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.IMagicLinkService;
@@ -45,14 +43,14 @@ public class MagicLinkService implements IMagicLinkService {
         IServerInfoService serverInfoService = api.services().serverInfo();
         this.heartbeat.scheduleDelayed(() -> {
             try {
-                HandshakePacket packet = api.services().packetBuilder().startNew()
+                MagicLink.Handshake.Ping packet = api.services().packetBuilder().startNew()
                         .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE)
                         .sendingToProxy()
-                        .parameter(HandshakePacket.Parameters.ADDRESS, serverInfoService.address())
-                        .parameter(HandshakePacket.Parameters.DISPLAY_NAME, serverInfoService.displayName())
-                        .parameter(HandshakePacket.Parameters.MAGIC_CONFIG_NAME, serverInfoService.magicConfig())
-                        .parameter(HandshakePacket.Parameters.PLAYER_COUNT, new PacketParameter(serverInfoService.playerCount()))
-                        .build(HandshakePacket.class);
+                        .parameter(MagicLink.Handshake.Ping.Parameters.ADDRESS, serverInfoService.address())
+                        .parameter(MagicLink.Handshake.Ping.Parameters.DISPLAY_NAME, serverInfoService.displayName())
+                        .parameter(MagicLink.Handshake.Ping.Parameters.MAGIC_CONFIG_NAME, serverInfoService.magicConfig())
+                        .parameter(MagicLink.Handshake.Ping.Parameters.PLAYER_COUNT, new PacketParameter(serverInfoService.playerCount()))
+                        .build(MagicLink.Handshake.Ping.class);
 
                 api.services().magicLink().connection().orElseThrow().publish(packet);
             } catch (Exception e) {

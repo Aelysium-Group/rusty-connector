@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCLoaderConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeKillListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeDisconnectListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
@@ -50,7 +50,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.FriendsC
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakePingListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.LockServerListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.SendPlayerListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.UnlockServerListener;
@@ -309,8 +309,8 @@ class Initialize {
         messenger.connect();
         IMessengerConnection connection = messenger.connection().orElseThrow();
 
-        connection.listen(new HandshakeListener(this.api));
-        connection.listen(new HandshakeKillListener(this.api));
+        connection.listen(new HandshakePingListener(this.api));
+        connection.listen(new HandshakeDisconnectListener(this.api));
 
         connection.listen(new SendPlayerListener(this.api));
         connection.listen(new LockServerListener(this.api));

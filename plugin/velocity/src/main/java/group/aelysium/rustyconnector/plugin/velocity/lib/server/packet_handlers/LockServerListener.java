@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers;
 
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.LockServerPacket;
+import group.aelysium.rustyconnector.core.lib.packets.LockServerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
