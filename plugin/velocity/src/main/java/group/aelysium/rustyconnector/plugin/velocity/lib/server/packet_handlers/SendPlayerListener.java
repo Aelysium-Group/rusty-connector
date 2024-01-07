@@ -1,7 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers;
 
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
+import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.core.lib.packets.SendPlayerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -19,8 +22,14 @@ public class SendPlayerListener extends PacketListener<SendPlayerPacket> {
 
     @Override
     public PacketIdentification target() {
-        return PacketIdentification.Predefined.SEND_PLAYER;
+        return BuiltInIdentifications.SEND_PLAYER;
     }
+
+    @Override
+    public SendPlayerPacket wrap(Packet packet) {
+        return new SendPlayerPacket(packet);
+    }
+
     @Override
     public void execute(SendPlayerPacket packet) throws Exception {
 

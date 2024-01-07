@@ -4,10 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
+import group.aelysium.rustyconnector.core.lib.packets.RankedGame;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.mc_loader.events.ranked_game.RankedGameEndEvent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.ranked_game_interface.IRankedGameInterfaceService;
 
@@ -64,8 +65,8 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
 
         tinder.services().events().fire(new RankedGameEndEvent(uuid, sessionPlayers, List.of(winners)));
 
-        GenericPacket packet = tinder.services().packetBuilder().startNew()
-                .identification(PacketIdentification.Predefined.END_RANKED_GAME)
+        Packet packet = tinder.services().packetBuilder().newBuilder()
+                .identification(BuiltInIdentifications.RANKED_GAME_END)
                 .sendingToProxy()
                 .parameter("session", object.toString())
                 .build();

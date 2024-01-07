@@ -1,28 +1,25 @@
 package group.aelysium.rustyconnector.core.lib.messenger;
 
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.*;
 import group.aelysium.rustyconnector.toolkit.core.message_cache.ICacheableMessage;
 import group.aelysium.rustyconnector.toolkit.core.message_cache.IMessageCacheService;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketStatus;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 
 import java.util.*;
 
 public abstract class MessengerSubscriber {
-    private final Map<PacketIdentification, List<PacketListener<?>>> listeners;
+    private final Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners;
     private final AESCryptor cryptor;
     private final PluginLogger logger;
     private IMessageCacheService<? extends ICacheableMessage> messageCache;
     private final UUID senderUUID;
 
-    public MessengerSubscriber(AESCryptor cryptor, IMessageCacheService<? extends ICacheableMessage> messageCache, PluginLogger logger, UUID senderUUID, Map<PacketIdentification, List<PacketListener<?>>> listeners) {
+    public MessengerSubscriber(AESCryptor cryptor, IMessageCacheService<? extends ICacheableMessage> messageCache, PluginLogger logger, UUID senderUUID, Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners) {
         this.cryptor = cryptor;
         this.messageCache = messageCache;
         this.logger = logger;
@@ -49,7 +46,7 @@ public abstract class MessengerSubscriber {
                 return;
             }
 
-            GenericPacket message = GenericPacket.Serializer.parseReceived(decryptedMessage);
+            Packet message = Packet.Serializer.parseReceived(decryptedMessage);
 
             if (messageCache.ignoredType(message)) messageCache.removeMessage(cachedMessage.getSnowflake());
 
@@ -63,13 +60,13 @@ public abstract class MessengerSubscriber {
             try {
                 cachedMessage.sentenceMessage(PacketStatus.ACCEPTED);
 
-                List<PacketListener<? extends GenericPacket>> listeners = this.listeners.get(message.identification());
+                List<PacketListener<? extends Packet.Wrapper>> listeners = this.listeners.get(message.identification());
                 if(listeners == null) throw new NullPointerException("No packet handler with the type "+message.identification()+" exists!");
                 if(listeners.isEmpty()) throw new NullPointerException("No packet handler with the type "+message.identification()+" exists!");
 
                 listeners.forEach(listener -> {
                     try {
-                        listener.genericExecute(message);
+                        listener.wrapAndExecute(message);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

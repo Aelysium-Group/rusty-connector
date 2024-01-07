@@ -4,7 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
+import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
+import group.aelysium.rustyconnector.core.lib.packets.RankedGame;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
@@ -14,20 +17,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class StartRankedGameListener extends PacketListener<GenericPacket> {
+public class RankedGameReadyListener extends PacketListener<RankedGame.Ready> {
     protected IMCLoaderTinder api;
 
-    public StartRankedGameListener(IMCLoaderTinder api) {
+    public RankedGameReadyListener(IMCLoaderTinder api) {
         this.api = api;
     }
 
     @Override
     public PacketIdentification target() {
-        return PacketIdentification.Predefined.START_RANKED_GAME;
+        return BuiltInIdentifications.RANKED_GAME_READY;
     }
 
     @Override
-    public void execute(GenericPacket packet) {
+    public RankedGame.Ready wrap(Packet packet) {
+        return new RankedGame.Ready(packet);
+    }
+
+    @Override
+    public void execute(RankedGame.Ready packet) {
         JsonObject object = new Gson().fromJson(packet.parameters().get("session").getAsString(), JsonObject.class);
 
         UUID uuid = UUID.fromString(object.get("uuid").getAsString());

@@ -9,13 +9,14 @@ import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
+import group.aelysium.rustyconnector.core.lib.packets.MCLoader;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
-import group.aelysium.rustyconnector.core.lib.packets.LockServerPacket;
 import group.aelysium.rustyconnector.core.lib.packets.SendPlayerPacket;
-import group.aelysium.rustyconnector.core.lib.packets.UnlockServerPacket;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -112,12 +113,12 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                SendPlayerPacket message = api.services().packetBuilder().startNew()
-                                        .identification(PacketIdentification.Predefined.SEND_PLAYER)
+                                Packet message = api.services().packetBuilder().newBuilder()
+                                        .identification(BuiltInIdentifications.SEND_PLAYER)
                                         .sendingToProxy()
                                         .parameter(SendPlayerPacket.Parameters.TARGET_FAMILY_NAME, familyName)
                                         .parameter(SendPlayerPacket.Parameters.PLAYER_UUID, player.getUniqueId().toString())
-                                        .build(SendPlayerPacket.class);
+                                        .build();
 
                                 api.services().magicLink().connection().orElseThrow().publish(message);
                             } catch (NullPointerException e) {
@@ -156,12 +157,7 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                     try {
-                        UnlockServerPacket message = api.services().packetBuilder().startNew()
-                                .identification(PacketIdentification.Predefined.UNLOCK_SERVER)
-                                .sendingToProxy()
-                                .build(UnlockServerPacket.class);
-
-                        api.services().magicLink().connection().orElseThrow().publish(message);
+                        api.services().magicLink().connection().orElseThrow().publish(MCLoader.Unlock.build(api.flame()));
                         logger.log("Unlocking server.");
                     } catch (NullPointerException e) {
                         MCLoaderLang.RC_SEND_USAGE.send(logger);
@@ -182,12 +178,7 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                             try {
-                                LockServerPacket message = api.services().packetBuilder().startNew()
-                                        .identification(PacketIdentification.Predefined.LOCK_SERVER)
-                                        .sendingToProxy()
-                                        .build(LockServerPacket.class);
-
-                                api.services().magicLink().connection().orElseThrow().publish(message);
+                                api.services().magicLink().connection().orElseThrow().publish(MCLoader.Lock.build(api.flame()));
                                 logger.log("Locking server.");
                             } catch (NullPointerException e) {
                                 MCLoaderLang.RC_SEND_USAGE.send(logger);

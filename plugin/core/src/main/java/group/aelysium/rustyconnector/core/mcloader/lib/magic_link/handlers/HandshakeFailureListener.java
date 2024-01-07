@@ -1,8 +1,10 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers;
 
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
@@ -19,7 +21,12 @@ public class HandshakeFailureListener extends PacketListener<MagicLink.Handshake
 
     @Override
     public PacketIdentification target() {
-        return PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_FAIL;
+        return BuiltInIdentifications.MAGICLINK_HANDSHAKE_FAIL;
+    }
+
+    @Override
+    public MagicLink.Handshake.Failure wrap(Packet packet) {
+        return new MagicLink.Handshake.Failure(packet);
     }
 
     @Override

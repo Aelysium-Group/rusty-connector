@@ -14,7 +14,7 @@ import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeFailureListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeSuccessListener;
-import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.StartRankedGameListener;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameReadyListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
@@ -24,14 +24,12 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
-import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -181,7 +179,7 @@ class Initialize {
         connection.listen(new HandshakeSuccessListener(this.api));
         connection.listen(new HandshakeFailureListener(this.api));
         connection.listen(new CoordinateRequestListener(this.api));
-        connection.listen(new StartRankedGameListener(this.api));
+        connection.listen(new RankedGameReadyListener(this.api));
 
         ((RedisConnection) connection).startListening(cacheService, logger, senderUUID);
 

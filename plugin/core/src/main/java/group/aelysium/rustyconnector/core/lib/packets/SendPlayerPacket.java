@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.packets;
 
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 
 import java.util.ArrayList;
@@ -9,17 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class SendPlayerPacket extends GenericPacket {
+public class SendPlayerPacket extends Packet.Wrapper {
     public String targetFamilyName() {
-        return this.parameters.get(Parameters.TARGET_FAMILY_NAME).getAsString();
+        return this.parameters().get(Parameters.TARGET_FAMILY_NAME).getAsString();
     }
 
     public UUID uuid() {
-        return UUID.fromString(this.parameters.get(Parameters.PLAYER_UUID).getAsString());
+        return UUID.fromString(this.parameters().get(Parameters.PLAYER_UUID).getAsString());
     }
 
-    public SendPlayerPacket(Integer messageVersion, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
-        super(messageVersion, PacketIdentification.Predefined.SEND_PLAYER, sender, target, parameters);
+    public SendPlayerPacket(Packet packet) {
+        super(packet);
     }
 
     public interface Parameters {

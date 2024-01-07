@@ -1,9 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers;
 
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCLoaderConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
@@ -25,7 +27,12 @@ public class HandshakePingListener extends PacketListener<MagicLink.Handshake.Pi
 
     @Override
     public PacketIdentification target() {
-        return PacketIdentification.Predefined.MAGICLINK_HANDSHAKE;
+        return BuiltInIdentifications.MAGICLINK_HANDSHAKE_PING;
+    }
+
+    @Override
+    public MagicLink.Handshake.Ping wrap(Packet packet) {
+        return new MagicLink.Handshake.Ping(packet);
     }
 
     @Override
@@ -51,33 +58,35 @@ public class HandshakePingListener extends PacketListener<MagicLink.Handshake.Pi
                     .softPlayerCap(magicMCLoaderConfig.playerCap_soft())
                     .hardPlayerCap(magicMCLoaderConfig.playerCap_hard())
                     .weight(magicMCLoaderConfig.weight())
-                    .podName(packet.podName())
+                    .podName("")
                     .build();
             server.register(family.id());
 
             ServerAssignment assignment = ServerAssignment.GENERIC;
             if(family instanceof RankedFamily) assignment = ServerAssignment.RANKED_GAME_SERVER;
 
-            MagicLink.Handshake.Success message = api.services().packetBuilder().startNew()
-                    .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_SUCCESS)
+            Packet response = api.services().packetBuilder().newBuilder()
+                    .identification(BuiltInIdentifications.MAGICLINK_HANDSHAKE_SUCCESS)
                     .sendingToMCLoader(packet.sender())
                     .parameter(MagicLink.Handshake.Success.Parameters.MESSAGE, "Connected to the proxy! Registered as `"+server.serverInfo().getName()+"` into the family `"+server.family().id()+"`. Loaded using the magic config `"+packet.magicConfigName()+"`.")
                     .parameter(MagicLink.Handshake.Success.Parameters.COLOR, NamedTextColor.GREEN.toString())
                     .parameter(MagicLink.Handshake.Success.Parameters.INTERVAL, String.valueOf(serverService.serverInterval()))
                     .parameter(MagicLink.Handshake.Success.Parameters.ASSIGNMENT, assignment.toString())
-                    .build(MagicLink.Handshake.Success.class);
-            backboneMessenger.publish(message);
+                    .build();
+            backboneMessenger.publish(response);
 
         } catch(Exception e) {
-            api.services().packetBuilder().startNew()
-                .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_FAIL)
+            e.printStackTrace();
+            Packet response = api.services().packetBuilder().newBuilder()
+                .identification(BuiltInIdentifications.MAGICLINK_HANDSHAKE_FAIL)
                 .sendingToMCLoader(packet.sender())
                 .parameter(MagicLink.Handshake.Failure.Parameters.REASON, "Attempt to connect to proxy failed! " + e.getMessage())
                 .build();
+            backboneMessenger.publish(response);
         }
     }
 
-    private static void reviveOrConnectServer(Tinder api, MagicLink.Handshake.Ping packet) throws IOException {
+    private static void reviveOrConnectServer(Tinder api, MagicLink.Handshake.Ping packet) {
         ServerService serverService = api.services().server();
 
         try {

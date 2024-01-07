@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.core.messenger;
 
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
@@ -11,11 +10,11 @@ public interface IMessengerConnection extends Service {
      *
      * @param packet The packet to publish.
      */
-    <TPacket extends IPacket> void publish(TPacket packet);
+    void publish(Packet packet);
 
     /**
      * Register a listener to handle particular packets.
      * @param listener The listener to use.
      */
-    <TPacketListener extends PacketListener<? extends GenericPacket>> void listen(TPacketListener listener);
+    <TPacketListener extends PacketListener<? extends Packet.Wrapper>> void listen(TPacketListener listener);
 }

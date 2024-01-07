@@ -11,8 +11,8 @@ public class MCLoaderPacketBuilder implements Service {
         this.flame = flame;
     }
 
-    public GenericPacket.MCLoaderPacketBuilder startNew() {
-        return new GenericPacket.MCLoaderPacketBuilder(flame);
+    public Packet.MCLoaderPacketBuilder newBuilder() {
+        return new Packet.MCLoaderPacketBuilder(flame);
     }
 
     @Override

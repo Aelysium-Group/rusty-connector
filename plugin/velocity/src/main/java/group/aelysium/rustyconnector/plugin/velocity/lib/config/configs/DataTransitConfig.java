@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
@@ -90,7 +91,7 @@ public class DataTransitConfig extends YAML implements group.aelysium.rustyconne
             List<String> stringTypes = (List<String>) IYAML.getValue(this.data,"cache.ignored-types",List.class);
             stringTypes.forEach(item -> {
                 try {
-                    this.cache_ignoredTypes.add(PacketIdentification.mapping(item));
+                    this.cache_ignoredTypes.add(BuiltInIdentifications.mapping(item));
                 } catch (Exception ignore) {
                     logger.send(ProxyLang.BOXED_MESSAGE_COLORED.build("There is no packet type of "+item+"! Ignoring...", NamedTextColor.YELLOW));
                 }

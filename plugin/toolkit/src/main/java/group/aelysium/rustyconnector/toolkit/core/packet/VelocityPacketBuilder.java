@@ -11,8 +11,8 @@ public class VelocityPacketBuilder implements Service {
         this.flame = flame;
     }
 
-    public GenericPacket.ProxyPacketBuilder startNew() {
-        return new GenericPacket.ProxyPacketBuilder(flame);
+    public Packet.ProxyPacketBuilder newBuilder() {
+        return new Packet.ProxyPacketBuilder(flame);
     }
 
     @Override
