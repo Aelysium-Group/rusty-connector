@@ -1,22 +1,22 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
-import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
+import group.aelysium.rustyconnector.toolkit.velocity.events.family.RebalanceEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
+import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class Family implements IFamily<MCLoader, Player> {
+public abstract class Family implements IFamily {
     protected final String id;
     protected Metadata metadata;
     protected Settings settings;
@@ -32,31 +32,45 @@ public abstract class Family implements IFamily<MCLoader, Player> {
     }
 
     public Component displayName() {
-        return this.settings.displayName;
+        return this.settings.displayName();
     }
 
-    public MCLoader findServer(@NotNull ServerInfo serverInfo) {
+    public IMCLoader findServer(@NotNull UUID uuid) {
+        // Using MCLoader.Reference should be faster since it uses ServerService#fetch which is backed by HashMap.
+        try {
+            IMCLoader mcLoader = new IMCLoader.Reference(uuid).get();
+            if(mcLoader.family().equals(this)) return mcLoader;
+            else return null;
+        } catch (Exception ignore) {}
+
+        // If the MCLoader can't be found via MCLoader.Reference, try searching the family itself.
         return this.registeredServers().stream()
-                .filter(server -> server.serverInfo().equals(serverInfo)
+                .filter(server -> server.uuid().equals(uuid)
                 ).findFirst().orElse(null);
     }
 
-    public void addServer(MCLoader server) {
-        this.settings.loadBalancer.add(server);
+    public void addServer(@NotNull IMCLoader server) {
+        this.settings.loadBalancer().add(server);
     }
 
-    public void removeServer(MCLoader server) {
-        this.settings.loadBalancer.remove(server);
+    public void removeServer(@NotNull IMCLoader server) {
+        this.settings.loadBalancer().remove(server);
     }
 
     public Whitelist whitelist() {
-        return this.settings.whitelist.get();
+        return this.settings.whitelist().get();
+    }
+
+    public void balance() {
+        this.settings.loadBalancer().completeSort();
+
+        EventDispatch.Safe.fireAndForget(new RebalanceEvent(this));
     }
 
     public List<com.velocitypowered.api.proxy.Player> players(int max) {
         List<com.velocitypowered.api.proxy.Player> players = new ArrayList<>();
 
-        for (MCLoader server : this.registeredServers()) {
+        for (IMCLoader server : this.registeredServers()) {
             if(players.size() > max) break;
 
             players.addAll(server.registeredServer().getPlayersConnected());
@@ -65,31 +79,41 @@ public abstract class Family implements IFamily<MCLoader, Player> {
         return players;
     }
 
-    public List<MCLoader> registeredServers() {
-        List<MCLoader> servers = new ArrayList<>();
-        servers.addAll(this.settings.loadBalancer.servers());
-        servers.addAll(this.settings.loadBalancer.lockedServers());
-        return servers;
+    public List<com.velocitypowered.api.proxy.Player> players() {
+        List<com.velocitypowered.api.proxy.Player> players = new ArrayList<>();
+
+        for (IMCLoader server : this.registeredServers()) {
+            players.addAll(server.registeredServer().getPlayersConnected());
+        }
+
+        return players;
     }
-    public boolean containsServer(ServerInfo serverInfo) {
-        return !(this.findServer(serverInfo) == null);
+
+    public List<IMCLoader> registeredServers() {
+        return this.loadBalancer().servers();
+    }
+    public boolean containsServer(UUID uuid) {
+        try {
+            return new IMCLoader.Reference(uuid).get().family().equals(this);
+        } catch (Exception ignore) {}
+
+        // If the MCLoader can't be found via MCLoader.Reference, try searching the family itself.
+        return this.registeredServers().stream().anyMatch(server -> server.uuid().equals(uuid));
     }
 
     public long playerCount() {
         AtomicLong newPlayerCount = new AtomicLong();
-        this.settings.loadBalancer.servers().forEach(server -> newPlayerCount.addAndGet(server.playerCount()));
+        this.settings.loadBalancer().servers().forEach(server -> newPlayerCount.addAndGet(server.playerCount()));
 
         return newPlayerCount.get();
     }
 
-    public long serverCount() { return this.registeredServers().size(); }
-
-    public LoadBalancer loadBalancer() {
-        return this.settings.loadBalancer;
+    public ILoadBalancer<IMCLoader> loadBalancer() {
+        return this.settings.loadBalancer();
     }
 
     public Family parent() {
-        return this.settings.parent.get(true);
+        return this.settings.parent().get(true);
     }
 
     public Metadata metadata() {
@@ -102,47 +126,5 @@ public abstract class Family implements IFamily<MCLoader, Player> {
         if (o == null || getClass() != o.getClass()) return false;
         Family that = (Family) o;
         return Objects.equals(id, that.id);
-    }
-
-    public record Settings(Component displayName, LoadBalancer loadBalancer, Family.Reference parent, Whitelist.Reference whitelist) {}
-
-    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Family, String> {
-        private boolean rootFamily = false;
-
-        public Reference(String name) {
-            super(name);
-        }
-        protected Reference() {
-            super(null);
-            this.rootFamily = true;
-        }
-
-        public Family get() {
-            if(rootFamily) return Tinder.get().services().family().rootFamily();
-            return Tinder.get().services().family().find(this.referencer).orElseThrow();
-        }
-
-        /**
-         * Gets the family referenced.
-         * If no family could be found and {@param fetchRoot} is disabled, will throw an exception.
-         * If {@param fetchRoot} is enabled and the family isn't found, will return the root family instead.
-         * @param fetchRoot Should the root family be returned if the parent family can't be found?
-         * @return {@link Family}
-         * @throws java.util.NoSuchElementException If {@param fetchRoot} is disabled and the family can't be found.
-         */
-        public Family get(boolean fetchRoot) {
-            if(rootFamily) return Tinder.get().services().family().rootFamily();
-            if(fetchRoot)
-                try {
-                    return Tinder.get().services().family().find(this.referencer).orElseThrow();
-                } catch (Exception ignore) {
-                    return Tinder.get().services().family().rootFamily();
-                }
-            else return Tinder.get().services().family().find(this.referencer).orElseThrow();
-        }
-
-        public static Reference rootFamily() {
-            return new Reference();
-        }
     }
 }

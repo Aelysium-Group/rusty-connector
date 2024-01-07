@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-rustyconnector:
     if: contains(github.event.head_commit.message, '[actions skip]') == false
     runs-on: ubuntu-latest
     steps:
@@ -25,6 +25,12 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: rustyconnector
+    - name: Cache Gradle Packages
+      uses: actions/cache@v3
+      with:
+        key: ${{ runner.os }}-rcbuild-${{ hashFiles('**rustyconnector/plugin/gradle.properties') }}
+        path: |
+          rustyconnector/plugin/.gradle/loom-cache
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
@@ -39,15 +45,44 @@ jobs:
         cd rustyconnector/plugin
         chmod +x ./gradlew
         ./gradlew build
-    #- name: Build Websocket-Bridge With Gradle
-    #  run : |
-    #    cd rustyconnector/websocket-bridge
-    #    chmod +x ./gradlew
-    #    ./gradlew build
     - name: Capture Build Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: RustyConnector Artifacts
         path: |
           rustyconnector/plugin/build/libs/
-         #rustyconnector/websocket-bridge/build/libs/
+    
+#  build-websocket-bridge:
+#    if: contains(github.event.head_commit.message, '[actions skip]') == false
+#    runs-on: ubuntu-latest
+#    steps:
+#    - name: Checkout codes
+#      uses: actions/checkout@v3
+#      with:
+#        path: rustyconnector
+#    - name: Cache Gradle Packages
+#      uses: actions/cache@v3
+#      with:
+#        key: ${{ runner.os }}-wsbridge_build-${{ hashFiles('**rustyconnector/websocket-bridge/build.gradle') }}
+#        path: |
+#          rustyconnector/websocket-bridge/.gradle/caches
+#    - name: Set up JDK 17
+#      uses: actions/setup-java@v3
+#      with:
+#        java-version: '17'
+#        distribution: 'temurin'
+#    - name: Setup Gradle
+#      uses: gradle/gradle-build-action@v2
+#    - name: Validate Gradle Wrapper
+#      uses: gradle/wrapper-validation-action@v1
+#    - name: Build Websocket-Bridge With Gradle
+#      run : |
+#        cd rustyconnector/websocket-bridge
+#        chmod +x ./gradlew
+#        ./gradlew build
+#    - name: Capture Build Artifacts
+#      uses: actions/upload-artifact@v3
+#      with:
+#        name: WebSocket-Bridge Artifacts
+#        path: |
+#          rustyconnector/websocket-bridge/build/libs/

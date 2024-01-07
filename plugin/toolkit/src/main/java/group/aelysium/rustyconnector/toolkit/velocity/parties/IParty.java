@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
 import java.util.Vector;
 
-public interface IParty<TMCLoader extends IMCLoader> {
+public interface IParty {
     /**
      * Sets the server that this party is assigned to.
      * <p>
@@ -15,21 +15,21 @@ public interface IParty<TMCLoader extends IMCLoader> {
      * This will automatically connect the party to the new server and also set the party's server to the new server.
      * @param server The server to assign to this party.
      */
-    void setServer(TMCLoader server);
+    void setServer(IMCLoader server);
 
     /**
      * Gets the server that this party has been assigned to.
      * @return {@link IMCLoader}
      */
-    TMCLoader server();
+    IMCLoader server();
 
     /**
      * Gets the leader of this party.
      * If the leader is no longer a member of the party, or if they aren't online anymore, this method will call {@link IParty#newRandomLeader()} and assign a new leader.
-     * @return {@link Player}
+     * @return {@link IPlayer}
      * @throws IllegalStateException If the party is empty.
      */
-    Player leader() throws IllegalStateException;
+    IPlayer leader() throws IllegalStateException;
 
     /**
      * Sets a player as the leader of this party.
@@ -43,7 +43,7 @@ public interface IParty<TMCLoader extends IMCLoader> {
      * @param player The player to set as leader.
      * @throws IllegalStateException If the player isn't a member of the party.
      */
-    void setLeader(Player player) throws IllegalStateException;
+    void setLeader(IPlayer player) throws IllegalStateException;
 
     /**
      * Effectively set a new leader.
@@ -66,19 +66,19 @@ public interface IParty<TMCLoader extends IMCLoader> {
 
     /**
      * Gets a vector of all the players in this party.
-     * @return {@link Vector<Player>}
+     * @return {@link Vector< IPlayer >}
      */
-    Vector<Player> players();
+    Vector<IPlayer> players();
 
     /**
      * Adds the player to this party.
-     * This method does not connect the player to the party's server. You'll need to use {@link IParty#server()}.{@link IMCLoader#directConnect(Player) directConnect(Player)}.
+     * This method does not connect the player to the party's server. You'll need to use {@link IParty#server()}.{@link IMCLoader#directConnect(IPlayer) directConnect(Player)}.
      * However, once a player is in a party, they will be pulled into the next server the party travels to.
      * @param player The player to join the party.
      * @throws IllegalStateException If the party is empty. Empty parties are marked as "destroyable" and get decomposed. You'll have to create a new party and connect the player to that one instead.
      * @throws RuntimeException If the party is full. Checks {@link IParty#players()}.{@link Vector#size()} against {@link PartyServiceSettings#maxMembers()}.
      */
-    void join(Player player) throws IllegalStateException, RuntimeException;
+    void join(IPlayer player) throws IllegalStateException, RuntimeException;
 
     /**
      * Removes the player from this party.
@@ -90,7 +90,7 @@ public interface IParty<TMCLoader extends IMCLoader> {
      * If this player was the leader of this party (but not the last member) this method will call {@link IParty#newRandomLeader()} and assign a new, random leader.
      * @param player The player to leave.
      */
-    void leave(Player player);
+    void leave(IPlayer player);
 
     /**
      * Broadcast a message to all members of the party.
@@ -103,7 +103,7 @@ public interface IParty<TMCLoader extends IMCLoader> {
      * @param player The player to check for.
      * @return {@link Boolean}
      */
-    boolean contains(Player player);
+    boolean contains(IPlayer player);
 
     /**
      * Decomposes the party, removing its data and making it unusable.
@@ -114,8 +114,8 @@ public interface IParty<TMCLoader extends IMCLoader> {
      * This method connects the entire party to the specified server.
      * It also calls {@link IParty#setServer(IMCLoader)}, setting the passed server as this party's new server.
      * <p>
-     * If this player is unable to join the server for some reason, they will be kicked from the party via {@link IParty#leave(Player)} and receive an error message.
+     * If this player is unable to join the server for some reason, they will be kicked from the party via {@link IParty#leave(IPlayer)} and receive an error message.
      * @param server The server to connect to.
      */
-    void connect(TMCLoader server);
+    void connect(IMCLoader server);
 }

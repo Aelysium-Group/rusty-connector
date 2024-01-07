@@ -2,8 +2,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.webhook;
 
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 public interface DiscordWebhookMessage {
     String IMAGE_PROXY__REGISTER_ALL = "https://cdn.discordapp.com/attachments/1098811303679774851/1100480087037591653/PROXY__REGISTER_ALL.png";
@@ -39,7 +39,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_AQUA)
                     .build();
 
-    ParameterizedEmbed2<MCLoader, String> PROXY__SERVER_REGISTER = (server, familyName) ->
+    ParameterizedEmbed2<IMCLoader, String> PROXY__SERVER_REGISTER = (server, familyName) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -53,7 +53,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_GREEN)
                     .build();
 
-    ParameterizedEmbed1<MCLoader> PROXY__SERVER_UNREGISTER = (server) ->
+    ParameterizedEmbed1<IMCLoader> PROXY__SERVER_UNREGISTER = (server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -67,7 +67,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed2<Player, MCLoader> PROXY__PLAYER_JOIN = (player, server) ->
+    ParameterizedEmbed2<IPlayer, IMCLoader> PROXY__PLAYER_JOIN = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -83,7 +83,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_GREEN)
                     .build();
 
-    ParameterizedEmbed1<Player> PROXY__PLAYER_LEAVE = (player) ->
+    ParameterizedEmbed1<IPlayer> PROXY__PLAYER_LEAVE = (player) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -97,7 +97,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed2<Player, MCLoader> PROXY__PLAYER_JOIN_FAMILY = (player, server) ->
+    ParameterizedEmbed2<IPlayer, IMCLoader> PROXY__PLAYER_JOIN_FAMILY = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -112,7 +112,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_GREEN)
                     .build();
 
-    ParameterizedEmbed2<Player, MCLoader> PROXY__PLAYER_LEAVE_FAMILY = (player, server) ->
+    ParameterizedEmbed2<IPlayer, IMCLoader> PROXY__PLAYER_LEAVE_FAMILY = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -126,7 +126,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed3<Player, MCLoader, MCLoader> PROXY__PLAYER_SWITCH_SERVER = (player, oldServer, newServer) -> {
+    ParameterizedEmbed3<IPlayer, IMCLoader, IMCLoader> PROXY__PLAYER_SWITCH_SERVER = (player, oldServer, newServer) -> {
         if(oldServer.family().equals(newServer.family()))
             return new WebhookEmbedBuilder()
                     .setAuthor(
@@ -158,7 +158,7 @@ public interface DiscordWebhookMessage {
                 .build();
     };
 
-    ParameterizedEmbed3<Player, MCLoader, MCLoader> PROXY__PLAYER_SWITCH_FAMILY = (player, oldServer, newServer) ->
+    ParameterizedEmbed3<IPlayer, IMCLoader, IMCLoader> PROXY__PLAYER_SWITCH_FAMILY = (player, oldServer, newServer) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -172,7 +172,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_BLUE)
                     .build();
 
-    ParameterizedEmbed2<Player, MCLoader> PROXY__DISCONNECT_CATCH = (player, newServer) ->
+    ParameterizedEmbed2<IPlayer, IMCLoader> PROXY__DISCONNECT_CATCH = (player, newServer) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -200,7 +200,7 @@ public interface DiscordWebhookMessage {
                     )
                     .setColor(COLOR_AQUA)
                     .build();
-    ParameterizedEmbed2<MCLoader, String> FAMILY__SERVER_REGISTER = (server, familyName) ->
+    ParameterizedEmbed2<IMCLoader, String> FAMILY__SERVER_REGISTER = (server, familyName) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -214,7 +214,7 @@ public interface DiscordWebhookMessage {
                     .addField(new WebhookEmbed.EmbedField(false, "Family", familyName))
                     .setColor(COLOR_GREEN)
                     .build();
-    ParameterizedEmbed1<MCLoader> FAMILY__SERVER_UNREGISTER = (server) ->
+    ParameterizedEmbed1<IMCLoader> FAMILY__SERVER_UNREGISTER = (server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -229,7 +229,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed2<Player, MCLoader> FAMILY__PLAYER_JOIN = (player, server) ->
+    ParameterizedEmbed2<IPlayer, IMCLoader> FAMILY__PLAYER_JOIN = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -245,7 +245,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_GREEN)
                     .build();
 
-    ParameterizedEmbed2<Player, MCLoader> FAMILY__PLAYER_LEAVE = (player, server) ->
+    ParameterizedEmbed2<IPlayer, IMCLoader> FAMILY__PLAYER_LEAVE = (player, server) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(
@@ -261,7 +261,7 @@ public interface DiscordWebhookMessage {
                     .setColor(COLOR_RED)
                     .build();
 
-    ParameterizedEmbed3<Player, MCLoader, MCLoader> FAMILY__PLAYER_SWITCH = (player, oldServer, newServer) ->
+    ParameterizedEmbed3<IPlayer, IMCLoader, IMCLoader> FAMILY__PLAYER_SWITCH = (player, oldServer, newServer) ->
             new WebhookEmbedBuilder()
                     .setAuthor(
                             new WebhookEmbed.EmbedAuthor(

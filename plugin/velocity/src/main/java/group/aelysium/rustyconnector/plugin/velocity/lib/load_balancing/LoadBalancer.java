@@ -1,20 +1,22 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 
-import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
+import group.aelysium.rustyconnector.toolkit.velocity.events.family.MCLoaderLockedEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.family.MCLoaderUnlockedEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
+public abstract class LoadBalancer implements ILoadBalancer<IMCLoader> {
     private boolean weighted;
     private boolean persistence;
     private int attempts;
     protected int index = 0;
-    protected Vector<MCLoader> servers = new Vector<>();
-    protected Vector<MCLoader> lockedServers = new Vector<>();
+    protected Vector<IMCLoader> unlockedServers = new Vector<>();
+    protected Vector<IMCLoader> lockedServers = new Vector<>();
 
     public LoadBalancer(Settings settings) {
         this.weighted = settings.weighted();
@@ -35,12 +37,12 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
         return this.weighted;
     }
 
-    public MCLoader current() {
-        MCLoader item;
+    public IMCLoader current() {
+        IMCLoader item;
         if(this.index >= this.size()) {
             this.index = 0;
-            item = this.servers.get(this.index);
-        } else item = this.servers.get(this.index);
+            item = this.unlockedServers.get(this.index);
+        } else item = this.unlockedServers.get(this.index);
 
         assert item != null;
 
@@ -53,42 +55,50 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
 
     public void iterate() {
         this.index += 1;
-        if(this.index >= this.servers.size()) this.index = 0;
+        if(this.index >= this.unlockedServers.size()) this.index = 0;
     }
 
     final public void forceIterate() {
         this.index += 1;
-        if(this.index >= this.servers.size()) this.index = 0;
+        if(this.index >= this.unlockedServers.size()) this.index = 0;
     }
 
     public abstract void completeSort();
 
     public abstract void singleSort();
 
-    public void add(MCLoader item) {
-        if(this.servers.contains(item)) return;
-        this.servers.add(item);
+    public void add(IMCLoader item) {
+        if(this.unlockedServers.contains(item)) return;
+        this.unlockedServers.add(item);
     }
 
-    public void remove(MCLoader item) {
-        if(this.servers.remove(item)) return;
+    public void remove(IMCLoader item) {
+        if(this.unlockedServers.remove(item)) return;
         this.lockedServers.remove(item);
     }
 
     public int size() {
-        return this.servers.size() + this.lockedServers.size();
+        return this.unlockedServers.size() + this.lockedServers.size();
     }
 
     public int size(boolean locked) {
         if(locked) return this.lockedServers.size();
-        return this.servers.size();
+        return this.unlockedServers.size();
     }
 
-    public List<MCLoader> servers() {
-        return this.servers.stream().toList();
+    public List<IMCLoader> servers() {
+        List<IMCLoader> servers = new ArrayList<>();
+
+        servers.addAll(openServers());
+        servers.addAll(lockedServers());
+
+        return servers;
     }
-    public List<MCLoader> lockedServers() {
-        return this.servers.stream().toList();
+    public List<IMCLoader> openServers() {
+        return this.unlockedServers.stream().toList();
+    }
+    public List<IMCLoader> lockedServers() {
+        return this.lockedServers.stream().toList();
     }
 
     public String toString() {
@@ -108,22 +118,26 @@ public abstract class LoadBalancer implements ILoadBalancer<MCLoader> {
         this.index = 0;
     }
 
-    public boolean contains(MCLoader item) {
-        return this.servers.contains(item);
+    public boolean contains(IMCLoader item) {
+        return this.unlockedServers.contains(item);
     }
 
-    public void lock(MCLoader server) {
-        if(!this.servers.remove(server)) return;
+    public void lock(IMCLoader server) {
+        if(!this.unlockedServers.remove(server)) return;
         this.lockedServers.add(server);
+
+        EventDispatch.Safe.fireAndForget(new MCLoaderLockedEvent(server.family(), server));
     }
 
-    public void unlock(MCLoader server) {
+    public void unlock(IMCLoader server) {
         if(!this.lockedServers.remove(server)) return;
-        this.servers.add(server);
+        this.unlockedServers.add(server);
+
+        EventDispatch.Safe.fireAndForget(new MCLoaderUnlockedEvent(server.family(), server));
     }
 
-    public boolean joinable(MCLoader server) {
-        return this.servers.contains(server);
+    public boolean joinable(IMCLoader server) {
+        return this.unlockedServers.contains(server);
     }
 
     public record Settings(boolean weighted, boolean persistence, int attempts) {}

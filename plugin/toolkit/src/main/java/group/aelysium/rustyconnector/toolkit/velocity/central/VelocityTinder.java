@@ -3,18 +3,17 @@ package group.aelysium.rustyconnector.toolkit.velocity.central;
 import group.aelysium.rustyconnector.toolkit.core.lang.ILangService;
 import group.aelysium.rustyconnector.toolkit.core.lang.ILanguageResolver;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.function.Consumer;
 
 /**
  * The root api endpoint for the entire RustyConnector api.
  */
 public interface VelocityTinder {
-    /**
-     * Ignites a {@link VelocityFlame} which effectively starts the RustyConnector kernel.
-     */
-    void ignite() throws RuntimeException;
-
     /**
      * Allows access to the {@link PluginLogger} used by RustyConnector.
      * @return {@link PluginLogger}
@@ -25,14 +24,9 @@ public interface VelocityTinder {
      * Allows access to RustyConnector's data folder.
      * @return {@link String}
      */
-    String dataFolder();
+    Path dataFolder();
 
     ILangService<? extends ILanguageResolver> lang();
-
-    /**
-     * Restarts the entire RustyConnector kernel by exhausting the current {@link VelocityFlame} and igniting a new one.
-     */
-    void rekindle();
 
     /**
      * Allows access to RustyConnector's available services.
@@ -55,4 +49,18 @@ public interface VelocityTinder {
     static InputStream resourceAsStream(String filename)  {
         return VelocityTinder.class.getClassLoader().getResourceAsStream(filename);
     }
+
+    /**
+     * Schedules a consumer to be executed once a flame has started for RustyConnector.
+     * Specifically, this method will run after the base RustyConnector plugin has fully booted.
+     * @param callback A consumer. The passed input argument is the newly created Flame instance.
+     */
+    <TFlame extends VelocityFlame<?>> void onStart(Consumer<TFlame> callback);
+
+    /**
+     * Schedules a runnable to be executed once a flame is ready to be killed for RustyConnector.
+     * Specifically, this method will run before the base RustyConnector attempts to start shutting down.
+     * @param callback A runnable.
+     */
+    void onStop(Runnable callback);
 }

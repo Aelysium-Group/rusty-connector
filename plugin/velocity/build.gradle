@@ -5,13 +5,12 @@ compileJava {
 dependencies {
     // Include in jar
     implementation "club.minnced:discord-webhooks:${project.discord_version}"
-    implementation "com.sparkjava:spark-core:${project.spark_version}"
-    implementation "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
-    implementation "one.microstream:microstream-storage-embedded:${project.microstream_version}"
-    implementation "one.microstream:microstream-afs-sql:${project.microstream_sql_version}"
+
+    implementation "org.eclipse.store:storage-embedded:${project.eclipsestore_version}"
+    implementation "org.eclipse.store:afs-sql:${project.eclipsestore_sql_version}"
     implementation "org.mariadb.jdbc:mariadb-java-client:${project.mariadb_version}"
+
     implementation "io.fabric8:kubernetes-client:${project.kubernetes_version}"
-    implementation "de.gesundkrank.jskills:jskills:${project.jskills_version}"
 
     // Dev Only
     shadow project(path: ':core', configuration: 'shadow')

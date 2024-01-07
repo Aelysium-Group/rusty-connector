@@ -2,19 +2,19 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import org.slf4j.Logger;
 
-import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Vector;
+import java.util.function.Consumer;
 
 /**
  * The root api endpoint for the entire RustyConnector api.
@@ -31,6 +31,8 @@ public class Tinder implements VelocityTinder {
     private final Path dataFolder;
     private final PluginLogger pluginLogger;
     private final LangService lang;
+    private final Vector<Consumer<Flame>> onStart = new Vector<>();
+    private final Vector<Runnable> onStop = new Vector<>();
 
     private Tinder(VelocityRustyConnector plugin, ProxyServer server, PluginLogger logger, @DataDirectory Path dataFolder, LangService lang) {
         instance = this;
@@ -47,14 +49,16 @@ public class Tinder implements VelocityTinder {
      */
     public void ignite() throws RuntimeException {
         this.flame = Flame.fabricateNew(this.plugin, this.lang);
+
+        this.onStart.forEach(callback -> callback.accept(this.flame));
     }
 
     public PluginLogger logger() {
         return this.pluginLogger;
     }
 
-    public String dataFolder() {
-        return String.valueOf(this.dataFolder);
+    public Path dataFolder() {
+        return this.dataFolder;
     }
 
     public LangService lang() {
@@ -66,13 +70,25 @@ public class Tinder implements VelocityTinder {
      */
     public void rekindle() {
         try {
-            this.flame.exhaust(this.plugin);
+            this.onStop.forEach(Runnable::run);
+
+            this.exhaust(this.plugin);
             this.flame = null;
 
             this.ignite();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Kill the {@link Flame}.
+     * Typically good for if you want to ignite a new one.
+     */
+    public void exhaust(VelocityRustyConnector plugin) {
+        Tinder.get().velocityServer().getEventManager().unregisterListeners(plugin);
+        if(this.flame == null) return;
+        this.flame.kill();
     }
 
     public CoreServiceHandler services() {
@@ -93,7 +109,7 @@ public class Tinder implements VelocityTinder {
      * @return The resource as a stream.
      */
     public static InputStream resourceAsStream(String filename)  {
-        return MCLoaderTinder.class.getClassLoader().getResourceAsStream(filename);
+        return IMCLoaderTinder.class.getClassLoader().getResourceAsStream(filename);
     }
 
     /**
@@ -104,40 +120,28 @@ public class Tinder implements VelocityTinder {
     }
 
     /**
-     * Registers a server with this proxy.` A server with this id should not already exist.
-     *
-     * @param serverInfo the server to register
-     * @return the newly registered server
-     */
-    public RegisteredServer registerServer(ServerInfo serverInfo) {
-        return velocityServer().registerServer(serverInfo);
-    }
-
-    /**
-     * Unregisters this server from the proxy.
-     *
-     * @param serverInfo the server to unregister
-     */
-    public void unregisterServer(ServerInfo serverInfo) {
-        velocityServer().unregisterServer(serverInfo);
-    }
-
-    /**
      * Creates new {@link Tinder} based on the gathered resources.
      */
     public static Tinder gather(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
         try {
             PluginLogger pluginLogger = new PluginLogger(logger);
-            RootLanguageConfig config = new RootLanguageConfig(new File(String.valueOf(dataFolder), "language.yml"));
-            if (!config.generate(pluginLogger))
-                throw new IllegalStateException("Unable to load or create language.yml!");
-            config.register();
-
+            RootLanguageConfig config = RootLanguageConfig.construct(dataFolder);
             LangService langService = LangService.resolveLanguageCode(config.getLanguage(), dataFolder);
 
             return new Tinder(plugin, server, pluginLogger, dataFolder, langService);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public <TFlame extends VelocityFlame<?>> void onStart(Consumer<TFlame> callback) {
+        this.onStart.add((Consumer<Flame>) callback);
+        if(this.flame != null) callback.accept((TFlame) this.flame);
+    }
+
+    @Override
+    public void onStop(Runnable callback) {
+        this.onStop.add(callback);
     }
 }

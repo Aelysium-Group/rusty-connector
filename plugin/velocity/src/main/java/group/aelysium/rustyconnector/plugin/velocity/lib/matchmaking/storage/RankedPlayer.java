@@ -4,16 +4,17 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortable, IRankedPlayer<Player, TPlayerRank> {
+public class RankedPlayer implements ISortable, IRankedPlayer {
     protected UUID uuid;
-    protected TPlayerRank rank;
+    protected IPlayerRank<?> rank;
 
-    public RankedPlayer(UUID uuid, TPlayerRank rank) {
+    public RankedPlayer(UUID uuid, IPlayerRank<?> rank) {
         this.uuid = uuid;
         this.rank = rank;
     }
@@ -22,7 +23,7 @@ public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortab
         return uuid;
     }
 
-    public Optional<Player> player() {
+    public Optional<IPlayer> player() {
         try {
             return Optional.of(new Player.Reference(this.uuid).get());
         } catch (Exception ignore) {}
@@ -30,7 +31,7 @@ public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortab
         return Optional.empty();
     }
 
-    public TPlayerRank rank() {
+    public IPlayerRank<?> rank() {
         return this.rank;
     }
 
@@ -48,7 +49,7 @@ public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortab
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RankedPlayer<?> that = (RankedPlayer<?>) o;
+        IRankedPlayer that = (IRankedPlayer) o;
         return Objects.equals(this.uuid, that.uuid());
     }
 
@@ -57,7 +58,7 @@ public class RankedPlayer<TPlayerRank extends IPlayerRank<?>> implements ISortab
         return Objects.hash(uuid);
     }
 
-    public static <TPlayerRank extends IPlayerRank<?>> RankedPlayer<TPlayerRank> from(UUID uuid, TPlayerRank rank) {
-        return new RankedPlayer<>(uuid, rank);
+    public static RankedPlayer from(UUID uuid, IPlayerRank<?> rank) {
+        return new RankedPlayer(uuid, rank);
     }
 }

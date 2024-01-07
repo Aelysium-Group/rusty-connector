@@ -1,15 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.command.CommandManager;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.PartyServiceSettings;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -19,9 +21,9 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PartyService implements IPartyService<Player, MCLoader, Party, PartyInvite> {
-    private final Vector<Party> parties = new Vector<>();
-    private final Vector<PartyInvite> invites = new Vector<>();
+public class PartyService implements IPartyService {
+    private final Vector<IParty> parties = new Vector<>();
+    private final Vector<IPartyInvite> invites = new Vector<>();
     private final PartyServiceSettings settings;
     private final ExecutorService connector;
 
@@ -58,44 +60,44 @@ public class PartyService implements IPartyService<Player, MCLoader, Party, Part
         return this.settings;
     }
 
-    public Party create(com.velocitypowered.api.proxy.Player host, MCLoader server) {
+    public Party create(IPlayer host, IMCLoader server) {
         Party party = new Party(this.settings.maxMembers(), host, server);
         this.parties.add(party);
         return party;
     }
 
-    public void delete(Party party) {
+    public void delete(IParty party) {
         party.decompose();
         this.parties.remove(party);
     }
 
-    public Optional<Party> find(com.velocitypowered.api.proxy.Player member) {
+    public Optional<IParty> find(IPlayer member) {
         return this.parties.stream().filter(party -> party.contains(member)).findFirst();
     }
 
-    public void disband(Party party) {
-        for (com.velocitypowered.api.proxy.Player player : party.players()) {
-            player.sendMessage(VelocityLang.PARTY_DISBANDED);
+    public void disband(IParty party) {
+        for (IPlayer player : party.players()) {
+            player.sendMessage(ProxyLang.PARTY_DISBANDED);
         }
         this.delete(party);
     }
 
-    public PartyInvite invitePlayer(Party party, com.velocitypowered.api.proxy.Player sender, com.velocitypowered.api.proxy.Player target) {
+    public IPartyInvite invitePlayer(IParty party, IPlayer sender, IPlayer target) {
         Tinder api = Tinder.get();
 
         if(party.leader() != sender && this.settings.onlyLeaderCanInvite())
-            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ONLY_LEADER_CAN_INVITE);
+            throw new IllegalStateException(ProxyLang.PARTY_INJECTED_ONLY_LEADER_CAN_INVITE);
 
         if(this.settings.friendsOnly())
             try {
                 FriendsService friendsService = api.services().friends().orElse(null);
                 if(friendsService == null) {
-                    api.logger().send(Component.text(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
+                    api.logger().send(Component.text(ProxyLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
                     throw new NoOutputException();
                 }
 
-                if(friendsService.findFriends(Player.from(sender)).orElseThrow().contains(target))
-                    throw new IllegalStateException(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION);
+                if(friendsService.findFriends(sender).orElseThrow().contains(target))
+                    throw new IllegalStateException(ProxyLang.PARTY_INJECTED_FRIENDS_RESTRICTION);
             } catch (IllegalStateException e) {
                 throw e;
             } catch (Exception ignore) {}
@@ -103,25 +105,25 @@ public class PartyService implements IPartyService<Player, MCLoader, Party, Part
         PartyInvite invite = new PartyInvite(this, party, sender, target);
         this.invites.add(invite);
 
-        sender.sendMessage(VelocityLang.PARTY_INVITE_SENT.build(target.getUsername()));
+        sender.sendMessage(ProxyLang.PARTY_INVITE_SENT.build(target.username()));
 
-        target.sendMessage(VelocityLang.PARTY_INVITE_RECEIVED.build(sender.getUsername()));
+        target.sendMessage(ProxyLang.PARTY_INVITE_RECEIVED.build(sender.username()));
         return invite;
     }
 
-    public List<PartyInvite> findInvitesToTarget(Player target) {
+    public List<IPartyInvite> findInvitesToTarget(IPlayer target) {
         return this.invites.stream().filter(invite -> invite.target().equals(target)).findAny().stream().toList();
     }
-    public Optional<PartyInvite> findInvite(Player target, Player sender) {
+    public Optional<IPartyInvite> findInvite(IPlayer target, IPlayer sender) {
         return this.invites.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();
     }
 
-    public void closeInvite(PartyInvite invite) {
+    public void closeInvite(IPartyInvite invite) {
         this.invites.remove(invite);
         invite.decompose();
     }
 
-    public List<Party> dump() {
+    public List<IParty> dump() {
         return this.parties.stream().toList();
     }
 

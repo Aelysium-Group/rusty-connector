@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.fabric.events;
 
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.CoordinateRequest;
-import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -21,10 +21,10 @@ public class OnPlayerJoin {
                 try {
                     tpaRequest.teleport();
                 } catch (NullPointerException e) {
-                    player.sendMessage(PluginLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
+                    player.sendMessage(MCLoaderLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
                 }
             } catch (Exception e) {
-                player.sendMessage(PluginLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
+                player.sendMessage(MCLoaderLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
             }
 
             api.services().dynamicTeleport().removeAllPlayersRequests(player.getUuid());

@@ -4,8 +4,9 @@ compileJava {
 
 dependencies {
     shadow "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
-    shadow "net.kyori:adventure-api:${project.adventure_version}"
-    shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
+    shadow "com.google.code.gson:gson:${project.gson_version}"
+    implementation "com.velocitypowered:velocity-api:${project.velocity_version}"
+    implementation "net.engio:mbassador:${project.mbassador_version}"
 }
 
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
@@ -15,6 +16,11 @@ shadowJar {
 
     mergeServiceFiles()
     minimize()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 jar.finalizedBy('shadowJar')

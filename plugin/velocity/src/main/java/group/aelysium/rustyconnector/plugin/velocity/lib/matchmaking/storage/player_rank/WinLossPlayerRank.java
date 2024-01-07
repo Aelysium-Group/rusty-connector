@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScore
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IWinLossPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 
-import static one.microstream.math.XMath.round;
+import static org.eclipse.serializer.math.XMath.round;
 
 public class WinLossPlayerRank implements IWinLossPlayerRank {
     protected int wins = 0;

@@ -2,22 +2,26 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
+import org.eclipse.serializer.collections.lazy.LazyHashMap;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
- * ScoreCard is a representation of a player's entire ranked game history.
- * All ranks associated with a player should be able to be fetched using their score card.
+ * A RankedGame is a representation of all variations of a player's rank within a specific gamemode.
+ * If, over the time of this game existing, it has ranked players based on both ELO and WIN_RATE, both of those
+ * ranks are saved here and can be retrieved.
  */
-public class RankedGame implements IRankedGame<Player, MySQLStorage> {
+public class RankedGame implements IRankedGame<Player> {
     protected String name;
     protected IScoreCard.IRankSchema.Type<?> rankingSchema;
-    protected HashMap<UUID, ScoreCard> scorecards = new HashMap<>();
+    protected Map<UUID, ScoreCard> scorecards = new LazyHashMap<>();
 
     public RankedGame(String name, IScoreCard.IRankSchema.Type<?> schema) {
         this.name = name;
@@ -28,7 +32,7 @@ public class RankedGame implements IRankedGame<Player, MySQLStorage> {
         return this.name;
     }
 
-    public <TPlayerRank extends IPlayerRank<?>> TPlayerRank rankedPlayer(MySQLStorage storage, UUID uuid) {
+    public <TPlayerRank extends IPlayerRank<?>, TMySQLStorage extends IMySQLStorageService> TPlayerRank rankedPlayer(TMySQLStorage storage, UUID uuid) {
         ScoreCard scorecard = this.scorecards.get(uuid);
         if(scorecard == null) {
             ScoreCard newScorecard = new ScoreCard();
@@ -39,12 +43,12 @@ public class RankedGame implements IRankedGame<Player, MySQLStorage> {
             scorecard = newScorecard;
         }
 
-        TPlayerRank rank = scorecard.fetch(storage, this.rankingSchema);
+        TPlayerRank rank = scorecard.fetch((StorageService) storage, this.rankingSchema);
 
         return (TPlayerRank) RankedPlayer.from(uuid, rank);
     }
 
-    public <TPlayerRank extends IPlayerRank<?>> TPlayerRank playerRank(MySQLStorage storage, Player player) throws IllegalStateException {
+    public <TPlayerRank extends IPlayerRank<?>, TMySQLStorage extends IMySQLStorageService> TPlayerRank playerRank(TMySQLStorage storage, Player player) throws IllegalStateException {
         if(rankingSchema == IScoreCard.IRankSchema.RANDOMIZED) return (TPlayerRank) new RandomizedPlayerRank();
 
         ScoreCard scorecard = this.scorecards.get(player.uuid());
@@ -57,12 +61,12 @@ public class RankedGame implements IRankedGame<Player, MySQLStorage> {
             scorecard = fresh;
         }
 
-        TPlayerRank playerRank = scorecard.fetch(storage, this.rankingSchema);
+        TPlayerRank playerRank = scorecard.fetch((StorageService) storage, this.rankingSchema);
         if(playerRank == null) {
             try {
                 TPlayerRank fresh = (TPlayerRank) this.rankingSchema.get().getDeclaredConstructor().newInstance();
 
-                scorecard.store(storage, fresh);
+                scorecard.store((StorageService) storage, fresh);
 
                 playerRank = fresh;
             } catch (Exception e) {
@@ -71,5 +75,11 @@ public class RankedGame implements IRankedGame<Player, MySQLStorage> {
         }
 
         return playerRank;
+    }
+
+    public void quantizeRankSchemas(StorageService storage) {
+        for (ScoreCard scorecard : this.scorecards.values()) {
+            scorecard.quantize(storage, this.rankingSchema);
+        }
     }
 }

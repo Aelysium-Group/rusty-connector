@@ -7,14 +7,10 @@ import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageServi
 
 import java.util.UUID;
 
-/**
- * ScoreCard is a representation of a player's entire ranked game history.
- * All ranks associated with a player should be able to be fetched using their scorecard.
- */
-public interface IRankedGame<TPlayer extends IPlayer, TMySQLStorage extends IMySQLStorageService> {
+public interface IRankedGame<TPlayer extends IPlayer> {
     String name();
 
-    <TPlayerRank extends IPlayerRank<?>> TPlayerRank rankedPlayer(TMySQLStorage storage, UUID uuid);
+    <TPlayerRank extends IPlayerRank<?>, TMySQLStorage extends IMySQLStorageService> TPlayerRank rankedPlayer(TMySQLStorage storage, UUID uuid);
 
-    <TPlayerRank extends IPlayerRank<?>> TPlayerRank playerRank(TMySQLStorage storage, TPlayer player) throws IllegalStateException;
+    <TPlayerRank extends IPlayerRank<?>, TMySQLStorage extends IMySQLStorageService> TPlayerRank playerRank(TMySQLStorage storage, TPlayer player) throws IllegalStateException;
 }

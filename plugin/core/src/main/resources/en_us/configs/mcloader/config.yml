@@ -1,0 +1,34 @@
+#
+# If you need help updating your configs from an older version;
+# take a look at our config migration docs:
+#
+# https://wiki.aelysium.group/rusty-connector/docs/updating/
+#
+version: 6
+
+#
+# Define the MCLoader Config to load from the proxy.
+# To define new custom configs in the proxy look in the "magic_configs" folder.
+# The definition below can contain ".yml" or not, it doesn't matter.
+#
+magic-config: "default"
+
+#
+# The address used to connect to this server.
+# This address should match what a player would enter if they were trying to connect directly to this server.
+# Make sure you also include the port number!
+#
+# If you leave this empty, RustyConnector will grab this server's port number and attempt to resolve your server's address from that.
+#
+# Example: 127.0.0.1:25565
+#
+address: ""
+
+#
+# An optional display name that can be used to represent this MCLoader in the console.
+# If you do not provide a display name, this MCLoader's UUID will be shown instead.
+# Please keep in mind that an MCLoader's UUID will change each time you restart it.
+#
+# Display names can't be longer than 16 characters.
+#
+display-name: ""

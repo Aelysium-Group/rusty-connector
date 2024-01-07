@@ -76,15 +76,6 @@ public final class AddressUtil {
     }
 
     /**
-     * Converts a string of format {@code 127.0.0.1:25565} into a resolved address.
-     * @param address The string to convert.
-     * @return A resolved address.
-     */
-    public static InetSocketAddress stringToAddress(String address) {
-        return AddressUtil.parseAndResolveAddress(address);
-    }
-
-    /**
      * Converts an address into a string of format {@code 127.0.0.1:25565}.
      * @param address The address to convert.
      * @return A string of format {@code 127.0.0.1:25565}.

@@ -7,11 +7,17 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.fabric.FabricServerCommandManager;
+import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
-import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.LockServerPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.SendPlayerPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.UnlockServerPacket;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -51,7 +57,7 @@ public final class CommandRusty {
 
                         CacheableMessage message = messageCacheService.findMessage(snowflake);
 
-                        PluginLang.RC_MESSAGE_GET_MESSAGE.send(logger, message.getSnowflake(), message.getDate(), message.getContents());
+                        MCLoaderLang.RC_MESSAGE_GET_MESSAGE.send(logger, message.getSnowflake(), message.getDate(), message.getContents());
                     } catch (NullPointerException e) {
                         logger.log("That message either doesn't exist or is no-longer available in the cache!");
                     } catch (Exception e) {
@@ -77,14 +83,14 @@ public final class CommandRusty {
 
                                 List<CacheableMessage> messagesPage = messageCacheService.fetchMessagesPage(1);
 
-                                PluginLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
+                                MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
                                 return;
                             }
 
                             List<CacheableMessage> messages = messageCacheService.messages();
 
-                            PluginLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
+                            MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
                         } catch (Exception e) {
                             logger.log("There was an issue getting those messages!\n"+e.getMessage());
@@ -113,9 +119,16 @@ public final class CommandRusty {
 
                         UUID playerUUID = Tinder.get().getPlayerUUID(username);
 
-                        api.services().packetBuilder().sendToOtherFamily(playerUUID, familyName);
+                        SendPlayerPacket message = api.services().packetBuilder().startNew()
+                                .identification(PacketIdentification.Predefined.SEND_PLAYER)
+                                .sendingToProxy()
+                                .parameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
+                                .parameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, playerUUID.toString())
+                                .build(SendPlayerPacket.class);
+
+                        api.services().magicLink().connection().orElseThrow().publish(message);
                     } catch (NullPointerException e) {
-                        PluginLang.RC_SEND_USAGE.send(logger);
+                        MCLoaderLang.RC_SEND_USAGE.send(logger);
                     } catch (Exception e) {
                         logger.log("An error stopped us from processing the request!", e);
                     }
@@ -131,10 +144,15 @@ public final class CommandRusty {
         return builder.literal("unlock")
                 .handler(context -> {
                     try {
-                        api.services().packetBuilder().unlockServer();
+                        UnlockServerPacket message = api.services().packetBuilder().startNew()
+                                .identification(PacketIdentification.Predefined.UNLOCK_SERVER)
+                                .sendingToProxy()
+                                .build(UnlockServerPacket.class);
+
+                        api.services().magicLink().connection().orElseThrow().publish(message);
                         logger.log("Unlocking server.");
                     } catch (NullPointerException e) {
-                        PluginLang.RC_SEND_USAGE.send(logger);
+                        MCLoaderLang.RC_SEND_USAGE.send(logger);
                     } catch (Exception e) {
                         logger.log("An error stopped us from processing the request!", e);
                     }
@@ -150,10 +168,15 @@ public final class CommandRusty {
         return builder.literal("lock")
                 .handler(context -> {
                     try {
-                        api.services().packetBuilder().lockServer();
+                        LockServerPacket message = api.services().packetBuilder().startNew()
+                                .identification(PacketIdentification.Predefined.LOCK_SERVER)
+                                .sendingToProxy()
+                                .build(LockServerPacket.class);
+
+                        api.services().magicLink().connection().orElseThrow().publish(message);
                         logger.log("Locking server.");
                     } catch (NullPointerException e) {
-                        PluginLang.RC_SEND_USAGE.send(logger);
+                        MCLoaderLang.RC_SEND_USAGE.send(logger);
                     } catch (Exception e) {
                         logger.log("An error stopped us from processing the request!", e);
                     }

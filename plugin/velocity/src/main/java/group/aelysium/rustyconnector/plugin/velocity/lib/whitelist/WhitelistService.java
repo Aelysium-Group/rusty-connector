@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistService;
 
 import java.util.HashMap;
@@ -7,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class WhitelistService implements IWhitelistService<Whitelist> {
-    private final Map<String, Whitelist> registeredWhitelists = new HashMap<>();
+public class WhitelistService implements IWhitelistService {
+    private final Map<String, IWhitelist> registeredWhitelists = new HashMap<>();
     private Whitelist.Reference proxyWhitelist;
 
-    public Whitelist proxyWhitelist() {
+    public IWhitelist proxyWhitelist() {
         return proxyWhitelist.get();
     }
 
@@ -19,8 +20,8 @@ public class WhitelistService implements IWhitelistService<Whitelist> {
         this.proxyWhitelist = whitelist;
     }
 
-    protected Optional<Whitelist> find(String name) {
-        Whitelist whitelist = this.registeredWhitelists.get(name);
+    public Optional<IWhitelist> find(String name) {
+        IWhitelist whitelist = this.registeredWhitelists.get(name);
         if(whitelist == null) return Optional.empty();
 
         return Optional.of(whitelist);
@@ -31,7 +32,7 @@ public class WhitelistService implements IWhitelistService<Whitelist> {
      * @param whitelist The whitelist to add to this manager.
      */
     @Override
-    public void add(Whitelist whitelist) {
+    public void add(IWhitelist whitelist) {
         this.registeredWhitelists.put(whitelist.name(),whitelist);
     }
 
@@ -40,12 +41,12 @@ public class WhitelistService implements IWhitelistService<Whitelist> {
      * @param whitelist The whitelist to remove from this manager.
      */
     @Override
-    public void remove(Whitelist whitelist) {
+    public void remove(IWhitelist whitelist) {
         this.registeredWhitelists.remove(whitelist.name());
     }
 
     @Override
-    public List<Whitelist> dump() {
+    public List<IWhitelist> dump() {
         return this.registeredWhitelists.values().stream().toList();
     }
 

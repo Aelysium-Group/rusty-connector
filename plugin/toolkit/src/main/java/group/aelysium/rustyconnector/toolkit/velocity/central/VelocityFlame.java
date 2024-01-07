@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.central;
 
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.velocity.util.Version;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
 import net.kyori.adventure.text.Component;
@@ -21,12 +22,6 @@ public abstract class VelocityFlame<TCoreServiceHandler extends ICoreServiceHand
      * @return {@link Version}
      */
     public abstract Version version();
-
-    /**
-     * Gets the current version being used by RustyConnector's config manager.
-     * @return {@link Integer}
-     */
-    public abstract int configVersion();
 
     /**
      * Gets RustyConnector's boot log.

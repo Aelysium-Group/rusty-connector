@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistPlayerFilter;
 
 import java.util.Objects;
@@ -29,18 +29,23 @@ public class WhitelistPlayerFilter implements IWhitelistPlayerFilter {
         this.ip = ip;
     }
 
-    public static boolean validate(Whitelist whitelist, Player playerToValidate) {
+    public static boolean validate(Whitelist whitelist, IPlayer playerToValidate) {
         WhitelistPlayerFilter player = whitelist.playerFilters().stream()
-                .filter(whitelistPlayerFilter -> whitelistPlayerFilter.username().equals(playerToValidate.getUsername()))
+                .filter(whitelistPlayerFilter -> whitelistPlayerFilter.username().equals(playerToValidate.username()))
                 .findAny().orElse(null);
         if(player == null) return false;
 
         if(player.uuid() != null)
-            if(!Objects.equals(player.uuid().toString(), playerToValidate.getUniqueId().toString()))
+            if(!Objects.equals(player.uuid().toString(), playerToValidate.uuid().toString()))
                 return false;
 
-        if(player.ip() != null)
-            return Objects.equals(player.ip(), playerToValidate.getRemoteAddress().getHostString());
+        if(player.ip() != null) {
+            try {
+                return Objects.equals(player.ip(), playerToValidate.resolve().orElseThrow().getRemoteAddress().getHostString());
+            } catch (Exception ignore) {
+                return false;
+            }
+        }
 
         return true;
     }

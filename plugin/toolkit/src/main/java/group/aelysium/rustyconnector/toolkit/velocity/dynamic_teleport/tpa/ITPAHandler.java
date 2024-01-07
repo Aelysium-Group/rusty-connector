@@ -1,23 +1,23 @@
 package group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa;
 
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.util.List;
 
-public interface ITPAHandler<TTPARequest extends ITPARequest> {
-    TTPARequest findRequest(Player sender, Player target);
+public interface ITPAHandler {
+    ITPARequest findRequest(IPlayer sender, IPlayer target);
 
-    TTPARequest findRequestSender(Player sender);
+    ITPARequest findRequestSender(IPlayer sender);
 
-    List<TTPARequest> findRequestsForTarget(Player target);
+    List<ITPARequest> findRequestsForTarget(IPlayer target);
 
-    TTPARequest newRequest(Player sender, Player target);
+    ITPARequest newRequest(IPlayer sender, IPlayer target);
 
-    void remove(TTPARequest request);
+    void remove(ITPARequest request);
 
     void clearExpired();
 
-    List<TTPARequest> dump();
+    List<ITPARequest> dump();
 
     void decompose();
 }

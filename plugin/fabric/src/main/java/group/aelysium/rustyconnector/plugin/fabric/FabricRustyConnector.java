@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.fabric;
 
-import group.aelysium.rustyconnector.toolkit.RustyConnectorToolkit;
+import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -16,19 +16,20 @@ public final class FabricRustyConnector implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        Tinder api = Tinder.gather(this, (Logger) LogManager.getLogger());
-        TinderAdapterForCore.init(api);
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            this.server = server;
 
-        api.logger().log("Initializing RustyConnector...");
-        api.ignite();
-        PluginLang.WORDMARK_RUSTY_CONNECTOR.send(api.logger(), api.flame().versionAsString());
+            Tinder api = Tinder.gather(this, (Logger) LogManager.getLogger());
+            TinderAdapterForCore.init(api);
 
-        RustyConnectorToolkit.register(api);
+            api.logger().log("Initializing RustyConnector...");
+            api.ignite(server.getServerPort());
+            MCLoaderLang.WORDMARK_RUSTY_CONNECTOR.send(api.logger(), api.flame().versionAsString());
 
-        ServerLifecycleEvents.SERVER_STARTING.register(server1 -> server = server1);
+            RustyConnector.Toolkit.register(api);
+        });
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            RustyConnectorToolkit.unregister();
-            Tinder.get().flame().exhaust();
+            Tinder.get().exhaust();
         });
     }
 

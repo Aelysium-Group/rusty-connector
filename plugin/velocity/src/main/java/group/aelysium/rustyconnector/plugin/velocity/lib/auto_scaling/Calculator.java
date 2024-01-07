@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static one.microstream.math.XMath.round;
+import static org.eclipse.serializer.math.XMath.round;
 
 class Calculator {
     protected static LocalDateTime now() {

@@ -1,19 +1,18 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
 import com.google.gson.Gson;
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import group.aelysium.rustyconnector.core.lib.Callable;
-import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.config.WhitelistConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.WhitelistConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -63,7 +62,7 @@ public class Whitelist implements IWhitelist {
      * @param player The player to validate.
      * @return `true` if the player is whitelisted. `false` otherwise.
      */
-    public boolean validate(Player player) {
+    public boolean validate(IPlayer player) {
         Callable<Boolean> validate = () -> {
             if (Whitelist.this.strict)
                 return validateStrict(player);
@@ -77,7 +76,7 @@ public class Whitelist implements IWhitelist {
             return validate.execute();
     }
 
-    private boolean validateStrict(Player player) {
+    private boolean validateStrict(IPlayer player) {
         boolean playersValid = true;
         boolean countryValid = true;
         boolean permissionValid = true;
@@ -87,27 +86,21 @@ public class Whitelist implements IWhitelist {
             if (!WhitelistPlayerFilter.validate(this, player))
                 playersValid = false;
 
-
-        // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
-
-
         if (this.usesPermission())
-            if (!Permission.validate(player, this.permission))
+            if (!Permission.validate(player.resolve().orElse(null), this.permission))
                 permissionValid = false;
 
 
         return (playersValid && countryValid && permissionValid);
     }
 
-    private boolean validateSoft(Player player) {
+    private boolean validateSoft(IPlayer player) {
         if (this.usesPlayers())
             if (WhitelistPlayerFilter.validate(this, player))
                 return true;
 
-        // if(this.usesCountries()) valid = this.validateCountry(ipAddress);
-
         if (this.usesPermission())
-            return Permission.validate(player, this.permission);
+            return Permission.validate(player.resolve().orElse(null), this.permission);
 
         return false;
     }
@@ -116,17 +109,13 @@ public class Whitelist implements IWhitelist {
      * Initializes a whitelist based on a config.
      * @return A whitelist.
      */
-    public static Reference init(DependencyInjector.DI3<List<Component>, LangService, WhitelistService> dependencies, String whitelistName) throws IOException {
+    public static Reference init(DependencyInjector.DI4<List<Component>, LangService, WhitelistService, ConfigService> deps, String whitelistName) throws IOException {
         Tinder api = Tinder.get();
-        List<Component> bootOutput = dependencies.d1();
+        List<Component> bootOutput = deps.d1();
 
         bootOutput.add(Component.text(" | Registering whitelist "+whitelistName+"...", NamedTextColor.DARK_GRAY));
 
-        WhitelistConfig whitelistConfig = new WhitelistConfig(new File(String.valueOf(api.dataFolder()), "whitelists/"+whitelistName+".yml"));
-        if(!whitelistConfig.generate(bootOutput, dependencies.d2(), LangFileMappings.VELOCITY_WHITELIST_TEMPLATE)) {
-            throw new IllegalStateException("Unable to load or create whitelists/"+whitelistName+".yml!");
-        }
-        whitelistConfig.register();
+        WhitelistConfig whitelistConfig = WhitelistConfig.construct(api.dataFolder(), whitelistName, deps.d2(), deps.d4());
 
         Whitelist whitelist = new Whitelist(
                 whitelistName,
@@ -149,17 +138,7 @@ public class Whitelist implements IWhitelist {
 
         bootOutput.add(Component.text(" | Registered whitelist: "+whitelistName, NamedTextColor.YELLOW));
 
-        dependencies.d3().add(whitelist);
+        deps.d3().add(whitelist);
         return new Whitelist.Reference(whitelistName);
-    }
-
-    public static class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<Whitelist, String> {
-        public Reference(String name) {
-            super(name);
-        }
-
-        public Whitelist get() {
-            return Tinder.get().services().whitelist().find(this.referencer).orElseThrow();
-        }
     }
 }

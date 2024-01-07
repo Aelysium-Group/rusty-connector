@@ -14,7 +14,7 @@ en_us.zip:
       - README.md
       - language.yml
         configs:
-            paper: []
-            velocity: []
+            mcloader: []
+            proxy: []
 ```
 Make sure that both the parent folder and also the zip file have the same name.

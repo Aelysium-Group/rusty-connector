@@ -2,13 +2,17 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderFlame;
+import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
+import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderFlame;
+import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
+import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
-import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import net.kyori.adventure.text.Component;
@@ -17,24 +21,23 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.slf4j.Logger;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
 public class Tinder extends MCLoaderTinder {
-    private static Tinder instance;
-
+    protected static Tinder instance;
+    public static Tinder get() {
+        return instance;
+    }
     private final PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
-    private MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> flame;
     private final PluginLogger pluginLogger;
     private final LangService lang;
 
 
     private Tinder(PaperRustyConnector plugin, PluginLogger logger, LangService lang) throws Exception {
-
+        super(logger, lang);
         this.plugin = plugin;
         this.pluginLogger = logger;
         this.lang = lang;
@@ -47,27 +50,6 @@ public class Tinder extends MCLoaderTinder {
         );
 
         instance = this;
-    }
-
-    public static Tinder get() {
-        return instance;
-    }
-
-    /**
-     * Ignites a {@link MCLoaderFlame} which effectively starts the RustyConnector kernel.
-     */
-    public void ignite() throws RuntimeException {
-        this.flame = Flame.fabricateNew(this.plugin, this.lang);
-    }
-
-    /**
-     * Restarts the entire RustyConnector kernel by exhausting the current {@link MCLoaderFlame} and igniting a new one.
-     */
-    public void rekindle() {
-        this.flame.exhaust();
-        this.flame = null;
-
-        this.ignite();
     }
 
     @Override
@@ -83,10 +65,6 @@ public class Tinder extends MCLoaderTinder {
     @Override
     public LangService lang() {
         return this.lang;
-    }
-
-    public Path dataFolderPath() {
-        return plugin.getDataFolder().toPath();
     }
 
     @Override
@@ -143,16 +121,9 @@ public class Tinder extends MCLoaderTinder {
         return this.plugin.getServer();
     }
 
-    /**
-     * Returns the currently active RustyConnector kernel.
-     * @return A {@link MCLoaderFlame}.
-     */
-    public MCLoaderFlame<CoreServiceHandler, RedisConnection, RedisConnector> flame() {
-        return this.flame;
-    }
-
-    public CoreServiceHandler services() {
-        return this.flame.services();
+    @Override
+    public Object server() {
+        return this.paperServer();
     }
 
     public PaperCommandManager<CommandSender> commandManager() {
@@ -167,16 +138,24 @@ public class Tinder extends MCLoaderTinder {
         return false;
     }
 
+    @Override
+    public void ignite(int port) throws RuntimeException {
+        super.ignite(port);
+
+        CommandRusty.create(this.commandManager());
+
+        this.paperServer().getPluginManager().registerEvents(new OnPlayerJoin(), plugin);
+        this.paperServer().getPluginManager().registerEvents(new OnPlayerLeave(), plugin);
+        this.paperServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), plugin);
+    }
+
     /**
      * Creates new {@link Tinder} based on the gathered resources.
      */
     public static Tinder gather(PaperRustyConnector plugin, Logger logger) {
         PluginLogger pluginLogger = new PluginLogger(logger);
         try {
-            RootLanguageConfig config = new RootLanguageConfig(new File(plugin.getDataFolder(), "language.yml"));
-            if (!config.generate(pluginLogger))
-                throw new IllegalStateException("Unable to load or create language.yml!");
-            config.register();
+            RootLanguageConfig config = RootLanguageConfig.construct(plugin.getDataFolder().toPath());
 
             LangService langService = LangService.resolveLanguageCode(config.getLanguage(), plugin.getDataFolder().toPath());
 

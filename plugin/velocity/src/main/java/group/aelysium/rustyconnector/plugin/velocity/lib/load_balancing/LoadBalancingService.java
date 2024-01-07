@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
@@ -24,9 +24,9 @@ public class LoadBalancingService extends ClockService {
                 try {
                     PluginLogger logger = deps.d2();
 
-                    family.loadBalancer().completeSort();
+                    family.balance();
                     if (logger.loggerGate().check(GateKey.FAMILY_BALANCING))
-                        VelocityLang.FAMILY_BALANCING.send(logger, family);
+                        ProxyLang.FAMILY_BALANCING.send(logger, family);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

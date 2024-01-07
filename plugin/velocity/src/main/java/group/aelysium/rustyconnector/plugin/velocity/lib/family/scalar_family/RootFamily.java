@@ -1,22 +1,18 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.config.LoadBalancerConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
-import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
-import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
-import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.config.ScalarFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.ScalarFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import net.kyori.adventure.text.Component;
 
@@ -27,32 +23,24 @@ import java.util.List;
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.ROOT_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
-public class RootFamily extends ScalarFamily implements IRootFamily<MCLoader, Player> {
+public class RootFamily extends ScalarFamily implements IRootFamily {
 
-    public RootFamily(Settings settings) {
+    public RootFamily(ScalarFamily.Settings settings) {
         super(settings, ROOT_FAMILY_META);
     }
 
-    public static RootFamily init(DependencyInjector.DI3<List<Component>, LangService, WhitelistService> dependencies, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+    public static RootFamily init(DependencyInjector.DI4<List<Component>, LangService, WhitelistService, ConfigService> deps, String familyName) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Tinder api = Tinder.get();
-        List<Component> bootOutput = dependencies.d1();
-        LangService lang = dependencies.d2();
-        WhitelistService whitelistService = dependencies.d3();
+        List<Component> bootOutput = deps.d1();
+        LangService lang = deps.d2();
+        WhitelistService whitelistService = deps.d3();
 
-        ScalarFamilyConfig config = new ScalarFamilyConfig(api.dataFolder(), familyName);
-        if(!config.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_SCALAR_FAMILY_TEMPLATE)) {
-            throw new IllegalStateException("Unable to load or create families/"+familyName+".scalar.yml!");
-        }
-        config.register();
+        ScalarFamilyConfig config = ScalarFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d4());
 
         AlgorithmType loadBalancerAlgorithm;
         LoadBalancer.Settings loadBalancerSettings;
         {
-            LoadBalancerConfig loadBalancerConfig = new LoadBalancerConfig(api.dataFolder(), config.loadBalancer());
-            if (!loadBalancerConfig.generate(dependencies.d1(), dependencies.d2(), LangFileMappings.VELOCITY_LOAD_BALANCER_TEMPLATE)) {
-                throw new IllegalStateException("Unable to load or create load_balancer/" + config.loadBalancer() + ".yml!");
-            }
-            loadBalancerConfig.register();
+            LoadBalancerConfig loadBalancerConfig = LoadBalancerConfig.construct(api.dataFolder(), config.loadBalancer_name(), lang);
 
             loadBalancerAlgorithm = loadBalancerConfig.getAlgorithm();
 
@@ -65,7 +53,7 @@ public class RootFamily extends ScalarFamily implements IRootFamily<MCLoader, Pl
 
         Whitelist.Reference whitelist = null;
         if (config.isWhitelist_enabled())
-            whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService), config.getWhitelist_name());
+            whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService, deps.d4()), config.getWhitelist_name());
 
         LoadBalancer loadBalancer;
         switch (loadBalancerAlgorithm) {
@@ -75,7 +63,7 @@ public class RootFamily extends ScalarFamily implements IRootFamily<MCLoader, Pl
             default -> throw new RuntimeException("The id used for "+familyName+"'s load balancer is invalid!");
         }
 
-        Settings settings = new ScalarFamily.Settings(familyName, config.displayName(), loadBalancer, null, whitelist);
+        ScalarFamily.Settings settings = new ScalarFamily.Settings(familyName, config.displayName(), loadBalancer, null, whitelist);
         return new RootFamily(settings);
     }
 }

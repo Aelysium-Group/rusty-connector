@@ -1,5 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
+import group.aelysium.rustyconnector.core.lib.events.EventManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.toolkit.core.packet.VelocityPacketBuilder;
 import group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -14,7 +17,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkSer
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 
 import java.util.Map;
@@ -25,20 +28,26 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
         super(services);
     }
 
+    public EventManager events() {
+        return this.find(EventManager.class).orElseThrow();
+    }
     public FamilyService family() {
         return this.find(FamilyService.class).orElseThrow();
     }
     public ServerService server() {
         return this.find(ServerService.class).orElseThrow();
     }
-    public RedisConnector messenger() {
-        return this.find(RedisConnector.class).orElseThrow();
+    public MagicLinkService magicLink() {
+        return this.find(MagicLinkService.class).orElseThrow();
     }
-    public MySQLStorage storage() {
-        return this.find(MySQLStorage.class).orElseThrow();
+    public StorageService storage() {
+        return this.find(StorageService.class).orElseThrow();
     }
     public PlayerService player() {
         return this.find(PlayerService.class).orElseThrow();
+    }
+    public ConfigService config() {
+        return this.find(ConfigService.class).orElseThrow();
     }
     public DataTransitService dataTransitService() {
         return this.find(DataTransitService.class).orElseThrow();
@@ -52,8 +61,8 @@ public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHa
     public LoadBalancingService loadBalancingService() {
         return this.find(LoadBalancingService.class).orElseThrow();
     }
-    public MagicLinkService magicLinkService() {
-        return this.find(MagicLinkService.class).orElseThrow();
+    public VelocityPacketBuilder packetBuilder() {
+        return this.find(VelocityPacketBuilder.class).orElseThrow();
     }
     public Optional<PartyService> party() {
         return this.find(PartyService.class);

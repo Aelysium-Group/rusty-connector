@@ -1,12 +1,11 @@
 package group.aelysium.rustyconnector.toolkit.velocity.friends;
 
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.*;
 
-public interface IFriendsService<TPlayer extends IPlayer, TFriendRequest extends IFriendRequest> extends Service {
+public interface IFriendsService extends Service {
     /**
      * Gets the settings that this {@link IFriendsService} abides by.
      * @return {@link IFriendsService}
@@ -18,24 +17,24 @@ public interface IFriendsService<TPlayer extends IPlayer, TFriendRequest extends
      * @param target The target to search for.
      * @return {@link List<IFriendRequest>}
      */
-    List<TFriendRequest> findRequestsToTarget(TPlayer target);
+    List<IFriendRequest> findRequestsToTarget(IPlayer target);
 
     /**
      * Searches for a list of {@link IFriendRequest friend requests} that are addressed to a target.
      * @param target The target to search for.
      * @return {@link List<IFriendRequest>}
      */
-    Optional<TFriendRequest> findRequest(TPlayer target, TPlayer sender);
+    Optional<IFriendRequest> findRequest(IPlayer target, IPlayer sender);
 
-    Optional<List<TPlayer>> findFriends(TPlayer player);
+    Optional<List<IPlayer>> findFriends(IPlayer player);
 
-    boolean areFriends(TPlayer player1, TPlayer player2);
-    void addFriends(TPlayer player1, TPlayer player2);
-    void removeFriends(TPlayer player1, TPlayer player2);
+    boolean areFriends(IPlayer player1, IPlayer player2);
+    void addFriends(IPlayer player1, IPlayer player2);
+    void removeFriends(IPlayer player1, IPlayer player2);
 
-    IFriendMapping<TPlayer> sendRequest(Player sender, TPlayer target);
+    IFriendMapping sendRequest(IPlayer sender, IPlayer target);
 
-    void closeInvite(TFriendRequest request);
+    void closeInvite(IFriendRequest request);
 
-    Optional<Long> friendCount(TPlayer player);
+    Optional<Long> friendCount(IPlayer player);
 }

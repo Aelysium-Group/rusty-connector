@@ -11,8 +11,9 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -40,11 +41,11 @@ public final class CommandFM {
                     }
 
                     if(!Permission.validate(player, "rustyconnector.command.fm")) {
-                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                        player.sendMessage(ProxyLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    return closeMessage(player, VelocityLang.FM_USAGE);
+                    return closeMessage(player, ProxyLang.FM_USAGE);
                 })
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
@@ -52,7 +53,7 @@ public final class CommandFM {
                             Player player = Player.from(eventPlayer);
 
                             try {
-                                List<Player> friends = friendsService.findFriends(player).orElseThrow();
+                                List<IPlayer> friends = friendsService.findFriends(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -73,11 +74,11 @@ public final class CommandFM {
                             }
 
                             if(!Permission.validate(player, "rustyconnector.command.fm")) {
-                                player.sendMessage(VelocityLang.NO_PERMISSION);
+                                player.sendMessage(ProxyLang.NO_PERMISSION);
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            return closeMessage(player, VelocityLang.FM_USAGE);
+                            return closeMessage(player, ProxyLang.FM_USAGE);
                         }).then(RequiredArgumentBuilder.<CommandSource, String>argument("message", StringArgumentType.greedyString())
                             .executes(context -> {
                                 if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player player)) {
@@ -86,7 +87,7 @@ public final class CommandFM {
                                 }
 
                                 if(!Permission.validate(player, "rustyconnector.command.fm")) {
-                                    player.sendMessage(VelocityLang.NO_PERMISSION);
+                                    player.sendMessage(ProxyLang.NO_PERMISSION);
                                     return Command.SINGLE_SUCCESS;
                                 }
 
@@ -94,19 +95,19 @@ public final class CommandFM {
                                 com.velocitypowered.api.proxy.Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
 
                                 if(targetPlayer == null)
-                                    return closeMessage(player, VelocityLang.NO_PLAYER.build(username));
+                                    return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
                                 if(player.equals(targetPlayer))
-                                    return closeMessage(player, VelocityLang.FRIEND_MESSAGING_NO_SELF_MESSAGING);
+                                    return closeMessage(player, ProxyLang.FRIEND_MESSAGING_NO_SELF_MESSAGING);
                                 if(!friendsService.areFriends(
                                         Player.from(player),
                                         Player.from(targetPlayer)
                                 ))
-                                    return closeMessage(player, VelocityLang.FRIEND_MESSAGING_ONLY_FRIENDS);
+                                    return closeMessage(player, ProxyLang.FRIEND_MESSAGING_ONLY_FRIENDS);
 
                                 String message = context.getArgument("message", String.class);
 
                                 player.sendMessage(Component.text("[you -> "+targetPlayer.getUsername()+"]: "+message, NamedTextColor.GRAY));
-                                targetPlayer.sendMessage(Component.text("["+player.getUsername()+" -> you]: "+message, NamedTextColor.GRAY).hoverEvent(HoverEvent.showText(VelocityLang.FRIEND_MESSAGING_REPLY)).clickEvent(ClickEvent.suggestCommand("/fm "+player.getUsername()+" ")));
+                                targetPlayer.sendMessage(Component.text("["+player.getUsername()+" -> you]: "+message, NamedTextColor.GRAY).hoverEvent(HoverEvent.showText(ProxyLang.FRIEND_MESSAGING_REPLY)).clickEvent(ClickEvent.suggestCommand("/fm "+player.getUsername()+" ")));
 
                                 return Command.SINGLE_SUCCESS;
                             })

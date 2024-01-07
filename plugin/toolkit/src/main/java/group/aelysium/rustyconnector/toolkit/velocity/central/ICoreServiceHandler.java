@@ -1,12 +1,17 @@
 package group.aelysium.rustyconnector.toolkit.velocity.central;
 
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.events.EventManager;
+import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
+import group.aelysium.rustyconnector.toolkit.core.packet.MCLoaderPacketBuilder;
+import group.aelysium.rustyconnector.toolkit.core.packet.VelocityPacketBuilder;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.IServiceableService;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.IDynamicTeleportServiceHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamilyService;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsService;
+import group.aelysium.rustyconnector.toolkit.velocity.magic_link.IMagicLink;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
@@ -22,19 +27,30 @@ import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistServic
 import java.util.Optional;
 
 public interface ICoreServiceHandler extends IServiceHandler {
+
+    /**
+     * Gets the {@link EventManager event manager} which allows access to event based logic.
+     * @return {@link EventManager}
+     */
+    EventManager events();
+
     /**
      * Gets the {@link IFamilyService family service} which allows access to server families and other family related logic.
      * @return {@link IFamilyService}
      */
-    <TMCLoader extends IMCLoader, TPlayer extends IPlayer, TRootFamily extends IRootFamily<TMCLoader, TPlayer>, TBaseFamily extends IFamily<TMCLoader, TPlayer>>
-        IFamilyService<TMCLoader, TPlayer, TRootFamily, TBaseFamily> family();
+    IFamilyService family();
 
     /**
      * Gets the {@link IServerService server service} which allows access to server registration, unregistration, connection, and other server related logic.
      * @return {@link IServerService}
      */
-    <TMCLoader extends IMCLoader, TPlayer extends IPlayer, TBaseFamily extends IFamily<TMCLoader, TPlayer>>
-        IServerService<TMCLoader, TPlayer, TBaseFamily> server();
+    IServerService server();
+
+    /**
+     * Gets RustyConnector's {@link IConfigService config service} which allows direct access to RC configs.
+     * @return {@link IConfigService}
+     */
+    IConfigService config();
 
     /**
      * Gets RustyConnector's {@link IMySQLStorageService remote storage connector service} which allows direct access to database storage.
@@ -52,29 +68,35 @@ public interface ICoreServiceHandler extends IServiceHandler {
      * Gets the {@link IWhitelistService whitelist service} which allows access to the proxy's configured whitelists.
      * @return {@link IWhitelistService}
      */
-    <TWhitelist extends IWhitelist>
-        IWhitelistService<TWhitelist> whitelist();
+    IWhitelistService whitelist();
+
+    /**
+     * Gets the {@link IMagicLink dynamic teleport service}.
+     * The dynamic teleport module may not always be enabled, hence this returns an {@link Optional<IServiceableService<IDynamicTeleportServiceHandler>>}
+     * @return {@link Optional<IServiceableService>}
+     */
+    IMagicLink magicLink();
+
+    VelocityPacketBuilder packetBuilder();
 
     /**
      * Gets the {@link IPartyService party service}.
      * The party module may not always be enabled, hence this returns an {@link Optional<IPartyService>}
      * @return {@link Optional<IPartyService>}
      */
-    <TPlayer extends IPlayer, TMCLoader extends IMCLoader, TParty extends IParty<TMCLoader>, TPartyInvite extends IPartyInvite<TPlayer>>
-        Optional<IPartyService<TPlayer, TMCLoader, TParty, TPartyInvite>> party();
+    Optional<? extends IPartyService> party();
 
     /**
      * Gets the {@link IFriendsService friends service}.
      * The friends module may not always be enabled, hence this returns an {@link Optional<IFriendsService>}
      * @return {@link Optional<IFriendsService>}
      */
-    <TPlayer extends IPlayer, TFriendRequest extends IFriendRequest>
-        Optional<? extends IFriendsService<TPlayer, TFriendRequest>> friends();
+    Optional<? extends IFriendsService> friends();
 
     /**
      * Gets the {@link IServiceableService<IDynamicTeleportServiceHandler> dynamic teleport service}.
      * The dynamic teleport module may not always be enabled, hence this returns an {@link Optional<IServiceableService<IDynamicTeleportServiceHandler>>}
      * @return {@link Optional<IServiceableService>}
      */
-    Optional<? extends IServiceableService<?>> dynamicTeleport();
+    Optional<? extends IServiceableService<? extends IDynamicTeleportServiceHandler>> dynamicTeleport();
 }

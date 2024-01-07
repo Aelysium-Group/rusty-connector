@@ -2,16 +2,14 @@ package group.aelysium.rustyconnector.toolkit.velocity.family;
 
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.family.version_filter.IFamilyCategory;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPlayer, TRootFamily extends IRootFamily<TMCLoader, TPlayer>, TFamily extends IFamily<TMCLoader, TPlayer>> extends Service {
+public interface IFamilyService extends Service {
     boolean shouldCatchDisconnectingPlayers();
 
-    void setRootFamily(TRootFamily family);
+    void setRootFamily(IRootFamily family);
 
     /**
      * Get the root family of this FamilyService.
@@ -19,7 +17,7 @@ public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPl
      * this will return `null`.
      * @return A {@link IRootFamily} or `null`
      */
-    TRootFamily rootFamily();
+    IRootFamily rootFamily();
 
     /**
      * Get the number of families in this {@link IFamilyService}.
@@ -28,24 +26,28 @@ public interface IFamilyService<TMCLoader extends IMCLoader, TPlayer extends IPl
     int size();
 
     /**
+     * Finds a family based on an id.
+     * An alternate route of getting a family, other than "tinder.services().family().find()", can be to use {@link IFamily.Reference new Family.Reference(id)}{@link IFamily.Reference#get() .get()}.
+     * @param id The id to search for.
+     * @return {@link Optional< IFamily >}
+     */
+    Optional<? extends IFamily> find(String id);
+
+    /**
      * Add a family to this manager.
      * @param family The family to add to this manager.
      */
-    void add(TFamily family);
+    void add(IFamily family);
 
     /**
      * Remove a family from this manager.
      * @param family The family to remove from this manager.
      */
-    void remove(TFamily family);
-
-    void add(IFamilyCategory<TPlayer> category);
-
-    void remove(IFamilyCategory<TPlayer> category);
+    void remove(IFamily family);
 
     /**
      * Gets a list of all families in this service.
-     * @return {@link List< TFamily >}
+     * @return {@link List< IFamily >}
      */
-    List<TFamily> dump();
+    List<? extends IFamily> dump();
 }

@@ -19,29 +19,29 @@
 version: "v0.8.0"
 core:
     single_word:
-        reason: "Reason" #
-        status: "Status" #
-        id: "ID" #
-        timestamp: "Timestamp" #
-        contents: "Contents" #
-        pages: "Pages" #
-        usage: "Usage" #
-        leader: "Leader" #
-        party: "Party" #
-        leave: "Leave" #
-        disband: "Disband" #
-        accept: "Accept" #
-        deny: "Deny" #
-        ignore: "Ignore" #
-        date: "Date" #
+        reason: "Reason" # No MiniMessage
+        status: "Status" # No MiniMessage
+        id: "ID" # No MiniMessage
+        timestamp: "Timestamp" # No MiniMessage
+        contents: "Contents" # No MiniMessage
+        pages: "Pages" # No MiniMessage
+        usage: "Usage" # No MiniMessage
+        leader: "Leader" # No MiniMessage
+        party: "Party" # No MiniMessage
+        leave: "Leave" # No MiniMessage
+        disband: "Disband" # No MiniMessage
+        accept: "Accept" # No MiniMessage
+        deny: "Deny" # No MiniMessage
+        ignore: "Ignore" # No MiniMessage
+        date: "Date" # No MiniMessage
     boot_wordmark:
-        developed_by: "Developed by Aelysium | Nathan M." #
-        usage: "Use: `/rc` to get started" #
-    unknown_command: "Unknown command. Type \"/help\" for help." #
+        developed_by: "Developed by" # No MiniMessage
+        usage: "Use: `/rc` to get started" # No MiniMessage
+    unknown_command: "Unknown command. Type \"/help\" for help." # No MiniMessage
     no_permission: "<red>You do not have permission to do this.</red>"
     no_player: "<red><username> has never joined the network!</red>"
     internal_error: "<red>There was an internal error while trying to complete your request.</red>"
-velocity:
+proxy:
     server:
         already_connected: "<red>You're already connected to this server.</red>"
     root:
@@ -74,8 +74,8 @@ velocity:
         not_friends: "<red>You and <username> aren't friends! You can only /tpa to friends!</red>"
         target_query:
             query: "<gold>Hey! <username> has requested to teleport to you!</gold>"
-            accept_tooltip: "Let <username> teleport to you" #
-            deny_tooltip: "Deny <username>'s teleport request" #
+            accept_tooltip: "Let <username> teleport to you" # No MiniMessage
+            deny_tooltip: "Deny <username>'s teleport request" # No MiniMessage
         sender_accepted:
             - "<green><username> accepted your request!</green>"
             - "<gray>Attempting to teleport...</gray>"
@@ -101,64 +101,90 @@ velocity:
         no_family: "<red>There is no family with the name: <family_name></red>"
         no_server: "<red>There is no family with the name: <server_name></red>"
     family:
-        description: "<gray><gold>Gold families</gold> are Scalar. <green>Green families</green> are Static.</gray>"
+        description:
+            - "<gray>Families are colored as: <blue>Scalar</blue>, <green>Static</green>, and <yellow>Ranked</yellow>.</gray>"
+            - "<gray>The family with a star (*) is the root family.</gray>"
         details_usage: "<gray>See more details about a particular family.</gray>"
-        scalar_family:
-            panel:
+        generic:
+            servers:
                 no_registered_servers: "<dark_gray>There are no registered servers.</dark_gray>"
                 no_locked_servers: "<dark_gray>There are no locked servers.</dark_gray>"
                 no_unlocked_servers: "<dark_gray>There are no unlocked servers.</dark_gray>"
+                open_servers: "<aqua>Open Servers</aqua>"
+                locked_servers: "<aqua>Locked Servers</aqua>"
+                details: "   ---| <index_number>. [<server_name>](<server_address>) [<player_count> (<player_soft_cap> <> <player_hard_cap>) w-<server_weight>]" # No MiniMessage
+            command_descriptions:
+                players: "<dark_gray>Returns a list of the players in this family.</dark_gray>"
+                sort: "<dark_gray>Will cause the family to completely resort itself in accordance with it's load balancing algorithm.</dark_gray>"
+                reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
+                locked: "<dark_gray>Shows all locked servers instead of unlocked.</dark_gray>"
+        scalar:
+            panel:
                 info:
-                    - "   ---| Online Players: <player_count>"
-                    - "   ---| Registered Servers: <server_count>"
-                    - "   ---| Joinable Servers: <joinable_count>"
+                    - "   ---| Display Name: <display_name>"
                     - "   ---| Parent Family: <parent_family_name>"
+                    - "   ---| Online Players: <players_count>"
+                    - ""
+                    - "   ---| Servers:"
+                    - "      | - Total: <servers_count>"
+                    - "      | - Open: <servers_open>"
+                    - "      | - Locked: <servers_locked>"
+                    - ""
                     - "   ---| Load Balancing:"
-                    - "      | - Algorithm: <balancing_algorithm>"
-                    - "      | - Weighted Sorting: <weighted>"
-                    - "      | - Persistence: <persistence>"
-                    - "      | - Max Attempts: <persistence_attempts>"
-                registered_servers: "<aqua>Registered Servers</aqua>"
-                commands:
-                    sort: "<dark_gray>Will cause the family to completely resort itself in accordance with it's load balancing algorithm.</dark_gray>"
-                    reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
-                    locked: "<dark_gray>Shows all locked servers instead of unlocked.</dark_gray>"
-        static_family:
+                    - "      | - Algorithm: <load_balancing_algorithm>"
+                    - "      | - Weighted Sorting: <load_balancing_weighted>"
+                    - "      | - Persistence: <load_balancing_persistence>"
+        static:
             residence:
                 missing: "<red>The server you were meant to be connected to is unavailable! In the meantime you've been connected to a fallback server!</red>"
                 blocked_join_attempt: "<red>The server you were meant to be connected to is unavailable! Please try again later!</red>"
             panel:
-                no_registered_servers: "<dark_gray>There are no registered servers.</dark_gray>"
-                no_locked_servers: "<dark_gray>There are no locked servers.</dark_gray>"
-                no_unlocked_servers: "<dark_gray>There are no unlocked servers.</dark_gray>"
                 info:
-                    - "   ---| Online Players: <player_count>"
-                    - "   ---| Registered Servers: <server_count>"
-                    - "   ---| Joinable Servers: <joinable_count>"
+                    - "   ---| Display Name: <display_name>"
                     - "   ---| Parent Family: <parent_family_name>"
+                    - "   ---| Online Players: <player_count>"
+                    - ""
                     - "   ---| Resident Server Expiration: <residence_expiration>"
+                    - "   ---| Servers:"
+                    - "      | - Total: <servers_count>"
+                    - "      | - Open: <servers_open>"
+                    - "      | - Locked: <servers_locked>"
+                    - ""
                     - "   ---| Load Balancing:"
-                    - "      | - Algorithm: <balancing_algorithm>"
-                    - "      | - Weighted Sorting: <weighted>"
-                    - "      | - Persistence: <persistence>"
-                    - "      | - Max Attempts: <persistence_attempts>"
-                registered_servers: "<aqua>Registered Servers</aqua>"
-                commands:
-                    sort: "<dark_gray>Will cause the family to completely resort itself in accordance with it's load balancing algorithm.</dark_gray>"
-                    reset_index: "<dark_gray>Will reset the family's input to the first server in the family.</dark_gray>"
-                    locked: "<dark_gray>Shows all locked servers instead of unlocked.</dark_gray>"
+                    - "      | - Algorithm: <load_balancing_algorithm>"
+                    - "      | - Weighted Sorting: <load_balancing_weighted>"
+                    - "      | - Persistence: <load_balancing_persistence>"
+        ranked:
+            panel:
+                info:
+                    - "   ---| Display Name: <display_name>"
+                    - "   ---| Parent Family: <parent_family_name>"
+                    - ""
+                    - "   ---| Players:"
+                    - "      | - Total: <player_count>"
+                    - "      | - Active: <active_players>"
+                    - "      | - Waiting: <waiting_players>"
+                    - ""
+                    - "   ---| Servers:"
+                    - "      | - Total: <servers_count>"
+                    - "      | - Available: <servers_open>"
+                    - "      | - In Session: <servers_locked>"
+                    - ""
+                    - "   ---| Matchmaker:"
+                    - "      | - Algorithm: <matchmaking_algorithm>"
+                    - "      | - Highest Player: <matchmaking_highest_player>"
+                    - "      | - Lowest Player: <matchmaking_lowest_player>"
     party:
         injected_error:
-            # Always the color red
-            only_leader_can_invite: "Only the party leader can invite other players!" #
+            only_leader_can_invite: "Only the party leader can invite other players!" # No MiniMessage
             friends_restriction_conflict: "You have parties set to only allow players to invite their friends! But the Friends module is disabled! Ignoring..." #
-            friends_restriction: "You are only allowed to invite friends to join your party!" #
-            acknowledged: "This invite has already been closed!" #
-            expired_invite: "This invite has expired!" #
-            no_sender: "The sender is no longer online!" #
-            no_target: "The invited player is no longer online!" #
-            invalid_leader_invite: "The leader that invited you to their party is either no longer in it or isn't the leader anymore!" #
-            invalid_member_invite: "The member that invited you to their party is no longer in it!" #
+            friends_restriction: "You are only allowed to invite friends to join your party!" # No MiniMessage
+            acknowledged: "This invite has already been closed!" # No MiniMessage
+            expired_invite: "This invite has expired!" # No MiniMessage
+            no_sender: "The sender is no longer online!" # No MiniMessage
+            no_target: "The invited player is no longer online!" # No MiniMessage
+            invalid_leader_invite: "The leader that invited you to their party is either no longer in it or isn't the leader anymore!" # No MiniMessage
+            invalid_member_invite: "The member that invited you to their party is no longer in it!" # No MiniMessage
         invite:
             sent: "<green>You invited <username> to join your party!</green>"
             no_double_dipping: "<red>You must leave your current party before joining another party.</red>"
@@ -208,14 +234,13 @@ velocity:
         invite_player: "Invite Player"
     friends:
         injected_error:
-            # Always the color red
-            maxed: "You've already maxed out the number of friends you can have." #
-            acknowledged: "This friend request has already been closed!" #
-            internal_error: "There was an internal error while trying to complete your request." #
+            maxed: "You've already maxed out the number of friends you can have." # No MiniMessage
+            acknowledged: "This friend request has already been closed!" # No MiniMessage
+            internal_error: "There was an internal error while trying to complete your request." # No MiniMessage
         messaging:
             no_self_messaging: "<red>You can't message yourself!</red>"
             only_friends: "<red>You can only send messages to your friends!</red>"
-            reply: "Click to reply" #
+            reply: "Click to reply" # No MiniMessage
         request:
             already_friends: "<red><username> is already your friend!</red>"
             sent: "<green>Friend request sent to <username>! It will expire in 10 minutes.</green>"
@@ -268,7 +293,7 @@ velocity:
         error: "xxxxx"
         family_balancing: "▲▼▲▼▲"
         ping: "<<<<|"
-paper:
+mcloader:
     send:
         usage: "<gray>Send a player from the current server to another family.</gray>"
     tpa:

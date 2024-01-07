@@ -9,9 +9,15 @@ import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
+import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.LockServerPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.SendPlayerPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.variants.UnlockServerPacket;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -25,7 +31,7 @@ public final class CommandRusty {
         manager.command(send(manager));
         manager.command(unlock(manager));
         manager.command(lock(manager));
-        manager.command(game(manager));
+        manager.command(uuid(manager));
     }
 
     private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager) {
@@ -46,7 +52,7 @@ public final class CommandRusty {
 
                                 CacheableMessage message = messageCacheService.findMessage(snowflake);
 
-                                PluginLang.RC_MESSAGE_GET_MESSAGE.send(logger, message.getSnowflake(), message.getDate(), message.getContents());
+                                MCLoaderLang.RC_MESSAGE_GET_MESSAGE.send(logger, message.getSnowflake(), message.getDate(), message.getContents());
                             } catch (NullPointerException e) {
                                 logger.log("That message either doesn't exist or is no-longer available in the cache!");
                             } catch (Exception e) {
@@ -73,14 +79,14 @@ public final class CommandRusty {
 
                                         List<CacheableMessage> messagesPage = messageCacheService.fetchMessagesPage(1);
 
-                                        PluginLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
+                                        MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
                                         return;
                                     }
 
                                     List<CacheableMessage> messages = messageCacheService.messages();
 
-                                    PluginLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
+                                    MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
                                 } catch (Exception e) {
                                     logger.log("There was an issue getting those messages!\n"+e.getMessage());
@@ -108,9 +114,33 @@ public final class CommandRusty {
                                 final Player player = commandContext.get("player");
                                 final String familyName = commandContext.get("family-name");
 
-                                api.services().packetBuilder().sendToOtherFamily(player.getUniqueId(), familyName);
+                                SendPlayerPacket message = api.services().packetBuilder().startNew()
+                                        .identification(PacketIdentification.Predefined.SEND_PLAYER)
+                                        .sendingToProxy()
+                                        .parameter(SendPlayerPacket.ValidParameters.TARGET_FAMILY_NAME, familyName)
+                                        .parameter(SendPlayerPacket.ValidParameters.PLAYER_UUID, player.getUniqueId().toString())
+                                        .build(SendPlayerPacket.class);
+
+                                api.services().magicLink().connection().orElseThrow().publish(message);
                             } catch (NullPointerException e) {
-                                PluginLang.RC_SEND_USAGE.send(logger);
+                                MCLoaderLang.RC_SEND_USAGE.send(logger);
+                            } catch (Exception e) {
+                                logger.log("An error stopped us from processing the request!", e);
+                            }
+                        }).execute());
+    }
+
+    private static Command.Builder<CommandSender> uuid(PaperCommandManager<CommandSender> manager) {
+        Tinder api = Tinder.get();
+        PluginLogger logger = api.logger();
+        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
+
+        return builder.literal("uuid")
+                .senderType(ConsoleCommandSender.class)
+                .handler(context -> manager.taskRecipe().begin(context)
+                        .asynchronous(commandContext -> {
+                            try {
+                                logger.log("This MCLoader's UUID is: "+api.services().serverInfo().uuid());
                             } catch (Exception e) {
                                 logger.log("An error stopped us from processing the request!", e);
                             }
@@ -128,10 +158,15 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                     try {
-                        api.services().packetBuilder().unlockServer();
+                        UnlockServerPacket message = api.services().packetBuilder().startNew()
+                                .identification(PacketIdentification.Predefined.UNLOCK_SERVER)
+                                .sendingToProxy()
+                                .build(UnlockServerPacket.class);
+
+                        api.services().magicLink().connection().orElseThrow().publish(message);
                         logger.log("Unlocking server.");
                     } catch (NullPointerException e) {
-                        PluginLang.RC_SEND_USAGE.send(logger);
+                        MCLoaderLang.RC_SEND_USAGE.send(logger);
                     } catch (Exception e) {
                         logger.log("An error stopped us from processing the request!", e);
                     }
@@ -149,31 +184,17 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                             try {
-                                api.services().packetBuilder().lockServer();
+                                LockServerPacket message = api.services().packetBuilder().startNew()
+                                        .identification(PacketIdentification.Predefined.LOCK_SERVER)
+                                        .sendingToProxy()
+                                        .build(LockServerPacket.class);
+
+                                api.services().magicLink().connection().orElseThrow().publish(message);
                                 logger.log("Locking server.");
                             } catch (NullPointerException e) {
-                                PluginLang.RC_SEND_USAGE.send(logger);
+                                MCLoaderLang.RC_SEND_USAGE.send(logger);
                             } catch (Exception e) {
                                 logger.log("An error stopped us from processing the request!", e);
-                            }
-                        }).execute());
-    }
-
-    private static Command.Builder<CommandSender> game(PaperCommandManager<CommandSender> manager) {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-
-        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
-
-        return builder.literal("game")
-                .senderType(ConsoleCommandSender.class)
-                .argument(StaticArgument.of("end"))
-                .handler(context -> manager.taskRecipe().begin(context)
-                        .asynchronous(commandContext -> {
-                            try {
-                                api.services().rankedGameInterface().endGame();
-                            } catch (Exception e) {
-                                logger.log("An error stopped us from processing that request!", e);
                             }
                         }).execute());
     }

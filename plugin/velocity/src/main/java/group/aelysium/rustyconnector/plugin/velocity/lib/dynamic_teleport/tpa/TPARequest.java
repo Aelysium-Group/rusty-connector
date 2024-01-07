@@ -1,24 +1,22 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa;
 
-import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPARequest;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 
 import java.util.Date;
 
 public class TPARequest implements ITPARequest {
-    private final Player sender;
-    private final Player target;
+    private final IPlayer sender;
+    private final IPlayer target;
     private final Date expiration;
     private TPARequestStatus status = TPARequestStatus.NOT_SENT;
 
-    public TPARequest(Player sender, Player target, LiquidTimestamp lifetime) {
+    public TPARequest(IPlayer sender, IPlayer target, LiquidTimestamp lifetime) {
         this.sender = sender;
         this.target = target;
         this.expiration = new Date(lifetime.epochFromNow());
@@ -28,11 +26,11 @@ public class TPARequest implements ITPARequest {
         this.status = status;
     }
 
-    public Player sender() {
+    public IPlayer sender() {
         return sender;
     }
 
-    public Player target() {
+    public IPlayer target() {
         return target;
     }
 
@@ -46,14 +44,14 @@ public class TPARequest implements ITPARequest {
     }
 
     public void submit() {
-        this.sender().sendMessage(VelocityLang.TPA_REQUEST_SUBMISSION.build(this.target().getUsername()));
-        this.target().sendMessage(VelocityLang.TPA_REQUEST_QUERY.build(this.sender()));
+        this.sender().sendMessage(ProxyLang.TPA_REQUEST_SUBMISSION.build(this.target().username()));
+        this.target().sendMessage(ProxyLang.TPA_REQUEST_QUERY.build((group.aelysium.rustyconnector.plugin.velocity.lib.players.Player) this.sender()));
         this.updateStatus(TPARequestStatus.REQUESTED);
     }
 
     public void deny() {
-        this.sender().sendMessage(VelocityLang.TPA_REQUEST_DENIED_SENDER.build(this.target().getUsername()));
-        this.target().sendMessage(VelocityLang.TPA_REQUEST_DENIED_TARGET.build(this.sender().getUsername()));
+        this.sender().sendMessage(ProxyLang.TPA_REQUEST_DENIED_SENDER.build(this.target().username()));
+        this.target().sendMessage(ProxyLang.TPA_REQUEST_DENIED_TARGET.build(this.sender().username()));
 
         this.updateStatus(TPARequestStatus.DENIED);
     }
@@ -69,19 +67,16 @@ public class TPARequest implements ITPARequest {
         try {
             this.updateStatus(TPARequestStatus.ACCEPTED);
 
-            ServerInfo serverInfo = this.target().getCurrentServer().orElseThrow().getServerInfo();
-            MCLoader server = new MCLoader.Reference(serverInfo).get();
-            Family family = server.family();
-            if(family == null) throw new NullPointerException();
+            MCLoader server = (MCLoader) this.target().server().orElseThrow();
 
             tpaService.tpaSendPlayer(this.sender(), this.target(), server);
 
-            this.sender().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.target().getUsername()));
-            this.target().sendMessage(VelocityLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.sender().getUsername()));
+            this.sender().sendMessage(ProxyLang.TPA_REQUEST_ACCEPTED_SENDER.build(this.target().username()));
+            this.target().sendMessage(ProxyLang.TPA_REQUEST_ACCEPTED_TARGET.build(this.sender().username()));
         } catch (Exception e) {
             e.printStackTrace();
-            this.sender().sendMessage(VelocityLang.TPA_FAILURE.build(this.target().getUsername()));
-            this.target().sendMessage(VelocityLang.TPA_FAILURE_TARGET.build(this.sender().getUsername()));
+            this.sender().sendMessage(ProxyLang.TPA_FAILURE.build(this.target().username()));
+            this.target().sendMessage(ProxyLang.TPA_FAILURE_TARGET.build(this.sender().username()));
 
             this.updateStatus(TPARequestStatus.STALE);
         }
@@ -89,8 +84,8 @@ public class TPARequest implements ITPARequest {
 
     @Override
     public String toString() {
-        return "<TPARequest Sender=" + this.sender().getUsername() +" "+
-               "Target="+ this.target().getUsername() +" "+
+        return "<TPARequest Sender=" + this.sender().username() +" "+
+               "Target="+ this.target().username() +" "+
                "Status="+ this.status +" "+
                "Expiration="+ this.expiration.toString() +" "+
                ">";

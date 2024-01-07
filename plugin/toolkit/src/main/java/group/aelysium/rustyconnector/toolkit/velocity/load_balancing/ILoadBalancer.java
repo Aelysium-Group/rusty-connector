@@ -84,11 +84,18 @@ public interface ILoadBalancer<I> {
     int size(boolean locked);
 
     /**
+     * Returns a list of all servers in this load balancer.
+     * The returned list will contain all open and all locked servers.
+     * @return {@link List<I>}
+     */
+    List<I> servers();
+
+    /**
      * Return all open servers from the load balancer.
      * The returned list is separated from the list the load balancer uses. Changes to the returned list will not be reflected in the load balancer.
      * @return The servers to return.
      */
-    List<I> servers();
+    List<I> openServers();
 
     /**
      * Return all locked servers from the load balancer.

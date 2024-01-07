@@ -1,16 +1,12 @@
 package group.aelysium.rustyconnector.toolkit.mc_loader.server_info;
 
-import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.toolkit.core.server.ServerAssignment;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.UUID;
 
 public interface IServerInfoService extends Service {
-    /**
-     * Gets the info of this server.
-     * @return {@link ServerInfo}
-     */
-    ServerInfo serverInfo();
+    String displayName();
 
     /**
      * Gets the address of this server.
@@ -36,5 +32,11 @@ public interface IServerInfoService extends Service {
      * The server's uuid won't change while it's alive, but once it's restarted or reloaded, the session uuid will change.
      * @return {@link UUID}
      */
-    UUID sessionUUID();
+    UUID uuid();
+
+    /**
+     * Gets the assignment that was given to this server.
+     * @return {@link ServerAssignment}
+     */
+    ServerAssignment assignment();
 }

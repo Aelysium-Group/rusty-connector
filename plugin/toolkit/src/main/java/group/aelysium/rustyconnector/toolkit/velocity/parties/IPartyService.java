@@ -1,14 +1,13 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
-import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoader, TParty extends IParty<TMCLoader>, TPartyInvite extends IPartyInvite<TPlayer>> extends Service {
+public interface IPartyService extends Service {
     /**
      * Gets the settings that this {@link IPartyService} abides by.
      * @return {@link PartyServiceSettings}
@@ -21,7 +20,7 @@ public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoa
      * @param server The server that the party is currently residing in.
      * @return {@link IParty}
      */
-    TParty create(Player host, TMCLoader server);
+    IParty create(IPlayer host, IMCLoader server);
 
     /**
      * Deletes an existing {@link IParty}.
@@ -29,13 +28,13 @@ public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoa
      * Once delete has been called, no other references to this party should be made.
      * @param party The party to delete.
      */
-    void delete(TParty party);
+    void delete(IParty party);
 
     /**
      * Find a party based on its member.
      * @return A party.
      */
-    Optional<TParty> find(Player member);
+    Optional<IParty> find(IPlayer member);
 
     /**
      * Gracefully deletes a party.
@@ -43,7 +42,7 @@ public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoa
      * It will then remove the players, and call {@link IPartyService#delete(IParty)}.
      * @param party The party to disband.
      */
-    void disband(TParty party);
+    void disband(IParty party);
 
     /**
      * Invites a player to join the party.
@@ -52,33 +51,33 @@ public interface IPartyService<TPlayer extends IPlayer, TMCLoader extends IMCLoa
      * @param target The player receiving the invite.
      * @return {@link IPartyInvite}
      */
-    TPartyInvite invitePlayer(TParty party, Player sender, Player target);
+    IPartyInvite invitePlayer(IParty party, IPlayer sender, IPlayer target);
 
     /**
      * Fetches the party invites which have been made to a specific player.
      * @param target The player who has received the invites.
-     * @return {@link List<IPartyInvite>}
+     * @return {@link List< IPartyInvite >}
      */
-    List<TPartyInvite> findInvitesToTarget(TPlayer target);
+    List<IPartyInvite> findInvitesToTarget(IPlayer target);
 
     /**
      * Fetches a specific party invite based on the two players involved in it.
      * @param target The player who received the invite.
      * @param sender The player who sent the invite.
-     * @return {@link Optional<IPartyInvite>}
+     * @return {@link Optional< IPartyInvite >}
      */
-    Optional<TPartyInvite> findInvite(TPlayer target, TPlayer sender);
+    Optional<IPartyInvite> findInvite(IPlayer target, IPlayer sender);
 
     /**
      * Closes an invitation.
      * This method will remove the invite from the party service and decompose it.
      * @param invite The invite to close.
      */
-    void closeInvite(TPartyInvite invite);
+    void closeInvite(IPartyInvite invite);
 
     /**
      * Dumps all currently open parties and returns them as a list.
-     * @return {@link List<IParty>}
+     * @return {@link List< IParty >}
      */
-    List<TParty> dump();
+    List<IParty> dump();
 }

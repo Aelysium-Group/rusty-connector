@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.toolkit.velocity.players;
 
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.RustyConnector;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
 import java.util.Optional;
@@ -13,9 +15,15 @@ public interface IPlayer {
     /**
      * Resolves the rusty player into a currently active online player.
      * If the player isn't online, the resolution will be empty.
-     * @return {@link Optional<Player>}
+     * @return {@link Optional<com.velocitypowered.api.proxy.Player>}
      */
-    Optional<Player> resolve();
+    Optional<com.velocitypowered.api.proxy.Player> resolve();
+
+    /**
+     * Check whether the Player is online.
+     * @return `true` if the player is online. `false` otherwise.
+     */
+    boolean online();
 
     /**
      * Convenience method that will resolve the player and then send a message to them if the resolution was successful.
@@ -30,4 +38,35 @@ public interface IPlayer {
      * @param reason The message to send as the reason for the disconnection.
      */
     void disconnect(Component reason);
+
+    /**
+     * Convenience method that will resolve the player and then return their MCLoader if there is one.
+     */
+    Optional<? extends IMCLoader> server();
+
+    /**
+     * Gets the ranked verison of this player.
+     * @param game The game to fetch the rank from.
+     */
+    Optional<IRankedPlayer> rank(String game);
+
+    class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IPlayer, UUID> {
+        public Reference(UUID uuid) {
+            super(uuid);
+        }
+
+        public <TPlayer extends IPlayer> TPlayer get() {
+            return (TPlayer) RustyConnector.Toolkit.proxy().orElseThrow().services().player().fetch(this.referencer).orElseThrow();
+        }
+    }
+
+    class UsernameReference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IPlayer, String> {
+        public UsernameReference(String username) {
+            super(username);
+        }
+
+        public <TPlayer extends IPlayer> TPlayer get() {
+            return (TPlayer) RustyConnector.Toolkit.proxy().orElseThrow().services().player().fetch(this.referencer).orElseThrow();
+        }
+    }
 }

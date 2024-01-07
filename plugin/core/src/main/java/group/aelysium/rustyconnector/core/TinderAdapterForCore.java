@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core;
 
-import group.aelysium.rustyconnector.toolkit.mc_loader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
 
 /**

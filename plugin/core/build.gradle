@@ -5,27 +5,19 @@ compileJava {
 dependencies {
     // Include in jar
     implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
-    implementation "commons-codec:commons-codec:${project.commons_version}"
-    implementation "com.jcabi:jcabi-log:${project.jcabi_version}"
-    implementation "org.spongepowered:configurate-yaml:${project.configurate_version}"
-    implementation "cloud.commandframework:cloud-paper:${project.cloudpaper_version}"
-    implementation "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
     implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
 
     // Dev only
     shadow project(path: ':toolkit', configuration: 'shadow')
-    shadow "com.google.code.gson:gson:${project.gson_version}"
+    shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
     shadow "org.yaml:snakeyaml:${project.snakeyaml_version}"
+    shadow "net.engio:mbassador:${project.mbassador_version}"
 }
 
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
 shadowJar {
     archiveClassifier.set('')
     archiveVersion.set('')
-
-    minimize {
-        exclude(dependency('cloud.commandframework:cloud-paper:.*'))
-    }
 
     mergeServiceFiles()
     minimize()

@@ -7,6 +7,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -14,7 +15,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.Hu
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
@@ -39,14 +40,11 @@ public class CommandHub {
                     }
                     Player player = Player.from(eventPlayer);
 
-                    ServerInfo serverInfo = eventPlayer.getCurrentServer().orElseThrow().getServerInfo();
-
-                    MCLoader sendersServer = new MCLoader.Reference(serverInfo).get();
-                    Family family = sendersServer.family();
-                    RootFamily rootFamily = familyService.rootFamily();
+                    Family family = player.server().orElseThrow().family();
+                    IRootFamily rootFamily = familyService.rootFamily();
 
                     if(!hubService.isEnabled(family.id())) {
-                        context.getSource().sendMessage(VelocityLang.UNKNOWN_COMMAND);
+                        context.getSource().sendMessage(ProxyLang.UNKNOWN_COMMAND);
                         return Command.SINGLE_SUCCESS;
                     }
 
@@ -57,7 +55,7 @@ public class CommandHub {
                             return Command.SINGLE_SUCCESS;
                         } catch (RuntimeException err) {
                             logger.send(Component.text("Failed to connect player to parent family " + rootFamily.id() + "!",NamedTextColor.RED));
-                            context.getSource().sendMessage(VelocityLang.HUB_CONNECTION_FAILED);
+                            context.getSource().sendMessage(ProxyLang.HUB_CONNECTION_FAILED);
                         }
 
                         return Command.SINGLE_SUCCESS;
@@ -74,7 +72,7 @@ public class CommandHub {
                         rootFamily.connect(player);
                     } catch (RuntimeException err) {
                         logger.send(Component.text("Failed to connect player to parent family " + rootFamily.id() + "!",NamedTextColor.RED));
-                        context.getSource().sendMessage(VelocityLang.HUB_CONNECTION_FAILED);
+                        context.getSource().sendMessage(ProxyLang.HUB_CONNECTION_FAILED);
                     }
 
                     return Command.SINGLE_SUCCESS;

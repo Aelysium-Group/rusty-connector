@@ -12,8 +12,6 @@ import java.util.Base64;
 
 public class AESCryptor implements IAESCryptor {
     private final SecretKey key;
-    private static final int DATA_LENGTH = 128;
-    private Cipher encryptionCipher;
 
     public AESCryptor(SecretKey key) {
         this.key = key;

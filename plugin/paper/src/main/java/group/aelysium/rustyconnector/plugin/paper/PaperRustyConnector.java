@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import group.aelysium.rustyconnector.toolkit.RustyConnectorToolkit;
+import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
-import group.aelysium.rustyconnector.core.mcloader.lib.lang.PluginLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
 import group.aelysium.rustyconnector.plugin.paper.bstats.Metrics;
 import org.bukkit.Bukkit;
@@ -18,10 +18,10 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener {
             TinderAdapterForCore.init(api);
 
             api.logger().log("Initializing RustyConnector...");
-            api.ignite();
-            PluginLang.WORDMARK_RUSTY_CONNECTOR.send(api.logger(), api.flame().versionAsString());
+            api.ignite(Bukkit.getPort());
+            MCLoaderLang.WORDMARK_RUSTY_CONNECTOR.send(api.logger(), api.flame().versionAsString());
 
-            RustyConnectorToolkit.register(api);
+            RustyConnector.Toolkit.register(api);
             try {
                 new Metrics(this, 17973);
                 api.logger().log("Registered to bstats!");
@@ -36,7 +36,7 @@ public final class PaperRustyConnector extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        RustyConnectorToolkit.unregister();
-        Tinder.get().flame().exhaust();
+        RustyConnector.Toolkit.unregister();
+        Tinder.get().exhaust();
     }
 }

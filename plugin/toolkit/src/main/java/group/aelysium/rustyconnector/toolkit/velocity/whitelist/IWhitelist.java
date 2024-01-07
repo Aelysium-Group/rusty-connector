@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.toolkit.velocity.whitelist;
 
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.RustyConnector;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.util.List;
 
@@ -37,14 +39,26 @@ public interface IWhitelist {
 
     /**
      * Fetches a list of player filters.
-     * @return {@link List<  IWhitelistPlayerFilter  >}
+     * @return {@link List<IWhitelistPlayerFilter>}
      */
     List<? extends IWhitelistPlayerFilter> playerFilters();
 
     /**
      * Validate a player against the {@link IWhitelist}.
-     * @param player The {@link Player} to validate.
+     * @param player The {@link IPlayer} to validate.
      * @return `true` if the player is whitelisted. `false` otherwise.
      */
-    boolean validate(Player player);
+    boolean validate(IPlayer player);
+
+
+    class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IWhitelist, String> {
+        public Reference(String name) {
+            super(name);
+        }
+
+        public <TWhitelist extends IWhitelist> TWhitelist get() {
+            VelocityTinder tinder = RustyConnector.Toolkit.proxy().orElseThrow();
+            return (TWhitelist) tinder.services().whitelist().find(this.referencer).orElseThrow();
+        }
+    }
 }
