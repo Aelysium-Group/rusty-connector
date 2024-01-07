@@ -100,6 +100,9 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
     public void publish(Packet packet) {
         this.publisher.publish(packet);
     }
+    public void publish(Packet.Wrapper wrapper) {
+        publish(wrapper.packet());
+    }
 
     @Override
     public <TPacketListener extends PacketListener<? extends Packet.Wrapper>> void listen(TPacketListener listener) {

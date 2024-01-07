@@ -311,7 +311,7 @@ public final class Packet implements JSONParseable {
         }
     }
 
-    public static abstract class Wrapper {
+    public static class Wrapper {
         private final Packet packet;
 
         public int messageVersion() { return this.packet.messageVersion(); }
@@ -319,6 +319,10 @@ public final class Packet implements JSONParseable {
         public UUID target() { return this.packet.target(); }
         public PacketIdentification identification() { return this.packet.identification(); }
         public Map<String, PacketParameter> parameters() { return this.packet.parameters(); }
+        public PacketParameter parameter(String key) { return this.packet.parameters().get(key); }
+        public Packet packet() {
+            return this.packet;
+        }
 
         protected Wrapper(Packet packet) {
             this.packet = packet;
