@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,7 +28,9 @@ public class HandshakePacket extends GenericPacket {
         return this.parameters.get(Parameters.POD_NAME).getAsString();
     }
 
-    private HandshakePacket() { super(); }
+    protected HandshakePacket(Integer messageVersion, PacketIdentification identification, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
+        super(messageVersion, identification, sender, target, parameters);
+    }
 
     public interface Parameters {
         String ADDRESS = "a";

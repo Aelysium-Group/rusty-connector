@@ -32,8 +32,7 @@ public class GenericPacket implements IPacket, JSONParseable {
                 .newInstance(this.messageVersion, this.identification, this.sender, this.target, this.parameters);
     }
 
-    // Only exists so that inheriting packets don't have to define constructors.
-    protected GenericPacket() {
+    private GenericPacket() {
         messageVersion = 0;
         identification = null;
         sender = null;
@@ -41,8 +40,8 @@ public class GenericPacket implements IPacket, JSONParseable {
         parameters = new HashMap<>();
     }
 
-    protected GenericPacket(Integer messageVersion, PacketIdentification identification, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
-        this.messageVersion = messageVersion;
+    protected GenericPacket(Integer version, PacketIdentification identification, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
+        this.messageVersion = version;
         this.identification = identification;
         this.sender = sender;
         this.target = target;
