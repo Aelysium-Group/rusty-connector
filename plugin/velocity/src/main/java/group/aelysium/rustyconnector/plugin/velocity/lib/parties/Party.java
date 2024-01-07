@@ -125,9 +125,9 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
                         case MINIMAL -> {
                             if(server.full()) {
                                 if (kickOnSendFailure) {
-                                    player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
+                                    player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
                                     this.leave(player);
-                                } else player.sendMessage(VelocityLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
+                                } else player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
                                 return;
                             }
                             server.directConnect(player);
@@ -135,9 +135,9 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
                         case MODERATE -> {
                             if(server.maxed()) {
                                 if (kickOnSendFailure) {
-                                    player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
+                                    player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
                                     this.leave(player);
-                                } else player.sendMessage(VelocityLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
+                                } else player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
                                 return;
                             }
                             server.directConnect(player);
@@ -146,9 +146,9 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
                     }
                 } catch (ConnectException e) {
                     if (kickOnSendFailure) {
-                        player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED_GENERIC);
+                        player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_GENERIC);
                         this.leave(player);
-                    } else player.sendMessage(VelocityLang.PARTY_FOLLOWING_FAILED_GENERIC);
+                    } else player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_GENERIC);
                 }
         });
     }
