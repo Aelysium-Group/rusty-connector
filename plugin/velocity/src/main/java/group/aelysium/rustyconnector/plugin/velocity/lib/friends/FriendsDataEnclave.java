@@ -37,11 +37,10 @@ public class FriendsDataEnclave implements IFriendsDataEnclave {
     public Optional<Long> getFriendCount(IPlayer player) {
         try {
             Database root = this.storage.database();
-            long count = root.friends().stream().filter(friendMapping -> friendMapping.contains((group.aelysium.rustyconnector.plugin.velocity.lib.players.Player) player)).count();
+            long count = root.friends().stream().filter(friendMapping -> friendMapping.contains(player)).count();
 
             return Optional.of(count);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignore) {
         }
 
         return Optional.empty();
@@ -59,8 +58,7 @@ public class FriendsDataEnclave implements IFriendsDataEnclave {
             this.storage.store(networkFriends);
 
             return Optional.of(friendMapping);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignore) {
         }
 
         return Optional.empty();
@@ -76,8 +74,7 @@ public class FriendsDataEnclave implements IFriendsDataEnclave {
             networkFriends.remove(friendMapping);
 
             this.storage.store(networkFriends);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignore) {
         }
     }
 }
