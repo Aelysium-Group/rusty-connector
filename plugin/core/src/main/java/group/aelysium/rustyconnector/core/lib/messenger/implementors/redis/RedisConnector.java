@@ -29,7 +29,6 @@ public class RedisConnector extends MessengerConnector {
             this.toClientBuilder(),
             this.cryptor
         );
-        System.out.println("Finished building connection");
 
         return this.connection;
     }

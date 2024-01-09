@@ -10,17 +10,10 @@ import java.util.Optional;
 
 public interface IMagicLinkService extends Service {
     /**
-     * Sets the status of this server's magic link.
-     * Depending on the status this server may make requests to the proxy in different ways.
-     * @param status The status to be set.
-     */
-    void setStatus(MagicLinkStatus status);
-
-    /**
      * Set the ping delay for this upcoming ping.
      * @param delay The delay to set.
      */
-    void setUpcomingPingDelay(int delay);
+    void setDelay(int delay);
 
     /**
      * Starts the heartbeat that this server's magic link uses.

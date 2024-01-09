@@ -106,7 +106,7 @@ public class ScalarFamily extends Family implements IScalarFamily {
 
     public record Settings(
             String id,
-            Component displayName,
+            String displayName,
             LoadBalancer loadBalancer,
             Family.Reference parentFamily,
             Whitelist.Reference whitelist

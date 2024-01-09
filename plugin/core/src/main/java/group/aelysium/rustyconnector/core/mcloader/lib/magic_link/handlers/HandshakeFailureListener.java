@@ -8,7 +8,6 @@ import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
-import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatus;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -36,7 +35,6 @@ public class HandshakeFailureListener extends PacketListener<MagicLink.Handshake
 
         logger.send(Component.text(packet.reason(), NamedTextColor.RED));
         logger.send(Component.text("Waiting 1 minute before trying again...", NamedTextColor.GRAY));
-        service.setUpcomingPingDelay(60);
-        service.setStatus(MagicLinkStatus.SEARCHING);
+        service.setDelay(60);
     }
 }

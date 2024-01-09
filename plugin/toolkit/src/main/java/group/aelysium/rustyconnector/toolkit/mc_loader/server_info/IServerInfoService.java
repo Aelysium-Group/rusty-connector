@@ -28,8 +28,8 @@ public interface IServerInfoService extends Service {
     int playerCount();
 
     /**
-     * Gets the session uuid of this server.
-     * The server's uuid won't change while it's alive, but once it's restarted or reloaded, the session uuid will change.
+     * Gets the session uuid of this MCLoader.
+     * The MCLoader's uuid won't change while it's alive, but once it's restarted or reloaded, the session uuid will change.
      * @return {@link UUID}
      */
     UUID uuid();

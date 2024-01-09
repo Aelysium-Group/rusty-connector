@@ -137,7 +137,7 @@ public class StaticFamily extends Family implements IStaticFamily {
 
     public record Settings(
             String id,
-            Component displayName,
+            String displayName,
             LoadBalancer loadBalancer,
             Family.Reference parentFamily,
             Whitelist.Reference whitelist,

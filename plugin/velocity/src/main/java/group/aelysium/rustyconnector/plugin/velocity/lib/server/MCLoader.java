@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
@@ -15,6 +16,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.UnregisterEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
@@ -98,21 +100,21 @@ public class MCLoader implements IMCLoader {
     /**
      * Set the registered server associated with this PlayerServer.
      * @param registeredServer The RegisteredServer
-     * @deprecated This method should never be used in production code! Use `PlayerServer#register` instead! This is only meant for code testing.
+     * @deprecated This method should never be used in production code! Use {@link MCLoader#register(String)} instead! This is only meant for code testing.
      */
     @Deprecated
     public void registeredServer(RegisteredServer registeredServer) {
         this.registeredServer = registeredServer;
     }
 
-    public void register(@NotNull String familyName) throws Exception {
+    public void register(@NotNull String familyId) throws Exception {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
         try {
-            this.family = new Family.Reference(familyName).get();
+            this.family = new Family.Reference(familyId).get();
         } catch (Exception ignore) {
-            throw new InvalidAlgorithmParameterException("A family with the id `"+familyName+"` doesn't exist!");
+            throw new InvalidAlgorithmParameterException("A family with the id `"+familyId+"` doesn't exist!");
         }
 
         try {
@@ -148,6 +150,15 @@ public class MCLoader implements IMCLoader {
 
             api.velocityServer().unregisterServer(server.serverInfo());
             api.services().server().remove(this);
+
+            try {
+                Packet packet = api.services().packetBuilder().newBuilder()
+                        .identification(BuiltInIdentifications.MAGICLINK_HANDSHAKE_STALE_PING)
+                        .sendingToMCLoader(server.uuid())
+                        .build();
+                api.services().magicLink().connection().orElseThrow().publish(packet);
+            } catch (Exception ignore) {}
+
             if (removeFromFamily)
                 family.removeServer(server);
 
@@ -174,7 +185,6 @@ public class MCLoader implements IMCLoader {
     public boolean maxed() {
         return this.playerCount >= hardPlayerCap;
     }
-
 
     /**
      * Validates the player against the server's current player count.
@@ -346,62 +356,5 @@ public class MCLoader implements IMCLoader {
         if (o == null || getClass() != o.getClass()) return false;
         MCLoader mcLoader = (MCLoader) o;
         return Objects.equals(uuid, mcLoader.uuid());
-    }
-
-    public static class Builder {
-        private UUID uuid;
-        private InetSocketAddress address;
-        private String displayName;
-        private String podName = "";
-        private int weight = 0;
-        private int softPlayerCap = 20;
-        private int hardPlayerCap = 30;
-
-        protected int initialTimeout = 15;
-
-        public Builder address(InetSocketAddress address) {
-            this.address = address;
-            return this;
-        }
-
-        public Builder uuid(UUID uuid) {
-            this.uuid = uuid;
-            return this;
-        }
-
-        public Builder displayName(String displayName) {
-            this.displayName = displayName;
-            return this;
-        }
-
-        public Builder weight(int weight) {
-            this.weight = weight;
-            return this;
-        }
-
-        public Builder softPlayerCap(int softPlayerCap) {
-            this.softPlayerCap = softPlayerCap;
-            return this;
-        }
-
-        public Builder hardPlayerCap(int hardPlayerCap) {
-            this.hardPlayerCap = hardPlayerCap;
-            return this;
-        }
-
-        public Builder podName(String podName) {
-            this.podName = podName;
-            return this;
-        }
-
-        public MCLoader build() throws Exception {
-            if(this.uuid == null) throw new Exception("uuid can't be null!");
-            if(this.address == null) throw new Exception("address can't be null!");
-
-            this.initialTimeout = Tinder.get().services().server().serverTimeout();
-
-            if(this.podName.equals("")) return new MCLoader(uuid, address, displayName, softPlayerCap, hardPlayerCap, weight, initialTimeout);
-            return new K8MCLoader(this.podName, uuid, address, displayName, softPlayerCap, hardPlayerCap, weight, initialTimeout);
-        }
     }
 }

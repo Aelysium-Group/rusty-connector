@@ -20,7 +20,7 @@ import java.text.ParseException;
 import java.util.Optional;
 
 public class StaticFamilyConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.StaticFamilyConfig {
-    private Component displayName;
+    private String displayName;
     private Family.Reference parent_family = Family.Reference.rootFamily();
     private String firstConnection_loadBalancer = "default";
 
@@ -29,7 +29,7 @@ public class StaticFamilyConfig extends YAML implements group.aelysium.rustyconn
     private boolean whitelist_enabled = false;
     private String whitelist_name = "whitelist-template";
 
-    public Component displayName() { return displayName; }
+    public String displayName() { return displayName; }
     public Family.Reference getParent_family() { return parent_family; }
     public String getFirstConnection_loadBalancer() { return firstConnection_loadBalancer; }
 
@@ -69,8 +69,7 @@ public class StaticFamilyConfig extends YAML implements group.aelysium.rustyconn
 
     protected void register() throws IllegalStateException {
         try {
-            String name = IYAML.getValue(this.data, "display-name", String.class);
-            this.displayName = MiniMessage.miniMessage().deserialize(name);
+            this.displayName = IYAML.getValue(this.data, "display-name", String.class);
         } catch (Exception ignore) {}
 
         try {

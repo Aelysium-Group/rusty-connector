@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.toolkit.core.server.ServerAssignment;
 import group.aelysium.rustyconnector.toolkit.mc_loader.server_info.IServerInfoService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -22,7 +23,7 @@ public class ServerInfoService implements IServerInfoService {
     private final String magicConfigPointer;
     private ServerAssignment assignment = ServerAssignment.GENERIC;
 
-    public ServerInfoService(String address, String displayName, String magicConfigPointer, int port) {
+    public ServerInfoService(@NotNull String address, @NotNull String displayName, @NotNull String magicConfigPointer, int port) {
         this.magicConfigPointer = magicConfigPointer;
         this.displayName = displayName;
 

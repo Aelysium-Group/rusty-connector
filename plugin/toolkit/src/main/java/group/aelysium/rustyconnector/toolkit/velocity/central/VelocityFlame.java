@@ -18,6 +18,13 @@ public abstract class VelocityFlame<TCoreServiceHandler extends ICoreServiceHand
     }
 
     /**
+     * Gets the session uuid of this Proxy.
+     * The Proxy's uuid won't change while it's alive, but once it's restarted or reloaded, the session uuid will change.
+     * @return {@link UUID}
+     */
+    public abstract UUID uuid();
+
+    /**
      * Gets the current version of RustyConnector
      * @return {@link Version}
      */

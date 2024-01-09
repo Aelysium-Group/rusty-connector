@@ -48,13 +48,13 @@ public class PacketParameter {
     }
 
     public int getAsInt() {
-        return (int) this.object;
+        return ((Number) this.object).intValue();
     }
     public long getAsLong() {
-        return (long) this.object;
+        return ((Number) this.object).longValue();
     }
     public double getAsDouble() {
-        return (double) this.object;
+        return ((Number) this.object).doubleValue();
     }
     public boolean getAsBoolean() {
         return (boolean) this.object;

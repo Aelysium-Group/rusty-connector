@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public interface IFamily {
     String id();
-    Component displayName();
+    String displayName();
 
     /**
      * Get a server that is a part of the family.
@@ -99,7 +99,7 @@ public interface IFamily {
      */
     void balance();
 
-    record Settings(Component displayName, ILoadBalancer<IMCLoader> loadBalancer, Reference parent, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IWhitelist, String> whitelist) {}
+    record Settings(String displayName, ILoadBalancer<IMCLoader> loadBalancer, Reference parent, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IWhitelist, String> whitelist) {}
 
 
 

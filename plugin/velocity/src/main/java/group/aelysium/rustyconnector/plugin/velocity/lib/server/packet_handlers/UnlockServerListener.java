@@ -26,6 +26,6 @@ public class UnlockServerListener extends PacketListener<group.aelysium.rustycon
 
     @Override
     public void execute(group.aelysium.rustyconnector.core.lib.packets.MCLoader.Unlock packet) throws Exception {
-        new MCLoader.Reference(packet.sender()).get().unlock();
+        new MCLoader.Reference(packet.sender().uuid()).get().unlock();
     }
 }

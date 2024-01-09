@@ -29,6 +29,6 @@ public class RankedGameEndListener extends PacketListener<RankedGame.End> {
 
     @Override
     public void execute(RankedGame.End packet) {
-        RankedMCLoader mcloader = new IRankedMCLoader.Reference(packet.sender()).get();
+        RankedMCLoader mcloader = new IRankedMCLoader.Reference(packet.sender().uuid()).get();
     }
 }

@@ -13,6 +13,7 @@ import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicT
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeFailureListener;
+import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeStalePingListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeSuccessListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameReadyListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
@@ -20,6 +21,7 @@ import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.core.packet.MCLoaderPacketBuilder;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
@@ -178,10 +180,11 @@ class Initialize {
 
         connection.listen(new HandshakeSuccessListener(this.api));
         connection.listen(new HandshakeFailureListener(this.api));
+        connection.listen(new HandshakeStalePingListener(this.api));
         connection.listen(new CoordinateRequestListener(this.api));
         connection.listen(new RankedGameReadyListener(this.api));
 
-        ((RedisConnection) connection).startListening(cacheService, logger, senderUUID);
+        ((RedisConnection) connection).startListening(cacheService, logger, Packet.Node.mcLoader(senderUUID));
 
         logger.send(Component.text("Finished building Connectors.", NamedTextColor.GREEN));
 

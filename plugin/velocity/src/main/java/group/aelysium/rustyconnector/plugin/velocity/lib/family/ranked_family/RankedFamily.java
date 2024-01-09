@@ -130,7 +130,7 @@ public class RankedFamily extends Family implements IRankedFamily {
 
     public record Settings(
             String id,
-            Component displayName,
+            String displayName,
             Family.Reference parentFamily,
             Whitelist.Reference whitelist,
             Matchmaker matchmaker

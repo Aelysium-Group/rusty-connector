@@ -27,6 +27,6 @@ public class LockServerListener extends PacketListener<group.aelysium.rustyconne
 
     @Override
     public void execute(group.aelysium.rustyconnector.core.lib.packets.MCLoader.Lock packet) throws Exception {
-        new MCLoader.Reference(packet.sender()).get().lock();
+        new MCLoader.Reference(packet.sender().uuid()).get().lock();
     }
 }

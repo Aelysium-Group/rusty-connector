@@ -154,7 +154,7 @@ class FamilyC {
                     try {
                         ProxyLang.RC_FAMILY.send(logger);
                     } catch (Exception e) {
-                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting the families!\n"+e.getMessage());
+                        logger.send(Component.text("Something prevented us from getting the families!\n"+e.getMessage(), NamedTextColor.RED));
                     }
 
                     return Command.SINGLE_SUCCESS;
@@ -172,9 +172,9 @@ class FamilyC {
                                 if(family instanceof RankedFamily)
                                     ProxyLang.RC_RANKED_FAMILY_INFO.send(logger, (RankedFamily) family, false);
                             } catch (NoSuchElementException e) {
-                                ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                                logger.send(Component.text("A family with that id doesn't exist!", NamedTextColor.RED));
                             } catch (Exception e) {
-                                ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from getting that family!\n"+e.getMessage());
+                                logger.send(Component.text("Something prevented us from getting that family!\n"+e.getMessage(), NamedTextColor.RED));
                             }
                             return Command.SINGLE_SUCCESS;
                         })
@@ -191,7 +191,7 @@ class FamilyC {
                         String familyName = context.getArgument("familyName", String.class);
                         Family family = new Family.Reference(familyName).get();
                         if(!family.metadata().hasLoadBalancer()) {
-                            ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
+                            logger.send(Component.text("You can only resetIndex on families with load balancers!", NamedTextColor.RED));
                             return Command.SINGLE_SUCCESS;
                         }
 
@@ -204,9 +204,9 @@ class FamilyC {
                         if(family instanceof RankedFamily)
                             ProxyLang.RC_RANKED_FAMILY_INFO.send(logger, (RankedFamily) family, false);
                     } catch (NoSuchElementException e) {
-                        ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                        logger.send(Component.text("A family with that id doesn't exist!", NamedTextColor.RED));
                     } catch (Exception e) {
-                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
+                        logger.send(Component.text("Something prevented us from doing that!\n"+e.getMessage(), NamedTextColor.RED));
                     }
                     return Command.SINGLE_SUCCESS;
                 });
@@ -219,7 +219,7 @@ class FamilyC {
                         String familyName = context.getArgument("familyName", String.class);
                         Family family = new Family.Reference(familyName).get();
                         if(!family.metadata().hasLoadBalancer()) {
-                            ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only resetIndex on families with load balancers!");
+                            logger.send(Component.text("You can only resetIndex on families with load balancers!", NamedTextColor.RED));
                             return Command.SINGLE_SUCCESS;
                         }
 
@@ -232,9 +232,9 @@ class FamilyC {
                         if(family instanceof RankedFamily)
                             ProxyLang.RC_RANKED_FAMILY_INFO.send(logger, (RankedFamily) family, false);
                     } catch (NoSuchElementException e) {
-                        ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                        logger.send(Component.text("A family with that id doesn't exist!", NamedTextColor.RED));
                     } catch (Exception e) {
-                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
+                        logger.send(Component.text("Something prevented us from doing that!\n"+e.getMessage(), NamedTextColor.RED));
                     }
                     return 1;
                 });
@@ -254,9 +254,9 @@ class FamilyC {
                         if(family instanceof RankedFamily)
                             ProxyLang.RC_RANKED_FAMILY_INFO.send(logger, (RankedFamily) family, true);
                     } catch (NoSuchElementException e) {
-                        ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                        logger.send(Component.text("A family with that id doesn't exist!", NamedTextColor.RED));
                     } catch (Exception e) {
-                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
+                        logger.send(Component.text("Something prevented us from doing that!\n"+e.getMessage(), NamedTextColor.RED));
                     }
                     return 1;
                 });
@@ -282,9 +282,11 @@ class FamilyC {
 
                         logger.send(Component.text(playerNames));
                     } catch (NoSuchElementException e) {
-                        ProxyLang.RC_FAMILY_ERROR.send(logger,"A family with that id doesn't exist!");
+                        ProxyLang.RC_FAMILY.send(logger);
+                        logger.send(Component.text("A family with that id doesn't exist!", NamedTextColor.RED));
                     } catch (Exception e) {
-                        ProxyLang.RC_FAMILY_ERROR.send(logger,"Something prevented us from doing that!\n"+e.getMessage());
+                        ProxyLang.RC_FAMILY.send(logger);
+                        logger.send(Component.text("Something prevented us from doing that!\n"+e.getMessage(), NamedTextColor.RED));
                     }
                     return 1;
                 });
@@ -322,7 +324,7 @@ class Send {
 
                                 Family family = new Family.Reference(familyName).get();
                                 if(!family.metadata().hasLoadBalancer()) {
-                                    ProxyLang.RC_FAMILY_ERROR.send(logger,"You can only directly send player to scalar and static families!");
+                                    logger.send(Component.text("You can only directly send player to scalar and static families!", NamedTextColor.RED));
                                     return Command.SINGLE_SUCCESS;
                                 }
 
@@ -330,7 +332,7 @@ class Send {
                             } catch (NoSuchElementException e) {
                                 logger.send(ProxyLang.RC_SEND_NO_FAMILY.build(familyName));
                             } catch (Exception e) {
-                                logger.send(ProxyLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
+                                logger.send(Component.text("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                             }
                             return Command.SINGLE_SUCCESS;
                         })
@@ -372,7 +374,7 @@ class Send {
 
                                         server.connect(player);
                                     } catch (Exception e) {
-                                        logger.send(ProxyLang.BOXED_MESSAGE_COLORED.build("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
+                                        logger.send(Component.text("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                                     }
 
                                     return Command.SINGLE_SUCCESS;

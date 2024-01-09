@@ -33,6 +33,12 @@ public interface BuiltInIdentifications {
     PacketIdentification MAGICLINK_HANDSHAKE_DISCONNECT = PacketIdentification.from("RC","MLHK");
 
     /**
+     * `Proxy > MCLoader` | Informs the MCLoader that it's connection to the proxy has gone stale.
+     *                    | It is expected that, if the MCLoader is still available it will respond to this message with a {@link BuiltInIdentifications#MAGICLINK_HANDSHAKE_PING}
+     */
+    PacketIdentification MAGICLINK_HANDSHAKE_STALE_PING = PacketIdentification.from("RC","MLHSP");
+
+    /**
      * `MCLoader > Proxy` | Request to send a player to a family
      */
     PacketIdentification SEND_PLAYER = PacketIdentification.from("RC","SP");

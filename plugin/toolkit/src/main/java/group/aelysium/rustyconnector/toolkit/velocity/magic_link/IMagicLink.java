@@ -20,4 +20,18 @@ public interface IMagicLink extends Service {
      * @throws ConnectException If there was an issue connecting to the remote resource.
      */
     IMessengerConnection connect() throws ConnectException;
+
+    /**
+     * Fetches a Magic Link MCLoader Config based on a name.
+     * `name` is considered to be the name of the file found in `magic_configs` on the Proxy, minus the file extension.
+     * @param name The name to look for.
+     */
+    Optional<MagicLinkMCLoaderSettings> magicConfig(String name);
+
+    record MagicLinkMCLoaderSettings(
+            String family,
+            int weight,
+            int soft_cap,
+            int hard_cap
+    ) {};
 }

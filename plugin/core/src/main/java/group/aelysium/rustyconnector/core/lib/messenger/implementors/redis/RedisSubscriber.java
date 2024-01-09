@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisSubscriber extends MessengerSubscriber {
     private CountDownLatch lock = new CountDownLatch(0);
     private final RedisClient client;
-    public RedisSubscriber(AESCryptor cryptor, RedisClient client, IMessageCacheService<? extends ICacheableMessage> cache, PluginLogger logger, UUID senderUUID, Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners) {
+    public RedisSubscriber(AESCryptor cryptor, RedisClient client, IMessageCacheService<? extends ICacheableMessage> cache, PluginLogger logger, Packet.Node senderUUID, Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners) {
         super(cryptor, cache, logger, senderUUID, listeners);
         this.client = client;
         this.client.addListener(new RedisSubscriberListener());

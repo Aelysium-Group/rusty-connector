@@ -87,4 +87,10 @@ public interface MagicLink {
             super(packet);
         }
     }
+
+    class StalePing extends Packet.Wrapper {
+        public StalePing(Packet packet) {
+            super(packet);
+        }
+    }
 }

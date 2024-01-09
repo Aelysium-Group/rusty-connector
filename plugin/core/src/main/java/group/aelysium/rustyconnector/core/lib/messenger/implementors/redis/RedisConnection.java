@@ -36,7 +36,7 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
         this.cryptor = cryptor;
     }
 
-    protected void subscribe(IMessageCacheService<?> cache, PluginLogger logger, UUID senderUUID) {
+    protected void subscribe(IMessageCacheService<?> cache, PluginLogger logger, Packet.Node senderUUID) {
         if(!this.isAlive) return;
 
         this.executorService.submit(() -> {
@@ -61,7 +61,7 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
         });
     }
 
-    public void startListening(IMessageCacheService<?> cache, PluginLogger logger, UUID senderUUID) {
+    public void startListening(IMessageCacheService<?> cache, PluginLogger logger, Packet.Node senderUUID) {
         if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
         this.executorService = Executors.newFixedThreadPool(2);
 

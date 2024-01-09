@@ -8,7 +8,7 @@ import net.kyori.adventure.text.Component;
 import java.util.Optional;
 
 public interface StaticFamilyConfig {
-    Component displayName();
+    String displayName();
     IFamily.Reference getParent_family();
     String getFirstConnection_loadBalancer();
     boolean isWhitelist_enabled();

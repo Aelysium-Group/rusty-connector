@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 import java.util.Optional;
 
 public interface ScalarFamilyConfig {
-    Component displayName();
+    String displayName();
     IFamily.Reference getParent_family();
     String loadBalancer_name();
     boolean isWhitelist_enabled();

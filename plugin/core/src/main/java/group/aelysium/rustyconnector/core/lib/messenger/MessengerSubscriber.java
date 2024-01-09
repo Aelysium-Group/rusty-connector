@@ -17,13 +17,13 @@ public abstract class MessengerSubscriber {
     private final AESCryptor cryptor;
     private final PluginLogger logger;
     private IMessageCacheService<? extends ICacheableMessage> messageCache;
-    private final UUID senderUUID;
+    private final Packet.Node self; // This is a representation of who we are. Any time we receive a packet, this is how we know if it is addressed to us.
 
-    public MessengerSubscriber(AESCryptor cryptor, IMessageCacheService<? extends ICacheableMessage> messageCache, PluginLogger logger, UUID senderUUID, Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners) {
+    public MessengerSubscriber(AESCryptor cryptor, IMessageCacheService<? extends ICacheableMessage> messageCache, PluginLogger logger, Packet.Node self, Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners) {
         this.cryptor = cryptor;
         this.messageCache = messageCache;
         this.logger = logger;
-        this.senderUUID = senderUUID;
+        this.self = self;
         this.listeners = listeners;
     }
 
@@ -50,12 +50,7 @@ public abstract class MessengerSubscriber {
 
             if (messageCache.ignoredType(message)) messageCache.removeMessage(cachedMessage.getSnowflake());
 
-            if (senderUUID == null) { // If senderUUID is null it means we are the proxy
-                if (message.target() != null) throw new Exception("Message was not addressed to us.");
-            } else {
-                if(message.target() == null) throw new Exception("Message was not addressed to us.");
-                if(!message.target().equals(senderUUID)) throw new Exception("Message was not addressed to us.");
-            }
+            if(!self.isNodeEquivalentToMe(message.target())) throw new Exception("Message was not addressed to us.");
 
             try {
                 cachedMessage.sentenceMessage(PacketStatus.ACCEPTED);

@@ -43,8 +43,8 @@ public class DefaultConfig extends YAML {
             this.displayName = IYAML.getValue(this.data,"display-name",String.class);
             if(this.displayName.isEmpty()) throw new Exception();
             if(this.displayName.length() > 16) this.displayName = this.displayName.substring(0, 16);
-        } catch (Exception ignore) {
-            this.displayName = null;
+        } catch (Exception e) {
+            this.displayName = "";
         }
     }
 

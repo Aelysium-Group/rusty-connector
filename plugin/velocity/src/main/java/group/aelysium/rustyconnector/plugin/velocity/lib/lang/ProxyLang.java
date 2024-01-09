@@ -366,19 +366,6 @@ public class ProxyLang extends Lang {
         );
     };
 
-    public final static ParameterizedMessage1<String> RC_FAMILY_ERROR = error -> join(
-            newlines(),
-            BORDER,
-            SPACING,
-            WORDMARK_REGISTERED_FAMILIES.color(RED),
-            SPACING,
-            BORDER,
-            SPACING,
-            text(error,GRAY),
-            SPACING,
-            BORDER
-    );
-
     public final static ParameterizedMessage2<ScalarFamily, Boolean> RC_SCALAR_FAMILY_INFO = (family, locked) -> {
         Component servers = text("");
         int i = 0;
@@ -397,7 +384,7 @@ public class ProxyLang extends Lang {
                 Component serverEntry = resolver().get(
                         "proxy.family.generic.servers.details",
                         LanguageResolver.tagHandler("index_number", i + 1),
-                        LanguageResolver.tagHandler("server_name", server.registeredServer().getServerInfo().getName()),
+                        LanguageResolver.tagHandler("server_name", server.uuidOrDisplayName()),
                         LanguageResolver.tagHandler("server_address", AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress())),
                         LanguageResolver.tagHandler("player_count", server.playerCount()),
                         LanguageResolver.tagHandler("player_soft_cap", server.softPlayerCap()),
@@ -487,7 +474,7 @@ public class ProxyLang extends Lang {
                 Component serverEntry = resolver().get(
                         "proxy.family.generic.servers.details",
                         LanguageResolver.tagHandler("index_number", i + 1),
-                        LanguageResolver.tagHandler("server_name", server.registeredServer().getServerInfo().getName()),
+                        LanguageResolver.tagHandler("server_name", server.uuidOrDisplayName()),
                         LanguageResolver.tagHandler("server_address", AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress())),
                         LanguageResolver.tagHandler("player_count", server.playerCount()),
                         LanguageResolver.tagHandler("player_soft_cap", server.softPlayerCap()),
@@ -577,7 +564,7 @@ public class ProxyLang extends Lang {
                 Component serverEntry = resolver().get(
                         "proxy.family.generic.servers.details",
                         LanguageResolver.tagHandler("index_number", i + 1),
-                        LanguageResolver.tagHandler("server_name", server.registeredServer().getServerInfo().getName()),
+                        LanguageResolver.tagHandler("server_name", server.uuidOrDisplayName()),
                         LanguageResolver.tagHandler("server_address", AddressUtil.addressToString(server.registeredServer().getServerInfo().getAddress())),
                         LanguageResolver.tagHandler("player_count", server.playerCount()),
                         LanguageResolver.tagHandler("player_soft_cap", server.softPlayerCap()),

@@ -10,7 +10,6 @@ import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.IMagicLinkService;
-import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatus;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.toolkit.mc_loader.server_info.IServerInfoService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -24,19 +23,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MagicLinkService implements IMagicLinkService {
     private final IMessengerConnector messenger;
     private final ClockService heartbeat = new ClockService(2);
-    private final AtomicInteger upcomingPingDelay = new AtomicInteger(5);
-    private MagicLinkStatus status = MagicLinkStatus.SEARCHING;
+    private final AtomicInteger delay = new AtomicInteger(5);
 
     public MagicLinkService(IMessengerConnector messenger) {
         this.messenger = messenger;
     }
 
-    public void setStatus(MagicLinkStatus status) {
-        this.status = status;
-    }
-
-    public void setUpcomingPingDelay(int delay) {
-        upcomingPingDelay.set(delay);
+    public void setDelay(int delay) {
+        this.delay.set(delay);
     }
 
     private void scheduleNextPing(IMCLoaderFlame<? extends ICoreServiceHandler> api) {
@@ -58,7 +52,7 @@ public class MagicLinkService implements IMagicLinkService {
             }
 
             MagicLinkService.this.scheduleNextPing(api);
-        }, LiquidTimestamp.from(this.upcomingPingDelay.get(), TimeUnit.SECONDS));
+        }, LiquidTimestamp.from(this.delay.get(), TimeUnit.SECONDS));
     }
 
     public void startHeartbeat(IMCLoaderFlame<? extends ICoreServiceHandler> api) {

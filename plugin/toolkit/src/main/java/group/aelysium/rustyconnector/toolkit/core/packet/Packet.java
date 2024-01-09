@@ -5,8 +5,8 @@ import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
+import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public final class Packet implements JSONParseable {
@@ -18,17 +18,26 @@ public final class Packet implements JSONParseable {
 
     private final int messageVersion;
     private final PacketIdentification identification;
-    private final UUID sender;
-    private final UUID target;
-    protected final Map<String, PacketParameter> parameters;
+    private final Packet.Node sender;
+    private final Packet.Node target;
+    private final Map<String, PacketParameter> parameters;
 
     public int messageVersion() { return this.messageVersion; }
-    public UUID sender() { return this.sender; }
-    public UUID target() { return this.target; }
+    public Packet.Node sender() { return this.sender; }
+    public Packet.Node target() { return this.target; }
     public PacketIdentification identification() { return this.identification; }
     public Map<String, PacketParameter> parameters() { return parameters; }
 
-    public Packet(Integer version, PacketIdentification identification, UUID sender, UUID target, Map<String, PacketParameter> parameters) {
+    /**
+     * A convenience method that lets you build a reply packet that will reply to a packet you've received.
+     * The act of "replying" is simply marking the `.sender()` of the previous packet as this packet's `.target()`
+     * and marking the `.target()` of the previous packet as this packet's `.sender()`.
+     */
+    public ReplyPacketBuilder reply() {
+        return new ReplyPacketBuilder(this);
+    }
+
+    public Packet(@NotNull Integer version, @NotNull PacketIdentification identification, @NotNull Packet.Node sender, @NotNull Packet.Node target, @NotNull Map<String, PacketParameter> parameters) {
         this.messageVersion = version;
         this.identification = identification;
         this.sender = sender;
@@ -49,20 +58,14 @@ public final class Packet implements JSONParseable {
     public JsonObject toJSON() {
         JsonObject object = new JsonObject();
 
-        object.add(MasterValidParameters.PROTOCOL_VERSION, new JsonPrimitive(this.messageVersion));
-        object.add(MasterValidParameters.IDENTIFICATION, new JsonPrimitive(this.identification.toString()));
-        if(this.sender == null)
-            object.add(MasterValidParameters.SENDER_UUID, new JsonPrimitive("PROXY"));
-        else
-            object.add(MasterValidParameters.SENDER_UUID, new JsonPrimitive(this.sender.toString()));
-        if(this.target == null)
-            object.add(MasterValidParameters.TARGET_UUID, new JsonPrimitive("PROXY"));
-        else
-            object.add(MasterValidParameters.TARGET_UUID, new JsonPrimitive(this.target.toString()));
+        object.add(Parameters.PROTOCOL_VERSION, new JsonPrimitive(this.messageVersion));
+        object.add(Parameters.IDENTIFICATION, new JsonPrimitive(this.identification.toString()));
+        object.add(Parameters.SENDER, this.sender.toJSON());
+        object.add(Parameters.TARGET, this.target.toJSON());
 
         JsonObject parameters = new JsonObject();
         this.parameters.forEach((key, value) -> parameters.add(key, value.toJSON()));
-        object.add(MasterValidParameters.PARAMETERS, parameters);
+        object.add(Parameters.PARAMETERS, parameters);
 
         return object;
     }
@@ -70,38 +73,30 @@ public final class Packet implements JSONParseable {
     protected static class NakedBuilder {
         private Integer protocolVersion = Packet.protocolVersion();
         private PacketIdentification id;
-        private UUID sender;
-        private UUID target;
+        private Packet.Node sender;
+        private Packet.Node target;
         private final Map<String, PacketParameter> parameters = new HashMap<>();
 
-        public NakedBuilder identification(PacketIdentification id) {
+        public NakedBuilder identification(@NotNull PacketIdentification id) {
             this.id = id;
             return this;
         }
 
-        /**
-         * The sender of the packet.
-         * @param uuid The UUID of the sending MCLoader for the packet. Or `null` if the sender is the Proxy.
-         */
-        public NakedBuilder sender(UUID uuid) {
-            this.sender = uuid;
+        public NakedBuilder sender(@NotNull Packet.Node sender) {
+            this.sender = sender;
             return this;
         }
 
-        /**
-         * The target of the packet.
-         * @param uuid The UUID of the target MCLoader for the packet. Or `null` if the target is the Proxy.
-         */
-        public NakedBuilder target(UUID uuid) {
-            this.target = uuid;
+        public NakedBuilder target(@NotNull Packet.Node target) {
+            this.target = target;
             return this;
         }
 
-        public NakedBuilder parameter(String key, String value) {
+        public NakedBuilder parameter(@NotNull String key, @NotNull String value) {
             this.parameters.put(key, new PacketParameter(value));
             return this;
         }
-        public NakedBuilder parameter(String key, PacketParameter value) {
+        public NakedBuilder parameter(@NotNull String key, @NotNull PacketParameter value) {
             this.parameters.put(key, value);
             return this;
         }
@@ -139,8 +134,8 @@ public final class Packet implements JSONParseable {
              * Packet is being sent from an MCLoader to the Proxy.
              */
             public ReadyForParameters sendingToProxy() {
-                this.builder.sender(flame.services().serverInfo().uuid());
-                this.builder.target(null);
+                this.builder.sender(Node.mcLoader(flame.services().serverInfo().uuid()));
+                this.builder.target(Node.unknownProxy());
                 return new ReadyForParameters(builder);
             }
 
@@ -149,8 +144,8 @@ public final class Packet implements JSONParseable {
              * @param targetMCLoader The UUID of the MCLoader that the packet is being sent to.
              */
             public ReadyForParameters sendingToAnotherMCLoader(UUID targetMCLoader) {
-                this.builder.sender(flame.services().serverInfo().uuid());
-                this.builder.target(targetMCLoader);
+                this.builder.sender(Node.mcLoader(flame.services().serverInfo().uuid()));
+                this.builder.target(Node.mcLoader(targetMCLoader));
                 return new ReadyForParameters(builder);
             }
         }
@@ -185,16 +180,20 @@ public final class Packet implements JSONParseable {
         }
     }
     public static class ProxyPacketBuilder {
+        private final VelocityFlame<? extends group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler> flame;
         private final NakedBuilder builder;
 
         public ProxyPacketBuilder(VelocityFlame<? extends group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler> flame) {
+            this.flame = flame;
             this.builder = new NakedBuilder();
         }
 
         public static class ReadyForTargetingAssignment {
+            private final VelocityFlame<? extends group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler> flame;
             private final NakedBuilder builder;
 
-            protected ReadyForTargetingAssignment(NakedBuilder builder) {
+            protected ReadyForTargetingAssignment(VelocityFlame<? extends group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler> flame, NakedBuilder builder) {
+                this.flame = flame;
                 this.builder = builder;
             }
 
@@ -203,13 +202,13 @@ public final class Packet implements JSONParseable {
              * @param targetMCLoader The UUID of the MCLoader that the packet is being sent to.
              */
             public ReadyForParameters sendingToMCLoader(UUID targetMCLoader) {
-                this.builder.sender(null);
-                this.builder.target(targetMCLoader);
-                return new ReadyForParameters<>(builder);
+                this.builder.sender(Node.proxy(flame.uuid()));
+                this.builder.target(Node.mcLoader(targetMCLoader));
+                return new ReadyForParameters(builder);
             }
         }
 
-        public static class ReadyForParameters<Packet extends group.aelysium.rustyconnector.toolkit.core.packet.Packet> {
+        public static class ReadyForParameters {
             private final NakedBuilder builder;
 
             protected ReadyForParameters(NakedBuilder builder) {
@@ -225,7 +224,7 @@ public final class Packet implements JSONParseable {
                 return this;
             }
 
-            public group.aelysium.rustyconnector.toolkit.core.packet.Packet build() {
+            public Packet build() {
                 return this.builder.build();
             }
         }
@@ -235,7 +234,45 @@ public final class Packet implements JSONParseable {
          * Identification is what differentiates a "Server ping packet" from a "Teleport player packet"
          */
         public ReadyForTargetingAssignment identification(PacketIdentification id) {
-            return new ReadyForTargetingAssignment(this.builder.identification(id));
+            return new ReadyForTargetingAssignment(this.flame, this.builder.identification(id));
+        }
+    }
+    public static class ReplyPacketBuilder {
+        private final NakedBuilder builder;
+
+        public ReplyPacketBuilder(Packet packet) {
+            this.builder = new NakedBuilder();
+            this.builder.sender(packet.target());
+            this.builder.target(packet.sender());
+        }
+
+        public static class ReadyForParameters {
+            private final NakedBuilder builder;
+
+            protected ReadyForParameters(NakedBuilder builder) {
+                this.builder = builder;
+            }
+
+            public ReadyForParameters parameter(String key, String value) {
+                this.builder.parameter(key, new PacketParameter(value));
+                return this;
+            }
+            public ReadyForParameters parameter(String key, PacketParameter value) {
+                this.builder.parameter(key, value);
+                return this;
+            }
+
+            public Packet build() {
+                return this.builder.build();
+            }
+        }
+
+        /**
+         * The identification of this packet.
+         * Identification is what differentiates a "Server ping packet" from a "Teleport player packet"
+         */
+        public ReadyForParameters identification(PacketIdentification id) {
+            return new ReadyForParameters(this.builder.identification(id));
         }
     }
 
@@ -256,25 +293,11 @@ public final class Packet implements JSONParseable {
                 JsonElement value = entry.getValue();
 
                 switch (key) {
-                    case MasterValidParameters.PROTOCOL_VERSION -> builder.protocolVersion(value.getAsInt());
-                    case MasterValidParameters.IDENTIFICATION -> builder.identification(new PacketIdentification(value.getAsString()));
-                    case MasterValidParameters.SENDER_UUID -> {
-                        UUID uuid = null;
-                        try {
-                            uuid = UUID.fromString(value.getAsString());
-                        } catch (Exception ignore) {}
-
-                        builder.sender(uuid);
-                    }
-                    case MasterValidParameters.TARGET_UUID -> {
-                        UUID uuid = null;
-                        try {
-                            uuid = UUID.fromString(value.getAsString());
-                        } catch (Exception ignore) {}
-
-                        builder.target(uuid);
-                    }
-                    case MasterValidParameters.PARAMETERS -> parseParams(value.getAsJsonObject(), builder);
+                    case Parameters.PROTOCOL_VERSION -> builder.protocolVersion(value.getAsInt());
+                    case Parameters.IDENTIFICATION -> builder.identification(new PacketIdentification(value.getAsString()));
+                    case Parameters.SENDER -> builder.sender(Node.fromJSON(value.getAsJsonObject()));
+                    case Parameters.TARGET -> builder.target(Node.fromJSON(value.getAsJsonObject()));
+                    case Parameters.PARAMETERS -> parseParams(value.getAsJsonObject(), builder);
                 }
             });
 
@@ -292,22 +315,123 @@ public final class Packet implements JSONParseable {
 
     }
 
-    public interface MasterValidParameters {
+    public interface Parameters {
         String PROTOCOL_VERSION = "v";
         String IDENTIFICATION = "i";
-        String SENDER_UUID = "su";
-        String TARGET_UUID = "tu";
+        String SENDER = "s";
+        String TARGET = "t";
         String PARAMETERS = "p";
+    }
 
-        static List<String> toList() {
-            List<String> list = new ArrayList<>();
-            list.add(PROTOCOL_VERSION);
-            list.add(IDENTIFICATION);
-            list.add(SENDER_UUID);
-            list.add(TARGET_UUID);
-            list.add(PARAMETERS);
+    public static class Node implements JSONParseable {
+        private final UUID uuid;
+        private final Origin origin;
 
-            return list;
+        private Node(UUID uuid, Origin origin) {
+            this.uuid = uuid;
+            this.origin = origin;
+        }
+
+        public UUID uuid() {
+            return this.uuid;
+        }
+        public Origin origin() {
+            return this.origin;
+        }
+
+        public JsonObject toJSON() {
+            JsonObject object = new JsonObject();
+
+            if(this.uuid == null)
+                object.add("u", new JsonPrimitive(""));
+            else
+                object.add("u", new JsonPrimitive(this.uuid.toString()));
+            object.add("n", new JsonPrimitive(Origin.toInteger(this.origin)));
+
+            return object;
+        }
+
+        public static Node fromJSON(JsonObject object) {
+            UUID uuid = null;
+            if(!object.get("u").getAsString().isEmpty())
+                uuid = UUID.fromString(object.get("u").getAsString());
+
+            return new Node(
+                    uuid,
+                    Origin.fromInteger(object.get("n").getAsInt())
+            );
+        }
+
+        public static Node mcLoader(UUID uuid) {
+            return new Node(uuid, Origin.MCLOADER);
+        }
+        public static Node proxy(UUID uuid) {
+            return new Node(uuid, Origin.PROXY);
+        }
+        public static Node unknownProxy() {
+            return new Node(null, Origin.ANY_PROXY);
+        }
+
+        /**
+         * Checks if the passed node can be considered the same as `this`.
+         * For example, if `this` is of type {@link Origin#PROXY} and `node` is of type {@link Origin#ANY_PROXY} this will return `true`
+         * because `this` would be considered a part of `ANY_PROXY`.
+         * @param node Some other node.
+         * @return `true` if the other node is a valid way of identifying `this` node. `false` otherwise.
+         */
+        public boolean isNodeEquivalentToMe(Node node) {
+            // If the two match as defined by default expected behaviour, return true.
+            if(Objects.equals(uuid, node.uuid) && origin == node.origin) return true;
+
+            // If one of the two is of type "ANY_PROXY" and the other is of type "PROXY", return true.
+            if(
+                (this.origin == Origin.ANY_PROXY && node.origin == Origin.PROXY) ||
+                (this.origin == Origin.PROXY && node.origin == Origin.ANY_PROXY) ||
+                (this.origin == Origin.ANY_PROXY && node.origin == Origin.ANY_PROXY)
+            ) return true;
+
+            return false;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node node = (Node) o;
+
+            // If the two match as defined by default expected behaviour, return true.
+            return Objects.equals(uuid, node.uuid) && origin == node.origin;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(uuid, origin);
+        }
+
+        enum Origin {
+            PROXY,
+            ANY_PROXY,
+            MCLOADER,
+            ANY_MCLOADER
+            ;
+
+            public static Origin fromInteger(int number) {
+                return switch (number) {
+                    case 0 -> Origin.PROXY;
+                    case 1 -> Origin.ANY_PROXY;
+                    case 2 -> Origin.MCLOADER;
+                    case 3 -> Origin.ANY_MCLOADER;
+                    default -> throw new ClassCastException(number+" has no associated value!");
+                };
+            }
+            public static int toInteger(Origin origin) {
+                return switch (origin) {
+                    case PROXY -> 0;
+                    case ANY_PROXY -> 1;
+                    case MCLOADER -> 2;
+                    case ANY_MCLOADER -> 3;
+                };
+            }
         }
     }
 
@@ -315,13 +439,16 @@ public final class Packet implements JSONParseable {
         private final Packet packet;
 
         public int messageVersion() { return this.packet.messageVersion(); }
-        public UUID sender() { return this.packet.sender(); }
-        public UUID target() { return this.packet.target(); }
+        public Node sender() { return this.packet.sender(); }
+        public Node target() { return this.packet.target(); }
         public PacketIdentification identification() { return this.packet.identification(); }
         public Map<String, PacketParameter> parameters() { return this.packet.parameters(); }
         public PacketParameter parameter(String key) { return this.packet.parameters().get(key); }
         public Packet packet() {
             return this.packet;
+        }
+        public ReplyPacketBuilder reply() {
+            return this.packet.reply();
         }
 
         protected Wrapper(Packet packet) {

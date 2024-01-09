@@ -29,7 +29,7 @@ public class HandshakeDisconnectListener extends PacketListener<MagicLink.Discon
 
     @Override
     public void execute(MagicLink.Disconnect packet) throws Exception {
-        Optional<IMCLoader> mcLoader = api.services().server().fetch(packet.sender());
+        Optional<IMCLoader> mcLoader = api.services().server().fetch(packet.sender().uuid());
         mcLoader.orElseThrow().unregister(true);
     }
 }
