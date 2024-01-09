@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
+import java.util.List;
 import java.util.Vector;
 
 public interface IParty {
@@ -25,7 +26,7 @@ public interface IParty {
 
     /**
      * Gets the leader of this party.
-     * If the leader is no longer a member of the party, or if they aren't online anymore, this method will call {@link IParty#newRandomLeader()} and assign a new leader.
+     * If the leader is no longer a member of the party, or if they aren't online anymore, this method will call {@link IParty#randomPlayer()} and assign a new leader.
      * @return {@link IPlayer}
      * @throws IllegalStateException If the party is empty.
      */
@@ -54,7 +55,7 @@ public interface IParty {
      * The selected player becomes leader.
      * @throws IllegalStateException If the party is empty.
      */
-    void newRandomLeader() throws IllegalStateException;
+    IPlayer randomPlayer() throws IllegalStateException;
 
     /**
      * Gets if the party is empty or not.
@@ -66,9 +67,9 @@ public interface IParty {
 
     /**
      * Gets a vector of all the players in this party.
-     * @return {@link Vector< IPlayer >}
+     * @return {@link List<IPlayer>}
      */
-    Vector<IPlayer> players();
+    List<IPlayer> players();
 
     /**
      * Adds the player to this party.
@@ -87,7 +88,7 @@ public interface IParty {
      * If this player is the last member of the party, this will disband the party and it will decompose.
      * If that's the case, all future calls to this party will throw {@link IllegalStateException}.
      * <p>
-     * If this player was the leader of this party (but not the last member) this method will call {@link IParty#newRandomLeader()} and assign a new, random leader.
+     * If this player was the leader of this party (but not the last member) this method will call {@link IParty#randomPlayer()} and assign a new, random leader.
      * @param player The player to leave.
      */
     void leave(IPlayer player);
