@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.injec
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
@@ -50,8 +51,9 @@ public class InjectorService implements IInjectorService {
         this.injectors.clear();
     }
 
-    public static Optional<InjectorService> init(DependencyInjector.DI1<List<Component>> dependencies, DynamicTeleportConfig config) {
+    public static Optional<InjectorService> init(DependencyInjector.DI2<List<Component>, FamilyService> dependencies, DynamicTeleportConfig config) {
         List<Component> bootOutput = dependencies.d1();
+        FamilyService familyService = dependencies.d2();
 
         try {
             if(!config.isFamilyAnchor_enabled()) return Optional.empty();
@@ -60,7 +62,7 @@ public class InjectorService implements IInjectorService {
             for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
                 InitiallyConnectableFamily family;
                 try {
-                    Family fetchedFamily = new Family.Reference(entry.getValue()).get();
+                    Family fetchedFamily = familyService.find(entry.getValue()).orElseThrow();
                     if(!(fetchedFamily instanceof InitiallyConnectableFamily)) {
                         bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't support family injectors! Ignoring...", NamedTextColor.RED));
                         continue;

@@ -59,7 +59,7 @@ public class DynamicTeleportService extends ServiceableService<DynamicTeleportSe
 
             if(config.isFamilyAnchor_enabled()) {
                 try {
-                    builder.addService(AnchorService.init(inject(bootOutput), config).orElseThrow());
+                    builder.addService(AnchorService.init(inject(bootOutput, dependencies.d2()), config).orElseThrow());
                     bootOutput.add(Component.text(" | The Anchor module was enabled!",NamedTextColor.GREEN));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -69,7 +69,7 @@ public class DynamicTeleportService extends ServiceableService<DynamicTeleportSe
 
             if(config.isFamilyInjector_enabled()) {
                 try {
-                    builder.addService(InjectorService.init(inject(bootOutput), config).orElseThrow());
+                    builder.addService(InjectorService.init(inject(bootOutput, dependencies.d2()), config).orElseThrow());
                     bootOutput.add(Component.text(" | The Injector module was enabled!",NamedTextColor.GREEN));
                 } catch (Exception e) {
                     throw new RuntimeException(e);

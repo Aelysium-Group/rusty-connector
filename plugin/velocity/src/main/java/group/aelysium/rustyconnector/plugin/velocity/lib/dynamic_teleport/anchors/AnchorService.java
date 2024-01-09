@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors;
 
 import com.velocitypowered.api.command.CommandManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.anchors.IAnchorService;
@@ -76,23 +77,24 @@ public class AnchorService implements IAnchorService {
         return anchors;
     }
 
-    public static Optional<AnchorService> init(DependencyInjector.DI1<List<Component>> dependencies, DynamicTeleportConfig config) {
+    public static Optional<AnchorService> init(DependencyInjector.DI2<List<Component>, FamilyService> dependencies, DynamicTeleportConfig config) {
         List<Component> bootOutput = dependencies.d1();
+        FamilyService familyService = dependencies.d2();
 
         try {
             if(!config.isFamilyAnchor_enabled()) return Optional.empty();
 
             Map<String, IFamily> anchors = new HashMap<>();
             for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
-                Family family;
+                IFamily family;
                 try {
-                    family = new Family.Reference(entry.getValue()).get();
-                } catch (Exception ignore) {
-                    bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
-                    continue;
-                }
+                    family = familyService.find(entry.getValue()).orElseThrow();
 
-                anchors.put(entry.getKey(), family);
+                    anchors.put(entry.getKey(), family);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
+                }
             }
 
             return Optional.of(new AnchorService(anchors));
