@@ -52,7 +52,7 @@ public class OnPlayerChooseInitialServer {
                 } catch (Exception ignore) {}
 
                 // Handle family injectors if they exist
-                InitiallyConnectableFamily family = null;
+                InitiallyConnectableFamily family = api.services().family().rootFamily();
                 try {
                     InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
                     String host = eventPlayer.getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
@@ -61,8 +61,6 @@ public class OnPlayerChooseInitialServer {
                 } catch (NoSuchElementException ignore) {
                 } catch (Exception e) {
                     logger.send(Component.text("Error while using Family Injectors! Players will attempt to connect to the root family because of this! "+e.getMessage(), NamedTextColor.RED));
-
-                    family = api.services().family().rootFamily();
                 }
                 if(family == null) throw new RuntimeException("Unable to fetch a server to connect to.");
 

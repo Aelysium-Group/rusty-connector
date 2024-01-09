@@ -58,7 +58,7 @@ public abstract class Family implements IFamily {
     }
 
     public Whitelist whitelist() {
-        return this.settings.whitelist().get();
+        try { return this.settings.whitelist().get(); } catch (Exception ignore) { return null; }
     }
 
     public void balance() {

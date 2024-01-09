@@ -45,6 +45,7 @@ public class MCLoader implements IMCLoader {
     private AtomicInteger timeout;
 
     public MCLoader(@NotNull UUID uuid, @NotNull InetSocketAddress address, String displayName, int softPlayerCap, int hardPlayerCap, int weight, int timeout) {
+    public MCLoader(UUID uuid, InetSocketAddress address, String displayName, int softPlayerCap, int hardPlayerCap, int weight, int timeout) {
         this.uuid = uuid;
         this.address = address;
         this.displayName = displayName;
@@ -121,7 +122,7 @@ public class MCLoader implements IMCLoader {
             if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
                 ProxyLang.REGISTRATION_REQUEST.send(logger, uuidOrDisplayName(), family.id());
 
-            if(api.services().server().contains(this.uuid)) throw new DuplicateRequestException("Server "+this.uuid+" can't be registered twice!");
+            if(api.services().server().contains(this.uuid)) throw new RuntimeException("Server "+this.uuid+" can't be registered twice!");
 
             this.registeredServer = api.velocityServer().registerServer(serverInfo());
             if(this.registeredServer == null) throw new NullPointerException("Unable to register the server to the proxy.");
