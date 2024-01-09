@@ -75,7 +75,7 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
         if(this.players.size() > this.maxSize) throw new RuntimeException("The party is already full! Try again later!");
 
         player.sendMessage(ProxyLang.PARTY_JOINED_SELF);
-        this.players.forEach(partyMember -> partyMember.sendMessage(ProxyLang.PARTY_JOINED.build(partyMember.username())));
+        this.players.forEach(partyMember -> partyMember.sendMessage(ProxyLang.PARTY_JOINED.build(player.username())));
         this.players.add(player);
     }
 
