@@ -35,32 +35,20 @@ public class OnPlayerDisconnect {
         Player player = Player.from(event.getPlayer());
 
         return EventTask.async(() -> {
-            // Handle servers when player leaves
-            try {
-                MCLoader server = (MCLoader) player.server().orElseThrow();
-
-                server.playerLeft();
-
-                EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(server.family(), server, player, true));
-                EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(server, player, true));
-                EventDispatch.Safe.fireAndForget(new NetworkLeaveEvent(server.family(), server, player));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            EventDispatch.Safe.fireAndForget(new NetworkLeaveEvent(player));
 
             // Handle party when player leaves
             try {
                 PartyService partyService = api.services().party().orElseThrow();
                 IParty party = partyService.find(player).orElseThrow();
-                try {
-                    boolean wasPartyLeader = party.leader().equals(player);
 
-                    if(wasPartyLeader)
-                        if(partyService.settings().disbandOnLeaderQuit())
-                            partyService.disband(party);
+                boolean wasPartyLeader = party.leader().equals(player);
 
-                    party.leave(player);
-                } catch (Exception e) {}
+                if(wasPartyLeader)
+                    if(partyService.settings().disbandOnLeaderQuit())
+                        partyService.disband(party);
+
+                party.leave(player);
             } catch (Exception ignore) {}
 
             // Handle sending out friend messages when player leaves

@@ -18,6 +18,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.Ra
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
+import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -332,6 +333,7 @@ class Send {
                             } catch (NoSuchElementException e) {
                                 logger.send(ProxyLang.RC_SEND_NO_FAMILY.build(familyName));
                             } catch (Exception e) {
+                                e.printStackTrace();
                                 logger.send(Component.text("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                             }
                             return Command.SINGLE_SUCCESS;
@@ -356,13 +358,12 @@ class Send {
                                         UUID serverUUID = UUID.fromString(context.getArgument("serverUUID", String.class));
                                         String username = context.getArgument("username", String.class);
 
-                                        com.velocitypowered.api.proxy.Player velocityPlayer = Tinder.get().velocityServer().getPlayer(username).orElse(null);
-                                        if (velocityPlayer == null) {
+                                        // Uses this first so that we can start by checking if the player is online.
+                                        Player player = new IPlayer.UsernameReference(username).get();
+                                        if (!player.online()) {
                                             logger.send(ProxyLang.RC_SEND_NO_PLAYER.build(username));
                                             return Command.SINGLE_SUCCESS;
                                         }
-                                        
-                                        Player player = Player.from(velocityPlayer);
 
                                         MCLoader server;
                                         try {
@@ -374,6 +375,7 @@ class Send {
 
                                         server.connect(player);
                                     } catch (Exception e) {
+                                        e.printStackTrace();
                                         logger.send(Component.text("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                                     }
 

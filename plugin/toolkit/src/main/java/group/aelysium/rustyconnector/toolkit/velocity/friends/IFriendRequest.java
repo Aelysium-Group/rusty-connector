@@ -17,9 +17,10 @@ public interface IFriendRequest {
 
     /**
      * Gets the target of this {@link IFriendRequest}.
+     * Target is in the form of a username.
      * @return {@link IFriendRequest}
      */
-    IPlayer target();
+    String target();
 
     /**
      * Accepts this {@link IFriendRequest}.

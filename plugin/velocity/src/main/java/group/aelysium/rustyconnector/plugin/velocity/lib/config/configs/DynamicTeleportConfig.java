@@ -129,7 +129,7 @@ public class DynamicTeleportConfig extends YAML implements group.aelysium.rustyc
             if(anchors.size() != 0)
                 for (ConfigurationNode entry: anchors)
                     this.familyAnchor_anchors.add(Map.entry(
-                            IYAML.getValue(entry, "id", String.class),
+                            IYAML.getValue(entry, "name", String.class),
                             IYAML.getValue(entry, "family", String.class)
                     ));
         }

@@ -6,12 +6,15 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
@@ -29,12 +32,12 @@ public class OnPlayerKicked {
             boolean isFromRootFamily = false;
 
             try {
-                MCLoader oldServer = (MCLoader) player.server().orElseThrow();
+                MCLoader oldServer = player.server().orElseThrow();
 
                 oldServer.playerLeft();
 
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, oldServer.family().id(), DiscordWebhookMessage.PROXY__PLAYER_LEAVE_FAMILY.build(player, oldServer));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE_FAMILY, oldServer.family().id(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(player, oldServer));
+                EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(oldServer.family(), oldServer, player, true));
+                EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(oldServer, player, true));
 
                 isFromRootFamily = oldServer.family() == api.services().family().rootFamily();
             } catch (Exception ignore) {}

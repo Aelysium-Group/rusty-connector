@@ -53,7 +53,6 @@ public class FailService implements Service {
         this.numberOfFails = 0;
         this.fails.cleanUp();
         this.fails.invalidateAll();
-        this.fails = null;
         this.period = null;
     }
 }

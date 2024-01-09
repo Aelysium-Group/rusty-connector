@@ -69,4 +69,26 @@ public interface IPlayer {
             return (TPlayer) RustyConnector.Toolkit.proxy().orElseThrow().services().player().fetch(this.referencer).orElseThrow();
         }
     }
+
+    /**
+     * A collection of a player's UUID and Username, which can be resolved into a {@link IPlayer}.
+     */
+    interface IShard {
+        /**
+         * The UUID of the player shard.
+         */
+        UUID uuid();
+
+        /**
+         * The Username of the player shard.
+         */
+        String username();
+
+        /**
+         * Store the player shard and get the associated {@link IPlayer} that is created.
+         * If a {@link IPlayer} already exists for this shard, just get the player.
+         * @return {@link IPlayer}
+         */
+        IPlayer storeAndGet();
+    }
 }
