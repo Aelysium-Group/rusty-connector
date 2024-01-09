@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.core.lib.cache;
 
 import group.aelysium.rustyconnector.toolkit.core.message_cache.IMessageCacheService;
-import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketStatus;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.core.lib.crypt.Snowflake;
@@ -58,7 +58,7 @@ public class MessageCacheService implements IMessageCacheService<CacheableMessag
         return cacheableMessage;
     }
 
-    public <TPacket extends IPacket> boolean ignoredType(TPacket message) {
+    public boolean ignoredType(Packet message) {
         return this.ignoredTypes.contains(message.identification());
     }
 

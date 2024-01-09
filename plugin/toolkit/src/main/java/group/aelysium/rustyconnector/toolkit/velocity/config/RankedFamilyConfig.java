@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 import java.util.Optional;
 
 public interface RankedFamilyConfig {
-    Component displayName();
+    String displayName();
     IFamily.Reference getParent_family();
     String gamemodeName();
     String matchmaker_name();

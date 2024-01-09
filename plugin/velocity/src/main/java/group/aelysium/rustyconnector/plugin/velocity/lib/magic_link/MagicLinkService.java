@@ -21,12 +21,13 @@ import java.util.Optional;
 public class MagicLinkService extends ClockService implements IMagicLink {
     protected final long interval;
     protected IMessengerConnector redisConnector;
-    protected Map<String, MagicLinkMCLoaderSettings> settingsMap = new HashMap<>();
+    protected Map<String, MagicLinkMCLoaderSettings> settingsMap;
 
-    public MagicLinkService(long interval, IMessengerConnector redisConnector) {
+    public MagicLinkService(long interval, IMessengerConnector redisConnector, Map<String, MagicLinkMCLoaderSettings> magicLinkMCLoaderSettingsMap) {
         super(2);
         this.interval = interval;
         this.redisConnector = redisConnector;
+        this.settingsMap = magicLinkMCLoaderSettingsMap;
     }
 
     public void startHeartbeat(ServerService serverService) {
@@ -47,6 +48,11 @@ public class MagicLinkService extends ClockService implements IMagicLink {
         }, 3, 5); // Period of `3` lets us not loop over the servers as many times with a small hit to how quickly stale servers will be unregistered.
     }
 
+    public Optional<MagicLinkMCLoaderSettings> magicConfig(String name) {
+        MagicLinkMCLoaderSettings settings = this.settingsMap.get(name);
+        if(settings == null) return Optional.empty();
+        return Optional.of(settings);
+    }
 
     /**
      * Get the {@link MessengerConnection} created from this {@link MessengerConnector}.
@@ -70,6 +76,4 @@ public class MagicLinkService extends ClockService implements IMagicLink {
         this.redisConnector.kill();
         super.kill();
     }
-
-    public record MagicLinkMCLoaderSettings() {};
 }

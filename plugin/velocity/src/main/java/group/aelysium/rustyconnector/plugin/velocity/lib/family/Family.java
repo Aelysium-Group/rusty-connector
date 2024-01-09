@@ -31,7 +31,7 @@ public abstract class Family implements IFamily {
         return this.id;
     }
 
-    public Component displayName() {
+    public String displayName() {
         return this.settings.displayName();
     }
 

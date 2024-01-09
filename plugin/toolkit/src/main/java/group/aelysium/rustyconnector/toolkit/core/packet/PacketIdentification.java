@@ -2,8 +2,6 @@ package group.aelysium.rustyconnector.toolkit.core.packet;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class PacketIdentification {
@@ -53,85 +51,7 @@ public class PacketIdentification {
         String idToCheck = pluginID.toUpperCase();
         if(idToCheck.isEmpty()) throw new IllegalArgumentException("pluginID can't be empty!");
         if(packetID.isEmpty()) throw new IllegalArgumentException("packetID can't be empty!");
-        if(idToCheck.equals("ROOT")) throw new IllegalArgumentException("pluginID can't be 'ROOT'");
-        if(idToCheck.equals("RC")) throw new IllegalArgumentException("pluginID can't be 'RC'");
-        if(idToCheck.equals("RUSTYCONNECTOR")) throw new IllegalArgumentException("pluginID can't be 'RUSTYCONNECTOR'");
-        if(idToCheck.equals("RUSTY-CONNECTOR")) throw new IllegalArgumentException("pluginID can't be 'RUSTY-CONNECTOR'");
-        if(idToCheck.equals("RUSTY_CONNECTOR")) throw new IllegalArgumentException("pluginID can't be 'RUSTY_CONNECTOR'");
 
         return new PacketIdentification(pluginID + "-" + packetID);
-    }
-
-    public static List<PacketIdentification> toList() {
-        List<PacketIdentification> list = new ArrayList<>();
-        list.add(Predefined.MAGICLINK_HANDSHAKE);
-        list.add(Predefined.MAGICLINK_HANDSHAKE_SUCCESS);
-        list.add(Predefined.SEND_PLAYER);
-        list.add(Predefined.QUEUE_TPA);
-        list.add(Predefined.UNLOCK_SERVER);
-        list.add(Predefined.LOCK_SERVER);
-
-        return list;
-    }
-
-    public static PacketIdentification mapping(String id) {
-        return toList().stream().filter(entry -> Objects.equals(entry.get(), id)).findFirst().orElseThrow(NullPointerException::new);
-    }
-
-    public interface Predefined {
-        /**
-         * `MCLoader > Proxy` | MCLoader requesting to interface with Proxy.
-         *                    | If the MCLoader is new, it will attempt to be registered.
-         *                    | If the MCLoader is already registered, it's connection will refresh.
-         *                    
-         *                    | This packet is simultaneously a handshake initializer and a keep-alive packet.
-         */
-        PacketIdentification MAGICLINK_HANDSHAKE = new PacketIdentification("RC-MLHK");
-
-        /**
-         * `Proxy > MCLoader` | Tells the MCLoader it couldn't be registered
-         */
-        PacketIdentification MAGICLINK_HANDSHAKE_FAIL = new PacketIdentification("RC-MLHF");
-
-        /**
-         * `Proxy > MCLoader` | Tells the MCLoader it was registered and how it should configure itself
-         */
-        PacketIdentification MAGICLINK_HANDSHAKE_SUCCESS = new PacketIdentification("RC-MLHS");
-
-        /**
-         * `MCLoader > Proxy` | Tells the Proxy to drop the Magic Link between this MCLoader.
-         *                    | Typically used when the MCLoader is shutting down so that Magic Link doesn't have to manually scan it.
-         */
-        PacketIdentification MAGICLINK_HANDSHAKE_KILL = new PacketIdentification("RC-MLHK");
-
-        /**
-         * `MCLoader > Proxy` | Request to send a player to a family
-         */
-        PacketIdentification SEND_PLAYER = new PacketIdentification("RC-SP");
-
-        /**
-         * `Proxy > MCLoader` | Queues a tpa on a specific MCLoader. When that player joins the server, they'll be teleported to the other player.
-         */
-        PacketIdentification QUEUE_TPA = new PacketIdentification("RC-TPAQP");
-
-        /**
-         * `Server > MCLoader` | Tells the proxy to open a server.
-         */
-        PacketIdentification UNLOCK_SERVER = new PacketIdentification("RC-US");
-
-        /**
-         * `MCLoader > Proxy` | Tells the proxy to close a server.
-         */
-        PacketIdentification LOCK_SERVER = new PacketIdentification("RC-LS");
-
-        /**
-         * `MCLoader > Proxy` | Tells the proxy to end a game.
-         */
-        PacketIdentification END_RANKED_GAME = new PacketIdentification("RC-ERG");
-
-        /**
-         * `Proxy > MCLoader` | Tells the MCLoader to start a game.
-         */
-        PacketIdentification START_RANKED_GAME = new PacketIdentification("RC-SRG");
     }
 }

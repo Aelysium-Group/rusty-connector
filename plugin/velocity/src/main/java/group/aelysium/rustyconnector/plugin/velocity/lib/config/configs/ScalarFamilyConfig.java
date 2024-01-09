@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 public class ScalarFamilyConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.ScalarFamilyConfig {
-    private Component displayName;
+    private String displayName;
     private Family.Reference parent_family = Family.Reference.rootFamily();
     private String loadBalancer = "default";
     private boolean whitelist_enabled = false;
@@ -38,7 +38,7 @@ public class ScalarFamilyConfig extends YAML implements group.aelysium.rustyconn
         return service.whitelist(this.whitelist_name);
     }
 
-    public Component displayName() { return displayName; }
+    public String displayName() { return displayName; }
     public Family.Reference getParent_family() { return parent_family; }
     public String loadBalancer_name() { return loadBalancer; }
 
@@ -56,8 +56,7 @@ public class ScalarFamilyConfig extends YAML implements group.aelysium.rustyconn
 
     protected void register() throws IllegalStateException {
         try {
-            String name = IYAML.getValue(this.data, "display-name", String.class);
-            this.displayName = MiniMessage.miniMessage().deserialize(name);
+            this.displayName = IYAML.getValue(this.data, "display-name", String.class);
         } catch (Exception ignore) {}
 
         try {

@@ -2,9 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
@@ -45,8 +45,8 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
             // player.sendMessage(VelocityLang.GAME_FOLLOW_KICKED);
         });
 
-        GenericPacket packet = Tinder.get().services().packetBuilder().startNew()
-                .identification(PacketIdentification.Predefined.START_RANKED_GAME)
+        Packet packet = Tinder.get().services().packetBuilder().newBuilder()
+                .identification(BuiltInIdentifications.RANKED_GAME_READY)
                 .sendingToMCLoader(this.uuid())
                 .parameter("session", session.toJSON().toString())
                 .build();

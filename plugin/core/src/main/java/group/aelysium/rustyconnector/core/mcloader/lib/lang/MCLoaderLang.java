@@ -84,6 +84,14 @@ public class MCLoaderLang extends Lang {
         );
     };
 
+    public final static Message MAGIC_LINK = () -> join(
+            newlines(),
+            SPACING,
+            text("              /(¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯)\\"),
+            text("          --<||(     MAGIC LINK -- CONNECTED     )||>--"),
+            text("              \\(_.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._)/")
+    ).color(DARK_PURPLE);
+
     public final static ParameterizedMessage2<String, NamedTextColor> BOXED_MESSAGE_COLORED = (message, color) -> join(
             newlines(),
             SPACING,

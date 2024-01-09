@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 public class RankedFamilyConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.RankedFamilyConfig {
-    private Component displayName;
+    private String displayName;
     private Family.Reference parent_family = Family.Reference.rootFamily();
     private String matchmaker;
     private String gamemodeName;
@@ -37,7 +37,7 @@ public class RankedFamilyConfig extends YAML implements group.aelysium.rustyconn
     public Optional<? extends WhitelistConfig> whitelist(IProxyConfigService service) {
         return service.whitelist(this.whitelist_name);
     }
-    public Component displayName() { return displayName; }
+    public String displayName() { return displayName; }
     public Family.Reference getParent_family() { return parent_family; }
 
     public String gamemodeName() {
@@ -61,8 +61,7 @@ public class RankedFamilyConfig extends YAML implements group.aelysium.rustyconn
 
     protected void register(String familyName) throws IllegalStateException {
         try {
-            String name = IYAML.getValue(this.data, "display-name", String.class);
-            this.displayName = MiniMessage.miniMessage().deserialize(name);
+            this.displayName = IYAML.getValue(this.data, "display-name", String.class);
         } catch (Exception ignore) {}
 
         try {

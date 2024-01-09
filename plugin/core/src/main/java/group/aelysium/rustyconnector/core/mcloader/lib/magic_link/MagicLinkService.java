@@ -1,18 +1,15 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link;
 
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderFlame;
-import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link.HandshakeKillPacket;
-import group.aelysium.rustyconnector.toolkit.core.packet.variants.magic_link.HandshakePacket;
+import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.IMagicLinkService;
-import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.MagicLinkStatus;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.toolkit.mc_loader.server_info.IServerInfoService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -26,33 +23,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MagicLinkService implements IMagicLinkService {
     private final IMessengerConnector messenger;
     private final ClockService heartbeat = new ClockService(2);
-    private final AtomicInteger upcomingPingDelay = new AtomicInteger(5);
-    private MagicLinkStatus status = MagicLinkStatus.SEARCHING;
+    private final AtomicInteger delay = new AtomicInteger(5);
 
     public MagicLinkService(IMessengerConnector messenger) {
         this.messenger = messenger;
     }
 
-    public void setStatus(MagicLinkStatus status) {
-        this.status = status;
-    }
-
-    public void setUpcomingPingDelay(int delay) {
-        upcomingPingDelay.set(delay);
+    public void setDelay(int delay) {
+        this.delay.set(delay);
     }
 
     private void scheduleNextPing(IMCLoaderFlame<? extends ICoreServiceHandler> api) {
         IServerInfoService serverInfoService = api.services().serverInfo();
         this.heartbeat.scheduleDelayed(() -> {
             try {
-                HandshakePacket packet = api.services().packetBuilder().startNew()
-                        .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE)
+                Packet packet = api.services().packetBuilder().newBuilder()
+                        .identification(BuiltInIdentifications.MAGICLINK_HANDSHAKE_PING)
                         .sendingToProxy()
-                        .parameter(HandshakePacket.Parameters.ADDRESS, serverInfoService.address())
-                        .parameter(HandshakePacket.Parameters.DISPLAY_NAME, serverInfoService.displayName())
-                        .parameter(HandshakePacket.Parameters.MAGIC_CONFIG_NAME, serverInfoService.magicConfig())
-                        .parameter(HandshakePacket.Parameters.PLAYER_COUNT, new PacketParameter(serverInfoService.playerCount()))
-                        .build(HandshakePacket.class);
+                        .parameter(MagicLink.Handshake.Ping.Parameters.ADDRESS, serverInfoService.address())
+                        .parameter(MagicLink.Handshake.Ping.Parameters.DISPLAY_NAME, serverInfoService.displayName())
+                        .parameter(MagicLink.Handshake.Ping.Parameters.MAGIC_CONFIG_NAME, serverInfoService.magicConfig())
+                        .parameter(MagicLink.Handshake.Ping.Parameters.PLAYER_COUNT, new PacketParameter(serverInfoService.playerCount()))
+                        .build();
 
                 api.services().magicLink().connection().orElseThrow().publish(packet);
             } catch (Exception e) {
@@ -60,7 +52,7 @@ public class MagicLinkService implements IMagicLinkService {
             }
 
             MagicLinkService.this.scheduleNextPing(api);
-        }, LiquidTimestamp.from(this.upcomingPingDelay.get(), TimeUnit.SECONDS));
+        }, LiquidTimestamp.from(this.delay.get(), TimeUnit.SECONDS));
     }
 
     public void startHeartbeat(IMCLoaderFlame<? extends ICoreServiceHandler> api) {
@@ -77,13 +69,17 @@ public class MagicLinkService implements IMagicLinkService {
 
     @Override
     public void kill() {
-        MCLoaderFlame api = TinderAdapterForCore.getTinder().flame();
+        try {
+            MCLoaderFlame api = TinderAdapterForCore.getTinder().flame();
 
-        GenericPacket packet = api.services().packetBuilder().startNew()
-                .identification(PacketIdentification.Predefined.MAGICLINK_HANDSHAKE_KILL)
-                .sendingToProxy()
-                .build();
-        api.services().magicLink().connection().orElseThrow().publish(packet);
+            Packet packet = api.services().packetBuilder().newBuilder()
+                    .identification(BuiltInIdentifications.MAGICLINK_HANDSHAKE_DISCONNECT)
+                    .sendingToProxy()
+                    .build();
+            api.services().magicLink().connection().orElseThrow().publish(packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         this.heartbeat.kill();
         this.messenger.kill();

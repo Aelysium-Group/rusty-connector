@@ -29,8 +29,6 @@
 # | Display name can appear as a result of multiple        #
 # | factors such as the friends module being enabled.      #
 #                                                          #
-# | Display names support MiniMessage.                     #
-#                                                          #
 # | Multiple families are allowed to have the              #
 # | same display name.                                     #
 #                                                          #

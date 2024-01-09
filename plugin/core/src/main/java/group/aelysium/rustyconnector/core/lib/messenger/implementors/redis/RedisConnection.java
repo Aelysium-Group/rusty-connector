@@ -3,16 +3,14 @@ package group.aelysium.rustyconnector.core.lib.messenger.implementors.redis;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.message_cache.IMessageCacheService;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
-import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
-import group.aelysium.rustyconnector.toolkit.core.packet.GenericPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
 import group.aelysium.rustyconnector.core.lib.model.FailService;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 
-import java.net.InetSocketAddress;
 import java.util.*;
 
 import java.util.concurrent.ExecutorService;
@@ -21,13 +19,13 @@ import java.util.concurrent.TimeUnit;
 
 public class RedisConnection extends MessengerConnection implements IMessengerConnection {
     private final Vector<RedisSubscriber> subscribers = new Vector<>();
-    private final Map<PacketIdentification, List<PacketListener<?>>> listeners = new HashMap<>();
+    private final Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners = new HashMap<>();
     private final RedisPublisher publisher;
     private final RedisClient.Builder clientBuilder;
     private boolean isAlive = false;
     private ExecutorService executorService;
     private final FailService failService;
-    private AESCryptor cryptor;
+    private final AESCryptor cryptor;
 
     public RedisConnection(RedisClient.Builder clientBuilder, AESCryptor cryptor) {
         super();
@@ -38,7 +36,7 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
         this.cryptor = cryptor;
     }
 
-    protected void subscribe(IMessageCacheService<?> cache, PluginLogger logger, UUID senderUUID) {
+    protected void subscribe(IMessageCacheService<?> cache, PluginLogger logger, Packet.Node senderUUID) {
         if(!this.isAlive) return;
 
         this.executorService.submit(() -> {
@@ -63,7 +61,7 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
         });
     }
 
-    public void startListening(IMessageCacheService<?> cache, PluginLogger logger, UUID senderUUID) {
+    public void startListening(IMessageCacheService<?> cache, PluginLogger logger, Packet.Node senderUUID) {
         if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
         this.executorService = Executors.newFixedThreadPool(2);
 
@@ -99,12 +97,15 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
         } catch (Exception ignore) {}
     }
 
-    public <P extends IPacket> void publish(P packet) {
-        this.publisher.publish((GenericPacket) packet);
+    public void publish(Packet packet) {
+        this.publisher.publish(packet);
+    }
+    public void publish(Packet.Wrapper wrapper) {
+        publish(wrapper.packet());
     }
 
     @Override
-    public <TPacketListener extends PacketListener<? extends GenericPacket>> void listen(TPacketListener listener) {
+    public <TPacketListener extends PacketListener<? extends Packet.Wrapper>> void listen(TPacketListener listener) {
         this.listeners.computeIfAbsent(listener.target(), s -> new ArrayList<>());
 
         this.listeners.get(listener.target()).add(listener);

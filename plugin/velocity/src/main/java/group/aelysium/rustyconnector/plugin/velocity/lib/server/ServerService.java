@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerService implements IServerService {
-    protected final Map<UUID, IMCLoader> servers = new ConcurrentHashMap<>(); // Should be used exclusively for serverInfo based lookups.
+    protected final Map<UUID, IMCLoader> servers = new ConcurrentHashMap<>();
     private final int serverTimeout;
     private final int serverInterval;
 

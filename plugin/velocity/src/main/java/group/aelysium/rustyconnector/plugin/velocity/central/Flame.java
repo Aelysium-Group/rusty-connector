@@ -8,10 +8,11 @@ import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCLoaderConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeKillListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeDisconnectListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.VelocityPacketBuilder;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
@@ -50,7 +51,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.FriendsC
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakePingListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.LockServerListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.SendPlayerListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.UnlockServerListener;
@@ -80,12 +81,14 @@ import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInje
  * If not, check {@link Tinder}.
  */
 public class Flame extends VelocityFlame<CoreServiceHandler> {
+    private final UUID uuid;
     private final Version version;
     private final List<Component> bootOutput;
     private final char[] memberKey;
 
-    protected Flame(Version version, char[] memberKey, Map<Class<? extends Service>, Service> services, List<Component> bootOutput) {
+    protected Flame(UUID uuid, Version version, char[] memberKey, Map<Class<? extends Service>, Service> services, List<Component> bootOutput) {
         super(new CoreServiceHandler(services));
+        this.uuid = uuid;
         this.version = version;
         this.bootOutput = bootOutput;
         this.memberKey = memberKey;
@@ -95,6 +98,9 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
         return this.version;
     }
 
+    public UUID uuid() {
+        return this.uuid;
+    }
 
     private Optional<char[]> memberKey() {
         if (this.memberKey.length == 0) return Optional.empty();
@@ -119,6 +125,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
         logger.send(Component.text("Initializing 0%...", NamedTextColor.DARK_GRAY));
 
         try {
+            UUID uuid = UUID.randomUUID();
             String version = initialize.version();
             ConfigService configService = initialize.configService();
             AESCryptor cryptor = initialize.privateKey();
@@ -131,17 +138,16 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
             MessageCacheService messageCacheService = initialize.dataTransit(inject(langService, configService));
 
             logger.send(Component.text("Initializing 20%...", NamedTextColor.DARK_GRAY));
-            DependencyInjector.DI2<IMessengerConnector, StorageService> connectors = initialize.connectors(inject(cryptor, messageCacheService, Tinder.get().logger(), langService));
+            DependencyInjector.DI2<IMessengerConnector, StorageService> connectors = initialize.connectors(inject(cryptor, messageCacheService, Tinder.get().logger(), langService), uuid);
 
             logger.send(Component.text("Initializing 30%...", NamedTextColor.DARK_GRAY));
             FamilyService familyService = initialize.families(inject(defaultConfig, langService, connectors.d2(), configService));
-            initialize.magicConfigs(inject(familyService, langService, configService));
             logger.send(Component.text("Initializing 40%...", NamedTextColor.DARK_GRAY));
             ServerService serverService = initialize.servers(defaultConfig);
             logger.send(Component.text("Initializing 50%...", NamedTextColor.DARK_GRAY));
             initialize.networkWhitelist(inject(defaultConfig, langService, configService));
             logger.send(Component.text("Initializing 60%...", NamedTextColor.DARK_GRAY));
-            initialize.magicLink(inject(defaultConfig, serverService, connectors.d1()));
+            initialize.magicLink(inject(defaultConfig, serverService, connectors.d1(), langService, configService, familyService));
             initialize.webhooks(inject(langService, configService));
 
             logger.send(Component.text("Initializing 70%...", NamedTextColor.DARK_GRAY));
@@ -153,7 +159,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
 
             logger.send(Component.text("Initializing 90%...", NamedTextColor.DARK_GRAY));
 
-            Flame flame = new Flame(new Version(version), memberKey.orElse(new char[0]), initialize.getServices(), initialize.getBootOutput());
+            Flame flame = new Flame(uuid, new Version(version), memberKey.orElse(new char[0]), initialize.getServices(), initialize.getBootOutput());
 
             flame.services().add(new VelocityPacketBuilder(flame));
 
@@ -291,7 +297,7 @@ class Initialize {
         PluginLogger.init(loggerConfig);
     }
 
-    public DependencyInjector.DI2<IMessengerConnector, StorageService> connectors(DependencyInjector.DI4<AESCryptor, MessageCacheService, PluginLogger, LangService> dependencies) throws IOException, SQLException {
+    public DependencyInjector.DI2<IMessengerConnector, StorageService> connectors(DependencyInjector.DI4<AESCryptor, MessageCacheService, PluginLogger, LangService> dependencies, UUID uuid) throws IOException, SQLException {
         bootOutput.add(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
         ConnectorsConfig config = ConnectorsConfig.construct(api.dataFolder(), dependencies.d4(), true, true);
@@ -309,17 +315,16 @@ class Initialize {
         messenger.connect();
         IMessengerConnection connection = messenger.connection().orElseThrow();
 
-        connection.listen(new HandshakeListener(this.api));
-        connection.listen(new HandshakeKillListener(this.api));
+        connection.listen(new HandshakePingListener(this.api));
+        connection.listen(new HandshakeDisconnectListener(this.api));
 
         connection.listen(new SendPlayerListener(this.api));
         connection.listen(new LockServerListener(this.api));
         connection.listen(new UnlockServerListener(this.api));
 
         connection.listen(new RankedGameEndListener(this.api));
-        System.out.println("done setting up listeners");
 
-        ((RedisConnection) connection).startListening(dependencies.d2(), dependencies.d3(), null);
+        ((RedisConnection) connection).startListening(dependencies.d2(), dependencies.d3(), Packet.Node.proxy(uuid));
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
 
         bootOutput.add(Component.text("Booting MicroStream MariaDB driver...", NamedTextColor.DARK_GRAY));
@@ -391,31 +396,6 @@ class Initialize {
         return familyService;
     }
 
-    public void magicConfigs(DependencyInjector.DI3<FamilyService, LangService, ConfigService> deps) throws Exception {
-        bootOutput.add(Component.text("Validating Magic Configs...", NamedTextColor.DARK_GRAY));
-
-        File folder = new File(String.valueOf(api.dataFolder()), "/magic_configs");
-        if (!folder.exists() && !folder.isDirectory())
-            folder.mkdirs();
-        File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
-        try {
-            if (files.length == 0) {
-                files = new File[]{new File("default.yml")};
-            }
-        } catch (Exception ignore) {
-            files = new File[]{new File("default.yml")};
-        }
-
-        for (File file : files) {
-            MagicMCLoaderConfig magicMCLoaderConfig = MagicMCLoaderConfig.construct(api.dataFolder(), file.getName().replaceAll("\\.yml",""), deps.d2(), deps.d3());
-
-            if(deps.d1().dump().stream().noneMatch(family -> family.id().equals(magicMCLoaderConfig.family())))
-                throw new NullPointerException("The magic config `" + file.getName() + "` is pointing to a family: `" + magicMCLoaderConfig.family() + "`, which doesn't exist!");
-        }
-
-        bootOutput.add(Component.text("Magic Configs have been validated!", NamedTextColor.GREEN));
-    }
-
     public void networkWhitelist(DependencyInjector.DI3<DefaultConfig, LangService, ConfigService> deps) throws IOException {
         bootOutput.add(Component.text("Registering whitelist service to the API...", NamedTextColor.DARK_GRAY));
         WhitelistService whitelistService = new WhitelistService();
@@ -473,17 +453,47 @@ class Initialize {
         return messageCacheService;
     }
 
-    public void magicLink(DependencyInjector.DI3<DefaultConfig, ServerService, IMessengerConnector> dependencies) {
+    public void magicLink(DependencyInjector.DI6<DefaultConfig, ServerService, IMessengerConnector, LangService, ConfigService, FamilyService> deps) {
         bootOutput.add(Component.text("Building magic link service...", NamedTextColor.DARK_GRAY));
 
-        MagicLinkService magicLinkService = new MagicLinkService(dependencies.d1().magicLink_serverPingInterval(), dependencies.d3());
+        Map<String, MagicLinkService.MagicLinkMCLoaderSettings> configs = new HashMap<>();
+        {
+            bootOutput.add(Component.text("Validating Magic Configs...", NamedTextColor.DARK_GRAY));
+
+            File folder = new File(String.valueOf(api.dataFolder()), "/magic_configs");
+            if (!folder.exists() && !folder.isDirectory())
+                folder.mkdirs();
+            File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
+            try {
+                if (files.length == 0) {
+                    files = new File[]{new File("default.yml")};
+                }
+            } catch (Exception ignore) {
+                files = new File[]{new File("default.yml")};
+            }
+
+            for (File file : files) {
+                String name = file.getName().replaceAll("\\.yml","").replaceAll("\\.yaml", "");
+
+                MagicLinkService.MagicLinkMCLoaderSettings settings = MagicMCLoaderConfig.construct(api.dataFolder(), name, deps.d4(), deps.d5());
+
+                if(deps.d6().find(settings.family()).isEmpty())
+                    throw new NullPointerException("The magic config `" + file.getName() + "` is pointing to a family: `" + settings.family() + "`, which doesn't exist!");
+
+                configs.put(name, settings);
+            }
+
+            bootOutput.add(Component.text("Magic Configs have been validated!", NamedTextColor.GREEN));
+        }
+
+        MagicLinkService magicLinkService = new MagicLinkService(deps.d1().magicLink_serverPingInterval(), deps.d3(), configs);
         services.put(MagicLinkService.class, magicLinkService);
 
         bootOutput.add(Component.text("Finished building magic link service.", NamedTextColor.GREEN));
 
 
         bootOutput.add(Component.text("Booting magic link service...", NamedTextColor.DARK_GRAY));
-        magicLinkService.startHeartbeat(dependencies.d2());
+        magicLinkService.startHeartbeat(deps.d2());
         bootOutput.add(Component.text("Finished booting magic link service.", NamedTextColor.GREEN));
     }
 

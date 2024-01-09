@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.core.message_cache;
 
-import group.aelysium.rustyconnector.toolkit.core.packet.IPacket;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketStatus;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
@@ -15,7 +15,7 @@ public interface IMessageCacheService<TCacheableMessage extends ICacheableMessag
      */
     TCacheableMessage cacheMessage(String message, PacketStatus status);
 
-    <TPacket extends IPacket> boolean ignoredType(TPacket message);
+    boolean ignoredType(Packet message);
 
     /**
      * Find a cached message based on its snowflake.
