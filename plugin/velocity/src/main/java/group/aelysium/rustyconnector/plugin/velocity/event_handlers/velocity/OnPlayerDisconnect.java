@@ -35,18 +35,7 @@ public class OnPlayerDisconnect {
         Player player = Player.from(event.getPlayer());
 
         return EventTask.async(() -> {
-            // Handle servers when player leaves
-            try {
-                MCLoader server = (MCLoader) player.server().orElseThrow();
-
-                server.playerLeft();
-
-                EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(server.family(), server, player, true));
-                EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(server, player, true));
-                EventDispatch.Safe.fireAndForget(new NetworkLeaveEvent(server.family(), server, player));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            EventDispatch.Safe.fireAndForget(new NetworkLeaveEvent(player));
 
             // Handle party when player leaves
             try {

@@ -11,22 +11,12 @@ import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
  * This event fires after {@link FamilyLeaveEvent}.
  */
 public class NetworkLeaveEvent extends Cancelable {
-    protected final IFamily lastFamily;
-    protected final IMCLoader lastMCLoader;
     protected final IPlayer player;
 
-    public NetworkLeaveEvent(IFamily lastFamily, IMCLoader lastMCLoader, IPlayer player) {
-        this.lastFamily = lastFamily;
-        this.lastMCLoader = lastMCLoader;
+    public NetworkLeaveEvent(IPlayer player) {
         this.player = player;
     }
 
-    public IFamily lastFamily() {
-        return lastFamily;
-    }
-    public IMCLoader lastMCLoader() {
-        return lastMCLoader;
-    }
     public IPlayer player() {
         return player;
     }
