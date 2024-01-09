@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.velocitypowered.api.command.CommandManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsService;
@@ -122,22 +123,21 @@ public class FriendsService implements IFriendsService {
         this.dataEnclave.removeFriend(player1, player2);
     }
 
-    public FriendMapping sendRequest(IPlayer sender, IPlayer target) {
+    public void sendRequest(IPlayer sender, String targetUsername) {
         if(this.friendCount(sender).orElseThrow() > this.settings().maxFriends())
             sender.sendMessage(ProxyLang.MAX_FRIENDS_REACHED);
 
-        IFriendRequest friendRequest = new FriendRequest(this, snowflakeGenerator.nextId(), sender, target);
+        IFriendRequest friendRequest = new FriendRequest(this, snowflakeGenerator.nextId(), sender, targetUsername);
         this.friendRequests.put(friendRequest.id(), friendRequest);
 
 
         try {
-            target.resolve().orElseThrow().sendMessage(ProxyLang.FRIEND_REQUEST.build(sender));
-            sender.sendMessage(ProxyLang.FRIEND_REQUEST_SENT.build(target.username()));
+            Player player = new IPlayer.UsernameReference(targetUsername).get();
+            player.sendMessage(ProxyLang.FRIEND_REQUEST.build(sender));
+            sender.sendMessage(ProxyLang.FRIEND_REQUEST_SENT.build(targetUsername));
         } catch (NoSuchElementException ignore) {
-            sender.sendMessage(ProxyLang.FRIEND_REQUEST_TARGET_NOT_ONLINE.build(target.username()));
+            sender.sendMessage(ProxyLang.FRIEND_REQUEST_TARGET_NOT_ONLINE.build(targetUsername));
         }
-
-        return FriendMapping.from(sender, target);
     }
 
     public void closeInvite(IFriendRequest request) {

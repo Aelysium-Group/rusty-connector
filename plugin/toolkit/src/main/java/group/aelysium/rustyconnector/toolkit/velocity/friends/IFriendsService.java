@@ -32,7 +32,15 @@ public interface IFriendsService extends Service {
     void addFriends(IPlayer player1, IPlayer player2);
     void removeFriends(IPlayer player1, IPlayer player2);
 
-    IFriendMapping sendRequest(IPlayer sender, IPlayer target);
+    /**
+     * Sends a friend request to the target username.
+     * If the user is online they will be notified immediately.
+     * If the user is offline, they will be notified once they login.
+     * Friend requests expire after 10 minutes.
+     * @param sender The user sending the friend request.
+     * @param targetUsername The target of the friend request.
+     */
+    void sendRequest(IPlayer sender, String targetUsername);
 
     void closeInvite(IFriendRequest request);
 

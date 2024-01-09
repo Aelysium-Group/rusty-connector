@@ -52,15 +52,14 @@ public class OnPlayerDisconnect {
             try {
                 PartyService partyService = api.services().party().orElseThrow();
                 IParty party = partyService.find(player).orElseThrow();
-                try {
-                    boolean wasPartyLeader = party.leader().equals(player);
 
-                    if(wasPartyLeader)
-                        if(partyService.settings().disbandOnLeaderQuit())
-                            partyService.disband(party);
+                boolean wasPartyLeader = party.leader().equals(player);
 
-                    party.leave(player);
-                } catch (Exception e) {}
+                if(wasPartyLeader)
+                    if(partyService.settings().disbandOnLeaderQuit())
+                        partyService.disband(party);
+
+                party.leave(player);
             } catch (Exception ignore) {}
 
             // Handle sending out friend messages when player leaves

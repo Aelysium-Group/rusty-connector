@@ -24,9 +24,7 @@ public class FriendsDataEnclave implements IFriendsDataEnclave {
                     .toList();
 
             return Optional.of(mappings);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignore) {}
 
         return Optional.empty();
     }

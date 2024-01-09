@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
@@ -10,10 +11,10 @@ public class FriendRequest implements IFriendRequest {
     private final FriendsService friendsService;
     private long id;
     private IPlayer sender;
-    private IPlayer target;
+    private String target;
     private Boolean isAcknowledged = null;
 
-    public FriendRequest(FriendsService friendsService, long id, IPlayer sender, IPlayer target) {
+    public FriendRequest(FriendsService friendsService, long id, IPlayer sender, String target) {
         this.friendsService = friendsService;
         this.id = id;
         this.sender = sender;
@@ -26,40 +27,45 @@ public class FriendRequest implements IFriendRequest {
     public IPlayer sender() {
         return this.sender;
     }
-    public IPlayer target() {
+    public String target() {
         return this.target;
     }
 
     public synchronized void accept() {
         try {
-            if (friendsService.friendCount(this.target).orElseThrow() > friendsService.settings().maxFriends())
-                throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_MAXED);
-        } catch (IllegalStateException e) {
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_INTERNAL_ERROR);
-        }
-
-        if(this.isAcknowledged != null)
-            throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_ACKNOWLEDGED);
-
-        try {
-            friendsService.addFriends(this.sender, this.target);
+            Player player = new IPlayer.UsernameReference(this.target).get();
 
             try {
-                com.velocitypowered.api.proxy.Player resolved = this.target.resolve().orElseThrow();
-                resolved.sendMessage(ProxyLang.BECOME_FRIENDS.build(sender.username()));
-            } catch (NoSuchElementException ignore) {}
-            try {
-                com.velocitypowered.api.proxy.Player resolved = this.sender.resolve().orElseThrow();
-                resolved.sendMessage(ProxyLang.BECOME_FRIENDS.build(target.username()));
-            } catch (NoSuchElementException ignore) {}
+                if (friendsService.friendCount(player).orElseThrow() > friendsService.settings().maxFriends())
+                    throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_MAXED);
+            } catch (IllegalStateException e) {
+                throw e;
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_INTERNAL_ERROR);
+            }
 
-            friendsService.closeInvite(this);
-            this.isAcknowledged = true;
+            if(this.isAcknowledged != null)
+                throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_ACKNOWLEDGED);
+
+            try {
+                friendsService.addFriends(this.sender, player);
+
+                try {
+                    player.sendMessage(ProxyLang.BECOME_FRIENDS.build(sender.username()));
+                } catch (NoSuchElementException ignore) {}
+                try {
+                    com.velocitypowered.api.proxy.Player resolved = this.sender.resolve().orElseThrow();
+                    resolved.sendMessage(ProxyLang.BECOME_FRIENDS.build(player.username()));
+                } catch (NoSuchElementException ignore) {}
+
+                friendsService.closeInvite(this);
+                this.isAcknowledged = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_INTERNAL_ERROR);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
             throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_INTERNAL_ERROR);
         }
     }

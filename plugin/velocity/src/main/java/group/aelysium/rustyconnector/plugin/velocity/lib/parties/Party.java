@@ -38,7 +38,7 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
 
     public synchronized IPlayer leader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
-        if(!this.players.contains(this.leader) || this.leader.online()) {
+        if(!this.players.contains(this.leader) || !this.leader.online()) {
             this.newRandomLeader();
             this.broadcast(Component.text("The old party leader is no-longer available! "+this.leader.username()+" is the new leader!", NamedTextColor.YELLOW));
         }
