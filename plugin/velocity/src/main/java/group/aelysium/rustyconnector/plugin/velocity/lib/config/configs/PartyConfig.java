@@ -106,7 +106,7 @@ public class PartyConfig extends YAML implements group.aelysium.rustyconnector.t
             throw new IllegalStateException("Switch power: "+this.switchingServers_switchPower+" isn't valid! Please review `party.yml` again!");
         }
 
-        this.switchingServers_kickOnSendFailure = IYAML.getValue(this.data, "servers.kick-on-failure", Boolean.class);
+        this.switchingServers_kickOnSendFailure = IYAML.getValue(this.data, "switching-servers.kick-on-failure", Boolean.class);
     }
 
     public static PartyConfig construct(Path dataFolder, LangService lang, ConfigService configService) {
