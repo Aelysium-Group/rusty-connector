@@ -144,7 +144,10 @@ class ScalarFamilyConnector {
 
         this.validateWhitelist();
 
-        return this.family.loadBalancer().current();
+        IMCLoader server = this.family.loadBalancer().current().orElse(null);
+        if(server == null) throw new RuntimeException("There are no servers to connect to!");
+
+        return server;
     }
 
     public void validateWhitelist() throws RuntimeException {
@@ -167,7 +170,8 @@ class ScalarFamilyConnector {
     }
 
     private IMCLoader connectSingleton() {
-        IMCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
+        IMCLoader server = this.family.loadBalancer().current().orElse(null);
+        if(server == null) throw new RuntimeException("There are no servers to connect to!");
         try {
             if(!server.validatePlayer(player))
                 throw new RuntimeException("The server you're trying to connect to is full!");
@@ -193,7 +197,8 @@ class ScalarFamilyConnector {
 
         for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
             boolean isFinal = (attempt == attemptsLeft);
-            IMCLoader server = this.family.loadBalancer().current(); // Get the server that is currently listed as highest priority
+            IMCLoader server = this.family.loadBalancer().current().orElse(null);
+            if(server == null) throw new RuntimeException("There are no servers to connect to!");
 
             try {
                 if(!server.validatePlayer(player))

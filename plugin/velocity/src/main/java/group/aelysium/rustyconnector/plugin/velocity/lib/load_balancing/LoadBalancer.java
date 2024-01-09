@@ -6,9 +6,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.events.family.MCLoaderUnlo
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 public abstract class LoadBalancer implements ILoadBalancer<IMCLoader> {
     private boolean weighted;
@@ -37,16 +35,16 @@ public abstract class LoadBalancer implements ILoadBalancer<IMCLoader> {
         return this.weighted;
     }
 
-    public IMCLoader current() {
+    public Optional<IMCLoader> current() {
+        if(this.size(false) == 0) return Optional.empty();
+
         IMCLoader item;
         if(this.index >= this.size()) {
             this.index = 0;
             item = this.unlockedServers.get(this.index);
         } else item = this.unlockedServers.get(this.index);
 
-        assert item != null;
-
-        return item;
+        return Optional.of(item);
     }
 
     public int index() {

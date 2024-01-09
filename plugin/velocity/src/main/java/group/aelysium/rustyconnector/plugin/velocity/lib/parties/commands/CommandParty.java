@@ -306,18 +306,19 @@ public final class CommandParty {
                                             return closeMessage(player, ProxyLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
 
                                     String username = context.getArgument("username", String.class);
-                                    com.velocitypowered.api.proxy.Player targetPlayer;
-                                    try {
-                                        targetPlayer = api.velocityServer().getPlayer(username).orElseThrow();
-                                    } catch (Exception ignore) {
+                                    Player target = new IPlayer.UsernameReference(username).get();
+
+                                    if(!target.online())
                                         return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
-                                    }
-                                    Player target = Player.from(targetPlayer);
+                                    if(target.equals(player))
+                                        return closeMessage(player, ProxyLang.PARTY_INVITE_SELF_INVITE);
+                                    if(party.contains(target))
+                                        return closeMessage(player, ProxyLang.PARTY_INVITE_ALREADY_A_MEMBER.build(target.username()));
 
                                     try {
-                                        Collection<com.velocitypowered.api.proxy.Player> connectedPlayers = targetPlayer.getCurrentServer().orElseThrow().getServer().getPlayersConnected();
+                                        Collection<com.velocitypowered.api.proxy.Player> connectedPlayers = target.resolve().orElseThrow().getCurrentServer().orElseThrow().getServer().getPlayersConnected();
                                         if (partyService.settings().localOnly())
-                                            if (!connectedPlayers.contains(targetPlayer))
+                                            if (!connectedPlayers.contains(player.resolve().orElseThrow()))
                                                 return closeMessage(player, ProxyLang.PARTY_INVITE_NOT_ONLINE);
                                     } catch (Exception ignore) {}
                                     try {
@@ -328,10 +329,6 @@ public final class CommandParty {
                                             ))
                                                 return closeMessage(player, ProxyLang.PARTY_INVITE_FRIENDS_ONLY);
                                     } catch (Exception ignore) {}
-                                    if(targetPlayer.equals(player))
-                                        return closeMessage(player, ProxyLang.PARTY_INVITE_SELF_INVITE);
-                                    if(party.contains(target))
-                                        return closeMessage(player, ProxyLang.PARTY_INVITE_ALREADY_A_MEMBER.build(target.username()));
 
                                     try {
                                         partyService.invitePlayer(party, player, target);

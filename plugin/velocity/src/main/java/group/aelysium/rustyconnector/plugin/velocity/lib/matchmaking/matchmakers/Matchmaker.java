@@ -103,7 +103,8 @@ public abstract class Matchmaker implements IMatchmaker {
             for (ISession.IWaiting waitingSession : this.waitingSessions.values().stream().toList()) {
                 if(loadBalancer.size(false) == 0) break;
                 try {
-                    RankedMCLoader server = (RankedMCLoader) loadBalancer.current();
+                    RankedMCLoader server = (RankedMCLoader) loadBalancer.current().orElse(null);
+                    if(server == null) throw new RuntimeException("There are no servers to connect to!");
                     ISession session = waitingSession.start(server);
 
                     this.waitingSessions.remove(waitingSession.uuid());
