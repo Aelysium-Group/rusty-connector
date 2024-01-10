@@ -1,23 +1,47 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family.static_family;
 
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.Reference;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface IServerResidence {
     IPlayer player();
-    Reference<? extends IPlayer, ?> rawPlayer();
 
-    IMCLoader server();
-    Reference<? extends IMCLoader, UUID> rawServer();
+    Optional<MCLoaderEntry> server(String familyID);
 
-    IFamily family();
+    /**
+     * Deletes all mappings that are expired.
+     */
+    void purgeExpired();
 
-    Long expiration();
+    class MCLoaderEntry {
+        protected UUID mcloaderUUID;
+        protected Long expiration = null;
 
-    void expiration(LiquidTimestamp expiration);
+        public MCLoaderEntry(UUID mcloaderUUID, Long expiration) {
+            this.mcloaderUUID = mcloaderUUID;
+            this.expiration = expiration;
+        }
+
+        public IMCLoader server() {
+            return new IMCLoader.Reference(this.mcloaderUUID).get();
+        }
+
+        public boolean expired() {
+            if(expiration == null) return false;
+            return expiration < Instant.EPOCH.getEpochSecond();
+        }
+
+        public void expiration(LiquidTimestamp expiration) {
+            if(expiration == null) this.expiration = null;
+            else this.expiration = expiration.epochFromNow();
+        }
+
+    }
 }

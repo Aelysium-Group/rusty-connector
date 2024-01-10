@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -127,18 +127,18 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
                                 kickedPlayers.add(player);
                                 return;
                             }
-                            server.directConnect(player);
+                            server.connect(player);
                         }
                         case MODERATE -> {
                             if(server.maxed()) {
                                 kickedPlayers.add(player);
                                 return;
                             }
-                            server.directConnect(player);
+                            server.connect(player);
                         }
-                        case AGGRESSIVE -> server.directConnect(player);
+                        case AGGRESSIVE -> server.connect(player);
                     }
-                } catch (ConnectException e) {
+                } catch (Exception e) {
                     kickedPlayers.add(player);
                 }
 

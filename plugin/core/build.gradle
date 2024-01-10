@@ -4,7 +4,6 @@ compileJava {
 
 dependencies {
     // Include in jar
-    implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
     implementation "net.kyori:adventure-text-serializer-plain:${project.plaintextserializer_version}"
 
     // Dev only
@@ -12,6 +11,7 @@ dependencies {
     shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
     shadow "org.yaml:snakeyaml:${project.snakeyaml_version}"
     shadow "net.engio:mbassador:${project.mbassador_version}"
+    shadow "io.lettuce:lettuce-core:${project.lettuce_version}"
 }
 
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/

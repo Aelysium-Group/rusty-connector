@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAH
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPARequest;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 import java.util.List;
 import java.util.Vector;

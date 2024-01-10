@@ -9,13 +9,14 @@ import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.PlayerConnectable;
 
 import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
-public interface IMCLoader extends ISortable {
+public interface IMCLoader extends ISortable, PlayerConnectable {
     /**
      * Checks if the {@link IMCLoader} is stale.
      * @return {@link Boolean}
@@ -98,15 +99,6 @@ public interface IMCLoader extends ISortable {
      */
     boolean maxed();
 
-
-    /**
-     * Validates the player against the server's current player count.
-     * If the server is full or the player doesn't have permissions to bypass soft and hard player caps. They will be kicked
-     * @param player The player to validate
-     * @return `true` if the player is able to join. `false` otherwise.
-     */
-    boolean validatePlayer(IPlayer player);
-
     /**
      * Lazily gets the player count for this server.
      * Depending on sync configurations and how often players connect and disconnect form this server.
@@ -174,30 +166,6 @@ public interface IMCLoader extends ISortable {
      * @throws NullPointerException If the family associated with this server doesn't exist.
      */
     IFamily family() throws IllegalStateException, NullPointerException;
-
-    /**
-     * Connect a player to this server.
-     * This method respects {@link IParty parties} and will attempt to connect the entire party to this server if the player is in one and has the proper permissions.
-     * @param player The {@link IPlayer} to connect.
-     * @return `true` if the connection was successful. `false` otherwise.
-     */
-    boolean connect(IPlayer player) throws ConnectException;
-
-    /**
-     * Set's a connections initial server to the server.
-     * This method primarily only exists for compatibility reasons for use with Velocity Events.
-     * @param event The connection to set.
-     * @return `true` if the connection succeeds. `false` if the connection encounters an exception.
-     */
-    boolean directConnect(PlayerChooseInitialServerEvent event);
-
-    /**
-     * Connect a player directly to this server.
-     * This method is disrespectful of {@link IParty parties} and makes no attempt to accommodate them.
-     * @param player The {@link IPlayer} to connect.
-     * @return `true` if the connection was successful. `false` otherwise.
-     */
-    boolean directConnect(IPlayer player) throws ConnectException;
 
     /**
      * Locks the specific server in its respective family so that the load balancer won't return it for players to connect to.

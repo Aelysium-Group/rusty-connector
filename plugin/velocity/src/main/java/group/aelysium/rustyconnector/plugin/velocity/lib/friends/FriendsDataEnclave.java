@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsDataEnclave;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.Database;

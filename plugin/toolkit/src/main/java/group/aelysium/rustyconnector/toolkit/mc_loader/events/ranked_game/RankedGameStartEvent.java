@@ -1,9 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.mc_loader.events.ranked_game;
 
 import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
-import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.List;
 import java.util.UUID;

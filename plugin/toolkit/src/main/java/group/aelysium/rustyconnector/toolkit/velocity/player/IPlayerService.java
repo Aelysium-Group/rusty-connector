@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.toolkit.velocity.players;
+package group.aelysium.rustyconnector.toolkit.velocity.player;
 
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 

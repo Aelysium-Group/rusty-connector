@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 public interface IPartyInvite {
     /**

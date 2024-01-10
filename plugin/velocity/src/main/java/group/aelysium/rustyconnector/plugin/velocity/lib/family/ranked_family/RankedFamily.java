@@ -12,15 +12,18 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.Ran
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +31,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.RANKED_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
@@ -35,16 +39,16 @@ import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInje
 public class RankedFamily extends Family implements IRankedFamily {
     protected final Matchmaker matchmaker;
 
-    protected RankedFamily(Settings settings) {
-        super(settings.id(), new Family.Settings(settings.displayName(), new RoundRobin(new LoadBalancer.Settings(false, false, 0)), settings.parentFamily(), settings.whitelist()), RANKED_FAMILY_META);
+    protected RankedFamily(Settings settings, RoundRobin roundRobin) {
+        super(settings.id(), new Family.Settings(settings.displayName(), roundRobin, settings.parentFamily(), settings.whitelist(), new Connector(roundRobin, settings.matchmaker(), settings.whitelist())), RANKED_FAMILY_META);
         this.matchmaker = settings.matchmaker();
     }
 
-    public IMCLoader connect(IPlayer player) {
+    @Override
+    public ConnectionRequest connect(IPlayer player) {
         EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
 
-        this.matchmaker.add(player);
-        return null;
+        return new ConnectionRequest(player, new CompletableFuture<>());
     }
 
     public void dequeue(IPlayer player) {
@@ -120,7 +124,7 @@ public class RankedFamily extends Family implements IRankedFamily {
             whitelist = Whitelist.init(inject(bootOutput, lang, whitelistService, deps.d5()), config.getWhitelist_name());
 
         Settings settings = new Settings(familyName, config.displayName(), config.getParent_family(), whitelist, matchmaker);
-        return new RankedFamily(settings);
+        return new RankedFamily(settings, new RoundRobin(new LoadBalancer.Settings(false, false, 0)));
     }
 
     @Override
@@ -135,4 +139,24 @@ public class RankedFamily extends Family implements IRankedFamily {
             Whitelist.Reference whitelist,
             Matchmaker matchmaker
     ) {}
+
+    public static class Connector extends IFamily.Connector.Core {
+        protected final Matchmaker matchmaker;
+
+        public Connector(@NotNull LoadBalancer loadBalancer, @NotNull Matchmaker matchmaker, IWhitelist.Reference whitelist) {
+            super(loadBalancer, whitelist);
+
+            this.matchmaker = matchmaker;
+        }
+
+        @Override
+        public ConnectionRequest connect(IPlayer player) {
+            CompletableFuture<ConnectionRequest.Result> result = new CompletableFuture<>();
+            ConnectionRequest request = new ConnectionRequest(player, result);
+
+            this.matchmaker.add(request, result);
+
+            return request;
+        }
+    }
 }

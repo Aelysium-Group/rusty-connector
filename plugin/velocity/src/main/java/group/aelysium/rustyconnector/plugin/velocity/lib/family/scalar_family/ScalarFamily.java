@@ -1,18 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
-import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IScalarFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -22,12 +21,15 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBala
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.rmi.ConnectException;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.SCALAR_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
@@ -35,30 +37,14 @@ import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInje
 public class ScalarFamily extends Family implements IScalarFamily {
 
     public ScalarFamily(Settings settings) {
-        super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), SCALAR_FAMILY_META);
+        super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist(), settings.connector()), SCALAR_FAMILY_META);
     }
 
     /**
      * Used by {@link RootFamily}.
      */
     protected ScalarFamily(Settings settings, Metadata metadata) {
-        super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist()), metadata);
-    }
-
-    public IMCLoader connect(IPlayer player) throws RuntimeException {
-        EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
-
-        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
-        return connector.connect();
-    }
-    public IMCLoader connect(PlayerChooseInitialServerEvent event) throws RuntimeException {
-        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, event);
-        return connector.connect();
-    }
-
-    public IMCLoader fetchAny(IPlayer player) throws RuntimeException {
-        ScalarFamilyConnector connector = new ScalarFamilyConnector(this, player);
-        return connector.fetchAny();
+        super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist(), settings.connector()), metadata);
     }
 
     /**
@@ -100,7 +86,11 @@ public class ScalarFamily extends Family implements IScalarFamily {
             default -> throw new RuntimeException("The id used for "+familyName+"'s load balancer is invalid!");
         }
 
-        Settings settings = new Settings(familyName, config.displayName(), loadBalancer, config.getParent_family(), whitelist);
+        Family.Connector.Core connector = new Connector.Singleton(loadBalancer, whitelist);
+        if(loadBalancer.persistent() && loadBalancer.attempts() > 1)
+            connector = new Connector.Persistent(loadBalancer, whitelist);
+
+        Settings settings = new Settings(familyName, config.displayName(), loadBalancer, config.getParent_family(), whitelist, connector);
         return new ScalarFamily(settings);
     }
 
@@ -109,121 +99,80 @@ public class ScalarFamily extends Family implements IScalarFamily {
             String displayName,
             LoadBalancer loadBalancer,
             Family.Reference parentFamily,
-            Whitelist.Reference whitelist
+            Whitelist.Reference whitelist,
+            Family.Connector.Core connector
     ) {}
-}
 
-class ScalarFamilyConnector {
-    private final ScalarFamily family;
-    private final IPlayer player;
-    private final PlayerChooseInitialServerEvent event;
-
-    public ScalarFamilyConnector(ScalarFamily family, IPlayer player) {
-        this.family = family;
-        this.player = player;
-        this.event = null;
-    }
-    public ScalarFamilyConnector(ScalarFamily family, PlayerChooseInitialServerEvent event) {
-        this.family = family;
-        this.player = Player.from(event.getPlayer());
-        this.event = event;
-    }
-
-    public IMCLoader connect() throws RuntimeException {
-        if(this.family.loadBalancer().size() == 0)
-            throw new RuntimeException("There are no servers for you to connect to!");
-
-        this.validateWhitelist();
-
-        return this.establishAnyConnection();
-    }
-
-    public IMCLoader fetchAny() throws RuntimeException {
-        if(this.family.loadBalancer().size() == 0)
-            throw new RuntimeException("There are no servers for you to connect to!");
-
-        this.validateWhitelist();
-
-        IMCLoader server = this.family.loadBalancer().current().orElse(null);
-        if(server == null) throw new RuntimeException("There are no servers to connect to!");
-
-        return server;
-    }
-
-    public void validateWhitelist() throws RuntimeException {
-        if(!(this.family.whitelist() == null)) {
-            Whitelist familyWhitelist = this.family.whitelist();
-
-            if (!familyWhitelist.validate(this.player))
-                throw new RuntimeException(familyWhitelist.message());
-        }
-    }
-
-    public IMCLoader establishAnyConnection() {
-        IMCLoader server;
-        if(this.family.loadBalancer().persistent() && this.family.loadBalancer().attempts() > 1)
-            server = this.connectPersistent();
-        else
-            server = this.connectSingleton();
-
-        return server;
-    }
-
-    private IMCLoader connectSingleton() {
-        IMCLoader server = this.family.loadBalancer().current().orElse(null);
-        if(server == null) throw new RuntimeException("There are no servers to connect to!");
-        try {
-            if(!server.validatePlayer(player))
-                throw new RuntimeException("The server you're trying to connect to is full!");
-
-            if(this.event == null) {
-                if (!server.connect(player))
-                    throw new RuntimeException("There was an issue connecting you to the server!");
-            } else {
-                if (!server.directConnect(this.event))
-                    throw new RuntimeException("There was an issue connecting you to the server!");
+    public static class Connector {
+        public static class Persistent extends Family.Connector.Core {
+            public Persistent(@NotNull LoadBalancer loadBalancer, IWhitelist.Reference whitelist) {
+                super(loadBalancer, whitelist);
             }
 
-            this.family.loadBalancer().iterate();
+            @Override
+            public ConnectionRequest connect(IPlayer player) {
+                CompletableFuture<ConnectionRequest.Result> result = new CompletableFuture<>();
+                ConnectionRequest request = new ConnectionRequest(player, result);
 
-            return server;
-        } catch (RuntimeException | ConnectException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    private IMCLoader connectPersistent() {
-        int attemptsLeft = this.family.loadBalancer().attempts();
-
-        for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
-            boolean isFinal = (attempt == attemptsLeft);
-            IMCLoader server = this.family.loadBalancer().current().orElse(null);
-            if(server == null) throw new RuntimeException("There are no servers to connect to!");
-
-            try {
-                if(!server.validatePlayer(player))
-                    throw new RuntimeException("The server you're trying to connect to is full!");
-
-                if(this.event == null) {
-                    if (server.connect(player)) {
-                        this.family.loadBalancer().forceIterate();
-                        return server;
-                    }
-                } else {
-                    if (server.directConnect(this.event)) {
-                        this.family.loadBalancer().forceIterate();
-                        return server;
-                    }
+                if(!this.validateLoadBalancer()) {
+                    result.complete(ConnectionRequest.Result.failed(Component.text("There are no servers for you to connect to!")));
+                    return request;
+                }
+                if(!this.whitelisted(player)) {
+                    result.complete(ConnectionRequest.Result.failed(Component.text(this.whitelist.message())));
+                    return request;
                 }
 
-                throw new RuntimeException("Unable to connect you to the server in time!");
-            } catch (Exception e) {
-                if(isFinal)
-                    player.disconnect(Component.text(e.getMessage()));
+                int attemptsLeft = this.loadBalancer.attempts();
+
+                Optional<ConnectionRequest> serverResponse = Optional.empty();
+                for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
+                    IMCLoader server = this.loadBalancer.current().orElse(null);
+                    if(server == null) {
+                        result.complete(ConnectionRequest.Result.failed(Component.text("There are no servers for you to connect to!")));
+                        return request;
+                    }
+
+                    serverResponse = Optional.of(server.connect(player));
+                    this.loadBalancer.forceIterate();
+                }
+
+                return serverResponse.orElse(request);
             }
-            this.family.loadBalancer().forceIterate();
         }
 
-        throw new RuntimeException("There was an issue connecting you to the server!");
+        public static class Singleton extends Family.Connector.Core {
+            public Singleton(@NotNull LoadBalancer loadBalancer, IWhitelist.Reference whitelist) {
+                super(loadBalancer, whitelist);
+            }
+
+            @Override
+            public ConnectionRequest connect(IPlayer player) {
+                CompletableFuture<ConnectionRequest.Result> result = new CompletableFuture<>();
+                ConnectionRequest request = new ConnectionRequest(player, result);
+
+                if(!this.validateLoadBalancer()) {
+                    result.complete(ConnectionRequest.Result.failed(Component.text("There are no servers for you to connect to!")));
+                    return request;
+                }
+                if(!this.whitelisted(player)) {
+                    result.complete(ConnectionRequest.Result.failed(Component.text(this.whitelist.message())));
+                    return request;
+                }
+                IMCLoader server = this.loadBalancer.current().orElse(null);
+                if(server == null) {
+                    result.complete(ConnectionRequest.Result.failed(Component.text("There are no server to connect to. Try again later.")));
+                    return request;
+                }
+
+                ConnectionRequest serverResponse = server.connect(player);
+                try {
+                    if (serverResponse.result().get().connected())
+                        this.loadBalancer.iterate();
+                } catch (Exception ignore) {}
+
+                return serverResponse;
+            }
+        }
     }
 }

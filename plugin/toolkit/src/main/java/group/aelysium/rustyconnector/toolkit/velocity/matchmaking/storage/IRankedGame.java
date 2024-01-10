@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage;
 
 
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 
 import java.util.UUID;

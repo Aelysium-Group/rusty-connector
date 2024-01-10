@@ -26,24 +26,10 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
     }
 
     public void connect(ISession session) {
-        List<Player> kickedPlayers = new Vector<>();
-        ProxyServer velocityServer = Tinder.get().velocityServer();
-
-        for (IRankedPlayer rankedPlayer : session.players()) {
+        for (IRankedPlayer rankedPlayer : session.players())
             try {
-                com.velocitypowered.api.proxy.Player player = velocityServer.getPlayer(rankedPlayer.uuid()).orElseThrow();
-                try {
-                    this.directConnect(player);
-                } catch (ConnectException e) {
-                    kickedPlayers.add(player);
-                }
-            } catch (NoSuchElementException ignore) {
-            } // Player isn't online, so it's not like we could message them anyway.
-        }
-
-        kickedPlayers.forEach(player -> {
-            // player.sendMessage(VelocityLang.GAME_FOLLOW_KICKED);
-        });
+                this.connect(rankedPlayer.player().orElseThrow());
+            } catch (NoSuchElementException ignore) {} // Player isn't online, so it's not like we could message them anyway.
 
         Packet packet = Tinder.get().services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_READY)

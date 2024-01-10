@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.parties;
 
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
@@ -73,7 +73,7 @@ public interface IParty {
 
     /**
      * Adds the player to this party.
-     * This method does not connect the player to the party's server. You'll need to use {@link IParty#server()}.{@link IMCLoader#directConnect(IPlayer) directConnect(Player)}.
+     * This method does not connect the player to the party's server. You'll need to use {@link IParty#server()}.{@link IMCLoader#connect(IPlayer)} connect(Player)}.
      * However, once a player is in a party, they will be pulled into the next server the party travels to.
      * @param player The player to join the party.
      * @throws IllegalStateException If the party is empty. Empty parties are marked as "destroyable" and get decomposed. You'll have to create a new party and connect the player to that one instead.

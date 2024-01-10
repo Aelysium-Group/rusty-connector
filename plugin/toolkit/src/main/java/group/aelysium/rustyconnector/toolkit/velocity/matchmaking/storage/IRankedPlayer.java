@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage;
 
-import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 import java.util.Optional;
 import java.util.UUID;

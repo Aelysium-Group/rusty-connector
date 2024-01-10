@@ -1,14 +1,10 @@
 package group.aelysium.rustyconnector.toolkit.velocity.family.static_family;
 
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.family.InitiallyConnectableFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
-import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
-public interface IStaticFamily extends IFamily, InitiallyConnectableFamily {
+public interface IStaticFamily extends IFamily {
     /**
      * Gets the {@link UnavailableProtocol} for this family. {@link UnavailableProtocol} governs what happens when a player's resident server is unavailable.
      * @return {@link UnavailableProtocol}
@@ -23,11 +19,4 @@ public interface IStaticFamily extends IFamily, InitiallyConnectableFamily {
      * @return {@link LiquidTimestamp}
      */
     LiquidTimestamp homeServerExpiration();
-
-    /**
-     * Gets the {@link IResidenceDataEnclave} for this {@link IStaticFamily}.
-     * Data enclave gives you an interface between this family and the remote storage connector that this family uses.
-     * @return {@link IResidenceDataEnclave}
-     */
-    IResidenceDataEnclave dataEnclave();
 }

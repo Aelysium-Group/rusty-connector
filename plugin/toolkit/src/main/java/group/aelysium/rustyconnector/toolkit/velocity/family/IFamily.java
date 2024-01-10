@@ -3,16 +3,17 @@ package group.aelysium.rustyconnector.toolkit.velocity.family;
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface IFamily {
+public interface IFamily extends PlayerConnectable {
     String id();
     String displayName();
 
@@ -59,14 +60,6 @@ public interface IFamily {
     boolean containsServer(UUID uuid);
 
     /**
-     * Method added for convenience.
-     * Any implementation of this interface should perform some form of operation when connect is called.
-     * @param player The player to ultimately connect to the family
-     * @return The server that the player was connected to.
-     */
-    IMCLoader connect(IPlayer player);
-
-    /**
      * Gets the aggregate player count across all servers in this family
      * @return A player count
      */
@@ -99,9 +92,36 @@ public interface IFamily {
      */
     void balance();
 
-    record Settings(String displayName, ILoadBalancer<IMCLoader> loadBalancer, Reference parent, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IWhitelist, String> whitelist) {}
+    record Settings(
+            String displayName,
+            ILoadBalancer<IMCLoader> loadBalancer,
+            Reference parent,
+            group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IWhitelist, String> whitelist,
+            Connector.Core connector) {}
 
+    class Connector {
+        public static abstract class Core implements PlayerConnectable {
+            protected final ILoadBalancer<IMCLoader> loadBalancer;
+            protected IWhitelist whitelist;
 
+            protected Core(@NotNull ILoadBalancer<IMCLoader> loadBalancer, group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IWhitelist, String> whitelist) {
+                this.loadBalancer = loadBalancer;
+                try {
+                    this.whitelist = whitelist.get();
+                } catch (Exception ignore) {}
+            }
+
+            protected boolean whitelisted(IPlayer player) throws RuntimeException {
+                if(this.whitelist == null) return true;
+
+                return whitelist.validate(player);
+            }
+
+            protected boolean validateLoadBalancer() {
+                return this.loadBalancer.size(false) > 0;
+            }
+        }
+    }
 
     class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IFamily, String> {
         private boolean rootFamily = false;

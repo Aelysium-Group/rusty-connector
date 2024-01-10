@@ -6,8 +6,8 @@ import com.google.gson.JsonObject;
 import com.velocitypowered.api.event.EventManager;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MagicMCLoaderConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeDisconnectListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
@@ -18,7 +18,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.Version;
-import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
@@ -30,24 +29,18 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DefaultConfig;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoggerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.OnPlayerChangeServer;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.OnPlayerChooseInitialServer;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.OnPlayerDisconnect;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.OnPlayerKicked;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DataTransitConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.DynamicTeleportConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.tpa.TPAService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.FamiliesConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.FriendsConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancingService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkService;
@@ -57,11 +50,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers.UnlockServerListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.PartyServiceSettings;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.PartyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.WebhooksConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import net.kyori.adventure.text.Component;
@@ -328,11 +319,7 @@ class Initialize {
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
 
         bootOutput.add(Component.text("Booting MicroStream MariaDB driver...", NamedTextColor.DARK_GRAY));
-        StorageService storage = StorageService.create(
-                config.getMysql_address(),
-                config.getMysql_user(),
-                config.getMysql_database()
-        );
+        StorageService storage = StorageService.create(config.storageConfiguration());
         services.put(StorageService.class, storage);
         bootOutput.add(Component.text("Finished booting MariaDB driver.", NamedTextColor.GREEN));
 
@@ -360,7 +347,7 @@ class Initialize {
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             for (String familyName : familiesConfig.staticFamilies()) {
-                familyService.add(StaticFamily.init(inject(bootOutput, deps.d2(), deps.d3(), whitelistService, deps.d4()), familyName));
+                familyService.add(StaticFamily.init(inject(bootOutput, deps.d2(), whitelistService, deps.d4()), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             for (String familyName : familiesConfig.rankedFamilies()) {
