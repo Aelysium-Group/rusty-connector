@@ -51,10 +51,7 @@ public class OnPlayerChooseInitialServer {
                     player.disconnect(Component.text(whitelist.message()));
                     return;
                 }
-            } catch (NoOutputException ignore) {
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception ignore) {}
 
             connect(event, player);
 
