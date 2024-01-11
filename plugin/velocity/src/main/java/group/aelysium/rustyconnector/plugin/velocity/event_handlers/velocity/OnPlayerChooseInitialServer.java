@@ -116,8 +116,9 @@ public class OnPlayerChooseInitialServer {
                     if(!result.connected()) throw new NoOutputException();
 
                     IMCLoader server = result.server().orElseThrow();
-
                     EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
+
+                    event.setInitialServer(server.registeredServer());
                     return;
                 } catch (NoOutputException ignore) {
                 } catch (Exception e) {
@@ -137,6 +138,7 @@ public class OnPlayerChooseInitialServer {
             IMCLoader server = result.server().orElseThrow();
 
             EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
+            event.setInitialServer(server.registeredServer());
         } catch (NoOutputException ignore) {
         } catch (Exception e) {
             player.sendMessage(Component.text("We were unable to connect you!"));
