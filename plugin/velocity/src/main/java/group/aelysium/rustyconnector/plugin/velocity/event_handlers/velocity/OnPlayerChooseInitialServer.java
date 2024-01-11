@@ -101,7 +101,6 @@ public class OnPlayerChooseInitialServer {
         PluginLogger logger = api.logger();
         try {
             // Handle family injectors if they exist
-            event.setInitialServer(null);
             try {
                 InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
                 try {
