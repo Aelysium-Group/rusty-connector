@@ -17,17 +17,13 @@ public class PlayerService implements IPlayerService {
 
     public Optional<Player> fetch(UUID uuid) {
         try {
-            Optional<com.velocitypowered.api.proxy.Player> velocityPlayer = Tinder.get().velocityServer().getPlayer(uuid);
             Database root = this.storage.database();
 
-            if(velocityPlayer.isEmpty()) {
-                Player player = root.players().get(uuid);
-                if (player == null) return Optional.empty();
+            Player player = root.players().get(uuid);
 
-                return Optional.of(player);
-            }
+            if(player == null) return Optional.empty();
 
-            return Optional.of(Player.from(velocityPlayer.orElseThrow()));
+            return Optional.of(player);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,7 +39,10 @@ public class PlayerService implements IPlayerService {
             if(velocityPlayer.isEmpty())
                 return root.players().values().stream().filter(fakePlayer -> fakePlayer.username().equals(username)).findAny();
 
-            return Optional.of(Player.from(velocityPlayer.orElseThrow()));
+            Player player = root.players().get(velocityPlayer.orElseThrow().getUniqueId());
+            if(player == null) return Optional.empty();
+
+            return Optional.of(player);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -73,18 +73,18 @@ public class ConnectorsConfig extends YAML {
             switch (storageType) {
                 case FILE -> this.storageConfiguration = new StorageService.StorageConfiguration.File(enableRESTAPI);
                 case MARIADB -> {
-                    String host = IYAML.getValue(this.data, "mariadb.host", String.class);
+                    String host = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.host", String.class);
                     if (host.equals(""))
                         throw new IllegalStateException("Please configure your connector settings. `host` cannot be empty.");
-                    int port = IYAML.getValue(this.data, "mariadb.port", Integer.class);
+                    int port = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.port", Integer.class);
                     InetSocketAddress address = new InetSocketAddress(host, port);
 
-                    String user = IYAML.getValue(this.data, "mariadb.user", String.class);
+                    String user = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.user", String.class);
                     if (user.equals(""))
                         throw new IllegalStateException("Please configure your connector settings. `user` cannot be empty.");
-                    char[] password = IYAML.getValue(this.data, "mariadb.password", String.class).toCharArray();
+                    char[] password = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.password", String.class).toCharArray();
                     UserPass userPass = new UserPass(user, password);
-                    String database = IYAML.getValue(this.data, "mariadb.database", String.class);
+                    String database = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.database", String.class);
 
                     this.storageConfiguration = new StorageService.StorageConfiguration.MariaDB(enableRESTAPI, address, userPass, database);
                 }
