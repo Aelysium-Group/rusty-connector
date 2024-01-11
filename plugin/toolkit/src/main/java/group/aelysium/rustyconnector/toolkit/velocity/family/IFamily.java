@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface IFamily extends PlayerConnectable {
@@ -92,6 +93,8 @@ public interface IFamily extends PlayerConnectable {
      */
     void balance();
 
+    Optional<IMCLoader> fetchAny();
+
     record Settings(
             String displayName,
             ILoadBalancer<IMCLoader> loadBalancer,
@@ -115,6 +118,10 @@ public interface IFamily extends PlayerConnectable {
                 if(this.whitelist == null) return true;
 
                 return whitelist.validate(player);
+            }
+
+            public Optional<IMCLoader> fetchAny() {
+                return loadBalancer.current();
             }
 
             protected boolean validateLoadBalancer() {

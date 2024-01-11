@@ -110,14 +110,9 @@ public class OnPlayerChooseInitialServer {
                     String host = event.getPlayer().getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
 
                     family = injectors.familyOf(host).orElseThrow();
-                    ConnectionRequest request = family.connect(player);
+                    IMCLoader server = family.fetchAny().orElseThrow();
 
-                    ConnectionRequest.Result result = request.result().get(15, TimeUnit.SECONDS);
-                    if(!result.connected()) throw new NoOutputException();
-
-                    IMCLoader server = result.server().orElseThrow();
                     EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
-
                     event.setInitialServer(server.registeredServer());
                     return;
                 } catch (NoOutputException ignore) {
@@ -127,15 +122,7 @@ public class OnPlayerChooseInitialServer {
             } catch (Exception ignore) {}
 
             IRootFamily family = api.services().family().rootFamily();
-            ConnectionRequest request = family.connect(player);
-
-            ConnectionRequest.Result result = request.result().get(15, TimeUnit.SECONDS);
-            if(!result.connected()) {
-                player.sendMessage(result.message());
-                return;
-            }
-
-            IMCLoader server = result.server().orElseThrow();
+            IMCLoader server = family.fetchAny().orElseThrow();
 
             EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
             event.setInitialServer(server.registeredServer());
