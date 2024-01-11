@@ -45,11 +45,13 @@ public class OnPlayerChooseInitialServer {
             // Check for network whitelist
             try {
                 IWhitelist whitelist = api.services().whitelist().proxyWhitelist();
+                if (whitelist == null) throw new NoOutputException();
                 if (!whitelist.validate(player)) {
                     logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
                     player.disconnect(Component.text(whitelist.message()));
                     return;
                 }
+            } catch (NoOutputException ignore) {
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -102,7 +104,7 @@ public class OnPlayerChooseInitialServer {
         PluginLogger logger = api.logger();
         try {
             // Handle family injectors if they exist
-            IMCLoader inititalConnectServer = null;
+            event.setInitialServer(null);
             try {
                 InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
                 try {
@@ -120,8 +122,6 @@ public class OnPlayerChooseInitialServer {
                     IMCLoader server = result.server().orElseThrow();
 
                     EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
-                    event.setInitialServer(server.registeredServer());
-
                     return;
                 } catch (NoOutputException ignore) {
                 } catch (Exception e) {
@@ -141,7 +141,6 @@ public class OnPlayerChooseInitialServer {
             IMCLoader server = result.server().orElseThrow();
 
             EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
-            event.setInitialServer(server.registeredServer());
         } catch (NoOutputException ignore) {
         } catch (Exception e) {
             player.sendMessage(Component.text("We were unable to connect you!"));
