@@ -127,7 +127,7 @@ public abstract class Family implements IFamily {
         return this.settings.connector().connect(player);
     }
 
-    public Optional<IMCLoader> fetchAny() {
+    public Optional<IMCLoader> smartFetch() {
         return this.settings.connector().fetchAny();
     }
 

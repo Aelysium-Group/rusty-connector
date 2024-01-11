@@ -17,7 +17,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
@@ -28,7 +27,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public class OnPlayerChooseInitialServer {
     /**
@@ -110,7 +108,7 @@ public class OnPlayerChooseInitialServer {
                     String host = event.getPlayer().getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
 
                     family = injectors.familyOf(host).orElseThrow();
-                    IMCLoader server = family.fetchAny().orElseThrow();
+                    IMCLoader server = family.smartFetch().orElseThrow();
 
                     EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
                     event.setInitialServer(server.registeredServer());
@@ -122,7 +120,7 @@ public class OnPlayerChooseInitialServer {
             } catch (Exception ignore) {}
 
             IRootFamily family = api.services().family().rootFamily();
-            IMCLoader server = family.fetchAny().orElseThrow();
+            IMCLoader server = family.smartFetch().orElseThrow();
 
             EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
             event.setInitialServer(server.registeredServer());

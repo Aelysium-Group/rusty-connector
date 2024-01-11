@@ -4,7 +4,6 @@ import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.player.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
@@ -93,7 +92,10 @@ public interface IFamily extends PlayerConnectable {
      */
     void balance();
 
-    Optional<IMCLoader> fetchAny();
+    /**
+     * Attempts to fetch a server that a player should theoretically be able to connect to.
+     */
+    Optional<IMCLoader> smartFetch();
 
     record Settings(
             String displayName,

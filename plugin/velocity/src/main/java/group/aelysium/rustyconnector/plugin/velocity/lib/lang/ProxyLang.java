@@ -590,6 +590,16 @@ public class ProxyLang extends Lang {
 
         int waitingPlayersCount = family.waitingPlayers();
 
+        String highest_ranking_player = "None";
+        try {
+            if(waitingPlayersCount == 0) highest_ranking_player = matchmaker.waitingPlayers().get(0).toString();
+            highest_ranking_player = matchmaker.waitingPlayers().get(waitingPlayersCount - 1).toString();
+        } catch (Exception ignore) {}
+        String lowest_ranking_player = "None";
+        try {
+            lowest_ranking_player = matchmaker.waitingPlayers().get(0).toString();
+        } catch (Exception ignore) {}
+
         return join(
                 newlines(),
                 BORDER,
@@ -612,8 +622,8 @@ public class ProxyLang extends Lang {
                         LanguageResolver.tagHandler("servers_locked", family.loadBalancer().size(true)),
 
                         LanguageResolver.tagHandler("matchmaking_algorithm", algorithm),
-                        LanguageResolver.tagHandler("matchmaking_highest_player", matchmaker.waitingPlayers().get(waitingPlayersCount - 1)),
-                        LanguageResolver.tagHandler("matchmaking_lowest_player", matchmaker.waitingPlayers().get(0))
+                        LanguageResolver.tagHandler("matchmaking_highest_player", highest_ranking_player),
+                        LanguageResolver.tagHandler("matchmaking_lowest_player", lowest_ranking_player)
                 ),
                 SPACING,
                 BORDER,
