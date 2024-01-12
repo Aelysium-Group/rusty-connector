@@ -7,6 +7,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
@@ -20,6 +21,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class CommandAnchor {
     public static BrigadierCommand create(DependencyInjector.DI3<DynamicTeleportService, ServerService, AnchorService> dependencies, String anchor) {
@@ -54,7 +56,9 @@ public class CommandAnchor {
                                 return closeMessage(velocityPlayer, ProxyLang.SERVER_ALREADY_CONNECTED);
                         } catch (Exception ignore) {}
 
-                        family.connect(player);
+                        ConnectionResult result = family.connect(player).result().get(50, TimeUnit.SECONDS);
+
+                        if(!result.connected()) return closeMessage(player.resolve().orElseThrow(), result.message());
                     } catch (Exception e) {
                         e.printStackTrace();
                         return closeMessage(velocityPlayer, ProxyLang.INTERNAL_ERROR);

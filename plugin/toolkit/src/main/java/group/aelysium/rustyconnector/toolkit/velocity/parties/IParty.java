@@ -9,16 +9,6 @@ import java.util.Vector;
 
 public interface IParty {
     /**
-     * Sets the server that this party is assigned to.
-     * <p>
-     * Setting the server with this method does not cause the party to connect to that new server.
-     * If you'd like to connect the party to a new server, you can use {@link IParty#connect(IMCLoader)}.
-     * This will automatically connect the party to the new server and also set the party's server to the new server.
-     * @param server The server to assign to this party.
-     */
-    void setServer(IMCLoader server);
-
-    /**
      * Gets the server that this party has been assigned to.
      * @return {@link IMCLoader}
      */
@@ -110,13 +100,4 @@ public interface IParty {
      * Decomposes the party, removing its data and making it unusable.
      */
     void decompose();
-
-    /**
-     * This method connects the entire party to the specified server.
-     * It also calls {@link IParty#setServer(IMCLoader)}, setting the passed server as this party's new server.
-     * <p>
-     * If this player is unable to join the server for some reason, they will be kicked from the party via {@link IParty#leave(IPlayer)} and receive an error message.
-     * @param server The server to connect to.
-     */
-    void connect(IMCLoader server);
 }

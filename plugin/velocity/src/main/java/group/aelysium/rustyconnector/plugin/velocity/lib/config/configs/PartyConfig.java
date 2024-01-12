@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.ServerOverflowHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
@@ -28,7 +29,7 @@ public class PartyConfig extends YAML implements group.aelysium.rustyconnector.t
 
     private SwitchPower switchingServers_switchPower = SwitchPower.MODERATE;
 
-    private boolean switchingServers_kickOnSendFailure = true;
+    private ServerOverflowHandler switchingServers_overflowHandler = ServerOverflowHandler.HARD_BLOCK;
 
     @Override
     public IConfigService.ConfigKey key() {
@@ -70,8 +71,8 @@ public class PartyConfig extends YAML implements group.aelysium.rustyconnector.t
         return switchingServers_switchPower;
     }
 
-    public boolean getSwitchingServers_kickOnSendFailure() {
-        return switchingServers_kickOnSendFailure;
+    public ServerOverflowHandler getSwitchingServers_overflowHandler() {
+        return switchingServers_overflowHandler;
     }
 
     protected PartyConfig(Path dataFolder, String target, String name, LangService lang) {
@@ -103,10 +104,14 @@ public class PartyConfig extends YAML implements group.aelysium.rustyconnector.t
         try {
             this.switchingServers_switchPower = Enum.valueOf(SwitchPower.class, IYAML.getValue(this.data, "switching-servers.switch-power", String.class));
         } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("Switch power: "+this.switchingServers_switchPower+" isn't valid! Please review `party.yml` again!");
+            throw new IllegalStateException("Switch power isn't valid! Please review `party.yml` again!");
         }
 
-        this.switchingServers_kickOnSendFailure = IYAML.getValue(this.data, "switching-servers.kick-on-failure", Boolean.class);
+        try {
+            this.switchingServers_overflowHandler = ServerOverflowHandler.valueOf(IYAML.getValue(this.data, "switching-servers.on-server-overflow", String.class));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Overflow handler isn't valid! Please review `party.yml` again!");
+        }
     }
 
     public static PartyConfig construct(Path dataFolder, LangService lang, ConfigService configService) {

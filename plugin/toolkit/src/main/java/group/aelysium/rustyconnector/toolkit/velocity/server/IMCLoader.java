@@ -4,6 +4,7 @@ import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PartyConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
@@ -12,7 +13,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectab
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 
-public interface IMCLoader extends ISortable, PlayerConnectable {
+public interface IMCLoader extends ISortable, PlayerConnectable, PartyConnectable {
     /**
      * Checks if the {@link IMCLoader} is stale.
      * @return {@link Boolean}

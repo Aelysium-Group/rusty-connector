@@ -20,6 +20,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectab
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.UnregisterEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.ServerOverflowHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
@@ -30,7 +31,6 @@ import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.Vector;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -254,9 +254,9 @@ public class MCLoader implements IMCLoader {
         return !this.full();
     }
 
-    private Request internalConnect(IPlayer player) {
+    private PlayerConnectable.Request internalConnect(IPlayer player) {
         CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
-        Request request = new Request(player, result);
+        PlayerConnectable.Request request = new PlayerConnectable.Request(player, result);
 
         try {
             if (!player.online()) {
@@ -292,57 +292,105 @@ public class MCLoader implements IMCLoader {
     }
 
     public PlayerConnectable.Request connect(IPlayer player) {
+        // Handle party
         try {
+            CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
+            PlayerConnectable.Request request = new PlayerConnectable.Request(player, result);
+
             IParty party = Party.locate(player).orElseThrow();
             if(!Party.allowedToInitiateConnection(party, player)) {
-                CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
-                Request request = new Request(player, result);
-                result.complete(ConnectionResult.failed(ProxyLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
+                result.complete(ConnectionResult.failed(ProxyLang.PARTY_ONLY_LEADER_CAN_SWITCH));
                 return request;
             }
+
+            ServerOverflowHandler overflowHandler = Tinder.get().services().party().orElseThrow().settings().overflowHandler();
+            if(overflowHandler == ServerOverflowHandler.HARD_BLOCK) {
+                SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
+                int partyCount = party.players().size();
+                int playerCap = 0;
+
+                if(switchPower == SwitchPower.MINIMAL) playerCap = this.softPlayerCap();
+                if(switchPower == SwitchPower.MODERATE) playerCap = this.hardPlayerCap();
+                if(switchPower == SwitchPower.AGGRESSIVE) playerCap = Integer.MAX_VALUE;
+
+                if((this.playerCount.get() + partyCount) > playerCap) {
+                    result.complete(ConnectionResult.failed(Component.text("There isn't enough room in the server for your party!")));
+                    return request;
+                }
+            }
+
+            ConnectionResult partyResult = this.connect(party).result().get(30, TimeUnit.SECONDS);
+            if(partyResult.connected())
+                result.complete(ConnectionResult.success(Component.text("Successfully connected player and the player's party to the server!"), this));
+            else
+                result.complete(ConnectionResult.success(Component.text("Failed to connect the player to the server!"), this));
+            return request;
         } catch (Exception ignore) {}
-        return this.connect(player);
+
+        return this.internalConnect(player);
     }
 
     public PartyConnectable.Request connect(IParty party) {
         CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
-        Request request = new Request(player, result);
-        try {
-            SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
-            this.setServer(server);
-            Vector<IPlayer> kickedPlayers = new Vector<>();
+        PartyConnectable.Request request = new PartyConnectable.Request(party, result);
 
-            Tinder.get().services().party().orElseThrow().queueConnector(() -> {
-                for (IPlayer player : this.players.values())
-                    try {
-                        switch (switchPower) {
-                            case MINIMAL -> {
-                                if (this.full()) {
-                                    kickedPlayers.add(player);
-                                    return;
-                                }
-                                server.connect(player);
-                            }
-                            case MODERATE -> {
-                                if (this.maxed()) {
-                                    kickedPlayers.add(player);
-                                    return;
-                                }
-                                server.connect(player);
-                            }
-                            case AGGRESSIVE -> server.connect(player);
+        SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
+        ServerOverflowHandler overflowHandler = Tinder.get().services().party().orElseThrow().settings().overflowHandler();
+
+        Tinder.get().services().party().orElseThrow().queueConnector(() -> {
+            AtomicInteger completeConnections = new AtomicInteger();
+
+            party.players().forEach(player -> {
+                boolean shouldKick = false;
+                boolean shouldDitch = false;
+                try {
+                    switch (switchPower) {
+                        case MINIMAL -> {
+                            if(!this.full()) break;
+
+                            if (overflowHandler == ServerOverflowHandler.STAY_BEHIND) shouldDitch = true;
+
+                            if (overflowHandler == ServerOverflowHandler.KICK_FROM_PARTY) shouldKick = true;
                         }
-                    } catch (Exception e) {
-                        kickedPlayers.add(player);
+                        case MODERATE -> {
+                            if(!this.maxed()) break;
+
+                            if (overflowHandler == ServerOverflowHandler.STAY_BEHIND) shouldDitch = true;
+
+                            if (overflowHandler == ServerOverflowHandler.KICK_FROM_PARTY) shouldKick = true;
+                        }
+                        case AGGRESSIVE -> {}
                     }
 
-                kickedPlayers.forEach(player -> {
-                    player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED);
-                    this.leave(player);
-                });
+                    if(shouldKick) {
+                        party.leave(player);
+                        player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
+                        return;
+                    }
+                    if(shouldDitch) {
+                        player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
+                        return;
+                    }
+
+                    ConnectionResult playerResult = this.internalConnect(player).result().get(5, TimeUnit.SECONDS);
+                    if (!playerResult.connected()) throw new NoOutputException();
+
+                    completeConnections.getAndIncrement();
+                } catch (Exception e) {
+                    player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_GENERIC);
+
+                    if (overflowHandler == ServerOverflowHandler.KICK_FROM_PARTY) party.leave(player);
+                }
             });
-        } catch (Exception ignore) {}
-        result.complete(ConnectionResult.failed(ProxyLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
+            boolean consideredSuccessful = completeConnections.get() >= 1;
+
+            if(consideredSuccessful) {
+                result.complete(ConnectionResult.success(Component.text("Connected party to server successfully!"), this));
+                ((Party) party).setServer(this);
+            } else
+                result.complete(ConnectionResult.failed(Component.text("Unable to connect your party to this server!")));
+        });
+
         return request;
     }
 

@@ -822,7 +822,6 @@ public class ProxyLang extends Lang {
             "proxy.party.invite.sent",
             LanguageResolver.tagHandler("username", username)
     );
-    public final static Component PARTY_INVITE_ONLY_LEADER_CAN_SEND = resolver().get("proxy.party.invite.only_leader");
     public final static Component PARTY_INVITE_NOT_ONLINE = resolver().get("proxy.party.invite.not_online");
     public final static Component PARTY_INVITE_FRIENDS_ONLY = resolver().get("proxy.party.invite.friends_only");
     public final static Component PARTY_INVITE_SELF_INVITE = resolver().get("proxy.party.invite.self_invite");
@@ -852,6 +851,7 @@ public class ProxyLang extends Lang {
     public final static Component PARTY_ONLY_LEADER_CAN_SWITCH = resolver().get("proxy.party.only_leader_can.switch");
     public final static Component PARTY_ONLY_LEADER_CAN_KICK = resolver().get("proxy.party.only_leader_can.kick");
     public final static Component PARTY_ONLY_LEADER_CAN_PROMOTE = resolver().get("proxy.party.only_leader_can.promote");
+    public final static Component PARTY_ONLY_LEADER_CAN_INVITE = resolver().get("proxy.party.only_leader_can.invite");
     public final static ParameterizedMessage1<String> PARTY_NO_INVITE = (sender) -> resolver().get("proxy.party.invite.no_invite", LanguageResolver.tagHandler("username", sender));
     public final static ParameterizedMessage1<String> PARTY_IGNORE_INVITE = (sender) -> resolver().get("proxy.party.invite.ignore", LanguageResolver.tagHandler("username", sender));
 

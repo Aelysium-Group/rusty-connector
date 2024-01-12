@@ -9,5 +9,5 @@ public record PartyServiceSettings(
         boolean onlyLeaderCanSwitchServers,
         boolean disbandOnLeaderQuit,
         SwitchPower switchPower,
-        boolean kickOnSendFailure
+        ServerOverflowHandler overflowHandler
 ) {}

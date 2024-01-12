@@ -75,12 +75,12 @@ switching-servers:
     # | Set the amount of power a server switch should hold.   #
     #                                                          #
     #  ⚫ MINIMAL -                                            #
-    #             Minimal power. Members of the party will be  #
-    #             kicked from the party if the target server   #
+    #             Minimal power. The server will be            #
+    #             considered overflown if the target server    #
     #             is at max capacity (soft-cap)                #
     #  ⚫ MODERATE -                                           #
-    #             Moderate power. Members of the party will be #
-    #             kicked from the party if the target server   #
+    #             Moderate power. The server will be           #
+    #             considered overflown if the target server    #
     #             is at max capacity (hard-cap)                #
     #  ⚫ AGGRESSIVE -                                         #
     #             Aggressive power. Assuming there are no      #
@@ -92,13 +92,37 @@ switching-servers:
     ############################################################
     switch-power: MODERATE
 
-    #
-    # Should a party members be kicked if they're unable to follow the party?
-    # If enabled, party members will be removed from the party if they cannot be sent to the target server.
-    # This setting does not affect how effective parties are at actually getting players into a server;
-    # For that check out Switch Power.
-    #
-    kick-on-failure: true
+    ############################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                   On Server Overflow                     #
+    #                                                          #
+    #               ---------------------------                #
+    # | Set the server overflow handler to use.                #
+    # | A server is considered "overflown" based on            #
+    # | Switch Power. If a server is overflown, this defines   #
+    # | what should happen.                                    #
+    #                                                          #
+    #  ⚫ KICK_FROM_PARTY -                                    #
+    #             The number of players that are over the      #
+    #             server's threshold will be kicked from       #
+    #             the party.                                   #
+    #  ⚫ STAY_BEHIND -                                        #
+    #             The number of players that are over the      #
+    #             server's threshold will not be able to       #
+    #             connect to the server but they'll stay       #
+    #             in the party.                                #
+    #             Next time the party switches servers,        #
+    #             those players will also attempt to join the  #
+    #             rest of the party.                           #
+    #  ⚫ HARD_BLOCK -                                         #
+    #             If there are to many players to fit into     #
+    #             the new server, the entire party will be     #
+    #             prevented from joining the server.           #
+    #               ---------------------------                #
+    #                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################
+    on-server-overflow: HARD_BLOCK
 
 
 #

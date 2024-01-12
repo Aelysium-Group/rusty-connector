@@ -14,7 +14,7 @@ public interface PartyConnectable {
      * @param party The party to connect.
      * @return A {@link Request} for the player's attempt.
      */
-    PlayerConnectable.Request connect(IParty party);
+    Request connect(IParty party);
 
     record Request(@NotNull IParty party, Future<ConnectionResult> result) {}
 }

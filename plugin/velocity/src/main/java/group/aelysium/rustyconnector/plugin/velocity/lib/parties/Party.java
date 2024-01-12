@@ -113,47 +113,6 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
         this.leader = null;
     }
 
-    public synchronized void connect(IMCLoader server) {
-        SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
-        boolean kickOnSendFailure = Tinder.get().services().party().orElseThrow().settings().kickOnSendFailure();
-
-        this.setServer(server);
-
-        Tinder.get().services().party().orElseThrow().queueConnector(() -> {
-            for (IPlayer player : this.players.values())
-                try {
-                    switch (switchPower) {
-                        case MINIMAL -> {
-                            if(server.full()) {
-                                if (kickOnSendFailure) {
-                                    player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
-                                    this.leave(player);
-                                } else player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
-                                return;
-                            }
-                            server.connect(player);
-                        }
-                        case MODERATE -> {
-                            if(server.maxed()) {
-                                if (kickOnSendFailure) {
-                                    player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
-                                    this.leave(player);
-                                } else player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
-                                return;
-                            }
-                            server.connect(player);
-                        }
-                        case AGGRESSIVE -> server.connect(player);
-                    }
-                } catch (ConnectException e) {
-                    if (kickOnSendFailure) {
-                        player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_GENERIC);
-                        this.leave(player);
-                    } else player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_GENERIC);
-                }
-        });
-    }
-
     @Override
     public String toString() {
         try {

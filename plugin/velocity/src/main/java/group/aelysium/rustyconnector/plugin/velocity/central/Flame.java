@@ -523,7 +523,7 @@ class Initialize {
                     config.isPartyLeader_onlyLeaderCanSwitchServers(),
                     config.isPartyLeader_disbandOnLeaderQuit(),
                     config.getSwitchingServers_switchPower(),
-                    config.getSwitchingServers_kickOnSendFailure()
+                    config.getSwitchingServers_overflowHandler()
             );
 
             PartyService service = new PartyService(settings);
