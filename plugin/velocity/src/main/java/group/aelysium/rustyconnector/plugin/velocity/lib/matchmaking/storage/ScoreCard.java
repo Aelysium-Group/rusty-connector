@@ -23,6 +23,7 @@ public class ScoreCard implements IScoreCard<StorageService> {
     @SuppressWarnings("unchecked")
     public <TPlayerRank extends IPlayerRank<?>> TPlayerRank fetch(StorageService storage, IRankSchema.Type<?> schema) {
         try {
+            System.out.println("Fetching a rank");
             TPlayerRank rank = (TPlayerRank) this.ranks.get(schema.get());
             if (rank == null) {
                 TPlayerRank newRank = (TPlayerRank) schema.get().getDeclaredConstructor().newInstance();
@@ -34,10 +35,9 @@ public class ScoreCard implements IScoreCard<StorageService> {
             }
 
             return rank;
-        } catch (Exception ignore) {
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
-
-        throw new IllegalStateException();
     }
 
     @SuppressWarnings("unchecked")

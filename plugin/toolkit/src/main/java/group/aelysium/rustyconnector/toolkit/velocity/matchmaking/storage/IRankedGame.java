@@ -7,10 +7,10 @@ import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageServi
 
 import java.util.UUID;
 
-public interface IRankedGame<TPlayer extends IPlayer> {
+public interface IRankedGame {
     String name();
 
-    <TPlayerRank extends IPlayerRank<?>, TMySQLStorage extends IMySQLStorageService> TPlayerRank rankedPlayer(TMySQLStorage storage, UUID uuid);
+    IRankedPlayer rankedPlayer(IMySQLStorageService storage, UUID uuid);
 
-    <TPlayerRank extends IPlayerRank<?>, TMySQLStorage extends IMySQLStorageService> TPlayerRank playerRank(TMySQLStorage storage, TPlayer player) throws IllegalStateException;
+    IPlayerRank<?> playerRank(IMySQLStorageService storage, IPlayer player) throws IllegalStateException;
 }

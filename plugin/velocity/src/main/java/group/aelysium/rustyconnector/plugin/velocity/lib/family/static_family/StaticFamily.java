@@ -68,6 +68,9 @@ public class StaticFamily extends Family implements IStaticFamily {
         return ((Connector) this.settings.connector()).connect(player, this);
     }
 
+    @Override
+    public void leave(IPlayer player) {}
+
     /**
      * Initializes all server families based on the configs.
      * By the time this runs, the configuration file should be able to guarantee that all values are present.

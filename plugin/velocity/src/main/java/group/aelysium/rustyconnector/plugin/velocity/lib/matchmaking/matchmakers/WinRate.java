@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRanke
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class WinRate extends Matchmaker {
@@ -36,8 +37,12 @@ public class WinRate extends Matchmaker {
 
         List<IRankedPlayer> playersToUse = new ArrayList<>();
         for(IRankedPlayer player : validPlayers) {
-            builder.addPlayer(player);
-            playersToUse.add(player);
+            try {
+                builder.addPlayer(player.player().orElseThrow());
+                playersToUse.add(player);
+            } catch (NoSuchElementException ignore) {
+                this.waitingPlayers.remove(player);
+            }
         }
 
         this.waitingPlayers.removeAll(playersToUse); // Remove these players from the matchmaker

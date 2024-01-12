@@ -16,5 +16,4 @@ public class RandomizedPlayerRank implements IRandomizedPlayerRank {
 
     @Override
     public <TMySQLStorage extends IMySQLStorageService> void markLoss(TMySQLStorage storage) {}
-
 }

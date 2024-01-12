@@ -21,6 +21,7 @@ public record ConnectionRequest(@NotNull IPlayer player, Future<Result> result) 
             return new Result(Status.FAILED, message, Optional.empty());
         }
         public static Result success(Component message, IMCLoader server) {
+            if(server == null) return new Result(Status.SUCCESS, message, Optional.empty());
             return new Result(Status.SUCCESS, message, Optional.of(server));
         }
     }

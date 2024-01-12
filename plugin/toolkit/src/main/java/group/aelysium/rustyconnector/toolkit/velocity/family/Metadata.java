@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.toolkit.velocity.family;
 
 public record Metadata(
         StateType stateType,
-        boolean hasLoadBalancer,
         boolean canBeAParentFamily,
         boolean tpaAllowed,
         boolean supportsInjectors
@@ -17,12 +16,10 @@ public record Metadata(
             Metadata.StateType.STATEFUL,
             true,
             true,
-            true,
             true
     );
     public static Metadata SCALAR_FAMILY_META = new Metadata(
             Metadata.StateType.STATELESS,
-            true,
             true,
             true,
             true
@@ -31,12 +28,10 @@ public record Metadata(
             Metadata.StateType.STATELESS,
             true,
             true,
-            true,
             true
     );
     public static Metadata RANKED_FAMILY_META = new Metadata(
             StateType.STATELESS,
-            false,
             false,
             false,
             false

@@ -1,11 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family;
 
-import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
-import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IScalarFamily;
@@ -46,6 +44,9 @@ public class ScalarFamily extends Family implements IScalarFamily {
     protected ScalarFamily(Settings settings, Metadata metadata) {
         super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist(), settings.connector()), metadata);
     }
+
+    @Override
+    public void leave(IPlayer player) {}
 
     /**
      * Initializes all server families based on the configs.

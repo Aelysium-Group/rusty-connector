@@ -37,8 +37,6 @@ public class OnPlayerKicked {
             try {
                 MCLoader oldServer = player.server().orElseThrow();
 
-                oldServer.playerLeft();
-
                 EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(oldServer.family(), oldServer, player, true));
                 EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(oldServer, player, true));
 
@@ -66,8 +64,6 @@ public class OnPlayerKicked {
                 } catch (Exception ignore) {
                     event.setResult(KickedFromServerEvent.RedirectPlayer.create(server.registeredServer()));
                 }
-
-                server.playerJoined();
 
                 WebhookEventManager.fire(WebhookAlertFlag.DISCONNECT_CATCH, api.services().family().rootFamily().id(), DiscordWebhookMessage.PROXY__DISCONNECT_CATCH.build(player, server));
                 WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, api.services().family().rootFamily().id(), DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, server));

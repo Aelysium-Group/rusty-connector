@@ -74,7 +74,7 @@ public interface IMatchmaker extends Service {
     record Settings (
             IMySQLStorageService storage,
             IScoreCard.IRankSchema.Type<?> algorithm,
-            IRankedGame<? extends IPlayer> game,
+            IRankedGame game,
             int min,
             int max,
             double variance,

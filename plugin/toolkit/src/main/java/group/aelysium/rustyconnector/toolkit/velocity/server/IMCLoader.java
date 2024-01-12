@@ -116,18 +116,6 @@ public interface IMCLoader extends ISortable, PlayerConnectable {
     void setPlayerCount(int playerCount);
 
     /**
-     * Record that a player has left this server.
-     * This will reduce the player count on this server by 1.
-     */
-    void playerLeft();
-
-    /**
-     * Record that a player has joined this server.
-     * This will increase the player count on this server by 1.
-     */
-    void playerJoined();
-
-    /**
      * Gets the sort index of this server.
      * This method is used by the {@link ILoadBalancer} to sort this and other servers in a family.
      * @return {@link Integer}

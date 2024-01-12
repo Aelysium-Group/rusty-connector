@@ -4,8 +4,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.pla
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import org.eclipse.serializer.collections.lazy.LazyHashMap;
 
@@ -18,7 +20,7 @@ import java.util.UUID;
  * If, over the time of this game existing, it has ranked players based on both ELO and WIN_RATE, both of those
  * ranks are saved here and can be retrieved.
  */
-public class RankedGame implements IRankedGame<Player> {
+public class RankedGame implements IRankedGame {
     protected String name;
     protected IScoreCard.IRankSchema.Type<?> rankingSchema;
     protected Map<UUID, ScoreCard> scorecards = new LazyHashMap<>();
@@ -32,7 +34,7 @@ public class RankedGame implements IRankedGame<Player> {
         return this.name;
     }
 
-    public <TPlayerRank extends IPlayerRank<?>, TMySQLStorage extends IMySQLStorageService> TPlayerRank rankedPlayer(TMySQLStorage storage, UUID uuid) {
+    public IRankedPlayer rankedPlayer(IMySQLStorageService storage, UUID uuid) {
         ScoreCard scorecard = this.scorecards.get(uuid);
         if(scorecard == null) {
             ScoreCard newScorecard = new ScoreCard();
@@ -43,13 +45,13 @@ public class RankedGame implements IRankedGame<Player> {
             scorecard = newScorecard;
         }
 
-        TPlayerRank rank = scorecard.fetch((StorageService) storage, this.rankingSchema);
+        IPlayerRank<?> rank = scorecard.fetch((StorageService) storage, this.rankingSchema);
 
-        return (TPlayerRank) RankedPlayer.from(uuid, rank);
+        return RankedPlayer.from(uuid, rank);
     }
 
-    public <TPlayerRank extends IPlayerRank<?>, TMySQLStorage extends IMySQLStorageService> TPlayerRank playerRank(TMySQLStorage storage, Player player) throws IllegalStateException {
-        if(rankingSchema == IScoreCard.IRankSchema.RANDOMIZED) return (TPlayerRank) new RandomizedPlayerRank();
+    public IPlayerRank<?> playerRank(IMySQLStorageService storage, IPlayer player) throws IllegalStateException {
+        if(rankingSchema == IScoreCard.IRankSchema.RANDOMIZED) return new RandomizedPlayerRank();
 
         ScoreCard scorecard = this.scorecards.get(player.uuid());
         if(scorecard == null) {
@@ -61,10 +63,10 @@ public class RankedGame implements IRankedGame<Player> {
             scorecard = fresh;
         }
 
-        TPlayerRank playerRank = scorecard.fetch((StorageService) storage, this.rankingSchema);
+        IPlayerRank<?> playerRank = scorecard.fetch((StorageService) storage, this.rankingSchema);
         if(playerRank == null) {
             try {
-                TPlayerRank fresh = (TPlayerRank) this.rankingSchema.get().getDeclaredConstructor().newInstance();
+                IPlayerRank<?> fresh = this.rankingSchema.get().getDeclaredConstructor().newInstance();
 
                 scorecard.store((StorageService) storage, fresh);
 

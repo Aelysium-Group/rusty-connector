@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 
-import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.RankedFamilyConfig;
@@ -11,7 +10,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
-import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
@@ -42,13 +40,6 @@ public class RankedFamily extends Family implements IRankedFamily {
     protected RankedFamily(Settings settings, RoundRobin roundRobin) {
         super(settings.id(), new Family.Settings(settings.displayName(), roundRobin, settings.parentFamily(), settings.whitelist(), new Connector(roundRobin, settings.matchmaker(), settings.whitelist())), RANKED_FAMILY_META);
         this.matchmaker = settings.matchmaker();
-    }
-
-    @Override
-    public ConnectionRequest connect(IPlayer player) {
-        EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
-
-        return new ConnectionRequest(player, new CompletableFuture<>());
     }
 
     public void dequeue(IPlayer player) {
@@ -82,11 +73,16 @@ public class RankedFamily extends Family implements IRankedFamily {
     }
 
     public int waitingPlayers() {
-        return this.matchmaker.waitingPlayers().size();
+        return this.matchmaker.waitingPlayersCount();
     }
 
     public long activePlayers() {
         return super.playerCount();
+    }
+
+    @Override
+    public void leave(IPlayer player) {
+        this.settings.connector().leave(player);
     }
 
     /**
@@ -147,6 +143,11 @@ public class RankedFamily extends Family implements IRankedFamily {
             super(loadBalancer, whitelist);
 
             this.matchmaker = matchmaker;
+        }
+
+        @Override
+        public void leave(IPlayer player) {
+            this.matchmaker.remove(player);
         }
 
         @Override

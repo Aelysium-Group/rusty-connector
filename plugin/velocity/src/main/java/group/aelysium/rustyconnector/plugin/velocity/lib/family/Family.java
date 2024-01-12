@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.toolkit.velocity.events.family.RebalanceEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;

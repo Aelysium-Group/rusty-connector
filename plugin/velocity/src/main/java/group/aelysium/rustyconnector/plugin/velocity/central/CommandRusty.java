@@ -18,6 +18,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.Ran
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -32,6 +33,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public final class CommandRusty {
     public static BrigadierCommand create(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
@@ -190,10 +192,6 @@ class FamilyC {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
                         Family family = new Family.Reference(familyName).get();
-                        if(!family.metadata().hasLoadBalancer()) {
-                            logger.send(Component.text("You can only resetIndex on families with load balancers!", NamedTextColor.RED));
-                            return Command.SINGLE_SUCCESS;
-                        }
 
                         family.loadBalancer().resetIndex();
 
@@ -218,10 +216,6 @@ class FamilyC {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
                         Family family = new Family.Reference(familyName).get();
-                        if(!family.metadata().hasLoadBalancer()) {
-                            logger.send(Component.text("You can only resetIndex on families with load balancers!", NamedTextColor.RED));
-                            return Command.SINGLE_SUCCESS;
-                        }
 
                         family.balance();
 
@@ -323,12 +317,14 @@ class Send {
                                 Player player = Player.from(fetchedPlayer);
 
                                 Family family = new Family.Reference(familyName).get();
-                                if(!family.metadata().hasLoadBalancer()) {
-                                    logger.send(Component.text("You can only directly send player to scalar and static families!", NamedTextColor.RED));
-                                    return Command.SINGLE_SUCCESS;
-                                }
+                                System.out.println("fetched: "+family);
 
-                                family.connect(player);
+                                ConnectionRequest request = family.connect(player);
+                                ConnectionRequest.Result result = request.result().get(30, TimeUnit.SECONDS);
+
+                                if(result.connected()) return Command.SINGLE_SUCCESS;
+
+                                player.sendMessage(result.message());
                             } catch (NoSuchElementException e) {
                                 logger.send(ProxyLang.RC_SEND_NO_FAMILY.build(familyName));
                             } catch (Exception e) {

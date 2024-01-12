@@ -122,6 +122,9 @@ public interface IFamily extends PlayerConnectable {
                 return whitelist.validate(player);
             }
 
+            @Override
+            public void leave(IPlayer player) {}
+
             public Optional<IMCLoader> fetchAny() {
                 return loadBalancer.current();
             }

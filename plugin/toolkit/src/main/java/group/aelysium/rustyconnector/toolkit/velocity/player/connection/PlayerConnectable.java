@@ -12,4 +12,10 @@ public interface PlayerConnectable {
      * @return A {@link ConnectionRequest} for the player's attempt.
      */
     ConnectionRequest connect(IPlayer player);
+
+    /**
+     * Handles logic when a player leaves this connectable.
+     * @param player The player that left.
+     */
+    void leave(IPlayer player);
 }

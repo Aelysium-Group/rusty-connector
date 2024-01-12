@@ -60,8 +60,6 @@ public class OnPlayerChangeServer {
     protected void serverSwitch(MCLoader oldServer, MCLoader newServer, Player player) {
         boolean isTheSameFamily = newServer.family().equals(oldServer.family());
 
-        oldServer.playerLeft();
-
         if(!isTheSameFamily) familySwitch(oldServer, newServer, player);
 
         EventDispatch.Safe.fireAndForget(new FamilyInternalSwitchEvent(newServer.family(), oldServer, newServer, player));

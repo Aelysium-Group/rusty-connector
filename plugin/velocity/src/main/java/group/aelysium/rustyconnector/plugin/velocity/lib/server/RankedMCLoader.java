@@ -1,16 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
-import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
+import group.aelysium.rustyconnector.core.lib.packets.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
 import java.net.InetSocketAddress;
-import java.rmi.ConnectException;
 import java.util.*;
 
 public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
@@ -26,10 +24,8 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
     }
 
     public void connect(ISession session) {
-        for (IRankedPlayer rankedPlayer : session.players())
-            try {
-                this.connect(rankedPlayer.player().orElseThrow());
-            } catch (NoSuchElementException ignore) {} // Player isn't online, so it's not like we could message them anyway.
+        for (IPlayer rankedPlayer : session.players())
+            this.connect(rankedPlayer);
 
         Packet packet = Tinder.get().services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_READY)
@@ -40,6 +36,31 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
 
         this.activeSession = session;
         this.lock();
+    }
+
+    @Override
+    public void leave(IPlayer player) {
+        if(this.activeSession == null) return;
+
+        this.activeSession.players().remove(player);
+
+        ISession.Settings settings = this.activeSession.settings();
+
+        if(this.activeSession.players().size() > settings.min()) return;
+
+        this.implodeSession();
+    }
+
+    public void implodeSession() {
+        Packet packet = Tinder.get().services().packetBuilder().newBuilder()
+                .identification(BuiltInIdentifications.RANKED_GAME_IMPLODE)
+                .sendingToMCLoader(this.uuid())
+                .parameter(RankedGame.Imploded.Parameters.REASON, "To many people left the server! There aren't enough players to meet the minimum player requirements.")
+                .parameter(RankedGame.Imploded.Parameters.SESSION_UUID, this.activeSession.uuid().toString())
+                .build();
+        Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
+
+        this.activeSession = null;
     }
 
     public void unlock() {

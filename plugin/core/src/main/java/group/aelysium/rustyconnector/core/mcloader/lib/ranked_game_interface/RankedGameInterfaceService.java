@@ -39,8 +39,6 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
     public void end(UUID... winners) {
         if(this.uuid == null) return;
 
-        ServerInfoService infoService = TinderAdapterForCore.getTinder().services().serverInfo();
-
         JsonObject object = new JsonObject();
         object.add("uuid", new JsonPrimitive(uuid.toString()));
 

@@ -227,6 +227,7 @@ class Initialize {
         factory.on(new OnMCLoaderRegister());
         factory.on(new OnMCLoaderUnregister());
         factory.on(new OnMCLoaderSwitch());
+        factory.on(new OnMCLoaderLeave());
     }
 
     public void commands(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {

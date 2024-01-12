@@ -35,7 +35,7 @@ public class MCLoader implements IMCLoader {
     private final InetSocketAddress address;
     private RegisteredServer registeredServer = null;
     private Family family;
-    private int playerCount = 0;
+    private AtomicInteger playerCount = new AtomicInteger(0);
     private int weight;
     private int softPlayerCap;
     private int hardPlayerCap;
@@ -172,7 +172,7 @@ public class MCLoader implements IMCLoader {
      * @return `true` if the server is full
      */
     public boolean full() {
-        return this.playerCount >= softPlayerCap;
+        return this.playerCount.get() >= softPlayerCap;
     }
 
     /**
@@ -180,29 +180,20 @@ public class MCLoader implements IMCLoader {
      * @return `true` if the server is maxed out
      */
     public boolean maxed() {
-        return this.playerCount >= hardPlayerCap;
+        return this.playerCount.get() >= hardPlayerCap;
     }
 
     @Override
     public int playerCount() {
-        //return 0;
-        return this.playerCount;
+        return this.playerCount.get();
     }
 
     public void setPlayerCount(int playerCount) {
-        this.playerCount = playerCount;
-    }
-
-    public void playerLeft() {
-        if(this.playerCount > 0) this.playerCount -= 1;
-    }
-
-    public void playerJoined() {
-        this.playerCount += 1;
+        this.playerCount.set(playerCount);
     }
 
     public double sortIndex() {
-        return this.playerCount;
+        return this.playerCount.get();
     }
 
     @Override
@@ -283,7 +274,7 @@ public class MCLoader implements IMCLoader {
 
                 if (!connectionResult.isSuccessful()) throw new NoOutputException();
 
-                this.playerJoined();
+                this.playerCount.incrementAndGet();
                 result.complete(ConnectionRequest.Result.success(Component.text("You successfully connected to the server!"), this));
                 return request;
             } catch (Exception ignore) {}
@@ -293,69 +284,10 @@ public class MCLoader implements IMCLoader {
         return request;
     }
 
-    /**
-    public boolean connect(IPlayer player) throws ConnectException {
-        try {
-            PartyService partyService = Tinder.get().services().party().orElseThrow();
-            IParty party = partyService.find(player).orElseThrow();
-
-            try {
-                if(partyService.settings().onlyLeaderCanSwitchServers())
-                    if(!party.leader().equals(player)) {
-                        player.sendMessage(ProxyLang.PARTY_ONLY_LEADER_CAN_SWITCH);
-                        return false;
-                    }
-
-                party.connect(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } catch (Exception ignore) {}
-
-        return directConnect(player);
+    @Override
+    public void leave(IPlayer player) {
+        this.playerCount.decrementAndGet();
     }
-
-    public boolean directConnect(IPlayer player) throws ConnectException {
-        ConnectionRequestBuilder connection = player.resolve().orElseThrow().createConnectionRequest(this.registeredServer());
-        try {
-            ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
-
-            if(result.isSuccessful()) {
-                this.playerJoined();
-                return true;
-            }
-        } catch (Exception e) {
-            throw new ConnectException("Unable to connect to that server!", e);
-        }
-
-        return false;
-    }
-
-    public boolean directConnect(Player player) throws ConnectException {
-        ConnectionRequestBuilder connection = player.createConnectionRequest(this.registeredServer());
-        try {
-            ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
-
-            if(result.isSuccessful()) {
-                this.playerJoined();
-                return true;
-            }
-        } catch (Exception e) {
-            throw new ConnectException("Unable to connect to that server!", e);
-        }
-
-        return false;
-    }
-
-    public boolean directConnect(PlayerChooseInitialServerEvent event) {
-        try {
-            event.setInitialServer(this.registeredServer());
-            return true;
-        } catch(Exception ignore) {
-            return false;
-        }
-    }
-     */
 
     public void lock() {
         this.family().loadBalancer().lock(this);
