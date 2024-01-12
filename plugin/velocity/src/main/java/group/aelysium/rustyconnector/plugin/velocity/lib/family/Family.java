@@ -62,8 +62,6 @@ public abstract class Family implements IFamily {
 
     public void balance() {
         this.settings.loadBalancer().completeSort();
-
-        EventDispatch.UnSafe.fireAndForget(new RebalanceEvent(this));
     }
 
     public List<com.velocitypowered.api.proxy.Player> players(int max) {

@@ -122,6 +122,8 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
             AESCryptor cryptor = initialize.privateKey();
             Optional<char[]> memberKey = initialize.memberKey();
 
+            group.aelysium.rustyconnector.core.lib.events.EventManager eventManager = new group.aelysium.rustyconnector.core.lib.events.EventManager();
+
             logger.send(Component.text("Initializing 10%...", NamedTextColor.DARK_GRAY));
             DefaultConfig defaultConfig = initialize.defaultConfig(inject(langService, configService));
             initialize.loggerConfig(inject(langService, configService));
@@ -132,7 +134,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
             DependencyInjector.DI2<IMessengerConnector, StorageService> connectors = initialize.connectors(inject(cryptor, messageCacheService, Tinder.get().logger(), langService), uuid);
 
             logger.send(Component.text("Initializing 30%...", NamedTextColor.DARK_GRAY));
-            FamilyService familyService = initialize.families(inject(defaultConfig, langService, connectors.d2(), configService));
+            FamilyService familyService = initialize.families(inject(defaultConfig, langService, connectors.d2(), configService, eventManager));
             logger.send(Component.text("Initializing 40%...", NamedTextColor.DARK_GRAY));
             ServerService serverService = initialize.servers(defaultConfig);
             logger.send(Component.text("Initializing 50%...", NamedTextColor.DARK_GRAY));
@@ -154,7 +156,7 @@ public class Flame extends VelocityFlame<CoreServiceHandler> {
 
             flame.services().add(new VelocityPacketBuilder(flame));
 
-            initialize.events(plugin);
+            initialize.events(plugin, eventManager);
             initialize.commands(inject(flame, logger, messageCacheService));
             logger.send(Component.text("Initializing 100%...", NamedTextColor.DARK_GRAY));
 
@@ -210,7 +212,7 @@ class Initialize {
         return service;
     }
 
-    public void events(VelocityRustyConnector plugin) {
+    public void events(VelocityRustyConnector plugin, group.aelysium.rustyconnector.core.lib.events.EventManager rcEventManager) {
         EventManager eventManager = api.velocityServer().getEventManager();
 
         eventManager.register(plugin, new OnPlayerChooseInitialServer());
@@ -218,16 +220,15 @@ class Initialize {
         eventManager.register(plugin, new OnPlayerKicked());
         eventManager.register(plugin, new OnPlayerDisconnect());
 
-        group.aelysium.rustyconnector.core.lib.events.EventManager factory = new group.aelysium.rustyconnector.core.lib.events.EventManager();
-        services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, factory);
+        services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, rcEventManager);
 
-        factory.on(new OnMCLoaderRegister());
-        factory.on(new OnFamilyLeave());
-        factory.on(new OnFamilySwitch());
-        factory.on(new OnMCLoaderRegister());
-        factory.on(new OnMCLoaderUnregister());
-        factory.on(new OnMCLoaderSwitch());
-        factory.on(new OnMCLoaderLeave());
+        rcEventManager.on(new OnMCLoaderRegister());
+        rcEventManager.on(new OnFamilyLeave());
+        rcEventManager.on(new OnFamilySwitch());
+        rcEventManager.on(new OnMCLoaderRegister());
+        rcEventManager.on(new OnMCLoaderUnregister());
+        rcEventManager.on(new OnMCLoaderSwitch());
+        rcEventManager.on(new OnMCLoaderLeave());
     }
 
     public void commands(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
@@ -328,7 +329,7 @@ class Initialize {
         return DependencyInjector.inject(messenger, storage);
     }
 
-    public FamilyService families(DependencyInjector.DI4<DefaultConfig, LangService, StorageService, ConfigService> deps) throws Exception {
+    public FamilyService families(DependencyInjector.DI5<DefaultConfig, LangService, StorageService, ConfigService, group.aelysium.rustyconnector.core.lib.events.EventManager> deps) throws Exception {
         bootOutput.add(Component.text("Building families service...", NamedTextColor.DARK_GRAY));
 
         FamiliesConfig familiesConfig = FamiliesConfig.construct(api.dataFolder(), deps.d2(), deps.d4());
@@ -376,7 +377,7 @@ class Initialize {
             bootOutput.add(Component.text(" | Registering load balancing service to the API...", NamedTextColor.DARK_GRAY));
             LoadBalancingService clock = new LoadBalancingService(familyService.size(), LiquidTimestamp.from(20, TimeUnit.SECONDS));
             services.put(LoadBalancingService.class, clock);
-            clock.init(inject(familyService, this.api.logger()));
+            clock.init(inject(familyService, this.api.logger(), deps.d5()));
             bootOutput.add(Component.text(" | Finished registering load balancing service to the API.", NamedTextColor.GREEN));
         }
 
