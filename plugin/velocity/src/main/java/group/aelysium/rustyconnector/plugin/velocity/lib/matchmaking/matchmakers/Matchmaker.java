@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers;
 
+import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.bossbars.MatchmakingBossbar;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
@@ -13,6 +15,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRanke
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -20,9 +23,11 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard.IRankSchema.*;
 import static java.lang.Math.floor;
+import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 
 public abstract class Matchmaker implements IMatchmaker {
     protected final ClockService supervisor = new ClockService(5);
@@ -31,6 +36,18 @@ public abstract class Matchmaker implements IMatchmaker {
     protected final ISession.Settings sessionSettings;
     protected final int minPlayersPerGame;
     protected final int maxPlayersPerGame;
+    protected BossBar waitingForPlayers = BossBar.bossBar(
+            Component.text("Waiting for players...").color(GRAY),
+            (float) 0.0,
+            BossBar.Color.WHITE,
+            BossBar.Overlay.PROGRESS
+    );
+    protected BossBar waitingForServers = BossBar.bossBar(
+            Component.text("Waiting for servers...").color(GRAY),
+            (float) 0.0,
+            BossBar.Color.WHITE,
+            BossBar.Overlay.PROGRESS
+    );
     protected Map<UUID, ISession.IWaiting> waitingSessions = new ConcurrentHashMap<>();
     protected Map<UUID, ISession> runningSessions = new ConcurrentHashMap<>();
     protected Vector<IRankedPlayer> waitingPlayers = new Vector<>();
@@ -71,6 +88,12 @@ public abstract class Matchmaker implements IMatchmaker {
     }
     public void remove(IPlayer player) {
         try {
+            Player velocityPlayer = player.resolve().orElseThrow();
+            hideBossBars(velocityPlayer);
+        } catch (Exception ignore) {}
+
+        try {
+
             boolean didContain = this.waitingPlayers.removeIf(player1 -> player1.uuid().equals(player.uuid()));
             if(!didContain)
                 this.waitingSessions.values().forEach(session -> ((Session.Waiting) session).players().remove(player));
@@ -86,6 +109,11 @@ public abstract class Matchmaker implements IMatchmaker {
     }
     public boolean contains(IRankedPlayer item) {
         return this.waitingPlayers.contains(item);
+    }
+
+    public void hideBossBars(Player player) {
+        player.hideBossBar(this.waitingForPlayers);
+        player.hideBossBar(this.waitingForServers);
     }
 
     public void start(ILoadBalancer<IMCLoader> loadBalancer) {
@@ -130,29 +158,44 @@ public abstract class Matchmaker implements IMatchmaker {
                     this.waitingSessions.remove(waitingSession.uuid());
                     this.runningSessions.put(session.uuid(), session);
 
+                    session.players().forEach(player -> {
+                        try {
+                            Player velocityPlayer = player.resolve().orElseThrow();
+                            hideBossBars(velocityPlayer);
+                        } catch (Exception ignore) {}
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }, LiquidTimestamp.from(10, TimeUnit.SECONDS));
 
-
         this.queueIndicator.scheduleRecurring(() -> {
             // So that we don't lock the Vector while sending messages
             this.waitingPlayers.stream().toList().forEach(player -> {
                 try {
-                    player.player().orElseThrow().resolve().orElseThrow().sendActionBar(
-                            Component.text("Looking for players...", NamedTextColor.GRAY)
-                    );
+                    Player velocityPlayer = player.player().orElseThrow().resolve().orElseThrow();
+
+                    velocityPlayer.sendActionBar(Component.text("----< MATCHMAKING >----", NamedTextColor.YELLOW));
+                    MatchmakingBossbar.WAITING_FOR_PLAYERS(this.waitingForPlayers, this.waitingPlayersCount(), settings.max());
+
+                    hideBossBars(velocityPlayer);
+
+                    velocityPlayer.showBossBar(this.waitingForPlayers);
                 } catch (Exception ignore) {}
             });
 
             this.waitingSessions.values().forEach(session -> {
                 ((Session.Waiting) session).players().forEach(player -> {
                     try {
-                        player.resolve().orElseThrow().sendActionBar(
-                                Component.text("Waiting for open server...", NamedTextColor.GRAY)
-                        );
+                        Player velocityPlayer = player.resolve().orElseThrow();
+
+                        velocityPlayer.sendActionBar(Component.text("----< MATCHMAKING >----", NamedTextColor.YELLOW));
+                        MatchmakingBossbar.WAITING_FOR_SERVERS(this.waitingForServers, loadBalancer.size(true), loadBalancer.size(false));
+
+                        hideBossBars(velocityPlayer);
+
+                        velocityPlayer.showBossBar(this.waitingForServers);
                     } catch (Exception ignore) {}
                 });
             });
