@@ -8,5 +8,6 @@ public record PartyServiceSettings(
         boolean onlyLeaderCanKick,
         boolean onlyLeaderCanSwitchServers,
         boolean disbandOnLeaderQuit,
-        SwitchPower switchPower
+        SwitchPower switchPower,
+        boolean kickOnSendFailure
 ) {}

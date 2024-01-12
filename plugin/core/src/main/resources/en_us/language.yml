@@ -223,7 +223,12 @@ proxy:
         promoted: "<yellow>You were promoted to party leader.</yellow>"
         already_leader: "<red>You're already the leader!</red>"
         demoted: "<yellow>You are no longer party leader.</yellow>"
-        following_kicked: "<red>There was an issue following your party! You've been kicked.</red>"
+        following_kicked:
+            server_full: "<red>There's not enough space in your party's new server so you were removed from the party.</red>"
+            generic: "<red>There was an issue following your party! You've been kicked.</red>"
+        following_failed:
+            server_full: "<red>There's not enough space in your party's new server so you did not follow them.</red>"
+            generic: "<red>There was an issue following your party!</red>"
         created: "<green>You created a new party!</green>"
         left_self: "<green>You left the party.</green>"
         self_kick: "</red>You can't kick yourself! Use <blue>/party leave</blue> instead!</red>"

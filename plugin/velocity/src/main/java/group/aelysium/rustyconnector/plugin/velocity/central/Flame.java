@@ -522,7 +522,8 @@ class Initialize {
                     config.isPartyLeader_onlyLeaderCanKick(),
                     config.isPartyLeader_onlyLeaderCanSwitchServers(),
                     config.isPartyLeader_disbandOnLeaderQuit(),
-                    config.getSwitchingServers_switchPower()
+                    config.getSwitchingServers_switchPower(),
+                    config.getSwitchingServers_kickOnSendFailure()
             );
 
             PartyService service = new PartyService(settings);

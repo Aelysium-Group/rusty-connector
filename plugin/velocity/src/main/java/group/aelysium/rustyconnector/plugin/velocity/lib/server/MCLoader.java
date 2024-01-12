@@ -47,7 +47,7 @@ public class MCLoader implements IMCLoader {
     private int hardPlayerCap;
     private AtomicInteger timeout;
 
-    public MCLoader(UUID uuid, InetSocketAddress address, String displayName, int softPlayerCap, int hardPlayerCap, int weight, int timeout) {
+    public MCLoader(@NotNull UUID uuid, @NotNull InetSocketAddress address, String displayName, int softPlayerCap, int hardPlayerCap, int weight, int timeout) {
         this.uuid = uuid;
         this.address = address;
         this.displayName = displayName;

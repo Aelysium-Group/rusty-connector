@@ -115,8 +115,9 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
 
     public synchronized void connect(IMCLoader server) {
         SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
+        boolean kickOnSendFailure = Tinder.get().services().party().orElseThrow().settings().kickOnSendFailure();
+
         this.setServer(server);
-        Vector<IPlayer> kickedPlayers = new Vector<>();
 
         Tinder.get().services().party().orElseThrow().queueConnector(() -> {
             for (IPlayer player : this.players.values())
@@ -124,28 +125,32 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
                     switch (switchPower) {
                         case MINIMAL -> {
                             if(server.full()) {
-                                kickedPlayers.add(player);
+                                if (kickOnSendFailure) {
+                                    player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
+                                    this.leave(player);
+                                } else player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
                                 return;
                             }
                             server.connect(player);
                         }
                         case MODERATE -> {
                             if(server.maxed()) {
-                                kickedPlayers.add(player);
+                                if (kickOnSendFailure) {
+                                    player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_SERVER_FULL);
+                                    this.leave(player);
+                                } else player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_SERVER_FULL);
                                 return;
                             }
                             server.connect(player);
                         }
                         case AGGRESSIVE -> server.connect(player);
                     }
-                } catch (Exception e) {
-                    kickedPlayers.add(player);
+                } catch (ConnectException e) {
+                    if (kickOnSendFailure) {
+                        player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED_GENERIC);
+                        this.leave(player);
+                    } else player.sendMessage(ProxyLang.PARTY_FOLLOWING_FAILED_GENERIC);
                 }
-
-            kickedPlayers.forEach(player -> {
-                player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED);
-                this.leave(player);
-            });
         });
     }
 
