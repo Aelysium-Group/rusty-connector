@@ -34,16 +34,15 @@ public class FriendsDataEnclave implements IFriendsDataEnclave {
         return root.friends().contains(FriendMapping.from(player1, player2));
     }
 
-    public Optional<Long> getFriendCount(IPlayer player) {
+    public long getFriendCount(IPlayer player) {
         try {
             Database root = this.storage.database();
-            long count = root.friends().stream().filter(friendMapping -> friendMapping.contains(player)).count();
 
-            return Optional.of(count);
+            return root.friends().stream().filter(friendMapping -> friendMapping.contains(player)).count();
         } catch (Exception ignore) {
         }
 
-        return Optional.empty();
+        return 0;
     }
 
     public Optional<FriendMapping> addFriend(IPlayer player1, IPlayer player2) {

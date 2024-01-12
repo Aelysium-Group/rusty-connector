@@ -26,7 +26,7 @@ public interface IFriendsDataEnclave {
      * @param player The player to get the friend count of.
      * @return The number of friends a player has.
      */
-    Optional<Long> getFriendCount(IPlayer player);
+    long getFriendCount(IPlayer player);
 
     Optional<? extends IFriendMapping> addFriend(IPlayer player1, IPlayer player2);
 

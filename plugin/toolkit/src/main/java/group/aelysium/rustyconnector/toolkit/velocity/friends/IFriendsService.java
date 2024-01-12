@@ -44,5 +44,5 @@ public interface IFriendsService extends Service {
 
     void closeInvite(IFriendRequest request);
 
-    Optional<Long> friendCount(IPlayer player);
+    long friendCount(IPlayer player);
 }

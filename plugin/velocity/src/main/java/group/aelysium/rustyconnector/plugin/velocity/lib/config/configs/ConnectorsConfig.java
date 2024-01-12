@@ -69,9 +69,11 @@ public class ConnectorsConfig extends YAML {
 
         {
             StorageService.StorageType storageType = StorageService.StorageType.valueOf(IYAML.getValue(this.data, "storage.provider", String.class));
-            boolean enableRESTAPI = IYAML.getValue(this.data, "storage.enable-rest-api", Boolean.class);
+            boolean restEnabled = IYAML.getValue(this.data, "storage.rest-api.enabled", Boolean.class);
+            int restPort = 0;
+            StorageService.StorageConfiguration.RESTAPISettings restSettings = new StorageService.StorageConfiguration.RESTAPISettings(restEnabled, restPort);
             switch (storageType) {
-                case FILE -> this.storageConfiguration = new StorageService.StorageConfiguration.File(enableRESTAPI);
+                case FILE -> this.storageConfiguration = new StorageService.StorageConfiguration.File(restSettings);
                 case MARIADB -> {
                     String host = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.host", String.class);
                     if (host.equals(""))
@@ -86,7 +88,7 @@ public class ConnectorsConfig extends YAML {
                     UserPass userPass = new UserPass(user, password);
                     String database = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.database", String.class);
 
-                    this.storageConfiguration = new StorageService.StorageConfiguration.MariaDB(enableRESTAPI, address, userPass, database);
+                    this.storageConfiguration = new StorageService.StorageConfiguration.MariaDB(restSettings, address, userPass, database);
                 }
                 default -> throw new NullPointerException("No proper Storage System was defined!");
             }

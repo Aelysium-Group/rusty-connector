@@ -8,7 +8,7 @@ public class OnMCLoaderLeave extends Listener<MCLoaderLeaveEvent> {
     @Override
     @Handler() // Changes priority to {@link Priority.NATIVE}
     public void handler(MCLoaderLeaveEvent event) {
-        System.out.println("Player left "+event.mcLoader());
+
         event.mcLoader().leave(event.player());
     }
 }

@@ -40,19 +40,19 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
 
     @Override
     public void leave(IPlayer player) {
-        System.out.println("Player marked as leaving RankedMCLoader!");
+
         if(this.activeSession == null) return;
 
-        System.out.println("Active session found");
+
 
         if(!this.activeSession.players().remove(player)) return;
 
-        System.out.println("Player successfully removed from session!");
+
 
         ISession.Settings settings = this.activeSession.settings();
 
         if(this.activeSession.players().size() >= settings.min()) return;
-        System.out.println("Session marked as imploded!");
+
 
         this.implodeSession();
     }

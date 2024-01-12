@@ -21,5 +21,5 @@ public interface IRankedGameInterfaceService extends Service {
      * This method will also cause players to be sent back to the parent family.
      * @param winners A list of the players that are winners. All players in this session that aren't in this list will be marked as losers.
      */
-    void end(UUID... winners);
+    void end(List<UUID> winners);
 }

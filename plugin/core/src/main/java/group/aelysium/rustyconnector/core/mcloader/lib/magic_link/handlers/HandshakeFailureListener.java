@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers;
 
+import group.aelysium.rustyconnector.core.lib.events.EventManager;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
@@ -8,6 +9,8 @@ import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.DisconnectedEvent;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.TimeoutEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 

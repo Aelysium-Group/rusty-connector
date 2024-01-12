@@ -36,10 +36,6 @@ storage:
     #
     provider: FILE
 
-    #
-    # Should we enable the REST API which grants access to the database?
-    # The REST API can then be used with EclipseStorage's Client GUI to view your data: https://docs.eclipsestore.io/manual/storage/rest-interface/client-gui.html
-    #
     enable-rest-api: false
 
     additional-providers:
@@ -49,3 +45,11 @@ storage:
             user: "default"
             password: "password"
             database: "RustyConnector"
+
+    #
+    # The storage REST API allows for reading the data in your database.
+    # The REST API can then be used with EclipseStorage's Client GUI to view your data: https://docs.eclipsestore.io/manual/storage/rest-interface/client-gui.html
+    # The REST API will use the default settings listed in the previous url.
+    #
+    rest-api:
+        enabled: false

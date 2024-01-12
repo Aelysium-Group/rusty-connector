@@ -34,16 +34,17 @@ public class RankedGame implements IRankedGame {
         return this.name;
     }
 
-    public IRankedPlayer rankedPlayer(IMySQLStorageService storage, UUID uuid) {
+    public IRankedPlayer rankedPlayer(IMySQLStorageService storage, UUID uuid, boolean allowNull) {
         ScoreCard scorecard = this.scorecards.get(uuid);
-        if(scorecard == null) {
-            ScoreCard newScorecard = new ScoreCard();
-            this.scorecards.put(uuid, newScorecard);
+        if(scorecard == null)
+            if(allowNull) {
+                ScoreCard newScorecard = new ScoreCard();
+                this.scorecards.put(uuid, newScorecard);
 
-            storage.store(this.scorecards);
+                storage.store(this.scorecards);
 
-            scorecard = newScorecard;
-        }
+                scorecard = newScorecard;
+            } else return null;
 
         IPlayerRank<?> rank = scorecard.fetch((StorageService) storage, this.rankingSchema);
 

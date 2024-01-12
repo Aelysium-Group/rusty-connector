@@ -317,7 +317,11 @@ class Send {
                                 Player player = Player.from(fetchedPlayer);
 
                                 Family family = new Family.Reference(familyName).get();
-                                System.out.println("fetched: "+family);
+
+                                if(player.server().orElseThrow().family().equals(family)) {
+                                    logger.send(ProxyLang.RC_SEND_NO_FAMILY.build(familyName));
+                                    return Command.SINGLE_SUCCESS;
+                                }
 
                                 ConnectionRequest request = family.connect(player);
                                 ConnectionRequest.Result result = request.result().get(30, TimeUnit.SECONDS);

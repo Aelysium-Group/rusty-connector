@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link;
 
+import group.aelysium.rustyconnector.core.lib.events.EventManager;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderFlame;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
@@ -9,6 +10,7 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.ICoreServiceHandler;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.DisconnectedEvent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.magic_link.IMagicLinkService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.toolkit.mc_loader.server_info.IServerInfoService;
@@ -71,6 +73,7 @@ public class MagicLinkService implements IMagicLinkService {
     public void kill() {
         try {
             MCLoaderFlame api = TinderAdapterForCore.getTinder().flame();
+            api.services().events().fire(new DisconnectedEvent());
 
             Packet packet = api.services().packetBuilder().newBuilder()
                     .identification(BuiltInIdentifications.MAGICLINK_HANDSHAKE_DISCONNECT)

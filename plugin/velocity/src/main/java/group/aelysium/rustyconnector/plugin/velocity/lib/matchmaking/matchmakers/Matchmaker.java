@@ -51,23 +51,18 @@ public abstract class Matchmaker implements IMatchmaker {
 
     public void add(ConnectionRequest request, CompletableFuture<ConnectionRequest.Result> result) {
         try {
-            System.out.println("fetching ranked player....");
-            IRankedPlayer rankedPlayer = this.settings.game().rankedPlayer(this.settings.storage(), request.player().uuid());
-            System.out.println("Found!");
-            int index = this.waitingPlayers.lastIndexOf(rankedPlayer);
-            if(index > -1) throw new RuntimeException("Player is already queued!");
-            System.out.println("waitingPlayers didn't contain "+request.player());
-            System.out.println("index of: "+index);
+            IRankedPlayer rankedPlayer = this.settings.game().rankedPlayer(this.settings.storage(), request.player().uuid(), false);
+
+            if(this.waitingPlayers.contains(rankedPlayer)) throw new RuntimeException("Player is already queued!");
 
             this.waitingPlayers.add(rankedPlayer);
 
             if(this.waitingPlayers.size() >= 2) try {
+                int index = this.waitingPlayers.size() - 1;
                 SingleSort.sort(this.waitingPlayers, index);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            System.out.println("Added "+request.player()+" to matchmaker!");
         } catch (Exception e) {
             result.complete(ConnectionRequest.Result.failed(Component.text("There was an issue queuing into matchmaking!")));
             throw new RuntimeException(e);
@@ -99,25 +94,17 @@ public abstract class Matchmaker implements IMatchmaker {
 
         // Build sessions periodically
         this.supervisor.scheduleRecurring(() -> {
-            System.out.println("| Building sessions...");
-
             int playerCount = this.waitingPlayers.size();
-            System.out.println("| There are currently "+playerCount+" players waiting");
-            if(playerCount < minPlayersPerGame) return;
 
-            System.out.println("| There are enough players to make a game! Attempting...");
+            if(playerCount < minPlayersPerGame) return;
 
             double approximateNumberOfGamesToRun = floor((double) ((playerCount / maxPlayersPerGame) + (playerCount / minPlayersPerGame)) / 2);
 
-            System.out.println("| Should be able to start around "+approximateNumberOfGamesToRun+" games");
-
             for (int i = 0; i < approximateNumberOfGamesToRun; i++) {
                 try {
-                    System.out.println("| | Building session");
                     Session.Waiting session = this.make();
                     if(session == null) continue;
 
-                    System.out.println("| | Session built successfully! Queuing it for a server!");
                     this.waitingSessions.put(session.uuid(), session);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -128,24 +115,21 @@ public abstract class Matchmaker implements IMatchmaker {
 
         // Connect sessions to a server periodically
         this.supervisor.scheduleRecurring(() -> {
-            System.out.println("> Connecting sessions...");
+
             if(loadBalancer.size(false) == 0) return;
 
-            System.out.println("> Found at least 1 open server to load a session in!");
             for (ISession.IWaiting waitingSession : this.waitingSessions.values().stream().toList()) {
                 if(loadBalancer.size(false) == 0) break;
 
-                System.out.println("> > Loading session `"+waitingSession.uuid()+"` into a server!");
                 try {
                     RankedMCLoader server = (RankedMCLoader) loadBalancer.current().orElse(null);
                     if(server == null) throw new RuntimeException("There are no servers to connect to!");
-                    System.out.println("> > Loading session into server: "+server);
+
                     ISession session = waitingSession.start(server, this.sessionSettings);
 
-                    System.out.println("> > Finished connecting session to server!");
                     this.waitingSessions.remove(waitingSession.uuid());
                     this.runningSessions.put(session.uuid(), session);
-                    System.out.println("> > Moved session from waitingSessions to runningSessions!");
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -8,11 +8,11 @@ import java.util.UUID;
 /**
  * Represents a game starting.
  */
-public class RankedGameStartEvent extends Cancelable {
+public class RankedGameReadyEvent extends Cancelable {
     private final UUID uuid;
     private final List<UUID> players;
 
-    public RankedGameStartEvent(UUID uuid, List<UUID> players) {
+    public RankedGameReadyEvent(UUID uuid, List<UUID> players) {
         this.uuid = uuid;
         this.players = players;
     }

@@ -160,28 +160,22 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = (Player) new Player.UsernameReference(username).get();
+                                            Player senderPlayer = new Player.UsernameReference(username).get();
 
                                             if(senderPlayer == null)
                                                 return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
-                                            try {
-                                                IFriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
-                                                if (invite == null) throw new NoOutputException();
-
-                                                try {
-                                                    invite.ignore();
-
-                                                    return Command.SINGLE_SUCCESS;
-                                                } catch (Exception ignore) {
-                                                    friendsService.closeInvite(invite);
-                                                }
-
-                                                return closeMessage(player, ProxyLang.FRIEND_REQUEST_IGNORE.build(username));
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
+                                            IFriendRequest invite = friendsService.findRequest(Player.from(player), senderPlayer).orElse(null);
+                                            if (invite == null)
                                                 return closeMessage(player, ProxyLang.INTERNAL_ERROR);
+
+                                            try {
+                                                invite.ignore();
+                                            } catch (Exception ignore) {
+                                                friendsService.closeInvite(invite);
                                             }
+
+                                            return closeMessage(player, ProxyLang.FRIEND_REQUEST_IGNORE.build(username));
                                         })
                                 )
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
@@ -197,7 +191,7 @@ public final class CommandFriends {
                                             }
 
                                             String username = context.getArgument("username", String.class);
-                                            Player senderPlayer = (Player) new Player.UsernameReference(username).get();
+                                            Player senderPlayer = new Player.UsernameReference(username).get();
 
                                             if (senderPlayer == null)
                                                 return closeMessage(player, ProxyLang.NO_PLAYER.build(username));

@@ -9,9 +9,11 @@ import org.eclipse.store.afs.sql.types.SqlFileSystem;
 import org.eclipse.store.afs.sql.types.SqlProviderMariaDb;
 import org.eclipse.store.storage.embedded.types.EmbeddedStorage;
 import org.eclipse.store.storage.embedded.types.EmbeddedStorageManager;
+import org.eclipse.store.storage.restservice.sparkjava.types.StorageRestServiceSparkJava;
 import org.eclipse.store.storage.restservice.types.StorageRestService;
 import org.eclipse.store.storage.restservice.types.StorageRestServiceResolver;
 import org.mariadb.jdbc.MariaDbDataSource;
+import spark.Service;
 
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
@@ -19,7 +21,7 @@ import java.sql.SQLException;
 public class StorageService implements IMySQLStorageService {
     protected final StorageConfiguration configuration;
     protected final EmbeddedStorageManager storageManager;
-    protected StorageRestService restService;
+    protected StorageRestServiceSparkJava restService;
 
     protected StorageService(StorageConfiguration configuration) throws SQLException {
         this.configuration = configuration;
@@ -31,7 +33,10 @@ public class StorageService implements IMySQLStorageService {
 
         storageManager.storeRoot();
 
-        if(this.configuration.enableRESTAPI()) restService = StorageRestServiceResolver.resolve(storageManager);
+        if(this.configuration.rest().enabled()) {
+            restService = StorageRestServiceSparkJava.New(storageManager);
+            this.restService.start();
+        }
 
         this.storageManager = storageManager;
     }
@@ -46,6 +51,7 @@ public class StorageService implements IMySQLStorageService {
 
     @Override
     public void kill() {
+        if(this.restService != null) this.restService.stop();
         this.storageManager.shutdown();
     }
 
@@ -60,18 +66,18 @@ public class StorageService implements IMySQLStorageService {
 
     public static abstract class StorageConfiguration {
         protected final StorageType type;
-        protected final boolean enableRESTAPI;
+        protected final RESTAPISettings rest;
 
-        protected StorageConfiguration(StorageType type, boolean enableRESTAPI) {
+        protected StorageConfiguration(StorageType type, RESTAPISettings rest) {
             this.type = type;
-            this.enableRESTAPI = enableRESTAPI;
+            this.rest = rest;
         }
 
         public StorageType type() {
             return this.type;
         }
-        public boolean enableRESTAPI() {
-            return this.enableRESTAPI;
+        public RESTAPISettings rest() {
+            return this.rest;
         }
 
         public abstract AFileSystem fileSystem();
@@ -81,8 +87,8 @@ public class StorageService implements IMySQLStorageService {
             protected final UserPass userPass;
             protected final String database;
 
-            public MariaDB(boolean enableRESTAPI, InetSocketAddress address, UserPass userPass, String database) {
-                super(StorageType.MARIADB, enableRESTAPI);
+            public MariaDB(RESTAPISettings rest, InetSocketAddress address, UserPass userPass, String database) {
+                super(StorageType.MARIADB, rest);
                 this.address = address;
                 this.userPass = userPass;
                 this.database = database;
@@ -119,8 +125,8 @@ public class StorageService implements IMySQLStorageService {
         }
 
         public static class File extends StorageConfiguration {
-            public File(boolean enableRESTAPI) {
-                super(StorageType.FILE, enableRESTAPI);
+            public File(RESTAPISettings rest) {
+                super(StorageType.FILE, rest);
             }
 
             @Override
@@ -128,5 +134,7 @@ public class StorageService implements IMySQLStorageService {
                 return NioFileSystem.New();
             }
         }
+
+        public record RESTAPISettings(boolean enabled, int port) {}
     }
 }

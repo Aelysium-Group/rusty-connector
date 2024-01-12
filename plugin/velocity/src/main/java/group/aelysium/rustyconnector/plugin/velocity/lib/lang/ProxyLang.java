@@ -301,6 +301,7 @@ public class ProxyLang extends Lang {
             resolver().get("proxy.send.no_family", LanguageResolver.tagHandler("family_name", familyName));
     public final static ParameterizedMessage1<String> RC_SEND_NO_SERVER = serverName ->
             resolver().get("proxy.send.no_server", LanguageResolver.tagHandler("server_name", serverName));
+    public final static Message RC_SEND_SAME_FAMILY = () -> resolver().get("proxy.send.same_family");
 
     public final static ParameterizedMessage1<CacheableMessage> RC_MESSAGE_GET_MESSAGE = (message) -> join(
             newlines(),

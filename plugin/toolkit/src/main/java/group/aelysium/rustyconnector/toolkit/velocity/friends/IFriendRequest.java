@@ -2,12 +2,14 @@ package group.aelysium.rustyconnector.toolkit.velocity.friends;
 
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
+import java.util.UUID;
+
 public interface IFriendRequest {
     /**
-     * Gets this {@link IFriendRequest friend request's} snowflake based ID.
-     * @return {@link Long}
+     * Gets this {@link IFriendRequest friend request's} UUID.
+     * @return {@link UUID}
      */
-    long id();
+    UUID uuid();
 
     /**
      * Gets the sender of this {@link IFriendRequest}.

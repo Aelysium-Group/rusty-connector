@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers;
 
+import group.aelysium.rustyconnector.core.lib.events.EventManager;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
@@ -9,6 +10,8 @@ import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.ConnectedEvent;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.DisconnectedEvent;
 import net.kyori.adventure.text.Component;
 
 public class HandshakeSuccessListener extends PacketListener<MagicLink.Handshake.Success> {
@@ -32,6 +35,7 @@ public class HandshakeSuccessListener extends PacketListener<MagicLink.Handshake
     public void execute(MagicLink.Handshake.Success packet) {
         PluginLogger logger = api.logger();
         MagicLinkService service = api.services().magicLink();
+        api.services().events().fire(new ConnectedEvent(packet.assignment()));
 
         logger.send(Component.text(packet.message(), packet.color()));
         logger.send(MCLoaderLang.MAGIC_LINK.build());

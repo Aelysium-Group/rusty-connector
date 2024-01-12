@@ -22,26 +22,19 @@ public class Randomized extends Matchmaker {
 
     @Override
     public void add(ConnectionRequest request, CompletableFuture<ConnectionRequest.Result> result) {
-        System.out.println("This is the RANDOMIZED matchmaker");
         try {
-            System.out.println("fetching ranked player....");
             IRankedPlayer rankedPlayer = new RankedPlayer(request.player().uuid(), new RandomizedPlayerRank());
-            System.out.println("Found!");
 
-            int index = this.waitingPlayers.lastIndexOf(rankedPlayer);
-            if(index > -1) throw new RuntimeException("Player is already queued!");
-            System.out.println("waitingPlayers didn't contain "+request.player());
-            System.out.println("index of: "+index);
+            if(this.waitingPlayers.contains(rankedPlayer)) throw new RuntimeException("Player is already queued!");
 
             this.waitingPlayers.add(rankedPlayer);
 
             if(this.waitingPlayers.size() >= 2) try {
+                int index = this.waitingPlayers.size() - 1;
                 SingleSort.sort(this.waitingPlayers, index);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            System.out.println("Added "+request.player()+" to matchmaker!");
         } catch (Exception e) {
             result.complete(ConnectionRequest.Result.failed(Component.text("There was an issue queuing into matchmaking!")));
             throw new RuntimeException(e);
@@ -63,13 +56,10 @@ public class Randomized extends Matchmaker {
             } catch (NoSuchElementException ignore) {
                 this.waitingPlayers.remove(player);
             }
-            System.out.println("| | Added "+player+" to session");
         }
 
-        System.out.println("| | Removing players from waitingPlayers");
         this.waitingPlayers.removeAll(playersToUse); // Remove these players from the matchmaker
 
-        System.out.println("| | Building and returning session.");
         return builder.build();
     }
 

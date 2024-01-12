@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers;
 
+import group.aelysium.rustyconnector.core.TinderAdapterForCore;
+import group.aelysium.rustyconnector.core.lib.events.EventManager;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
@@ -10,8 +12,12 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.TimeoutEvent;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.ranked_game.RankedGameEndEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+
+import java.util.List;
 
 public class HandshakeStalePingListener extends PacketListener<MagicLink.StalePing> {
     protected IMCLoaderTinder api;
@@ -35,6 +41,7 @@ public class HandshakeStalePingListener extends PacketListener<MagicLink.StalePi
         PluginLogger logger = api.logger();
         MagicLinkService service = (MagicLinkService) api.services().magicLink();
         ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
+        ((EventManager) api.services().events()).fire(new TimeoutEvent());
 
         logger.send(Component.text("Connection to the Proxy has timed out! Attempting to reconnect...", NamedTextColor.RED));
         service.setDelay(5);

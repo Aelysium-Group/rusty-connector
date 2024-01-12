@@ -100,6 +100,7 @@ proxy:
         no_player: "<red>There is no online player with the username: <username></red>"
         no_family: "<red>There is no family with the name: <family_name></red>"
         no_server: "<red>There is no family with the name: <server_name></red>"
+        same_family: "<red>You're already in that server</red>"
     family:
         description:
             - "<gray>Families are colored as: <blue>Scalar</blue>, <green>Static</green>, and <yellow>Ranked</yellow>.</gray>"
