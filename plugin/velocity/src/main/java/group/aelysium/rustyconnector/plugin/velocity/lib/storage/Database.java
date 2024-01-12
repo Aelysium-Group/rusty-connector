@@ -2,18 +2,18 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
-import group.aelysium.rustyconnector.toolkit.velocity.storage.IStorageRoot;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ServerResidence;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IStorageRoot;
 import org.eclipse.serializer.collections.lazy.LazyHashMap;
 import org.eclipse.serializer.collections.lazy.LazyHashSet;
 
 import java.util.*;
 
-public class Database implements IStorageRoot<Player, FriendMapping> {
+public class Database implements IStorageRoot {
     private final Map<UUID, Player> players = new LazyHashMap<>();
-    private final Set<FriendMapping> friends = new LazyHashSet<>();
+    private final Set<PlayerPair> friends = new LazyHashSet<>();
     private final Map<String, Map<UUID, IServerResidence.MCLoaderEntry>> residence = new LazyHashMap<>();
     private final Map<String, RankedGame> games = new LazyHashMap<>();
 
@@ -26,7 +26,7 @@ public class Database implements IStorageRoot<Player, FriendMapping> {
         return players;
     }
 
-    public Set<FriendMapping> friends() {
+    public Set<PlayerPair> friends() {
         return friends;
     }
 

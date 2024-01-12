@@ -227,8 +227,6 @@ class Initialize {
     public void eventManager() {
         group.aelysium.rustyconnector.core.lib.events.EventManager factory = new group.aelysium.rustyconnector.core.lib.events.EventManager();
         services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, factory);
-
-        factory.on(new OnRankedGameEnd());
     }
 
     public void dynamicTeleport() {

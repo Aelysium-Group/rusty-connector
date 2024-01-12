@@ -7,7 +7,6 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
@@ -118,19 +117,15 @@ public final class CommandParty {
 
                                             Player sender = Player.from(senderVelocityPlayer);
 
-                                            try {
-                                                IPartyInvite invite = partyService.findInvite(player, sender).orElse(null);
-                                                if(invite == null) throw new NoOutputException();
+                                            IPartyInvite invite = partyService.findInvite(player, sender).orElse(null);
+                                            if(invite == null) return closeMessage(player, ProxyLang.PARTY_NO_INVITE.build(sender.username()));
 
-                                                try {
-                                                    invite.ignore();
-                                                } catch (Exception ignore) {
-                                                    partyService.closeInvite(invite);
-                                                }
+                                            try {
+                                                invite.ignore();
                                             } catch (Exception ignore) {
-                                                return closeMessage(player, ProxyLang.INTERNAL_ERROR);
+                                                partyService.closeInvite(invite);
                                             }
-                                            return Command.SINGLE_SUCCESS;
+                                            return closeMessage(player, ProxyLang.PARTY_IGNORE_INVITE.build(sender.username()));
                                         })
                                 )
                                 .then(LiteralArgumentBuilder.<CommandSource>literal("accept")
@@ -300,10 +295,6 @@ public final class CommandParty {
                                         party = newParty;
                                     }
 
-                                    if(partyService.settings().onlyLeaderCanInvite())
-                                        if(!party.leader().equals(player))
-                                            return closeMessage(player, ProxyLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
-
                                     String username = context.getArgument("username", String.class);
                                     Player target = new IPlayer.UsernameReference(username).get();
 
@@ -464,14 +455,11 @@ public final class CommandParty {
                                     IParty party = partyService.find(player).orElse(null);
                                     if(party == null) return closeMessage(player, ProxyLang.NO_PARTY);
 
-                                    if(partyService.settings().onlyLeaderCanKick())
-                                        if(!party.leader().equals(player))
-                                            return closeMessage(player, ProxyLang.PARTY_ONLY_LEADER_CAN_PROMOTE);
+                                    if(!party.leader().equals(player)) return closeMessage(player, ProxyLang.PARTY_ONLY_LEADER_CAN_PROMOTE);
 
                                     String username = context.getArgument("username", String.class);
                                     com.velocitypowered.api.proxy.Player targetPlayer = api.velocityServer().getPlayer(username).orElse(null);
-                                    if(targetPlayer == null)
-                                        return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
+                                    if(targetPlayer == null) return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
                                     Player target = Player.from(targetPlayer);
 
@@ -491,8 +479,9 @@ public final class CommandParty {
                                             partyMember.sendMessage(ProxyLang.PARTY_STATUS_PROMOTED.build(targetPlayer));
                                         });
 
-                                        context.getSource().sendMessage(ProxyLang.PARTY_BOARD.build(party, player));
+                                        velocityPlayer.sendMessage(ProxyLang.PARTY_BOARD.build(party, player));
                                     } catch (IllegalStateException e) {
+                                        e.printStackTrace();
                                         return closeMessage(player, ProxyLang.PARTY_NO_MEMBER.build(targetPlayer.getUsername()));
                                     } catch (Exception e) {
                                         return closeMessage(player, ProxyLang.INTERNAL_ERROR);

@@ -83,8 +83,7 @@ public interface ServerResidence {
         return Optional.of(mcLoaderEntry);
     }
 
-    static void updateExpirations(LiquidTimestamp expiration, IStaticFamily family) throws Exception {
-        StorageService storage = Tinder.get().services().storage();
+    static void updateExpirations(StorageService storage, LiquidTimestamp expiration, IStaticFamily family) {
         Database database = storage.database();
 
         Map<UUID, IServerResidence.MCLoaderEntry> residences = database.residence().get(family.id());

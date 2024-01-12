@@ -11,7 +11,7 @@ public interface IFriendsDataEnclave {
      * @param player The player to find friends of.
      * @return A list of friends.
      */
-    Optional<? extends List<? extends IFriendMapping>> findFriends(IPlayer player);
+    Optional<List<PlayerPair>> findFriends(IPlayer player);
 
     /**
      * Check if two players are friends.
@@ -28,7 +28,7 @@ public interface IFriendsDataEnclave {
      */
     long getFriendCount(IPlayer player);
 
-    Optional<? extends IFriendMapping> addFriend(IPlayer player1, IPlayer player2);
+    Optional<PlayerPair> addFriend(IPlayer player1, IPlayer player2);
 
     /**
      * Delete two players friend mapping.

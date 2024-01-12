@@ -82,15 +82,19 @@ public final class CommandFriends {
                                 Player player = Player.from(velocityPlayer);
 
                                 String username = context.getArgument("username", String.class);
-                                Player targetPlayer = new Player.UsernameReference(username).get();
+                                try {
+                                    Player targetPlayer = new Player.UsernameReference(username).get();
 
-                                if(friendsService.areFriends(player, targetPlayer))
-                                    return closeMessage(velocityPlayer, ProxyLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
+                                    if (friendsService.areFriends(player, targetPlayer))
+                                        return closeMessage(velocityPlayer, ProxyLang.FRIEND_REQUEST_ALREADY_FRIENDS.build(username));
 
-                                if(targetPlayer == null)
+                                    if (targetPlayer == null)
+                                        return closeMessage(velocityPlayer, ProxyLang.NO_PLAYER.build(username));
+
+                                    friendsService.sendRequest(player, username);
+                                } catch (Exception ignore) {
                                     return closeMessage(velocityPlayer, ProxyLang.NO_PLAYER.build(username));
-
-                                friendsService.sendRequest(player, username);
+                                }
 
                                 return Command.SINGLE_SUCCESS;
                             })

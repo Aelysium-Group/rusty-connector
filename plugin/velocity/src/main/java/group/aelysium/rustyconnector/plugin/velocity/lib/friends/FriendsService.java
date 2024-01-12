@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsService;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -102,10 +103,10 @@ public class FriendsService implements IFriendsService {
 
     public Optional<List<IPlayer>> findFriends(IPlayer player) {
         List<IPlayer> friends = new ArrayList<>();
-        List<FriendMapping> friendMappings = this.dataEnclave.findFriends(player).orElse(null);
-        if(friendMappings == null) return Optional.empty();
+        List<PlayerPair> playerPairs = this.dataEnclave.findFriends(player).orElse(null);
+        if(playerPairs == null) return Optional.empty();
 
-        friendMappings.forEach(mapping -> {
+        playerPairs.forEach(mapping -> {
             try {
                 friends.add(mapping.fetchOther(player));
             } catch (NullPointerException ignore) {}

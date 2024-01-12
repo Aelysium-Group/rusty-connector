@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ServerResidence;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
@@ -73,7 +74,7 @@ public class StaticFamily extends Family implements IStaticFamily {
      *
      * @return A list of all server families.
      */
-    public static StaticFamily init(DependencyInjector.DI4<List<Component>, LangService, WhitelistService, ConfigService> deps, String familyName) throws Exception {
+    public static StaticFamily init(DependencyInjector.DI5<List<Component>, LangService, WhitelistService, ConfigService, StorageService> deps, String familyName) throws Exception {
         Tinder api = Tinder.get();
         List<Component> bootOutput = deps.d1();
         LangService lang = deps.d2();
@@ -119,7 +120,7 @@ public class StaticFamily extends Family implements IStaticFamily {
         StaticFamily family = new StaticFamily(settings);
 
         try {
-            ServerResidence.updateExpirations(config.getConsecutiveConnections_homeServer_expiration(), family);
+            ServerResidence.updateExpirations(deps.d5(), config.getConsecutiveConnections_homeServer_expiration(), family);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("There was an issue with MySQL! " + e.getMessage());

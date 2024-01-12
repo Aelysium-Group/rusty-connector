@@ -48,8 +48,7 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
     }
 
     public void setLeader(IPlayer player) {
-        if(this.players.containsKey(player.uuid()))
-            throw new IllegalStateException(player.username() + " isn't in this party, they can't be made leader!");
+        if(!this.players.containsKey(player.uuid())) throw new IllegalStateException();
         this.leader = player.uuid();
     }
 
@@ -82,7 +81,7 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
 
     public synchronized void leave(IPlayer player) {
         if(this.isEmpty()) return;
-        this.players.remove(player);
+        this.players.remove(player.uuid());
 
         if(this.isEmpty()) { // This was the last member of the party
             Tinder.get().services().party().orElseThrow().disband(this);
@@ -92,8 +91,9 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
         this.players.values().forEach(partyMember -> partyMember.sendMessage(Component.text(player.username() + " left the party.", NamedTextColor.YELLOW)));
 
         if(player.uuid().equals(this.leader)) {
-            randomPlayer();
-            this.broadcast(Component.text(player.username()+" is the new party leader!", NamedTextColor.YELLOW));
+            IPlayer newLeader = randomPlayer();
+            setLeader(newLeader);
+            this.broadcast(Component.text(newLeader.username()+" is the new party leader!", NamedTextColor.YELLOW));
         }
 
         if(this.isEmpty())

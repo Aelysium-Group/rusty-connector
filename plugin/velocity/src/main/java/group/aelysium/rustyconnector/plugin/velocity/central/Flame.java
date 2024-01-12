@@ -348,7 +348,7 @@ class Initialize {
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             for (String familyName : familiesConfig.staticFamilies()) {
-                familyService.add(StaticFamily.init(inject(bootOutput, deps.d2(), whitelistService, deps.d4()), familyName));
+                familyService.add(StaticFamily.init(inject(bootOutput, deps.d2(), whitelistService, deps.d4(), deps.d3()), familyName));
                 bootOutput.add(Component.text(" | Registered family: "+familyName, NamedTextColor.YELLOW));
             }
             for (String familyName : familiesConfig.rankedFamilies()) {

@@ -196,6 +196,8 @@ proxy:
             friends_only: "<red>You can only send invites to your friends!</red>"
             self_invite: "<red>You can't invite yourself to your own party!</red>"
             already_a_member: "<red><username> is already in your party!</red>"
+            no_invite: "<red>It doesn't seem like <username> has sent you any invites!</red>"
+            ignore: "<yellow>Party invite from <username> ignored.</yellow>"
         receiver_invite_query:
             query: "<gray>Hey! <username> wants you to join their party!</gray>"
             hover:

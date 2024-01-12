@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsDataEnclave;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
@@ -15,11 +16,11 @@ public class FriendsDataEnclave implements IFriendsDataEnclave {
         this.storage = (StorageService) storage;
     }
 
-    public Optional<List<FriendMapping>> findFriends(IPlayer player) {
+    public Optional<List<PlayerPair>> findFriends(IPlayer player) {
         try {
             Database root = this.storage.database();
 
-            List<FriendMapping> mappings = root.friends().stream()
+            List<PlayerPair> mappings = root.friends().stream()
                     .filter(friendMapping -> friendMapping.player1().equals(player) || friendMapping.player2().equals(player))
                     .toList();
 
@@ -31,7 +32,7 @@ public class FriendsDataEnclave implements IFriendsDataEnclave {
 
     public boolean areFriends(IPlayer player1, IPlayer player2) throws RuntimeException {
         Database root = this.storage.database();
-        return root.friends().contains(FriendMapping.from(player1, player2));
+        return root.friends().contains(PlayerPair.from(player1, player2));
     }
 
     public long getFriendCount(IPlayer player) {
@@ -45,18 +46,18 @@ public class FriendsDataEnclave implements IFriendsDataEnclave {
         return 0;
     }
 
-    public Optional<FriendMapping> addFriend(IPlayer player1, IPlayer player2) {
+    public Optional<PlayerPair> addFriend(IPlayer player1, IPlayer player2) {
         try {
             Database root = this.storage.database();
 
-            FriendMapping friendMapping = FriendMapping.from(player1, player2);
+            PlayerPair playerPair = PlayerPair.from(player1, player2);
 
-            Set<FriendMapping> networkFriends = root.friends();
-            networkFriends.add(friendMapping);
+            Set<PlayerPair> networkFriends = root.friends();
+            networkFriends.add(playerPair);
 
             this.storage.store(networkFriends);
 
-            return Optional.of(friendMapping);
+            return Optional.of(playerPair);
         } catch (Exception ignore) {
         }
 
@@ -67,10 +68,10 @@ public class FriendsDataEnclave implements IFriendsDataEnclave {
         try {
             Database root = this.storage.database();
 
-            FriendMapping friendMapping = FriendMapping.from(player1, player2);
+            PlayerPair playerPair = PlayerPair.from(player1, player2);
 
-            Set<FriendMapping> networkFriends = root.friends();
-            networkFriends.remove(friendMapping);
+            Set<PlayerPair> networkFriends = root.friends();
+            networkFriends.remove(playerPair);
 
             this.storage.store(networkFriends);
         } catch (Exception ignore) {
