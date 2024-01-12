@@ -124,14 +124,14 @@ public abstract class LoadBalancer implements ILoadBalancer<IMCLoader> {
         if(!this.unlockedServers.remove(server)) return;
         this.lockedServers.add(server);
 
-        EventDispatch.Safe.fireAndForget(new MCLoaderLockedEvent(server.family(), server));
+        EventDispatch.UnSafe.fireAndForget(new MCLoaderLockedEvent(server.family(), server));
     }
 
     public void unlock(IMCLoader server) {
         if(!this.lockedServers.remove(server)) return;
         this.unlockedServers.add(server);
 
-        EventDispatch.Safe.fireAndForget(new MCLoaderUnlockedEvent(server.family(), server));
+        EventDispatch.UnSafe.fireAndForget(new MCLoaderUnlockedEvent(server.family(), server));
     }
 
     public boolean joinable(IMCLoader server) {

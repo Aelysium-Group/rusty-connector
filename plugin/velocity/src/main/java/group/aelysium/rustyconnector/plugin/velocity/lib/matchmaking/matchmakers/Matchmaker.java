@@ -45,7 +45,7 @@ public abstract class Matchmaker implements IMatchmaker {
 
     public abstract group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session.Waiting make();
     public boolean minimumPlayersExist() {
-        return this.waitingPlayers.size() > minPlayersPerGame;
+        return this.waitingPlayers.size() >= minPlayersPerGame;
     }
     public abstract void completeSort();
 

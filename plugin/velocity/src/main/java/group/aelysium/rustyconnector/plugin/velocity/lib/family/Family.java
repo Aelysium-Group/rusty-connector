@@ -64,7 +64,7 @@ public abstract class Family implements IFamily {
     public void balance() {
         this.settings.loadBalancer().completeSort();
 
-        EventDispatch.Safe.fireAndForget(new RebalanceEvent(this));
+        EventDispatch.UnSafe.fireAndForget(new RebalanceEvent(this));
     }
 
     public List<com.velocitypowered.api.proxy.Player> players(int max) {
@@ -121,7 +121,7 @@ public abstract class Family implements IFamily {
     }
 
     public ConnectionRequest connect(IPlayer player) {
-        EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
+        EventDispatch.UnSafe.fireAndForget(new FamilyPreJoinEvent(this, player));
 
         return this.settings.connector().connect(player);
     }

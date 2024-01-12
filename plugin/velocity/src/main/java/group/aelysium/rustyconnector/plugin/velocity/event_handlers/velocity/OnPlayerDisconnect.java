@@ -32,7 +32,7 @@ public class OnPlayerDisconnect {
         Player player = Player.from(event.getPlayer());
 
         return EventTask.async(() -> {
-            EventDispatch.Safe.fireAndForget(new NetworkLeaveEvent(player));
+            EventDispatch.UnSafe.fireAndForget(new NetworkLeaveEvent(player));
 
             // Handle party when player leaves
             try {

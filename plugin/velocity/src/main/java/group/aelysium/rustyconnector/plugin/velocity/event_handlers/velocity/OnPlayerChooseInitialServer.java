@@ -110,7 +110,7 @@ public class OnPlayerChooseInitialServer {
                     family = injectors.familyOf(host).orElseThrow();
                     IMCLoader server = family.smartFetch().orElseThrow();
 
-                    EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
+                    EventDispatch.UnSafe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
                     event.setInitialServer(server.registeredServer());
                     return;
                 } catch (NoOutputException ignore) {
@@ -122,7 +122,7 @@ public class OnPlayerChooseInitialServer {
             IRootFamily family = api.services().family().rootFamily();
             IMCLoader server = family.smartFetch().orElseThrow();
 
-            EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
+            EventDispatch.UnSafe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
             event.setInitialServer(server.registeredServer());
         } catch (NoOutputException ignore) {
         } catch (Exception e) {

@@ -131,7 +131,7 @@ public class MCLoader implements IMCLoader {
             throw new Exception(error.getMessage());
         }
 
-        EventDispatch.Safe.fireAndForget(new RegisterEvent(family, this));
+        EventDispatch.UnSafe.fireAndForget(new RegisterEvent(family, this));
     }
 
     public void unregister(boolean removeFromFamily) throws Exception {
@@ -159,7 +159,7 @@ public class MCLoader implements IMCLoader {
             if (removeFromFamily)
                 family.removeServer(server);
 
-            EventDispatch.Safe.fireAndForget(new UnregisterEvent(family, server));
+            EventDispatch.UnSafe.fireAndForget(new UnregisterEvent(family, server));
         } catch (Exception e) {
             if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
                 ProxyLang.ERROR.send(logger, uuidOrDisplayName(), family.id());

@@ -11,6 +11,8 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRanke
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.rmi.AlreadyBoundException;
 import java.util.*;
@@ -53,6 +55,12 @@ public class Session implements ISession {
         }
 
         this.mcLoader.unlock();
+    }
+
+    public void implode() {
+        this.players.forEach(player -> player.sendMessage(Component.text("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.", NamedTextColor.RED)));
+
+        this.end();
     }
 
     public List<IPlayer> players() {

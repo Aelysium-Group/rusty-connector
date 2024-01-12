@@ -7,7 +7,6 @@ import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -37,8 +36,8 @@ public class OnPlayerKicked {
             try {
                 MCLoader oldServer = player.server().orElseThrow();
 
-                EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(oldServer.family(), oldServer, player, true));
-                EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(oldServer, player, true));
+                EventDispatch.UnSafe.fireAndForget(new FamilyLeaveEvent(oldServer.family(), oldServer, player, true));
+                EventDispatch.UnSafe.fireAndForget(new MCLoaderLeaveEvent(oldServer, player, true));
 
                 isFromRootFamily = oldServer.family() == api.services().family().rootFamily();
             } catch (Exception ignore) {}

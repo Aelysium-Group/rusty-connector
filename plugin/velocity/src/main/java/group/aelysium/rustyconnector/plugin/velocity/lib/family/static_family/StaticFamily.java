@@ -6,9 +6,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ServerResidence;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
@@ -29,7 +27,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LeastCon
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.MostConnection;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
@@ -40,7 +37,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.STATIC_FAMILY_META;
-import static group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol.*;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 
 public class StaticFamily extends Family implements IStaticFamily {
@@ -63,7 +59,7 @@ public class StaticFamily extends Family implements IStaticFamily {
 
     @Override
     public ConnectionRequest connect(IPlayer player) {
-        EventDispatch.Safe.fireAndForget(new FamilyPreJoinEvent(this, player));
+        EventDispatch.UnSafe.fireAndForget(new FamilyPreJoinEvent(this, player));
 
         return ((Connector) this.settings.connector()).connect(player, this);
     }
