@@ -25,7 +25,7 @@ public class LoadBalancingService extends ClockService {
                 try {
                     PluginLogger logger = deps.d2();
 
-                    EventDispatch.UnSafe.fireAndForget(new RebalanceEvent(family));
+                    deps.d3().fireAndForget(new RebalanceEvent(family));
                     family.balance();
                     if (logger.loggerGate().check(GateKey.FAMILY_BALANCING))
                         ProxyLang.FAMILY_BALANCING.send(logger, family);
