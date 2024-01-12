@@ -8,11 +8,11 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.bstats.Metrics;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -46,6 +46,7 @@ public class VelocityRustyConnector {
             metricsFactory.make(this, 17972);
             Tinder.get().logger().log("Registered to bstats!");
         } catch (Exception e) {
+            e.printStackTrace();
             Tinder.get().logger().log("Failed to register to bstats!");
         }
 

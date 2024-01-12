@@ -36,10 +36,8 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
         this.players = players;
     }
 
-    public void end(UUID... winners) {
+    public void end(List<UUID> winners) {
         if(this.uuid == null) return;
-
-        ServerInfoService infoService = TinderAdapterForCore.getTinder().services().serverInfo();
 
         JsonObject object = new JsonObject();
         object.add("uuid", new JsonPrimitive(uuid.toString()));
@@ -63,7 +61,7 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
 
         MCLoaderTinder tinder = TinderAdapterForCore.getTinder();
 
-        tinder.services().events().fire(new RankedGameEndEvent(uuid, sessionPlayers, List.of(winners)));
+        tinder.services().events().fire(new RankedGameEndEvent(uuid, sessionPlayers, winners));
 
         Packet packet = tinder.services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_END)

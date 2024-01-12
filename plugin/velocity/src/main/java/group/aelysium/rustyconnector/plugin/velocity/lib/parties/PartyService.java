@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.command.CommandManager;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
@@ -10,20 +11,18 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PartyService implements IPartyService {
     private final Vector<IParty> parties = new Vector<>();
-    private final Vector<IPartyInvite> invites = new Vector<>();
+    private final Map<PlayerPair, IPartyInvite> invites = new HashMap<>();
     private final PartyServiceSettings settings;
     private final ExecutorService connector;
 
@@ -85,7 +84,7 @@ public class PartyService implements IPartyService {
     public IPartyInvite invitePlayer(IParty party, IPlayer sender, IPlayer target) {
         Tinder api = Tinder.get();
 
-        if(party.leader() != sender && this.settings.onlyLeaderCanInvite())
+        if(!party.leader().equals(sender) && this.settings.onlyLeaderCanInvite())
             throw new IllegalStateException(ProxyLang.PARTY_INJECTED_ONLY_LEADER_CAN_INVITE);
 
         if(this.settings.friendsOnly())
@@ -103,7 +102,7 @@ public class PartyService implements IPartyService {
             } catch (Exception ignore) {}
 
         PartyInvite invite = new PartyInvite(this, party, sender, target);
-        this.invites.add(invite);
+        this.invites.put(PlayerPair.from(invite.target(), invite.sender()), invite);
 
         sender.sendMessage(ProxyLang.PARTY_INVITE_SENT.build(target.username()));
 
@@ -112,10 +111,12 @@ public class PartyService implements IPartyService {
     }
 
     public List<IPartyInvite> findInvitesToTarget(IPlayer target) {
-        return this.invites.stream().filter(invite -> invite.target().equals(target)).findAny().stream().toList();
+        return this.invites.values().stream().filter(invite -> invite.target().equals(target)).findAny().stream().toList();
     }
     public Optional<IPartyInvite> findInvite(IPlayer target, IPlayer sender) {
-        return this.invites.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();
+        IPartyInvite invite = this.invites.get(PlayerPair.from(target, sender));
+        if(invite == null) return Optional.empty();
+        return Optional.of(invite);
     }
 
     public void closeInvite(IPartyInvite invite) {

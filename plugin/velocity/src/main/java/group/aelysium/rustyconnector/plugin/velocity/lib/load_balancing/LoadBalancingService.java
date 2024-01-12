@@ -18,8 +18,6 @@ public class LoadBalancingService extends ClockService {
 
     public void init(DependencyInjector.DI2<FamilyService, PluginLogger> deps) {
         for (Family family : deps.d1().dump()) {
-            if (!family.metadata().hasLoadBalancer()) continue;
-
             this.scheduleRecurring(() -> {
                 try {
                     PluginLogger logger = deps.d2();

@@ -13,9 +13,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPostJoinEvent;
-import group.aelysium.rustyconnector.toolkit.velocity.family.InitiallyConnectableFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
@@ -26,7 +27,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.NoSuchElementException;
 
 public class OnPlayerChooseInitialServer {
     /**
@@ -34,43 +34,24 @@ public class OnPlayerChooseInitialServer {
      */
     @Subscribe(order = PostOrder.LAST)
     public EventTask onPlayerChooseInitialServer(PlayerChooseInitialServerEvent event) {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-        Player player = Player.from(event.getPlayer());
-        com.velocitypowered.api.proxy.Player eventPlayer = event.getPlayer();
-
         return EventTask.async(() -> {
+            Tinder api = Tinder.get();
+            PluginLogger logger = api.logger();
+            Player player = Player.from(event.getPlayer());
+            com.velocitypowered.api.proxy.Player eventPlayer = event.getPlayer();
+
+            // Check for network whitelist
             try {
-                // Check for network whitelist
-                try {
-                    IWhitelist whitelist = api.services().whitelist().proxyWhitelist();
-                    if (!whitelist.validate(player)) {
-                        logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
-                        eventPlayer.disconnect(Component.text(whitelist.message()));
-                        return;
-                    }
-                } catch (Exception ignore) {}
-
-                // Handle family injectors if they exist
-                InitiallyConnectableFamily family = api.services().family().rootFamily();
-                try {
-                    InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
-                    String host = eventPlayer.getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
-
-                    family = injectors.familyOf(host).orElseThrow();
-                } catch (NoSuchElementException ignore) {
-                } catch (Exception e) {
-                    logger.send(Component.text("Error while using Family Injectors! Players will attempt to connect to the root family because of this! "+e.getMessage(), NamedTextColor.RED));
+                IWhitelist whitelist = api.services().whitelist().proxyWhitelist();
+                if (whitelist == null) throw new NoOutputException();
+                if (!whitelist.validate(player)) {
+                    logger.log("Player isn't whitelisted on the proxy whitelist! Kicking...");
+                    player.disconnect(Component.text(whitelist.message()));
+                    return;
                 }
-                if(family == null) throw new RuntimeException("Unable to fetch a server to connect to.");
+            } catch (Exception ignore) {}
 
-                IMCLoader server = family.connect(event);
-
-                EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(server.family(), server, player));
-            } catch (Exception e) {
-                eventPlayer.disconnect(Component.text("Disconnected. "+e.getMessage()));
-                e.printStackTrace();
-            }
+            connect(event, player);
 
             // Check for active friend requests
             try {
@@ -111,5 +92,42 @@ public class OnPlayerChooseInitialServer {
                 onlineFriends.forEach(friend -> friend.sendMessage(ProxyLang.FRIEND_JOIN.build(player)));
             } catch (Exception ignore) {}
         });
+    }
+
+    private static void connect(PlayerChooseInitialServerEvent event, IPlayer player) {
+        Tinder api = Tinder.get();
+        PluginLogger logger = api.logger();
+        try {
+            // Handle family injectors if they exist
+            try {
+                InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
+                try {
+                    IFamily family = api.services().family().rootFamily();
+                    if(family == null) throw new RuntimeException("Unable to fetch a server to connect to.");
+
+                    String host = event.getPlayer().getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
+
+                    family = injectors.familyOf(host).orElseThrow();
+                    IMCLoader server = family.smartFetch().orElseThrow();
+
+                    EventDispatch.UnSafe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
+                    event.setInitialServer(server.registeredServer());
+                    return;
+                } catch (NoOutputException ignore) {
+                } catch (Exception e) {
+                    logger.send(Component.text("Error while using Family Injectors! Players will attempt to connect to the root family because of this! "+e.getMessage(), NamedTextColor.RED));
+                }
+            } catch (Exception ignore) {}
+
+            IRootFamily family = api.services().family().rootFamily();
+            IMCLoader server = family.smartFetch().orElseThrow();
+
+            EventDispatch.UnSafe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
+            event.setInitialServer(server.registeredServer());
+        } catch (NoOutputException ignore) {
+        } catch (Exception e) {
+            player.sendMessage(Component.text("We were unable to connect you!"));
+            e.printStackTrace();
+        }
     }
 }

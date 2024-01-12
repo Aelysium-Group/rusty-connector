@@ -1,29 +1,29 @@
 package group.aelysium.rustyconnector.toolkit.velocity.storage;
 
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
-import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendMapping;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public interface IStorageRoot<players extends IPlayer, friends extends IFriendMapping, residence extends IServerResidence> {
+public interface IStorageRoot<Player extends IPlayer> {
     /**
      * Gets the player mappings that have been stored by RustyConnector's remote storage connector.
      * As you make requests to this method, RustyConnector will dynamically query the database and fetch the data you need.
      * Interact with this method just like any other Java method!
-     * @return {@link Set< IPlayer >}
+     * @return {@link Set<IPlayer>}
      */
-    Map<UUID, players> players();
+    Map<UUID, Player> players();
 
     /**
      * Gets the friend mappings that have been stored by RustyConnector's remote storage connector.
      * As you make requests to this method, RustyConnector will dynamically query the database and fetch the data you need.
      * Interact with this method just like any other Java method!
-     * @return {@link Set<friends>}
+     * @return {@link Set<PlayerPair>}
      */
-    Set<friends> friends();
+    Set<PlayerPair> friends();
 
     /**
      * Gets the server residences that have been stored by RustyConnector's remote storage connector.
@@ -31,5 +31,5 @@ public interface IStorageRoot<players extends IPlayer, friends extends IFriendMa
      * Interact with this method just like any other Java method!
      * @return {@link Set<IServerResidence>}
      */
-    Set<residence> residence();
+    Map<String, Map<UUID, IServerResidence.MCLoaderEntry>> residence();
 }

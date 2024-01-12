@@ -12,6 +12,10 @@ public class OnFamilyLeave extends Listener<FamilyLeaveEvent> {
     @Override
     @Handler() // Changes priority to {@link Priority.NATIVE}
     public void handler(FamilyLeaveEvent event) {
+        try {
+            event.family().leave(event.player());
+        } catch (Exception ignore) {}
+
         WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, event.family().id(), DiscordWebhookMessage.FAMILY__PLAYER_LEAVE.build(event.player(), event.mcLoader()));
 
         if(!event.disconnected()) return;

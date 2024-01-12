@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayerService;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.Database;
 

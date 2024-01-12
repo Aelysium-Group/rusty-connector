@@ -1,11 +1,9 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
-import com.sun.jdi.request.DuplicateRequestException;
-import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -13,22 +11,21 @@ import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatc
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
-import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.UnregisterEvent;
-import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetSocketAddress;
-import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,7 +35,7 @@ public class MCLoader implements IMCLoader {
     private final InetSocketAddress address;
     private RegisteredServer registeredServer = null;
     private Family family;
-    private int playerCount = 0;
+    private AtomicInteger playerCount = new AtomicInteger(0);
     private int weight;
     private int softPlayerCap;
     private int hardPlayerCap;
@@ -134,7 +131,7 @@ public class MCLoader implements IMCLoader {
             throw new Exception(error.getMessage());
         }
 
-        EventDispatch.Safe.fireAndForget(new RegisterEvent(family, this));
+        EventDispatch.UnSafe.fireAndForget(new RegisterEvent(family, this));
     }
 
     public void unregister(boolean removeFromFamily) throws Exception {
@@ -162,7 +159,7 @@ public class MCLoader implements IMCLoader {
             if (removeFromFamily)
                 family.removeServer(server);
 
-            EventDispatch.Safe.fireAndForget(new UnregisterEvent(family, server));
+            EventDispatch.UnSafe.fireAndForget(new UnregisterEvent(family, server));
         } catch (Exception e) {
             if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
                 ProxyLang.ERROR.send(logger, uuidOrDisplayName(), family.id());
@@ -175,7 +172,7 @@ public class MCLoader implements IMCLoader {
      * @return `true` if the server is full
      */
     public boolean full() {
-        return this.playerCount >= softPlayerCap;
+        return this.playerCount.get() >= softPlayerCap;
     }
 
     /**
@@ -183,54 +180,20 @@ public class MCLoader implements IMCLoader {
      * @return `true` if the server is maxed out
      */
     public boolean maxed() {
-        return this.playerCount >= hardPlayerCap;
-    }
-
-    /**
-     * Validates the player against the server's current player count.
-     * If the server is full or the player doesn't have permissions to bypass soft and hard player caps. They will be kicked
-     * @param player The player to validate
-     * @return `true` if the player is able to join. `false` otherwise.
-     */
-    public boolean validatePlayer(IPlayer player) {
-        com.velocitypowered.api.proxy.Player velocityPlayer = player.resolve().orElseThrow();
-        if(Permission.validate(
-                velocityPlayer,
-                "rustyconnector.hardCapBypass",
-                Permission.constructNode("rustyconnector.<family id>.hardCapBypass",this.family.id())
-        )) return true; // If the player has permission to bypass hard-player-cap, let them in.
-
-        if(this.maxed()) return false; // If the player count is at hard-player-cap. Boot the player.
-
-        if(Permission.validate(
-                velocityPlayer,
-                "rustyconnector.softCapBypass",
-                Permission.constructNode("rustyconnector.<family id>.softCapBypass",this.family.id())
-        )) return true; // If the player has permission to bypass soft-player-cap, let them in.
-
-        return !this.full();
+        return this.playerCount.get() >= hardPlayerCap;
     }
 
     @Override
     public int playerCount() {
-        //return 0;
-        return this.playerCount;
+        return this.playerCount.get();
     }
 
     public void setPlayerCount(int playerCount) {
-        this.playerCount = playerCount;
-    }
-
-    public void playerLeft() {
-        if(this.playerCount > 0) this.playerCount -= 1;
-    }
-
-    public void playerJoined() {
-        this.playerCount += 1;
+        this.playerCount.set(playerCount);
     }
 
     public double sortIndex() {
-        return this.playerCount;
+        return this.playerCount.get();
     }
 
     @Override
@@ -267,66 +230,63 @@ public class MCLoader implements IMCLoader {
         return family;
     }
 
-    public boolean connect(IPlayer player) throws ConnectException {
+    protected boolean validatePlayerLimits(com.velocitypowered.api.proxy.Player player) {
+        if(Permission.validate(
+                player,
+                "rustyconnector.hardCapBypass",
+                Permission.constructNode("rustyconnector.<family id>.hardCapBypass",this.family.id())
+        )) return true; // If the player has permission to bypass hard-player-cap, let them in.
+
+        if(this.maxed()) return false; // If the player count is at hard-player-cap. Boot the player.
+
+        if(Permission.validate(
+                player,
+                "rustyconnector.softCapBypass",
+                Permission.constructNode("rustyconnector.<family id>.softCapBypass",this.family.id())
+        )) return true; // If the player has permission to bypass soft-player-cap, let them in.
+
+        return !this.full();
+    }
+
+    public ConnectionRequest connect(IPlayer player) {
+        CompletableFuture<ConnectionRequest.Result> result = new CompletableFuture<>();
+        ConnectionRequest request = new ConnectionRequest(player, result);
         try {
-            PartyService partyService = Tinder.get().services().party().orElseThrow();
-            IParty party = partyService.find(player).orElseThrow();
-
-            try {
-                if(partyService.settings().onlyLeaderCanSwitchServers())
-                    if(!party.leader().equals(player)) {
-                        player.sendMessage(ProxyLang.PARTY_ONLY_LEADER_CAN_SWITCH);
-                        return false;
-                    }
-
-                party.connect(this);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (!player.online()) {
+                result.complete(ConnectionRequest.Result.failed(Component.text(player.username() + " isn't online.")));
+                return request;
             }
+
+            com.velocitypowered.api.proxy.Player velocityPlayer = player.resolve().orElse(null);
+            if (velocityPlayer == null) {
+                result.complete(ConnectionRequest.Result.failed(Component.text(player.username() + " couldn't be found.")));
+                return request;
+            }
+
+            if (!this.validatePlayerLimits(velocityPlayer)) {
+                result.complete(ConnectionRequest.Result.failed(Component.text("The server is currently full. Try again later.")));
+                return request;
+            }
+
+            ConnectionRequestBuilder connection = player.resolve().orElseThrow().createConnectionRequest(this.registeredServer());
+            try {
+                ConnectionRequestBuilder.Result connectionResult = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
+
+                if (!connectionResult.isSuccessful()) throw new NoOutputException();
+
+                this.playerCount.incrementAndGet();
+                result.complete(ConnectionRequest.Result.success(Component.text("You successfully connected to the server!"), this));
+                return request;
+            } catch (Exception ignore) {}
         } catch (Exception ignore) {}
 
-        return directConnect(player);
+        result.complete(ConnectionRequest.Result.failed(Component.text("Unable to connect you to the server!")));
+        return request;
     }
 
-    public boolean directConnect(IPlayer player) throws ConnectException {
-        ConnectionRequestBuilder connection = player.resolve().orElseThrow().createConnectionRequest(this.registeredServer());
-        try {
-            ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
-
-            if(result.isSuccessful()) {
-                this.playerJoined();
-                return true;
-            }
-        } catch (Exception e) {
-            throw new ConnectException("Unable to connect to that server!", e);
-        }
-
-        return false;
-    }
-
-    public boolean directConnect(Player player) throws ConnectException {
-        ConnectionRequestBuilder connection = player.createConnectionRequest(this.registeredServer());
-        try {
-            ConnectionRequestBuilder.Result result = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
-
-            if(result.isSuccessful()) {
-                this.playerJoined();
-                return true;
-            }
-        } catch (Exception e) {
-            throw new ConnectException("Unable to connect to that server!", e);
-        }
-
-        return false;
-    }
-
-    public boolean directConnect(PlayerChooseInitialServerEvent event) {
-        try {
-            event.setInitialServer(this.registeredServer());
-            return true;
-        } catch(Exception ignore) {
-            return false;
-        }
+    @Override
+    public void leave(IPlayer player) {
+        this.playerCount.decrementAndGet();
     }
 
     public void lock() {

@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.injector
 
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.family.InitiallyConnectableFamily;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,14 +12,14 @@ public interface IInjectorService extends Service {
      * @param anchor The anchor to find the family of.
      * @return {@link Optional<IFamily>}
      */
-    Optional<InitiallyConnectableFamily> familyOf(String anchor);
+    Optional<IFamily> familyOf(String anchor);
 
     /**
      * Creates a new anchor, which points to a family.
      * @param name The name of the anchor to register. Anchors can be referenced using `/anchor-name`
      * @param target The family that this anchor will teleport players to.
      */
-    void create(String name, InitiallyConnectableFamily target);
+    void create(String name, IFamily target);
 
     /**
      * Deletes an anchor.
@@ -33,5 +32,5 @@ public interface IInjectorService extends Service {
      * @param target The family to target.
      * @return A list of anchor names.
      */
-    List<String> anchorsFor(InitiallyConnectableFamily target);
+    List<String> anchorsFor(IFamily target);
 }

@@ -11,15 +11,12 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
-import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
-import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.NetworkLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +32,7 @@ public class OnPlayerDisconnect {
         Player player = Player.from(event.getPlayer());
 
         return EventTask.async(() -> {
-            EventDispatch.Safe.fireAndForget(new NetworkLeaveEvent(player));
+            EventDispatch.UnSafe.fireAndForget(new NetworkLeaveEvent(player));
 
             // Handle party when player leaves
             try {

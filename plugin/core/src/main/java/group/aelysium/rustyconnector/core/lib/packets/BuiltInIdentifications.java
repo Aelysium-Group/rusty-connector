@@ -64,6 +64,12 @@ public interface BuiltInIdentifications {
     PacketIdentification RANKED_GAME_END = PacketIdentification.from("RC","ERG");
 
     /**
+     * `Proxy > MCLoader` | Informs the MCLoader that the game has imploded and was forced to end.
+     *                    | Implosion occurs when to many players leave the session.
+     */
+    PacketIdentification RANKED_GAME_IMPLODE = PacketIdentification.from("RC","RGI");
+
+    /**
      * `Proxy > MCLoader` | Tells the MCLoader to start a game.
      */
     PacketIdentification RANKED_GAME_READY = PacketIdentification.from("RC","SRG");

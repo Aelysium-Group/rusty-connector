@@ -5,14 +5,9 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.*;
 
 import java.util.UUID;
@@ -49,33 +44,31 @@ public class OnPlayerChangeServer {
      * Fires when a player first joins the proxy.
      */
     protected void proxyJoin(MCLoader newServer, Player player) {
-        EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(newServer.family(), newServer, player));
-        EventDispatch.Safe.fireAndForget(new NetworkJoinEvent(newServer.family(), newServer, player));
+        EventDispatch.UnSafe.fireAndForget(new FamilyPostJoinEvent(newServer.family(), newServer, player));
+        EventDispatch.UnSafe.fireAndForget(new NetworkJoinEvent(newServer.family(), newServer, player));
     }
 
     /**
      * Fires when the player is switching from one server on the proxy to another server on the proxy.
-     * Regardless of the families the posess those servers.
+     * Regardless of the families that poses those servers.
      */
     protected void serverSwitch(MCLoader oldServer, MCLoader newServer, Player player) {
         boolean isTheSameFamily = newServer.family().equals(oldServer.family());
 
-        oldServer.playerLeft();
-
         if(!isTheSameFamily) familySwitch(oldServer, newServer, player);
 
-        EventDispatch.Safe.fireAndForget(new FamilyInternalSwitchEvent(newServer.family(), oldServer, newServer, player));
-        EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(oldServer, player, false));
-        EventDispatch.Safe.fireAndForget(new MCLoaderJoinEvent(newServer, player));
-        EventDispatch.Safe.fireAndForget(new MCLoaderSwitchEvent(oldServer, newServer, player));
+        EventDispatch.UnSafe.fireAndForget(new FamilyInternalSwitchEvent(newServer.family(), oldServer, newServer, player));
+        EventDispatch.UnSafe.fireAndForget(new MCLoaderLeaveEvent(oldServer, player, false));
+        EventDispatch.UnSafe.fireAndForget(new MCLoaderJoinEvent(newServer, player));
+        EventDispatch.UnSafe.fireAndForget(new MCLoaderSwitchEvent(oldServer, newServer, player));
     }
 
     /**
      * Fires if the player is switching from one family to another family.
      */
     protected void familySwitch(MCLoader oldServer, MCLoader newServer, Player player) {
-        EventDispatch.Safe.fireAndForget(new FamilySwitchEvent(oldServer.family(), newServer.family(), oldServer, newServer, player));
-        EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(oldServer.family(), oldServer, player, false));
-        EventDispatch.Safe.fireAndForget(new FamilyPostJoinEvent(newServer.family(), newServer, player));
+        EventDispatch.UnSafe.fireAndForget(new FamilySwitchEvent(oldServer.family(), newServer.family(), oldServer, newServer, player));
+        EventDispatch.UnSafe.fireAndForget(new FamilyLeaveEvent(oldServer.family(), oldServer, player, false));
+        EventDispatch.UnSafe.fireAndForget(new FamilyPostJoinEvent(newServer.family(), newServer, player));
     }
 }

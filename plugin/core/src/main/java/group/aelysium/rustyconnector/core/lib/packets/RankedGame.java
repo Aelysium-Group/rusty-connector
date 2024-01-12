@@ -30,4 +30,22 @@ public interface RankedGame {
             String REASON = "r";
         }
     }
+
+    class Imploded extends Packet.Wrapper {
+        public String reason() {
+            return this.parameters().get(Parameters.REASON).getAsString();
+        }
+        public UUID sessionUUID() {
+            return UUID.fromString(this.parameters().get(Parameters.SESSION_UUID).getAsString());
+        }
+
+        public Imploded(Packet packet) {
+            super(packet);
+        }
+
+        public interface Parameters {
+            String REASON = "r";
+            String SESSION_UUID = "u";
+        }
+    }
 }

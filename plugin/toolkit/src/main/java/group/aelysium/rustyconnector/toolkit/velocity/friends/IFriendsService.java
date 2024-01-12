@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.friends;
 
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
 import java.util.*;
@@ -44,5 +44,5 @@ public interface IFriendsService extends Service {
 
     void closeInvite(IFriendRequest request);
 
-    Optional<Long> friendCount(IPlayer player);
+    long friendCount(IPlayer player);
 }

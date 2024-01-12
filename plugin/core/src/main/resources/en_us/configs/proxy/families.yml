@@ -104,35 +104,3 @@ static: []
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 ranked: []
-
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                     Version Funnels                      #
-#                                                          #
-#               ---------------------------                #
-#                                                          #
-# | Version Filters are collections of families.           #
-# | When a player connections to a version filter          #
-# | the filter will assess the player's client version and #
-# | connect them to the appropriate family for             #
-# | their version.                                         #
-#                                                          #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-version-funnels: []
-## This is an example of a Version Funnel.
-## Version Funnels are not allowed to use other Version Funnels as a target.
-## `target-family` must point to an already existing family.
-## You can also use sub versions such as 1.20.2.
-##
-##    - name: "lobby"
-##      mappings:
-##          - versions: 1.8, 1.9, 1.10, 1.11, 1.12
-##            target-family: "lobby-legacy"
-##          - versions: 1.13, 1.14, 1.15, 1.16, 1.17
-##            target-family: "lobby-old"
-##          - versions: 1.18, 1.19, 1.20
-##            target-family: "lobby-modern"

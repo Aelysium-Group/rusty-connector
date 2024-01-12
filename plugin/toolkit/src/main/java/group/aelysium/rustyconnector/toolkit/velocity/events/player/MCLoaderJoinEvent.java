@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
 import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 /**

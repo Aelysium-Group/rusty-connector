@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.toolkit.velocity.whitelist;
 
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 import java.util.List;
 

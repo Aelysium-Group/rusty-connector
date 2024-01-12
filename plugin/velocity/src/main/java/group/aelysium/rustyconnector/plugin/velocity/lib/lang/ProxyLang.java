@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
@@ -301,6 +301,7 @@ public class ProxyLang extends Lang {
             resolver().get("proxy.send.no_family", LanguageResolver.tagHandler("family_name", familyName));
     public final static ParameterizedMessage1<String> RC_SEND_NO_SERVER = serverName ->
             resolver().get("proxy.send.no_server", LanguageResolver.tagHandler("server_name", serverName));
+    public final static Message RC_SEND_SAME_FAMILY = () -> resolver().get("proxy.send.same_family");
 
     public final static ParameterizedMessage1<CacheableMessage> RC_MESSAGE_GET_MESSAGE = (message) -> join(
             newlines(),
@@ -590,6 +591,16 @@ public class ProxyLang extends Lang {
 
         int waitingPlayersCount = family.waitingPlayers();
 
+        String highest_ranking_player = "None";
+        try {
+            if(waitingPlayersCount == 0) highest_ranking_player = matchmaker.waitingPlayers().get(0).toString();
+            highest_ranking_player = matchmaker.waitingPlayers().get(waitingPlayersCount - 1).toString();
+        } catch (Exception ignore) {}
+        String lowest_ranking_player = "None";
+        try {
+            lowest_ranking_player = matchmaker.waitingPlayers().get(0).toString();
+        } catch (Exception ignore) {}
+
         return join(
                 newlines(),
                 BORDER,
@@ -612,8 +623,8 @@ public class ProxyLang extends Lang {
                         LanguageResolver.tagHandler("servers_locked", family.loadBalancer().size(true)),
 
                         LanguageResolver.tagHandler("matchmaking_algorithm", algorithm),
-                        LanguageResolver.tagHandler("matchmaking_highest_player", matchmaker.waitingPlayers().get(waitingPlayersCount - 1)),
-                        LanguageResolver.tagHandler("matchmaking_lowest_player", matchmaker.waitingPlayers().get(0))
+                        LanguageResolver.tagHandler("matchmaking_highest_player", highest_ranking_player),
+                        LanguageResolver.tagHandler("matchmaking_lowest_player", lowest_ranking_player)
                 ),
                 SPACING,
                 BORDER,
@@ -840,6 +851,8 @@ public class ProxyLang extends Lang {
     public final static Component PARTY_ONLY_LEADER_CAN_SWITCH = resolver().get("proxy.party.only_leader_can.switch");
     public final static Component PARTY_ONLY_LEADER_CAN_KICK = resolver().get("proxy.party.only_leader_can.kick");
     public final static Component PARTY_ONLY_LEADER_CAN_PROMOTE = resolver().get("proxy.party.only_leader_can.promote");
+    public final static ParameterizedMessage1<String> PARTY_NO_INVITE = (sender) -> resolver().get("proxy.party.invite.no_invite", LanguageResolver.tagHandler("username", sender));
+    public final static ParameterizedMessage1<String> PARTY_IGNORE_INVITE = (sender) -> resolver().get("proxy.party.invite.ignore", LanguageResolver.tagHandler("username", sender));
 
 
     public final static String PARTY_INJECTED_ONLY_LEADER_CAN_INVITE = resolver().getRaw("proxy.party.injected_error.only_leader_can_invite");

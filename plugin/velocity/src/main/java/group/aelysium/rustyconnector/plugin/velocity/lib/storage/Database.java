@@ -1,19 +1,20 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
-import group.aelysium.rustyconnector.toolkit.velocity.storage.IStorageRoot;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.ServerResidence;
-import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendMapping;
+import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IStorageRoot;
 import org.eclipse.serializer.collections.lazy.LazyHashMap;
 import org.eclipse.serializer.collections.lazy.LazyHashSet;
 
 import java.util.*;
 
-public class Database implements IStorageRoot<Player, FriendMapping, ServerResidence> {
+public class Database implements IStorageRoot {
     private final Map<UUID, Player> players = new LazyHashMap<>();
-    private final Set<FriendMapping> friends = new LazyHashSet<>();
-    private final Set<ServerResidence> residence = new LazyHashSet<>();
+    private final Set<PlayerPair> friends = new LazyHashSet<>();
+    private final Map<String, Map<UUID, IServerResidence.MCLoaderEntry>> residence = new LazyHashMap<>();
     private final Map<String, RankedGame> games = new LazyHashMap<>();
 
     public void savePlayer(StorageService storage, Player player) {
@@ -25,11 +26,11 @@ public class Database implements IStorageRoot<Player, FriendMapping, ServerResid
         return players;
     }
 
-    public Set<FriendMapping> friends() {
+    public Set<PlayerPair> friends() {
         return friends;
     }
 
-    public Set<ServerResidence> residence() {
+    public Map<String, Map<UUID, IServerResidence.MCLoaderEntry>> residence() {
         return residence;
     }
 

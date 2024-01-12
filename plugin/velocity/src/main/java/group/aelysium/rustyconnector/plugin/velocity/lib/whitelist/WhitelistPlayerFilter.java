@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.whitelist;
 
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistPlayerFilter;
 
 import java.util.Objects;

@@ -3,23 +3,23 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.toolkit.velocity.events.family.RebalanceEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Family implements IFamily {
     protected final String id;
-    protected Metadata metadata;
-    protected Settings settings;
+    protected final Metadata metadata;
+    protected final Settings settings;
 
     protected Family(String id, Settings settings, Metadata metadata) {
         this.id = id;
@@ -64,7 +64,7 @@ public abstract class Family implements IFamily {
     public void balance() {
         this.settings.loadBalancer().completeSort();
 
-        EventDispatch.Safe.fireAndForget(new RebalanceEvent(this));
+        EventDispatch.UnSafe.fireAndForget(new RebalanceEvent(this));
     }
 
     public List<com.velocitypowered.api.proxy.Player> players(int max) {
@@ -118,6 +118,16 @@ public abstract class Family implements IFamily {
 
     public Metadata metadata() {
         return this.metadata;
+    }
+
+    public ConnectionRequest connect(IPlayer player) {
+        EventDispatch.UnSafe.fireAndForget(new FamilyPreJoinEvent(this, player));
+
+        return this.settings.connector().connect(player);
+    }
+
+    public Optional<IMCLoader> smartFetch() {
+        return this.settings.connector().fetchAny();
     }
 
     @Override

@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import group.aelysium.rustyconnector.core.lib.key.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
-import group.aelysium.rustyconnector.core.lib.messenger.config.ConnectorsConfig;
+import group.aelysium.rustyconnector.core.mcloader.central.config.ConnectorsConfig;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
@@ -15,6 +15,7 @@ import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkServi
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeFailureListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeStalePingListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.HandshakeSuccessListener;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameImplodedListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameReadyListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
@@ -183,6 +184,7 @@ class Initialize {
         connection.listen(new HandshakeStalePingListener(this.api));
         connection.listen(new CoordinateRequestListener(this.api));
         connection.listen(new RankedGameReadyListener(this.api));
+        connection.listen(new RankedGameImplodedListener(this.api));
 
         ((RedisConnection) connection).startListening(cacheService, logger, Packet.Node.mcLoader(senderUUID));
 
@@ -225,8 +227,6 @@ class Initialize {
     public void eventManager() {
         group.aelysium.rustyconnector.core.lib.events.EventManager factory = new group.aelysium.rustyconnector.core.lib.events.EventManager();
         services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, factory);
-
-        factory.on(new OnRankedGameEnd());
     }
 
     public void dynamicTeleport() {

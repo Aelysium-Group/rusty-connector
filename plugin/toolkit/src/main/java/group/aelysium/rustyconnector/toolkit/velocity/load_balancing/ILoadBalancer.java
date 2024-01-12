@@ -1,6 +1,9 @@
 package group.aelysium.rustyconnector.toolkit.velocity.load_balancing;
 
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface ILoadBalancer<I> {
     /**
@@ -27,7 +30,7 @@ public interface ILoadBalancer<I> {
      *
      * @return The item.
      */
-    I current();
+    Optional<I> current();
 
     /**
      * Get the index number of the currently selected item.

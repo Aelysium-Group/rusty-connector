@@ -11,14 +11,14 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -33,6 +33,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public final class CommandRusty {
     public static BrigadierCommand create(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
@@ -191,10 +192,6 @@ class FamilyC {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
                         Family family = new Family.Reference(familyName).get();
-                        if(!family.metadata().hasLoadBalancer()) {
-                            logger.send(Component.text("You can only resetIndex on families with load balancers!", NamedTextColor.RED));
-                            return Command.SINGLE_SUCCESS;
-                        }
 
                         family.loadBalancer().resetIndex();
 
@@ -219,10 +216,6 @@ class FamilyC {
                     try {
                         String familyName = context.getArgument("familyName", String.class);
                         Family family = new Family.Reference(familyName).get();
-                        if(!family.metadata().hasLoadBalancer()) {
-                            logger.send(Component.text("You can only resetIndex on families with load balancers!", NamedTextColor.RED));
-                            return Command.SINGLE_SUCCESS;
-                        }
 
                         family.balance();
 
@@ -324,12 +317,18 @@ class Send {
                                 Player player = Player.from(fetchedPlayer);
 
                                 Family family = new Family.Reference(familyName).get();
-                                if(!family.metadata().hasLoadBalancer()) {
-                                    logger.send(Component.text("You can only directly send player to scalar and static families!", NamedTextColor.RED));
+
+                                if(player.server().orElseThrow().family().equals(family)) {
+                                    logger.send(ProxyLang.RC_SEND_NO_FAMILY.build(familyName));
                                     return Command.SINGLE_SUCCESS;
                                 }
 
-                                family.connect(player);
+                                ConnectionRequest request = family.connect(player);
+                                ConnectionRequest.Result result = request.result().get(30, TimeUnit.SECONDS);
+
+                                if(result.connected()) return Command.SINGLE_SUCCESS;
+
+                                player.sendMessage(result.message());
                             } catch (NoSuchElementException e) {
                                 logger.send(ProxyLang.RC_SEND_NO_FAMILY.build(familyName));
                             } catch (Exception e) {

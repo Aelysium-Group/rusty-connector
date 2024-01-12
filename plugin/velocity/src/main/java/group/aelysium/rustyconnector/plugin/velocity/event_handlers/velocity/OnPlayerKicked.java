@@ -7,7 +7,6 @@ import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
@@ -16,8 +15,11 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookM
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
+
+import java.util.concurrent.TimeUnit;
 
 public class OnPlayerKicked {
     /**
@@ -34,10 +36,8 @@ public class OnPlayerKicked {
             try {
                 MCLoader oldServer = player.server().orElseThrow();
 
-                oldServer.playerLeft();
-
-                EventDispatch.Safe.fireAndForget(new FamilyLeaveEvent(oldServer.family(), oldServer, player, true));
-                EventDispatch.Safe.fireAndForget(new MCLoaderLeaveEvent(oldServer, player, true));
+                EventDispatch.UnSafe.fireAndForget(new FamilyLeaveEvent(oldServer.family(), oldServer, player, true));
+                EventDispatch.UnSafe.fireAndForget(new MCLoaderLeaveEvent(oldServer, player, true));
 
                 isFromRootFamily = oldServer.family() == api.services().family().rootFamily();
             } catch (Exception ignore) {}
@@ -45,24 +45,28 @@ public class OnPlayerKicked {
             try {
                 if (!api.services().family().shouldCatchDisconnectingPlayers()) throw new NoOutputException();
 
-                IRootFamily rootFamily = api.services().family().rootFamily();
-                if(rootFamily.registeredServers().isEmpty()) throw new RuntimeException("There are no available servers for you to connect to!");
                 if(isFromRootFamily) throw new NoOutputException();
 
-                IMCLoader newServer = rootFamily.fetchAny(player);
-                if(newServer == null) throw new RuntimeException("Server closed.");
+                IRootFamily family = api.services().family().rootFamily();
+                ConnectionRequest request = family.connect(player);
 
-                try {
-                    event.setResult(KickedFromServerEvent.RedirectPlayer.create(newServer.registeredServer(), event.getServerKickReason().get()));
-                } catch (Exception ignore) {
-                    event.setResult(KickedFromServerEvent.RedirectPlayer.create(newServer.registeredServer()));
+                ConnectionRequest.Result result = request.result().get(15, TimeUnit.SECONDS);
+                if(!result.connected()) {
+                    player.sendMessage(result.message());
+                    return;
                 }
 
-                newServer.playerJoined();
+                IMCLoader server = result.server().orElseThrow();
 
-                WebhookEventManager.fire(WebhookAlertFlag.DISCONNECT_CATCH, api.services().family().rootFamily().id(), DiscordWebhookMessage.PROXY__DISCONNECT_CATCH.build(player, newServer));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, api.services().family().rootFamily().id(), DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, newServer));
-                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, api.services().family().rootFamily().id(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, newServer));
+                try {
+                    event.setResult(KickedFromServerEvent.RedirectPlayer.create(server.registeredServer(), event.getServerKickReason().get()));
+                } catch (Exception ignore) {
+                    event.setResult(KickedFromServerEvent.RedirectPlayer.create(server.registeredServer()));
+                }
+
+                WebhookEventManager.fire(WebhookAlertFlag.DISCONNECT_CATCH, api.services().family().rootFamily().id(), DiscordWebhookMessage.PROXY__DISCONNECT_CATCH.build(player, server));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN, api.services().family().rootFamily().id(), DiscordWebhookMessage.PROXY__PLAYER_JOIN_FAMILY.build(player, server));
+                WebhookEventManager.fire(WebhookAlertFlag.PLAYER_JOIN_FAMILY, api.services().family().rootFamily().id(), DiscordWebhookMessage.FAMILY__PLAYER_JOIN.build(player, server));
 
                 return;
             }

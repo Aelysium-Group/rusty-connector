@@ -7,25 +7,35 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.rmi.AlreadyBoundException;
 import java.util.*;
 
 public class Session implements ISession {
     protected final UUID uuid;
-    protected final List<IRankedPlayer> players;
-    protected IRankedMCLoader mcLoader;
+    protected final List<IPlayer> players;
+    protected final IRankedMCLoader mcLoader;
+    protected final Settings settings;
 
-    private Session(UUID uuid, List<IRankedPlayer> players, IRankedMCLoader mcLoader) {
+    private Session(UUID uuid, List<IPlayer> players, IRankedMCLoader mcLoader, Settings settings) {
         this.uuid = uuid;
         this.players = players;
         this.mcLoader = mcLoader;
+        this.settings = settings;
     }
 
     public UUID uuid() {
         return this.uuid;
+    }
+
+    public Settings settings() {
+        return this.settings;
     }
 
     public IRankedMCLoader mcLoader() {
@@ -38,16 +48,22 @@ public class Session implements ISession {
         family.matchmaker().remove(this);
         Family parent = family.parent();
 
-        for (IRankedPlayer player : this.players()) {
+        for (IPlayer player : this.players()) {
             try {
-                parent.connect(player.player().orElseThrow());
+                parent.connect(player);
             } catch (Exception ignore) {}
         }
 
         this.mcLoader.unlock();
     }
 
-    public List<IRankedPlayer> players() {
+    public void implode() {
+        this.players.forEach(player -> player.sendMessage(Component.text("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.", NamedTextColor.RED)));
+
+        this.end();
+    }
+
+    public List<IPlayer> players() {
         return players;
     }
 
@@ -64,14 +80,14 @@ public class Session implements ISession {
     }
 
     public static class Builder {
-        protected List<IRankedPlayer> players = new ArrayList<>();
+        protected List<IPlayer> players = new ArrayList<>();
         protected RankedMCLoader mcLoader;
 
         /**
          * Add a player to the match
          * @param player The player to add.
          */
-        public void addPlayer(IRankedPlayer player) {
+        public void addPlayer(IPlayer player) {
             this.players.add(player);
         }
 
@@ -86,9 +102,9 @@ public class Session implements ISession {
 
     public static class Waiting implements ISession.IWaiting {
         protected UUID uuid = UUID.randomUUID();
-        protected List<IRankedPlayer> players;
+        protected List<IPlayer> players;
 
-        protected Waiting(List<IRankedPlayer> teams) {
+        protected Waiting(List<IPlayer> teams) {
             this.players = teams;
         }
 
@@ -96,15 +112,20 @@ public class Session implements ISession {
             return this.uuid;
         }
 
+        public List<IPlayer> players() {
+            return this.players;
+        }
+
         /**
          * Starts the session on the specified MCLoader.
          * By the time {@link Session} is returned, it should be assumed that all players have connected.
          * @param mcLoader The MCLoader to run the session on.
+         * @param settings The settings that govern this session.
          * @return A running {@link Session}.
          * @throws AlreadyBoundException If a session is already running on this MCLoader.
          */
-        public ISession start(IRankedMCLoader mcLoader) {
-            ISession session = new Session(uuid, players, mcLoader);
+        public ISession start(IRankedMCLoader mcLoader, Settings settings) {
+            ISession session = new Session(uuid, players, mcLoader, settings);
             ((RankedMCLoader) mcLoader).connect(session);
             return session;
         }

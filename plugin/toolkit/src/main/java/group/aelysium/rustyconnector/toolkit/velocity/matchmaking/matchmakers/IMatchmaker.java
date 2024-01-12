@@ -5,11 +5,13 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISess
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface IMatchmaker extends Service {
     /**
@@ -35,10 +37,10 @@ public interface IMatchmaker extends Service {
      * Specifically, this method will resolve the passed player into a {@link IRankedPlayer}.
      * This method performs a single sort and injects the player into an approximation of the best place for them to reside.
      * Thus reducing how frequently you'll need to perform a full sort on the metchmaker.
-     * @param player The player to add.
+     * @param request The request being made.
      * @throws RuntimeException If there was an issue while adding the player to this matchmaker.
      */
-    void add(IPlayer player);
+    void add(ConnectionRequest request, CompletableFuture<ConnectionRequest.Result> result);
 
     /**
      * Removes the player from the matchmaker.
@@ -72,7 +74,7 @@ public interface IMatchmaker extends Service {
     record Settings (
             IMySQLStorageService storage,
             IScoreCard.IRankSchema.Type<?> algorithm,
-            IRankedGame<? extends IPlayer> game,
+            IRankedGame game,
             int min,
             int max,
             double variance,

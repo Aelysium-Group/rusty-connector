@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.toolkit.velocity.server;
 
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
-import group.aelysium.rustyconnector.toolkit.velocity.players.IPlayer;
 
 import java.util.List;
 import java.util.Optional;

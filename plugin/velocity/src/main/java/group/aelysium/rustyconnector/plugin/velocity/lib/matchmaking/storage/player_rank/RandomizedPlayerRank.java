@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 
 public class RandomizedPlayerRank implements IRandomizedPlayerRank {
-    public Boolean rank() { return false; }
+    public Double rank() { return 0.0; }
 
     public IScoreCard.IRankSchema.Type<Class<IRandomizedPlayerRank>> type() {
         return IScoreCard.IRankSchema.RANDOMIZED;
@@ -16,5 +16,4 @@ public class RandomizedPlayerRank implements IRandomizedPlayerRank {
 
     @Override
     public <TMySQLStorage extends IMySQLStorageService> void markLoss(TMySQLStorage storage) {}
-
 }
