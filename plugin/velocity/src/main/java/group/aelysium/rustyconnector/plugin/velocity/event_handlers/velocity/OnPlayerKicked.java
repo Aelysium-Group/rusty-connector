@@ -15,11 +15,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookM
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
-
-import java.util.concurrent.TimeUnit;
 
 public class OnPlayerKicked {
     /**
@@ -48,15 +45,8 @@ public class OnPlayerKicked {
                 if(isFromRootFamily) throw new NoOutputException();
 
                 IRootFamily family = api.services().family().rootFamily();
-                ConnectionRequest request = family.connect(player);
 
-                ConnectionRequest.Result result = request.result().get(15, TimeUnit.SECONDS);
-                if(!result.connected()) {
-                    player.sendMessage(result.message());
-                    return;
-                }
-
-                IMCLoader server = result.server().orElseThrow();
+                IMCLoader server = family.smartFetch().orElseThrow();
 
                 try {
                     event.setResult(KickedFromServerEvent.RedirectPlayer.create(server.registeredServer(), event.getServerKickReason().get()));

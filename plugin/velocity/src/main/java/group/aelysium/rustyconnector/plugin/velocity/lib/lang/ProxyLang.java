@@ -547,6 +547,7 @@ public class ProxyLang extends Lang {
         );
     };
 
+    public final static Message RANKED_FAMILY_PARTY_DENIAL = () -> resolver().get("proxy.family.ranked.in_party");
     public final static ParameterizedMessage2<RankedFamily, Boolean> RC_RANKED_FAMILY_INFO = (family, locked) -> {
         Component servers = text("");
         int i = 0;

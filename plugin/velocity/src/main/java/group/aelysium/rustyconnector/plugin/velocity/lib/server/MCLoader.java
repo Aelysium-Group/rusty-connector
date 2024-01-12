@@ -11,12 +11,17 @@ import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatc
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PartyConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.UnregisterEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +30,7 @@ import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.Vector;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -248,23 +254,24 @@ public class MCLoader implements IMCLoader {
         return !this.full();
     }
 
-    public ConnectionRequest connect(IPlayer player) {
-        CompletableFuture<ConnectionRequest.Result> result = new CompletableFuture<>();
-        ConnectionRequest request = new ConnectionRequest(player, result);
+    private Request internalConnect(IPlayer player) {
+        CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
+        Request request = new Request(player, result);
+
         try {
             if (!player.online()) {
-                result.complete(ConnectionRequest.Result.failed(Component.text(player.username() + " isn't online.")));
+                result.complete(ConnectionResult.failed(Component.text(player.username() + " isn't online.")));
                 return request;
             }
 
             com.velocitypowered.api.proxy.Player velocityPlayer = player.resolve().orElse(null);
             if (velocityPlayer == null) {
-                result.complete(ConnectionRequest.Result.failed(Component.text(player.username() + " couldn't be found.")));
+                result.complete(ConnectionResult.failed(Component.text(player.username() + " couldn't be found.")));
                 return request;
             }
 
             if (!this.validatePlayerLimits(velocityPlayer)) {
-                result.complete(ConnectionRequest.Result.failed(Component.text("The server is currently full. Try again later.")));
+                result.complete(ConnectionResult.failed(Component.text("The server is currently full. Try again later.")));
                 return request;
             }
 
@@ -275,12 +282,67 @@ public class MCLoader implements IMCLoader {
                 if (!connectionResult.isSuccessful()) throw new NoOutputException();
 
                 this.playerCount.incrementAndGet();
-                result.complete(ConnectionRequest.Result.success(Component.text("You successfully connected to the server!"), this));
+                result.complete(ConnectionResult.success(Component.text("You successfully connected to the server!"), this));
                 return request;
             } catch (Exception ignore) {}
         } catch (Exception ignore) {}
 
-        result.complete(ConnectionRequest.Result.failed(Component.text("Unable to connect you to the server!")));
+        result.complete(ConnectionResult.failed(Component.text("Unable to connect you to the server!")));
+        return request;
+    }
+
+    public PlayerConnectable.Request connect(IPlayer player) {
+        try {
+            IParty party = Party.locate(player).orElseThrow();
+            if(!Party.allowedToInitiateConnection(party, player)) {
+                CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
+                Request request = new Request(player, result);
+                result.complete(ConnectionResult.failed(ProxyLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
+                return request;
+            }
+        } catch (Exception ignore) {}
+        return this.connect(player);
+    }
+
+    public PartyConnectable.Request connect(IParty party) {
+        CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
+        Request request = new Request(player, result);
+        try {
+            SwitchPower switchPower = Tinder.get().services().party().orElseThrow().settings().switchPower();
+            this.setServer(server);
+            Vector<IPlayer> kickedPlayers = new Vector<>();
+
+            Tinder.get().services().party().orElseThrow().queueConnector(() -> {
+                for (IPlayer player : this.players.values())
+                    try {
+                        switch (switchPower) {
+                            case MINIMAL -> {
+                                if (this.full()) {
+                                    kickedPlayers.add(player);
+                                    return;
+                                }
+                                server.connect(player);
+                            }
+                            case MODERATE -> {
+                                if (this.maxed()) {
+                                    kickedPlayers.add(player);
+                                    return;
+                                }
+                                server.connect(player);
+                            }
+                            case AGGRESSIVE -> server.connect(player);
+                        }
+                    } catch (Exception e) {
+                        kickedPlayers.add(player);
+                    }
+
+                kickedPlayers.forEach(player -> {
+                    player.sendMessage(ProxyLang.PARTY_FOLLOWING_KICKED);
+                    this.leave(player);
+                });
+            });
+        } catch (Exception ignore) {}
+        result.complete(ConnectionResult.failed(ProxyLang.PARTY_INVITE_ONLY_LEADER_CAN_SEND);
         return request;
     }
 

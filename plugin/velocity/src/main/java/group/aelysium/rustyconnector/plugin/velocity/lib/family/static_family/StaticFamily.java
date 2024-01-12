@@ -9,6 +9,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.Sc
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.ServerResidence;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPreJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.UnavailableProtocol;
@@ -17,7 +18,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServ
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.AlgorithmType;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
@@ -59,7 +59,7 @@ public class StaticFamily extends Family implements IStaticFamily {
     }
 
     @Override
-    public ConnectionRequest connect(IPlayer player) {
+    public Request connect(IPlayer player) {
         EventDispatch.UnSafe.fireAndForget(new FamilyPreJoinEvent(this, player));
 
         return ((Connector) this.settings.connector()).connect(player, this);
@@ -151,9 +151,9 @@ public class StaticFamily extends Family implements IStaticFamily {
                 connector = new ScalarFamily.Connector.Singleton(loadBalancer, whitelist);
         }
 
-        public ConnectionRequest connect(IPlayer player, IStaticFamily family) {
-            CompletableFuture<ConnectionRequest.Result> result = new CompletableFuture<>();
-            ConnectionRequest request = new ConnectionRequest(player, result);
+        public Request connect(IPlayer player, IStaticFamily family) {
+            CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
+            Request request = new Request(player, result);
             try {
                 try {
                     Optional<IServerResidence.MCLoaderEntry> residenceOptional = ServerResidence.fetch(family, player.uuid());
@@ -178,28 +178,28 @@ public class StaticFamily extends Family implements IStaticFamily {
                         return request;
                     }
                     case CONNECT_WITH_ERROR -> {
-                        ConnectionRequest tempRequest = this.connector.connect(player);
+                        Request tempRequest = this.connector.connect(player);
 
                         if(!tempRequest.result().get().connected()) return tempRequest;
 
-                        result.complete(new ConnectionRequest.Result(ConnectionRequest.Status.SUCCESS, ProxyLang.MISSING_HOME_SERVER, tempRequest.result().get().server()));
+                        result.complete(new ConnectionResult(ConnectionResult.Status.SUCCESS, ProxyLang.MISSING_HOME_SERVER, tempRequest.result().get().server()));
 
                         return request;
                     }
                     case CANCEL_CONNECTION_ATTEMPT -> {
-                        result.complete(ConnectionRequest.Result.failed(ProxyLang.BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT));
+                        result.complete(ConnectionResult.failed(ProxyLang.BLOCKED_STATIC_FAMILY_JOIN_ATTEMPT));
                         return request;
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            result.complete(ConnectionRequest.Result.failed(Component.text("There was an issue connecting you to the server!")));
+            result.complete(ConnectionResult.failed(Component.text("There was an issue connecting you to the server!")));
             return request;
         }
 
         @Override
-        public ConnectionRequest connect(IPlayer player) {
+        public Request connect(IPlayer player) {
             throw new RuntimeException("Don't use HomeServer#connect(IPlayer)! Instead use HomeServer#connect(IPlayer, IStaticFamily)");
         }
     }

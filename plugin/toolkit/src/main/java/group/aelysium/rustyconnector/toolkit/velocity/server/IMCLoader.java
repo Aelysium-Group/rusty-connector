@@ -1,18 +1,14 @@
 package group.aelysium.rustyconnector.toolkit.velocity.server;
 
 import com.sun.jdi.request.DuplicateRequestException;
-import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
-import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
-import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.PlayerConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 
-import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
 

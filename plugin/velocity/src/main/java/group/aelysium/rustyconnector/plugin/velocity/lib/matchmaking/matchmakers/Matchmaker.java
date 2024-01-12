@@ -1,16 +1,16 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers;
 
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
-import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import net.kyori.adventure.text.Component;
@@ -49,7 +49,7 @@ public abstract class Matchmaker implements IMatchmaker {
     }
     public abstract void completeSort();
 
-    public void add(ConnectionRequest request, CompletableFuture<ConnectionRequest.Result> result) {
+    public void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         try {
             IRankedPlayer rankedPlayer = this.settings.game().rankedPlayer(this.settings.storage(), request.player().uuid(), false);
 
@@ -64,10 +64,10 @@ public abstract class Matchmaker implements IMatchmaker {
                 e.printStackTrace();
             }
         } catch (Exception e) {
-            result.complete(ConnectionRequest.Result.failed(Component.text("There was an issue queuing into matchmaking!")));
+            result.complete(ConnectionResult.failed(Component.text("There was an issue queuing into matchmaking!")));
             throw new RuntimeException(e);
         }
-        result.complete(ConnectionRequest.Result.success(Component.text("Successfully queued into the matchmaker!"), null));
+        result.complete(ConnectionResult.success(Component.text("Successfully queued into the matchmaker!"), null));
     }
     public void remove(IPlayer player) {
         try {

@@ -17,8 +17,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.Ra
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
@@ -323,8 +324,8 @@ class Send {
                                     return Command.SINGLE_SUCCESS;
                                 }
 
-                                ConnectionRequest request = family.connect(player);
-                                ConnectionRequest.Result result = request.result().get(30, TimeUnit.SECONDS);
+                                PlayerConnectable.Request request = family.connect(player);
+                                ConnectionResult result = request.result().get(30, TimeUnit.SECONDS);
 
                                 if(result.connected()) return Command.SINGLE_SUCCESS;
 

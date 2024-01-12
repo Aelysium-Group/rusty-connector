@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
@@ -9,7 +10,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
-import java.rmi.ConnectException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -156,5 +156,28 @@ public class Party implements group.aelysium.rustyconnector.toolkit.velocity.par
         } catch (Exception ignore) {
             return "<Party players=" + this.players.size() + " leader=null>";
         }
+    }
+
+    /**
+     * Checks is the player is a member of a party.
+     * @param player The player.
+     * @return A party if the player is in one. Otherwise, returns an empty optional.
+     */
+    public static Optional<IParty> locate(IPlayer player) {
+        try {
+            return Tinder.get().services().party().orElseThrow().find(player);
+        } catch (Exception ignore) {}
+        return Optional.empty();
+    }
+
+    public static boolean allowedToInitiateConnection(IParty party, IPlayer player) {
+        try {
+            if(!party.contains(player)) return false;
+
+            if(party.leader().equals(player)) return true;
+
+            return !Tinder.get().services().party().orElseThrow().settings().onlyLeaderCanInvite();
+        } catch (Exception ignore) {}
+        return true;
     }
 }

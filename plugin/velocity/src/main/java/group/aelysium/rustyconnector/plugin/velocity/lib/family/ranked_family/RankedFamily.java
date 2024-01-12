@@ -3,18 +3,20 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.RankedFamilyConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchMakerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
@@ -151,9 +153,14 @@ public class RankedFamily extends Family implements IRankedFamily {
         }
 
         @Override
-        public ConnectionRequest connect(IPlayer player) {
-            CompletableFuture<ConnectionRequest.Result> result = new CompletableFuture<>();
-            ConnectionRequest request = new ConnectionRequest(player, result);
+        public Request connect(IPlayer player) {
+            CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
+            Request request = new Request(player, result);
+
+            if(Party.locate(player).isPresent()) {
+                result.complete(ConnectionResult.failed(ProxyLang.RANKED_FAMILY_PARTY_DENIAL.build()));
+                return request;
+            }
 
             this.matchmaker.add(request, result);
 

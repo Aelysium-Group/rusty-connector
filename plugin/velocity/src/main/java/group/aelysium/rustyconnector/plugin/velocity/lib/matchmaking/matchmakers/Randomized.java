@@ -4,15 +4,14 @@ import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import net.kyori.adventure.text.Component;
-import org.eclipse.serializer.functional._intIndexedSupplier;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class Randomized extends Matchmaker {
@@ -21,7 +20,7 @@ public class Randomized extends Matchmaker {
     }
 
     @Override
-    public void add(ConnectionRequest request, CompletableFuture<ConnectionRequest.Result> result) {
+    public void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         try {
             IRankedPlayer rankedPlayer = new RankedPlayer(request.player().uuid(), new RandomizedPlayerRank());
 
@@ -36,10 +35,10 @@ public class Randomized extends Matchmaker {
                 e.printStackTrace();
             }
         } catch (Exception e) {
-            result.complete(ConnectionRequest.Result.failed(Component.text("There was an issue queuing into matchmaking!")));
+            result.complete(ConnectionResult.failed(Component.text("There was an issue queuing into matchmaking!")));
             throw new RuntimeException(e);
         }
-        result.complete(ConnectionRequest.Result.success(Component.text("Successfully queued into the matchmaker!"), null));
+        result.complete(ConnectionResult.success(Component.text("Successfully queued into the matchmaker!"), null));
     }
 
     @Override

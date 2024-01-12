@@ -8,7 +8,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.Metadata;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import org.jetbrains.annotations.NotNull;
 
@@ -120,7 +119,7 @@ public abstract class Family implements IFamily {
         return this.metadata;
     }
 
-    public ConnectionRequest connect(IPlayer player) {
+    public Request connect(IPlayer player) {
         EventDispatch.UnSafe.fireAndForget(new FamilyPreJoinEvent(this, player));
 
         return this.settings.connector().connect(player);

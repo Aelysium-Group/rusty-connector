@@ -53,6 +53,7 @@ public class PartyInvite implements group.aelysium.rustyconnector.toolkit.veloci
                 throw new IllegalStateException(ProxyLang.PARTY_INJECTED_INVALID_MEMBER_INVITE);
 
         Objects.requireNonNull(this.party.get()).join(this.target);
+        Objects.requireNonNull(this.party.get()).server().connect(this.target);
         partyService.closeInvite(this);
         this.isAcknowledged = true;
     }

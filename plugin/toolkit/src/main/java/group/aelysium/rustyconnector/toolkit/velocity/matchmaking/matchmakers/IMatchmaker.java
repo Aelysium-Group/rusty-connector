@@ -1,12 +1,13 @@
 package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers;
 
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.player.connection.ConnectionRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
@@ -40,7 +41,7 @@ public interface IMatchmaker extends Service {
      * @param request The request being made.
      * @throws RuntimeException If there was an issue while adding the player to this matchmaker.
      */
-    void add(ConnectionRequest request, CompletableFuture<ConnectionRequest.Result> result);
+    void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result);
 
     /**
      * Removes the player from the matchmaker.

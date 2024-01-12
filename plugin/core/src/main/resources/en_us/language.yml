@@ -156,6 +156,7 @@ proxy:
                     - "      | - Weighted Sorting: <load_balancing_weighted>"
                     - "      | - Persistence: <load_balancing_persistence>"
         ranked:
+            in_party: "<red>You're not allowed to enter matchmaking while in a party!</red>"
             panel:
                 info:
                     - "   ---| Display Name: <display_name>"
