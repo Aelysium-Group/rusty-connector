@@ -75,6 +75,7 @@ public abstract class Matchmaker implements IMatchmaker {
                      for (IPlayer player : session.players()) {
                          if (player.uuid() == rankedPlayer.uuid()) {
                              session.mcLoader().connect(player);
+                             result.complete(ConnectionResult.success(Component.text("You've been reconnected to your game."), session.mcLoader()));
                              return;
                          }
                      }

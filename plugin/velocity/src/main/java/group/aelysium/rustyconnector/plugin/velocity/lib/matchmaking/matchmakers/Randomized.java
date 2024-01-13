@@ -31,6 +31,7 @@ public class Randomized extends Matchmaker {
                     for (IPlayer player : session.players()) {
                         if (player.uuid() == rankedPlayer.uuid()) {
                             session.mcLoader().connect(player);
+                            result.complete(ConnectionResult.success(Component.text("You've been reconnected to your game."), session.mcLoader()));
                             return;
                         }
                     }
