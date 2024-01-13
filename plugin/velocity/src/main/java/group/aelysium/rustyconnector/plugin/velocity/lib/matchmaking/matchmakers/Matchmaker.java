@@ -70,7 +70,7 @@ public abstract class Matchmaker implements IMatchmaker {
         try {
             IRankedPlayer rankedPlayer = this.settings.game().rankedPlayer(this.settings.storage(), request.player().uuid(), false);
 
-            if (true) { // TODO: Replace this with config option
+            if (this.settings.reconnect()) {
                  for (ISession session : this.runningSessions.values().stream().toList()) {
                      for (IPlayer player : session.players()) {
                          if (player.uuid() == rankedPlayer.uuid()) {

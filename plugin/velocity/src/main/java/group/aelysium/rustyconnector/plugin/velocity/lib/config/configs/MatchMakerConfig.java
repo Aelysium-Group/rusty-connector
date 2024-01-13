@@ -21,6 +21,8 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
     private LiquidTimestamp matchmakingInterval;
     private double variance;
 
+    private boolean reconnect;
+
     public IScoreCard.IRankSchema.Type<?> getAlgorithm() {
         return algorithm;
     }
@@ -36,6 +38,8 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
     public double getVariance() {
         return variance;
     }
+
+    public boolean reconnect() { return reconnect; }
 
     protected MatchMakerConfig(Path dataFolder, String target, String name, LangService lang) {
         super(dataFolder, target, name, lang, LangFileMappings.PROXY_MATCHMAKER_TEMPLATE);
@@ -54,6 +58,8 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
 
         this.min = IYAML.getValue(this.data,"min",Integer.class);
         this.max = IYAML.getValue(this.data,"max",Integer.class);
+
+        this.reconnect = IYAML.getValue(this.data, "reconnect", Boolean.class);
 
         try {
             this.matchmakingInterval = LiquidTimestamp.from(IYAML.getValue(this.data, "matchmaking-interval", String.class));

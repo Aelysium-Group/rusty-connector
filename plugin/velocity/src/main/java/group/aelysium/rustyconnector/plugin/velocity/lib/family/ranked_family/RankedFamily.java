@@ -112,7 +112,7 @@ public class RankedFamily extends Family implements IRankedFamily {
 
                 fetched = Optional.of(game);
             }
-            IMatchmaker.Settings matchmakerSettings = new IMatchmaker.Settings(mySQLStorage, matchMakerConfig.getAlgorithm(), fetched.orElseThrow(), matchMakerConfig.min(), matchMakerConfig.max(), matchMakerConfig.getVariance(), matchMakerConfig.getMatchmakingInterval());
+            IMatchmaker.Settings matchmakerSettings = new IMatchmaker.Settings(mySQLStorage, matchMakerConfig.getAlgorithm(), fetched.orElseThrow(), matchMakerConfig.min(), matchMakerConfig.max(), matchMakerConfig.getVariance(), matchMakerConfig.reconnect(), matchMakerConfig.getMatchmakingInterval());
 
             matchmaker = Matchmaker.from(matchmakerSettings);
         }

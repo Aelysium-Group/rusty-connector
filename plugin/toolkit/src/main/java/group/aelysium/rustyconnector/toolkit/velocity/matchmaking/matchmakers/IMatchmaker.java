@@ -79,6 +79,7 @@ public interface IMatchmaker extends Service {
             int min,
             int max,
             double variance,
+            boolean reconnect,
             LiquidTimestamp interval
     ) {}
 }

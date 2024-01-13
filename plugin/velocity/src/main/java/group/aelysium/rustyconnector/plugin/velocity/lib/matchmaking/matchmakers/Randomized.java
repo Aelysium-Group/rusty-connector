@@ -26,7 +26,7 @@ public class Randomized extends Matchmaker {
         try {
             IRankedPlayer rankedPlayer = new RankedPlayer(request.player().uuid(), new RandomizedPlayerRank());
 
-            if (true) { // TODO: Replace this with config option
+            if (this.settings.reconnect()) {
                 for (ISession session : this.runningSessions.values().stream().toList()) {
                     for (IPlayer player : session.players()) {
                         if (player.uuid() == rankedPlayer.uuid()) {
