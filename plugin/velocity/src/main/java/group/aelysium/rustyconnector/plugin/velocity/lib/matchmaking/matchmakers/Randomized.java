@@ -29,7 +29,7 @@ public class Randomized extends Matchmaker {
             if (this.settings.reconnect()) {
                 for (ISession session : this.runningSessions.values().stream().toList()) {
                     for (IPlayer player : session.players()) {
-                        if (player.uuid() == rankedPlayer.uuid()) {
+                        if (player.uuid().equals(rankedPlayer.uuid())) {
                             session.mcLoader().connect(player);
                             result.complete(ConnectionResult.success(Component.text("You've been reconnected to your game."), session.mcLoader()));
                             return;
