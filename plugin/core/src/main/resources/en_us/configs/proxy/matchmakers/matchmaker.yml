@@ -91,3 +91,26 @@ variance: 0.2
 # Matches will only be made if there is a satisfactory number of players with the proper ranks.
 #
 matchmaking-interval: 10 SECONDS
+
+#
+# If players leave the game.
+# The auto-close section will handle those players and handle how the game should move forward with fewer players.
+#
+auto-close:
+    enabled: false
+
+    #
+    # If players quit the game, how many players can be left in the game before the game is closed.
+    #
+    player-threshold: 5
+
+    ranks:
+        #
+        # Should players that quit the game receive a "lose"?
+        #
+        quitters-lose: false
+
+        #
+        # should the players that stay in the game when it closes receive a "win"?
+        #
+        stayers-win: false
