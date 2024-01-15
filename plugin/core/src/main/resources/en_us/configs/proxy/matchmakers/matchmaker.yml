@@ -92,17 +92,44 @@ variance: 0.2
 #
 matchmaking-interval: 10 SECONDS
 
+
+
 #
-# If players leave the game.
-# The auto-close section will handle those players and handle how the game should move forward with fewer players.
+# Should players auto-join the matchmaker when they connect to this Ranked Family?
+#
+auto-join: false
+
+
+
+leaving:
+    #
+    # Should players be able to use "/leave" to leave matchmaking?
+    #
+    command: false
+
+
+
+    #
+    # If players leave matchmaking, should they be booted to this family's parent family?
+    #
+    boot-on-leave: false
+
+
+
+#
+# The auto-close section will handle players that leave games while they're active.
 #
 auto-close:
     enabled: false
+
+
 
     #
     # If players quit the game, how many players can be left in the game before the game is closed.
     #
     player-threshold: 5
+
+
 
     ranks:
         #
@@ -111,6 +138,6 @@ auto-close:
         quitters-lose: false
 
         #
-        # should the players that stay in the game when it closes receive a "win"?
+        # Should the players that stay in the game when it closes receive a "win"?
         #
         stayers-win: false
