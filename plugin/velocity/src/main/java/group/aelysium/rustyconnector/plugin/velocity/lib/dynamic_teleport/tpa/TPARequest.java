@@ -59,10 +59,8 @@ public class TPARequest implements ITPARequest {
     public void accept() {
         Tinder api = Tinder.get();
 
-        DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleport().orElse(null);
-        if(dynamicTeleportService == null) throw new NullPointerException("Dynamic Teleport must be enabled to use tpa functions!");
-        TPAService tpaService = dynamicTeleportService.services().tpa().orElse(null);
-        if(tpaService == null) throw new NullPointerException("TPA in Dynamic Teleport must be enabled to use tpa functions!");
+        DynamicTeleportService dynamicTeleportService = api.services().dynamicTeleport().orElseThrow(() -> new NullPointerException("Dynamic Teleport must be enabled to use tpa functions!"));
+        TPAService tpaService = dynamicTeleportService.services().tpa().orElseThrow(() -> new NullPointerException("TPA in Dynamic Teleport must be enabled to use tpa functions!"));
 
         try {
             this.updateStatus(TPARequestStatus.ACCEPTED);

@@ -47,6 +47,11 @@ public interface ISession extends JSONParseable {
          * @throws AlreadyBoundException If a session is already running on this MCLoader.
          */
         ISession start(IRankedMCLoader mcLoader, Settings settings) throws AlreadyBoundException;
+
+        /**
+         * Checks if the waiting session contains the player.
+         */
+        boolean contains(IPlayer player);
     }
 
     record Settings(int min, int max, IRankedGame game) {}

@@ -15,6 +15,9 @@
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
+
+
+
 #
 # The root family. Once a player connects and is validated.
 # This is the family that they will automatically be routed to.
@@ -28,6 +31,8 @@ root-family:
     #
     name: "lobby"
 
+
+
     #
     # If a player is kicked or disconnected from a family in this proxy.
     # Should the root family catch them? If not, they will disconnect from the whole network.
@@ -35,6 +40,8 @@ root-family:
     # a gamemode or sub-family.
     #
     catch-disconnecting-players: false
+
+
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -51,6 +58,8 @@ root-family:
 ############################################################
 scalar:
     - "lobby" # the default lobby family
+
+
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -73,6 +82,8 @@ scalar:
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 static: []
+
+
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

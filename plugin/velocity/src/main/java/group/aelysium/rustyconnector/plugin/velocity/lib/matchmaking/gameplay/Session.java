@@ -131,5 +131,10 @@ public class Session implements ISession {
             ((RankedMCLoader) mcLoader).connect(session);
             return session;
         }
+
+        @Override
+        public boolean contains(IPlayer player) {
+            return this.players.contains(player);
+        }
     }
 }

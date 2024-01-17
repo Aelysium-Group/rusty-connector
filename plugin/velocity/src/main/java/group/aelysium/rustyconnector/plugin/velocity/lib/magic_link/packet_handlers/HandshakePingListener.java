@@ -59,8 +59,9 @@ public class HandshakePingListener extends PacketListener<MagicLink.Handshake.Pi
             MagicLinkService magicLink = api.services().magicLink();
             IMessengerConnection backboneMessenger = api.services().magicLink().connection().orElseThrow();
 
-            IMagicLink.MagicLinkMCLoaderSettings config = magicLink.magicConfig(packet.magicConfigName()).orElse(null);
-            if(config == null) throw new NullPointerException("No Magic Config exists with the name "+packet.magicConfigName()+"!");
+            IMagicLink.MagicLinkMCLoaderSettings config = magicLink.magicConfig(packet.magicConfigName()).orElseThrow(
+                    () -> new NullPointerException("No Magic Config exists with the name "+packet.magicConfigName()+"!")
+            );
 
             try {
                 Family family = new Family.Reference(config.family()).get();

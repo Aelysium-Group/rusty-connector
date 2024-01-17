@@ -69,7 +69,7 @@ public class ConnectorsConfig extends YAML {
 
         {
             StorageService.StorageType storageType = StorageService.StorageType.valueOf(IYAML.getValue(this.data, "storage.provider", String.class));
-            boolean restEnabled = IYAML.getValue(this.data, "storage.rest-api.enabled", Boolean.class);
+            boolean restEnabled = IYAML.getValue(this.data, "storage.enable-rest-api", Boolean.class);
             int restPort = 0;
             StorageService.StorageConfiguration.RESTAPISettings restSettings = new StorageService.StorageConfiguration.RESTAPISettings(restEnabled, restPort);
             switch (storageType) {

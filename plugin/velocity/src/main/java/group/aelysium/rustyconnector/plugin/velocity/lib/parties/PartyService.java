@@ -89,11 +89,12 @@ public class PartyService implements IPartyService {
 
         if(this.settings.friendsOnly())
             try {
-                FriendsService friendsService = api.services().friends().orElse(null);
-                if(friendsService == null) {
-                    api.logger().send(Component.text(ProxyLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
-                    throw new NoOutputException();
-                }
+                FriendsService friendsService = api.services().friends().orElseThrow(
+                        () -> {
+                            api.logger().send(Component.text(ProxyLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
+                            return new NoOutputException();
+                        }
+                );
 
                 if(friendsService.findFriends(sender).orElseThrow().contains(target))
                     throw new IllegalStateException(ProxyLang.PARTY_INJECTED_FRIENDS_RESTRICTION);

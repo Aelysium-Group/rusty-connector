@@ -3,10 +3,15 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.nio.file.Path;
@@ -15,31 +20,11 @@ import java.util.concurrent.TimeUnit;
 import static org.eclipse.serializer.math.XMath.round;
 
 public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.MatchMakerConfig {
-    private IScoreCard.IRankSchema.Type<?> algorithm = IScoreCard.IRankSchema.RANDOMIZED;
-    private int min;
-    private int max;
-    private LiquidTimestamp matchmakingInterval;
-    private double variance;
+    private IMatchmaker.Settings settings;
 
-    private boolean reconnect;
-
-    public IScoreCard.IRankSchema.Type<?> getAlgorithm() {
-        return algorithm;
+    public IMatchmaker.Settings settings() {
+        return this.settings;
     }
-    public int min() {
-        return this.min;
-    }
-    public int max() {
-        return this.max;
-    }
-    public LiquidTimestamp getMatchmakingInterval() {
-        return matchmakingInterval;
-    }
-    public double getVariance() {
-        return variance;
-    }
-
-    public boolean reconnect() { return reconnect; }
 
     protected MatchMakerConfig(Path dataFolder, String target, String name, LangService lang) {
         super(dataFolder, target, name, lang, LangFileMappings.PROXY_MATCHMAKER_TEMPLATE);
@@ -51,21 +36,38 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
     }
 
     protected void register() throws IllegalStateException {
-        this.algorithm = IScoreCard.IRankSchema.valueOf(IYAML.getValue(this.data,"algorithm",String.class));
+        IScoreCard.IRankSchema.Type<?> algorithm = IScoreCard.IRankSchema.valueOf(IYAML.getValue(this.data,"ranking.algorithm",String.class));
+        double variance = IYAML.getValue(this.data,"ranking.variance",Double.class);
+        variance = round(variance, 2);
 
-        this.variance = IYAML.getValue(this.data,"variance",Double.class);
-        this.variance = round(this.variance, 2);
+        int min = IYAML.getValue(this.data,"session.building.min",Integer.class);
+        int max = IYAML.getValue(this.data,"session.building.max",Integer.class);
 
-        this.min = IYAML.getValue(this.data,"min",Integer.class);
-        this.max = IYAML.getValue(this.data,"max",Integer.class);
-
-        this.reconnect = IYAML.getValue(this.data, "reconnect", Boolean.class);
-
+        LiquidTimestamp matchmakingInterval = LiquidTimestamp.from(10, TimeUnit.SECONDS);
         try {
-            this.matchmakingInterval = LiquidTimestamp.from(IYAML.getValue(this.data, "matchmaking-interval", String.class));
-        } catch (Exception ignore) {
-            this.matchmakingInterval = LiquidTimestamp.from(10, TimeUnit.SECONDS);
-        }
+            matchmakingInterval = LiquidTimestamp.from(IYAML.getValue(this.data, "session.building.interval", String.class));
+        } catch (Exception ignore) {}
+
+        int session_closing_threshold = IYAML.getValue(this.data,"session.closing.threshold",Integer.class);
+        boolean session_closing_ranks_quittersLose = IYAML.getValue(this.data,"session.closing.ranks.quitters-lose",Boolean.class);
+        boolean session_closing_ranks_stayersWin = IYAML.getValue(this.data,"session.closing.ranks.stayers-win",Boolean.class);
+
+        boolean queue_joining_showInfo = IYAML.getValue(this.data, "queue.joining.show-info", Boolean.class);
+        boolean queue_joining_reconnect = IYAML.getValue(this.data, "queue.joining.reconnect", Boolean.class);
+
+        boolean session_leaving_command = IYAML.getValue(this.data, "queue.leaving.command", Boolean.class);
+
+        this.settings = new IMatchmaker.Settings(
+                new IMatchmaker.Settings.Ranking(algorithm, variance),
+                new IMatchmaker.Settings.Session(
+                        new IMatchmaker.Settings.Session.Building(min, max, matchmakingInterval),
+                        new IMatchmaker.Settings.Session.Closing(session_closing_threshold, session_closing_ranks_quittersLose, session_closing_ranks_stayersWin)
+                ),
+                new IMatchmaker.Settings.Queue(
+                        new IMatchmaker.Settings.Queue.Joining(queue_joining_showInfo, queue_joining_reconnect),
+                        new IMatchmaker.Settings.Queue.Leaving(session_leaving_command)
+                )
+        );
     }
 
     public static MatchMakerConfig construct(Path dataFolder, String matchmakerName, LangService lang, ConfigService configService) {

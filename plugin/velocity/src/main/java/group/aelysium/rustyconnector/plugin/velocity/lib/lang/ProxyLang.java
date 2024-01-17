@@ -882,9 +882,9 @@ public class ProxyLang extends Lang {
         boolean isFriendMessagingEnabled = friendsService.settings().allowMessaging();
         boolean canSeeFriendFamilies = friendsService.settings().showFamilies();
 
-        List<IPlayer> friends = friendsService.findFriends(player).orElse(null);
+        List<IPlayer> friends = friendsService.findFriends(player).orElse(List.of());
 
-        if(friends != null && friends.size() != 0) {
+        if(friends.size() != 0) {
             final Component[] playersList = {text("")};
 
             friends.forEach(friend -> {

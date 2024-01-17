@@ -25,6 +25,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
+import org.eclipse.serializer.chars._charArrayRange;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -101,20 +102,18 @@ public class RankedFamily extends Family implements IRankedFamily {
 
         RankedFamilyConfig config = RankedFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d5());
 
+        MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
+
         Matchmaker matchmaker;
         {
-            MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
-
-            Optional<RankedGame> fetched = mySQLStorage.database().getGame(config.name());
-            if(fetched.isEmpty()) {
-                RankedGame game = new RankedGame(config.gamemodeName(), matchMakerConfig.getAlgorithm());
+            RankedGame fetched = mySQLStorage.database().getGame(config.name()).orElseGet(() -> {
+                RankedGame game = new RankedGame(config.gamemodeName(), matchMakerConfig.settings().ranking().algorithm());
                 mySQLStorage.database().saveGame(mySQLStorage, game);
 
-                fetched = Optional.of(game);
-            }
-            IMatchmaker.Settings matchmakerSettings = new IMatchmaker.Settings(mySQLStorage, matchMakerConfig.getAlgorithm(), fetched.orElseThrow(), matchMakerConfig.min(), matchMakerConfig.max(), matchMakerConfig.getVariance(), matchMakerConfig.reconnect(), matchMakerConfig.getMatchmakingInterval());
+                return game;
+            });
 
-            matchmaker = Matchmaker.from(matchmakerSettings);
+            matchmaker = Matchmaker.from(deps.d3(), fetched, matchMakerConfig.settings());
         }
 
         Whitelist.Reference whitelist = null;
