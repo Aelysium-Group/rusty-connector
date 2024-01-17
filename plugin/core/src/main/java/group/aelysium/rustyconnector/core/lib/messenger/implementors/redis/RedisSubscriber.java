@@ -64,7 +64,7 @@ public class RedisSubscriber extends MessengerSubscriber {
         this.lock.countDown();
 
         try {
-            this.client.shutdownAsync(2, 2, TimeUnit.SECONDS);
+            this.client.shutdown();
         } catch (Exception ignore) {}
     }
 

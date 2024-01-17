@@ -7,7 +7,6 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service
 public interface IMessengerConnection extends Service {
     /**
      * Publish a new packet to the {@link IMessengerConnection}.
-     *
      * @param packet The packet to publish.
      */
     void publish(Packet packet);

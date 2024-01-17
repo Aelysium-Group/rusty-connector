@@ -73,16 +73,15 @@ public class MagicLinkService implements IMagicLinkService {
     public void kill() {
         try {
             MCLoaderFlame api = TinderAdapterForCore.getTinder().flame();
-            api.services().events().fire(new DisconnectedEvent());
 
             Packet packet = api.services().packetBuilder().newBuilder()
                     .identification(BuiltInIdentifications.MAGICLINK_HANDSHAKE_DISCONNECT)
                     .sendingToProxy()
                     .build();
-            api.services().magicLink().connection().orElseThrow().publish(packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            this.connection().orElseThrow().publish(packet);
+
+            api.services().events().fire(new DisconnectedEvent());
+        } catch (Exception ignore) {}
 
         this.heartbeat.kill();
         this.messenger.kill();

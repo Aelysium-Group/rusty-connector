@@ -24,20 +24,20 @@ public class RedisPublisher {
      */
     public void shutdown() {
         try {
-            this.client.shutdownAsync(2, 2, TimeUnit.SECONDS);
+            this.client.shutdownAsync();
         } catch (Exception ignore) {}
     }
 
     /**
      * Sends a message over a Redis data channel.
-     * If a message is not already, this method will sign messages with the private key provided via the RedisClient used to init this RedisPublisher.
-     * @param message The message to send.
+     * This method will also encrypt the packet using the Magic Link's AESCryptor
+     * @param packet The message to send.
      * @throws IllegalStateException If you attempt to send a received RedisMessage.
      */
-    public void publish(Packet message) {
+    public void publish(Packet packet) {
         String signedPacket;
         try {
-            signedPacket = this.cryptor.encrypt(message.toString());
+            signedPacket = this.cryptor.encrypt(packet.toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -48,21 +48,6 @@ public class RedisPublisher {
         RedisPubSubAsyncCommands<String, String> async = connection.async();
 
         async.publish(this.client.dataChannel(), signedPacket);
-    }
-
-    /**
-     * Publish a message that will cause the subscriber to kill itself.
-     * @deprecated This method should only ever be used for testing purposes.
-     */
-    @Deprecated
-    public void publishKillable() {
-        try (StatefulRedisPubSubConnection<String, String> connection = this.client.connectPubSub()) {
-            RedisPubSubAsyncCommands<String, String> async = connection.async();
-
-            async.publish(this.client.dataChannel(), "DIE");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     static class RedisPublisherListener extends RedisConnectionStateAdapter {
