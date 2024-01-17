@@ -9,6 +9,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeDisconnectListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.commands.CommandLeave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
@@ -359,6 +360,13 @@ class Initialize {
                 bootOutput.add(Component.text("   | Starting "+familyName+"'s matchmaker...", NamedTextColor.DARK_GRAY));
                 family.start();
                 bootOutput.add(Component.text("   | Started "+familyName+"'s matchmaker.", NamedTextColor.YELLOW));
+
+            }
+            if(familiesConfig.rankedFamilies().size() > 0) {
+                bootOutput.add(Component.text("Building ranked family commands...", NamedTextColor.DARK_GRAY));
+                CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
+                commandManager.register(CommandLeave.create());
+                bootOutput.add(Component.text(" | Registered: /leave", NamedTextColor.YELLOW));
             }
             bootOutput.add(Component.text(" | Finished building families.", NamedTextColor.GREEN));
         }

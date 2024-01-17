@@ -72,6 +72,10 @@ public abstract class Matchmaker implements IMatchmaker {
     }
     public abstract void completeSort();
 
+    public Settings settings() {
+        return this.settings;
+    }
+
     public void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         try {
             IRankedPlayer rankedPlayer = this.game.rankedPlayer(this.storage, request.player().uuid(), false);

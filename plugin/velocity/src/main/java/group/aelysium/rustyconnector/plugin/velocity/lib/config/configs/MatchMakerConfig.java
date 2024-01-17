@@ -56,6 +56,7 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         boolean queue_joining_reconnect = IYAML.getValue(this.data, "queue.joining.reconnect", Boolean.class);
 
         boolean session_leaving_command = IYAML.getValue(this.data, "queue.leaving.command", Boolean.class);
+        boolean session_leaving_boot = IYAML.getValue(this.data, "queue.leaving.boot", Boolean.class);
 
         this.settings = new IMatchmaker.Settings(
                 new IMatchmaker.Settings.Ranking(algorithm, variance),
@@ -65,7 +66,7 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
                 ),
                 new IMatchmaker.Settings.Queue(
                         new IMatchmaker.Settings.Queue.Joining(queue_joining_showInfo, queue_joining_reconnect),
-                        new IMatchmaker.Settings.Queue.Leaving(session_leaving_command)
+                        new IMatchmaker.Settings.Queue.Leaving(session_leaving_command, session_leaving_boot)
                 )
         );
     }

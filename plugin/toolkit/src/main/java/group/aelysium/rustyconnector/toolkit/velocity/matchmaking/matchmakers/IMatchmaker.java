@@ -45,9 +45,7 @@ public interface IMatchmaker extends Service {
 
     /**
      * Removes the player from the matchmaker.
-     * This method will only remove the player if they are currently waiting.
-     * <p>
-     * If this player has already leaded into a session, you'll have to find their session and remove them from it.
+     * This will remove the player from the matchmaking queue or from a session if they're in one.
      * @param player The player to remove.
      */
     void remove(IPlayer player);
@@ -84,7 +82,7 @@ public interface IMatchmaker extends Service {
         }
         public record Queue(Joining joining, Leaving leaving) {
             public record Joining(boolean showInfo, boolean reconnect) {}
-            public record Leaving(boolean command) {}
+            public record Leaving(boolean command, boolean boot) {}
         }
     }
 }

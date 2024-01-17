@@ -144,3 +144,10 @@ queue:
         # Should players be able to use "/leave" to leave the matchmaking queue?
         #
         command: false
+
+
+
+        #
+        # If a player leaves the matchmaking queue should they be booted to their family's parent?
+        #
+        boot: false
