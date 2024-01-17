@@ -70,6 +70,18 @@ public abstract class Matchmaker implements IMatchmaker {
         try {
             IRankedPlayer rankedPlayer = this.settings.game().rankedPlayer(this.settings.storage(), request.player().uuid(), false);
 
+            if (this.settings.reconnect()) {
+                 for (ISession session : this.runningSessions.values().stream().toList()) {
+                     for (IPlayer player : session.players()) {
+                         if (player.uuid().equals(rankedPlayer.uuid())) {
+                             session.mcLoader().connect(player);
+                             result.complete(ConnectionResult.success(Component.text("You've been reconnected to your game."), session.mcLoader()));
+                             return;
+                         }
+                     }
+                 }
+            }
+
             if(this.waitingPlayers.contains(rankedPlayer)) throw new RuntimeException("Player is already queued!");
 
             this.waitingPlayers.add(rankedPlayer);

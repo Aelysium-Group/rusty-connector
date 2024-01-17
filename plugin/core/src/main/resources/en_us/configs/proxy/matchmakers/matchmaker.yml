@@ -80,7 +80,14 @@ max: 10
 #
 variance: 0.2
 
+#
+# Whether a player should be reconnected to their previous session if
+# it's still running when they try to join the queue.
+#
+# If false, the player will be put into queue for a new session instead.
+#
 
+reconnect: true
 
 #
 # A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to build a match.

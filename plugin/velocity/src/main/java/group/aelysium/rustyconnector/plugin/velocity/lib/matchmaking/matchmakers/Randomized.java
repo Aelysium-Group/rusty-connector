@@ -6,7 +6,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.Ran
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
@@ -23,6 +25,18 @@ public class Randomized extends Matchmaker {
     public void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         try {
             IRankedPlayer rankedPlayer = new RankedPlayer(request.player().uuid(), new RandomizedPlayerRank());
+
+            if (this.settings.reconnect()) {
+                for (ISession session : this.runningSessions.values().stream().toList()) {
+                    for (IPlayer player : session.players()) {
+                        if (player.uuid().equals(rankedPlayer.uuid())) {
+                            session.mcLoader().connect(player);
+                            result.complete(ConnectionResult.success(Component.text("You've been reconnected to your game."), session.mcLoader()));
+                            return;
+                        }
+                    }
+                }
+            }
 
             if(this.waitingPlayers.contains(rankedPlayer)) throw new RuntimeException("Player is already queued!");
 
