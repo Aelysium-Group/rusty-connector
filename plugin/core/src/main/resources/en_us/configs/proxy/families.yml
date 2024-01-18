@@ -26,7 +26,7 @@
 #
 root-family:
     #
-    # The scalar family, or versioned family, to use as the root.
+    # The scalar family to use as the root.
     # The root family is not allowed to have a parent family.
     #
     name: "lobby"
