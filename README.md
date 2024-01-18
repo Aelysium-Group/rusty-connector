@@ -131,7 +131,7 @@
 [![简体中文](https://flat.badgen.net/badge/简体中文/Click%20me/blue)](https://github.com/Aelysium-Group/rustyconnector-zhhans)
 [![繁體中文](https://flat.badgen.net/badge/繁體中文/Click%20me/blue)](https://github.com/Aelysium-Group/rustyconnector-zhhant)
 
-2023 © [Aelysium](https://www.aelysium.group)
+2024 © [Aelysium](https://www.aelysium.group)
 
 <!-- URL LIST -->
 [Folia]:https://github.com/PaperMC/Folia
