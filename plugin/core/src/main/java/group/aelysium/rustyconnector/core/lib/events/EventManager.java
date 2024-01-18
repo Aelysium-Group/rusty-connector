@@ -15,13 +15,13 @@ public class EventManager implements group.aelysium.rustyconnector.toolkit.core.
         this.manager.unsubscribe(listener);
     }
     public void fire(Event event) {
-        this.manager.publish(event);
+        this.manager.post(event).now();
     }
     public void fireAndForget(Event event) {
-        this.manager.publishAsync(event);
+        this.manager.post(event).asynchronously();
     }
     public void fireWithTimeout(Event event) {
-        this.manager.publishAsync(event, 10, TimeUnit.SECONDS);
+        this.manager.post(event).asynchronously(10, TimeUnit.SECONDS);
     }
 
     @Override
