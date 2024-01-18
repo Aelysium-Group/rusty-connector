@@ -30,7 +30,7 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
         Packet packet = Tinder.get().services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_READY)
                 .sendingToMCLoader(this.uuid())
-                .parameter("session", session.toJSON().toString())
+                .parameter(RankedGame.Ready.Parameters.SESSION, session.toJSON().toString())
                 .build();
         Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
 
@@ -40,14 +40,9 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
 
     @Override
     public void leave(IPlayer player) {
-
         if(this.activeSession == null) return;
 
-
-
         if(!this.activeSession.players().remove(player)) return;
-
-
 
         ISession.Settings settings = this.activeSession.settings();
 

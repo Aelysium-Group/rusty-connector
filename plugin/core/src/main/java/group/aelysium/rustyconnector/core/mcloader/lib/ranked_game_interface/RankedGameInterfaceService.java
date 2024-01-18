@@ -66,7 +66,7 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
         Packet packet = tinder.services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_END)
                 .sendingToProxy()
-                .parameter("session", object.toString())
+                .parameter(RankedGame.End.Parameters.SESSION, object.toString())
                 .build();
         tinder.services().magicLink().connection().orElseThrow().publish(packet);
 

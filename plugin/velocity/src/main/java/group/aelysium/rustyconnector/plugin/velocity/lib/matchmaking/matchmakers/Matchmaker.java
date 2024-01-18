@@ -136,7 +136,7 @@ public abstract class Matchmaker implements IMatchmaker {
         return this.waitingPlayers.size();
     }
     public boolean contains(IPlayer player) {
-        if(this.waitingPlayers.contains(player.rank(this.game.name()).orElse(null))) return true;
+        if(this.waitingPlayers.contains(player.rank(this.game).orElse(null))) return true;
 
         // Check running session first since the player is more likely to be in a running session than in a waiting session.
         for (ISession session : this.runningSessions.values()) if(session.players().contains(player)) return true;
@@ -144,6 +144,12 @@ public abstract class Matchmaker implements IMatchmaker {
         for (ISession.IWaiting session : this.waitingSessions.values()) if(session.contains(player)) return true;
 
         return false;
+    }
+    public Optional<ISession> fetch(UUID uuid) {
+        ISession session = this.runningSessions.get(uuid);
+        if(session == null) this.waitingSessions.get(uuid);
+        if(session == null) return Optional.empty();
+        return Optional.of(session);
     }
 
     public void hideBossBars(Player player) {
@@ -239,11 +245,11 @@ public abstract class Matchmaker implements IMatchmaker {
         }, LiquidTimestamp.from(3, TimeUnit.SECONDS));
     }
 
-    public static Matchmaker from(StorageService storage, IRankedGame game, Settings settings) {
-        if (settings.ranking().algorithm().equals(WIN_LOSS)) return new WinLoss(settings);
-        if (settings.ranking().algorithm().equals(WIN_RATE)) return new WinRate(settings);
+    public static Matchmaker from(Settings settings, StorageService storage, IRankedGame game) {
+        if (settings.ranking().algorithm().equals(WIN_LOSS)) return new WinLoss(settings, storage, game);
+        if (settings.ranking().algorithm().equals(WIN_RATE)) return new WinRate(settings, storage, game);
 
-        return new Randomized(settings);
+        return new Randomized(settings, storage, game);
     }
 
     public void remove(ISession session) {
@@ -257,7 +263,7 @@ public abstract class Matchmaker implements IMatchmaker {
 
         this.waitingSessions.clear();
 
-        this.runningSessions.values().forEach(ISession::end);
+        this.runningSessions.values().forEach(session -> session.end(List.of(), List.of()));
         this.runningSessions.clear();
     }
 }

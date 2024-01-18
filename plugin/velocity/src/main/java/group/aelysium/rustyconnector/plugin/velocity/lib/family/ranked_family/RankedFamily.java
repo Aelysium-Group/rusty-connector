@@ -113,7 +113,7 @@ public class RankedFamily extends Family implements IRankedFamily {
                 return game;
             });
 
-            matchmaker = Matchmaker.from(deps.d3(), fetched, matchMakerConfig.settings());
+            matchmaker = Matchmaker.from(matchMakerConfig.settings(), deps.d3(), fetched);
         }
 
         Whitelist.Reference whitelist = null;

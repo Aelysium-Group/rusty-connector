@@ -82,18 +82,13 @@ public class OnPlayerDisconnect {
         // Handle sending out friend messages when player leaves
         try {
             FriendsService friendsService = api.services().friends().orElseThrow();
-            if(!friendsService.settings().allowMessaging()) throw new NoOutputException();
+            if(!friendsService.settings().allowMessaging()) return;
 
             List<IPlayer> friends = friendsService.findFriends(player).orElseThrow();
 
-            if(friends.size() == 0) throw new NoOutputException();
+            if(friends.size() == 0) return;
 
-            friends.forEach(friend -> {
-                Optional<com.velocitypowered.api.proxy.Player> resolvedPlayer = friend.resolve();
-                if(!resolvedPlayer.isPresent()) return;
-
-                resolvedPlayer.get().sendMessage(ProxyLang.FRIEND_LEAVE.build(player));
-            });
+            friends.forEach(friend -> friend.sendMessage(ProxyLang.FRIEND_LEAVE.build(player)));
         } catch (Exception ignore) {}
     }
 }

@@ -12,6 +12,8 @@ import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageServi
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface IMatchmaker extends Service {
@@ -61,7 +63,7 @@ public interface IMatchmaker extends Service {
      * @param player The player to look for.
      * @return `true` if the player is waiting in the matchmaker. `false` otherwise.
      */
-    boolean contains(IRankedPlayer player);
+    boolean contains(IPlayer player);
 
     /**
      * Ends a session.
@@ -69,6 +71,13 @@ public interface IMatchmaker extends Service {
      * @param session The session to end.
      */
     void remove(ISession session);
+
+    /**
+     * Fetches a session based on a UUID.
+     * @param uuid The uuid to search for.
+     * @return A session if it exists. Otherwise, an empty Optional.
+     */
+    Optional<ISession> fetch(UUID uuid);
 
     record Settings (
             Ranking ranking,

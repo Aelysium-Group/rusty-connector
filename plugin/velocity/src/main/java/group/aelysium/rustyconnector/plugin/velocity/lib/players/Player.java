@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import net.kyori.adventure.text.Component;
@@ -56,10 +57,10 @@ public class Player implements IPlayer {
         return Optional.empty();
     }
 
-    public Optional<IRankedPlayer> rank(String gamemode) {
+    public Optional<IRankedPlayer> rank(IRankedGame game) {
         StorageService storage = Tinder.get().services().storage();
         try {
-            return Optional.of(storage.database().getGame(gamemode).orElseThrow().rankedPlayer(storage, this.uuid, false));
+            return Optional.of(storage.database().getGame(game.name()).orElseThrow().rankedPlayer(storage, this.uuid, false));
         } catch (NoSuchElementException ignore) {}
         return Optional.empty();
     }

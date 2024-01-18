@@ -18,11 +18,11 @@ public interface ISession extends JSONParseable {
     /**
      * Ends this session.
      */
-    void end();
+    void end(List<UUID> winners, List<UUID> losers);
 
     /**
      * Implodes the session.
-     * This method is similar to {@link #end()} except that it will inform players that their session had to be ended,
+     * This method is similar to {@link #end(List, List)} except that it will inform players that their session had to be ended,
      * and not players will be rewarded points.
      */
     void implode();

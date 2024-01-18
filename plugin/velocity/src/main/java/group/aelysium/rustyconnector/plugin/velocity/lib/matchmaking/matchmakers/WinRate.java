@@ -3,6 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmaker
 import group.aelysium.rustyconnector.core.lib.algorithm.WeightedQuickSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.WinRatePlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 
 import java.util.ArrayList;
@@ -13,8 +15,8 @@ import java.util.Random;
 public class WinRate extends Matchmaker {
     private final Random random = new Random();
 
-    public WinRate(Settings settings) {
-        super(settings);
+    public WinRate(Settings settings, StorageService storage, IRankedGame game) {
+        super(settings, storage, game);
     }
 
     private Session.Waiting attemptBuild(int playerCount, double variance) {
@@ -58,7 +60,7 @@ public class WinRate extends Matchmaker {
 
         if(enoughForFullGame) return null;
 
-        double variance = settings.variance(); // Since WinRate is a percentage, variance is exactly the value it represents.
+        double variance = settings.ranking().variance(); // Since WinRate is a percentage, variance is exactly the value it represents.
 
         // Attempt to build a game 5 times. If one of the attempts succeeds, we return that and break the loop.
         for (int i = 0; i < 5; i++) {

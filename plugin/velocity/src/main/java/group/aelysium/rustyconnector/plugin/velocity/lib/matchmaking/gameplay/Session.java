@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
@@ -44,13 +45,20 @@ public class Session implements ISession {
         return this.mcLoader;
     }
 
-    public void end() {
+    public void end(List<UUID> winners, List<UUID> losers) {
         RankedFamily family = (RankedFamily) this.mcLoader.family();
+        StorageService storage = Tinder.get().services().storage();
 
         family.matchmaker().remove(this);
         Family parent = family.parent();
 
         for (IPlayer player : this.players()) {
+            try {
+                if(winners.contains(player.uuid())) player.rank(this.settings.game()).orElseThrow().rank().markWin(storage);
+                if(losers.contains(player.uuid())) player.rank(this.settings.game()).orElseThrow().rank().markLoss(storage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             try {
                 parent.connect(player);
             } catch (Exception ignore) {}
@@ -62,7 +70,7 @@ public class Session implements ISession {
     public void implode() {
         this.players.forEach(player -> player.sendMessage(Component.text("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.", NamedTextColor.RED)));
 
-        this.end();
+        this.end(List.of(), List.of());
     }
 
     public List<IPlayer> players() {
@@ -75,7 +83,18 @@ public class Session implements ISession {
         object.add("uuid", new JsonPrimitive(this.uuid.toString()));
 
         JsonArray array = new JsonArray();
-        players.forEach(player -> array.add(player.uuid().toString()));
+        players.forEach(player -> {
+            JsonObject playerObject = new JsonObject();
+
+            playerObject.add("uuid", new JsonPrimitive(player.uuid().toString()));
+
+            Object rank = "null";
+            try {
+                rank = player.rank(this.settings.game()).orElseThrow().rank().rank();
+            } catch (Exception ignore) {}
+
+            playerObject.add("rank", new JsonPrimitive(rank.toString()));
+        });
         object.add("players", array);
 
         return object;
