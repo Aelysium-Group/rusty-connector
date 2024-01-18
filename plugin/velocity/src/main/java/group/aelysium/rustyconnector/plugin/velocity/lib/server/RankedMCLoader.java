@@ -49,14 +49,14 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
         if(this.activeSession.players().size() >= settings.min()) return;
 
 
-        this.implodeSession();
+        this.implodeSession("To many people left the server! There aren't enough players to meet the minimum player requirements.");
     }
 
-    public void implodeSession() {
+    public void implodeSession(String reason) {
         Packet packet = Tinder.get().services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_IMPLODE)
                 .sendingToMCLoader(this.uuid())
-                .parameter(RankedGame.Imploded.Parameters.REASON, "To many people left the server! There aren't enough players to meet the minimum player requirements.")
+                .parameter(RankedGame.Imploded.Parameters.REASON, reason)
                 .parameter(RankedGame.Imploded.Parameters.SESSION_UUID, this.activeSession.uuid().toString())
                 .build();
         Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);

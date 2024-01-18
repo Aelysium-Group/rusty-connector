@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
@@ -17,6 +18,11 @@ public class OnMCLoaderUnregister extends Listener<UnregisterEvent> {
     @Handler() // Changes priority to {@link Priority.NATIVE}
     public void handler(UnregisterEvent event) {
         PluginLogger logger = Tinder.get().logger();
+
+        try {
+            RankedMCLoader mcLoader = (RankedMCLoader) event.mcLoader();
+            mcLoader.implodeSession("The server that this session was on has closed!");
+        } catch (Exception ignore) {}
 
         // Fire console message
         if (logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
