@@ -45,8 +45,8 @@ public class RankedFamily extends Family implements IRankedFamily {
         this.matchmaker = settings.matchmaker();
     }
 
-    public void dequeue(IPlayer player) {
-        this.matchmaker.remove(player);
+    public boolean dequeue(IPlayer player) {
+        return this.matchmaker.dequeue(player);
     }
 
     /**

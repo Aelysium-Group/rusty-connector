@@ -22,5 +22,5 @@ public interface IRankedFamily extends IFamily, Service {
      * If the player is already connected to this family, nothing will happen.
      * @param player The player to dequeue.
      */
-    void dequeue(IPlayer player);
+    boolean dequeue(IPlayer player);
 }

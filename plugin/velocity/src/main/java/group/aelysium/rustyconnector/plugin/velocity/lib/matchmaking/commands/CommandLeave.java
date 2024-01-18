@@ -20,8 +20,11 @@ import io.fabric8.kubernetes.api.model.policy.v1beta1.HostPortRangeBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CommandLeave {
-    public static BrigadierCommand create() {
+    public static BrigadierCommand create(FamilyService service) {
         PluginLogger logger = Tinder.get().logger();
 
         LiteralCommandNode<CommandSource> hub = LiteralArgumentBuilder
@@ -35,22 +38,27 @@ public class CommandLeave {
                     try {
                         Player player = Player.from(eventPlayer);
 
-                        Family familyGeneric = player.server().orElseThrow().family();
-                        if(!(familyGeneric instanceof RankedFamily family)) {
-                            eventPlayer.sendMessage(ProxyLang.UNKNOWN_COMMAND);
-                            return Command.SINGLE_SUCCESS;
-                        }
-                        if(!family.matchmaker().settings().queue().leaving().command()) {
-                            eventPlayer.sendMessage(ProxyLang.UNKNOWN_COMMAND);
-                            return Command.SINGLE_SUCCESS;
+                        List<RankedFamily> families = new ArrayList<>();
+                        service.dump().forEach(family -> {
+                            if(family instanceof RankedFamily) families.add((RankedFamily) family);
+                        });
+
+                        RankedFamily queuedFamily = null;
+                        for (RankedFamily family : families) {
+                            if(family.dequeue(player)) {
+                                queuedFamily = family;
+                                break;
+                            }
                         }
 
-                        family.matchmaker().remove(player);
+                        if(queuedFamily == null) {
+                            eventPlayer.sendMessage(Component.text("You must be in matchmaking to use the `/leave` command!", NamedTextColor.RED));
+                            return Command.SINGLE_SUCCESS;
+                        }
                         eventPlayer.sendMessage(Component.text("You successfully left matchmaking!"));
 
-                        if(family.matchmaker().settings().queue().leaving().boot()) {
-                            family.parent().connect(player);
-                        }
+                        if(queuedFamily.matchmaker().settings().queue().leaving().boot())
+                            queuedFamily.parent().connect(player);
                     } catch (Exception ignore) {
                         eventPlayer.sendMessage(Component.text("There was an issue trying to leave matchmaking"));
                     }

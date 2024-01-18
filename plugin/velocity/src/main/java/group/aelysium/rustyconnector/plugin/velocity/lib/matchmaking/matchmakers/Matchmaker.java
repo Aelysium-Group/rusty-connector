@@ -106,6 +106,10 @@ public abstract class Matchmaker implements IMatchmaker {
         }
         result.complete(ConnectionResult.success(Component.text("Successfully queued into the matchmaker!"), null));
     }
+
+    public boolean dequeue(IPlayer player) {
+        return this.waitingPlayers.removeIf(player1 -> player1.uuid().equals(player.uuid()));
+    }
     public void remove(IPlayer player) {
         try {
             Player velocityPlayer = player.resolve().orElseThrow();
