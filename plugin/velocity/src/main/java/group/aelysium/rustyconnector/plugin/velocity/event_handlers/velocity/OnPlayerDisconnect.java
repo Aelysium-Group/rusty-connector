@@ -21,6 +21,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.events.player.NetworkLeave
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,12 +49,22 @@ public class OnPlayerDisconnect {
      * Handles any Ranked Family game sessions that the player may be in.
      */
     private static void handleMatchmakerSession(Tinder api, IPlayer player) {
+        // There are no ranked families, thus no sessions to potentially clean up.
+        if(api.services().family().dump().stream().noneMatch(family -> family instanceof RankedFamily)) return;
+
         try {
             RankedFamily family = (RankedFamily) player.server().orElseThrow().family();
 
-            if(!family.matchmaker().contains(player)) return;
-
             family.matchmaker().remove(player);
+        } catch (Exception ignore) {}
+        try {
+            List<RankedFamily> families = new ArrayList<>();
+            api.services().family().dump().forEach(family -> {
+                if(family instanceof RankedFamily) families.add((RankedFamily) family);
+            });
+
+            for (RankedFamily family : families)
+                if (family.matchmaker().remove(player)) break;
         } catch (Exception ignore) {}
     }
 

@@ -50,7 +50,7 @@ public interface IMatchmaker extends Service {
      * This will remove the player from the matchmaking queue or from a session if they're in one.
      * @param player The player to remove.
      */
-    void remove(IPlayer player);
+    boolean remove(IPlayer player);
 
     /**
      * Gets The number of players currently waiting in the matchmaker.

@@ -113,7 +113,7 @@ public abstract class Matchmaker implements IMatchmaker {
         } catch (Exception ignore) {}
         return this.waitingPlayers.removeIf(player1 -> player1.uuid().equals(player.uuid()));
     }
-    public void remove(IPlayer player) {
+    public boolean remove(IPlayer player) {
         try {
             Player velocityPlayer = player.resolve().orElseThrow();
             hideBossBars(velocityPlayer);
@@ -122,19 +122,24 @@ public abstract class Matchmaker implements IMatchmaker {
         try {
             AtomicBoolean didContain = new AtomicBoolean(this.waitingPlayers.removeIf(player1 -> player1.uuid().equals(player.uuid())));
 
-            if(didContain.get()) return;
+            if(didContain.get()) return true;
 
             this.runningSessions.values().forEach(session -> {
                 boolean removed = ((Session.Waiting) session).players().remove(player);
                 if(removed) didContain.set(true);
             });
 
-            if(didContain.get()) return;
+            if(didContain.get()) return true;
 
-            this.waitingSessions.values().forEach(session -> ((Session.Waiting) session).players().remove(player));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+            this.waitingSessions.values().forEach(session -> {
+                boolean removed = ((Session) session).players().remove(player);
+                if(removed) didContain.set(true);
+            });
+
+            return didContain.get();
+        } catch (Exception ignore) {}
+
+        return false;
     }
     public List<IRankedPlayer> waitingPlayers() {
         return this.waitingPlayers.stream().toList();
