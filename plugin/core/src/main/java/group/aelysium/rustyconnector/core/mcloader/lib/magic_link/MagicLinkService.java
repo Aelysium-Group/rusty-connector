@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.magic_link;
 
-import group.aelysium.rustyconnector.core.lib.events.EventManager;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderFlame;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
@@ -26,6 +25,7 @@ public class MagicLinkService implements IMagicLinkService {
     private final IMessengerConnector messenger;
     private final ClockService heartbeat = new ClockService(2);
     private final AtomicInteger delay = new AtomicInteger(5);
+    private boolean stopPinging = false;
 
     public MagicLinkService(IMessengerConnector messenger) {
         this.messenger = messenger;
@@ -38,6 +38,8 @@ public class MagicLinkService implements IMagicLinkService {
     private void scheduleNextPing(IMCLoaderFlame<? extends ICoreServiceHandler> api) {
         IServerInfoService serverInfoService = api.services().serverInfo();
         this.heartbeat.scheduleDelayed(() -> {
+            if(stopPinging) return;
+
             try {
                 Packet packet = api.services().packetBuilder().newBuilder()
                         .identification(BuiltInIdentifications.MAGICLINK_HANDSHAKE_PING)
@@ -71,6 +73,8 @@ public class MagicLinkService implements IMagicLinkService {
 
     @Override
     public void kill() {
+        stopPinging = true;
+
         try {
             MCLoaderFlame api = TinderAdapterForCore.getTinder().flame();
 
