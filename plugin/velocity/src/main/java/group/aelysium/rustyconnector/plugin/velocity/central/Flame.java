@@ -365,7 +365,7 @@ class Initialize {
             if(familiesConfig.rankedFamilies().size() > 0) {
                 bootOutput.add(Component.text("Building ranked family commands...", NamedTextColor.DARK_GRAY));
                 CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
-                commandManager.register(CommandLeave.create());
+                commandManager.register(CommandLeave.create(familyService));
                 bootOutput.add(Component.text(" | Registered: /leave", NamedTextColor.YELLOW));
             }
             bootOutput.add(Component.text(" | Finished building families.", NamedTextColor.GREEN));
