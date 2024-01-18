@@ -108,6 +108,9 @@ public abstract class Matchmaker implements IMatchmaker {
     }
 
     public boolean dequeue(IPlayer player) {
+        try {
+            hideBossBars(player.resolve().orElseThrow());
+        } catch (Exception ignore) {}
         return this.waitingPlayers.removeIf(player1 -> player1.uuid().equals(player.uuid()));
     }
     public void remove(IPlayer player) {
