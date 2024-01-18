@@ -17,78 +17,137 @@
 
 
 
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                        Algorithm                         #
-#                                                          #
-#               ---------------------------                #
-# | Algorithm controls not only how a player is ranked     #
-# | but also how ranked matches are created.               #
-#                                                          #
-# | If you change algorithms, player skills, will reset.   #
-# | If you switch from WIN_LOSS to RANDOM, the player      #
-# | skills will reset, however if you switch back to       #
-# | WIN_LOSS, the player's ranks will reload to what they  #
-# | were before you switched away from WIN_LOSS.           #
-#                                                          #
-# | Your options are:                                      #
-#  ⚫ RANDOMIZED -                                         #
-#           Randomly select players for a game.            #
-#           Player skill levels are totally ignored.       #
-#  ⚫ WIN_LOSS -                                           #
-#           Ranks player based on their win/loss ratio.    #
-#  ⚫ WIN_RATE -                                           #
-#           Ranks players based on the percentage of how   #
-#           many games they've won versus lost.            #
-#           Win-rate ranking ignores the number of games   #
-#           ranked players have played.                    #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-algorithm: RANDOMIZED
+ranking:
+    ############################################################
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    #                        Algorithm                         #
+    #                                                          #
+    #               ---------------------------                #
+    # | Algorithm controls not only how a player is ranked     #
+    # | but also how ranked matches are created.               #
+    #                                                          #
+    # | If you change algorithm, player skills, will reset.    #
+    # | If you switch from WIN_LOSS to RANDOM, the player      #
+    # | skills will reset, however if you switch back to       #
+    # | WIN_LOSS, the player's ranks will reload to what they  #
+    # | were before you switched away from WIN_LOSS.           #
+    #                                                          #
+    # | Your options are:                                      #
+    #  ⚫ RANDOMIZED -                                         #
+    #           Randomly select players for a game.            #
+    #           Player skill levels are totally ignored.       #
+    #  ⚫ WIN_LOSS -                                           #
+    #           Ranks player based on their win/loss ratio.    #
+    #  ⚫ WIN_RATE -                                           #
+    #           Ranks players based on the percentage of how   #
+    #           many games they've won versus lost.            #
+    #           Win-rate ranking ignores the number of games   #
+    #           ranked players have played.                    #
+    #               ---------------------------                #
+    #                                                          #
+    #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+    ############################################################
+    algorithm: RANDOMIZED
 
 
 
-#
-# The minimum number of players that must be in a game session.
-#
-min: 8
+    #
+    # A decimal representing the percentage that player's ranks are allowed to deviate from one-another.
+    #
+    # Cannot be set to 0.
+    #
+    # If algorithm is set to `RANDOM` this will be ignored.
+    #
+    # 0.1 means that other players in the round must have a rank within 10% of each-other.
+    # If set to 1.0, any players are allowed to be in a match together; regardless of rank.
+    # Setting to 1.0 is effectively the same as setting `algorithm` to RANDOM.
+    #
+    # For ranking systems with an infinitely high top-rank, variance will be calculated based on the highest ranking
+    # player in the matchmaking queue representing 100%.
+    #
+    variance: 0.2
 
 
 
-#
-# The maximum number of players that can be in a game session.
-#
-max: 10
+session:
+    building:
+        #
+        # The minimum number of players that must be in a game session.
+        #
+        min: 8
 
 
 
-#
-# A decimal representing the percentage that player's ranks are allowed to deviate from one-another.
-#
-# Cannot be set to 0.
-#
-# If algorithm is set to `RANDOM` this will be ignored.
-#
-# 0.1 means that other players in the round must have a rank within 10% of each-other.
-# If set to 1.0, any players are allowed to be in a match together; regardless of rank.
-# Setting to 1.0 is effectively the same as setting `algorithm` to RANDOM.
-#
-# For ranking systems with an infinitely high top-rank, variance will be calculated based on the highest ranking
-# player in the matchmaking queue representing 100%.
-#
-variance: 0.2
+        #
+        # The maximum number of players that can be in a game session.
+        #
+        max: 10
 
 
 
-#
-# A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to build a match.
-# This should be set relatively low depending on what you expect player influxes to be.
-# Can't be set lower than `3 SECONDS`.
-# Wiki: https://wiki.aelysium.group/rusty-connector/docs/concepts/liquid_timestamps
-#
-# Keep in mind that this setting doesn't necessarily mean that new matches will be made every interval.
-# Matches will only be made if there is a satisfactory number of players with the proper ranks.
-#
-matchmaking-interval: 10 SECONDS
+        #
+        # A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to
+        # build a new game session
+        # This should be set relatively low depending on what you expect player influxes to be.
+        # Can't be set lower than `3 SECONDS`.
+        #
+        # Keep in mind that this setting doesn't necessarily mean that new matches will be made every interval.
+        # Matches will only be made if there is a satisfactory number of players with the proper ranks.
+        #
+        interval: 10 SECONDS
+
+
+
+    closing:
+        #
+        # If players quit the game, how many players can be left in the game before the game is closed.
+        # Set this value to be -1 if you want it to be the same number as `session.building.min`.
+        #
+        threshold: -1
+
+        ranks:
+            #
+            # Should players that quit the game receive a "lose"?
+            #
+            quitters-lose: false
+
+            #
+            # Should the players that stay in the game when it closes receive a "win"?
+            #
+            stayers-win: false
+
+
+
+queue:
+    joining:
+        #
+        # Should players see actionbar and bossbar messages while they're in the matchmaking queue?
+        # When this is enabled, players will be informed of the status of their queue such as
+        # "waiting for players", "waiting for open servers" etc.
+        # If you disable this, you should probably have your own system to let players know what's happening.
+        #
+        show-info: true
+
+
+        #
+        # Should a player be reconnected to their previous session if
+        # it's still running when they try to join the queue.
+        #
+        # If false, the player will be put into queue for a new session instead.
+        #
+        reconnect: true
+
+
+
+    leaving:
+        #
+        # Should players be able to use "/leave" to leave the matchmaking queue?
+        #
+        command: false
+
+
+
+        #
+        # If a player leaves the matchmaking queue should they be booted to their family's parent?
+        #
+        boot: false

@@ -100,6 +100,7 @@ proxy:
         no_player: "<red>There is no online player with the username: <username></red>"
         no_family: "<red>There is no family with the name: <family_name></red>"
         no_server: "<red>There is no family with the name: <server_name></red>"
+        same_family: "<red>You're already in that server</red>"
     family:
         description:
             - "<gray>Families are colored as: <blue>Scalar</blue>, <green>Static</green>, and <yellow>Ranked</yellow>.</gray>"
@@ -155,6 +156,7 @@ proxy:
                     - "      | - Weighted Sorting: <load_balancing_weighted>"
                     - "      | - Persistence: <load_balancing_persistence>"
         ranked:
+            in_party: "<red>You're not allowed to enter matchmaking while in a party!</red>"
             panel:
                 info:
                     - "   ---| Display Name: <display_name>"
@@ -190,11 +192,12 @@ proxy:
             no_double_dipping: "<red>You must leave your current party before joining another party.</red>"
             target_not_online: "<red><username> isn't online for you to join their party!</red>"
             expired: "<red>That invite seems to have expired!</red>"
-            only_leader: "<red>Only the party leader can invite people!</red>"
             not_online: "<red>You can only send invites to players that are currently online with you!</red>"
             friends_only: "<red>You can only send invites to your friends!</red>"
             self_invite: "<red>You can't invite yourself to your own party!</red>"
             already_a_member: "<red><username> is already in your party!</red>"
+            no_invite: "<red>It doesn't seem like <username> has sent you any invites!</red>"
+            ignore: "<yellow>Party invite from <username> ignored.</yellow>"
         receiver_invite_query:
             query: "<gray>Hey! <username> wants you to join their party!</gray>"
             hover:
@@ -209,6 +212,7 @@ proxy:
             switch: "<red>Only the party leader can switch servers!</red>"
             kick: "<red>Only the party leader can kick people!</red>"
             promote: "<red>Only the party leader can promote people!</red>"
+            invite: "<red>Only the party leader can invite people!</red>"
         no_party: "<red>You aren't in a party!</red>"
         no_member: "<red><username> isn't in your party!</red>"
         disbanded: "<gray>Your party has been disbanded.</gray>"
@@ -219,7 +223,12 @@ proxy:
         promoted: "<yellow>You were promoted to party leader.</yellow>"
         already_leader: "<red>You're already the leader!</red>"
         demoted: "<yellow>You are no longer party leader.</yellow>"
-        following_kicked: "<red>There was an issue following your party! You've been kicked.</red>"
+        following_kicked:
+            server_full: "<red>There's not enough space in your party's new server so you were removed from the party.</red>"
+            generic: "<red>There was an issue following your party! You've been kicked.</red>"
+        following_failed:
+            server_full: "<red>There's not enough space in your party's new server so you did not follow them.</red>"
+            generic: "<red>There was an issue following your party!</red>"
         created: "<green>You created a new party!</green>"
         left_self: "<green>You left the party.</green>"
         self_kick: "</red>You can't kick yourself! Use <blue>/party leave</blue> instead!</red>"

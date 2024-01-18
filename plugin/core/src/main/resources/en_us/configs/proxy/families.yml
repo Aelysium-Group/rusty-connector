@@ -15,6 +15,9 @@
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
+
+
+
 #
 # The root family. Once a player connects and is validated.
 # This is the family that they will automatically be routed to.
@@ -23,10 +26,12 @@
 #
 root-family:
     #
-    # The scalar family, or versioned family, to use as the root.
+    # The scalar family to use as the root.
     # The root family is not allowed to have a parent family.
     #
     name: "lobby"
+
+
 
     #
     # If a player is kicked or disconnected from a family in this proxy.
@@ -35,6 +40,8 @@ root-family:
     # a gamemode or sub-family.
     #
     catch-disconnecting-players: false
+
+
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -51,6 +58,8 @@ root-family:
 ############################################################
 scalar:
     - "lobby" # the default lobby family
+
+
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -73,6 +82,8 @@ scalar:
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 static: []
+
+
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -104,35 +115,3 @@ static: []
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
 ranked: []
-
-
-############################################################
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                     Version Funnels                      #
-#                                                          #
-#               ---------------------------                #
-#                                                          #
-# | Version Filters are collections of families.           #
-# | When a player connections to a version filter          #
-# | the filter will assess the player's client version and #
-# | connect them to the appropriate family for             #
-# | their version.                                         #
-#                                                          #
-#               ---------------------------                #
-#                                                          #
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-############################################################
-version-funnels: []
-## This is an example of a Version Funnel.
-## Version Funnels are not allowed to use other Version Funnels as a target.
-## `target-family` must point to an already existing family.
-## You can also use sub versions such as 1.20.2.
-##
-##    - name: "lobby"
-##      mappings:
-##          - versions: 1.8, 1.9, 1.10, 1.11, 1.12
-##            target-family: "lobby-legacy"
-##          - versions: 1.13, 1.14, 1.15, 1.16, 1.17
-##            target-family: "lobby-old"
-##          - versions: 1.18, 1.19, 1.20
-##            target-family: "lobby-modern"

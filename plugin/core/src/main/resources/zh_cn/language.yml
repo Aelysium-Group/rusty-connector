@@ -100,6 +100,7 @@ proxy:
         no_player: "<red>未找到玩家: <username> 请确认TA是否在线或存在。</red>"
         no_family: "<red>未找到家庭组: <family_name> 请确认该家庭组是否存在。</red>"
         no_server: "<red>未找到服务器: <server_name> 请检查该服务器或对应的家庭组是否有效。</red>"
+        same_family: "<red>您已在该服务器中!</red>"
     family:
         description:
             - "<gray>家庭组颜色说明: <blue>动态（Scalar）</blue>, <green>静态（Static）</green>, <yellow>Ranked</yellow>.</gray>"
@@ -155,6 +156,7 @@ proxy:
                     - "      | - 权重: <load_balancing_weighted>"
                     - "      | - 自动重连: <load_balancing_persistence>"
         ranked:
+            in_party: "<red>您当前在一个派对内，无法进行匹配比赛，请先离开派对</red>"
             panel:
                 info:
                     - "   ---| 显示名称: <display_name>"
@@ -190,11 +192,12 @@ proxy:
             no_double_dipping: "<red>在加入另一个派对之前，您必须退出您当前加入的派对!</red>"
             target_not_online: "<red><username> 不在线，无法邀请TA加入您的派对!</red>"
             expired: "<red>该邀请已过期!</red>"
-            only_leader: "<red>仅允许派对队长邀请其他人加入!</red>"
             not_online: "<red>您只能向在线的玩家发送派对邀请!</red>"
             friends_only: "<red>您只能向您的好友发送派对邀请!</red>"
             self_invite: "<red>你不能邀请自己参加自己的派对!</red>"
             already_a_member: "<red><username> 已在您的派对内!</red>"
+            no_invite: "<red>玩家 <username> TA似乎没有向您发出任何邀请!</red>"
+            ignore: "<yellow>来自玩家 <username> 的派对邀请被忽略。</yellow>"
         receiver_invite_query:
             query: "<gray>Hi，<username> 邀请您加入TA们的派对!</gray>"
             hover:
@@ -209,6 +212,7 @@ proxy:
             switch: "<red>只有派对队长可以切换服务器!</red>"
             kick: "<red>只有派对队长可以踢人!</red>"
             promote: "<red>只有派对队长可以转移队长权限!</red>"
+            invite: "<red>只有派对队长可以邀请其它玩家加入派对!</red>"
         no_party: "<red>你未参加派对。</red>"
         no_member: "<red><username> 不在您的派对中!</red>"
         disbanded: "<gray>你的派对已解散。</gray>"
@@ -219,7 +223,12 @@ proxy:
         promoted: "<yellow>你成为了派对队长!</yellow>"
         already_leader: "<red>你已经是派对队长了!</red>"
         demoted: "<yellow>你不再是派对队长。</yellow>"
-        following_kicked: "<red>您的派对出现了问题，您已被踢出。</red>"
+        following_kicked:
+            server_full: "<red>目标服务器没有足够的剩余人数空间，因此您被踢出了派对。</red>"
+            generic: "<red>您的派对出现了问题，您已被踢出。</red>"
+        following_failed:
+            server_full: "<red>目标服务器没有足够的剩余人数空间，因此您跟随加入失败。</red>"
+            generic: "<red>您的派对出现了问题!</red>"
         created: "<green>你创建了一个新的派对!</green>"
         left_self: "<green>你离开了派对。</green>"
         self_kick: "</red>你不能踢出你自己，请使用<blue>/party leave</blue>离开派对!</red>"
