@@ -41,7 +41,7 @@ storage:
     #
     # 存储REST API允许读取数据库中的数据
     # REST API可与EclipseStorage客户端配合使用，用以查看数据: https://docs.eclipsestore.io/manual/storage/rest-interface/client-gui.html
-    # REST API will将使用前一个URL中列出的默认设置
+    # REST API将使用前一个URL中列出的默认设置
     #
     enable-rest-api: false
 
