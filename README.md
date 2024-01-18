@@ -6,7 +6,7 @@
 ![Folia](https://flat.badgen.net/badge/Folia/Supported/E004BC?icon=maven)
 [![Aelysium](https://flat.badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
 [![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
-[![License](https://flat.badgen.net/badge/License/MIT/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE)
+[![License](https://flat.badgen.net/badge/License/GPL-V3/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE_rusty-connector)
 
 [RustyConnector] is a load-balancing plugin that can run on [Velocity]/[Paper]/[Folia] networks, which allows your proxy to automatically register or unregister sub-servers while it's running.
 
@@ -131,7 +131,7 @@
 [![简体中文](https://flat.badgen.net/badge/简体中文/Click%20me/blue)](https://github.com/Aelysium-Group/rustyconnector-zhhans)
 [![繁體中文](https://flat.badgen.net/badge/繁體中文/Click%20me/blue)](https://github.com/Aelysium-Group/rustyconnector-zhhant)
 
-2023 © [Aelysium](https://www.aelysium.group)
+2024 © [Aelysium](https://www.aelysium.group)
 
 <!-- URL LIST -->
 [Folia]:https://github.com/PaperMC/Folia
