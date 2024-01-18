@@ -9,17 +9,17 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFla
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.toolkit.core.events.Listener;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
-import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.UnregisterEvent;
 import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Invoke;
 
 public class OnMCLoaderUnregister extends Listener<UnregisterEvent> {
     @Override
-    @Handler() // Changes priority to {@link Priority.NATIVE}
+    @Handler(delivery = Invoke.Asynchronously) // Changes priority to {@link Priority.NATIVE}
     public void handler(UnregisterEvent event) {
         PluginLogger logger = Tinder.get().logger();
 
-        System.out.println("MCLoader event has fired!");
+        System.out.println("MCLoader unregister event has fired!");
 
         try {
             RankedMCLoader mcLoader = (RankedMCLoader) event.mcLoader();

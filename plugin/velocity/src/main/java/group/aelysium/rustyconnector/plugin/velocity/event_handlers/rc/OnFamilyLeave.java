@@ -7,10 +7,11 @@ import group.aelysium.rustyconnector.toolkit.core.events.Listener;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
 import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Invoke;
 
 public class OnFamilyLeave extends Listener<FamilyLeaveEvent> {
     @Override
-    @Handler() // Changes priority to {@link Priority.NATIVE}
+    @Handler(delivery = Invoke.Asynchronously) // Changes priority to {@link Priority.NATIVE}
     public void handler(FamilyLeaveEvent event) {
         try {
             event.family().leave(event.player());

@@ -6,10 +6,11 @@ import group.aelysium.rustyconnector.toolkit.core.events.Listener;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Invoke;
 
 public class OnMCLoaderLeave extends Listener<MCLoaderLeaveEvent> {
     @Override
-    @Handler() // Changes priority to {@link Priority.NATIVE}
+    @Handler(delivery = Invoke.Asynchronously) // Changes priority to {@link Priority.NATIVE}
     public void handler(MCLoaderLeaveEvent event) {
         IMCLoader mcLoader = event.mcLoader();
 

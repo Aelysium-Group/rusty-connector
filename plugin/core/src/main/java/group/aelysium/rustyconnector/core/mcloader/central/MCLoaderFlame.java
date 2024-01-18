@@ -8,6 +8,9 @@ import group.aelysium.rustyconnector.core.mcloader.central.config.ConnectorsConf
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnection;
 import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
+import group.aelysium.rustyconnector.core.mcloader.event_handlers.OnConnection;
+import group.aelysium.rustyconnector.core.mcloader.event_handlers.OnDisconnection;
+import group.aelysium.rustyconnector.core.mcloader.event_handlers.OnTimeout;
 import group.aelysium.rustyconnector.core.mcloader.events.OnRankedGameEnd;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestListener;
@@ -148,7 +151,7 @@ class Initialize {
         }
     }
 
-    public AESCryptor privateKey() throws NoSuchAlgorithmException {
+    public AESCryptor privateKey() {
         PrivateKeyConfig privateKeyConfig = new PrivateKeyConfig(new File(api.dataFolder(), "private.key"));
         try {
             return privateKeyConfig.get(bootOutput);
@@ -157,7 +160,7 @@ class Initialize {
         }
     }
 
-    public DefaultConfig defaultConfig(LangService lang) throws IOException {
+    public DefaultConfig defaultConfig(LangService lang) {
         return DefaultConfig.construct(Path.of(api.dataFolder()), lang, this.configVersion());
     }
 
@@ -227,6 +230,10 @@ class Initialize {
     public void eventManager() {
         group.aelysium.rustyconnector.core.lib.events.EventManager factory = new group.aelysium.rustyconnector.core.lib.events.EventManager();
         services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, factory);
+
+        factory.on(new OnConnection());
+        factory.on(new OnDisconnection());
+        factory.on(new OnTimeout());
     }
 
     public void dynamicTeleport() {

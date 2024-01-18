@@ -10,12 +10,15 @@ import group.aelysium.rustyconnector.toolkit.core.events.Listener;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
 import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Invoke;
 
 public class OnMCLoaderRegister extends Listener<RegisterEvent> {
     @Override
-    @Handler() // Changes priority to {@link Priority.NATIVE}
+    @Handler(delivery = Invoke.Asynchronously) // Changes priority to {@link Priority.NATIVE}
     public void handler(RegisterEvent event) {
         PluginLogger logger = Tinder.get().logger();
+
+        System.out.println("MCLoader register event has fired!");
 
         // Fire console message
         if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
