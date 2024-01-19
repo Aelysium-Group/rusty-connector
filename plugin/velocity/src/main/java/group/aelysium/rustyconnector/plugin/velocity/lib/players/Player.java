@@ -99,7 +99,7 @@ public class Player implements IPlayer {
             Player player = new Reference(velocityPlayer.getUniqueId()).get();
             if(!player.username().equals(velocityPlayer.getUsername())) {
                 player.username = velocityPlayer.getUsername();
-                storageService.store(player);
+                storageService.database().savePlayer(storageService, player);
                 return player;
             }
         } catch (Exception ignore) {}

@@ -12,6 +12,12 @@ import org.eclipse.serializer.collections.lazy.LazyHashSet;
 import java.util.*;
 
 public class Database implements IStorageRoot {
+    private transient final StorageService storage;
+
+    public Database(StorageService storage) {
+        this.storage = storage;
+    }
+
     private final Map<UUID, IPlayer> players = new LazyHashMap<>();
     private final Set<PlayerPair> friends = new LazyHashSet<>();
     private final Map<String, Map<UUID, IServerResidence.MCLoaderEntry>> residence = new LazyHashMap<>();
