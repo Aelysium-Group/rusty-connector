@@ -129,7 +129,13 @@ public abstract class Matchmaker implements IMatchmaker {
 
             this.runningSessions.values().forEach(session -> {
                 boolean removed = ((Session.Waiting) session).players().remove(player);
-                if(removed) didContain.set(true);
+                if(removed) {
+                    didContain.set(true);
+
+                    // Check if the session is to empty now
+                    if(session.players().size() < this.settings.session().closing().threshold())
+                        ((RankedMCLoader) session.mcLoader()).implodeSession("To many people left the server! There aren't enough players to meet the minimum player requirements.");
+                }
             });
 
             if(didContain.get()) return true;

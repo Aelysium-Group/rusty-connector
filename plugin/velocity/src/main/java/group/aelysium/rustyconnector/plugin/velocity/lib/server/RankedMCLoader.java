@@ -61,7 +61,7 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
                 .build();
         Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
         this.activeSession.implode();
-        this.activeSession = null;
+        this.unlock();
     }
 
     public void unlock() {

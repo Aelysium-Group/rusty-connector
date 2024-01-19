@@ -14,6 +14,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -53,9 +54,9 @@ public class OnPlayerDisconnect {
         if(api.services().family().dump().stream().noneMatch(family -> family instanceof RankedFamily)) return;
 
         try {
-            RankedFamily family = (RankedFamily) player.server().orElseThrow().family();
+            player.server().orElseThrow().leave(player);
 
-            family.matchmaker().remove(player);
+            return;
         } catch (Exception ignore) {
             System.out.println("No MCLoader was found for the player! Attempting to hard search for player in matchmakers...");
         }
