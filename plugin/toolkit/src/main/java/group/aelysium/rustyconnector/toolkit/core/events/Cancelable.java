@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.core.events;
 
-public class Cancelable implements Event {
+public class Cancelable {
     protected boolean canceled = false;
 
     public boolean isCanceled() {

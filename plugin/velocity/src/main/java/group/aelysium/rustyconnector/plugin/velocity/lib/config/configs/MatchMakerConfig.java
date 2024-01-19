@@ -49,6 +49,8 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         } catch (Exception ignore) {}
 
         int session_closing_threshold = IYAML.getValue(this.data,"session.closing.threshold",Integer.class);
+        if(session_closing_threshold < min) session_closing_threshold = min;
+        
         boolean session_closing_ranks_quittersLose = IYAML.getValue(this.data,"session.closing.ranks.quitters-lose",Boolean.class);
         boolean session_closing_ranks_stayersWin = IYAML.getValue(this.data,"session.closing.ranks.stayers-win",Boolean.class);
 

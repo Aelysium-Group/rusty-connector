@@ -6,6 +6,5 @@ import net.engio.mbassy.listener.Invoke;
 @net.engio.mbassy.listener.Listener
 public abstract class Listener<Event extends Cancelable> {
     @Handler(priority = Priority.AFTER_NATIVE, delivery = Invoke.Asynchronously)
-    @CancelableHandler
     public abstract void handler(Event event);
 }

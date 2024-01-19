@@ -11,7 +11,6 @@ import group.aelysium.rustyconnector.core.mcloader.central.config.DefaultConfig;
 import group.aelysium.rustyconnector.core.mcloader.event_handlers.OnConnection;
 import group.aelysium.rustyconnector.core.mcloader.event_handlers.OnDisconnection;
 import group.aelysium.rustyconnector.core.mcloader.event_handlers.OnTimeout;
-import group.aelysium.rustyconnector.core.mcloader.events.OnRankedGameEnd;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers.CoordinateRequestListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
@@ -21,6 +20,7 @@ import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.Hands
 import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameImplodedListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameReadyListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
+import group.aelysium.rustyconnector.toolkit.core.events.DefaultListener;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
@@ -37,7 +37,6 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implements IMCLoaderFlame<CoreServiceHandler> {
@@ -234,6 +233,7 @@ class Initialize {
         factory.on(new OnConnection());
         factory.on(new OnDisconnection());
         factory.on(new OnTimeout());
+        factory.on(new DefaultListener());
     }
 
     public void dynamicTeleport() {

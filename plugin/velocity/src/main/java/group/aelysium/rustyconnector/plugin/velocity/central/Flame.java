@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.Ra
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeDisconnectListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.commands.CommandLeave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
+import group.aelysium.rustyconnector.toolkit.core.events.DefaultListener;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
@@ -223,13 +224,13 @@ class Initialize {
 
         services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, rcEventManager);
 
-        rcEventManager.on(new OnMCLoaderRegister());
         rcEventManager.on(new OnFamilyLeave());
         rcEventManager.on(new OnFamilySwitch());
         rcEventManager.on(new OnMCLoaderRegister());
         rcEventManager.on(new OnMCLoaderUnregister());
         rcEventManager.on(new OnMCLoaderSwitch());
         rcEventManager.on(new OnMCLoaderLeave());
+        rcEventManager.on(new DefaultListener());
     }
 
     public void commands(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {

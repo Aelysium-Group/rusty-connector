@@ -60,7 +60,7 @@ public abstract class Matchmaker implements IMatchmaker {
         this.storage = storage;
         this.game = game;
         this.settings = settings;
-        this.sessionSettings = new ISession.Settings(settings.session().building().min(), settings.session().building().max(), this.game);
+        this.sessionSettings = new ISession.Settings(settings.session().closing().threshold(), settings.session().building().max(), this.game);
 
         this.minPlayersPerGame = settings.session().building().min();
         this.maxPlayersPerGame = settings.session().building().max();
