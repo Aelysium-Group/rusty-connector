@@ -1,8 +1,12 @@
 package group.aelysium.rustyconnector.toolkit.core.packet;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 /**
  * A parameter used by a packet.
@@ -24,6 +28,14 @@ public class PacketParameter {
         this.object = object;
         this.type = 's';
     }
+    public PacketParameter(@NotNull JsonArray object) {
+        this.object = object;
+        this.type = 'a';
+    }
+    public PacketParameter(@NotNull JsonObject object) {
+        this.object = object;
+        this.type = 'j';
+    }
     public PacketParameter(JsonPrimitive object) {
         if(object.isNumber()) {
             this.object = object.getAsNumber();
@@ -38,6 +50,16 @@ public class PacketParameter {
         if(object.isString()) {
             this.object = object.getAsString();
             this.type = 's';
+            return;
+        }
+        if(object.isJsonArray()) {
+            this.object = object.getAsJsonArray();
+            this.type = 'a';
+            return;
+        }
+        if(object.isJsonObject()) {
+            this.object = object.getAsJsonObject();
+            this.type = 'j';
             return;
         }
         throw new IllegalStateException("Unexpected value: " + type);
@@ -62,12 +84,23 @@ public class PacketParameter {
     public String getAsString() {
         return (String) this.object;
     }
+    public UUID getStringAsUUID() {
+        return UUID.fromString(this.getAsString());
+    }
+    public JsonArray getAsJsonArray() {
+        return (JsonArray) this.object;
+    }
+    public JsonObject getAsJsonObject() {
+        return (JsonObject) this.object;
+    }
 
-    protected JsonPrimitive toJSON() {
+    protected JsonElement toJSON() {
         return switch (type) {
             case 'n' -> new JsonPrimitive((Number) this.object);
             case 'b' -> new JsonPrimitive((Boolean) this.object);
             case 's' -> new JsonPrimitive((String) this.object);
+            case 'a' -> (JsonArray) this.object;
+            case 'j' -> (JsonObject) this.object;
             default -> throw new IllegalStateException("Unexpected value: " + type);
         };
     }

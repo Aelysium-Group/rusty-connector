@@ -9,13 +9,12 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import java.util.*;
 
 public interface RankedGame {
-    public record Session(UUID uuid, Map<UUID, String> players) {}
-    public record EndedSession(UUID uuid, List<UUID> winners, List<UUID> losers) {}
+    record Session(UUID uuid, Map<UUID, String> players) {}
+    record EndedSession(UUID uuid, List<UUID> winners, List<UUID> losers) {}
 
     class Ready extends Packet.Wrapper {
         public Session session() {
-            Gson gson = new Gson();
-            JsonObject object = gson.fromJson(this.parameter(Parameters.SESSION).getAsString(), JsonObject.class);
+            JsonObject object = this.parameter(Parameters.SESSION).getAsJsonObject();
             UUID uuid = UUID.fromString(object.get("uuid").getAsString());
 
             Map<UUID, String> players = new HashMap<>();

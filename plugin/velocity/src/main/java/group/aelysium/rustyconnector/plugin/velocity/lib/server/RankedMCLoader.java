@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
@@ -30,7 +31,7 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
         Packet packet = Tinder.get().services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_READY)
                 .sendingToMCLoader(this.uuid())
-                .parameter(RankedGame.Ready.Parameters.SESSION, session.toJSON().toString())
+                .parameter(RankedGame.Ready.Parameters.SESSION, new PacketParameter(session.toJSON()))
                 .build();
         Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
 
