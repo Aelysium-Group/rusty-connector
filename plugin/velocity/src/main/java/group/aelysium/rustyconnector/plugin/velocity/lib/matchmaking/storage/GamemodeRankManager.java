@@ -32,10 +32,10 @@ public class GamemodeRankManager implements IGamemodeRankManager {
         return this.name;
     }
 
-    public IPlayerRankProfile rankedPlayer(IMySQLStorageService storage, UUID uuid, boolean allowNull) {
+    public IPlayerRankProfile rankedPlayer(IMySQLStorageService storage, UUID uuid, boolean createNew) {
         ScoreCard scorecard = this.scorecards.get(uuid);
         if(scorecard == null)
-            if(allowNull) {
+            if(createNew) {
                 ScoreCard newScorecard = new ScoreCard();
                 this.scorecards.put(uuid, newScorecard);
 
