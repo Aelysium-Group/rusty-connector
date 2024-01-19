@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
-import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
+import group.aelysium.rustyconnector.toolkit.core.events.Event;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
  * It can be assumed that if this event fires, the player has successfully acquired a new origin.
  * This event will also fire if a player leaves the family by logging out of the network.
  */
-public class FamilyLeaveEvent extends Cancelable {
+public class FamilyLeaveEvent implements Event {
     protected final IFamily family;
     protected final IMCLoader mcLoader;
     protected final IPlayer player;

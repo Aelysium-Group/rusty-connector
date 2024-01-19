@@ -41,7 +41,7 @@ public class HandshakeStalePingListener extends PacketListener<MagicLink.StalePi
         PluginLogger logger = api.logger();
         MagicLinkService service = (MagicLinkService) api.services().magicLink();
         ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
-        ((EventManager) api.services().events()).fire(new TimeoutEvent());
+        ((EventManager) api.services().events()).fireEvent(new TimeoutEvent());
 
         logger.send(Component.text("Connection to the Proxy has timed out! Attempting to reconnect...", NamedTextColor.RED));
         service.setDelay(5);

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.mc_loader.events.ranked_game;
 
-import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
+import group.aelysium.rustyconnector.toolkit.core.events.Event;
 
 import java.util.List;
 import java.util.UUID;
@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * Represents a game ending.
  */
-public class RankedGameEndEvent extends Cancelable {
+public class RankedGameEndEvent implements Event {
     private final UUID uuid;
     private final List<UUID> losers;
     private final List<UUID> winners;

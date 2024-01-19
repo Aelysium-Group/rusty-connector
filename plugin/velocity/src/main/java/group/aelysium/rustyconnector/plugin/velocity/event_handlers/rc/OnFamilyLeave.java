@@ -5,13 +5,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFla
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.toolkit.core.events.Listener;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
-import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
-import net.engio.mbassy.listener.Handler;
-import net.engio.mbassy.listener.Invoke;
 
-public class OnFamilyLeave extends Listener<FamilyLeaveEvent> {
-    @Override
-    @Handler(delivery = Invoke.Asynchronously) // Changes priority to {@link Priority.NATIVE}
+public class OnFamilyLeave implements Listener<FamilyLeaveEvent> {
     public void handler(FamilyLeaveEvent event) {
         try {
             event.family().leave(event.player());

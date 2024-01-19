@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
-import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
+import group.aelysium.rustyconnector.toolkit.core.events.Event;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
  * Represents a player joining the network.
  * This event fires after {@link FamilyPostJoinEvent}.
  */
-public class NetworkJoinEvent extends Cancelable {
+public class NetworkJoinEvent implements Event {
     protected final IFamily family;
     protected final IMCLoader mcLoader;
     protected final IPlayer player;

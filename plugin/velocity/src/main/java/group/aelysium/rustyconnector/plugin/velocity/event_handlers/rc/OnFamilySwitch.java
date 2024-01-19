@@ -4,14 +4,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookM
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.toolkit.core.events.Listener;
-import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyPostJoinEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilySwitchEvent;
-import net.engio.mbassy.listener.Handler;
-import net.engio.mbassy.listener.Invoke;
 
-public class OnFamilySwitch extends Listener<FamilySwitchEvent> {
-    @Override
-    @Handler(delivery = Invoke.Asynchronously) // Changes priority to {@link Priority.NATIVE}
+public class OnFamilySwitch implements Listener<FamilySwitchEvent> {
     public void handler(FamilySwitchEvent event) {
         WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH_FAMILY, DiscordWebhookMessage.PROXY__PLAYER_SWITCH_FAMILY.build(event.player(), event.oldMCLoader(), event.newMCLoader()));
         WebhookEventManager.fire(WebhookAlertFlag.PLAYER_SWITCH, event.newFamily().id(), DiscordWebhookMessage.FAMILY__PLAYER_SWITCH.build(event.player(), event.oldMCLoader(), event.newMCLoader()));

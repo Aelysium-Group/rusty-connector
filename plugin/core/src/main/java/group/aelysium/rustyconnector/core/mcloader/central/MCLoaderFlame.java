@@ -20,7 +20,6 @@ import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers.Hands
 import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameImplodedListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.handlers.RankedGameReadyListener;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
-import group.aelysium.rustyconnector.toolkit.core.events.DefaultListener;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
@@ -30,6 +29,9 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceableService
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderFlame;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.ConnectedEvent;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.DisconnectedEvent;
+import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.TimeoutEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -230,10 +232,9 @@ class Initialize {
         group.aelysium.rustyconnector.core.lib.events.EventManager factory = new group.aelysium.rustyconnector.core.lib.events.EventManager();
         services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, factory);
 
-        factory.on(new OnConnection());
-        factory.on(new OnDisconnection());
-        factory.on(new OnTimeout());
-        factory.on(new DefaultListener());
+        factory.on(ConnectedEvent.class, new OnConnection());
+        factory.on(DisconnectedEvent.class, new OnDisconnection());
+        factory.on(TimeoutEvent.class, new OnTimeout());
     }
 
     public void dynamicTeleport() {

@@ -44,6 +44,6 @@ public class RankedGameReadyListener extends PacketListener<RankedGame.Ready> {
         array.forEach(item -> players.add(UUID.fromString(item.getAsString())));
 
         TinderAdapterForCore.getTinder().services().rankedGameInterface().orElseThrow().session(uuid, players);
-        TinderAdapterForCore.getTinder().services().events().fire(new RankedGameReadyEvent(uuid, players));
+        TinderAdapterForCore.getTinder().services().events().fireEvent(new RankedGameReadyEvent(uuid, players));
     }
 }

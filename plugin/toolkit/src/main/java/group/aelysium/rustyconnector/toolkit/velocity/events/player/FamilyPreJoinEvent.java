@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
-import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
+import group.aelysium.rustyconnector.toolkit.core.events.Event;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
  * when the player is added to the matchmaker.
  * In such a case, {@link FamilyPostJoinEvent} won't be called until the player actually joins a game.
  */
-public class FamilyPreJoinEvent extends Cancelable {
+public class FamilyPreJoinEvent implements Event {
     protected IFamily family;
     protected IPlayer player;
 

@@ -61,7 +61,7 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
 
         MCLoaderTinder tinder = TinderAdapterForCore.getTinder();
 
-        tinder.services().events().fire(new RankedGameEndEvent(uuid, sessionPlayers, winners));
+        tinder.services().events().fireEvent(new RankedGameEndEvent(uuid, sessionPlayers, winners));
 
         Packet packet = tinder.services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_END)

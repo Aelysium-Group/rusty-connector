@@ -84,7 +84,7 @@ public class MagicLinkService implements IMagicLinkService {
                     .build();
             this.connection().orElseThrow().publish(packet);
 
-            api.services().events().fire(new DisconnectedEvent());
+            api.services().events().fireEvent(new DisconnectedEvent());
         } catch (Exception ignore) {}
 
         this.heartbeat.kill();

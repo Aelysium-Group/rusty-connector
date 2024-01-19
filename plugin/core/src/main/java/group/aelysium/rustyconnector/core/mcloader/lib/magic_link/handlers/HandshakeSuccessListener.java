@@ -35,7 +35,7 @@ public class HandshakeSuccessListener extends PacketListener<MagicLink.Handshake
     public void execute(MagicLink.Handshake.Success packet) {
         PluginLogger logger = api.logger();
         MagicLinkService service = api.services().magicLink();
-        api.services().events().fire(new ConnectedEvent(packet.assignment()));
+        api.services().events().fireEvent(new ConnectedEvent(packet.assignment()));
 
         logger.send(Component.text(packet.message(), packet.color()));
         logger.send(MCLoaderLang.MAGIC_LINK.build());

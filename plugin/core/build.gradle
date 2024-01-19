@@ -10,7 +10,6 @@ dependencies {
     shadow project(path: ':toolkit', configuration: 'shadow')
     shadow "com.velocitypowered:velocity-api:${project.velocity_version}"
     shadow "org.yaml:snakeyaml:${project.snakeyaml_version}"
-    shadow "net.engio:mbassador:${project.mbassador_version}"
     implementation "io.lettuce:lettuce-core:${project.lettuce_version}"
 }
 

@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.events.player;
 
-import group.aelysium.rustyconnector.toolkit.core.events.Cancelable;
+import group.aelysium.rustyconnector.toolkit.core.events.Event;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 /**
  * Represents a player switching from one MCLoader in a family to another MCLoader in that same family.
  */
-public class FamilyInternalSwitchEvent extends Cancelable {
+public class FamilyInternalSwitchEvent implements Event {
     protected final IFamily family;
     protected final IMCLoader previousMCLoader;
     protected final IMCLoader newMCLoader;

@@ -11,12 +11,17 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.Ra
 import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handlers.HandshakeDisconnectListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.commands.CommandLeave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
-import group.aelysium.rustyconnector.toolkit.core.events.DefaultListener;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.VelocityPacketBuilder;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
+import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.UnregisterEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilySwitchEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderSwitchEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.toolkit.velocity.util.Version;
@@ -224,13 +229,12 @@ class Initialize {
 
         services.put(group.aelysium.rustyconnector.core.lib.events.EventManager.class, rcEventManager);
 
-        rcEventManager.on(new OnFamilyLeave());
-        rcEventManager.on(new OnFamilySwitch());
-        rcEventManager.on(new OnMCLoaderRegister());
-        rcEventManager.on(new OnMCLoaderUnregister());
-        rcEventManager.on(new OnMCLoaderSwitch());
-        rcEventManager.on(new OnMCLoaderLeave());
-        rcEventManager.on(new DefaultListener());
+        rcEventManager.on(FamilyLeaveEvent.class, new OnFamilyLeave());
+        rcEventManager.on(FamilySwitchEvent.class, new OnFamilySwitch());
+        rcEventManager.on(RegisterEvent.class, new OnMCLoaderRegister());
+        rcEventManager.on(UnregisterEvent.class, new OnMCLoaderUnregister());
+        rcEventManager.on(MCLoaderSwitchEvent.class, new OnMCLoaderSwitch());
+        rcEventManager.on(MCLoaderLeaveEvent.class, new OnMCLoaderLeave());
     }
 
     public void commands(DependencyInjector.DI3<Flame, PluginLogger, MessageCacheService> dependencies) {
