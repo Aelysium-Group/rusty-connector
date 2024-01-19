@@ -42,26 +42,7 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
     public void leave(IPlayer player) {
         if(this.activeSession == null) return;
 
-        if(!this.activeSession.players().remove(player)) return;
-
-        ISession.Settings settings = this.activeSession.settings();
-
-        if(this.activeSession.players().size() >= settings.min()) return;
-
-
-        this.implodeSession("To many people left the server! There aren't enough players to meet the minimum player requirements.");
-    }
-
-    public void implodeSession(String reason) {
-        Packet packet = Tinder.get().services().packetBuilder().newBuilder()
-                .identification(BuiltInIdentifications.RANKED_GAME_IMPLODE)
-                .sendingToMCLoader(this.uuid())
-                .parameter(RankedGame.Imploded.Parameters.REASON, reason)
-                .parameter(RankedGame.Imploded.Parameters.SESSION_UUID, this.activeSession.uuid().toString())
-                .build();
-        Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
-        this.activeSession.implode();
-        this.unlock();
+        this.activeSession.leave(player);
     }
 
     public void unlock() {

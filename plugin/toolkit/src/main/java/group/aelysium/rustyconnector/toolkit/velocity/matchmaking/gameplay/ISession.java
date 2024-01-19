@@ -24,7 +24,7 @@ public interface ISession extends JSONParseable {
      * This method is similar to {@link #end(List, List)} except that it will inform players that their session had to be ended,
      * and not players will be rewarded points.
      */
-    void implode();
+    void implode(String reason);
 
     IRankedMCLoader mcLoader();
 
@@ -32,6 +32,13 @@ public interface ISession extends JSONParseable {
      * Gets the players that are currently in this session.
      */
     List<IPlayer> players();
+
+    /**
+     * Removes the player from the session.
+     * The session will implode if the player leaving causes it to have not enough players to continue.
+     * @param player The player to leave.
+     */
+    boolean leave(IPlayer player);
 
 
     interface IWaiting {
@@ -51,6 +58,11 @@ public interface ISession extends JSONParseable {
          * Checks if the waiting session contains the player.
          */
         boolean contains(IPlayer player);
+
+        /**
+         * Removes the specified player from the waiting session.
+         */
+        boolean remove(IPlayer player);
     }
 
     record Settings(int min, int max, IGamemodeRankManager game) {}

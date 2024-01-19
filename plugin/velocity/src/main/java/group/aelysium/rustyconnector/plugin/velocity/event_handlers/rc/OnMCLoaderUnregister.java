@@ -19,7 +19,7 @@ public class OnMCLoaderUnregister implements Listener<UnregisterEvent> {
 
         try {
             RankedMCLoader mcLoader = (RankedMCLoader) event.mcLoader();
-            mcLoader.implodeSession("The server that this session was on has closed!");
+            mcLoader.currentSession().orElseThrow().implode("The server that this session was on has closed!");
         } catch (Exception ignore) {}
 
         // Fire console message

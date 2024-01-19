@@ -3,11 +3,14 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
+import group.aelysium.rustyconnector.core.lib.packets.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
+import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
@@ -64,14 +67,33 @@ public class Session implements ISession {
         this.mcLoader.unlock();
     }
 
-    public void implode() {
-        this.players.forEach(player -> player.sendMessage(Component.text("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.", NamedTextColor.RED)));
+    public void implode(String reason) {
+        this.players.forEach(player -> player.sendMessage(Component.text(reason, NamedTextColor.RED)));
+
+        Packet packet = Tinder.get().services().packetBuilder().newBuilder()
+                .identification(BuiltInIdentifications.RANKED_GAME_IMPLODE)
+                .sendingToMCLoader(this.uuid())
+                .parameter(RankedGame.Imploded.Parameters.REASON, reason)
+                .parameter(RankedGame.Imploded.Parameters.SESSION_UUID, this.uuid.toString())
+                .build();
+        Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
+        this.mcLoader.unlock();
 
         this.end(List.of(), List.of());
     }
 
     public List<IPlayer> players() {
         return players;
+    }
+
+    public boolean leave(IPlayer player) {
+        if(!this.players.remove(player)) return false;
+
+        if(this.players.size() >= this.settings.min()) return true;
+
+        this.implode("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.");
+
+        return true;
     }
 
     @Override
@@ -134,6 +156,10 @@ public class Session implements ISession {
             return this.players;
         }
 
+        public boolean remove(IPlayer player) {
+            return this.players.remove(player);
+        }
+
         /**
          * Starts the session on the specified MCLoader.
          * By the time {@link Session} is returned, it should be assumed that all players have connected.
@@ -142,8 +168,9 @@ public class Session implements ISession {
          * @return A running {@link Session}.
          * @throws AlreadyBoundException If a session is already running on this MCLoader.
          */
-        public ISession start(IRankedMCLoader mcLoader, Settings settings) {
+        public ISession start(IRankedMCLoader mcLoader, Settings settings) throws AlreadyBoundException {
             ISession session = new Session(uuid, players, mcLoader, settings);
+            if(mcLoader.currentSession().isPresent()) throw new AlreadyBoundException("There's already a Session running on this MCLoader!");
             ((RankedMCLoader) mcLoader).connect(session);
             return session;
         }
