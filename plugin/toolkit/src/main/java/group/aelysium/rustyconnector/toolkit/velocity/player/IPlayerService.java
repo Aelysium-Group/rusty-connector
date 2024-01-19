@@ -14,15 +14,15 @@ public interface IPlayerService extends Service {
      * Finds a player based on a uuid.
      * An alternate route of getting a player, other than "tinder.services().player().fetch()", can be to use {@link IPlayer.Reference new Family.Reference(uuid)}{@link IPlayer.Reference#get() .get()}.
      * @param uuid The uuid to search for.
-     * @return {@link Optional< IPlayer >}
+     * @return {@link Optional<IPlayer>}
      */
-    Optional<? extends IPlayer> fetch(UUID uuid);
+    Optional<IPlayer> fetch(UUID uuid);
 
     /**
      * Finds a player based on a username.
      * An alternate route of getting a player, other than "tinder.services().player().fetch()", can be to use {@link IPlayer.UsernameReference new Family.UsernameReference(username)}{@link IPlayer.Reference#get() .get()}.
      * @param username The username to search for.
-     * @return {@link Optional< IPlayer >}
+     * @return {@link Optional<IPlayer>}
      */
-    Optional<? extends IPlayer> fetch(String username);
+    Optional<IPlayer> fetch(String username);
 }

@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.Ra
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.WinLoss;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.WinRate;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
@@ -336,7 +337,7 @@ public class ProxyLang extends Lang {
     public final static Message RC_FAMILY = () -> {
         Tinder api = Tinder.get();
         Component families = text("");
-        for (Family family : api.services().family().dump()) {
+        for (IFamily family : api.services().family().dump()) {
             if(family instanceof RootFamily)
                 families = families.append(text("["+family.id()+"*] ").color(BLUE));
             if(family instanceof ScalarFamily)
@@ -1045,7 +1046,7 @@ public class ProxyLang extends Lang {
             uuidOrDisplayName + " " + resolver().get("proxy.console_icons.unregistered") +" "+familyName
     );
 
-    public final static ParameterizedMessage1<Family> FAMILY_BALANCING = family -> text(
+    public final static ParameterizedMessage1<IFamily> FAMILY_BALANCING = family -> text(
             family.id() + " " + resolver().get("proxy.console_icons.family_balancing")
     );
 }

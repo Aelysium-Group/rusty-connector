@@ -29,9 +29,9 @@ public interface IFamilyService extends Service {
      * Finds a family based on an id.
      * An alternate route of getting a family, other than "tinder.services().family().find()", can be to use {@link IFamily.Reference new Family.Reference(id)}{@link IFamily.Reference#get() .get()}.
      * @param id The id to search for.
-     * @return {@link Optional< IFamily >}
+     * @return {@link Optional<IFamily>}
      */
-    Optional<? extends IFamily> find(String id);
+    Optional<IFamily> find(String id);
 
     /**
      * Add a family to this manager.
@@ -47,7 +47,7 @@ public interface IFamilyService extends Service {
 
     /**
      * Gets a list of all families in this service.
-     * @return {@link List< IFamily >}
+     * @return {@link List<IFamily>}
      */
-    List<? extends IFamily> dump();
+    List<IFamily> dump();
 }

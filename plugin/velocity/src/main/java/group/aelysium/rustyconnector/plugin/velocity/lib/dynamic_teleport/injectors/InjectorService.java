@@ -58,13 +58,7 @@ public class InjectorService implements IInjectorService {
             for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
                 IFamily family;
                 try {
-                    Family fetchedFamily = familyService.find(entry.getValue()).orElseThrow();
-                    if(!(fetchedFamily instanceof IFamily)) {
-                        bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't support family injectors! Ignoring...", NamedTextColor.RED));
-                        continue;
-                    }
-
-                    family = (IFamily) fetchedFamily;
+                    family = familyService.find(entry.getValue()).orElseThrow();
                 } catch (Exception ignore) {
                     bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
                     continue;

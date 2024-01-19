@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
@@ -46,7 +47,7 @@ public class ServerService implements IServerService {
     }
 
     protected Optional<K8MCLoader> fetchPods(String podName) {
-        for(Family family : Tinder.get().services().family().dump()) {
+        for(IFamily family : Tinder.get().services().family().dump()) {
             try {
                 K8MCLoader found = (K8MCLoader) family.loadBalancer().servers().stream().filter(s -> {
                     if (!(s instanceof K8MCLoader)) return false;

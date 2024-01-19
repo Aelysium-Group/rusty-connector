@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class FamilyService implements IFamilyService {
-    private final Map<String, Family> families = new HashMap<>();
+    private final Map<String, IFamily> families = new HashMap<>();
     private WeakReference<IRootFamily> rootFamily;
     private final boolean catchDisconnectingPlayers;
 
@@ -33,8 +33,8 @@ public class FamilyService implements IFamilyService {
         return this.rootFamily.get();
     }
 
-    public Optional<Family> find(String id) {
-        Family family = this.families.get(id);
+    public Optional<IFamily> find(String id) {
+        IFamily family = this.families.get(id);
         if(family == null) return Optional.empty();
         return Optional.of(family);
     }
@@ -47,7 +47,7 @@ public class FamilyService implements IFamilyService {
         this.families.remove(family.id());
     }
 
-    public List<Family> dump() {
+    public List<IFamily> dump() {
         return this.families.values().stream().toList();
     }
 
@@ -61,7 +61,7 @@ public class FamilyService implements IFamilyService {
 
     public void kill() {
         // Teardown logic for any families that need it
-        for (Family family : this.families.values()) {
+        for (IFamily family : this.families.values()) {
             if(family instanceof Service)
                 ((Service) family).kill();
         }

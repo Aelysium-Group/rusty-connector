@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.toolkit.velocity.events.family.RebalanceEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
@@ -19,7 +20,7 @@ public class LoadBalancingService extends ClockService {
     }
 
     public void init(DependencyInjector.DI3<FamilyService, PluginLogger, EventManager> deps) {
-        for (Family family : deps.d1().dump()) {
+        for (IFamily family : deps.d1().dump()) {
             this.scheduleRecurring(() -> {
                 try {
                     PluginLogger logger = deps.d2();

@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.Database;
@@ -15,11 +16,11 @@ public class PlayerService implements IPlayerService {
         this.storage = storage;
     }
 
-    public Optional<Player> fetch(UUID uuid) {
+    public Optional<IPlayer> fetch(UUID uuid) {
         try {
             Database root = this.storage.database();
 
-            Player player = root.players().get(uuid);
+            IPlayer player = root.players().get(uuid);
 
             if(player == null) return Optional.empty();
 
@@ -31,7 +32,7 @@ public class PlayerService implements IPlayerService {
         return Optional.empty();
     }
 
-    public Optional<Player> fetch(String username) {
+    public Optional<IPlayer> fetch(String username) {
         try {
             Optional<com.velocitypowered.api.proxy.Player> velocityPlayer = Tinder.get().velocityServer().getPlayer(username);
             Database root = this.storage.database();
@@ -39,7 +40,7 @@ public class PlayerService implements IPlayerService {
             if(velocityPlayer.isEmpty())
                 return root.players().values().stream().filter(fakePlayer -> fakePlayer.username().equals(username)).findAny();
 
-            Player player = root.players().get(velocityPlayer.orElseThrow().getUniqueId());
+            IPlayer player = root.players().get(velocityPlayer.orElseThrow().getUniqueId());
             if(player == null) return Optional.empty();
 
             return Optional.of(player);
