@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.plugin.fabric.commands;
 import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
 import cloud.commandframework.arguments.StaticArgument;
+import cloud.commandframework.arguments.standard.IntegerArgument;
 import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.context.CommandContext;
@@ -31,6 +32,7 @@ public final class CommandRusty {
     public static void create(FabricServerCommandManager<CommandSource> manager) {
         manager.command(messageList());
         manager.command(messageGet());
+        manager.command(messageListPage());
         manager.command(send());
         manager.command(unlock());
         manager.command(lock());
@@ -93,6 +95,31 @@ public final class CommandRusty {
                         List<CacheableMessage> messages = cache.messages();
 
                         MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
+                    } catch (Exception e) {
+                        logger.send(Component.text("There was an issue getting those messages!\n"+e.getMessage(), NamedTextColor.RED));
+                    }
+                });
+    }
+
+    private static Command.Builder<CommandSource> messageListPage() {
+        Tinder api = Tinder.get();
+        PluginLogger logger = api.logger();
+        final Command.Builder<CommandSource> builder = api.commandManager().commandBuilder("rc", "/rc");
+
+        return builder.literal("message")
+                .argument(StaticArgument.of("list"))
+                .argument(IntegerArgument.of("page"), ArgumentDescription.of("The page number to fetch."))
+                .handler(context -> {
+                    checkForConsole(context);
+                    MessageCacheService cache = TinderAdapterForCore.getTinder().services().messageCache();
+                    try {
+                        final Integer page = context.get("page");
+
+                        List<CacheableMessage> messages = cache.fetchMessagesPage(page);
+
+                        int numberOfPages = Math.floorDiv(cache.size(),10) + 1;
+
+                        MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,page,numberOfPages);
                     } catch (Exception e) {
                         logger.send(Component.text("There was an issue getting those messages!\n"+e.getMessage(), NamedTextColor.RED));
                     }

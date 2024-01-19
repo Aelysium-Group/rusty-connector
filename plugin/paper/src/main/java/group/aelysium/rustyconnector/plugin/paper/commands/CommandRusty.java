@@ -3,10 +3,12 @@ package group.aelysium.rustyconnector.plugin.paper.commands;
 import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
 import cloud.commandframework.arguments.StaticArgument;
+import cloud.commandframework.arguments.standard.IntegerArgument;
 import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
+import com.velocitypowered.api.command.CommandSource;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -28,16 +30,17 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public final class CommandRusty {
-    public static void create(PaperCommandManager<CommandSender> manager, MessageCacheService cache) {
-        manager.command(messageList(manager, cache));
-        manager.command(messageGet(manager, cache));
+    public static void create(PaperCommandManager<CommandSender> manager) {
+        manager.command(messageList(manager));
+        manager.command(messageListPage(manager));
+        manager.command(messageGet(manager));
         manager.command(send(manager));
         manager.command(unlock(manager));
         manager.command(lock(manager));
         manager.command(uuid(manager));
     }
 
-    private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager, MessageCacheService cache) {
+    private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
@@ -48,6 +51,7 @@ public final class CommandRusty {
                 .argument(LongArgument.of("snowflake"), ArgumentDescription.of("Message ID"))
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
+                            MessageCacheService cache = TinderAdapterForCore.getTinder().services().messageCache();
                             try {
                                 final Long snowflake = commandContext.get("snowflake");
 
@@ -62,7 +66,7 @@ public final class CommandRusty {
                         }).execute());
     }
 
-    private static Command.Builder<CommandSender> messageList(PaperCommandManager<CommandSender> manager, MessageCacheService cache) {
+    private static Command.Builder<CommandSender> messageList(PaperCommandManager<CommandSender> manager) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
@@ -72,6 +76,7 @@ public final class CommandRusty {
                 .argument(StaticArgument.of("list"))
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
+                            MessageCacheService cache = TinderAdapterForCore.getTinder().services().messageCache();
                             try {
                                 if(cache.size() > 10) {
                                     int numberOfPages = Math.floorDiv(cache.size(),10) + 1;
@@ -86,6 +91,32 @@ public final class CommandRusty {
 
                                 MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
+                            } catch (Exception e) {
+                                logger.send(Component.text("There was an issue getting those messages!\n"+e.getMessage(), NamedTextColor.RED));
+                            }
+                        }).execute());
+    }
+
+    private static Command.Builder<CommandSender> messageListPage(PaperCommandManager<CommandSender> manager) {
+        Tinder api = Tinder.get();
+        group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger logger = api.logger();
+        final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
+
+        return builder.literal("message")
+                .senderType(ConsoleCommandSender.class)
+                .argument(StaticArgument.of("list"))
+                .argument(IntegerArgument.of("page"), ArgumentDescription.of("The page number to fetch."))
+                .handler(context -> manager.taskRecipe().begin(context)
+                        .asynchronous(commandContext -> {
+                            MessageCacheService cache = TinderAdapterForCore.getTinder().services().messageCache();
+                            try {
+                                final Integer page = context.get("page");
+
+                                List<CacheableMessage> messages = cache.fetchMessagesPage(page);
+
+                                int numberOfPages = Math.floorDiv(cache.size(),10) + 1;
+
+                                MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,page,numberOfPages);
                             } catch (Exception e) {
                                 logger.send(Component.text("There was an issue getting those messages!\n"+e.getMessage(), NamedTextColor.RED));
                             }

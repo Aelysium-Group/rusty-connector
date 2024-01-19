@@ -14,6 +14,7 @@ import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import group.aelysium.rustyconnector.toolkit.core.server.ServerAssignment;
 import group.aelysium.rustyconnector.toolkit.velocity.magic_link.IMagicLink;
 import group.aelysium.rustyconnector.toolkit.velocity.util.AddressUtil;
@@ -79,7 +80,7 @@ public class HandshakePingListener extends PacketListener<MagicLink.Handshake.Pi
                         .identification(BuiltInIdentifications.MAGICLINK_HANDSHAKE_SUCCESS)
                         .parameter(MagicLink.Handshake.Success.Parameters.MESSAGE, "Connected to the proxy! Registered as `"+server.serverInfo().getName()+"` into the family `"+server.family().id()+"`. Loaded using the magic config `"+packet.magicConfigName()+"`.")
                         .parameter(MagicLink.Handshake.Success.Parameters.COLOR, NamedTextColor.GREEN.toString())
-                        .parameter(MagicLink.Handshake.Success.Parameters.INTERVAL, String.valueOf(serverService.serverInterval()))
+                        .parameter(MagicLink.Handshake.Success.Parameters.INTERVAL, new PacketParameter(serverService.serverInterval()))
                         .parameter(MagicLink.Handshake.Success.Parameters.ASSIGNMENT, assignment.toString())
                         .build();
                 backboneMessenger.publish(response);
