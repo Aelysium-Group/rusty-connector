@@ -56,7 +56,9 @@ public class OnPlayerDisconnect {
             RankedFamily family = (RankedFamily) player.server().orElseThrow().family();
 
             family.matchmaker().remove(player);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+            System.out.println("No MCLoader was found for the player! Attempting to hard search for player in matchmakers...");
+        }
         try {
             List<RankedFamily> families = new ArrayList<>();
             api.services().family().dump().forEach(family -> {
@@ -65,7 +67,9 @@ public class OnPlayerDisconnect {
 
             for (RankedFamily family : families)
                 if (family.matchmaker().remove(player)) break;
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
