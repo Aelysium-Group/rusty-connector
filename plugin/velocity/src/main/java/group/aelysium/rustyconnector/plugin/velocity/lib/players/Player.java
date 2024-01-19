@@ -61,7 +61,9 @@ public class Player implements IPlayer {
         StorageService storage = Tinder.get().services().storage();
         try {
             return Optional.of(storage.database().getGame(game.name()).orElseThrow().rankedPlayer(storage, this.uuid, false));
-        } catch (NoSuchElementException ignore) {}
+        } catch (NoSuchElementException e) {
+            e.printStackTrace();
+        }
         return Optional.empty();
     }
 
