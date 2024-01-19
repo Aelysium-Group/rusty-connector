@@ -7,8 +7,8 @@ import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageServi
 public class RandomizedPlayerRank implements IRandomizedPlayerRank {
     public Double rank() { return 0.0; }
 
-    public IScoreCard.IRankSchema.Type<Class<IRandomizedPlayerRank>> type() {
-        return IScoreCard.IRankSchema.RANDOMIZED;
+    public IScoreCard.RankSchema type() {
+        return IScoreCard.RankSchema.RANDOMIZED;
     }
 
     @Override

@@ -88,7 +88,7 @@ public interface IMatchmaker extends Service {
             Session session,
             Queue queue
     ) {
-        public record Ranking(IScoreCard.IRankSchema.Type<?> algorithm, double variance) {}
+        public record Ranking(IScoreCard.RankSchema schema, double variance) {}
         public record Session(Building building, Closing closing) {
             public record Building(int min, int max, LiquidTimestamp interval) {}
             public record Closing(int threshold, boolean quittersLose, boolean stayersWin) {}

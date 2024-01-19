@@ -3,6 +3,7 @@ package group.aelysium.rustyconnector.core.mcloader.lib.magic_link.handlers;
 import group.aelysium.rustyconnector.core.lib.events.EventManager;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
+import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
@@ -34,7 +35,7 @@ public class HandshakeFailureListener extends PacketListener<MagicLink.Handshake
     @Override
     public void execute(MagicLink.Handshake.Failure packet) {
         PluginLogger logger = api.logger();
-        MagicLinkService service = (MagicLinkService) api.services().magicLink();
+        MagicLinkService service = ((MCLoaderTinder) api).services().magicLink();
 
         logger.send(Component.text(packet.reason(), NamedTextColor.RED));
         logger.send(Component.text("Waiting 1 minute before trying again...", NamedTextColor.GRAY));

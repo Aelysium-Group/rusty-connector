@@ -19,6 +19,4 @@ public interface IWinRatePlayerRank extends IPlayerRank<Double> {
     <TMySQLStorage extends IMySQLStorageService> void markLoss(TMySQLStorage storage);
 
     Double rank();
-
-    IScoreCard.IRankSchema.Type<Class<IWinRatePlayerRank>> type();
 }

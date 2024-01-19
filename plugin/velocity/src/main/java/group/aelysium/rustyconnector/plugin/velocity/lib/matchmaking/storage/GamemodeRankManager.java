@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.WinLossPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.WinRatePlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
@@ -11,6 +13,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageServi
 import org.eclipse.serializer.collections.lazy.LazyHashMap;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -20,10 +23,10 @@ import java.util.UUID;
  */
 public class GamemodeRankManager implements IGamemodeRankManager {
     protected String name;
-    protected IScoreCard.IRankSchema.Type<?> rankingSchema;
+    protected IScoreCard.RankSchema rankingSchema;
     protected Map<UUID, ScoreCard> scorecards = new LazyHashMap<>();
 
-    public GamemodeRankManager(String name, IScoreCard.IRankSchema.Type<?> schema) {
+    public GamemodeRankManager(String name, IScoreCard.RankSchema schema) {
         this.name = name;
         this.rankingSchema = schema;
     }
@@ -50,32 +53,18 @@ public class GamemodeRankManager implements IGamemodeRankManager {
     }
 
     public IPlayerRank<?> playerRank(IMySQLStorageService storage, IPlayer player) throws IllegalStateException {
-        if(rankingSchema == IScoreCard.IRankSchema.RANDOMIZED) return new RandomizedPlayerRank();
+        if(rankingSchema == IScoreCard.RankSchema.RANDOMIZED) return new RandomizedPlayerRank();
 
-        ScoreCard scorecard = this.scorecards.get(player.uuid());
-        if(scorecard == null) {
+        ScoreCard scorecard = Optional.ofNullable(this.scorecards.get(player.uuid())).orElseGet(() -> {
             ScoreCard fresh = new ScoreCard();
 
             this.scorecards.put(player.uuid(), fresh);
             storage.store(this.scorecards);
 
-            scorecard = fresh;
-        }
+            return fresh;
+        });
 
-        IPlayerRank<?> playerRank = scorecard.fetch((StorageService) storage, this.rankingSchema);
-        if(playerRank == null) {
-            try {
-                IPlayerRank<?> fresh = this.rankingSchema.get().getDeclaredConstructor().newInstance();
-
-                scorecard.store((StorageService) storage, fresh);
-
-                playerRank = fresh;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return playerRank;
+        return scorecard.fetch((StorageService) storage, this.rankingSchema); // Should never be null
     }
 
     public void quantizeRankSchemas(StorageService storage) {

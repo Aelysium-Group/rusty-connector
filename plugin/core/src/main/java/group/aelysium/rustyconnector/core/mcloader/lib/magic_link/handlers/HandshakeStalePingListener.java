@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.lib.events.EventManager;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.MagicLink;
+import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.core.mcloader.lib.magic_link.MagicLinkService;
 import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
@@ -39,9 +40,9 @@ public class HandshakeStalePingListener extends PacketListener<MagicLink.StalePi
     @Override
     public void execute(MagicLink.StalePing packet) {
         PluginLogger logger = api.logger();
-        MagicLinkService service = (MagicLinkService) api.services().magicLink();
-        ServerInfoService serverInfoService = (ServerInfoService) api.services().serverInfo();
-        ((EventManager) api.services().events()).fireEvent(new TimeoutEvent());
+        MagicLinkService service = ((MCLoaderTinder) api).services().magicLink();
+        ServerInfoService serverInfoService = ((MCLoaderTinder) api).services().serverInfo();
+        ((MCLoaderTinder) api).services().events().fireEvent(new TimeoutEvent());
 
         logger.send(Component.text("Connection to the Proxy has timed out! Attempting to reconnect...", NamedTextColor.RED));
         service.setDelay(5);

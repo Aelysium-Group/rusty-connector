@@ -14,6 +14,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISess
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -27,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard.IRankSchema.*;
 import static java.lang.Math.floor;
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 
@@ -261,8 +261,8 @@ public abstract class Matchmaker implements IMatchmaker {
     }
 
     public static Matchmaker from(Settings settings, StorageService storage, IGamemodeRankManager game) {
-        if (settings.ranking().algorithm().equals(WIN_LOSS)) return new WinLoss(settings, storage, game);
-        if (settings.ranking().algorithm().equals(WIN_RATE)) return new WinRate(settings, storage, game);
+        if (settings.ranking().schema().equals(IScoreCard.RankSchema.WIN_LOSS)) return new WinLoss(settings, storage, game);
+        if (settings.ranking().schema().equals(IScoreCard.RankSchema.WIN_RATE)) return new WinRate(settings, storage, game);
 
         return new Randomized(settings, storage, game);
     }

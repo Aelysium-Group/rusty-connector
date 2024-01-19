@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.handlers;
 
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
+import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
@@ -33,7 +34,7 @@ public class CoordinateRequestListener extends PacketListener<QueueTPAPacket> {
         if(target == null) return;
         if(!api.isOnline(target)) return;
 
-        CoordinateRequest coordinateRequest = (CoordinateRequest) api.services().dynamicTeleport().newRequest(packet.sourceUsername(), target);
+        CoordinateRequest coordinateRequest = ((MCLoaderTinder) api).services().dynamicTeleport().newRequest(packet.sourceUsername(), target);
 
         // Attempt to resolve the tpa right away! If the player isn't on the server, this should fail silently.
         try {

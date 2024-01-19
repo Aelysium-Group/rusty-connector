@@ -13,44 +13,20 @@ public interface IScoreCard<TMySQLStorageService extends IMySQLStorageService> {
      * @param storage The storage resource to store in.
      * @param rank The rank to store.
      */
-    <TPlayerRank extends IPlayerRank<?>> void store(TMySQLStorageService storage, TPlayerRank rank);
+    void store(TMySQLStorageService storage, IPlayerRank<?> rank);
 
     /**
      * Fetches the player's current rank based on the schema provided.
      * If no rank exists for that schema, will create a new rank entry and return that.
      * @param schema The schema to search for.
-     * @return {@link TPlayerRank}
+     * @return {@link IPlayerRank}
      * @throws IllegalStateException If there was a fatal exception while attempting to get the user's rank.
      */
-    <TPlayerRank extends IPlayerRank<?>> TPlayerRank fetch(TMySQLStorageService storage, IRankSchema.Type<?> schema);
+    IPlayerRank<?> fetch(TMySQLStorageService storage, RankSchema schema);
 
-    interface IRankSchema {
-        Type<Class<IRandomizedPlayerRank>> RANDOMIZED = new Type<>(IRandomizedPlayerRank.class);
-        Type<Class<IWinLossPlayerRank>> WIN_LOSS = new Type<>(IWinLossPlayerRank.class);
-        Type<Class<IWinRatePlayerRank>> WIN_RATE = new Type<>(IWinRatePlayerRank.class);
-
-        class Type<T extends Class<? extends IPlayerRank<?>>> {
-            T holder;
-
-            public Type(T holder) {
-                this.holder = holder;
-            }
-
-            public T get() {
-                return this.holder;
-            }
-        }
-
-        static Type<?> valueOf(String type) {
-            switch (type.toUpperCase()) {
-                case "WIN_LOSS" -> {
-                    return WIN_LOSS;
-                }
-                case "WIN_RATE" -> {
-                    return WIN_RATE;
-                }
-            }
-            return RANDOMIZED;
-        }
+    enum RankSchema {
+        RANDOMIZED,
+        WIN_LOSS,
+        WIN_RATE
     }
 }

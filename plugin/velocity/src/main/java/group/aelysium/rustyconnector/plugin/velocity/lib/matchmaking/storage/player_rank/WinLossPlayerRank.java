@@ -26,7 +26,8 @@ public class WinLossPlayerRank implements IWinLossPlayerRank {
         return round((double) wins / losses, 2);
     }
 
-    public IScoreCard.IRankSchema.Type<Class<IWinLossPlayerRank>> type() {
-        return IScoreCard.IRankSchema.WIN_LOSS;
+
+    public IScoreCard.RankSchema type() {
+        return IScoreCard.RankSchema.WIN_LOSS;
     }
 }

@@ -28,7 +28,8 @@ public class WinRatePlayerRank implements IWinRatePlayerRank {
         return round((double) wins / games, 4);
     }
 
-    public IScoreCard.IRankSchema.Type<Class<IWinRatePlayerRank>> type() {
-        return IScoreCard.IRankSchema.WIN_RATE;
+
+    public IScoreCard.RankSchema type() {
+        return IScoreCard.RankSchema.WIN_RATE;
     }
 }

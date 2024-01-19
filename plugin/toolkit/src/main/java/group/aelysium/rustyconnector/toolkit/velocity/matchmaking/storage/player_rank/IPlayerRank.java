@@ -10,7 +10,7 @@ public interface IPlayerRank<T> {
      */
     T rank();
 
-    IScoreCard.IRankSchema.Type<?> type();
+    IScoreCard.RankSchema type();
 
     <TMySQLStorage extends IMySQLStorageService> void markWin(TMySQLStorage storage);
     <TMySQLStorage extends IMySQLStorageService> void markLoss(TMySQLStorage storage);

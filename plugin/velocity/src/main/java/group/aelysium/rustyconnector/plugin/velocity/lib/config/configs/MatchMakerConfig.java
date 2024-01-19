@@ -32,7 +32,7 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
     }
 
     protected void register() throws IllegalStateException {
-        IScoreCard.IRankSchema.Type<?> algorithm = IScoreCard.IRankSchema.valueOf(IYAML.getValue(this.data,"ranking.algorithm",String.class));
+        IScoreCard.RankSchema algorithm = IScoreCard.RankSchema.valueOf(IYAML.getValue(this.data,"ranking.algorithm",String.class));
         double variance = IYAML.getValue(this.data,"ranking.variance",Double.class);
         variance = round(variance, 2);
 

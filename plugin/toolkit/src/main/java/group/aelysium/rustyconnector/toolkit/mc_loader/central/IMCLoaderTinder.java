@@ -21,8 +21,6 @@ public interface IMCLoaderTinder {
 
     PluginLogger logger();
 
-    ICoreServiceHandler services();
-
     String dataFolder();
 
     ILangService<? extends ILanguageResolver> lang();

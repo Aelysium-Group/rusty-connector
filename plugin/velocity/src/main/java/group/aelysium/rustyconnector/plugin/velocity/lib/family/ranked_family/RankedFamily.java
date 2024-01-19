@@ -104,7 +104,7 @@ public class RankedFamily extends Family implements IRankedFamily {
         Matchmaker matchmaker;
         {
             GamemodeRankManager fetched = mySQLStorage.database().getGame(config.name()).orElseGet(() -> {
-                GamemodeRankManager game = new GamemodeRankManager(config.gamemodeName(), matchMakerConfig.settings().ranking().algorithm());
+                GamemodeRankManager game = new GamemodeRankManager(config.gamemodeName(), matchMakerConfig.settings().ranking().schema());
                 mySQLStorage.database().saveGame(mySQLStorage, game);
 
                 return game;
