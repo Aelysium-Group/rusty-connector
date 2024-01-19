@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.GamemodeRankManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -60,7 +61,7 @@ public class Player implements IPlayer {
     public Optional<IPlayerRankProfile> rank(IGamemodeRankManager game) {
         StorageService storage = Tinder.get().services().storage();
         try {
-            return Optional.of(storage.database().getGame(game.name()).orElseThrow().rankedPlayer(storage, this.uuid, false));
+            return Optional.of(game.rankedPlayer(storage, this.uuid, false));
         } catch (NoSuchElementException e) {
             e.printStackTrace();
         }
