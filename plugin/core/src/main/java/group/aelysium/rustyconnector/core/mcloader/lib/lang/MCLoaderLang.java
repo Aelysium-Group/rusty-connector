@@ -29,15 +29,6 @@ public class MCLoaderLang extends Lang {
 
     public final static String STATUS = resolver().getRaw("core.single_word.status");
 
-    /*
-     * AQUA - For when data is successfully returned or when we send usage info
-     * RED - For when an error has occurred.
-     * ORANGE/YELLOW - For emphasis or highlighting.
-     */
-    public static JoinConfiguration newlines() {
-        return JoinConfiguration.separator(newline());
-    }
-
     public final static Component BORDER = text("█████████████████████████████████████████████████████████████████████████████████████████████████", DARK_GRAY);
 
     public final static Component SPACING = text("");
@@ -104,6 +95,7 @@ public class MCLoaderLang extends Lang {
     );
 
     public final static Message RC_SEND_USAGE = () -> join(
+            newlines(),
             BORDER,
             SPACING,
             WORDMARK_USAGE.build(),
@@ -117,6 +109,7 @@ public class MCLoaderLang extends Lang {
     );
 
     public final static ParameterizedMessage3<Long, Date, String> RC_MESSAGE_GET_MESSAGE = (id, date, contents) -> join(
+            newlines(),
             BORDER,
             SPACING,
             WORDMARK_MESSAGE.build().color(BLUE),

@@ -54,7 +54,7 @@ public class ConnectorsConfig extends YAML {
         if (this.redis_dataChannel.equals("")) throw new IllegalStateException("Please configure your connector settings. `dataChannel` cannot be empty for Redis connectors.");
     }
 
-    public static ConnectorsConfig construct(Path dataFolder, LangService lang, boolean loadMessengers, boolean loadStorage) {
+    public static ConnectorsConfig construct(Path dataFolder, LangService lang) {
         ConnectorsConfig config = new ConnectorsConfig(dataFolder, "connectors.yml", "connectors", lang);
         config.register();
         return config;

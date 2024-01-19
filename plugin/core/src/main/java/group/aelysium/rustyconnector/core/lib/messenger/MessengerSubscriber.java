@@ -32,7 +32,9 @@ public abstract class MessengerSubscriber {
     protected void onMessage(String rawMessage) {
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
         // Set a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
-        if(messageCache == null) messageCache = new MessageCacheService(1);
+        if(messageCache == null) {
+            this.messageCache = new MessageCacheService(1);
+        }
 
         ICacheableMessage cachedMessage = null;
         try {

@@ -71,7 +71,6 @@ public class MCLoaderFlame extends ServiceableService<CoreServiceHandler> implem
             MessageCacheService messageCacheService = initialize.messageCache();
             RedisConnector messenger = initialize.connectors(cryptor, messageCacheService, logger, langService, serverInfoService.uuid());
 
-            initialize.messageCache();
             initialize.dynamicTeleport();
             MagicLinkService magicLinkService = initialize.magicLink(messenger);
             initialize.eventManager();
@@ -168,7 +167,7 @@ class Initialize {
     public RedisConnector connectors(AESCryptor cryptor, MessageCacheService cacheService, PluginLogger logger, LangService lang, UUID senderUUID) throws IOException {
         logger.send(Component.text("Building Connectors...", NamedTextColor.DARK_GRAY));
 
-        ConnectorsConfig config = ConnectorsConfig.construct(Path.of(api.dataFolder()), lang, true, false);
+        ConnectorsConfig config = ConnectorsConfig.construct(Path.of(api.dataFolder()), lang);
 
         RedisConnector.RedisConnectorSpec spec = new RedisConnector.RedisConnectorSpec(
                 config.getRedis_address(),

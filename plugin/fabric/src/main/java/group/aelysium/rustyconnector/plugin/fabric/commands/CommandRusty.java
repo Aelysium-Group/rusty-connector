@@ -7,6 +7,8 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.fabric.FabricServerCommandManager;
+import group.aelysium.rustyconnector.core.TinderAdapterForCore;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.MCLoader;
 import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
@@ -17,6 +19,8 @@ import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.core.lib.packets.SendPlayerPacket;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -74,30 +78,23 @@ public final class CommandRusty {
                 .argument(StaticArgument.of("list"))
                 .handler(context -> {
                     checkForConsole(context);
+                    MessageCacheService cache = TinderAdapterForCore.getTinder().services().messageCache();
                     try {
-                        MessageCacheService messageCacheService = api.services().messageCache();
-                        try {
-                            if(messageCacheService.size() > 10) {
-                                int numberOfPages = Math.floorDiv(messageCacheService.size(),10) + 1;
+                        if(cache.size() > 10) {
+                            int numberOfPages = Math.floorDiv(cache.size(),10) + 1;
 
-                                List<CacheableMessage> messagesPage = messageCacheService.fetchMessagesPage(1);
+                            List<CacheableMessage> messagesPage = cache.fetchMessagesPage(1);
 
-                                MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
+                            MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
-                                return;
-                            }
-
-                            List<CacheableMessage> messages = messageCacheService.messages();
-
-                            MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
-
-                        } catch (Exception e) {
-                            logger.log("There was an issue getting those messages!\n"+e.getMessage());
+                            return;
                         }
-                    } catch (NullPointerException e) {
-                        logger.log("That message either doesn't exist or is no-longer available in the cache!");
+
+                        List<CacheableMessage> messages = cache.messages();
+
+                        MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
                     } catch (Exception e) {
-                        logger.log("An error stopped us from getting that message!", e);
+                        logger.send(Component.text("There was an issue getting those messages!\n"+e.getMessage(), NamedTextColor.RED));
                     }
                 });
     }

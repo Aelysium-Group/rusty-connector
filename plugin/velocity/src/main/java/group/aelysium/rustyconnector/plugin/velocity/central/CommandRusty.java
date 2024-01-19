@@ -99,7 +99,7 @@ class Message {
                             ProxyLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
 
                         } catch (Exception e) {
-                            ProxyLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting those messages!\n"+e.getMessage());
+                            logger.send(Component.text("There was an issue getting those messages!\n"+e.getMessage(), NamedTextColor.RED));
                         }
                     }).start();
 
@@ -117,7 +117,7 @@ class Message {
 
                                     ProxyLang.RC_MESSAGE_PAGE.send(logger,messages,pageNumber,numberOfPages);
                                 } catch (Exception e) {
-                                    ProxyLang.RC_MESSAGE_ERROR.send(logger,"There was an issue getting that page!\n"+e.getMessage());
+                                    logger.send(Component.text("There was an issue getting those messages!\n"+e.getMessage(), NamedTextColor.RED));
                                 }
 
                             }).start();

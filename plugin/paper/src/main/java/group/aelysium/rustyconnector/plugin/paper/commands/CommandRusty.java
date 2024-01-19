@@ -7,8 +7,10 @@ import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.parsers.PlayerArgument;
 import cloud.commandframework.paper.PaperCommandManager;
+import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.MCLoader;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
@@ -17,6 +19,8 @@ import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.core.lib.packets.SendPlayerPacket;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -24,16 +28,16 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public final class CommandRusty {
-    public static void create(PaperCommandManager<CommandSender> manager) {
-        manager.command(messageList(manager));
-        manager.command(messageGet(manager));
+    public static void create(PaperCommandManager<CommandSender> manager, MessageCacheService cache) {
+        manager.command(messageList(manager, cache));
+        manager.command(messageGet(manager, cache));
         manager.command(send(manager));
         manager.command(unlock(manager));
         manager.command(lock(manager));
         manager.command(uuid(manager));
     }
 
-    private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager) {
+    private static Command.Builder<CommandSender> messageGet(PaperCommandManager<CommandSender> manager, MessageCacheService cache) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
@@ -47,9 +51,7 @@ public final class CommandRusty {
                             try {
                                 final Long snowflake = commandContext.get("snowflake");
 
-                                MessageCacheService messageCacheService = api.services().messageCache();
-
-                                CacheableMessage message = messageCacheService.findMessage(snowflake);
+                                CacheableMessage message = cache.findMessage(snowflake);
 
                                 MCLoaderLang.RC_MESSAGE_GET_MESSAGE.send(logger, message.getSnowflake(), message.getDate(), message.getContents());
                             } catch (NullPointerException e) {
@@ -60,7 +62,7 @@ public final class CommandRusty {
                         }).execute());
     }
 
-    private static Command.Builder<CommandSender> messageList(PaperCommandManager<CommandSender> manager) {
+    private static Command.Builder<CommandSender> messageList(PaperCommandManager<CommandSender> manager, MessageCacheService cache) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
         final Command.Builder<CommandSender> builder = api.commandManager().commandBuilder("rc", "/rc");
@@ -71,29 +73,21 @@ public final class CommandRusty {
                 .handler(context -> manager.taskRecipe().begin(context)
                         .asynchronous(commandContext -> {
                             try {
-                                MessageCacheService messageCacheService = api.services().messageCache();
-                                try {
-                                    if(messageCacheService.size() > 10) {
-                                        int numberOfPages = Math.floorDiv(messageCacheService.size(),10) + 1;
+                                if(cache.size() > 10) {
+                                    int numberOfPages = Math.floorDiv(cache.size(),10) + 1;
 
-                                        List<CacheableMessage> messagesPage = messageCacheService.fetchMessagesPage(1);
+                                    List<CacheableMessage> messagesPage = cache.fetchMessagesPage(1);
 
-                                        MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
+                                    MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messagesPage,1,numberOfPages);
 
-                                        return;
-                                    }
-
-                                    List<CacheableMessage> messages = messageCacheService.messages();
-
-                                    MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
-
-                                } catch (Exception e) {
-                                    logger.log("There was an issue getting those messages!\n"+e.getMessage());
+                                    return;
                                 }
-                            } catch (NullPointerException e) {
-                                logger.log("That message either doesn't exist or is no-longer available in the cache!");
+                                List<CacheableMessage> messages = cache.messages();
+
+                                MCLoaderLang.RC_MESSAGE_PAGE.send(logger,messages,1,1);
+
                             } catch (Exception e) {
-                                logger.log("An error stopped us from getting that message!", e);
+                                logger.send(Component.text("There was an issue getting those messages!\n"+e.getMessage(), NamedTextColor.RED));
                             }
                         }).execute());
     }

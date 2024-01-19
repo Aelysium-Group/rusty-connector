@@ -142,7 +142,7 @@ public class Tinder extends MCLoaderTinder {
     public void ignite(int port) throws RuntimeException {
         super.ignite(port);
 
-        CommandRusty.create(this.commandManager());
+        CommandRusty.create(this.commandManager(), this.flame.services().messageCache());
 
         this.paperServer().getPluginManager().registerEvents(new OnPlayerJoin(), plugin);
         this.paperServer().getPluginManager().registerEvents(new OnPlayerLeave(), plugin);

@@ -6,40 +6,37 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketStatus;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.core.lib.crypt.Snowflake;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MessageCacheService implements IMessageCacheService<CacheableMessage> {
     private final Snowflake snowflakeGenerator = new Snowflake();
     private final List<PacketStatus> ignoredStatuses;
     private final List<PacketIdentification> ignoredTypes;
-    private int max = 25;
+    protected final int max;
+    protected final Map<Long, CacheableMessage> messages;
 
-    public MessageCacheService(Integer max) {
-        if(max <= 0) max = 0;
-        if(max > 500) max = 500;
-
-        this.max = max;
-        this.ignoredStatuses = new ArrayList<>(0);
-        this.ignoredTypes = new ArrayList<>(0);
-    }
-    public MessageCacheService(Integer max, List<PacketStatus> ignoredStatuses, List<PacketIdentification> ignoredTypes) {
+    public MessageCacheService(int max, List<PacketStatus> ignoredStatuses, List<PacketIdentification> ignoredTypes) {
         if(max <= 0) max = 0;
         if(max > 500) max = 500;
 
         this.max = max;
         this.ignoredStatuses = ignoredStatuses;
         this.ignoredTypes = ignoredTypes;
-    }
 
-    protected final LinkedHashMap<Long, CacheableMessage> messages = new LinkedHashMap<>(this.max){
-        @Override
-        protected boolean removeEldestEntry(final Map.Entry eldest) {
-            return size() > max;
-        }
-    };
+        int finalMax = max;
+        this.messages = new LinkedHashMap<>(this.max){
+            @Override
+            protected boolean removeEldestEntry(Map.Entry eldest) {
+                return this.size() > finalMax;
+            }
+        };
+    }
+    public MessageCacheService(int max) {
+        this(max, List.of(), List.of());
+    }
+    public MessageCacheService() {
+        this(50);
+    }
 
     /**
      * Caches a redis message, so it can be accessed later.
@@ -91,7 +88,7 @@ public class MessageCacheService implements IMessageCacheService<CacheableMessag
     /**
      * Get a page view of all currently cached messages.
      * @param pageNumber The page number to look at. Pages are split by 10. Page numbers start at 1 and go up.
-     * @return A list of all cached messages inside of a page.
+     * @return A list of all cached messages inside a page.
      */
     public List<CacheableMessage> fetchMessagesPage(int pageNumber) {
         if(pageNumber < 1) pageNumber = 1;
@@ -103,7 +100,9 @@ public class MessageCacheService implements IMessageCacheService<CacheableMessag
 
         if(upperIndex > this.size()) upperIndex = this.size();
 
-        List<CacheableMessage> messages = this.messages();
+        List<CacheableMessage> messages = new ArrayList<>(this.messages());
+
+        Collections.reverse(messages);
 
         return messages.subList(lowerIndex,upperIndex);
     }

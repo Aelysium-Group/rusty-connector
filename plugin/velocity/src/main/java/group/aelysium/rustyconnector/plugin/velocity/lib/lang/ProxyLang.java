@@ -59,15 +59,6 @@ public class ProxyLang extends Lang {
     public final static String IGNORE = resolver().getRaw("core.single_word.ignore");
     public final static String DATE = resolver().getRaw("core.single_word.date");
 
-    /*
-     * AQUA - For when data is successfully returned or when we send usage info
-     * RED - For when an error has occurred.
-     * ORANGE/YELLOW - For emphasis or highlighting.
-     */
-    public final static JoinConfiguration newlines() {
-        return JoinConfiguration.separator(newline());
-    }
-
     public final static Component BORDER = text("█████████████████████████████████████████████████████████████████████████████████████████████████", DARK_GRAY);
 
     public final static Component SPACING = text("");

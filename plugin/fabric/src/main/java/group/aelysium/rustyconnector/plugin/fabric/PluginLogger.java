@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.fabric;
 
+import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.LoggerGate;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
 import net.kyori.adventure.text.Component;
@@ -12,6 +13,7 @@ public class PluginLogger implements group.aelysium.rustyconnector.toolkit.core.
 
     public PluginLogger(Logger logger) {
         this.logger = logger;
+        this.gate.registerNode(GateKey.SAVE_TRASH_MESSAGES, true);
     }
 
     @Override
