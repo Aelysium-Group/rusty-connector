@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.core.lib.algorithm.WeightedQuickSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.WinLossPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import java.util.Random;
 public class WinLoss extends Matchmaker {
     private final Random random = new Random();
 
-    public WinLoss(Settings settings, StorageService storage, IRankedGame game) {
+    public WinLoss(Settings settings, StorageService storage, IGamemodeRankManager game) {
         super(settings, storage, game);
     }
 

@@ -1,8 +1,7 @@
 package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay;
 
 import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
@@ -54,5 +53,5 @@ public interface ISession extends JSONParseable {
         boolean contains(IPlayer player);
     }
 
-    record Settings(int min, int max, IRankedGame game) {}
+    record Settings(int min, int max, IGamemodeRankManager game) {}
 }

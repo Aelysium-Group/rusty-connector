@@ -14,7 +14,7 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.GamemodeRankManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
@@ -488,7 +488,7 @@ class Database {
                                     String gameName = context.getArgument("gameName", String.class);
 
                                     StorageService storage = flame.services().storage();
-                                    RankedGame game = storage.database().getGame(gameName).orElse(null);
+                                    GamemodeRankManager game = storage.database().getGame(gameName).orElse(null);
                                     if(game == null) {
                                         logger.log(gameName + " couldn't be found.");
                                         return Command.SINGLE_SUCCESS;
@@ -505,7 +505,7 @@ class Database {
                                     String gameName = context.getArgument("gameName", String.class);
 
                                     StorageService storage = flame.services().storage();
-                                    RankedGame game = storage.database().getGame(gameName).orElse(null);
+                                    GamemodeRankManager game = storage.database().getGame(gameName).orElse(null);
                                     if(game == null) {
                                         logger.log(gameName + " couldn't be found.");
                                         return Command.SINGLE_SUCCESS;

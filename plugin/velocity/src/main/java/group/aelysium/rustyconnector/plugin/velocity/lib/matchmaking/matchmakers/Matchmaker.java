@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.bossbars.MatchmakingBossbar;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.GamemodeRankManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
@@ -12,7 +13,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectab
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
@@ -35,7 +36,7 @@ public abstract class Matchmaker implements IMatchmaker {
     protected final ClockService supervisor = new ClockService(5);
     protected final ClockService queueIndicator = new ClockService(1);
     protected final StorageService storage;
-    protected final IRankedGame game;
+    protected final IGamemodeRankManager game;
     protected final Settings settings;
     protected final ISession.Settings sessionSettings;
     protected final int minPlayersPerGame;
@@ -56,7 +57,7 @@ public abstract class Matchmaker implements IMatchmaker {
     protected Map<UUID, ISession> runningSessions = new ConcurrentHashMap<>();
     protected Vector<IRankedPlayer> waitingPlayers = new Vector<>();
 
-    public Matchmaker(Settings settings, StorageService storage, IRankedGame game) {
+    public Matchmaker(Settings settings, StorageService storage, IGamemodeRankManager game) {
         this.storage = storage;
         this.game = game;
         this.settings = settings;
@@ -74,6 +75,9 @@ public abstract class Matchmaker implements IMatchmaker {
 
     public Settings settings() {
         return this.settings;
+    }
+    public IGamemodeRankManager rankManager() {
+        return this.game;
     }
 
     public void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
@@ -257,7 +261,7 @@ public abstract class Matchmaker implements IMatchmaker {
         }, LiquidTimestamp.from(3, TimeUnit.SECONDS));
     }
 
-    public static Matchmaker from(Settings settings, StorageService storage, IRankedGame game) {
+    public static Matchmaker from(Settings settings, StorageService storage, IGamemodeRankManager game) {
         if (settings.ranking().algorithm().equals(WIN_LOSS)) return new WinLoss(settings, storage, game);
         if (settings.ranking().algorithm().equals(WIN_RATE)) return new WinRate(settings, storage, game);
 

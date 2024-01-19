@@ -4,11 +4,10 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
@@ -33,6 +32,11 @@ public interface IMatchmaker extends Service {
      * The sorting algorithm is a weighted quicksort.
      */
     void completeSort();
+
+    /**
+     * Gets the rank manager used by this matchmaker to handle player ranks.
+     */
+    IGamemodeRankManager rankManager();
 
     /**
      * Inserts a player into the matchmaker.

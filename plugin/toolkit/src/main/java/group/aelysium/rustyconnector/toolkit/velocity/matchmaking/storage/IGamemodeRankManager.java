@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageServi
 
 import java.util.UUID;
 
-public interface IRankedGame {
+public interface IGamemodeRankManager {
     String name();
 
     /**

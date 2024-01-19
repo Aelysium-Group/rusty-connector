@@ -1,9 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
@@ -11,7 +10,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
 import org.eclipse.serializer.collections.lazy.LazyHashMap;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,12 +18,12 @@ import java.util.UUID;
  * If, over the time of this game existing, it has ranked players based on both ELO and WIN_RATE, both of those
  * ranks are saved here and can be retrieved.
  */
-public class RankedGame implements IRankedGame {
+public class GamemodeRankManager implements IGamemodeRankManager {
     protected String name;
     protected IScoreCard.IRankSchema.Type<?> rankingSchema;
     protected Map<UUID, ScoreCard> scorecards = new LazyHashMap<>();
 
-    public RankedGame(String name, IScoreCard.IRankSchema.Type<?> schema) {
+    public GamemodeRankManager(String name, IScoreCard.IRankSchema.Type<?> schema) {
         this.name = name;
         this.rankingSchema = schema;
     }

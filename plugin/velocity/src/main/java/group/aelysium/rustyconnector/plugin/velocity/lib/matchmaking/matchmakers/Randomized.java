@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedGame;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import net.kyori.adventure.text.Component;
@@ -19,7 +19,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 
 public class Randomized extends Matchmaker {
-    public Randomized(Settings settings, StorageService storage, IRankedGame game) {
+    public Randomized(Settings settings, StorageService storage, IGamemodeRankManager game) {
         super(settings, storage, game);
     }
 

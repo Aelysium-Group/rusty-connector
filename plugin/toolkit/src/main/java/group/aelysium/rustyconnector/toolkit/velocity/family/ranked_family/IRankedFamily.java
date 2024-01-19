@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family;
 
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 public interface IRankedFamily extends IFamily, Service {
@@ -23,4 +24,6 @@ public interface IRankedFamily extends IFamily, Service {
      * @param player The player to dequeue.
      */
     boolean dequeue(IPlayer player);
+
+    IMatchmaker matchmaker();
 }

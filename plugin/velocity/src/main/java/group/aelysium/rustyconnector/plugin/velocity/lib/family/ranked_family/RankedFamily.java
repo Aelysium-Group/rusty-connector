@@ -8,14 +8,13 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBala
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchMakerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedGame;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.GamemodeRankManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
@@ -25,13 +24,11 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.Whitelist;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelist;
 import net.kyori.adventure.text.Component;
-import org.eclipse.serializer.chars._charArrayRange;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.RANKED_FAMILY_META;
@@ -106,8 +103,8 @@ public class RankedFamily extends Family implements IRankedFamily {
 
         Matchmaker matchmaker;
         {
-            RankedGame fetched = mySQLStorage.database().getGame(config.name()).orElseGet(() -> {
-                RankedGame game = new RankedGame(config.gamemodeName(), matchMakerConfig.settings().ranking().algorithm());
+            GamemodeRankManager fetched = mySQLStorage.database().getGame(config.name()).orElseGet(() -> {
+                GamemodeRankManager game = new GamemodeRankManager(config.gamemodeName(), matchMakerConfig.settings().ranking().algorithm());
                 mySQLStorage.database().saveGame(mySQLStorage, game);
 
                 return game;
