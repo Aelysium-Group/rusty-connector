@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface IRankedPlayer extends ISortable {
+public interface IPlayerRankProfile extends ISortable {
     /**
      * The UUID of the player.
      * @return {@link UUID}

@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResul
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -41,7 +41,7 @@ public interface IMatchmaker extends Service {
     /**
      * Inserts a player into the matchmaker.
      * <p>
-     * Specifically, this method will resolve the passed player into a {@link IRankedPlayer}.
+     * Specifically, this method will resolve the passed player into a {@link IPlayerRankProfile}.
      * This method performs a single sort and injects the player into an approximation of the best place for them to reside.
      * Thus reducing how frequently you'll need to perform a full sort on the metchmaker.
      * @param request The request being made.
@@ -60,7 +60,7 @@ public interface IMatchmaker extends Service {
      * Gets The number of players currently waiting in the matchmaker.
      * @return The number of players waiting.
      */
-    List<IRankedPlayer> waitingPlayers();
+    List<IPlayerRankProfile> waitingPlayers();
 
     /**
      * Checks if a player is currently waiting in the matchmaker.

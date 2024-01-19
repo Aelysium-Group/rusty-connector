@@ -17,9 +17,9 @@ public interface IGamemodeRankManager {
      * @param storage The storage service.
      * @param uuid The uuid of the player to fetch.
      * @param createNew Should this method create a new Ranked Player if one doesn't already exist.
-     * @return {@link IRankedPlayer} or `null` if `createNew` is false and there isn't a RankedPlayer for the requested UUID.
+     * @return {@link IPlayerRankProfile} or `null` if `createNew` is false and there isn't a RankedPlayer for the requested UUID.
      */
-    IRankedPlayer rankedPlayer(IMySQLStorageService storage, UUID uuid, boolean createNew);
+    IPlayerRankProfile rankedPlayer(IMySQLStorageService storage, UUID uuid, boolean createNew);
 
     IPlayerRank<?> playerRank(IMySQLStorageService storage, IPlayer player) throws IllegalStateException;
 }

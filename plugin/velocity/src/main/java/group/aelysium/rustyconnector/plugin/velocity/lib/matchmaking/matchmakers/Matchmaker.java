@@ -4,7 +4,6 @@ import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.bossbars.MatchmakingBossbar;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.GamemodeRankManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
@@ -14,7 +13,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalanc
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -55,7 +54,7 @@ public abstract class Matchmaker implements IMatchmaker {
     );
     protected Map<UUID, ISession.IWaiting> waitingSessions = new ConcurrentHashMap<>();
     protected Map<UUID, ISession> runningSessions = new ConcurrentHashMap<>();
-    protected Vector<IRankedPlayer> waitingPlayers = new Vector<>();
+    protected Vector<IPlayerRankProfile> waitingPlayers = new Vector<>();
 
     public Matchmaker(Settings settings, StorageService storage, IGamemodeRankManager game) {
         this.storage = storage;
@@ -82,7 +81,7 @@ public abstract class Matchmaker implements IMatchmaker {
 
     public void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         try {
-            IRankedPlayer rankedPlayer = this.game.rankedPlayer(this.storage, request.player().uuid(), false);
+            IPlayerRankProfile rankedPlayer = this.game.rankedPlayer(this.storage, request.player().uuid(), false);
 
             if(this.waitingPlayers.contains(rankedPlayer)) throw new RuntimeException("Player is already queued!");
 
@@ -145,7 +144,7 @@ public abstract class Matchmaker implements IMatchmaker {
 
         return false;
     }
-    public List<IRankedPlayer> waitingPlayers() {
+    public List<IPlayerRankProfile> waitingPlayers() {
         return this.waitingPlayers.stream().toList();
     }
     public int waitingPlayersCount() {

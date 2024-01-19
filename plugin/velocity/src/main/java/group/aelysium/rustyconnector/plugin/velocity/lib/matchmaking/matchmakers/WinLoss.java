@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Se
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.WinLossPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +22,13 @@ public class WinLoss extends Matchmaker {
     private Session.Waiting attemptBuild(int playerCount, double variance) {
         // Randomly selects a player index to use as our pivot
         int randomIndex = random.nextInt(playerCount);
-        IRankedPlayer pivot = this.waitingPlayers.get(randomIndex);
+        IPlayerRankProfile pivot = this.waitingPlayers.get(randomIndex);
         double pivotRank = ((WinLossPlayerRank) pivot.rank()).rank();
         double floor = pivotRank - variance;
         double ceiling = pivotRank + variance;
 
         // Check variance mask. Fetches all players that fit variance.
-        List<IRankedPlayer> validPlayers = this.waitingPlayers.stream().filter(player -> {
+        List<IPlayerRankProfile> validPlayers = this.waitingPlayers.stream().filter(player -> {
             double rank = ((WinLossPlayerRank) player.rank()).rank();
             return rank > floor && rank < ceiling;
         }).toList();
@@ -37,8 +37,8 @@ public class WinLoss extends Matchmaker {
         // Start building game
         Session.Builder builder = new Session.Builder();
 
-        List<IRankedPlayer> playersToUse = new ArrayList<>();
-        for(IRankedPlayer player : validPlayers) {
+        List<IPlayerRankProfile> playersToUse = new ArrayList<>();
+        for(IPlayerRankProfile player : validPlayers) {
             try {
                 builder.addPlayer(player.player().orElseThrow());
                 playersToUse.add(player);

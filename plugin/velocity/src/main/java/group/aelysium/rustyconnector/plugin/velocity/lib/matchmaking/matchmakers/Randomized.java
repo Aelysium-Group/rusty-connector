@@ -2,14 +2,14 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmaker
 
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RankedPlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.PlayerRankProfile;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import net.kyori.adventure.text.Component;
 
@@ -26,7 +26,7 @@ public class Randomized extends Matchmaker {
     @Override
     public void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         try {
-            IRankedPlayer rankedPlayer = new RankedPlayer(request.player().uuid(), new RandomizedPlayerRank());
+            IPlayerRankProfile rankedPlayer = new PlayerRankProfile(request.player().uuid(), new RandomizedPlayerRank());
 
             if (this.settings.queue().joining().reconnect()) {
                 for (ISession session : this.runningSessions.values().stream().toList()) {
@@ -63,8 +63,8 @@ public class Randomized extends Matchmaker {
 
         Session.Builder builder = new Session.Builder();
 
-        List<IRankedPlayer> playersToUse = new ArrayList<>();
-        for(IRankedPlayer player : this.waitingPlayers) {
+        List<IPlayerRankProfile> playersToUse = new ArrayList<>();
+        for(IPlayerRankProfile player : this.waitingPlayers) {
             try {
                 builder.addPlayer(player.player().orElseThrow());
                 playersToUse.add(player);

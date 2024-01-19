@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
@@ -32,7 +32,7 @@ public class GamemodeRankManager implements IGamemodeRankManager {
         return this.name;
     }
 
-    public IRankedPlayer rankedPlayer(IMySQLStorageService storage, UUID uuid, boolean allowNull) {
+    public IPlayerRankProfile rankedPlayer(IMySQLStorageService storage, UUID uuid, boolean allowNull) {
         ScoreCard scorecard = this.scorecards.get(uuid);
         if(scorecard == null)
             if(allowNull) {
@@ -46,7 +46,7 @@ public class GamemodeRankManager implements IGamemodeRankManager {
 
         IPlayerRank<?> rank = scorecard.fetch((StorageService) storage, this.rankingSchema);
 
-        return RankedPlayer.from(uuid, rank);
+        return PlayerRankProfile.from(uuid, rank);
     }
 
     public IPlayerRank<?> playerRank(IMySQLStorageService storage, IPlayer player) throws IllegalStateException {

@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IRankedPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
@@ -10,11 +10,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class RankedPlayer implements ISortable, IRankedPlayer {
+public class PlayerRankProfile implements ISortable, IPlayerRankProfile {
     protected UUID uuid;
     protected IPlayerRank<?> rank;
 
-    public RankedPlayer(UUID uuid, IPlayerRank<?> rank) {
+    public PlayerRankProfile(UUID uuid, IPlayerRank<?> rank) {
         this.uuid = uuid;
         this.rank = rank;
     }
@@ -49,7 +49,7 @@ public class RankedPlayer implements ISortable, IRankedPlayer {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        IRankedPlayer that = (IRankedPlayer) o;
+        IPlayerRankProfile that = (IPlayerRankProfile) o;
         return Objects.equals(this.uuid, that.uuid());
     }
 
@@ -58,7 +58,7 @@ public class RankedPlayer implements ISortable, IRankedPlayer {
         return Objects.hash(uuid);
     }
 
-    public static RankedPlayer from(UUID uuid, IPlayerRank<?> rank) {
-        return new RankedPlayer(uuid, rank);
+    public static PlayerRankProfile from(UUID uuid, IPlayerRank<?> rank) {
+        return new PlayerRankProfile(uuid, rank);
     }
 }
