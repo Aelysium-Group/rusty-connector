@@ -35,15 +35,9 @@ public class RankedGameReadyListener extends PacketListener<RankedGame.Ready> {
 
     @Override
     public void execute(RankedGame.Ready packet) {
-        JsonObject object = new Gson().fromJson(packet.parameters().get("session").getAsString(), JsonObject.class);
+        RankedGame.Session session = packet.session();
 
-        UUID uuid = UUID.fromString(object.get("uuid").getAsString());
-
-        List<UUID> players = new ArrayList<>();
-        JsonArray array = object.get("players").getAsJsonArray();
-        array.forEach(item -> players.add(UUID.fromString(item.getAsString())));
-
-        TinderAdapterForCore.getTinder().services().events().fireEvent(new RankedGameReadyEvent(uuid, players));
-        TinderAdapterForCore.getTinder().services().rankedGameInterface().orElseThrow().session(uuid, players);
+        TinderAdapterForCore.getTinder().services().events().fireEvent(new RankedGameReadyEvent(session.uuid(), session.players()));
+        TinderAdapterForCore.getTinder().services().rankedGameInterface().orElseThrow().session(session.uuid(), session.players());
     }
 }

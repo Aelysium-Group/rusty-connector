@@ -15,26 +15,24 @@ public class PacketParameter {
     protected char type;
     protected Object object;
 
-    private PacketParameter() {}
-    public PacketParameter(@NotNull Number object) {
+    private PacketParameter(@NotNull Object object, char type) {
         this.object = object;
-        this.type = 'n';
+        this.type = type;
+    }
+    public PacketParameter(@NotNull Number object) {
+        this(object, 'n');
     }
     public PacketParameter(@NotNull Boolean object) {
-        this.object = object;
-        this.type = 'b';
+        this(object, 'b');
     }
     public PacketParameter(@NotNull String object) {
-        this.object = object;
-        this.type = 's';
+        this(object, 's');
     }
     public PacketParameter(@NotNull JsonArray object) {
-        this.object = object;
-        this.type = 'a';
+        this(object, 'a');
     }
     public PacketParameter(@NotNull JsonObject object) {
-        this.object = object;
-        this.type = 'j';
+        this(object, 'j');
     }
     public PacketParameter(JsonPrimitive object) {
         if(object.isNumber()) {

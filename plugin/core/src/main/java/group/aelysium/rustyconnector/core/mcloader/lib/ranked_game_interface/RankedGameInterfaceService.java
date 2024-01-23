@@ -12,31 +12,28 @@ import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.mc_loader.events.ranked_game.RankedGameEndEvent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.ranked_game_interface.IRankedGameInterfaceService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class RankedGameInterfaceService implements IRankedGameInterfaceService {
     private UUID uuid;
-    private List<UUID> players;
+    private Map<UUID, String> players;
 
     public Optional<UUID> uuid() {
         if(this.uuid == null) return Optional.empty();
         return Optional.of(this.uuid);
     }
 
-    public Optional<List<UUID>> players() {
+    public Optional<Map<UUID, String>> players() {
         if(this.players == null) return Optional.empty();
         return Optional.of(this.players);
     }
 
-    public void session(UUID uuid, List<UUID> players) {
+    public void session(UUID uuid, Map<UUID, String> players) {
         this.uuid = uuid;
         this.players = players;
     }
 
-    public void end(List<UUID> winners) {
+    public void end(List<UUID> winners, List<UUID> losers) {
         if(this.uuid == null) return;
 
         JsonObject object = new JsonObject();
@@ -45,14 +42,14 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
         JsonArray winnerUUIDs = new JsonArray();
         JsonArray loserUUIDs = new JsonArray();
 
-        List<UUID> sessionPlayers = new ArrayList<>(players);
-
         for (UUID uuid : winners) {
-            if(!sessionPlayers.contains(uuid)) continue;
-            sessionPlayers.remove(uuid);
+            if(!players.containsKey(uuid)) continue;
+
             winnerUUIDs.add(uuid.toString());
         }
-        for (UUID uuid : sessionPlayers) {
+        for (UUID uuid : losers) {
+            if(!players.containsKey(uuid)) continue;
+
             loserUUIDs.add(uuid.toString());
         }
 
@@ -61,7 +58,7 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
 
         MCLoaderTinder tinder = TinderAdapterForCore.getTinder();
 
-        tinder.services().events().fireEvent(new RankedGameEndEvent(uuid, sessionPlayers, winners));
+        tinder.services().events().fireEvent(new RankedGameEndEvent(uuid, winners, losers));
 
         Packet packet = tinder.services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_END)

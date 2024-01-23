@@ -307,7 +307,16 @@ public final class Packet implements JSONParseable {
         private static void parseParams(JsonObject object, NakedBuilder builder) {
             object.entrySet().forEach(entry -> {
                 String key = entry.getKey();
-                PacketParameter value = new PacketParameter(entry.getValue().getAsJsonPrimitive());
+                PacketParameter value = null;
+
+                if(entry.getValue().isJsonPrimitive())
+                    value = new PacketParameter(entry.getValue().getAsJsonPrimitive());
+                if(entry.getValue().isJsonArray())
+                    value = new PacketParameter(entry.getValue().getAsJsonArray());
+                if(entry.getValue().isJsonObject())
+                    value = new PacketParameter(entry.getValue().getAsJsonObject());
+
+                if(value == null) value = new PacketParameter("null");
 
                 builder.parameter(key, value);
             });

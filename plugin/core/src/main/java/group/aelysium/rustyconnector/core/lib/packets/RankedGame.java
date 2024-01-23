@@ -21,9 +21,11 @@ public interface RankedGame {
 
             JsonArray array = object.getAsJsonArray("players");
             array.forEach(entry -> {
+                JsonObject entryObject = entry.getAsJsonObject();
+
                 players.put(
-                        UUID.fromString(entry.getAsJsonObject().get("uuid").getAsString()),
-                        entry.getAsJsonObject().get("rank").getAsString()
+                        UUID.fromString(entryObject.get("uuid").getAsString()),
+                        entryObject.get("rank").getAsString()
                 );
             });
 
