@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmaker
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.bossbars.MatchmakingBossbar;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
@@ -66,7 +66,7 @@ public abstract class Matchmaker implements IMatchmaker {
         this.maxPlayersPerGame = settings.session().building().max();
     }
 
-    public abstract group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session.Waiting make();
+    public abstract Session.Waiting make();
     public boolean minimumPlayersExist() {
         return this.waitingPlayers.size() >= minPlayersPerGame;
     }

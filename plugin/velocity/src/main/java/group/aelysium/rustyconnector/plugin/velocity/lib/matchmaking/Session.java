@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay;
+package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -113,6 +113,8 @@ public class Session implements ISession {
             } catch (Exception ignore) {}
 
             playerObject.add("rank", new JsonPrimitive(rank.toString()));
+
+            array.add(object);
         });
         object.add("players", array);
 

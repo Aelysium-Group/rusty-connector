@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers;
 
 import group.aelysium.rustyconnector.core.lib.algorithm.WeightedQuickSort;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.gameplay.Session;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.WinRatePlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
