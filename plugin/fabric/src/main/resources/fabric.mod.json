@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "rustyconnector-fabric",
+  "version": "${version}",
+  "name": "RustyConnector",
+  "authors": ["Juice"],
+  "license": "GPL-V3",
+  "entrypoints": {
+    "main": [
+      "group.aelysium.rustyconnector.plugin.fabric.FabricRustyConnector"
+    ]
+  },
+  "depends": {
+    "minecraft": ">=1.16.5"
+  }
+}
