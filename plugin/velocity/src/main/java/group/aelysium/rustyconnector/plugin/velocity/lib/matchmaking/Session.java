@@ -61,7 +61,9 @@ public class Session implements ISession {
             }
             try {
                 parent.connect(player);
-            } catch (Exception ignore) {}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         this.mcLoader.unlock();
