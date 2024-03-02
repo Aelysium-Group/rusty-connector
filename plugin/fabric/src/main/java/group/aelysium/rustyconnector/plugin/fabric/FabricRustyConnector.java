@@ -4,18 +4,19 @@ import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
 import group.aelysium.rustyconnector.plugin.fabric.central.Tinder;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 
-public final class FabricRustyConnector implements ModInitializer {
+public final class FabricRustyConnector implements DedicatedServerModInitializer {
 
     private MinecraftServer server;
 
     @Override
-    public void onInitialize() {
+    public void onInitializeServer() {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             this.server = server;
 

@@ -6,11 +6,11 @@
   "authors": ["Juice"],
   "license": "GPL-V3",
   "entrypoints": {
-    "main": [
+    "server": [
       "group.aelysium.rustyconnector.plugin.fabric.FabricRustyConnector"
     ]
   },
   "depends": {
-    "minecraft": ">=1.16.5"
+    "minecraft": ">=1.20.2"
   }
 }
