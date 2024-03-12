@@ -1,23 +1,14 @@
 plugins {
-    id 'fabric-loom' version '1.3.9'
+    id 'fabric-loom' version '1.2-SNAPSHOT'
 }
 
-def targetJavaVersion = 17
-group = project.maven_group
-
-repositories {
-     maven {
-       name = "sonatype-oss-snapshots1"
-       url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-       mavenContent { snapshotsOnly() }
-   }
-   // for releases
-   mavenCentral()
+compileJava {
+    options.encoding = "UTF-8"
 }
+
+def targetJavaVersion = project.java_version as int
 
 dependencies {
-    shadow project(path: ':core', configuration: 'shadow')
-
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -25,25 +16,43 @@ dependencies {
 
     modImplementation "net.kyori:adventure-platform-fabric:${project.adventure_fabric_version}"
     modImplementation "cloud.commandframework:cloud-fabric:${project.cloud_paperfabric_version}"
+
+    shadow project(path: ':core', configuration: 'shadow')
 }
 
-tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        it.options.release = targetJavaVersion
-    }
+// If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
+shadowJar {
+    archiveBaseName.set('fabric')
+    archiveClassifier.set('')
+    archiveVersion.set('')
+
+    mergeServiceFiles()
+    minimize()
 }
+
+jar.finalizedBy('shadowJar')
 
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
     if (JavaVersion.current() < javaVersion) {
         toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     }
-    archivesBaseName = project.archives_base_name
 }
 
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}
+
+processResources {
+    def props = ['version': plugin_version, 'minecraft_version': minecraft_version, 'loader_version': loader_version]
+    inputs.properties props
+    filteringCharset "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand props
     }
 }
