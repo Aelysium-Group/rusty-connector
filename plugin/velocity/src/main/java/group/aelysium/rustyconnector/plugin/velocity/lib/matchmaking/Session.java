@@ -152,6 +152,10 @@ public class Session implements ISession {
             this.players = teams;
         }
 
+        public int size() {
+            return this.players.size();
+        }
+
         public UUID uuid() {
             return this.uuid;
         }

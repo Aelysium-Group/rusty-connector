@@ -45,6 +45,11 @@ public interface ISession extends JSONParseable {
         UUID uuid();
 
         /**
+         * The number of players waiting in this session.
+         */
+        int size();
+
+        /**
          * Starts the session on the specified MCLoader.
          * By the time {@link ISession} is returned, it should be assumed that all players have connected.
          * @param mcLoader The MCLoader to run the session on.

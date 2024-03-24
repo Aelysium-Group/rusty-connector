@@ -68,9 +68,10 @@ public class Randomized extends Matchmaker {
             try {
                 builder.addPlayer(player.player().orElseThrow());
                 playersToUse.add(player);
-            } catch (NoSuchElementException ignore) {
+            } catch (NoSuchElementException ignore) { // Removes the player because they don't seem to exist
                 this.waitingPlayers.remove(player);
             }
+            if(playersToUse.size() >= settings.session().building().max()) break;
         }
 
         this.waitingPlayers.removeAll(playersToUse); // Remove these players from the matchmaker

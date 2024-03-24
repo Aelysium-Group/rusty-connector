@@ -27,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.floor;
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
@@ -148,7 +149,9 @@ public abstract class Matchmaker implements IMatchmaker {
         return this.waitingPlayers.stream().toList();
     }
     public int waitingPlayersCount() {
-        return this.waitingPlayers.size();
+        AtomicInteger count = new AtomicInteger(this.waitingPlayers.size());
+        this.waitingSessions.forEach((k, v) -> count.addAndGet(v.size()));
+        return count.get();
     }
     public boolean contains(IPlayer player) {
         if(this.waitingPlayers.contains(player.rank(this.game).orElse(null))) return true;
@@ -199,7 +202,6 @@ public abstract class Matchmaker implements IMatchmaker {
 
         // Connect sessions to a server periodically
         this.supervisor.scheduleRecurring(() -> {
-
             if(loadBalancer.size(false) == 0) return;
 
             for (ISession.IWaiting waitingSession : this.waitingSessions.values().stream().toList()) {
