@@ -56,9 +56,6 @@ public class WinLoss extends Matchmaker {
     public Session.Waiting make() {
         if(!minimumPlayersExist()) return null;
         int playerCount = this.waitingPlayers.size(); // Calculate once so we don't keep calling it.
-        boolean enoughForFullGame = playerCount > maxPlayersPerGame;
-
-        if(!enoughForFullGame) return null;
 
         double variance = settings.ranking().variance() * ((WinLossPlayerRank) this.waitingPlayers.lastElement().rank()).rank(); // Variance is a percentage of the highest rank
 
