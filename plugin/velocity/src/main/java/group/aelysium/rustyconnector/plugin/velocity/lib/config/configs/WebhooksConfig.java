@@ -13,6 +13,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookScope;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -45,7 +46,7 @@ public class WebhooksConfig extends YAML implements group.aelysium.rustyconnecto
                 URL url = new URL(IYAML.getValue(node, "url", String.class));
                 DiscordWebhook webhook = new DiscordWebhook(name, url);
 
-                List<String> flags = IYAML.getValue(node, "flags", List.class);
+                List<String> flags = IYAML.get(node, "flags").getList(String.class, new ArrayList<>());
                 List<WebhookAlertFlag> correctFlags = new ArrayList<>();
                 for (String flag : flags) {
                     try {
@@ -76,6 +77,8 @@ public class WebhooksConfig extends YAML implements group.aelysium.rustyconnecto
                 logger.log("Successfully registered the webhook: " + webhook.name() + "!");
             } catch (MalformedURLException e) {
                 throw new IllegalStateException("`url` in webhooks.yml must be a valid url!");
+            } catch (SerializationException e) {
+                throw new RuntimeException(e);
             }
         });
     }

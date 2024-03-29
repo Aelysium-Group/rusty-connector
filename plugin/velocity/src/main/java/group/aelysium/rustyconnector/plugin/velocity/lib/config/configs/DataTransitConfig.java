@@ -88,7 +88,7 @@ public class DataTransitConfig extends YAML implements group.aelysium.rustyconne
             this.cache_size = 500;
         }
         try {
-            List<String> stringTypes = (List<String>) IYAML.getValue(this.data,"cache.ignored-types",List.class);
+            List<String> stringTypes = IYAML.get(this.data,"cache.ignored-types").getList(String.class, new ArrayList<>());
             stringTypes.forEach(item -> {
                 try {
                     this.cache_ignoredTypes.add(BuiltInIdentifications.mapping(item));
@@ -100,7 +100,7 @@ public class DataTransitConfig extends YAML implements group.aelysium.rustyconne
             throw new IllegalStateException("The node [cache.ignored-types] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }
         try {
-            List<String> stringStatuses = (List<String>) IYAML.getValue(this.data,"cache.ignored-statuses",List.class);
+            List<String> stringStatuses = IYAML.get(this.data,"cache.ignored-statuses").getList(String.class, new ArrayList<>());
             stringStatuses.forEach(item -> {
                 try {
                     this.cache_ignoredStatuses.add(PacketStatus.valueOf(item));
@@ -114,13 +114,13 @@ public class DataTransitConfig extends YAML implements group.aelysium.rustyconne
 
         this.whitelist_enabled = IYAML.getValue(this.data,"whitelist.enabled",Boolean.class);
         try {
-            this.whitelist_addresses = (List<String>) IYAML.getValue(this.data,"whitelist.addresses",List.class);
+            this.whitelist_addresses = IYAML.get(this.data,"whitelist.addresses").getList(String.class, new ArrayList<>());
         } catch (Exception e) {
             throw new IllegalStateException("The node [whitelist.addresses] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }
         this.denylist_enabled = IYAML.getValue(this.data,"denylist.enabled",Boolean.class);
         try {
-            this.denylist_addresses = (List<String>) IYAML.getValue(this.data,"denylist.addresses",List.class);
+            this.denylist_addresses = IYAML.get(this.data,"denylist.addresses").getList(String.class, new ArrayList<>());
         } catch (Exception e) {
             throw new IllegalStateException("The node [denylist.addresses] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }

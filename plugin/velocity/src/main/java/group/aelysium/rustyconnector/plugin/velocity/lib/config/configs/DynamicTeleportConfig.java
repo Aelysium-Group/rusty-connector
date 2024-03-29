@@ -102,7 +102,7 @@ public class DynamicTeleportConfig extends YAML implements group.aelysium.rustyc
             this.tpa_friendsOnly = IYAML.getValue(this.data, "tpa.friends-only", Boolean.class);
 
             try {
-                this.tpa_enabledFamilies = (List<String>) (IYAML.getValue(this.data, "tpa.enabled-families", List.class));
+                this.tpa_enabledFamilies = IYAML.get(this.data, "tpa.enabled-families").getList(String.class, new ArrayList<>());
             } catch (Exception e) {
                 throw new IllegalStateException("The node [tpa.enabled-families] in " + this.name() + " is invalid! Make sure you are using the correct type of data!");
             }
@@ -150,7 +150,7 @@ public class DynamicTeleportConfig extends YAML implements group.aelysium.rustyc
         this.hub_enabled = IYAML.getValue(this.data, "hub.enabled", Boolean.class);
         if(this.hub_enabled) {
             try {
-                this.hub_enabledFamilies = (List<String>) (IYAML.getValue(this.data, "hub.enabled-families", List.class));
+                this.hub_enabledFamilies = IYAML.get(this.data, "hub.enabled-families").getList(String.class, new ArrayList<>());
             } catch (Exception e) {
                 throw new IllegalStateException("The node [hub.enabled-families] in " + this.name() + " is invalid! Make sure you are using the correct type of data!");
             }

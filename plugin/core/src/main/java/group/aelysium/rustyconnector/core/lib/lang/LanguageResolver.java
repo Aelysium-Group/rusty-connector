@@ -13,6 +13,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -92,7 +93,7 @@ public class LanguageResolver implements ILanguageResolver {
     public Component getArray(String key){
         try {
             final Component[] component = {Component.empty()};
-            ((List<String>) this.getNode(key, List.class)).forEach(string -> {
+            this.parseNodeQuery(key).getList(String.class, new ArrayList<>()).forEach(string -> {
                 component[0] = component[0].append(miniMessage.deserialize(string)).appendNewline();
             });
 
