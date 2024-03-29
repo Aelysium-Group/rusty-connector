@@ -22,4 +22,4 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - name: Build with Gradle
-      run: ./${{ github.workflow }}/plugin/gradlew build
+      run: ../../plugin/gradlew build
