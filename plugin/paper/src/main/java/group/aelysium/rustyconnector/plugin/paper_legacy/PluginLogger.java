@@ -1,8 +1,8 @@
-package group.aelysium.rustyconnector.plugin.paper;
+package group.aelysium.rustyconnector.plugin.paper_legacy;
 
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.LoggerGate;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.plugin.paper_legacy.central.Tinder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Server;
 import org.slf4j.Logger;

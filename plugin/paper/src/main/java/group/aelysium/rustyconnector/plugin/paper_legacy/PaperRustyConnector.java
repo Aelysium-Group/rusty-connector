@@ -1,9 +1,9 @@
-package group.aelysium.rustyconnector.plugin.paper;
+package group.aelysium.rustyconnector.plugin.paper_legacy;
 
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
 import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
-import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
+import group.aelysium.rustyconnector.plugin.paper_legacy.central.Tinder;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;

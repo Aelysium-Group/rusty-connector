@@ -1,29 +1,26 @@
-package group.aelysium.rustyconnector.plugin.paper.central;
+package group.aelysium.rustyconnector.plugin.paper_legacy.central;
 
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
-import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderFlame;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
-import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
-import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
-import group.aelysium.rustyconnector.toolkit.RustyConnector;
+import group.aelysium.rustyconnector.plugin.paper_legacy.commands.CommandRusty;
+import group.aelysium.rustyconnector.plugin.paper_legacy.events.OnPlayerJoin;
+import group.aelysium.rustyconnector.plugin.paper_legacy.events.OnPlayerLeave;
+import group.aelysium.rustyconnector.plugin.paper_legacy.events.OnPlayerPreLogin;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
-import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
-import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper_legacy.LegacyPaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper_legacy.PluginLogger;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 public class Tinder extends MCLoaderTinder {
     protected static Tinder instance;
@@ -31,12 +28,12 @@ public class Tinder extends MCLoaderTinder {
         return instance;
     }
     private final PaperCommandManager<CommandSender> commandManager;
-    private final PaperRustyConnector plugin;
+    private final LegacyPaperRustyConnector plugin;
     private final PluginLogger pluginLogger;
     private final LangService lang;
 
 
-    private Tinder(PaperRustyConnector plugin, PluginLogger logger, LangService lang) throws Exception {
+    private Tinder(LegacyPaperRustyConnector plugin, PluginLogger logger, LangService lang) throws Exception {
         super(logger, lang);
         this.plugin = plugin;
         this.pluginLogger = logger;
@@ -68,9 +65,7 @@ public class Tinder extends MCLoaderTinder {
     }
 
     @Override
-    public void setMaxPlayers(int max) {
-        plugin.getServer().setMaxPlayers(max);
-    }
+    public void setMaxPlayers(int max) { logger().error("Changing the max players is not supported on legacy paper."); }
 
     @Override
     public int onlinePlayerCount() {
@@ -101,17 +96,17 @@ public class Tinder extends MCLoaderTinder {
         if (target == null) return;
 
         if (isFolia()) {
-            plugin.getServer().getScheduler().scheduleSyncDelayedTask(PaperRustyConnector.getPlugin(PaperRustyConnector.class), () -> {
+            plugin.getServer().getScheduler().scheduleSyncDelayedTask(LegacyPaperRustyConnector.getPlugin(LegacyPaperRustyConnector.class), () -> {
                client.teleport(target.getLocation());
             }, 0);
         } else {
-            client.teleportAsync(target.getLocation());
+            client.teleport(target.getLocation());
         }
     }
 
     @Override
     public void sendMessage(UUID uuid, Component component) {
-        Objects.requireNonNull(plugin.getServer().getPlayer(uuid)).sendMessage(component);
+        Objects.requireNonNull(plugin.getServer().getPlayer(uuid)).sendMessage(PlainTextComponentSerializer.plainText().serialize(component));
     }
 
     /**
@@ -131,10 +126,6 @@ public class Tinder extends MCLoaderTinder {
     }
 
     public boolean isFolia() {
-        try {
-            Class.forName("io.papermc.paper.threadedregions.RegionisedServer");
-            return true;
-        } catch (ClassNotFoundException ignore) {}
         return false;
     }
 
@@ -152,7 +143,7 @@ public class Tinder extends MCLoaderTinder {
     /**
      * Creates new {@link Tinder} based on the gathered resources.
      */
-    public static Tinder gather(PaperRustyConnector plugin, Logger logger) {
+    public static Tinder gather(LegacyPaperRustyConnector plugin, Logger logger) {
         PluginLogger pluginLogger = new PluginLogger(logger);
         try {
             RootLanguageConfig config = RootLanguageConfig.construct(plugin.getDataFolder().toPath());
