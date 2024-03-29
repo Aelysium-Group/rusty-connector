@@ -6,7 +6,7 @@ compileJava {
 
 dependencies {
     // Dev only
-    shadow project(path: ':core', configuration: 'shadow')
+    implementation project(path: ':core', configuration: 'shadow')
     compileOnly "org.spigotmc:spigot-api:${project.spigot_version}"
     implementation "cloud.commandframework:cloud-paper:${project.cloud_paperfabric_version}"
 }
