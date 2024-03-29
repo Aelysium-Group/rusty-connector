@@ -1,8 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
@@ -15,24 +12,18 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
-import group.aelysium.rustyconnector.core.lib.packets.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.GamemodeRankManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
-import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.auto_scaling.K8Service;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
@@ -62,7 +53,6 @@ public final class CommandRusty {
             .then(Send.build(flame, logger, messageCacheService))
             .then(Debug.build(flame, logger, messageCacheService))
             .then(Reload.build(flame, logger, messageCacheService))
-            .then(K8.build(flame, logger, messageCacheService))
             .then(Database.build(flame, logger, messageCacheService))
             .then(LiteralArgumentBuilder.<CommandSource>literal("hug")
                     .executes(context -> {
@@ -416,53 +406,6 @@ class Reload {
                     }
                     return 0;
                 });
-    }
-}
-class K8 {
-    public static ArgumentBuilder<CommandSource, ?> build(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
-        return LiteralArgumentBuilder.<CommandSource>literal("k8") // k8 createPod <familyName> <containerName> <containerPort>
-                .then(LiteralArgumentBuilder.<CommandSource>literal("createPod")
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
-                                .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerName", StringArgumentType.string())
-                                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerPort", StringArgumentType.string())
-                                                .then(RequiredArgumentBuilder.<CommandSource, String>argument("containerImage", StringArgumentType.greedyString())
-                                                        .executes(context -> {
-                                                            try {
-                                                                String familyName = context.getArgument("familyName", String.class);
-                                                                String containerName = context.getArgument("containerName", String.class);
-                                                                String containerPort = context.getArgument("containerPort", String.class);
-                                                                String containerImage = context.getArgument("containerImage", String.class);
-
-                                                                K8Service k8 = new K8Service();
-                                                                k8.createServer(familyName, containerName, containerImage);
-                                                            } catch (Exception e) {
-                                                                e.printStackTrace();
-                                                            }
-
-                                                            return Command.SINGLE_SUCCESS;
-                                                        })
-                                                )
-                                        )
-                                )
-                        ))
-                .then(LiteralArgumentBuilder.<CommandSource>literal("deletePod") // k8 deletePod <podName> <familyName>
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("podName", StringArgumentType.string())
-                                .then(RequiredArgumentBuilder.<CommandSource, String>argument("familyName", StringArgumentType.string())
-                                        .executes(context -> {
-                                            try {
-                                                String podName = context.getArgument("podName", String.class);
-                                                String familyName = context.getArgument("familyName", String.class);
-
-                                                K8Service k8 = new K8Service();
-                                                k8.deleteServer(podName, familyName);
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-
-                                            return Command.SINGLE_SUCCESS;
-                                        })
-                                )
-                        ));
     }
 }
 class Database {

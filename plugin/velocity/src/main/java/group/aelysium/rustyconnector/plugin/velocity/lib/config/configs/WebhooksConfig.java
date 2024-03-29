@@ -38,7 +38,7 @@ public class WebhooksConfig extends YAML implements group.aelysium.rustyconnecto
         Boolean enabled = IYAML.getValue(this.data, "enabled", Boolean.class);
         if(!enabled) return;
 
-        IYAML.get(this.data,"webhooks").getChildrenList().forEach(node -> {
+        IYAML.get(this.data,"webhooks").childrenList().forEach(node -> {
             WebhookScope scope = WebhookScope.valueOf(IYAML.getValue(node, "scope", String.class).toUpperCase());
             String name = IYAML.getValue(node, "id", String.class);
             try {

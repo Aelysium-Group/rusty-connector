@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.toolkit.core.config;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +42,7 @@ public interface IYAML {
 
         final ConfigurationNode[] currentNode = {node};
         Arrays.stream(steps).forEach(step -> {
-            currentNode[0] = currentNode[0].getNode(step);
+            currentNode[0] = currentNode[0].node(step);
         });
 
         if(currentNode[0] == null) throw new IllegalArgumentException("The called YAML node `"+path+"` was null.");
@@ -60,7 +60,7 @@ public interface IYAML {
      */
     static <T> T getValue(ConfigurationNode data, String node, Class<? extends T> type) throws IllegalStateException {
         try {
-            Object objectData = get(data,node).getValue();
+            Object objectData = get(data,node).get(type);
             if(objectData == null) throw new NullPointerException();
 
             return type.cast(objectData);
@@ -74,9 +74,9 @@ public interface IYAML {
     }
 
     static ConfigurationNode loadYAML(File file) throws IOException {
-        return YAMLConfigurationLoader.builder()
-                .setIndent(2)
-                .setPath(file.toPath())
+        return YamlConfigurationLoader.builder()
+                .indent(2)
+                .path(file.toPath())
                 .build().load();
     }
 }

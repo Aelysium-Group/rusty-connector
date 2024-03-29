@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib;
 
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 
 public abstract class Config {
     public abstract ConfigurationNode getData();

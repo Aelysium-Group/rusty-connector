@@ -3,14 +3,13 @@ package group.aelysium.rustyconnector.core.lib.lang;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.ILanguageResolver;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
-import group.aelysium.rustyconnector.core.lib.config.YAML;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +29,7 @@ public class LanguageResolver implements ILanguageResolver {
 
         final ConfigurationNode[] currentNode = {this.mappings};
         Arrays.stream(steps).forEach(step -> {
-            currentNode[0] = currentNode[0].getNode(step);
+            currentNode[0] = currentNode[0].node(step);
         });
 
         if(currentNode[0] == null) throw new IllegalArgumentException("The called YAML node `"+path+"` was null.");
@@ -40,7 +39,7 @@ public class LanguageResolver implements ILanguageResolver {
 
     protected <T> T getNode(String node, Class<T> type) throws IllegalStateException {
         try {
-            Object objectData = parseNodeQuery(node).getValue();
+            Object objectData = parseNodeQuery(node).get(type);
             if(objectData == null) throw new NullPointerException();
 
             return type.cast(objectData);
@@ -132,9 +131,9 @@ public class LanguageResolver implements ILanguageResolver {
 
             try(BufferedReader buffer = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
                 return new LanguageResolver(
-                        YAMLConfigurationLoader.builder()
-                                .setIndent(2)
-                                .setSource(() -> buffer)
+                        YamlConfigurationLoader.builder()
+                                .indent(2)
+                                .source(() -> buffer)
                                 .build().load()
                 );
             }
@@ -145,10 +144,6 @@ public class LanguageResolver implements ILanguageResolver {
                 stream.close();
             } catch (Exception ignore) {}
         }
-    }
-
-    public static LanguageResolver empty() {
-        return new LanguageResolver(ConfigurationNode.root());
     }
 
     @Override
