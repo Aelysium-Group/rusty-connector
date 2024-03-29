@@ -1,16 +1,16 @@
-package group.aelysium.rustyconnector.plugin.paper_legacy.central;
+package group.aelysium.rustyconnector.plugin.paper.central;
 
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.plugin.paper_legacy.commands.CommandRusty;
-import group.aelysium.rustyconnector.plugin.paper_legacy.events.OnPlayerJoin;
-import group.aelysium.rustyconnector.plugin.paper_legacy.events.OnPlayerLeave;
-import group.aelysium.rustyconnector.plugin.paper_legacy.events.OnPlayerPreLogin;
+import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
-import group.aelysium.rustyconnector.plugin.paper_legacy.PaperRustyConnector;
-import group.aelysium.rustyconnector.plugin.paper_legacy.PluginLogger;
+import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
+import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;

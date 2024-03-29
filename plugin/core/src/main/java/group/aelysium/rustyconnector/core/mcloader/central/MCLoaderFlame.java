@@ -175,7 +175,9 @@ class Initialize {
                 config.getRedis_protocol(),
                 config.getRedis_dataChannel()
         );
+
         RedisConnector messenger = RedisConnector.create(cryptor, spec);
+
         services.put(RedisConnector.class, messenger);
 
 
@@ -188,6 +190,7 @@ class Initialize {
         connection.listen(new CoordinateRequestListener(this.api));
         connection.listen(new RankedGameReadyListener(this.api));
         connection.listen(new RankedGameImplodedListener(this.api));
+        logger.send(Component.text("G", NamedTextColor.DARK_GRAY));
 
         ((RedisConnection) connection).startListening(cacheService, logger, Packet.Node.mcLoader(senderUUID));
 
