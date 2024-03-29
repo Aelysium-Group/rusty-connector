@@ -22,6 +22,4 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - name: Build with Gradle
-      run: |
-        cd plugin
-        ./gradlew build
+      run: ./plugin/gradlew build
