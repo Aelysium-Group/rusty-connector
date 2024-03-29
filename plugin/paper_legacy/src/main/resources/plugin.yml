@@ -1,7 +1,7 @@
 name: rustyconnector-paper
 version: '${version}'
 config-version: '${config_version}'
-main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
+main: group.aelysium.rustyconnector.plugin.paper_legacy.LegacyPaperRustyConnector
 api-version: 1.8
 website: https://github.com/Aelysium-Group/rusty-connector
 authors: [ Juice ]
