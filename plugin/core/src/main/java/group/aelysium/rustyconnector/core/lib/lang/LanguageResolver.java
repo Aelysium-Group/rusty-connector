@@ -107,7 +107,7 @@ public class LanguageResolver implements ILanguageResolver {
     public Component getArray(String key, TagResolver ...resolvers){
         try {
             final Component[] component = {Component.empty()};
-            ((List<String>) this.getNode(key, List.class)).forEach(string -> {
+            this.parseNodeQuery(key).getList(String.class, new ArrayList<>()).forEach(string -> {
                 component[0] = component[0].append(miniMessage.deserialize(string, resolvers)).appendNewline();
             });
 
