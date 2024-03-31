@@ -1,12 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
-import com.sun.jdi.request.DuplicateRequestException;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.hash.MD5;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
@@ -14,8 +12,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.viewport.events.ServerPlayerCountEvent;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.rmi.ConnectException;
 import java.security.InvalidAlgorithmParameterException;
@@ -93,7 +89,7 @@ public class PlayerServer implements group.aelysium.rustyconnector.core.lib.mode
     /**
      * Registers a server to the proxy.
      * @param familyName The family to associate the server with.
-     * @throws DuplicateRequestException If the server has already been registered to the proxy.
+     * @throws RuntimeException If the server has already been registered to the proxy.
      * @throws InvalidAlgorithmParameterException If the family doesn't exist.
      */
     public void register(String familyName) throws Exception {

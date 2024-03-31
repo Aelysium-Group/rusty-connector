@@ -81,7 +81,7 @@ public final class AddressUtil {
      * @return A resolved address.
      */
     public static InetSocketAddress stringToAddress(String address) {
-        return AddressUtil.parseAndResolveAddress(address);
+        return AddressUtil.parseAddress(address);
     }
 
     /**
