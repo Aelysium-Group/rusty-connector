@@ -34,8 +34,8 @@ import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.Disconn
 import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.TimeoutEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -118,14 +118,14 @@ class Initialize {
             InputStream stream = IMCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
-            ConfigurationNode node = YAMLConfigurationLoader.builder()
-                    .setIndent(2)
-                    .setSource(() -> reader)
+            ConfigurationNode node = YamlConfigurationLoader.builder()
+                    .indent(2)
+                    .source(() -> reader)
                     .build().load();
 
             stream.close();
             reader.close();
-            return node.getNode("version").getString();
+            return node.node("version").getString();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -137,14 +137,14 @@ class Initialize {
             InputStream stream = MCLoaderTinder.resourceAsStream("plugin.yml");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
-            ConfigurationNode node = YAMLConfigurationLoader.builder()
-                    .setIndent(2)
-                    .setSource(() -> reader)
+            ConfigurationNode node = YamlConfigurationLoader.builder()
+                    .indent(2)
+                    .source(() -> reader)
                     .build().load();
 
             stream.close();
             reader.close();
-            return node.getNode("config-version").getInt();
+            return node.node("config-version").getInt();
         } catch (Exception e) {
             e.printStackTrace();
             return 0;

@@ -11,7 +11,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.format.NamedTextColor;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -102,7 +102,7 @@ public class DynamicTeleportConfig extends YAML implements group.aelysium.rustyc
             this.tpa_friendsOnly = IYAML.getValue(this.data, "tpa.friends-only", Boolean.class);
 
             try {
-                this.tpa_enabledFamilies = (List<String>) (IYAML.getValue(this.data, "tpa.enabled-families", List.class));
+                this.tpa_enabledFamilies = IYAML.get(this.data, "tpa.enabled-families").getList(String.class, new ArrayList<>());
             } catch (Exception e) {
                 throw new IllegalStateException("The node [tpa.enabled-families] in " + this.name() + " is invalid! Make sure you are using the correct type of data!");
             }
@@ -123,7 +123,7 @@ public class DynamicTeleportConfig extends YAML implements group.aelysium.rustyc
 
         this.familyAnchor_enabled = IYAML.getValue(this.data, "family-anchor.enabled", Boolean.class);
         if(this.familyAnchor_enabled) {
-            List<? extends ConfigurationNode> anchors = IYAML.get(this.data, "family-anchor.anchors").getChildrenList();
+            List<? extends ConfigurationNode> anchors = IYAML.get(this.data, "family-anchor.anchors").childrenList();
 
             this.familyAnchor_anchors = new ArrayList<>();
             if(anchors.size() != 0)
@@ -136,7 +136,7 @@ public class DynamicTeleportConfig extends YAML implements group.aelysium.rustyc
 
         this.familyInjector_enabled = IYAML.getValue(this.data, "family-injectors.enabled", Boolean.class);
         if(this.familyInjector_enabled) {
-            List<? extends ConfigurationNode> injectors = IYAML.get(this.data, "family-injectors.injectors").getChildrenList();
+            List<? extends ConfigurationNode> injectors = IYAML.get(this.data, "family-injectors.injectors").childrenList();
 
             this.familyInjector_injectors = new ArrayList<>();
             if(injectors.size() != 0)
@@ -150,7 +150,7 @@ public class DynamicTeleportConfig extends YAML implements group.aelysium.rustyc
         this.hub_enabled = IYAML.getValue(this.data, "hub.enabled", Boolean.class);
         if(this.hub_enabled) {
             try {
-                this.hub_enabledFamilies = (List<String>) (IYAML.getValue(this.data, "hub.enabled-families", List.class));
+                this.hub_enabledFamilies = IYAML.get(this.data, "hub.enabled-families").getList(String.class, new ArrayList<>());
             } catch (Exception e) {
                 throw new IllegalStateException("The node [hub.enabled-families] in " + this.name() + " is invalid! Make sure you are using the correct type of data!");
             }

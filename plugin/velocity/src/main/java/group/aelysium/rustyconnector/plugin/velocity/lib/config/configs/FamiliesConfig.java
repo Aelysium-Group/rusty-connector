@@ -66,19 +66,19 @@ public class FamiliesConfig extends YAML implements group.aelysium.rustyconnecto
 
         this.rootFamily_catchDisconnectingPlayers = IYAML.getValue(this.data,"root-family.catch-disconnecting-players",Boolean.class);
         try {
-            List<String> array = (List<String>) (IYAML.getValue(this.data,"scalar",List.class));
+            List<String> array = IYAML.get(this.data,"scalar").getList(String.class, new ArrayList<>());
             array.forEach(item -> this.scalar.put(item.toLowerCase(), false));
         } catch (Exception e) {
             throw new IllegalStateException("The node [scalar] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }
         try {
-            List<String> array = (List<String>) (IYAML.getValue(this.data,"static",List.class));
+            List<String> array = IYAML.get(this.data,"static").getList(String.class, new ArrayList<>());
             array.forEach(item -> this.staticF.put(item.toLowerCase(), false));
         } catch (Exception e) {
             throw new IllegalStateException("The node [scalar] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }
         try {
-            List<String> array = (List<String>) (IYAML.getValue(this.data,"ranked",List.class));
+            List<String> array = IYAML.get(this.data,"ranked").getList(String.class, new ArrayList<>());
             array.forEach(item -> this.ranked.put(item.toLowerCase(), false));
         } catch (Exception e) {
             throw new IllegalStateException("The node [ranked] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
