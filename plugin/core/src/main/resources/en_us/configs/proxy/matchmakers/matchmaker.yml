@@ -62,51 +62,64 @@ ranking:
 
 
 session:
-    building:
-        #
-        # The minimum number of players that must be in a game session.
-        #
-        min: 8
+    #
+    # If a session is active should new players be able to join it?
+    # If enabled, and assuming the session isn't at max capacity.
+    # This may allow players to join a session in the middle of a game.
+    #
+    freeze-active-sessions: false
 
 
 
-        #
-        # The maximum number of players that can be in a game session.
-        #
-        max: 10
+    #
+    # The minimum number of players that must be in a game session.
+    #
+    min: 8
 
 
 
-        #
-        # A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to
-        # build a new game session
-        # This should be set relatively low depending on what you expect player influxes to be.
-        # Can't be set lower than `3 SECONDS`.
-        #
-        # Keep in mind that this setting doesn't necessarily mean that new matches will be made every interval.
-        # Matches will only be made if there is a satisfactory number of players with the proper ranks.
-        #
-        interval: 10 SECONDS
+    #
+    # The maximum number of players that can be in a game session.
+    #
+    max: 10
 
 
 
-    closing:
-        #
-        # If players quit the game, how many players can be left in the game before the game is closed.
-        # Set this value to be -1 if you want it to be the same number as `session.building.min`.
-        #
-        threshold: -1
+    #
+    # A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to
+    # build a new game session
+    # This should be set relatively low depending on what you expect player influxes to be.
+    # Can't be set lower than `3 SECONDS`.
+    #
+    # Keep in mind that this setting doesn't necessarily mean that new matches will be made every interval.
+    # Matches will only be made if there is a satisfactory number of players with the proper ranks.
+    #
+    interval: 10 SECONDS
 
-        ranks:
-            #
-            # Should players that quit the game receive a "lose"?
-            #
-            quitters-lose: false
 
-            #
-            # Should the players that stay in the game when it closes receive a "win"?
-            #
-            stayers-win: false
+
+    #
+    # If players quit the game, how many players can be left in the game before the game is closed.
+    # Set this value to be -1 if you want it to be the same number as `session.building.min`.
+    #
+    closing-threshold: -1
+
+
+
+    #
+    # Should players that quit the game receive a "lose"?
+    # Quitting is defined as a player leaving a session while it's still going.
+    #
+    quitters-lose: false
+
+
+
+    #
+    # Should the players that stay in the game when it closes receive a "win"?
+    # This option effects the fact that, if a session's player count drops below `min`, it will implode.
+    # A session implosion means that the session will end instantly and all players will be returned to the waiting location.
+    #
+    stayers-win: false
 
 
 
@@ -121,11 +134,13 @@ queue:
         show-info: true
 
 
+
         #
-        # Should a player be reconnected to their previous session if
+        # Should a player be specifically reconnected to their previous session if
         # it's still running when they try to join the queue.
         #
-        # If false, the player will be put into queue for a new session instead.
+        # If false, it's still possible for players to reconnect to a previous session -
+        # the matchmaker simply won't make a specific effort to do so.
         #
         reconnect: true
 

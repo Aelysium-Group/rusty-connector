@@ -101,10 +101,15 @@ public interface IMatchmaker<PlayerRank extends IPlayerRank> extends Service {
             Queue queue
     ) {
         public record Ranking(Class<? extends IPlayerRank> schema, double variance) {}
-        public record Session(Building building, Closing closing) {
-            public record Building(int min, int max, LiquidTimestamp interval) {}
-            public record Closing(int threshold, boolean quittersLose, boolean stayersWin) {}
-        }
+        public record Session(
+                boolean freezeActiveSessions,
+                int min,
+                int max,
+                LiquidTimestamp interval,
+                int closingThreshold,
+                boolean quittersLose,
+                boolean stayersWin
+        ) {}
         public record Queue(Joining joining, Leaving leaving) {
             public record Joining(boolean showInfo, boolean reconnect) {}
             public record Leaving(boolean command, boolean boot) {}

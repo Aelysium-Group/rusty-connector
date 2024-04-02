@@ -39,8 +39,9 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         double variance = IYAML.getValue(this.data,"ranking.variance",Double.class);
         variance = round(variance, 2);
 
-        int min = IYAML.getValue(this.data,"session.building.min",Integer.class);
-        int max = IYAML.getValue(this.data,"session.building.max",Integer.class);
+        boolean freezeActiveSessions = IYAML.getValue(this.data,"session.freeze-active-sessions",Boolean.class);
+        int min = IYAML.getValue(this.data,"session.min",Integer.class);
+        int max = IYAML.getValue(this.data,"session.max",Integer.class);
 
         LiquidTimestamp matchmakingInterval = LiquidTimestamp.from(10, TimeUnit.SECONDS);
         try {
@@ -50,8 +51,8 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         int session_closing_threshold = IYAML.getValue(this.data,"session.closing.threshold",Integer.class);
         if(session_closing_threshold == -1) session_closing_threshold = min;
 
-        boolean session_closing_ranks_quittersLose = IYAML.getValue(this.data,"session.closing.ranks.quitters-lose",Boolean.class);
-        boolean session_closing_ranks_stayersWin = IYAML.getValue(this.data,"session.closing.ranks.stayers-win",Boolean.class);
+        boolean session_closing_ranks_quittersLose = IYAML.getValue(this.data,"session.quitters-lose",Boolean.class);
+        boolean session_closing_ranks_stayersWin = IYAML.getValue(this.data,"session.stayers-win",Boolean.class);
 
         boolean queue_joining_showInfo = IYAML.getValue(this.data, "queue.joining.show-info", Boolean.class);
         boolean queue_joining_reconnect = IYAML.getValue(this.data, "queue.joining.reconnect", Boolean.class);
@@ -68,8 +69,13 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         this.settings = new IMatchmaker.Settings(
                 new IMatchmaker.Settings.Ranking(actualSchema, variance),
                 new IMatchmaker.Settings.Session(
-                        new IMatchmaker.Settings.Session.Building(min, max, matchmakingInterval),
-                        new IMatchmaker.Settings.Session.Closing(session_closing_threshold, session_closing_ranks_quittersLose, session_closing_ranks_stayersWin)
+                        freezeActiveSessions,
+                        min,
+                        max,
+                        matchmakingInterval,
+                        session_closing_threshold,
+                        session_closing_ranks_quittersLose,
+                        session_closing_ranks_stayersWin
                 ),
                 new IMatchmaker.Settings.Queue(
                         new IMatchmaker.Settings.Queue.Joining(queue_joining_showInfo, queue_joining_reconnect),

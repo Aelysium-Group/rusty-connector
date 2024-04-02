@@ -32,6 +32,7 @@ public class Session implements ISession {
     protected IRankedMCLoader mcLoader;
     protected final Settings settings;
     protected final RankRange rankRange;
+    protected boolean frozen = false;
 
     public Session(IMatchPlayer<IPlayerRank> starter, Settings settings) {
         this.players = new ConcurrentHashMap<>(settings.max());
@@ -67,6 +68,10 @@ public class Session implements ISession {
 
     public int size() {
         return this.players.size();
+    }
+
+    public boolean frozen() {
+        return this.frozen;
     }
 
     public void end(List<UUID> winners, List<UUID> losers) {
@@ -135,6 +140,11 @@ public class Session implements ISession {
             return request;
         }
 
+        if(this.frozen) {
+            result.complete(ConnectionResult.failed(Component.text("This session is already active and not accepting new players!")));
+            return request;
+        }
+
         this.players.put(matchPlayer.player().uuid(), matchPlayer);
 
         if(this.active())
@@ -161,6 +171,7 @@ public class Session implements ISession {
         if(mcLoader.currentSession().isPresent()) throw new AlreadyBoundException("There's already a Session running on this MCLoader!");
         ((RankedMCLoader) mcLoader).connect(this);
         this.mcLoader = mcLoader;
+        if(this.settings.shouldFreeze()) this.frozen = true;
     }
 
     @Override

@@ -60,10 +60,10 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
         this.storage = storage;
         this.gameId = gameId;
         this.settings = settings;
-        this.sessionSettings = new ISession.Settings(settings.session().closing().threshold(), settings.session().building().max(), settings.ranking().variance(), this.gameId);
+        this.sessionSettings = new ISession.Settings(settings.session().freezeActiveSessions(), settings.session().closingThreshold(), settings.session().max(), settings.ranking().variance(), this.gameId);
 
-        this.minPlayersPerGame = settings.session().building().min();
-        this.maxPlayersPerGame = settings.session().building().max();
+        this.minPlayersPerGame = settings.session().min();
+        this.maxPlayersPerGame = settings.session().max();
     }
 
     /**

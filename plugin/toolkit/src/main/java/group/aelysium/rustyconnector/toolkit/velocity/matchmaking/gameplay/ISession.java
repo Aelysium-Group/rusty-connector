@@ -36,6 +36,11 @@ public interface ISession extends JSONParseable {
     int size();
 
     /**
+     * Gets whether this session will allow new players to join it.
+     */
+    boolean frozen();
+
+    /**
      * Gets whether this session is active.
      * A session is considered active if it is connected ot an MCLoader.
      * @return `true` if the session is active. `false` otherwise.
@@ -113,5 +118,5 @@ public interface ISession extends JSONParseable {
         }
     }
 
-    record Settings(int min, int max, double variance, String gameId) {}
+    record Settings(boolean shouldFreeze, int min, int max, double variance, String gameId) {}
 }
