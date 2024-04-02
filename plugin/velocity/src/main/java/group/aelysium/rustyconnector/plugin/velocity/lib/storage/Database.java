@@ -2,7 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IStorageRoot;
 import org.eclipse.serializer.collections.lazy.LazyHashMap;

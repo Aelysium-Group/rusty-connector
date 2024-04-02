@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage;
+package group.aelysium.rustyconnector.toolkit.velocity.matchmaking;
 
 public interface IPlayerRank {
     /**

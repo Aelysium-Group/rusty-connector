@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking;
 
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 public class MatchPlayer implements IMatchPlayer<IPlayerRank> {

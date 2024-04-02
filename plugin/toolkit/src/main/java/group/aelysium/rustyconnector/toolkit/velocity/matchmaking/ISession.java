@@ -1,9 +1,7 @@
-package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay;
+package group.aelysium.rustyconnector.toolkit.velocity.matchmaking;
 
 import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
 import java.rmi.AlreadyBoundException;

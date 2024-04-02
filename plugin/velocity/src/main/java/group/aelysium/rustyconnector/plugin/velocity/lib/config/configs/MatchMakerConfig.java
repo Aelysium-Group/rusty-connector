@@ -9,8 +9,8 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.Win
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.nio.file.Path;

@@ -5,7 +5,7 @@ import static org.eclipse.serializer.math.XMath.round;
 import org.eclipse.serializer.concurrency.XThreads;
 import org.eclipse.serializer.persistence.types.Persister;
 
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 
 public class WinLossPlayerRank implements IPlayerRank {
     private transient Persister storage;
