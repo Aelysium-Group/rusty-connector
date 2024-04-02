@@ -1,10 +1,7 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers;
+package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking;
 
 import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.bossbars.MatchmakingBossbar;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.MatchPlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.Session;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
@@ -258,12 +255,12 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
                         velocityPlayer.sendActionBar(Component.text("----< MATCHMAKING >----", NamedTextColor.YELLOW));
 
                         if(session.size() < session.settings().min()) {
-                            MatchmakingBossbar.WAITING_FOR_SERVERS(this.waitingForServers, loadBalancer.size(true), loadBalancer.size(false));
+                            Bossbar.WAITING_FOR_SERVERS(this.waitingForServers, loadBalancer.size(true), loadBalancer.size(false));
                             velocityPlayer.showBossBar(this.waitingForServers);
                             continue;
                         }
 
-                        MatchmakingBossbar.WAITING_FOR_PLAYERS(this.waitingForPlayers, session.size(), maxPlayersPerGame);
+                        Bossbar.WAITING_FOR_PLAYERS(this.waitingForPlayers, session.size(), maxPlayersPerGame);
                         velocityPlayer.showBossBar(this.waitingForPlayers);
                     } catch (Exception ignore) {}
             }
@@ -343,5 +340,26 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
         this.sessions.clear();
 
         this.players.clear();
+    }
+
+    protected interface Bossbar {
+        static void WAITING_FOR_PLAYERS(BossBar bossbar, int players, int max) {
+            float percentage = (float) players / max;
+
+            BossBar.Color color = BossBar.Color.WHITE;
+            if (percentage > 0.5) color = BossBar.Color.YELLOW;
+            if (percentage >= 1) color = BossBar.Color.GREEN;
+
+            bossbar.color(color);
+            bossbar.progress(percentage);
+        }
+
+        static void WAITING_FOR_SERVERS(BossBar bossbar, int closedServers, int openServers) {
+            int totalServers = closedServers + openServers;
+            float percentage = (float) openServers / totalServers;
+
+            bossbar.color(BossBar.Color.BLUE);
+            bossbar.progress(percentage);
+        }
     }
 }

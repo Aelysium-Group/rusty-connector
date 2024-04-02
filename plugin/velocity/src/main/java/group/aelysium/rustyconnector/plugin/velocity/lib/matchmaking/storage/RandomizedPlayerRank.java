@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank;
+package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
 
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 

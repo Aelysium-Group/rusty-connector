@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchMakerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
