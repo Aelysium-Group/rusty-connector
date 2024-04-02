@@ -1,11 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.GamemodeRankManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import net.kyori.adventure.text.Component;
 
@@ -58,16 +55,6 @@ public class Player implements IPlayer {
         return Optional.empty();
     }
 
-    public Optional<IPlayerRankProfile> rank(IGamemodeRankManager game) {
-        StorageService storage = Tinder.get().services().storage();
-        try {
-            return Optional.of(game.rankedPlayer(storage, this.uuid, true));
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
-    }
-
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;
@@ -93,20 +80,20 @@ public class Player implements IPlayer {
      */
     public static Player from(com.velocitypowered.api.proxy.Player velocityPlayer) {
         // If player doesn't exist, we need to make one and store it.
-        StorageService storageService = Tinder.get().services().storage();
+        StorageService storage = Tinder.get().services().storage();
 
         try {
             Player player = new Reference(velocityPlayer.getUniqueId()).get();
             if(!player.username().equals(velocityPlayer.getUsername())) {
                 player.username = velocityPlayer.getUsername();
-                storageService.database().savePlayer(storageService, player);
+                storage.database().savePlayer(player);
                 return player;
             }
         } catch (Exception ignore) {}
 
         Player player = new Player(velocityPlayer.getUniqueId(), velocityPlayer.getUsername());
 
-        storageService.database().savePlayer(storageService, player);
+        storage.database().savePlayer(player);
 
         return player;
     }
@@ -137,7 +124,7 @@ public class Player implements IPlayer {
             } catch (Exception ignore) {}
             Player player = new Player(this.uuid, this.username);
 
-            storageService.database().savePlayer(storageService, player);
+            storageService.database().savePlayer(player);
 
             return player;
         }

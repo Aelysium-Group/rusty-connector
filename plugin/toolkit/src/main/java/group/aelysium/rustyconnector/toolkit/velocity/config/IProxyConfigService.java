@@ -1,10 +1,7 @@
 package group.aelysium.rustyconnector.toolkit.velocity.config;
 
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
-import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
-import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public interface IProxyConfigService extends IConfigService {

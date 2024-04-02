@@ -1,15 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers;
 
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.MatchPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.Session;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.PlayerRankProfile;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import net.kyori.adventure.text.Component;
 
@@ -19,32 +19,30 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 
 public class Randomized extends Matchmaker {
-    public Randomized(Settings settings, StorageService storage, IGamemodeRankManager game) {
-        super(settings, storage, game);
+    public Randomized(Settings settings, StorageService storage, String gameId) {
+        super(settings, storage, gameId);
     }
 
     @Override
     public void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         try {
-            IPlayerRankProfile rankedPlayer = new PlayerRankProfile(request.player().uuid(), new RandomizedPlayerRank());
+            IMatchPlayer<IPlayerRank> matchPlayer = new MatchPlayer<>(request.player(), new RandomizedPlayerRank(), this.gameId);
 
-            if (this.settings.queue().joining().reconnect()) {
-                for (ISession session : this.runningSessions.values().stream().toList()) {
-                    for (IPlayer player : session.players()) {
-                        if (player.uuid().equals(rankedPlayer.uuid())) {
-                            session.mcLoader().connect(player);
-                            result.complete(ConnectionResult.success(Component.text("You've been reconnected to your game."), session.mcLoader()));
-                            return;
-                        }
-                    }
+            if (this.settings.queue().joining().reconnect())
+                for (ISession session : this.runningSessions.values()) {
+                    if(!session.contains(matchPlayer)) continue;
+
+                    PlayerConnectable.Request request1 = session.mcLoader().connect(matchPlayer.player());
+                    request1.wait(10000);
+                    result.complete(ConnectionResult.success(Component.text("You've been reconnected to your game."), session.mcLoader()));
+                    return;
                 }
-            }
 
-            if(this.waitingPlayers.contains(rankedPlayer)) throw new RuntimeException("Player is already queued!");
+            if(this.waitingPlayers.contains(matchPlayer)) throw new RuntimeException("Player is already queued!");
 
-            this.waitingPlayers.add(rankedPlayer);
+            this.waitingPlayers.add(matchPlayer);
 
-            if(this.waitingPlayers.size() >= 2) try {
+            if(minimumPlayersExist()) try {
                 int index = this.waitingPlayers.size() - 1;
                 SingleSort.sort(this.waitingPlayers, index);
             } catch (Exception e) {
@@ -63,13 +61,13 @@ public class Randomized extends Matchmaker {
 
         Session.Builder builder = new Session.Builder();
 
-        List<IPlayerRankProfile> playersToUse = new ArrayList<>();
-        for(IPlayerRankProfile player : this.waitingPlayers) {
+        List<IMatchPlayer<IPlayerRank>> playersToUse = new ArrayList<>();
+        for(IMatchPlayer<IPlayerRank> matchPlayer : this.waitingPlayers) {
             try {
-                builder.addPlayer(player.player().orElseThrow());
-                playersToUse.add(player);
+                builder.addPlayer(matchPlayer);
+                playersToUse.add(matchPlayer);
             } catch (NoSuchElementException ignore) { // Removes the player because they don't seem to exist
-                this.waitingPlayers.remove(player);
+                this.waitingPlayers.remove(matchPlayer);
             }
             if(playersToUse.size() >= settings.session().building().max()) break;
         }

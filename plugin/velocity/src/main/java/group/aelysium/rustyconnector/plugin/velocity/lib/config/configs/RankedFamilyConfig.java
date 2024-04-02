@@ -10,8 +10,6 @@ import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.config.IProxyConfigService;
 import group.aelysium.rustyconnector.toolkit.velocity.config.MatchMakerConfig;
 import group.aelysium.rustyconnector.toolkit.velocity.config.WhitelistConfig;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -20,7 +18,7 @@ public class RankedFamilyConfig extends YAML implements group.aelysium.rustyconn
     private String displayName;
     private Family.Reference parent_family = Family.Reference.rootFamily();
     private String matchmaker;
-    private String gamemodeName;
+    private String gameId;
     private boolean whitelist_enabled;
     private String whitelist_name;
 
@@ -40,8 +38,8 @@ public class RankedFamilyConfig extends YAML implements group.aelysium.rustyconn
     public String displayName() { return displayName; }
     public Family.Reference getParent_family() { return parent_family; }
 
-    public String gamemodeName() {
-        return gamemodeName;
+    public String gameId() {
+        return gameId;
     }
     public String matchmaker_name() {
         return matchmaker;
@@ -68,9 +66,9 @@ public class RankedFamilyConfig extends YAML implements group.aelysium.rustyconn
             this.parent_family = new Family.Reference(IYAML.getValue(this.data, "parent-family", String.class));
         } catch (Exception ignore) {}
 
-        this.gamemodeName = IYAML.getValue(this.data,"gamemode-name",String.class);
-        if(this.gamemodeName.equalsIgnoreCase("default") || this.gamemodeName.equalsIgnoreCase(""))
-            this.gamemodeName = familyName;
+        this.gameId = IYAML.getValue(this.data,"game-id",String.class);
+        if(this.gameId.equalsIgnoreCase("default") || this.gameId.equalsIgnoreCase(""))
+            this.gameId = familyName;
 
         this.matchmaker = IYAML.getValue(this.data,"matchmaker",String.class);
 

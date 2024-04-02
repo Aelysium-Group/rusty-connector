@@ -1,14 +1,13 @@
 package group.aelysium.rustyconnector.toolkit.velocity.config;
 
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import net.kyori.adventure.text.Component;
 
 import java.util.Optional;
 
 public interface RankedFamilyConfig {
     String displayName();
     IFamily.Reference getParent_family();
-    String gamemodeName();
+    String gameId();
     String matchmaker_name();
     boolean isWhitelist_enabled();
     String getWhitelist_name();

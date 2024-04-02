@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay;
 
 import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
 import java.rmi.AlreadyBoundException;
@@ -29,16 +29,21 @@ public interface ISession extends JSONParseable {
     IRankedMCLoader mcLoader();
 
     /**
+     * Checks if the running session contains the player.
+     */
+    boolean contains(IMatchPlayer<IPlayerRank> player);
+
+    /**
      * Gets the players that are currently in this session.
      */
-    List<IPlayer> players();
+    List<IMatchPlayer<IPlayerRank>> players();
 
     /**
      * Removes the player from the session.
      * The session will implode if the player leaving causes it to have not enough players to continue.
      * @param player The player to leave.
      */
-    boolean leave(IPlayer player);
+    boolean leave(IMatchPlayer<IPlayerRank> player);
 
 
     interface IWaiting {
@@ -62,13 +67,13 @@ public interface ISession extends JSONParseable {
         /**
          * Checks if the waiting session contains the player.
          */
-        boolean contains(IPlayer player);
+        boolean contains(IMatchPlayer<IPlayerRank> player);
 
         /**
          * Removes the specified player from the waiting session.
          */
-        boolean remove(IPlayer player);
+        boolean remove(IMatchPlayer<IPlayerRank> player);
     }
 
-    record Settings(int min, int max, IGamemodeRankManager game) {}
+    record Settings(int min, int max, String gameId) {}
 }

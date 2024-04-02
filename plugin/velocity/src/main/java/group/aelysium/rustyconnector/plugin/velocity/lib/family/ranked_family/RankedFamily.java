@@ -8,7 +8,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBala
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchMakerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.GamemodeRankManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
@@ -94,24 +93,14 @@ public class RankedFamily extends Family implements IRankedFamily {
         Tinder api = Tinder.get();
         List<Component> bootOutput = deps.d1();
         LangService lang = deps.d2();
-        StorageService mySQLStorage = deps.d3();
+        StorageService storage = deps.d3();
         WhitelistService whitelistService = deps.d4();
 
         RankedFamilyConfig config = RankedFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d5());
 
         MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
 
-        Matchmaker matchmaker;
-        {
-            GamemodeRankManager fetched = mySQLStorage.database().getGame(config.name()).orElseGet(() -> {
-                GamemodeRankManager game = new GamemodeRankManager(config.gamemodeName(), matchMakerConfig.settings().ranking().schema());
-                mySQLStorage.database().saveGame(mySQLStorage, game);
-
-                return game;
-            });
-
-            matchmaker = Matchmaker.from(matchMakerConfig.settings(), deps.d3(), fetched);
-        }
+        Matchmaker matchmaker = Matchmaker.from(matchMakerConfig.settings(), storage, config.gameId());
 
         Whitelist.Reference whitelist = null;
         if (config.isWhitelist_enabled())

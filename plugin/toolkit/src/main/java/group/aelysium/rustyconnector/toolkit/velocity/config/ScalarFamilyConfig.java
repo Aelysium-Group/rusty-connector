@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.config;
 
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
-import net.kyori.adventure.text.Component;
 
 import java.util.Optional;
 

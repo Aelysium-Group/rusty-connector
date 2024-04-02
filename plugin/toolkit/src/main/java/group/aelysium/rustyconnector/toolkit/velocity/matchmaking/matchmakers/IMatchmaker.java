@@ -3,10 +3,9 @@ package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
@@ -15,7 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface IMatchmaker extends Service {
+public interface IMatchmaker<PlayerRank extends IPlayerRank> extends Service {
     /**
      * Using the players contained in the matchmaker, attempt to make a game.
      */
@@ -34,14 +33,13 @@ public interface IMatchmaker extends Service {
     void completeSort();
 
     /**
-     * Gets the rank manager used by this matchmaker to handle player ranks.
+     * Gets the game id used by this matchmaker to handle player ranks.
      */
-    IGamemodeRankManager rankManager();
+    String gameId();
 
     /**
      * Inserts a player into the matchmaker.
      * <p>
-     * Specifically, this method will resolve the passed player into a {@link IPlayerRankProfile}.
      * This method performs a single sort and injects the player into an approximation of the best place for them to reside.
      * Thus reducing how frequently you'll need to perform a full sort on the metchmaker.
      * @param request The request being made.
@@ -60,7 +58,7 @@ public interface IMatchmaker extends Service {
      * Gets The number of players currently waiting in the matchmaker.
      * @return The number of players waiting.
      */
-    List<IPlayerRankProfile> waitingPlayers();
+    List<IMatchPlayer<PlayerRank>> waitingPlayers();
 
     /**
      * Checks if a player is currently waiting in the matchmaker.
@@ -88,7 +86,7 @@ public interface IMatchmaker extends Service {
             Session session,
             Queue queue
     ) {
-        public record Ranking(IScoreCard.RankSchema schema, double variance) {}
+        public record Ranking(Class<? extends IPlayerRank> schema, double variance) {}
         public record Session(Building building, Closing closing) {
             public record Building(int min, int max, LiquidTimestamp interval) {}
             public record Closing(int threshold, boolean quittersLose, boolean stayersWin) {}

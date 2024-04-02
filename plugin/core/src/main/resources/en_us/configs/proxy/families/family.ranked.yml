@@ -47,7 +47,7 @@
 #     In order to use Ranked Families you must utilize the RustyConnector Toolkit in a custom plugin.     #
 #                                                                                                         #
 #                  We do the heavy lifting, but you still have to tell us who is winning,                 #
-#                               loosing, and when we need to end the game.                                #
+#                                losing, and when we need to end the game.                                #
 #                                                                                                         #
 #                                       ---------------------------                                       #
 #                                                                                                         #
@@ -108,25 +108,29 @@ parent-family: ""
 
 ############################################################
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#                      Gamemode Name                       #
+#                         Game ID                          #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
-# | The name of your gamemode.                             #
+# | The ID of your game.                                   #
 # | When players start playing this game and earning       #
 # | rank points, their rank will be bound                  #
-# | directly to this name.                                 #
-# | If you change this name, all players will lose their   #
-# | rank on this gamemode.                                 #
+# | directly to this id.                                   #
+# | If you change this id, all players will lose their     #
+# | rank on this game.                                     #
 #                                                          #
-# | `default` will cause the name of this gamemode to be   #
+# | You can also set multiple Ranked Families to use the   #
+# | same Game ID if you want them all to sync their        #
+# | player rank data.                                      #
+#                                                          #
+# | `default` will cause the name of this game to be       #
 # | the same as this family's id.                          #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ############################################################
-gamemode-name: "default"
+game-id: "default"
 
 
 

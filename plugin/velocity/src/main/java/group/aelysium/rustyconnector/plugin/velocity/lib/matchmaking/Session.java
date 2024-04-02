@@ -9,10 +9,10 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
-import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,11 +22,11 @@ import java.util.*;
 
 public class Session implements ISession {
     protected final UUID uuid;
-    protected final List<IPlayer> players;
+    protected final List<IMatchPlayer<IPlayerRank>> players;
     protected final IRankedMCLoader mcLoader;
     protected final Settings settings;
 
-    private Session(UUID uuid, List<IPlayer> players, IRankedMCLoader mcLoader, Settings settings) {
+    private Session(UUID uuid, List<IMatchPlayer<IPlayerRank>> players, IRankedMCLoader mcLoader, Settings settings) {
         this.uuid = uuid;
         this.players = players;
         this.mcLoader = mcLoader;
@@ -47,20 +47,19 @@ public class Session implements ISession {
 
     public void end(List<UUID> winners, List<UUID> losers) {
         RankedFamily family = (RankedFamily) this.mcLoader.family();
-        StorageService storage = Tinder.get().services().storage();
 
         family.matchmaker().remove(this);
         Family parent = family.parent();
 
-        for (IPlayer player : this.players()) {
+        for (IMatchPlayer<IPlayerRank> matchPlayer : this.players) {
             try {
-                if(winners.contains(player.uuid())) player.rank(this.settings.game()).orElseThrow().rank().markWin(storage);
-                if(losers.contains(player.uuid())) player.rank(this.settings.game()).orElseThrow().rank().markLoss(storage);
+                if(winners.contains(matchPlayer.player().uuid())) matchPlayer.rank().markWin();
+                if(losers.contains(matchPlayer.player().uuid())) matchPlayer.rank().markLoss();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
-                parent.connect(player);
+                parent.connect(matchPlayer.player());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -70,7 +69,7 @@ public class Session implements ISession {
     }
 
     public void implode(String reason) {
-        this.players.forEach(player -> player.sendMessage(Component.text(reason, NamedTextColor.RED)));
+        this.players.forEach(matchPlayer -> matchPlayer.player().sendMessage(Component.text(reason, NamedTextColor.RED)));
 
         Packet packet = Tinder.get().services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_IMPLODE)
@@ -84,11 +83,11 @@ public class Session implements ISession {
         this.end(List.of(), List.of());
     }
 
-    public List<IPlayer> players() {
+    public List<IMatchPlayer<IPlayerRank>> players() {
         return players;
     }
 
-    public boolean leave(IPlayer player) {
+    public boolean leave(IMatchPlayer<IPlayerRank> player) {
         if(!this.players.remove(player)) return false;
 
         if(this.players.size() >= this.settings.min()) return true;
@@ -98,20 +97,24 @@ public class Session implements ISession {
         return true;
     }
 
+    public boolean contains(IMatchPlayer<IPlayerRank> player) {
+        return this.players.contains(player);
+    }
+
     @Override
     public JsonObject toJSON() {
         JsonObject object = new JsonObject();
         object.add("uuid", new JsonPrimitive(this.uuid.toString()));
 
         JsonArray array = new JsonArray();
-        players.forEach(player -> {
+        players.forEach(matchPlayer -> {
             JsonObject playerObject = new JsonObject();
 
-            playerObject.add("uuid", new JsonPrimitive(player.uuid().toString()));
+            playerObject.add("uuid", new JsonPrimitive(matchPlayer.player().uuid().toString()));
 
             Object rank = "null";
             try {
-                rank = player.rank(this.settings.game()).orElseThrow().rank().rank();
+                rank = matchPlayer.rank().rank();
             } catch (Exception ignore) {}
 
             playerObject.add("rank", new JsonPrimitive(rank.toString()));
@@ -124,14 +127,14 @@ public class Session implements ISession {
     }
 
     public static class Builder {
-        protected List<IPlayer> players = new ArrayList<>();
+        protected List<IMatchPlayer<IPlayerRank>> players = new ArrayList<>();
         protected RankedMCLoader mcLoader;
 
         /**
          * Add a player to the match
          * @param player The player to add.
          */
-        public void addPlayer(IPlayer player) {
+        public void addPlayer(IMatchPlayer<IPlayerRank> player) {
             this.players.add(player);
         }
 
@@ -146,9 +149,9 @@ public class Session implements ISession {
 
     public static class Waiting implements ISession.IWaiting {
         protected UUID uuid = UUID.randomUUID();
-        protected List<IPlayer> players;
+        protected List<IMatchPlayer<IPlayerRank>> players;
 
-        protected Waiting(List<IPlayer> teams) {
+        protected Waiting(List<IMatchPlayer<IPlayerRank>> teams) {
             this.players = teams;
         }
 
@@ -160,11 +163,11 @@ public class Session implements ISession {
             return this.uuid;
         }
 
-        public List<IPlayer> players() {
+        public List<IMatchPlayer<IPlayerRank>> players() {
             return this.players;
         }
 
-        public boolean remove(IPlayer player) {
+        public boolean remove(IMatchPlayer<IPlayerRank> player) {
             return this.players.remove(player);
         }
 
@@ -184,7 +187,7 @@ public class Session implements ISession {
         }
 
         @Override
-        public boolean contains(IPlayer player) {
+        public boolean contains(IMatchPlayer<IPlayerRank> player) {
             return this.players.contains(player);
         }
     }
