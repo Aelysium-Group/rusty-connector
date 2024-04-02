@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlaye
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 public interface IMatchPlayer<PlayerRank extends IPlayerRank> extends ISortable {
-    public IPlayer player();
-    public PlayerRank rank();
-    public String gameId();
+    IPlayer player();
+    PlayerRank rank();
+    String gameId();
 }

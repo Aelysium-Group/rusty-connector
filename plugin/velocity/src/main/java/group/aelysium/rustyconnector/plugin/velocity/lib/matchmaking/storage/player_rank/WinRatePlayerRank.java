@@ -33,9 +33,4 @@ public class WinRatePlayerRank implements IPlayerRank {
 
         return round((double) wins / games, 4);
     }
-
-
-    public RankSchema type() {
-        return RankSchema.WIN_RATE;
-    }
 }

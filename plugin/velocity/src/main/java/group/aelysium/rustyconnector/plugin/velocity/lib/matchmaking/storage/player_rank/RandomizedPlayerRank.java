@@ -5,10 +5,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlaye
 public class RandomizedPlayerRank implements IPlayerRank {
     public double rank() { return 0.0; }
 
-    public RankSchema type() {
-        return RankSchema.RANDOMIZED;
-    }
-
     @Override
     public void markWin() {}
 

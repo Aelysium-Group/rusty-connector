@@ -435,3 +435,21 @@ class Database {
                 ;
     }
 }
+
+class DebugMatchmaking {
+    public static ArgumentBuilder<CommandSource, ?> build(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
+        return LiteralArgumentBuilder.<CommandSource>literal("matchmaking") // k8 createPod <familyName> <containerName> <containerPort>
+
+                .then(LiteralArgumentBuilder.<CommandSource>literal("purgeGameRecords")
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameId", StringArgumentType.greedyString())
+                                .executes(context -> {
+                                    String gameId = context.getArgument("gameId", String.class);
+
+                                    StorageService storage = flame.services().storage();
+                                    storage.database().deleteGame(gameId);
+                                    logger.log("Successfully purged all rank records from "+gameId);
+                                    return Command.SINGLE_SUCCESS;
+                                })))
+                ;
+    }
+}

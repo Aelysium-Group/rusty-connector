@@ -53,17 +53,9 @@ ranking:
 
     #
     # A decimal representing the percentage that player's ranks are allowed to deviate from one-another.
-    #
-    # Cannot be set to 0.
+    # 0.1 means that other players in the round must have a rank within 10% of each-other.
     #
     # If algorithm is set to `RANDOM` this will be ignored.
-    #
-    # 0.1 means that other players in the round must have a rank within 10% of each-other.
-    # If set to 1.0, any players are allowed to be in a match together; regardless of rank.
-    # Setting to 1.0 is effectively the same as setting `algorithm` to RANDOM.
-    #
-    # For ranking systems with an infinitely high top-rank, variance will be calculated based on the highest ranking
-    # player in the matchmaking queue representing 100%.
     #
     variance: 0.2
 

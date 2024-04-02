@@ -27,7 +27,7 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
     }
 
     public void connect(ISession session) {
-        for (IMatchPlayer<IPlayerRank> matchPlayer : session.players())
+        for (IMatchPlayer<IPlayerRank> matchPlayer : session.players().values())
             this.connect(matchPlayer.player());
 
         Packet packet = Tinder.get().services().packetBuilder().newBuilder()
@@ -45,11 +45,10 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
     public void leave(IPlayer player) {
         if(this.activeSession == null) return;
 
-        Optional<IMatchPlayer<IPlayerRank>> matchPlayer = this.activeSession.players().stream().filter(mp -> mp.player().equals(player)).findFirst();
+        IMatchPlayer<IPlayerRank> matchPlayer = this.activeSession.players().get(player.uuid());
+        if(matchPlayer == null) return;
 
-        if(matchPlayer.isEmpty()) return;
-
-        this.activeSession.leave(matchPlayer.get());
+        this.activeSession.leave(matchPlayer);
     }
 
     public void unlock() {

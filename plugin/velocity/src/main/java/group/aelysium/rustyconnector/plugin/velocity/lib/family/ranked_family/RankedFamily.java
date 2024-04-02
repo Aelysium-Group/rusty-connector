@@ -42,7 +42,7 @@ public class RankedFamily extends Family implements IRankedFamily {
     }
 
     public boolean dequeue(IPlayer player) {
-        return this.matchmaker.dequeue(player);
+        return this.matchmaker.remove(player);
     }
 
     /**
@@ -64,15 +64,15 @@ public class RankedFamily extends Family implements IRankedFamily {
 
     @Override
     public long playerCount() {
-        return super.playerCount() + this.waitingPlayers();
+        return this.matchmaker.playerCount();
     }
 
     public Matchmaker matchmaker() {
         return this.matchmaker;
     }
 
-    public int waitingPlayers() {
-        return this.matchmaker.waitingPlayersCount();
+    public int queuedPlayers() {
+        return this.matchmaker.queuedPlayerCount();
     }
 
     public long activePlayers() {
@@ -100,7 +100,7 @@ public class RankedFamily extends Family implements IRankedFamily {
 
         MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
 
-        Matchmaker matchmaker = Matchmaker.from(matchMakerConfig.settings(), storage, config.gameId());
+        Matchmaker matchmaker = new Matchmaker(matchMakerConfig.settings(), storage, config.gameId());
 
         Whitelist.Reference whitelist = null;
         if (config.isWhitelist_enabled())
@@ -147,7 +147,7 @@ public class RankedFamily extends Family implements IRankedFamily {
                 return request;
             }
 
-            this.matchmaker.add(request, result);
+            this.matchmaker.queue(request, result);
 
             return request;
         }

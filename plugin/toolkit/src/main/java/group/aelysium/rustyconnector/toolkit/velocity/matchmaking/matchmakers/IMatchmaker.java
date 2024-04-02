@@ -16,23 +16,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface IMatchmaker<PlayerRank extends IPlayerRank> extends Service {
     /**
-     * Using the players contained in the matchmaker, attempt to make a game.
-     */
-    ISession.IWaiting make();
-
-    /**
-     * Checks if there is the bare minimum worth of players in the matchmaker necessary to create at least one game.
-     * @return `true` if there are at least enough players to make a single game. `false` otherwise.
-     */
-    boolean minimumPlayersExist();
-
-    /**
-     * Completely sort all players in the matchmaker based on their rank in order from least to greatest.
-     * The sorting algorithm is a weighted quicksort.
-     */
-    void completeSort();
-
-    /**
      * Gets the game id used by this matchmaker to handle player ranks.
      */
     String gameId();
@@ -40,12 +23,12 @@ public interface IMatchmaker<PlayerRank extends IPlayerRank> extends Service {
     /**
      * Inserts a player into the matchmaker.
      * <p>
-     * This method performs a single sort and injects the player into an approximation of the best place for them to reside.
-     * Thus reducing how frequently you'll need to perform a full sort on the metchmaker.
+     * This method will connect the player to an already active session that they are the appropriate rank for (if it exists).
+     * If no session exists for them, this method will create a new one for them.
      * @param request The request being made.
      * @throws RuntimeException If there was an issue while adding the player to this matchmaker.
      */
-    void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result);
+    void queue(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result);
 
     /**
      * Removes the player from the matchmaker.
@@ -53,12 +36,6 @@ public interface IMatchmaker<PlayerRank extends IPlayerRank> extends Service {
      * @param player The player to remove.
      */
     boolean remove(IPlayer player);
-
-    /**
-     * Gets The number of players currently waiting in the matchmaker.
-     * @return The number of players waiting.
-     */
-    List<IMatchPlayer<PlayerRank>> waitingPlayers();
 
     /**
      * Checks if a player is currently waiting in the matchmaker.
@@ -75,11 +52,48 @@ public interface IMatchmaker<PlayerRank extends IPlayerRank> extends Service {
     void remove(ISession session);
 
     /**
+     * Fetches a session based on a player's UUID.
+     * @param uuid The uuid to search for.
+     * @return A session if it exists. Otherwise, an empty Optional.
+     */
+    Optional<ISession> fetchPlayerSession(UUID uuid);
+
+    /**
      * Fetches a session based on a UUID.
      * @param uuid The uuid to search for.
      * @return A session if it exists. Otherwise, an empty Optional.
      */
     Optional<ISession> fetch(UUID uuid);
+
+    /**
+     * Returns the total number of players in the Matchmaker.
+     */
+    int playerCount();
+
+    /**
+     * Returns the number of players waiting in queue.
+     */
+    int queuedPlayerCount();
+
+    /**
+     * Returns the number of players in an active session.
+     */
+    int activePlayerCount();
+
+    /**
+     * Returns the total number of sessions in the Matchmaker.
+     */
+    int sessionCount();
+
+    /**
+     * Returns the number of sessions waiting in queue.
+     */
+    int queuedSessionCount();
+
+    /**
+     * Returns the number of sessions that are active.
+     */
+    int activeSessionCount();
 
     record Settings (
             Ranking ranking,

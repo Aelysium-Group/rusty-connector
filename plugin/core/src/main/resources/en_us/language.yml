@@ -167,6 +167,11 @@ proxy:
                     - "      | - Active: <active_players>"
                     - "      | - Waiting: <waiting_players>"
                     - ""
+                    - "   ---| Sessions:"
+                    - "      | - Total: <session_count>"
+                    - "      | - Active: <active_sessions>"
+                    - "      | - Waiting: <waiting_sessions>"
+                    - ""
                     - "   ---| Servers:"
                     - "      | - Total: <servers_count>"
                     - "      | - Available: <servers_open>"
@@ -174,8 +179,6 @@ proxy:
                     - ""
                     - "   ---| Matchmaker:"
                     - "      | - Algorithm: <matchmaking_algorithm>"
-                    - "      | - Highest Player: <matchmaking_highest_player>"
-                    - "      | - Lowest Player: <matchmaking_lowest_player>"
     party:
         injected_error:
             only_leader_can_invite: "Only the party leader can invite other players!" # No MiniMessage

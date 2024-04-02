@@ -31,9 +31,4 @@ public class WinLossPlayerRank implements IPlayerRank {
     public double rank() {
         return round((double) wins / losses, 2);
     }
-
-
-    public RankSchema type() {
-        return RankSchema.WIN_LOSS;
-    }
 }

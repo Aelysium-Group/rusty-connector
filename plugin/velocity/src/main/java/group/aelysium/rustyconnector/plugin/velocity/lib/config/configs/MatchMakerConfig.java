@@ -35,7 +35,7 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
     }
 
     protected void register() throws IllegalStateException {
-        IPlayerRank.RankSchema algorithm = IPlayerRank.RankSchema.valueOf(IYAML.getValue(this.data,"ranking.algorithm",String.class));
+        String algorithm = IYAML.getValue(this.data,"ranking.algorithm",String.class);
         double variance = IYAML.getValue(this.data,"ranking.variance",Double.class);
         variance = round(variance, 2);
 
@@ -60,8 +60,8 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         boolean session_leaving_boot = IYAML.getValue(this.data, "queue.leaving.boot", Boolean.class);
 
         Class<? extends IPlayerRank> actualSchema = switch (algorithm) {
-            case WIN_LOSS -> WinLossPlayerRank.class;
-            case WIN_RATE -> WinRatePlayerRank.class;
+            case "WIN_LOSS" -> WinLossPlayerRank.class;
+            case "WIN_RATE" -> WinRatePlayerRank.class;
             default -> RandomizedPlayerRank.class;
         };
 

@@ -6,14 +6,6 @@ public interface IPlayerRank {
      */
     double rank();
 
-    RankSchema type();
-
     void markWin();
     void markLoss();
-
-    enum RankSchema {
-        RANDOMIZED,
-        WIN_LOSS,
-        WIN_RATE
-    }
 }

@@ -1,12 +1,15 @@
 package group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay;
 
 import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
 import java.rmi.AlreadyBoundException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ISession extends JSONParseable {
@@ -26,7 +29,23 @@ public interface ISession extends JSONParseable {
      */
     void implode(String reason);
 
-    IRankedMCLoader mcLoader();
+    Optional<IRankedMCLoader> mcLoader();
+
+    RankRange range();
+
+    int size();
+
+    /**
+     * Gets whether this session is active.
+     * A session is considered active if it is connected ot an MCLoader.
+     * @return `true` if the session is active. `false` otherwise.
+     */
+    boolean active();
+
+    /**
+     * Gets whether this session is full.
+     */
+    boolean full();
 
     /**
      * Checks if the running session contains the player.
@@ -36,7 +55,7 @@ public interface ISession extends JSONParseable {
     /**
      * Gets the players that are currently in this session.
      */
-    List<IMatchPlayer<IPlayerRank>> players();
+    Map<UUID, IMatchPlayer<IPlayerRank>> players();
 
     /**
      * Removes the player from the session.
@@ -46,34 +65,53 @@ public interface ISession extends JSONParseable {
     boolean leave(IMatchPlayer<IPlayerRank> player);
 
 
-    interface IWaiting {
-        UUID uuid();
+    /**
+     * Adds the player to the session.
+     * If the session is currently active the player will also attempt to connect to it.
+     * @param player The player to join.
+     */
+    PlayerConnectable.Request join(IMatchPlayer<IPlayerRank> player);
 
-        /**
-         * The number of players waiting in this session.
-         */
-        int size();
+    /**
+     * Starts the session on the specified MCLoader.
+     * Once the session starts, all players will be connected to the MCLoader.
+     * Additionally, any players that join the session after it's started will also connect to the MCLoader instantly.
+     * @param mcLoader The MCLoader to run the session on.
+     * @throws AlreadyBoundException If a session is already running on this MCLoader.
+     */
+    void start(IRankedMCLoader mcLoader) throws AlreadyBoundException;
 
-        /**
-         * Starts the session on the specified MCLoader.
-         * By the time {@link ISession} is returned, it should be assumed that all players have connected.
-         * @param mcLoader The MCLoader to run the session on.
-         * @param settings The settings that governs this session.
-         * @return A running {@link ISession}.
-         * @throws AlreadyBoundException If a session is already running on this MCLoader.
-         */
-        ISession start(IRankedMCLoader mcLoader, Settings settings) throws AlreadyBoundException;
+    class RankRange {
+        private final double pivot;
+        private final double min;
+        private final double max;
 
-        /**
-         * Checks if the waiting session contains the player.
-         */
-        boolean contains(IMatchPlayer<IPlayerRank> player);
+        public RankRange(double pivot, double variance) {
+            this.pivot = pivot;
 
-        /**
-         * Removes the specified player from the waiting session.
-         */
-        boolean remove(IMatchPlayer<IPlayerRank> player);
+            double con = pivot * variance;
+            double min = pivot + con;
+            double max = pivot - con;
+            this.min = min;
+            this.max = max;
+        }
+
+        public double pivot() {
+            return this.pivot;
+        }
+
+        public double min() {
+            return this.min;
+        }
+
+        public double max() {
+            return this.max;
+        }
+
+        public boolean validate(double rank) {
+            return rank > min && rank < max;
+        }
     }
 
-    record Settings(int min, int max, String gameId) {}
+    record Settings(int min, int max, double variance, String gameId) {}
 }

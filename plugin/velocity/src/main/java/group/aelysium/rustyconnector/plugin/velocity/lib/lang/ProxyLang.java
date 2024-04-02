@@ -6,8 +6,7 @@ import group.aelysium.rustyconnector.core.lib.lang.Lang;
 import group.aelysium.rustyconnector.core.lib.lang.LanguageResolver;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.WinLoss;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.WinRate;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.WinLossPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
@@ -22,7 +21,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.Sc
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.static_family.StaticFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -579,20 +577,8 @@ public class ProxyLang extends Lang {
 
         String algorithm = "RANDOMIZE";
         Matchmaker matchmaker = family.matchmaker();
-        if(matchmaker instanceof WinLoss) algorithm = "WIN_LOSS";
-        if(matchmaker instanceof WinRate) algorithm = "WIN_RATE";
-
-        int waitingPlayersCount = family.waitingPlayers();
-
-        String highest_ranking_player = "None";
-        try {
-            if(waitingPlayersCount == 0) highest_ranking_player = matchmaker.waitingPlayers().get(0).toString();
-            highest_ranking_player = matchmaker.waitingPlayers().get(waitingPlayersCount - 1).toString();
-        } catch (Exception ignore) {}
-        String lowest_ranking_player = "None";
-        try {
-            lowest_ranking_player = matchmaker.waitingPlayers().get(0).toString();
-        } catch (Exception ignore) {}
+        if(matchmaker.settings().ranking().schema().equals(WinLossPlayerRank.class)) algorithm = "WIN_LOSS";
+        if(matchmaker.settings().ranking().schema().equals(WinLossPlayerRank.class)) algorithm = "WIN_RATE";
 
         return join(
                 newlines(),
@@ -607,17 +593,19 @@ public class ProxyLang extends Lang {
                         LanguageResolver.tagHandler("display_name", family.displayName()),
                         LanguageResolver.tagHandler("parent_family_name", family.parent().id()),
 
-                        LanguageResolver.tagHandler("player_count", family.playerCount()),
-                        LanguageResolver.tagHandler("active_players", family.activePlayers()),
-                        LanguageResolver.tagHandler("waiting_players", waitingPlayersCount),
-
                         LanguageResolver.tagHandler("servers_count", family.loadBalancer().size()),
                         LanguageResolver.tagHandler("servers_open", family.loadBalancer().size(false)),
                         LanguageResolver.tagHandler("servers_locked", family.loadBalancer().size(true)),
 
-                        LanguageResolver.tagHandler("matchmaking_algorithm", algorithm),
-                        LanguageResolver.tagHandler("matchmaking_highest_player", highest_ranking_player),
-                        LanguageResolver.tagHandler("matchmaking_lowest_player", lowest_ranking_player)
+                        LanguageResolver.tagHandler("session_count", matchmaker.sessionCount()),
+                        LanguageResolver.tagHandler("active_sessions", matchmaker.activeSessionCount()),
+                        LanguageResolver.tagHandler("waiting_sessions", matchmaker.queuedSessionCount()),
+
+                        LanguageResolver.tagHandler("player_count", matchmaker.playerCount()),
+                        LanguageResolver.tagHandler("active_players", matchmaker.activePlayerCount()),
+                        LanguageResolver.tagHandler("waiting_players", matchmaker.queuedPlayerCount()),
+
+                        LanguageResolver.tagHandler("matchmaking_algorithm", algorithm)
                 ),
                 SPACING,
                 BORDER,
