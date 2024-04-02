@@ -3,7 +3,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing;
 import group.aelysium.rustyconnector.core.lib.algorithm.QuickSort;
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.core.lib.algorithm.WeightedQuickSort;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 public class LeastConnection extends LoadBalancer {

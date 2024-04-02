@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IK8MCLoader;
 

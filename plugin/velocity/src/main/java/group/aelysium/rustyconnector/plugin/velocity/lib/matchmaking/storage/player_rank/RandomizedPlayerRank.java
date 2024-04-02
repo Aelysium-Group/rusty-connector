@@ -1,19 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank;
 
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.player_rank.IRandomizedPlayerRank;
-import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 
-public class RandomizedPlayerRank implements IRandomizedPlayerRank {
-    public Double rank() { return 0.0; }
+public class RandomizedPlayerRank implements IPlayerRank {
+    public double rank() { return 0.0; }
 
-    public IScoreCard.RankSchema type() {
-        return IScoreCard.RankSchema.RANDOMIZED;
+    public RankSchema type() {
+        return RankSchema.RANDOMIZED;
     }
 
     @Override
-    public <TMySQLStorage extends IMySQLStorageService> void markWin(TMySQLStorage storage) {}
+    public void markWin() {}
 
     @Override
-    public <TMySQLStorage extends IMySQLStorageService> void markLoss(TMySQLStorage storage) {}
+    public void markLoss() {}
 }

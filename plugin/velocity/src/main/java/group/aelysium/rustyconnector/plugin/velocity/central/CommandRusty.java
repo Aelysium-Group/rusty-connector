@@ -14,7 +14,6 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.GamemodeRankManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
@@ -421,50 +420,13 @@ class Database {
     private static ArgumentBuilder<CommandSource, ?> bulk(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
         return LiteralArgumentBuilder.<CommandSource>literal("bulk")
                 .then(LiteralArgumentBuilder.<CommandSource>literal("purgeGameRecords")
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameName", StringArgumentType.greedyString())
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameId", StringArgumentType.greedyString())
                                 .executes(context -> {
-                                    String gameName = context.getArgument("gameName", String.class);
+                                    String gameId = context.getArgument("gameId", String.class);
 
                                     StorageService storage = flame.services().storage();
-
-                                    if(storage.database().deleteGame(storage, gameName))
-                                        logger.log("Successfully deleted "+gameName);
-                                    else
-                                        logger.log(gameName+" couldn't be found.");
-                                    return Command.SINGLE_SUCCESS;
-                                })))
-                .then(LiteralArgumentBuilder.<CommandSource>literal("purgeUnusedRanks")
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameName", StringArgumentType.greedyString())
-                                .executes(context -> {
-                                    String gameName = context.getArgument("gameName", String.class);
-
-                                    StorageService storage = flame.services().storage();
-                                    GamemodeRankManager game = storage.database().getGame(gameName).orElse(null);
-                                    if(game == null) {
-                                        logger.log(gameName + " couldn't be found.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    game.quantizeRankSchemas(storage);
-                                    logger.log("Successfully purged unused rank records from "+gameName);
-
-                                    return Command.SINGLE_SUCCESS;
-                                })))
-                .then(LiteralArgumentBuilder.<CommandSource>literal("export")
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameName", StringArgumentType.greedyString())
-                                .executes(context -> {
-                                    String gameName = context.getArgument("gameName", String.class);
-
-                                    StorageService storage = flame.services().storage();
-                                    GamemodeRankManager game = storage.database().getGame(gameName).orElse(null);
-                                    if(game == null) {
-                                        logger.log(gameName + " couldn't be found.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    game.quantizeRankSchemas(storage);
-                                    logger.log("Successfully purged unused rank records from "+gameName);
-
+                                    storage.database().deleteGame(gameId);
+                                    logger.log("Successfully purged all rank records from "+gameId);
                                     return Command.SINGLE_SUCCESS;
                                 })))
                 .then(LiteralArgumentBuilder.literal("players"))

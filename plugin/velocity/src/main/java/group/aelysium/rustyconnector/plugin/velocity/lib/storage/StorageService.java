@@ -10,10 +10,7 @@ import org.eclipse.store.afs.sql.types.SqlProviderMariaDb;
 import org.eclipse.store.storage.embedded.types.EmbeddedStorage;
 import org.eclipse.store.storage.embedded.types.EmbeddedStorageManager;
 import org.eclipse.store.storage.restservice.sparkjava.types.StorageRestServiceSparkJava;
-import org.eclipse.store.storage.restservice.types.StorageRestService;
-import org.eclipse.store.storage.restservice.types.StorageRestServiceResolver;
 import org.mariadb.jdbc.MariaDbDataSource;
-import spark.Service;
 
 import java.net.InetSocketAddress;
 import java.sql.SQLException;

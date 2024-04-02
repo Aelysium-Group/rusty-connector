@@ -3,6 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmaker
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.bossbars.MatchmakingBossbar;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.player_rank.RandomizedPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.MatchPlayer;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.Session;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
@@ -10,12 +12,12 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalancer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.matchmakers.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IScoreCard;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer.RankKey;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import net.kyori.adventure.bossbar.BossBar;
@@ -32,11 +34,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.Math.floor;
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 
-public abstract class Matchmaker implements IMatchmaker {
+public abstract class Matchmaker implements IMatchmaker<IPlayerRank> {
     protected final ClockService supervisor = new ClockService(5);
     protected final ClockService queueIndicator = new ClockService(1);
     protected final StorageService storage;
-    protected final IGamemodeRankManager game;
+    protected final String gameId;
     protected final Settings settings;
     protected final ISession.Settings sessionSettings;
     protected final int minPlayersPerGame;
@@ -55,16 +57,28 @@ public abstract class Matchmaker implements IMatchmaker {
     );
     protected Map<UUID, ISession.IWaiting> waitingSessions = new ConcurrentHashMap<>();
     protected Map<UUID, ISession> runningSessions = new ConcurrentHashMap<>();
-    protected Vector<IPlayerRankProfile> waitingPlayers = new Vector<>();
+    protected Vector<IMatchPlayer<IPlayerRank>> waitingPlayers = new Vector<>();
 
-    public Matchmaker(Settings settings, StorageService storage, IGamemodeRankManager game) {
+    public Matchmaker(Settings settings, StorageService storage, String gameId) {
         this.storage = storage;
-        this.game = game;
+        this.gameId = gameId;
         this.settings = settings;
-        this.sessionSettings = new ISession.Settings(settings.session().closing().threshold(), settings.session().building().max(), this.game);
+        this.sessionSettings = new ISession.Settings(settings.session().closing().threshold(), settings.session().building().max(), this.gameId);
 
         this.minPlayersPerGame = settings.session().building().min();
         this.maxPlayersPerGame = settings.session().building().max();
+    }
+
+    protected IPlayerRank resolvePlayerRank(IPlayer player) {
+        RankKey key = RankKey.from(player.uuid(), this.gameId);
+
+        return this.storage.database().fetchRank(key).orElseGet(()->{
+            IPlayerRank newRank = this.newPlayerRank();
+
+            storage.database().saveRank(key, newRank);
+
+            return newRank;
+        });
     }
 
     public abstract Session.Waiting make();
@@ -76,29 +90,33 @@ public abstract class Matchmaker implements IMatchmaker {
     public Settings settings() {
         return this.settings;
     }
-    public IGamemodeRankManager rankManager() {
-        return this.game;
+    public String gameId() {
+        return this.gameId;
     }
 
     public void add(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
+        IPlayer player = request.player();
         try {
-            IPlayerRankProfile rankedPlayer = this.game.rankedPlayer(this.storage, request.player().uuid(), false);
+            RankKey key = RankKey.from(player.uuid(), this.gameId);
+            IPlayerRank rank = this.resolvePlayerRank(player);
 
-            if(this.waitingPlayers.contains(rankedPlayer)) throw new RuntimeException("Player is already queued!");
+            IMatchPlayer<IPlayerRank> matchPlayer = new MatchPlayer<>(player, rank, key.gameId());
 
-            if (this.settings.queue().joining().reconnect()) {
-                 for (ISession session : this.runningSessions.values()) {
-                     if(!session.players().contains(request.player())) continue;
+            if(this.waitingPlayers.contains(matchPlayer)) throw new RuntimeException("Player is already queued!");
 
-                     PlayerConnectable.Request request1 = session.mcLoader().connect(request.player());
-                     result.complete(ConnectionResult.success(Component.text("You've been reconnected to your game."), session.mcLoader()));
-                     return;
-                 }
-            }
+            if (this.settings.queue().joining().reconnect())
+                for (ISession session : this.runningSessions.values()) {
+                    if(!session.contains(matchPlayer)) continue;
 
-            this.waitingPlayers.add(rankedPlayer);
+                    PlayerConnectable.Request request1 = session.mcLoader().connect(player);
+                    request1.wait(10000);
+                    result.complete(ConnectionResult.success(Component.text("You've been reconnected to your game."), session.mcLoader()));
+                    return;
+                }
 
-            if(this.waitingPlayers.size() >= 2) try {
+            this.waitingPlayers.add(matchPlayer);
+
+            if(minimumPlayersExist()) try {
                 int index = this.waitingPlayers.size() - 1;
                 SingleSort.sort(this.waitingPlayers, index);
             } catch (Exception e) {
@@ -115,7 +133,7 @@ public abstract class Matchmaker implements IMatchmaker {
         try {
             hideBossBars(player.resolve().orElseThrow());
         } catch (Exception ignore) {}
-        return this.waitingPlayers.removeIf(player1 -> player1.uuid().equals(player.uuid()));
+        return this.waitingPlayers.removeIf(p -> p.player().equals(player));
     }
     public boolean remove(IPlayer player) {
         try {
@@ -124,19 +142,22 @@ public abstract class Matchmaker implements IMatchmaker {
         } catch (Exception ignore) {}
 
         try {
-            AtomicBoolean didContain = new AtomicBoolean(this.waitingPlayers.removeIf(player1 -> player1.uuid().equals(player.uuid())));
+            AtomicBoolean didContain = new AtomicBoolean(this.waitingPlayers.removeIf(p -> p.player().equals(player)));
 
             if(didContain.get()) return true;
 
+            IPlayerRank rank = this.resolvePlayerRank(player);
+            IMatchPlayer<IPlayerRank> matchPlayer = new MatchPlayer<IPlayerRank>(player, rank, gameId);
+
             this.runningSessions.values().forEach(session -> {
-                boolean removed = session.leave(player);
+                boolean removed = session.leave(matchPlayer);
                 if(removed) didContain.set(true);
             });
 
             if(didContain.get()) return true;
 
             this.waitingSessions.values().forEach(session -> {
-                boolean removed = session.remove(player);
+                boolean removed = session.remove(matchPlayer);
                 if(removed) didContain.set(true);
             });
 
@@ -145,7 +166,7 @@ public abstract class Matchmaker implements IMatchmaker {
 
         return false;
     }
-    public List<IPlayerRankProfile> waitingPlayers() {
+    public List<IMatchPlayer<IPlayerRank>> waitingPlayers() {
         return this.waitingPlayers.stream().toList();
     }
     public int waitingPlayersCount() {
@@ -154,12 +175,15 @@ public abstract class Matchmaker implements IMatchmaker {
         return count.get();
     }
     public boolean contains(IPlayer player) {
-        if(this.waitingPlayers.contains(player.rank(this.game).orElse(null))) return true;
+        IPlayerRank rank = this.resolvePlayerRank(player);
+        IMatchPlayer<IPlayerRank> matchPlayer = new MatchPlayer<IPlayerRank>(player, rank, gameId);
+
+        if(this.waitingPlayers.contains(matchPlayer)) return true;
 
         // Check running session first since the player is more likely to be in a running session than in a waiting session.
-        for (ISession session : this.runningSessions.values()) if(session.players().contains(player)) return true;
+        for (ISession session : this.runningSessions.values()) if(session.contains(matchPlayer)) return true;
 
-        for (ISession.IWaiting session : this.waitingSessions.values()) if(session.contains(player)) return true;
+        for (ISession.IWaiting session : this.waitingSessions.values()) if(session.contains(matchPlayer)) return true;
 
         return false;
     }
@@ -217,9 +241,9 @@ public abstract class Matchmaker implements IMatchmaker {
                     this.waitingSessions.remove(waitingSession.uuid());
                     this.runningSessions.put(session.uuid(), session);
 
-                    session.players().forEach(player -> {
+                    session.players().forEach(matchPlayer -> {
                         try {
-                            Player velocityPlayer = player.resolve().orElseThrow();
+                            Player velocityPlayer = matchPlayer.player().resolve().orElseThrow();
                             hideBossBars(velocityPlayer);
                         } catch (Exception ignore) {}
                     });
@@ -232,9 +256,9 @@ public abstract class Matchmaker implements IMatchmaker {
         if(!this.settings.queue().joining().showInfo()) return;
         this.queueIndicator.scheduleRecurring(() -> {
             // So that we don't lock the Vector while sending messages
-            this.waitingPlayers.stream().toList().forEach(player -> {
+            this.waitingPlayers.stream().toList().forEach(matchPlayer -> {
                 try {
-                    Player velocityPlayer = player.player().orElseThrow().resolve().orElseThrow();
+                    Player velocityPlayer = matchPlayer.player().resolve().orElseThrow();
 
                     velocityPlayer.sendActionBar(Component.text("----< MATCHMAKING >----", NamedTextColor.YELLOW));
                     MatchmakingBossbar.WAITING_FOR_PLAYERS(this.waitingForPlayers, this.waitingPlayersCount(), maxPlayersPerGame);
@@ -246,9 +270,9 @@ public abstract class Matchmaker implements IMatchmaker {
             });
 
             this.waitingSessions.values().forEach(session -> {
-                ((Session.Waiting) session).players().forEach(player -> {
+                ((Session.Waiting) session).players().forEach(matchPlayer -> {
                     try {
-                        Player velocityPlayer = player.resolve().orElseThrow();
+                        Player velocityPlayer = matchPlayer.player().resolve().orElseThrow();
 
                         velocityPlayer.sendActionBar(Component.text("----< MATCHMAKING >----", NamedTextColor.YELLOW));
                         MatchmakingBossbar.WAITING_FOR_SERVERS(this.waitingForServers, loadBalancer.size(true), loadBalancer.size(false));
@@ -262,11 +286,20 @@ public abstract class Matchmaker implements IMatchmaker {
         }, LiquidTimestamp.from(3, TimeUnit.SECONDS));
     }
 
-    public static Matchmaker from(Settings settings, StorageService storage, IGamemodeRankManager game) {
-        if (settings.ranking().schema().equals(IScoreCard.RankSchema.WIN_LOSS)) return new WinLoss(settings, storage, game);
-        if (settings.ranking().schema().equals(IScoreCard.RankSchema.WIN_RATE)) return new WinRate(settings, storage, game);
+    public static Matchmaker from(Settings settings, StorageService storage, String gameId) {
+        if (settings.ranking().schema().equals(IPlayerRank.RankSchema.WIN_LOSS)) return new WinLoss(settings, storage, gameId);
+        if (settings.ranking().schema().equals(IPlayerRank.RankSchema.WIN_RATE)) return new WinRate(settings, storage, gameId);
 
-        return new Randomized(settings, storage, game);
+        return new Randomized(settings, storage, gameId);
+    }
+
+    protected IPlayerRank newPlayerRank() {
+        try {
+            return settings.ranking().schema().getConstructor().newInstance();
+        } catch(Exception e) {
+            e.printStackTrace();
+            return new RandomizedPlayerRank();
+        }
     }
 
     public void remove(ISession session) {

@@ -1,11 +1,11 @@
 package group.aelysium.rustyconnector.toolkit.velocity.player;
 
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IGamemodeRankManager;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRankProfile;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,12 +44,6 @@ public interface IPlayer {
      * Convenience method that will resolve the player and then return their MCLoader if there is one.
      */
     Optional<? extends IMCLoader> server();
-
-    /**
-     * Gets the ranked verison of this player.
-     * @param game The game to fetch the rank from.
-     */
-    Optional<IPlayerRankProfile> rank(IGamemodeRankManager game);
 
     class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IPlayer, UUID> {
         public Reference(UUID uuid) {
@@ -91,5 +85,39 @@ public interface IPlayer {
          * @return {@link IPlayer}
          */
         IPlayer storeAndGet();
+    }
+
+    /**
+     * Used to fetch the player's rank from the storage system.
+     */
+    class RankKey {
+        private UUID player;
+        private String game;
+
+        private RankKey(UUID player, String game) {
+            this.player = player;
+            this.game = game;
+        }
+
+        public String gameId() {
+            return this.game;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RankKey rankKey = (RankKey) o;
+            return Objects.equals(player, rankKey.player) && Objects.equals(game, rankKey.game);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(player, game);
+        }
+
+        public static RankKey from(UUID player, String gameId) {
+            return new RankKey(player, gameId);
+        }
     }
 }
