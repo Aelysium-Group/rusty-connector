@@ -48,7 +48,7 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
             matchmakingInterval = LiquidTimestamp.from(IYAML.getValue(this.data, "session.building.interval", String.class));
         } catch (Exception ignore) {}
 
-        int session_closing_threshold = IYAML.getValue(this.data,"session.closing.threshold",Integer.class);
+        int session_closing_threshold = IYAML.getValue(this.data,"session.closing-threshold",Integer.class);
         if(session_closing_threshold == -1) session_closing_threshold = min;
 
         boolean session_closing_ranks_quittersLose = IYAML.getValue(this.data,"session.quitters-lose",Boolean.class);
