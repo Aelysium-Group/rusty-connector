@@ -129,7 +129,7 @@ public class Session implements ISession {
         CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
         PlayerConnectable.Request request = new PlayerConnectable.Request(matchPlayer.player(), result);
 
-        if(!this.players.containsKey(matchPlayer.player().uuid())) {
+        if(this.players.containsKey(matchPlayer.player().uuid())) {
             result.complete(ConnectionResult.failed(Component.text("You're already in this session!")));
             return request;
         }
