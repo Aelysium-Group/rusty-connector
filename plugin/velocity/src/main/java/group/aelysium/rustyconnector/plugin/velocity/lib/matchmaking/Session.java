@@ -130,7 +130,7 @@ public class Session implements ISession {
         PlayerConnectable.Request request = new PlayerConnectable.Request(matchPlayer.player(), result);
 
         if(this.players.containsKey(matchPlayer.player().uuid())) {
-            result.complete(ConnectionResult.failed(Component.text("You're already in this session!")));
+            result.complete(ConnectionResult.success(Component.text("You're already in this session!"), this.mcLoader));
             return request;
         }
 
