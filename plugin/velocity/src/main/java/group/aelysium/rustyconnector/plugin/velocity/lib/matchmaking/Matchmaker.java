@@ -161,6 +161,7 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
             ISession session = this.prepareSession(matchPlayer);
             ConnectionResult sessionConnectResult = this.connectSession(session, matchPlayer);
             if(!sessionConnectResult.connected()) throw new RuntimeException("Unable to connect to a session.");
+            this.queuedSessions.add(session.uuid());
         } catch (Exception e) {
             result.complete(ConnectionResult.failed(Component.text("There was an issue queuing into matchmaking!")));
             throw new RuntimeException(e);
