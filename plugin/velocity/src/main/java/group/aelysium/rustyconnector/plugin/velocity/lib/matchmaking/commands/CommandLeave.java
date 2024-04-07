@@ -29,7 +29,7 @@ public class CommandLeave {
                         return Command.SINGLE_SUCCESS;
                     }
                     try {
-                        Player player = Player.from(eventPlayer);
+                        Player player = new Player(eventPlayer);
 
                         List<RankedFamily> families = new ArrayList<>();
                         service.dump().forEach(family -> {

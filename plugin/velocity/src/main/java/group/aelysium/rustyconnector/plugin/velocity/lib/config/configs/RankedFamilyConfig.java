@@ -69,6 +69,8 @@ public class RankedFamilyConfig extends YAML implements group.aelysium.rustyconn
         this.gameId = IYAML.getValue(this.data,"game-id",String.class);
         if(this.gameId.equalsIgnoreCase("default") || this.gameId.equalsIgnoreCase(""))
             this.gameId = familyName;
+        if(this.gameId.length() > 16)
+            throw new IllegalStateException("The game-id in your ranked families: "+this.gameId+" cannot be more than 16 characters long!");
 
         this.matchmaker = IYAML.getValue(this.data,"matchmaker",String.class);
 

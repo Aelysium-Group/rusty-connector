@@ -29,7 +29,7 @@ public class OnPlayerDisconnect {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerDisconnect(DisconnectEvent event) {
         Tinder api = Tinder.get();
-        Player player = Player.from(event.getPlayer());
+        Player player = new Player(event.getPlayer());
 
         return EventTask.async(() -> {
             EventDispatch.UnSafe.fireAndForget(new NetworkLeaveEvent(player));
@@ -95,7 +95,7 @@ public class OnPlayerDisconnect {
             FriendsService friendsService = api.services().friends().orElseThrow();
             if(!friendsService.settings().allowMessaging()) return;
 
-            List<IPlayer> friends = friendsService.findFriends(player).orElseThrow();
+            List<IPlayer> friends = friendsService.friendStorage().get(player).orElseThrow();
 
             if(friends.size() == 0) return;
 

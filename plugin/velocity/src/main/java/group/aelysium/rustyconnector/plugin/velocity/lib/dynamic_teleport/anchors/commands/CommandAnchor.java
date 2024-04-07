@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
@@ -16,11 +15,9 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class CommandAnchor {
@@ -45,7 +42,7 @@ public class CommandAnchor {
                     }
 
                     try {
-                        Player player = Player.from(velocityPlayer);
+                        Player player = new Player(velocityPlayer);
 
                         IFamily family = anchorService.familyOf(anchor).orElseThrow();
 

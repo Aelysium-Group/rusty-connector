@@ -18,6 +18,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
+import java.util.Optional;
 
 public final class CommandUnFriend {
     public static BrigadierCommand create(FriendsService friendsService) {
@@ -48,10 +49,10 @@ public final class CommandUnFriend {
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player eventPlayer)) return builder.buildFuture();
-                            Player player = Player.from(eventPlayer);
+                            Player player = new Player(eventPlayer);
 
                             try {
-                                List<IPlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                List<IPlayer> friends = friendsService.friendStorage().get(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -77,16 +78,19 @@ public final class CommandUnFriend {
                             }
 
                             String username = context.getArgument("username", String.class);
-                            Player targetPlayer = (Player) new Player.UsernameReference(username).get();
+                            Player targetPlayer = new Player.UsernameReference(username).get();
 
-                            if(!friendsService.areFriends(Player.from(player), targetPlayer))
+                            Optional<Boolean> contains = friendsService.friendStorage().contains(new Player(player), targetPlayer);
+                            if(contains.isEmpty())
+                                return closeMessage(player, ProxyLang.INTERNAL_ERROR);
+                            if(!contains.get())
                                 return closeMessage(player, ProxyLang.UNFRIEND_NOT_FRIENDS.build(username));
 
                             if(targetPlayer == null)
                                 return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
 
                             try {
-                                friendsService.removeFriends(Player.from(player), targetPlayer);
+                                friendsService.friendStorage().delete(new Player(player), targetPlayer);
 
                                 return closeMessage(player, ProxyLang.UNFRIEND_SUCCESS.build(username));
                             } catch (IllegalStateException e) {

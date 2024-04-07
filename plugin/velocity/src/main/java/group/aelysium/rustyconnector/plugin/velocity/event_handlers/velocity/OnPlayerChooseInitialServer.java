@@ -37,7 +37,7 @@ public class OnPlayerChooseInitialServer {
         return EventTask.async(() -> {
             Tinder api = Tinder.get();
             PluginLogger logger = api.logger();
-            Player player = Player.from(event.getPlayer());
+            Player player = new Player(event.getPlayer());
             com.velocitypowered.api.proxy.Player eventPlayer = event.getPlayer();
 
             // Check for network whitelist
@@ -53,6 +53,14 @@ public class OnPlayerChooseInitialServer {
 
             connect(event, player);
 
+            // Store the player once they join the network
+            // If they've joined recently, this will resolve pretty quickly.
+            try {
+                player.store();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             // Check for active friend requests
             try {
                 FriendsService friendsService = api.services().friends().orElseThrow();
@@ -66,7 +74,7 @@ public class OnPlayerChooseInitialServer {
             // Check for online friends
             try {
                 FriendsService friendsService = api.services().friends().orElseThrow();
-                List<IPlayer> friends = friendsService.findFriends(player).orElseThrow();
+                List<IPlayer> friends = friendsService.friendStorage().get(player).orElseThrow();
 
                 if(friends.size() == 0) throw new NoOutputException();
 

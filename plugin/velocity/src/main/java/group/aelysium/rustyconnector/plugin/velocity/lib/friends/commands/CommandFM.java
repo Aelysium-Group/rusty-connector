@@ -14,12 +14,14 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import kotlin.collections.BooleanIterator;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.List;
+import java.util.Optional;
 
 public final class CommandFM {
     public static BrigadierCommand create(FriendsService friendsService) {
@@ -50,10 +52,10 @@ public final class CommandFM {
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("username", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player eventPlayer)) return builder.buildFuture();
-                            Player player = Player.from(eventPlayer);
+                            Player player = new Player(eventPlayer);
 
                             try {
-                                List<IPlayer> friends = friendsService.findFriends(player).orElseThrow();
+                                List<IPlayer> friends = friendsService.friendStorage().get(player).orElseThrow();
 
                                 friends.forEach(friend -> {
                                     try {
@@ -98,10 +100,10 @@ public final class CommandFM {
                                     return closeMessage(player, ProxyLang.NO_PLAYER.build(username));
                                 if(player.equals(targetPlayer))
                                     return closeMessage(player, ProxyLang.FRIEND_MESSAGING_NO_SELF_MESSAGING);
-                                if(!friendsService.areFriends(
-                                        Player.from(player),
-                                        Player.from(targetPlayer)
-                                ))
+                                Optional<Boolean> contains = friendsService.friendStorage().contains(new Player(player),new Player(targetPlayer));
+                                if(contains.isEmpty())
+                                    return closeMessage(player, ProxyLang.INTERNAL_ERROR);
+                                if(!contains.get())
                                     return closeMessage(player, ProxyLang.FRIEND_MESSAGING_ONLY_FRIENDS);
 
                                 String message = context.getArgument("message", String.class);

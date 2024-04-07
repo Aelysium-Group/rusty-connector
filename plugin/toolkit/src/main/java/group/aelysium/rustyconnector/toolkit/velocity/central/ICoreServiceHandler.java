@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayerService;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.IServiceHandler;
-import group.aelysium.rustyconnector.toolkit.velocity.storage.IMySQLStorageService;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IStorageService;
 import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistService;
 
 import java.util.Optional;
@@ -44,10 +44,10 @@ public interface ICoreServiceHandler extends IServiceHandler {
     IConfigService config();
 
     /**
-     * Gets RustyConnector's {@link IMySQLStorageService remote storage connector service} which allows direct access to database storage.
-     * @return {@link IMySQLStorageService}
+     * Gets RustyConnector's {@link IStorageService remote storage connector service} which allows direct access to database storage.
+     * @return {@link IStorageService}
      */
-    IMySQLStorageService storage();
+    IStorageService storage();
 
     /**
      * Gets the {@link IPlayerService player service} which allows access to player resolving logic for usage when dealing with offline player data.

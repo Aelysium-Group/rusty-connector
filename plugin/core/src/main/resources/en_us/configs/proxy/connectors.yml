@@ -33,23 +33,14 @@ redis:
 
 storage:
     #
-    # The default provider is "FILE" and will store all database information on your Velocity server's filesystem.
+    # The default provider is "SQLITE" and will store all database information on your Velocity server's filesystem.
     #
-    provider: FILE
-
-
-
-    #
-    # The storage REST API allows for reading the data in your database.
-    # The REST API can then be used with EclipseStorage's Client GUI to view your data: https://docs.eclipsestore.io/manual/storage/rest-interface/client-gui.html
-    # The REST API will use the default settings listed in the previous url.
-    #
-    enable-rest-api: false
+    provider: MYSQL
 
 
 
     additional-providers:
-        MARIADB:
+        MYSQL:
             host: "0.0.0.0"
             port: 3306
             user: "default"

@@ -96,7 +96,10 @@ public class PartyService implements IPartyService {
                         }
                 );
 
-                if(friendsService.findFriends(sender).orElseThrow().contains(target))
+                Optional<Boolean> contains = friendsService.friendStorage().contains(sender, target);
+                if(contains.isEmpty())
+                    throw new IllegalStateException("There was an internal error while trying to do that.");
+                if(contains.get())
                     throw new IllegalStateException(ProxyLang.PARTY_INJECTED_FRIENDS_RESTRICTION);
             } catch (IllegalStateException e) {
                 throw e;

@@ -16,8 +16,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-import static org.eclipse.serializer.math.XMath.round;
-
 public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.MatchMakerConfig {
     private IMatchmaker.Settings settings;
 
@@ -37,7 +35,6 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
     protected void register() throws IllegalStateException {
         String algorithm = IYAML.getValue(this.data,"ranking.algorithm",String.class);
         double variance = IYAML.getValue(this.data,"ranking.variance",Double.class);
-        variance = round(variance, 2);
 
         boolean freezeActiveSessions = IYAML.getValue(this.data,"session.freeze-active-sessions",Boolean.class);
         int min = IYAML.getValue(this.data,"session.min",Integer.class);

@@ -19,7 +19,7 @@ public class OnPlayerChangeServer {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerChangeServer(ServerConnectedEvent event) {
             return EventTask.async(() -> {
-                Player player = Player.from(event.getPlayer());
+                Player player = new Player(event.getPlayer());
 
                 try {
                     RegisteredServer newRawServer = event.getServer();

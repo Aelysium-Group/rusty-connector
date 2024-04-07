@@ -24,7 +24,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 
 public class Matchmaker implements IMatchmaker<IPlayerRank> {
@@ -98,7 +97,7 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
      * To connect a player to the session use {@link Matchmaker#connectSession(ISession, IMatchPlayer)}
      */
     protected ISession prepareSession(IMatchPlayer<IPlayerRank> matchPlayer) {
-        double rank = matchPlayer.rank().rank();
+        double rank = matchPlayer.rank();
         ISession chosenSession = null;
         for (ISession session : this.sessions.values()) {
             if(!session.range().validate(rank)) continue;
@@ -115,20 +114,16 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
     /**
      * Resolves a player rank for the player.
      */
-    protected IPlayerRank resolvePlayerRank(IPlayer player) {
-        RankKey key = RankKey.from(player.uuid(), this.gameId);
-
-        return this.storage.database().fetchRank(key).orElseGet(()->{
+    protected IMatchPlayer<IPlayerRank> resolveMatchPlayer(IPlayer player) {
+        IPlayerRank rank = this.storage.database().ranks().get(player, this.gameId).orElseGet(()->{
             IPlayerRank newRank = this.newPlayerRank();
-            System.out.println(newRank);
 
-            if(newRank instanceof RandomizedPlayerRank) return newRank;
-            // No data is used by RandomizedPlayerRank. It would literally just waste space to store it.
-
-            storage.database().saveRank(key, newRank);
+            this.storage.database().ranks().set(new MatchPlayer(player, newRank, this.gameId));
 
             return newRank;
         });
+
+        return new MatchPlayer(player, rank, this.gameId);
     }
 
     public Settings settings() {
@@ -142,9 +137,7 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
         IPlayer player = request.player();
         try {
             RankKey key = RankKey.from(player.uuid(), this.gameId);
-            IPlayerRank rank = this.resolvePlayerRank(player);
-
-            IMatchPlayer<IPlayerRank> matchPlayer = new MatchPlayer(player, rank, key.gameId());
+            IMatchPlayer<IPlayerRank> matchPlayer = this.resolveMatchPlayer(player);
 
             if(this.players.containsKey(matchPlayer.player().uuid())) throw new RuntimeException("Player is already queued!");
 
@@ -321,7 +314,7 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
             return settings.ranking().schema().getConstructor().newInstance();
         } catch(Exception e) {
             e.printStackTrace();
-            return new RandomizedPlayerRank();
+            return RandomizedPlayerRank.New();
         }
     }
 

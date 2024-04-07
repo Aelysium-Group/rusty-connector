@@ -312,7 +312,7 @@ class Send {
                                     logger.send(ProxyLang.RC_SEND_NO_PLAYER.build(username));
                                     return Command.SINGLE_SUCCESS;
                                 }
-                                Player player = Player.from(fetchedPlayer);
+                                Player player = new Player(fetchedPlayer);
 
                                 Family family = new Family.Reference(familyName).get();
 
@@ -425,7 +425,7 @@ class Database {
                                     String gameId = context.getArgument("gameId", String.class);
 
                                     StorageService storage = flame.services().storage();
-                                    storage.database().deleteGame(gameId);
+                                    storage.database().ranks().deleteGame(gameId);
                                     logger.log("Successfully purged all rank records from "+gameId);
                                     return Command.SINGLE_SUCCESS;
                                 })))
@@ -446,7 +446,7 @@ class DebugMatchmaking {
                                     String gameId = context.getArgument("gameId", String.class);
 
                                     StorageService storage = flame.services().storage();
-                                    storage.database().deleteGame(gameId);
+                                    storage.database().ranks().deleteGame(gameId);
                                     logger.log("Successfully purged all rank records from "+gameId);
                                     return Command.SINGLE_SUCCESS;
                                 })))

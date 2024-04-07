@@ -25,7 +25,7 @@ public class OnPlayerKicked {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerKicked(KickedFromServerEvent event) {
         Tinder api = Tinder.get();
-        Player player = Player.from(event.getPlayer());
+        Player player = new Player(event.getPlayer());
 
         return EventTask.async(() -> {
             boolean isFromRootFamily = false;

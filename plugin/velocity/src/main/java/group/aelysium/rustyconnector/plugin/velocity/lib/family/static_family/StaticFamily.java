@@ -6,7 +6,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.LoadBalancerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.ScalarFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ServerResidence;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
@@ -45,7 +44,7 @@ public class StaticFamily extends Family implements IStaticFamily {
     protected UnavailableProtocol unavailableProtocol;
 
     private StaticFamily(Settings settings) {
-        super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist(), new StaticFamily.Connector(settings.loadBalancer(), settings.whitelist())), STATIC_FAMILY_META);
+        super(settings.id(), new Family.Settings(settings.displayName(), settings.loadBalancer(), settings.parentFamily(), settings.whitelist(), new StaticFamily.Connector(settings.storageService(), settings.loadBalancer(), settings.whitelist())), STATIC_FAMILY_META);
         this.unavailableProtocol = settings.unavailableProtocol();
         this.homeServerExpiration = settings.homeServerExpiration();
     }
@@ -79,6 +78,7 @@ public class StaticFamily extends Family implements IStaticFamily {
         List<Component> bootOutput = deps.d1();
         LangService lang = deps.d2();
         WhitelistService whitelistService = deps.d3();
+        StorageService storage = deps.d5();
 
         StaticFamilyConfig config = StaticFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d4());
 
@@ -115,12 +115,13 @@ public class StaticFamily extends Family implements IStaticFamily {
                 config.getParent_family(),
                 whitelist,
                 config.getConsecutiveConnections_homeServer_ifUnavailable(),
-                config.getConsecutiveConnections_homeServer_expiration()
+                config.getConsecutiveConnections_homeServer_expiration(),
+                storage
         );
         StaticFamily family = new StaticFamily(settings);
 
         try {
-            ServerResidence.updateExpirations(deps.d5(), config.getConsecutiveConnections_homeServer_expiration(), family);
+            storage.database().residences().refreshExpirations(family);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("There was an issue with MySQL! " + e.getMessage());
@@ -136,14 +137,17 @@ public class StaticFamily extends Family implements IStaticFamily {
             Family.Reference parentFamily,
             Whitelist.Reference whitelist,
             UnavailableProtocol unavailableProtocol,
-            LiquidTimestamp homeServerExpiration
+            LiquidTimestamp homeServerExpiration,
+            StorageService storageService
     ) {}
 
     public static class Connector extends IFamily.Connector.Core {
         protected final IFamily.Connector.Core connector;
+        protected final StorageService storage;
 
-        public Connector(@NotNull LoadBalancer loadBalancer, IWhitelist.Reference whitelist) {
+        public Connector(@NotNull StorageService storage, @NotNull LoadBalancer loadBalancer, IWhitelist.Reference whitelist) {
             super(loadBalancer, whitelist);
+            this.storage = storage;
 
             if(loadBalancer.persistent() && loadBalancer.attempts() > 1)
                 connector = new ScalarFamily.Connector.Persistent(loadBalancer, whitelist);
@@ -156,7 +160,7 @@ public class StaticFamily extends Family implements IStaticFamily {
             Request request = new Request(player, result);
             try {
                 try {
-                    Optional<IServerResidence.MCLoaderEntry> residenceOptional = ServerResidence.fetch(family, player.uuid());
+                    Optional<IServerResidence.MCLoaderEntry> residenceOptional = this.storage.database().residences().get(family, player);
 
                     if (residenceOptional.isEmpty()) throw new NoOutputException();
 
@@ -173,7 +177,7 @@ public class StaticFamily extends Family implements IStaticFamily {
 
                         IMCLoader server = request.result().get().server().orElseThrow();
 
-                        ServerResidence.store(family, server, player);
+                        this.storage.database().residences().set(family, server, player);
 
                         return request;
                     }

@@ -36,7 +36,7 @@ public class Session implements ISession {
     public Session(IMatchPlayer<IPlayerRank> starter, Settings settings) {
         this.players = new ConcurrentHashMap<>(settings.max());
         this.players.put(starter.player().uuid(), starter);
-        this.rankRange = new RankRange(starter.rank().rank(), settings.variance());
+        this.rankRange = new RankRange(starter.rank(), settings.variance());
         this.settings = settings;
     }
 
@@ -81,8 +81,8 @@ public class Session implements ISession {
 
         for (IMatchPlayer<IPlayerRank> matchPlayer : this.players.values()) {
             try {
-                if(winners.contains(matchPlayer.player().uuid())) matchPlayer.rank().markWin();
-                if(losers.contains(matchPlayer.player().uuid())) matchPlayer.rank().markLoss();
+                if(winners.contains(matchPlayer.player().uuid())) matchPlayer.markWin();
+                if(losers.contains(matchPlayer.player().uuid())) matchPlayer.markLoss();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -134,7 +134,7 @@ public class Session implements ISession {
             return request;
         }
 
-        if(!this.rankRange.validate(matchPlayer.rank().rank())) {
+        if(!this.rankRange.validate(matchPlayer.rank())) {
             result.complete(ConnectionResult.failed(Component.text("You're not the right rank to connect to this session!")));
             return request;
         }
@@ -186,7 +186,7 @@ public class Session implements ISession {
 
             Object rank = "null";
             try {
-                rank = matchPlayer.rank().rank();
+                rank = matchPlayer.rank();
             } catch (Exception ignore) {}
 
             playerObject.add("rank", new JsonPrimitive(rank.toString()));

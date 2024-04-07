@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
@@ -13,10 +12,8 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.hub.HubService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.scalar_family.RootFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -38,7 +35,7 @@ public class CommandHub {
                         logger.log("/hub must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
-                    Player player = Player.from(eventPlayer);
+                    Player player = new Player(eventPlayer);
 
                     Family family = player.server().orElseThrow().family();
                     IRootFamily rootFamily = familyService.rootFamily();

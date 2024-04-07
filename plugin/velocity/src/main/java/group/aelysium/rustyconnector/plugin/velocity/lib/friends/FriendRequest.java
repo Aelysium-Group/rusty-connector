@@ -50,7 +50,7 @@ public class FriendRequest implements IFriendRequest {
                 throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_ACKNOWLEDGED);
 
             try {
-                friendsService.addFriends(this.sender, player);
+                friendsService.friendStorage().set(this.sender, player);
 
                 try {
                     player.sendMessage(ProxyLang.BECOME_FRIENDS.build(sender.username()));

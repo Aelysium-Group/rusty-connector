@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.toolkit.velocity.matchmaking;
 
-public interface IPlayerRank {
+import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
+
+public interface IPlayerRank extends JSONParseable {
     /**
      * Compiles the attributes of this rankholder and returns it's rank.
      */
@@ -8,4 +10,9 @@ public interface IPlayerRank {
 
     void markWin();
     void markLoss();
+
+    /**
+     * Returns the string name of the ranking schema.
+     */
+    String schemaName();
 }

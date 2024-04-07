@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsService;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IDatabase;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;
@@ -25,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 public class FriendsService implements IFriendsService {
     private final Cache<UUID, IFriendRequest> friendRequests;
     private final FriendsServiceSettings settings;
-    private final FriendsDataEnclave dataEnclave;
 
     public FriendsService(FriendsServiceSettings settings) throws Exception {
         this.settings = settings;
@@ -34,8 +34,6 @@ public class FriendsService implements IFriendsService {
                 .maximumSize(200)
                 .expireAfterWrite(10, TimeUnit.MINUTES)
                 .build();
-
-        this.dataEnclave = new FriendsDataEnclave(this.settings.storage());
     }
 
     public void initCommand(DependencyInjector.DI1<List<Component>> dependencies) {
@@ -94,35 +92,16 @@ public class FriendsService implements IFriendsService {
 
         return requests;
     }
+
+    public IDatabase.FriendLinks friendStorage() {
+        return this.settings.storage().database().friends();
+    }
+
     public Optional<IFriendRequest> findRequest(IPlayer target, IPlayer sender) {
         Optional<Map.Entry<UUID, IFriendRequest>> entry = this.friendRequests.asMap().entrySet().stream().filter(invite ->
                 invite.getValue().target().equals(target.username()) && invite.getValue().sender().equals(sender)
         ).findFirst();
         return entry.map(Map.Entry::getValue);
-    }
-
-    public Optional<List<IPlayer>> findFriends(IPlayer player) {
-        List<IPlayer> friends = new ArrayList<>();
-        List<PlayerPair> playerPairs = this.dataEnclave.findFriends(player).orElse(null);
-        if(playerPairs == null) return Optional.empty();
-
-        playerPairs.forEach(mapping -> {
-            try {
-                friends.add(mapping.fetchOther(player));
-            } catch (NullPointerException ignore) {}
-        });
-
-        return Optional.of(friends);
-    }
-
-    public boolean areFriends(IPlayer player1, IPlayer player2) {
-        return this.dataEnclave.areFriends(player1, player2);
-    }
-    public void addFriends(IPlayer player1, IPlayer player2) {
-        this.dataEnclave.addFriend(player1, player2);
-    }
-    public void removeFriends(IPlayer player1, IPlayer player2) {
-        this.dataEnclave.removeFriend(player1, player2);
     }
 
     public void sendRequest(IPlayer sender, String targetUsername) {
@@ -148,7 +127,7 @@ public class FriendsService implements IFriendsService {
     }
 
     public long friendCount(IPlayer player) {
-        return this.dataEnclave.getFriendCount(player);
+        return this.settings.storage().database().friends().get(player).orElseGet(ArrayList::new).size();
     }
 
     @Override

@@ -48,7 +48,7 @@ public class SendPlayerListener extends PacketListener<SendPlayerPacket> {
 
             if(family.equals(server.family())) throw new RuntimeException("You're already connected to this server!");
 
-            family.connect(Player.from(player));
+            family.connect(new Player(player));
         } catch (Exception e) {
             player.sendMessage(Component.text(e.getMessage()));
         }
