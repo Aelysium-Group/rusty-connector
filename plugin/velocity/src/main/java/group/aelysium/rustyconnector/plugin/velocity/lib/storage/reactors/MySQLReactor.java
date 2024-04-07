@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.storage.reactors;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.mysql.cj.jdbc.Blob;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
@@ -8,13 +10,14 @@ import group.aelysium.rustyconnector.toolkit.core.UserPass;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IRankResolver;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.nio.charset.StandardCharsets;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +52,7 @@ public class MySQLReactor extends StorageReactor {
                     "    player_uuid VARCHAR(36) NOT NULL," +
                     "    game_id VARCHAR(16) NOT NULL," +
                     "    schema VARCHAR(16) NOT NULL," +
-                    "    rank TINYBLOB NOT NULL," +
+                    "    rank VARCHAR(256) NOT NULL," +
                     "    FOREIGN KEY (player_uuid) REFERENCES players(uuid) ON DELETE CASCADE," +
                     "    CONSTRAINT uc_Mappings UNIQUE (player_uuid, game_id)" +
                     ");";
@@ -317,14 +320,14 @@ public class MySQLReactor extends StorageReactor {
             statement.setString(2, gameId);
             statement.setString(3, schema);
             statement.setString(4, rank.toString());
-            this.core.execute(statement);
+        this.core.execute(statement);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public Optional<IPlayerRank> fetchRank(UUID player, String gameId) {
+    public Optional<IPlayerRank> fetchRank(UUID player, String gameId, IRankResolver resolver) {
         try {
             PreparedStatement statement = this.core.prepare("SELECT * FROM player_ranks WHERE player_uuid = ? AND game_id = ? LIMIT 1;");
             statement.setString(1, player.toString());
@@ -334,9 +337,12 @@ public class MySQLReactor extends StorageReactor {
             boolean hasRows = result.next();
             if(!hasRows) return Optional.empty();
 
-            UUID uuid = UUID.fromString(result.getString("uuid"));
+            String schema = result.getString("schema");
+            Gson gson = new Gson();
+            JsonObject rank = gson.fromJson(result.getString("rank"), JsonObject.class);
+            System.out.println(rank);
 
-            return Optional.empty();
+            return Optional.of(resolver.resolve(schema, rank));
         } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();

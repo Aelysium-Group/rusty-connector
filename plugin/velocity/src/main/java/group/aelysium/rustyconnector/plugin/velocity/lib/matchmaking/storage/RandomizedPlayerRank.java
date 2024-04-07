@@ -5,9 +5,9 @@ import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 
 public class RandomizedPlayerRank implements IPlayerRank {
-    private static RandomizedPlayerRank singleton = new RandomizedPlayerRank();
+    private static final RandomizedPlayerRank singleton = new RandomizedPlayerRank();
 
-    private RandomizedPlayerRank() {}
+    protected RandomizedPlayerRank() {}
     public static RandomizedPlayerRank New() { return singleton; }
 
     public double rank() { return 1.0; }

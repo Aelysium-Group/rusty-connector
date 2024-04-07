@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStat
 import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IRankResolver;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IDatabase;
@@ -137,8 +138,8 @@ public class Database extends StorageReactor.Holder implements IDatabase, Servic
             this.reactor.saveRank(player.player().uuid(), player.gameId(), player.rankSchemaName(), player.rankToJSON());
         }
 
-        public Optional<IPlayerRank> get(IPlayer player, String gameId) {
-            return this.reactor.fetchRank(player.uuid(), gameId);
+        public Optional<IPlayerRank> get(IPlayer player, String gameId, IRankResolver resolver) {
+            return this.reactor.fetchRank(player.uuid(), gameId, resolver);
         }
     }
 }
