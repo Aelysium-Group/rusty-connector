@@ -167,7 +167,7 @@ public class MySQLReactor extends StorageReactor {
             statement.setString(2, pair.player2().uuid().toString());
             ResultSet result = this.core.executeQuery(statement);
 
-            boolean hasRows = result.first();
+            boolean hasRows = result.next();
             if(!hasRows) return Optional.of(false);
             return Optional.of(true);
         } catch (Exception e) {
@@ -232,7 +232,7 @@ public class MySQLReactor extends StorageReactor {
             statement.setString(1, uuid.toString());
             ResultSet result = this.core.executeQuery(statement);
 
-            boolean hasRows = result.first();
+            boolean hasRows = result.next();
             if(!hasRows) return Optional.empty();
 
             String username = result.getString("username");
@@ -251,7 +251,7 @@ public class MySQLReactor extends StorageReactor {
             statement.setString(1, username);
             ResultSet result = this.core.executeQuery(statement);
 
-            boolean hasRows = result.first();
+            boolean hasRows = result.next();
             if(!hasRows) return Optional.empty();
 
             UUID uuid = UUID.fromString(result.getString("uuid"));
@@ -331,7 +331,7 @@ public class MySQLReactor extends StorageReactor {
             statement.setString(2, gameId);
             ResultSet result = this.core.executeQuery(statement);
 
-            boolean hasRows = result.first();
+            boolean hasRows = result.next();
             if(!hasRows) return Optional.empty();
 
             UUID uuid = UUID.fromString(result.getString("uuid"));
