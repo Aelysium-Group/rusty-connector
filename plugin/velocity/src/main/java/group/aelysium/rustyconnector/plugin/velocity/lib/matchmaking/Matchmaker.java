@@ -257,7 +257,7 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
                         hideBossBars(velocityPlayer);
                         velocityPlayer.sendActionBar(Component.text("----< MATCHMAKING >----", NamedTextColor.YELLOW));
 
-                        if(session.size() < session.settings().min()) {
+                        if(session.size() > session.settings().min()) {
                             Bossbar.WAITING_FOR_SERVERS(this.waitingForServers, loadBalancer.size(true), loadBalancer.size(false));
                             velocityPlayer.showBossBar(this.waitingForServers);
                             continue;
