@@ -49,7 +49,7 @@ public class MySQLReactor extends StorageReactor {
                     "    player_uuid VARCHAR(36) NOT NULL," +
                     "    game_id VARCHAR(16) NOT NULL," +
                     "    schema VARCHAR(16) NOT NULL," +
-                    "    rank TINYBLOB NOT NULL" +
+                    "    rank TINYBLOB NOT NULL," +
                     "    FOREIGN KEY (player_uuid) REFERENCES players(uuid) ON DELETE CASCADE," +
                     "    CONSTRAINT uc_Mappings UNIQUE (player_uuid, game_id)" +
                     ");";
