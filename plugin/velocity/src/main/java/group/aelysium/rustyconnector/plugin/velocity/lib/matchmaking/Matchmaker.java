@@ -217,6 +217,8 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
                 }
                 ISession session = optionalSession.get();
 
+                if (session.size() < session.settings().min()) continue;
+
                 try {
                     RankedMCLoader server = (RankedMCLoader) loadBalancer.current().orElseThrow(
                             () -> new RuntimeException("There are no servers to connect to!")
