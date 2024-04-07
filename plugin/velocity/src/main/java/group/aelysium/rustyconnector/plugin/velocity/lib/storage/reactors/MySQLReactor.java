@@ -58,6 +58,7 @@ public class MySQLReactor extends StorageReactor {
 
     public MySQLReactor(Core.Settings settings) {
         this.core = new Core(settings);
+        this.initializeDatabase();
     }
 
     @Override
@@ -360,7 +361,6 @@ public class MySQLReactor extends StorageReactor {
             this.dataSource.setUser(settings.userPass().user());
             this.dataSource.setPassword(new String(settings.userPass().password()));
             this.dataSource.setDatabaseName(settings.database());
-
         }
 
         /**
