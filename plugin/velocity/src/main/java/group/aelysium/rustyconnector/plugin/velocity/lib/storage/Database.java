@@ -5,35 +5,16 @@ import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IStorageRoot;
-import org.eclipse.serializer.collections.lazy.LazyHashMap;
-import org.eclipse.serializer.collections.lazy.LazyHashSet;
-import org.eclipse.serializer.concurrency.XThreads;
-import org.eclipse.serializer.persistence.types.Persister;
 
 import java.util.*;
 
 public class Database implements IStorageRoot {
-    private transient Persister storage;
-    private final Map<UUID, IPlayer> players = new LazyHashMap<>();
     private final Set<PlayerPair> friends = new LazyHashSet<>();
-    private final Map<String, Map<UUID, IServerResidence.MCLoaderEntry>> residence = new LazyHashMap<>();
+    private final Map<IServerResidence.Key, IServerResidence.MCLoaderEntry> residence = new LazyHashMap<>();
 
     private final Map<IPlayer.RankKey, IPlayerRank> ranks = new LazyHashMap<>();
 
-    public void savePlayer(IPlayer player) {
-        XThreads.executeSynchronized(()-> {
-            this.players.put(player.uuid(), player);
-    
-            storage.store(this.players);
-        });
-    }
-    public Map<UUID, IPlayer> players() {
-        return players;
-    }
 
-    public Set<PlayerPair> friends() {
-        return friends;
-    }
 
     public Map<String, Map<UUID, IServerResidence.MCLoaderEntry>> residence() {
         return residence;

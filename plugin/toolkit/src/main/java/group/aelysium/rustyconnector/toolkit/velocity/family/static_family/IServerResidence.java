@@ -42,4 +42,6 @@ public interface IServerResidence {
         }
 
     }
+
+    record Key(String familyName, UUID player) {}
 }

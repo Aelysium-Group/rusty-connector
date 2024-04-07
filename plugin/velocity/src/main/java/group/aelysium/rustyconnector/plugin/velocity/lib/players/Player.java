@@ -6,12 +6,10 @@ import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import net.kyori.adventure.text.Component;
-import org.eclipse.serializer.persistence.types.Persister;
 
 import java.util.*;
 
 public class Player implements IPlayer {
-    protected transient Persister storage;
     protected UUID uuid;
     protected String username;
     protected long firstLogin;

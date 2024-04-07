@@ -40,58 +40,6 @@ public class ServerService implements IServerService {
         return Optional.of(loader);
     }
 
-    protected Optional<K8MCLoader> fetchPods(String podName) {
-        for(IFamily family : Tinder.get().services().family().dump()) {
-            try {
-                K8MCLoader found = (K8MCLoader) family.loadBalancer().servers().stream().filter(s -> {
-                    if (!(s instanceof K8MCLoader)) return false;
-                    return ((K8MCLoader) s).podName().equals(podName);
-                }).findAny().orElseThrow();
-
-                return Optional.of(found);
-            } catch (Exception ignore) {
-                if(family.loadBalancer().size(true) == 0) continue;
-
-                K8MCLoader found = (K8MCLoader) family.loadBalancer().lockedServers().stream().filter(s -> {
-                    if (!(s instanceof K8MCLoader)) return false;
-                    return ((K8MCLoader) s).podName().equals(podName);
-                }).findAny().orElseThrow();
-
-                return Optional.of(found);
-            }
-        }
-        return Optional.empty();
-    }
-
-    protected Optional<K8MCLoader> fetchPods(String podName, String familyName) {
-        Family family = new Family.Reference(familyName).get();
-
-        try {
-            K8MCLoader found = (K8MCLoader) family.loadBalancer().servers().stream().filter(s -> {
-                if (!(s instanceof K8MCLoader)) return false;
-                return ((K8MCLoader) s).podName().equals(podName);
-            }).findAny().orElseThrow();
-
-            return Optional.of(found);
-        } catch (Exception ignore1) {}
-
-
-        if(family.loadBalancer().size(true) == 0) return Optional.empty();
-
-
-        try {
-            K8MCLoader found = (K8MCLoader) family.loadBalancer().lockedServers().stream().filter(s -> {
-                if (!(s instanceof K8MCLoader)) return false;
-                return ((K8MCLoader) s).podName().equals(podName);
-            }).findAny().orElseThrow();
-
-            return Optional.of(found);
-        } catch (Exception ignore) {}
-
-
-        return Optional.empty();
-    }
-
     public List<IMCLoader> servers() {
         return this.servers.values().stream().toList();
     }
