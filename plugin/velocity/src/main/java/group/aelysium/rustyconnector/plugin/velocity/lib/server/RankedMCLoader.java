@@ -45,10 +45,7 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
     public void leave(IPlayer player) {
         if(this.activeSession == null) return;
 
-        IMatchPlayer<IPlayerRank> matchPlayer = this.activeSession.players().get(player.uuid());
-        if(matchPlayer == null) return;
-
-        this.activeSession.leave(matchPlayer);
+        this.activeSession.leave(player);
     }
 
     public void unlock() {
