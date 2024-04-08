@@ -164,15 +164,14 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
     }
 
     public boolean remove(IPlayer player) {
+        ISession session = this.players.get(player.uuid());
+        if(session == null) return false;
+
         try {
             hideBossBars(player.resolve().orElseThrow());
         } catch (Exception ignore) {}
 
-        ISession session = this.players.get(player.uuid());
-        if(session == null) return false;
-        Optional<IMatchPlayer<IPlayerRank>> matchPlayer = this.matchPlayer(player); // Will remove the player from this.players if they aren't valid
-        if(matchPlayer.isEmpty()) return false;
-        return session.leave(matchPlayer.get());
+        return session.leave(player);
     }
 
     public boolean contains(IPlayer player) {
@@ -320,9 +319,9 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
     }
 
     public void remove(ISession session) {
+        session.players().keySet().forEach(k->this.players.remove(k));
         this.activeSessions.remove(session.uuid());
         this.queuedSessions.remove(session.uuid());
-        session.players().keySet().forEach(k->this.players.remove(k));
         this.sessions.remove(session.uuid());
     }
 

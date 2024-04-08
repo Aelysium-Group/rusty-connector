@@ -13,8 +13,10 @@ import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class Session implements ISession {
+    protected final IMatchmaker<IPlayerRank> matchmaker;
     protected final UUID uuid = UUID.randomUUID();;
     protected final Map<UUID, IMatchPlayer<IPlayerRank>> players;
     protected IRankedMCLoader mcLoader;
@@ -33,7 +36,8 @@ public class Session implements ISession {
     protected final RankRange rankRange;
     protected boolean frozen = false;
 
-    public Session(IMatchPlayer<IPlayerRank> starter, Settings settings) {
+    public Session(IMatchmaker<IPlayerRank> matchmaker, IMatchPlayer<IPlayerRank> starter, Settings settings) {
+        this.matchmaker = matchmaker;
         this.players = new ConcurrentHashMap<>(settings.max());
         this.players.put(starter.player().uuid(), starter);
         this.rankRange = new RankRange(starter.rank(), settings.variance());
@@ -73,58 +77,18 @@ public class Session implements ISession {
         return this.frozen;
     }
 
-    public void end(List<UUID> winners, List<UUID> losers) {
-        RankedFamily family = (RankedFamily) this.mcLoader.family();
-
-        family.matchmaker().remove(this);
-        Family parent = family.parent();
-
-        for (IMatchPlayer<IPlayerRank> matchPlayer : this.players.values()) {
-            try {
-                if(winners.contains(matchPlayer.player().uuid())) matchPlayer.markWin();
-                if(losers.contains(matchPlayer.player().uuid())) matchPlayer.markLoss();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                parent.connect(matchPlayer.player());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        this.mcLoader.unlock();
-    }
-
-    public void implode(String reason) {
-        this.players.values().forEach(matchPlayer -> matchPlayer.player().sendMessage(Component.text(reason, NamedTextColor.RED)));
-
-        Packet packet = Tinder.get().services().packetBuilder().newBuilder()
-                .identification(BuiltInIdentifications.RANKED_GAME_IMPLODE)
-                .sendingToMCLoader(this.uuid())
-                .parameter(RankedGame.Imploded.Parameters.REASON, reason)
-                .parameter(RankedGame.Imploded.Parameters.SESSION_UUID, this.uuid.toString())
-                .build();
-        Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
-
-        if(this.mcLoader != null)
-            this.mcLoader.unlock();
-
-        this.end(List.of(), List.of());
-    }
-
     public Map<UUID, IMatchPlayer<IPlayerRank>> players() {
         return players;
     }
 
-    public boolean leave(IMatchPlayer<IPlayerRank> matchPlayer) {
-        if(this.players.remove(matchPlayer.player().uuid()) == null) return false;
-
-        if(this.players.size() >= this.settings.min()) return true;
-
-        this.implode("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.");
-
-        return true;
+    public boolean contains(IMatchPlayer<IPlayerRank> matchPlayer) {
+        return this.players.containsKey(matchPlayer.player().uuid());
+    }
+    public void start(IRankedMCLoader mcLoader) throws AlreadyBoundException {
+        if(mcLoader.currentSession().isPresent()) throw new AlreadyBoundException("There's already a Session running on this MCLoader!");
+        ((RankedMCLoader) mcLoader).connect(this);
+        this.mcLoader = mcLoader;
+        if(this.settings.shouldFreeze()) this.frozen = true;
     }
 
     public PlayerConnectable.Request join(IMatchPlayer<IPlayerRank> matchPlayer) {
@@ -165,14 +129,54 @@ public class Session implements ISession {
         return request;
     }
 
-    public boolean contains(IMatchPlayer<IPlayerRank> matchPlayer) {
-        return this.players.containsKey(matchPlayer.player().uuid());
+    public boolean leave(IPlayer player) {
+        if(this.players.remove(player.uuid()) == null) return false;
+
+        if(this.players.size() >= this.settings.min()) return true;
+
+        this.implode("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.");
+
+        return true;
     }
-    public void start(IRankedMCLoader mcLoader) throws AlreadyBoundException {
-        if(mcLoader.currentSession().isPresent()) throw new AlreadyBoundException("There's already a Session running on this MCLoader!");
-        ((RankedMCLoader) mcLoader).connect(this);
-        this.mcLoader = mcLoader;
-        if(this.settings.shouldFreeze()) this.frozen = true;
+
+    public void implode(String reason) {
+        this.players.values().forEach(matchPlayer -> matchPlayer.player().sendMessage(Component.text(reason, NamedTextColor.RED)));
+
+        if(this.active()) {
+            Packet packet = Tinder.get().services().packetBuilder().newBuilder()
+                    .identification(BuiltInIdentifications.RANKED_GAME_IMPLODE)
+                    .sendingToMCLoader(this.mcLoader.uuid())
+                    .parameter(RankedGame.Imploded.Parameters.REASON, reason)
+                    .parameter(RankedGame.Imploded.Parameters.SESSION_UUID, this.uuid.toString())
+                    .build();
+            Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
+
+            this.mcLoader.unlock();
+        }
+
+        this.end(List.of(), List.of());
+    }
+
+    public void end(List<UUID> winners, List<UUID> losers) {
+        this.matchmaker.remove(this);
+
+        for (IMatchPlayer<IPlayerRank> matchPlayer : this.players.values()) {
+            try {
+                if(winners.contains(matchPlayer.player().uuid())) matchPlayer.markWin();
+                if(losers.contains(matchPlayer.player().uuid())) matchPlayer.markLoss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if(this.active())
+                try {
+                    this.mcLoader.family().parent().connect(matchPlayer.player());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+        }
+
+        if(this.active()) this.mcLoader.unlock();
     }
 
     @Override

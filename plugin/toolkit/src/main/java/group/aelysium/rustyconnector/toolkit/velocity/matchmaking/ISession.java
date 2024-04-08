@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.toolkit.velocity.matchmaking;
 
 import group.aelysium.rustyconnector.toolkit.core.JSONParseable;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
 import java.rmi.AlreadyBoundException;
@@ -65,7 +66,7 @@ public interface ISession extends JSONParseable {
      * The session will implode if the player leaving causes it to have not enough players to continue.
      * @param player The player to leave.
      */
-    boolean leave(IMatchPlayer<IPlayerRank> player);
+    boolean leave(IPlayer player);
 
 
     /**
