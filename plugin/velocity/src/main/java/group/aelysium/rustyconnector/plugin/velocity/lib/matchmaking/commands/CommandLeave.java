@@ -37,11 +37,12 @@ public class CommandLeave {
                         });
 
                         RankedFamily queuedFamily = null;
-                        for (RankedFamily family : families)
-                            if(family.dequeue(player)) {
+                        for (RankedFamily family : families) {
+                            if (family.dequeue(player)) {
                                 queuedFamily = family;
                                 break;
                             }
+                        }
 
                         if(queuedFamily == null) {
                             eventPlayer.sendMessage(Component.text("You must be in matchmaking to use the `/leave` command!", NamedTextColor.RED));
