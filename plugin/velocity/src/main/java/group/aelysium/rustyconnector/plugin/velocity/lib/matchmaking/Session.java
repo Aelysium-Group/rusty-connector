@@ -128,6 +128,7 @@ public class Session implements ISession {
     }
 
     public boolean leave(IPlayer player) {
+        ((Matchmaker) this.matchmaker).removePlayerFromPlayersMap(player);
         if(this.players.remove(player.uuid()) == null) return false;
 
         if(this.players.size() >= this.settings.min()) return true;

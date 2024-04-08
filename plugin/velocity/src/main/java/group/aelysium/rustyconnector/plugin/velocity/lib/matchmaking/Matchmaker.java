@@ -169,6 +169,10 @@ public class Matchmaker implements IMatchmaker {
         return this.players.remove(player.uuid()) != null;
     }
 
+    public boolean removePlayerFromPlayersMap(IPlayer player) {
+        return this.players.remove(player.uuid()) != null;
+    }
+
     public boolean contains(IPlayer player) {
         return this.players.containsKey(player.uuid());
     }
