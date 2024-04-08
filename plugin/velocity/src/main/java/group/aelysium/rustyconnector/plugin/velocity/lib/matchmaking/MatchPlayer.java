@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking;
 
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
@@ -24,6 +25,10 @@ public class MatchPlayer implements IMatchPlayer<IPlayerRank> {
     public void markLoss() {
         this.rank.markLoss();
         Tinder.get().services().storage().database().ranks().set(this);
+    }
+
+    public boolean isRandomizedPlayerRank() {
+        return this.rank instanceof RandomizedPlayerRank;
     }
 
     public JsonObject rankToJSON() {

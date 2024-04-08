@@ -133,7 +133,9 @@ public class Database extends StorageReactor.Holder implements IDatabase, Servic
         }
 
         public void set(IMatchPlayer<IPlayerRank> player) {
-            if(player instanceof RandomizedPlayerRank) return; // Storing randomized player ranks is a literal waste of space.
+            // Storing randomized player ranks is a literal waste of space.
+            if(player.isRandomizedPlayerRank()) return;
+            if(player.rankSchemaName().equals(RandomizedPlayerRank.New().schemaName())) return;
 
             this.reactor.saveRank(player.player().uuid(), player.gameId(), player.rankSchemaName(), player.rankToJSON());
         }

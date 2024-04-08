@@ -9,6 +9,7 @@ public interface IMatchPlayer<PlayerRank extends IPlayerRank> extends ISortable 
     void markLoss();
     JsonObject rankToJSON();
     String rankSchemaName();
+    boolean isRandomizedPlayerRank();
 
     IPlayer player();
     double rank();
