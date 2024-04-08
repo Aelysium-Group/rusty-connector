@@ -314,7 +314,7 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
         try {
             return settings.ranking().schema().getConstructor().newInstance();
         } catch(Exception e) {
-            e.printStackTrace();
+            if(!settings.ranking().schema().equals(RandomizedPlayerRank.class)) e.printStackTrace();
             return RandomizedPlayerRank.New();
         }
     }
