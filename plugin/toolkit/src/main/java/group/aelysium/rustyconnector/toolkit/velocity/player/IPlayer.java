@@ -43,7 +43,7 @@ public interface IPlayer {
     /**
      * Convenience method that will resolve the player and then return their MCLoader if there is one.
      */
-    Optional<? extends IMCLoader> server();
+    Optional<IMCLoader> server();
 
     /**
      * Fetches the player's rank for a specific game.

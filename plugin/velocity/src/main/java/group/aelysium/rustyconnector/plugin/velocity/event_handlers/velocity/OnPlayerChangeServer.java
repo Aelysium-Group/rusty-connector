@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity;
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.player.ServerConnectedEvent;
+import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
@@ -17,13 +17,13 @@ public class OnPlayerChangeServer {
      * Also runs when a player first joins the proxy
      */
     @Subscribe(order = PostOrder.FIRST)
-    public EventTask onPlayerChangeServer(ServerConnectedEvent event) {
+    public EventTask onPlayerChangeServer(ServerPreConnectEvent event) {
             return EventTask.async(() -> {
                 Player player = new Player(event.getPlayer());
 
                 try {
-                    RegisteredServer newRawServer = event.getServer();
-                    RegisteredServer oldRawServer = event.getPreviousServer().orElse(null);
+                    RegisteredServer newRawServer = event.getOriginalServer();
+                    RegisteredServer oldRawServer = event.getPreviousServer();
 
                     MCLoader newServer = new MCLoader.Reference(UUID.fromString(newRawServer.getServerInfo().getName())).get();
 

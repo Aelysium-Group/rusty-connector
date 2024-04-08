@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +52,7 @@ public class Player implements IPlayer {
         return Tinder.get().services().storage().database().ranks().get(this, gameId, DefaultRankResolver.New());
     }
 
-    public Optional<MCLoader> server() {
+    public Optional<IMCLoader> server() {
         try {
             com.velocitypowered.api.proxy.Player resolvedPlayer = this.resolve().orElseThrow();
             UUID mcLoaderUUID = UUID.fromString(resolvedPlayer.getCurrentServer().orElseThrow().getServerInfo().getName());
