@@ -150,6 +150,14 @@ public class RankedFamily extends Family implements IRankedFamily {
                 return request;
             }
 
+            if(Tinder.get().services().family().dump().stream().anyMatch(f -> {
+                if(!(f instanceof RankedFamily)) return false;
+                return ((RankedFamily) f).matchmaker().contains(player);
+            })) {
+                result.complete(ConnectionResult.failed(ProxyLang.RANKED_FAMILY_IN_MATCHMAKER_DENIAL.build()));
+                return request;
+            }
+
             this.matchmaker.queue(request, result);
 
             return request;

@@ -157,6 +157,7 @@ proxy:
                     - "      | - Persistence: <load_balancing_persistence>"
         ranked:
             in_party: "<red>You're not allowed to enter matchmaking while in a party!</red>"
+            in_matchmaker: "<red>You're already waiting in a matchmaking queue!</red>"
             panel:
                 info:
                     - "   ---| Display Name: <display_name>"
