@@ -90,7 +90,7 @@ public class MySQLReactor extends StorageReactor {
             try {
                 PreparedStatement statement = this.core.prepare("UPDATE server_residences SET expiration = FROM_UNIXTIME(?) WHERE family_id = ? AND expiration IS NULL;");
                   statement.setLong(1, newExpirationEpoch);
-                statement.setString(1, familyId);
+                statement.setString(2, familyId);
                 this.core.execute(statement);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -137,17 +137,29 @@ public class MySQLReactor extends StorageReactor {
 
     @Override
     public void saveServerResidence(String familyId, UUID mcloader, UUID player, Long expirationEpoch) {
-        try {
-            PreparedStatement statement = this.core.prepare("REPLACE INTO server_residence (player_uuid, family_id, mcloader_uuid, expiration) VALUES(?, ?, ?, ?, FROM_UNIXTIME(?));");
+        if(expirationEpoch == null)
+            try {
+                PreparedStatement statement = this.core.prepare("REPLACE INTO server_residence (player_uuid, family_id, mcloader_uuid, expiration) VALUES(?, ?, ?, ?, NULL);");
 
-            statement.setString(1, player.toString());
-            statement.setString(2, familyId);
-            statement.setString(3, mcloader.toString());
-              statement.setLong(4, expirationEpoch);
-            this.core.execute(statement);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                statement.setString(1, player.toString());
+                statement.setString(2, familyId);
+                statement.setString(3, mcloader.toString());
+                this.core.execute(statement);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        else
+            try {
+                PreparedStatement statement = this.core.prepare("REPLACE INTO server_residence (player_uuid, family_id, mcloader_uuid, expiration) VALUES(?, ?, ?, FROM_UNIXTIME(?));");
+
+                statement.setString(1, player.toString());
+                statement.setString(2, familyId);
+                statement.setString(3, mcloader.toString());
+                  statement.setLong(4, expirationEpoch);
+                this.core.execute(statement);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
     @Override

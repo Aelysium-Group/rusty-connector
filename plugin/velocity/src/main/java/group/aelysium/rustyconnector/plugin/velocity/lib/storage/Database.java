@@ -89,7 +89,10 @@ public class Database extends StorageReactor.Holder implements IDatabase, Servic
         }
 
         public void set(IStaticFamily family, IMCLoader mcLoader, IPlayer player) {
-            this.reactor.saveServerResidence(family.id(), mcLoader.uuid(), player.uuid(), family.homeServerExpiration().epochFromNow());
+            if(family.homeServerExpiration() == null)
+                this.reactor.saveServerResidence(family.id(), mcLoader.uuid(), player.uuid(), null);
+            else
+                this.reactor.saveServerResidence(family.id(), mcLoader.uuid(), player.uuid(), family.homeServerExpiration().epochFromNow());
         }
 
         public void delete(String familyId) {
