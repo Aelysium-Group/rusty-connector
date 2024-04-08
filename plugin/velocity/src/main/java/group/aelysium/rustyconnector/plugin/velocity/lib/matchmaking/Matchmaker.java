@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.DefaultRankResolver;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
@@ -115,7 +116,7 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
      * Resolves a player rank for the player.
      */
     protected IMatchPlayer<IPlayerRank> resolveMatchPlayer(IPlayer player) {
-        IPlayerRank rank = this.storage.database().ranks().get(player, this.gameId).orElseGet(()->{
+        IPlayerRank rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New()).orElseGet(()->{
             IPlayerRank newRank = this.newPlayerRank();
 
             this.storage.database().ranks().set(new MatchPlayer(player, newRank, this.gameId));

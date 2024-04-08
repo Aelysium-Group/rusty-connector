@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.DefaultRankResolver;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
@@ -47,7 +48,7 @@ public class Player implements IPlayer {
     }
 
     public Optional<IPlayerRank> rank(String gameId) {
-        return Tinder.get().services().storage().database().ranks().get(this, gameId);
+        return Tinder.get().services().storage().database().ranks().get(this, gameId, DefaultRankResolver.New());
     }
 
     public Optional<MCLoader> server() {

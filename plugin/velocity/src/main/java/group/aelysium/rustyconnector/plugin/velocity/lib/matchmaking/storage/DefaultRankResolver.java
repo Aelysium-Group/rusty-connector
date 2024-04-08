@@ -5,6 +5,9 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IRankResolver;
 
 public class DefaultRankResolver implements IRankResolver {
+    protected static final DefaultRankResolver singleton = new DefaultRankResolver();
+    protected DefaultRankResolver() {}
+
     @Override
     public IPlayerRank resolve(String schemaName, JsonObject object) throws IllegalStateException {
         String schema = object.get("schema").getAsString();
@@ -25,5 +28,9 @@ public class DefaultRankResolver implements IRankResolver {
             }
             default -> throw new IllegalStateException("The passed rank object uses schema "+schema+" which doesn't match a supported schema!");
         };
+    }
+
+    public static DefaultRankResolver New() {
+        return singleton;
     }
 }
