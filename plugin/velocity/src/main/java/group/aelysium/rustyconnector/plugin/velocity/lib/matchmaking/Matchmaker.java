@@ -107,7 +107,7 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
             break;
         }
 
-        if(chosenSession == null) chosenSession = new Session(matchPlayer, sessionSettings);
+        if(chosenSession == null) chosenSession = new Session(this, matchPlayer, sessionSettings);
 
         return chosenSession;
     }
@@ -137,7 +137,6 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
     public void queue(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         IPlayer player = request.player();
         try {
-            RankKey key = RankKey.from(player.uuid(), this.gameId);
             IMatchPlayer<IPlayerRank> matchPlayer = this.resolveMatchPlayer(player);
 
             if(this.players.containsKey(matchPlayer.player().uuid())) throw new RuntimeException("Player is already queued!");
