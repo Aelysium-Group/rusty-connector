@@ -49,8 +49,8 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
             BossBar.Overlay.PROGRESS
     );
     protected Map<UUID, ISession> sessions = new ConcurrentHashMap<>();
-    protected Vector<UUID> queuedSessions = new Vector<>();
-    protected Vector<UUID> activeSessions = new Vector<>();
+    protected Set<UUID> queuedSessions = Collections.synchronizedSet(new HashSet<>());;
+    protected Set<UUID> activeSessions = Collections.synchronizedSet(new HashSet<>());;
     protected Map<UUID, ISession> players = new ConcurrentHashMap<>();
 
     public Matchmaker(Settings settings, StorageService storage, String gameId) {
