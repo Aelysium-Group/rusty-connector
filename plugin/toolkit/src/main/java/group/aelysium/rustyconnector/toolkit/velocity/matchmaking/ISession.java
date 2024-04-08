@@ -94,10 +94,8 @@ public interface ISession extends JSONParseable {
             this.pivot = pivot;
 
             double con = pivot * variance;
-            double max = pivot + con;
-            double min = pivot - con;
-            this.min = min;
-            this.max = max;
+            this.max = pivot + con;
+            this.min = pivot - con;
         }
 
         public double pivot() {

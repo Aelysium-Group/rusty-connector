@@ -140,17 +140,6 @@ public class Matchmaker implements IMatchmaker {
 
             if(this.players.containsKey(matchPlayer.player().uuid())) throw new RuntimeException("Player is already queued!");
 
-            if (this.settings.queue().joining().reconnect())
-                for (ISession session : this.sessions.values()) {
-                    if(!session.contains(matchPlayer)) continue;
-
-                    ConnectionResult reconnectResult = session.join(matchPlayer).result().get(5, TimeUnit.SECONDS);
-                    if(!reconnectResult.connected()) break;
-
-                    result.complete(ConnectionResult.success(Component.text("You've successfully reconnected to your session!"), reconnectResult.server().orElse(null)));
-                    return;
-                }
-
             ISession session = this.prepareSession(matchPlayer);
             ConnectionResult sessionConnectResult = this.connectSession(session, matchPlayer);
             if(!sessionConnectResult.connected()) throw new RuntimeException("Unable to connect to a session.");

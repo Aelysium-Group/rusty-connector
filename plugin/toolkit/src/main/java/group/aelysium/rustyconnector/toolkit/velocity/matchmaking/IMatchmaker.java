@@ -108,7 +108,7 @@ public interface IMatchmaker extends Service {
                 boolean stayersWin
         ) {}
         public record Queue(Joining joining, Leaving leaving) {
-            public record Joining(boolean showInfo, boolean reconnect) {}
+            public record Joining(boolean showInfo) {}
             public record Leaving(boolean command, boolean boot) {}
         }
     }

@@ -135,17 +135,6 @@ queue:
 
 
 
-        #
-        # Should a player be specifically reconnected to their previous session if
-        # it's still running when they try to join the queue.
-        #
-        # If false, it's still possible for players to reconnect to a previous session -
-        # the matchmaker simply won't make a specific effort to do so.
-        #
-        reconnect: true
-
-
-
     leaving:
         #
         # Should players be able to use "/leave" to leave the matchmaking queue?

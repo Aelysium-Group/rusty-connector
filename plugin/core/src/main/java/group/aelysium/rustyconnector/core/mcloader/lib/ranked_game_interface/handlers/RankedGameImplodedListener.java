@@ -20,7 +20,7 @@ public class RankedGameImplodedListener extends PacketListener<RankedGame.Implod
 
     @Override
     public PacketIdentification target() {
-        return BuiltInIdentifications.RANKED_GAME_END;
+        return BuiltInIdentifications.RANKED_GAME_IMPLODE;
     }
 
     @Override
