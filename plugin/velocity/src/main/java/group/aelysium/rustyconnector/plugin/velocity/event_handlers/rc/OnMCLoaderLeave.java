@@ -15,7 +15,10 @@ public class OnMCLoaderLeave implements Listener<MCLoaderLeaveEvent> {
 
             if(!family.matchmaker().contains(event.player())) return;
 
-            family.matchmaker().remove(event.player());
+            try {
+                family.matchmaker().fetchPlayersSession(event.player().uuid()).orElseThrow().leave(event.player());
+            } catch (Exception ignore) {}
+            family.matchmaker().dequeue(event.player());
         } catch (Exception ignore) {}
     }
 }

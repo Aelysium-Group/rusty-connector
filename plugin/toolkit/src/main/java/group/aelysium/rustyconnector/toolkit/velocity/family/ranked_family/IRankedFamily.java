@@ -26,5 +26,5 @@ public interface IRankedFamily extends IFamily, Service {
      */
     boolean dequeue(IPlayer player);
 
-    IMatchmaker<IPlayerRank> matchmaker();
+    IMatchmaker matchmaker();
 }

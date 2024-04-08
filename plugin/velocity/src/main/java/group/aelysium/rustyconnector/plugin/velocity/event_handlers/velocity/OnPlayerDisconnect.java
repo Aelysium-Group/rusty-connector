@@ -61,8 +61,12 @@ public class OnPlayerDisconnect {
                 if(family instanceof RankedFamily) families.add((RankedFamily) family);
             });
 
-            for (RankedFamily family : families)
-                if (family.matchmaker().remove(player)) break;
+            for (RankedFamily family : families) {
+                if (family.matchmaker().dequeue(player)) break;
+                try {
+                    if(family.matchmaker().fetchPlayersSession(player.uuid()).orElseThrow().leave(player)) break;
+                } catch (Exception ignore) {}
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

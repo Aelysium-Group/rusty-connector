@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface IMatchmaker<PlayerRank extends IPlayerRank> extends Service {
+public interface IMatchmaker extends Service {
     /**
      * Gets the game id used by this matchmaker to handle player ranks.
      */
@@ -27,11 +27,12 @@ public interface IMatchmaker<PlayerRank extends IPlayerRank> extends Service {
     void queue(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result);
 
     /**
-     * Removes the player from the matchmaker.
-     * This will remove the player from the matchmaking queue or from a session if they're in one.
+     * Removes the player from the matchmaker queue.
+     * This will not remove the player from a session if they're in one.
+     * To accomplish that, you need to find the session and have the player leave it.
      * @param player The player to remove.
      */
-    boolean remove(IPlayer player);
+    boolean dequeue(IPlayer player);
 
     /**
      * Checks if a player is currently waiting in the matchmaker.
@@ -45,14 +46,14 @@ public interface IMatchmaker<PlayerRank extends IPlayerRank> extends Service {
      * This method will close the session, connect all players to the parent family, and unlock the MCLoader.
      * @param session The session to end.
      */
-    void remove(ISession session);
+    void dequeue(ISession session);
 
     /**
      * Fetches a session based on a player's UUID.
      * @param uuid The uuid to search for.
      * @return A session if it exists. Otherwise, an empty Optional.
      */
-    Optional<ISession> fetchPlayerSession(UUID uuid);
+    Optional<ISession> fetchPlayersSession(UUID uuid);
 
     /**
      * Fetches a session based on a UUID.

@@ -42,7 +42,7 @@ public class RankedFamily extends Family implements IRankedFamily {
     }
 
     public boolean dequeue(IPlayer player) {
-        return this.matchmaker.remove(player);
+        return this.matchmaker.dequeue(player);
     }
 
     /**
@@ -134,7 +134,10 @@ public class RankedFamily extends Family implements IRankedFamily {
 
         @Override
         public void leave(IPlayer player) {
-            this.matchmaker.remove(player);
+            try {
+                this.matchmaker.fetchPlayersSession(player.uuid()).orElseThrow().leave(player);
+            } catch (Exception ignore) {}
+            this.matchmaker.dequeue(player);
         }
 
         @Override

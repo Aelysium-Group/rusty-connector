@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 
-public class Matchmaker implements IMatchmaker<IPlayerRank> {
+public class Matchmaker implements IMatchmaker {
     protected final ClockService supervisor = new ClockService(5);
     protected final ClockService queueIndicator = new ClockService(1);
     protected final StorageService storage;
@@ -161,22 +161,19 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
         result.complete(ConnectionResult.success(Component.text("Successfully queued into the matchmaker!"), null));
     }
 
-    public boolean remove(IPlayer player) {
-        ISession session = this.players.get(player.uuid());
-        if(session == null) return false;
-
+    public boolean dequeue(IPlayer player) {
         try {
             hideBossBars(player.resolve().orElseThrow());
         } catch (Exception ignore) {}
 
-        return session.leave(player);
+        return this.players.remove(player.uuid()) != null;
     }
 
     public boolean contains(IPlayer player) {
         return this.players.containsKey(player.uuid());
     }
 
-    public Optional<ISession> fetchPlayerSession(UUID playerUUID) {
+    public Optional<ISession> fetchPlayersSession(UUID playerUUID) {
         ISession session = this.players.get(playerUUID);
         if(session == null) return Optional.empty();
         return Optional.of(session);
@@ -316,7 +313,7 @@ public class Matchmaker implements IMatchmaker<IPlayerRank> {
         }
     }
 
-    public void remove(ISession session) {
+    public void dequeue(ISession session) {
         session.players().keySet().forEach(k->this.players.remove(k));
         this.activeSessions.remove(session.uuid());
         this.queuedSessions.remove(session.uuid());

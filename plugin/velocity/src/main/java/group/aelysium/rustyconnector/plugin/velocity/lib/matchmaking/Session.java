@@ -6,8 +6,6 @@ import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.RankedGame;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
@@ -28,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class Session implements ISession {
-    protected final IMatchmaker<IPlayerRank> matchmaker;
+    protected final IMatchmaker matchmaker;
     protected final UUID uuid = UUID.randomUUID();;
     protected final Map<UUID, IMatchPlayer<IPlayerRank>> players;
     protected IRankedMCLoader mcLoader;
@@ -36,7 +34,7 @@ public class Session implements ISession {
     protected final RankRange rankRange;
     protected boolean frozen = false;
 
-    public Session(IMatchmaker<IPlayerRank> matchmaker, IMatchPlayer<IPlayerRank> starter, Settings settings) {
+    public Session(IMatchmaker matchmaker, IMatchPlayer<IPlayerRank> starter, Settings settings) {
         this.matchmaker = matchmaker;
         this.players = new ConcurrentHashMap<>(settings.max());
         this.players.put(starter.player().uuid(), starter);
@@ -158,7 +156,7 @@ public class Session implements ISession {
     }
 
     public void end(List<UUID> winners, List<UUID> losers) {
-        this.matchmaker.remove(this);
+        this.matchmaker.dequeue(this);
 
         for (IMatchPlayer<IPlayerRank> matchPlayer : this.players.values()) {
             try {
