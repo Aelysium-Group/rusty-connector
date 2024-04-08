@@ -148,6 +148,7 @@ public class Matchmaker implements IMatchmaker {
                     if(!reconnectResult.connected()) break;
 
                     result.complete(ConnectionResult.success(Component.text("You've successfully reconnected to your session!"), reconnectResult.server().orElse(null)));
+                    return;
                 }
 
             ISession session = this.prepareSession(matchPlayer);

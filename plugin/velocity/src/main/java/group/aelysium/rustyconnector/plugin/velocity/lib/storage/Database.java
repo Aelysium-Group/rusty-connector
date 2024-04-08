@@ -113,9 +113,9 @@ public class Database extends StorageReactor.Holder implements IDatabase, Servic
 
         public void refreshExpirations(IStaticFamily family) {
             if(family.homeServerExpiration() == null)
-                this.reactor.updateExpirations(family.id(), family.homeServerExpiration().epochFromNow());
-            else
                 this.reactor.updateExpirations(family.id(), null);
+            else
+                this.reactor.updateExpirations(family.id(), family.homeServerExpiration().epochFromNow());
         }
     }
     public static class PlayerRanks extends StorageReactor.Holder implements IDatabase.PlayerRanks {

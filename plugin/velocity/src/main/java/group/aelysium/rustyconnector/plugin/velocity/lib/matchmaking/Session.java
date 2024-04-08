@@ -108,6 +108,11 @@ public class Session implements ISession {
             return request;
         }
 
+        if(this.full()) {
+            result.complete(ConnectionResult.failed(Component.text("This session is already full!")));
+            return request;
+        }
+
         this.players.put(matchPlayer.player().uuid(), matchPlayer);
 
         if(this.active())
