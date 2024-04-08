@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStat
 import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IRankResolver;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -149,6 +150,6 @@ public interface IDatabase {
          * @param gameId The Game's ID to fetch the rank from.
          * @return The players rank. Or Empty if there is no rank, or there was an issue getting it.
          */
-        Optional<IPlayerRank> get(IPlayer player, String gameId);
+        Optional<IPlayerRank> get(IPlayer player, String gameId, IRankResolver resolver);
     }
 }
