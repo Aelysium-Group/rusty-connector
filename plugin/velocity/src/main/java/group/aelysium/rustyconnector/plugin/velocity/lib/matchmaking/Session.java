@@ -106,7 +106,9 @@ public class Session implements ISession {
                 .parameter(RankedGame.Imploded.Parameters.SESSION_UUID, this.uuid.toString())
                 .build();
         Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
-        this.mcLoader.unlock();
+
+        if(this.mcLoader != null)
+            this.mcLoader.unlock();
 
         this.end(List.of(), List.of());
     }
