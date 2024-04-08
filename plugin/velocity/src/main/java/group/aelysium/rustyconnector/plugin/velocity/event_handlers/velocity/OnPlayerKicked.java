@@ -8,7 +8,6 @@ import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
@@ -31,7 +30,7 @@ public class OnPlayerKicked {
             boolean isFromRootFamily = false;
 
             try {
-                MCLoader oldServer = player.server().orElseThrow();
+                IMCLoader oldServer = player.server().orElseThrow();
 
                 EventDispatch.UnSafe.fireAndForget(new FamilyLeaveEvent(oldServer.family(), oldServer, player, true));
                 EventDispatch.UnSafe.fireAndForget(new MCLoaderLeaveEvent(oldServer, player, true));

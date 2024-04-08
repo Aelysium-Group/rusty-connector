@@ -17,6 +17,12 @@ public interface IMatchmaker extends Service {
     String gameId();
 
     /**
+     * Gets the matched player for this matchmaker.
+     * If no rank exists for this player, it returns an Empty
+     */
+    Optional<IMatchPlayer<IPlayerRank>> matchPlayer(IPlayer player);
+
+    /**
      * Inserts a player into the matchmaker.
      * <p>
      * This method will connect the player to an already active session that they are the appropriate rank for (if it exists).
@@ -27,12 +33,10 @@ public interface IMatchmaker extends Service {
     void queue(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result);
 
     /**
-     * Removes the player from the matchmaker queue.
-     * This will not remove the player from a session if they're in one.
-     * To accomplish that, you need to find the session and have the player leave it.
+     * Removes the player from the matchmaker.
      * @param player The player to remove.
      */
-    boolean dequeue(IPlayer player);
+    void leave(IPlayer player);
 
     /**
      * Checks if a player is currently waiting in the matchmaker.
@@ -46,7 +50,7 @@ public interface IMatchmaker extends Service {
      * This method will close the session, connect all players to the parent family, and unlock the MCLoader.
      * @param session The session to end.
      */
-    void dequeue(ISession session);
+    void leave(ISession session);
 
     /**
      * Fetches a session based on a player's UUID.

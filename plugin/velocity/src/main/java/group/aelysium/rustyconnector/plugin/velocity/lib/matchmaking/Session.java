@@ -50,6 +50,10 @@ public class Session implements ISession {
         return this.settings;
     }
 
+    public IMatchmaker matchmaker() {
+        return this.matchmaker;
+    }
+
     public Optional<IRankedMCLoader> mcLoader() {
         if(!this.active()) return Optional.empty();
         return Optional.of(this.mcLoader);
@@ -86,6 +90,7 @@ public class Session implements ISession {
         if(mcLoader.currentSession().isPresent()) throw new AlreadyBoundException("There's already a Session running on this MCLoader!");
         ((RankedMCLoader) mcLoader).connect(this);
         this.mcLoader = mcLoader;
+
         if(this.settings.shouldFreeze()) this.frozen = true;
     }
 
@@ -132,15 +137,17 @@ public class Session implements ISession {
         return request;
     }
 
-    public boolean leave(IPlayer player) {
-        ((Matchmaker) this.matchmaker).removePlayerFromPlayersMap(player);
-        if(this.players.remove(player.uuid()) == null) return false;
+    public void leave(IPlayer player) {
+        this.players.remove(player.uuid());
 
-        if(this.players.size() >= this.settings.min()) return true;
+        if(settings.quittersLose()) {
+            Optional<IMatchPlayer<IPlayerRank>> matchPlayer = this.matchmaker.matchPlayer(player);
+            matchPlayer.ifPresent(IMatchPlayer::markLoss);
+        }
+
+        if(this.players.size() >= this.settings.min()) return;
 
         this.implode("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.");
-
-        return true;
     }
 
     public void implode(String reason) {
@@ -158,11 +165,14 @@ public class Session implements ISession {
             this.mcLoader.unlock();
         }
 
-        this.end(List.of(), List.of());
+        List<UUID> winners = new ArrayList<>();
+        if(settings.stayersWin()) winners = new ArrayList<>(this.players.keySet());
+
+        this.end(winners, List.of());
     }
 
     public void end(List<UUID> winners, List<UUID> losers) {
-        this.matchmaker.dequeue(this);
+        this.matchmaker.leave(this);
 
         for (IMatchPlayer<IPlayerRank> matchPlayer : this.players.values()) {
             try {

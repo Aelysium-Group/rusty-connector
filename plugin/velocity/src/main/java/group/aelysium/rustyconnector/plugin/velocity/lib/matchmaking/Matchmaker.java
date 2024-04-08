@@ -56,74 +56,18 @@ public class Matchmaker implements IMatchmaker {
         this.storage = storage;
         this.gameId = gameId;
         this.settings = settings;
-        this.sessionSettings = new ISession.Settings(settings.session().freezeActiveSessions(), settings.session().closingThreshold(), settings.session().max(), settings.ranking().variance(), this.gameId);
+        this.sessionSettings = new ISession.Settings(
+                settings.session().freezeActiveSessions(),
+                settings.session().closingThreshold(),
+                settings.session().max(),
+                settings.ranking().variance(),
+                this.gameId,
+                settings.session().quittersLose(),
+                settings.session().stayersWin()
+        );
 
         this.minPlayersPerGame = settings.session().min();
         this.maxPlayersPerGame = settings.session().max();
-    }
-
-    /**
-     * Gets the matched player in this matchmaker.
-     * If the player isn't in this matchmaker, this will return an empty optional.
-     */
-    protected Optional<IMatchPlayer<IPlayerRank>> matchPlayer(IPlayer player) {
-        ISession session = this.players.get(player.uuid());
-        if(session == null) return Optional.empty();
-        IMatchPlayer<IPlayerRank> matchPlayer = session.players().get(player.uuid());
-        if(matchPlayer == null) {
-            this.players.remove(player.uuid()); // matchPlayer shouldn't be null here. If it is, the player isn't in the matchmaker.
-            return Optional.empty();
-        }
-        return Optional.of(matchPlayer);
-    }
-
-    /**
-     * Attempts to connect the player to the session.
-     */
-    protected ConnectionResult connectSession(ISession session, IMatchPlayer<IPlayerRank> matchPlayer) throws ExecutionException, InterruptedException, TimeoutException {
-        ConnectionResult result = session.join(matchPlayer).result().get(5, TimeUnit.SECONDS);
-
-        if(result.connected()) {
-            this.players.put(matchPlayer.player().uuid(), session);
-            if(!this.sessions.containsKey(session.uuid())) this.sessions.put(session.uuid(), session);
-        }
-
-        return result;
-    }
-
-    /**
-     * Prepares a session for the passed player.
-     * This method does not save the session, nor does it connect the player to it.
-     * To connect a player to the session use {@link Matchmaker#connectSession(ISession, IMatchPlayer)}
-     */
-    protected ISession prepareSession(IMatchPlayer<IPlayerRank> matchPlayer) {
-        double rank = matchPlayer.rank();
-        ISession chosenSession = null;
-        for (ISession session : this.sessions.values()) {
-            if(!session.range().validate(rank)) continue;
-            if(session.full()) continue;
-            chosenSession = session;
-            break;
-        }
-
-        if(chosenSession == null) chosenSession = new Session(this, matchPlayer, sessionSettings);
-
-        return chosenSession;
-    }
-
-    /**
-     * Resolves a player rank for the player.
-     */
-    protected IMatchPlayer<IPlayerRank> resolveMatchPlayer(IPlayer player) {
-        IPlayerRank rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New()).orElseGet(()->{
-            IPlayerRank newRank = this.newPlayerRank();
-
-            this.storage.database().ranks().set(new MatchPlayer(player, newRank, this.gameId));
-
-            return newRank;
-        });
-
-        return new MatchPlayer(player, rank, this.gameId);
     }
 
     public Settings settings() {
@@ -131,6 +75,11 @@ public class Matchmaker implements IMatchmaker {
     }
     public String gameId() {
         return this.gameId;
+    }
+
+    public Optional<IMatchPlayer<IPlayerRank>> matchPlayer(IPlayer player) {
+        Optional<IPlayerRank> rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New());
+        return rank.map(r -> new MatchPlayer(player, r, this.gameId));
     }
 
     public void queue(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
@@ -151,16 +100,16 @@ public class Matchmaker implements IMatchmaker {
         result.complete(ConnectionResult.success(Component.text("Successfully queued into the matchmaker!"), null));
     }
 
-    public boolean dequeue(IPlayer player) {
+    public void leave(IPlayer player) {
+        if(!this.players.containsKey(player.uuid())) return;
+
         try {
             hideBossBars(player.resolve().orElseThrow());
         } catch (Exception ignore) {}
 
-        return this.players.remove(player.uuid()) != null;
-    }
+        ((Session) this.players.get(player.uuid())).leave(player);
 
-    public boolean removePlayerFromPlayersMap(IPlayer player) {
-        return this.players.remove(player.uuid()) != null;
+        this.players.remove(player.uuid());
     }
 
     public boolean contains(IPlayer player) {
@@ -192,16 +141,16 @@ public class Matchmaker implements IMatchmaker {
             for (UUID uuid : this.queuedSessions.stream().toList()) {
                 if(loadBalancer.size(false) == 0) return;
 
-                Optional<ISession> optionalSession = this.fetch(uuid);
-                if(optionalSession.isEmpty()) { // If empty, the session no-longer exists and shouldn't be here.
-                    this.queuedSessions.remove(uuid);
-                    continue;
-                }
-                ISession session = optionalSession.get();
-
-                if (session.size() < session.settings().min()) continue;
-
                 try {
+                    Optional<ISession> optionalSession = this.fetch(uuid);
+                    if(optionalSession.isEmpty()) { // If empty, the session no-longer exists and shouldn't be here.
+                        this.queuedSessions.remove(uuid);
+                        continue;
+                    }
+                    ISession session = optionalSession.orElseThrow();
+
+                    if (session.size() < session.settings().min()) continue;
+
                     RankedMCLoader server = (RankedMCLoader) loadBalancer.current().orElseThrow(
                             () -> new RuntimeException("There are no servers to connect to!")
                     );
@@ -307,7 +256,56 @@ public class Matchmaker implements IMatchmaker {
         }
     }
 
-    public void dequeue(ISession session) {
+    /**
+     * Attempts to connect the player to the session.
+     */
+    protected ConnectionResult connectSession(ISession session, IMatchPlayer<IPlayerRank> matchPlayer) throws ExecutionException, InterruptedException, TimeoutException {
+        ConnectionResult result = session.join(matchPlayer).result().get(5, TimeUnit.SECONDS);
+
+        if(result.connected()) {
+            this.players.put(matchPlayer.player().uuid(), session);
+            if(!this.sessions.containsKey(session.uuid())) this.sessions.put(session.uuid(), session);
+        }
+
+        return result;
+    }
+
+    /**
+     * Prepares a session for the passed player.
+     * This method does not save the session, nor does it connect the player to it.
+     * To connect a player to the session use {@link Matchmaker#connectSession(ISession, IMatchPlayer)}
+     */
+    protected ISession prepareSession(IMatchPlayer<IPlayerRank> matchPlayer) {
+        double rank = matchPlayer.rank();
+        ISession chosenSession = null;
+        for (ISession session : this.sessions.values()) {
+            if(!session.range().validate(rank)) continue;
+            if(session.full()) continue;
+            chosenSession = session;
+            break;
+        }
+
+        if(chosenSession == null) chosenSession = new Session(this, matchPlayer, sessionSettings);
+
+        return chosenSession;
+    }
+
+    /**
+     * Resolves a player rank for the player.
+     */
+    protected IMatchPlayer<IPlayerRank> resolveMatchPlayer(IPlayer player) {
+        IPlayerRank rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New()).orElseGet(()->{
+            IPlayerRank newRank = this.newPlayerRank();
+
+            this.storage.database().ranks().set(new MatchPlayer(player, newRank, this.gameId));
+
+            return newRank;
+        });
+
+        return new MatchPlayer(player, rank, this.gameId);
+    }
+
+    public void leave(ISession session) {
         session.players().keySet().forEach(k->this.players.remove(k));
         this.activeSessions.remove(session.uuid());
         this.queuedSessions.remove(session.uuid());

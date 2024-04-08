@@ -9,6 +9,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPAHandler;
 import group.aelysium.rustyconnector.toolkit.velocity.dynamic_teleport.tpa.ITPARequest;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -146,7 +147,7 @@ public final class CommandTPA {
                                         Player sender = new Player(requestSendingVelocityPlayer);
 
                                         try {
-                                            Family family = target.server().orElseThrow().family();
+                                            IFamily family = target.server().orElseThrow().family();
                                             if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
                                             ITPAHandler tpaHandler = tpaService.tpaHandler(family);
@@ -233,7 +234,7 @@ public final class CommandTPA {
                                         Player sender = new Player(senderVelocityPlayer);
 
                                         try {
-                                            Family family = sender.server().orElseThrow().family();
+                                            IFamily family = sender.server().orElseThrow().family();
                                             if(!family.metadata().tpaAllowed()) throw new NullPointerException();
 
                                             ITPAHandler tpaHandler = tpaService.tpaHandler(family);

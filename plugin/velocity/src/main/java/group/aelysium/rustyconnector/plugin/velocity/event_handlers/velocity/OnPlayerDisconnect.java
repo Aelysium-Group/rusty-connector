@@ -4,7 +4,6 @@ import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.proxy.ServerConnection;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.EventDispatch;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
@@ -15,7 +14,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
-import group.aelysium.rustyconnector.toolkit.core.events.Event;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.NetworkLeaveEvent;
@@ -26,7 +24,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public class OnPlayerDisconnect {
     /**
@@ -74,12 +71,8 @@ public class OnPlayerDisconnect {
                 if(family instanceof RankedFamily) families.add((RankedFamily) family);
             });
 
-            for (RankedFamily family : families) {
-                if (family.matchmaker().dequeue(player)) break;
-                try {
-                    if(family.matchmaker().fetchPlayersSession(player.uuid()).orElseThrow().leave(player)) break;
-                } catch (Exception ignore) {}
-            }
+            for (RankedFamily family : families)
+                family.matchmaker().leave(player);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -17,6 +17,11 @@ public interface ISession extends JSONParseable {
     Settings settings();
 
     /**
+     * Gets the matchmaker that this session belongs to.
+     */
+    IMatchmaker matchmaker();
+
+    /**
      * Ends this session.
      */
     void end(List<UUID> winners, List<UUID> losers);
@@ -60,14 +65,6 @@ public interface ISession extends JSONParseable {
      * Gets the players that are currently in this session.
      */
     Map<UUID, IMatchPlayer<IPlayerRank>> players();
-
-    /**
-     * Removes the player from the session.
-     * The session will implode if the player leaving causes it to have not enough players to continue.
-     * @param player The player to leave.
-     */
-    boolean leave(IPlayer player);
-
 
     /**
      * Adds the player to the session.
@@ -115,5 +112,5 @@ public interface ISession extends JSONParseable {
         }
     }
 
-    record Settings(boolean shouldFreeze, int min, int max, double variance, String gameId) {}
+    record Settings(boolean shouldFreeze, int min, int max, double variance, String gameId, boolean quittersLose, boolean stayersWin) {}
 }

@@ -41,10 +41,6 @@ public class RankedFamily extends Family implements IRankedFamily {
         this.matchmaker = settings.matchmaker();
     }
 
-    public boolean dequeue(IPlayer player) {
-        return this.matchmaker.dequeue(player);
-    }
-
     /**
      * Start the family's matchmaking system.
      */
@@ -66,17 +62,16 @@ public class RankedFamily extends Family implements IRankedFamily {
     public long playerCount() {
         return this.matchmaker.playerCount();
     }
-
-    public Matchmaker matchmaker() {
-        return this.matchmaker;
-    }
-
     public int queuedPlayers() {
         return this.matchmaker.queuedPlayerCount();
     }
 
     public long activePlayers() {
-        return super.playerCount();
+        return this.matchmaker.activePlayerCount();
+    }
+
+    public Matchmaker matchmaker() {
+        return this.matchmaker;
     }
 
     @Override
@@ -134,10 +129,7 @@ public class RankedFamily extends Family implements IRankedFamily {
 
         @Override
         public void leave(IPlayer player) {
-            try {
-                this.matchmaker.fetchPlayersSession(player.uuid()).orElseThrow().leave(player);
-            } catch (Exception ignore) {}
-            this.matchmaker.dequeue(player);
+            this.matchmaker.leave(player);
         }
 
         @Override
