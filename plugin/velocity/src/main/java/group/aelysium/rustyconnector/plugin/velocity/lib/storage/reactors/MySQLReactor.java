@@ -195,15 +195,25 @@ public class MySQLReactor extends StorageReactor {
     public Optional<List<IPlayer>> fetchFriends(UUID player) {
         try {
             PreparedStatement statement = this.core.prepare(
-                    "SELECT\n" +
-                            "    CASE\n" +
-                            "        WHEN player1_uuid = ? THEN player2_uuid\n" +
-                            "        ELSE player1_uuid\n" +
-                            "    END AS friend_uuid,\n" +
-                            "    p.username AS friend_username\n" +
-                            "FROM friend_links fl\n" +
-                            "JOIN players p ON fl.player1_uuid = p.uuid OR fl.player2_uuid = p.uuid\n" +
-                            "WHERE fl.player1_uuid = ? OR fl.player2_uuid = ?;\n"
+                    "SELECT subquery.friend_uuid, p.username AS friend_username\n" +
+                            "FROM (\n" +
+                            "    SELECT\n" +
+                            "        CASE\n" +
+                            "            WHEN player1_uuid = ? THEN player2_uuid\n" +
+                            "            ELSE player1_uuid\n" +
+                            "        END AS friend_uuid\n" +
+                            "    FROM friend_links\n" +
+                            "    WHERE player1_uuid = ?\n" +
+                            "    UNION\n" +
+                            "    SELECT\n" +
+                            "        CASE\n" +
+                            "            WHEN player2_uuid = ? THEN player1_uuid\n" +
+                            "            ELSE player2_uuid\n" +
+                            "        END AS friend_uuid\n" +
+                            "    FROM friend_links\n" +
+                            "    WHERE player2_uuid = ?\n" +
+                            ") AS subquery\n" +
+                            "JOIN players p ON subquery.friend_uuid = p.uuid;"
             );
             String uuidAsString = player.toString();
             statement.setString(1, uuidAsString);
