@@ -195,12 +195,12 @@ public class MySQLReactor extends StorageReactor {
     public Optional<List<IPlayer>> fetchFriends(UUID player) {
         try {
             PreparedStatement statement = this.core.prepare(
-                    "SELECT \n" +
+                    "SELECT\n" +
                             "    IF(f.player1_uuid = ?, f.player2_uuid, f.player1_uuid) AS friend_uuid,\n" +
                             "    p.username AS friend_username\n" +
                             "FROM friend_links f\n" +
                             "JOIN players p ON p.uuid = IF(f.player1_uuid = ?, f.player2_uuid, f.player1_uuid)\n" +
-                            "WHERE f.player1_uuid = ? OR f.player2_uuid = ?;    "
+                            "WHERE f.player1_uuid = ? OR f.player2_uuid = ?;"
             );
             String uuidAsString = player.toString();
             statement.setString(1, uuidAsString);
@@ -279,7 +279,7 @@ public class MySQLReactor extends StorageReactor {
     @Override
     public void savePlayer(UUID uuid, String username) {
         try {
-            PreparedStatement statement = this.core.prepare("REPLACE INTO players (uuid, username) VALUES(?, ?);");
+            PreparedStatement statement = this.core.prepare("INSERT IGNORE players (uuid, username) VALUES(?, ?);");
             statement.setString(1, uuid.toString());
             statement.setString(2, username);
             this.core.execute(statement);
