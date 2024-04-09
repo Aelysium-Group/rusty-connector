@@ -214,8 +214,8 @@ public class MySQLReactor extends StorageReactor {
             List<IPlayer> friends = new ArrayList<>();
 
             while(result.next()) {
-                UUID uuid = UUID.fromString(result.getString("uuid"));
-                String username = result.getString("username");
+                UUID uuid = UUID.fromString(result.getString("friend_uuid"));
+                String username = result.getString("friend_username");
 
                 friends.add(new Player(uuid, username));
             }
