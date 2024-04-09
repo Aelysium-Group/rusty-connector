@@ -227,8 +227,6 @@ public class MySQLReactor extends StorageReactor {
                 UUID uuid = UUID.fromString(result.getString("friend_uuid"));
                 String username = result.getString("friend_username");
 
-                if(uuid.equals(player)) continue;
-
                 friends.add(new Player(uuid, username));
             }
 
