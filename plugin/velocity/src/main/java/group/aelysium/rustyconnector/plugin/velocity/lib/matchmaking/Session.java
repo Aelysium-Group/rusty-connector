@@ -203,11 +203,11 @@ public class Session implements ISession {
             JsonObject playerObject = new JsonObject();
 
             playerObject.add("uuid", new JsonPrimitive(matchPlayer.player().uuid().toString()));
-            playerObject.add("username", new JsonPrimitive(matchPlayer.player().uuid().toString()));
+            playerObject.add("username", new JsonPrimitive(matchPlayer.player().username()));
             playerObject.add("schema", new JsonPrimitive(matchPlayer.rankSchemaName()));
             playerObject.add("rank", matchPlayer.rankToJSON());
 
-            array.add(object);
+            array.add(playerObject);
         });
         object.add("players", array);
 
