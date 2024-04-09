@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.STATIC_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
@@ -162,12 +163,26 @@ public class StaticFamily extends Family implements IStaticFamily {
                 try {
                     Optional<IServerResidence.MCLoaderEntry> residenceOptional = this.storage.database().residences().get(family, player);
 
-                    if (residenceOptional.isEmpty()) throw new NoOutputException();
+                    // Set new residence if none exists
+                    if (residenceOptional.isEmpty()) {
+                        request = this.connector.connect(player);
+
+                        if(!request.result().get().connected()) return request;
+
+                        IMCLoader server = request.result().get().server().orElseThrow();
+
+                        this.storage.database().residences().set(family, server, player);
+
+                        return request;
+                    }
 
                     IServerResidence.MCLoaderEntry residence = residenceOptional.orElseThrow();
 
+                    ConnectionResult result1 = residence.server().connect(player).result().get(10, TimeUnit.SECONDS);
+                    if(!result1.connected()) throw new NoOutputException();
+
                     return residence.server().connect(player);
-                } catch (Exception ignore) {}
+                } catch (NoOutputException ignore) {}
 
                 switch (family.unavailableProtocol()) {
                     case ASSIGN_NEW_HOME -> {
