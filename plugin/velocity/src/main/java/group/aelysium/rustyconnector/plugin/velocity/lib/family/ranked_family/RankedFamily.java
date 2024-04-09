@@ -14,9 +14,11 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistServ
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -28,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.RANKED_FAMILY_META;
@@ -142,13 +145,22 @@ public class RankedFamily extends Family implements IRankedFamily {
                 return request;
             }
 
-            if(Tinder.get().services().family().dump().stream().anyMatch(f -> {
+            // Validate that the player isn't in another matchmaker
+            Optional<IFamily> family = Tinder.get().services().family().dump().stream().filter(f -> {
                 if(!(f instanceof RankedFamily)) return false;
                 return ((RankedFamily) f).matchmaker().contains(player);
-            })) {
-                result.complete(ConnectionResult.failed(ProxyLang.RANKED_FAMILY_IN_MATCHMAKER_DENIAL.build()));
-                return request;
-            }
+            }).findAny();
+            if(family.isPresent())
+                if(family.get() instanceof RankedFamily rankedFamily) {
+                    Optional<ISession> session = rankedFamily.matchmaker().fetchPlayersSession(player.uuid());
+                    if(session.isPresent()) {
+                        if(session.get().active())
+                            result.complete(ConnectionResult.failed(ProxyLang.RANKED_FAMILY_IN_MATCHMAKER_GAME_DENIAL.build()));
+                        else
+                            result.complete(ConnectionResult.failed(ProxyLang.RANKED_FAMILY_IN_MATCHMAKER_QUEUE_DENIAL.build()));
+                        return request;
+                    }
+                }
 
             this.matchmaker.queue(request, result);
 

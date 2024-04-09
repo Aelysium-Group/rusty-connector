@@ -3,13 +3,15 @@ package group.aelysium.rustyconnector.core.lib.packets;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
+import group.aelysium.rustyconnector.toolkit.mc_loader.ranked_game_interface.MCLoaderMatchPlayer;
 
 import java.util.*;
 
 public interface RankedGame {
-    record Session(UUID uuid, Map<UUID, String> players) {}
+    record Session(UUID uuid, Map<UUID, MCLoaderMatchPlayer> players) {}
     record EndedSession(UUID uuid, List<UUID> winners, List<UUID> losers) {}
 
     class Ready extends Packet.Wrapper {
@@ -17,15 +19,21 @@ public interface RankedGame {
             JsonObject object = this.parameter(Parameters.SESSION).getAsJsonObject();
             UUID uuid = UUID.fromString(object.get("uuid").getAsString());
 
-            Map<UUID, String> players = new HashMap<>();
+            Map<UUID, MCLoaderMatchPlayer> players = new HashMap<>();
 
             JsonArray array = object.getAsJsonArray("players");
             array.forEach(entry -> {
                 JsonObject entryObject = entry.getAsJsonObject();
 
+                UUID player_uuid = UUID.fromString(entryObject.get("uuid").getAsString());
                 players.put(
-                        UUID.fromString(entryObject.get("uuid").getAsString()),
-                        entryObject.get("rank").getAsString()
+                    player_uuid,
+                    new MCLoaderMatchPlayer(
+                        player_uuid,
+                        entryObject.get("username").getAsString(),
+                        entryObject.get("schema").getAsString(),
+                        entryObject.get("rank").getAsJsonObject()
+                    )
                 );
             });
 

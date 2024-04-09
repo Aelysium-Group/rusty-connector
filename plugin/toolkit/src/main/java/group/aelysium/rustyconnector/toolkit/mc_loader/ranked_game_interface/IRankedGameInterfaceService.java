@@ -13,7 +13,7 @@ public interface IRankedGameInterfaceService extends Service {
     /**
      * Gets the players that are currently in this session.
      */
-    Optional<Map<UUID, String>> players();
+    Optional<Map<UUID, MCLoaderMatchPlayer>> players();
 
     /**
      * Ends the session with the defined players marked as winners.

@@ -11,24 +11,25 @@ import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoSer
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.mc_loader.events.ranked_game.RankedGameEndEvent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.ranked_game_interface.IRankedGameInterfaceService;
+import group.aelysium.rustyconnector.toolkit.mc_loader.ranked_game_interface.MCLoaderMatchPlayer;
 
 import java.util.*;
 
 public class RankedGameInterfaceService implements IRankedGameInterfaceService {
     private UUID uuid;
-    private Map<UUID, String> players;
+    private Map<UUID, MCLoaderMatchPlayer> players;
 
     public Optional<UUID> uuid() {
         if(this.uuid == null) return Optional.empty();
         return Optional.of(this.uuid);
     }
 
-    public Optional<Map<UUID, String>> players() {
+    public Optional<Map<UUID, MCLoaderMatchPlayer>> players() {
         if(this.players == null) return Optional.empty();
         return Optional.of(this.players);
     }
 
-    public void session(UUID uuid, Map<UUID, String> players) {
+    public void session(UUID uuid, Map<UUID, MCLoaderMatchPlayer> players) {
         this.uuid = uuid;
         this.players = players;
     }
