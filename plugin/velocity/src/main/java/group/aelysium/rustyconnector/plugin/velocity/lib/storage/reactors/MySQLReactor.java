@@ -139,7 +139,7 @@ public class MySQLReactor extends StorageReactor {
     public void saveServerResidence(String familyId, UUID mcloader, UUID player, Long expirationEpoch) {
         if(expirationEpoch == null)
             try {
-                PreparedStatement statement = this.core.prepare("REPLACE INTO server_residence (player_uuid, family_id, mcloader_uuid, expiration) VALUES(?, ?, ?, ?, NULL);");
+                PreparedStatement statement = this.core.prepare("REPLACE INTO server_residence (player_uuid, family_id, mcloader_uuid, expiration) VALUES(?, ?, ?, NULL);");
 
                 statement.setString(1, player.toString());
                 statement.setString(2, familyId);
