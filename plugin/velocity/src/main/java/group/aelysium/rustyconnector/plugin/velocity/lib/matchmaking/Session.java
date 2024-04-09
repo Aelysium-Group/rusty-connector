@@ -162,7 +162,7 @@ public class Session implements ISession {
                     .build();
             Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
 
-            this.mcLoader.unlock();
+            ((RankedMCLoader) this.mcLoader).rawUnlock();
         }
 
         List<UUID> winners = new ArrayList<>();
@@ -190,7 +190,7 @@ public class Session implements ISession {
                 }
         }
 
-        if(this.active()) this.mcLoader.unlock();
+        if(this.active()) ((RankedMCLoader) this.mcLoader).rawUnlock();
     }
 
     @Override

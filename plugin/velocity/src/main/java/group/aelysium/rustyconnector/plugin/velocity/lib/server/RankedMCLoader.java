@@ -65,4 +65,9 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
         }
         super.unlock();
     }
+
+    public void rawUnlock() {
+        this.activeSession = null;
+        super.unlock();
+    }
 }
