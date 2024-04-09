@@ -195,30 +195,18 @@ public class MySQLReactor extends StorageReactor {
     public Optional<List<IPlayer>> fetchFriends(UUID player) {
         try {
             PreparedStatement statement = this.core.prepare(
-                    "SELECT subquery.friend_uuid, p.username AS friend_username\n" +
-                            "FROM (\n" +
-                            "    SELECT\n" +
-                            "        CASE\n" +
-                            "            WHEN player1_uuid = ? THEN player2_uuid\n" +
-                            "            ELSE player1_uuid\n" +
-                            "        END AS friend_uuid\n" +
-                            "    FROM friend_links\n" +
-                            "    WHERE player1_uuid = ?\n" +
-                            "    UNION\n" +
-                            "    SELECT\n" +
-                            "        CASE\n" +
-                            "            WHEN player2_uuid = ? THEN player1_uuid\n" +
-                            "            ELSE player2_uuid\n" +
-                            "        END AS friend_uuid\n" +
-                            "    FROM friend_links\n" +
-                            "    WHERE player2_uuid = ?\n" +
-                            ") AS subquery\n" +
-                            "JOIN players p ON subquery.friend_uuid = p.uuid;"
+                    "SELECT \n" +
+                            "    IF(f.player1_uuid = ?, f.player2_uuid, f.player1_uuid) AS friend_uuid,\n" +
+                            "    p.username AS friend_username\n" +
+                            "FROM friend_links f\n" +
+                            "JOIN players p ON p.uuid = IF(f.player1_uuid = ?, f.player2_uuid, f.player1_uuid)\n" +
+                            "WHERE f.player1_uuid = ? OR f.player2_uuid = ?;    "
             );
             String uuidAsString = player.toString();
             statement.setString(1, uuidAsString);
             statement.setString(2, uuidAsString);
             statement.setString(3, uuidAsString);
+            statement.setString(4, uuidAsString);
             ResultSet result = this.core.executeQuery(statement);
 
             List<IPlayer> friends = new ArrayList<>();
