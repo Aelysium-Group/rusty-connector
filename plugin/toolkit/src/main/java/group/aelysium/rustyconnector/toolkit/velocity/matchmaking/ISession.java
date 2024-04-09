@@ -90,9 +90,8 @@ public interface ISession extends JSONParseable {
         public RankRange(double pivot, double variance) {
             this.pivot = pivot;
 
-            double con = pivot * variance;
-            this.max = pivot + con;
-            this.min = pivot - con;
+            this.max = pivot + variance;
+            this.min = pivot - variance;
         }
 
         public double pivot() {

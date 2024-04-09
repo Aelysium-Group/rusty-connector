@@ -52,10 +52,10 @@ ranking:
 
 
     #
-    # A decimal representing the percentage that player's ranks are allowed to deviate from one-another.
-    # 0.1 means that other players in the round must have a rank within 10% of each-other.
-    #
-    # If algorithm is set to `RANDOM` this will be ignored.
+    # A numeric value representing how far apart players in a session are allowed to be in rank.
+    # This value is ignored for the RANDOMIZED algorithm.
+    # For example if you use WIN_LOSS and a player joins with a rank of 0.6 and variance is 0.1,
+    # Players with ranks of 0.5 and 0.7 will be able to also join this player's session.
     #
     variance: 0.2
 
