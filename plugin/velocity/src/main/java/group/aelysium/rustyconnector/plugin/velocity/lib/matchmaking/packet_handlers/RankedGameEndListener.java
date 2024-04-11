@@ -39,6 +39,6 @@ public class RankedGameEndListener extends PacketListener<RankedGame.End> {
             return family.matchmaker().fetch(packet.session().uuid()).orElseThrow();
         });
 
-        session.end(List.of(), List.of());
+        session.end(packet.session().winners(), packet.session().losers());
     }
 }

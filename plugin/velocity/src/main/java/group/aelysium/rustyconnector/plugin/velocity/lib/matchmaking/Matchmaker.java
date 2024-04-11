@@ -174,8 +174,8 @@ public class Matchmaker implements IMatchmaker {
                 i = i + nextHop;
             }
 
-            if(builtSessions.size() == 0 && this.queuedPlayers.size() > this.minPlayersPerGame) this.failedBuilds.incrementAndGet();
-            if(builtSessions.size() > 0) this.failedBuilds.set(0);
+            if(builtSessions.isEmpty() && this.queuedPlayers.size() > this.minPlayersPerGame) this.failedBuilds.incrementAndGet();
+            if(!builtSessions.isEmpty()) this.failedBuilds.set(0);
 
             this.queuedPlayers.removeAll(removePlayers);
             builtSessions.forEach(s -> this.queuedSessions.put(s.uuid(), s));
