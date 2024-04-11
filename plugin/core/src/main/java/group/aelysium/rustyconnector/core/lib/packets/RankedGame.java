@@ -51,8 +51,7 @@ public interface RankedGame {
 
     class End extends Packet.Wrapper {
         public EndedSession session() {
-            Gson gson = new Gson();
-            JsonObject object = gson.fromJson(this.parameter(Ready.Parameters.SESSION).getAsString(), JsonObject.class);
+            JsonObject object = this.parameter(Ready.Parameters.SESSION).getAsJsonObject();
             UUID uuid = UUID.fromString(object.get("uuid").getAsString());
 
             List<UUID> winners = new ArrayList<>();
