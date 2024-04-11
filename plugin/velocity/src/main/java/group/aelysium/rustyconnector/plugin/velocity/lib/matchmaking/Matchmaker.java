@@ -95,7 +95,7 @@ public class Matchmaker implements IMatchmaker {
 
             int insertIndex = this.queuedPlayers.size();
             this.queuedPlayers.add(insertIndex, matchPlayer);
-            SingleSort.sort(this.queuedPlayers, insertIndex);
+            SingleSort.sortAsc(this.queuedPlayers, insertIndex);
         } catch (Exception e) {
             result.complete(ConnectionResult.failed(Component.text("There was an issue queuing into matchmaking!")));
             throw new RuntimeException(e);

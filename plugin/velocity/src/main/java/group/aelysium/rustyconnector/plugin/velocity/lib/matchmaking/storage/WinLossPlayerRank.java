@@ -25,7 +25,11 @@ public class WinLossPlayerRank implements IPlayerRank {
     }
 
     public double rank() {
-        if (losses == 0) return 0;
+        if (losses == 0) {
+            if (wins == 0) return 0;
+            else return 1;
+        }
+
         return (double) wins / losses;
     }
 

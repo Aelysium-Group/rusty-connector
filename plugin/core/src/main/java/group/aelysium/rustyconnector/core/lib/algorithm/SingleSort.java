@@ -11,7 +11,7 @@ public class SingleSort {
      * Thus reducing how frequently you'll have to perform a full sort.
      * @param index The index to sort.
      */
-    public static <I extends ISortable> void sort(List<I> array, int index) {
+    public static <I extends ISortable> void sortDesc(List<I> array, int index) {
         if (array.size() <= 1) return;
 
         I item = array.get(index);
@@ -19,6 +19,24 @@ public class SingleSort {
 
         for (I entry : array) {
             if(item.sortIndex() < entry.sortIndex()) continue;
+            array.add(array.indexOf(entry), item);
+            return;
+        }
+    }
+    /**
+     * Sorts a single index back into the entry set.
+     * Great for inserting items into the array and approximately sorting them into where they belong.
+     * Thus reducing how frequently you'll have to perform a full sort.
+     * @param index The index to sort.
+     */
+    public static <I extends ISortable> void sortAsc(List<I> array, int index) {
+        if (array.size() <= 1) return;
+
+        I item = array.get(index);
+        array.remove(item);
+
+        for (I entry : array) {
+            if(item.sortIndex() > entry.sortIndex()) continue;
             array.add(array.indexOf(entry), item);
             return;
         }
