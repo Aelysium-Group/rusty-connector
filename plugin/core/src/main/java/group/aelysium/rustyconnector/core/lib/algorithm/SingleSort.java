@@ -12,6 +12,8 @@ public class SingleSort {
      * @param index The index to sort.
      */
     public static <I extends ISortable> void sort(List<I> array, int index) {
+        if (array.size() <= 1) return;
+
         I item = array.get(index);
         array.remove(item);
 
