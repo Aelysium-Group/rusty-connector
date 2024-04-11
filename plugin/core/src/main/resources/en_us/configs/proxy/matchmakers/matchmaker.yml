@@ -72,7 +72,7 @@ ranking:
     # If there are not enough players to even make a single session,
     # variance will stay at the base value.
     #
-    variance-expansion-coefficient: 0.2
+    variance-expansion-coefficient: 0.1
 
 
 
