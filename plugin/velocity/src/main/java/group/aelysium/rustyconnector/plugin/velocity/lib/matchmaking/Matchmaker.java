@@ -116,7 +116,16 @@ public class Matchmaker implements IMatchmaker {
     }
 
     public boolean contains(IPlayer player) {
-        return this.sessionPlayers.containsKey(player.uuid());
+        Optional<IMatchPlayer<IPlayerRank>> matchPlayer = this.matchPlayer(player);
+        if(matchPlayer.isEmpty()) return false;
+        if(this.sessionPlayers.containsKey(player.uuid())) return true;
+        return this.queuedPlayers.contains(matchPlayer.get());
+    }
+
+    public boolean isQueued(IPlayer player) {
+        Optional<IMatchPlayer<IPlayerRank>> matchPlayer = this.matchPlayer(player);
+        if(matchPlayer.isEmpty()) return false;
+        return this.queuedPlayers.contains(matchPlayer.get());
     }
 
     public Optional<ISession> fetchPlayersSession(UUID playerUUID) {

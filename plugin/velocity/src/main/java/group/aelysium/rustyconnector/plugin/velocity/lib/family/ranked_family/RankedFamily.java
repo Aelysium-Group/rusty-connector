@@ -152,6 +152,11 @@ public class RankedFamily extends Family implements IRankedFamily {
             }).findAny();
             if(family.isPresent())
                 if(family.get() instanceof RankedFamily rankedFamily) {
+                    if(rankedFamily.matchmaker.isQueued(player)) {
+                        result.complete(ConnectionResult.failed(ProxyLang.RANKED_FAMILY_IN_MATCHMAKER_QUEUE_DENIAL.build()));
+                        return request;
+                    }
+
                     Optional<ISession> session = rankedFamily.matchmaker().fetchPlayersSession(player.uuid());
                     if(session.isPresent()) {
                         if(session.get().active())
