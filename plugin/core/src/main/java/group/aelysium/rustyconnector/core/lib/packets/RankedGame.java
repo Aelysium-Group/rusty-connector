@@ -56,10 +56,10 @@ public interface RankedGame {
             UUID uuid = UUID.fromString(object.get("uuid").getAsString());
 
             List<UUID> winners = new ArrayList<>();
-            object.getAsJsonArray("winners").forEach(entry -> winners.add(UUID.fromString(entry.getAsJsonObject().get("uuid").getAsString())));
+            object.getAsJsonArray("winners").forEach(entry -> winners.add(UUID.fromString(entry.getAsString())));
 
             List<UUID> losers = new ArrayList<>();
-            object.getAsJsonArray("losers").forEach(entry -> losers.add(UUID.fromString(entry.getAsJsonObject().get("uuid").getAsString())));
+            object.getAsJsonArray("losers").forEach(entry -> losers.add(UUID.fromString(entry.getAsString())));
 
             return new EndedSession(uuid, winners, losers);
         }
