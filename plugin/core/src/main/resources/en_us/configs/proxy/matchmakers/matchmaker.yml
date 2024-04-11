@@ -62,8 +62,8 @@ ranking:
 
 
     #
-    # Sometimes players will be too far apart for the matchmaker to make a session.
-    # Anytime there are enough players to be able to make a session,
+    # Sometimes players will be too far apart in rank for the matchmaker to make a session.
+    # Anytime there are enough players to be able to make a session
     # but no session is able to be made (because the variance range isn't large enough),
     # variance will be increased by this value until another session can be made.
     #

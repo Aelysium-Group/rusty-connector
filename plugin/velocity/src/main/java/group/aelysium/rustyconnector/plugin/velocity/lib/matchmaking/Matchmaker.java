@@ -148,15 +148,20 @@ public class Matchmaker implements IMatchmaker {
                     IMatchPlayer<IPlayerRank> current = this.queuedPlayers.get(i);
                     IMatchPlayer<IPlayerRank> thrown = this.queuedPlayers.get(i + this.minPlayersPerGame);
 
-                    if((current.rank() + varianceLookahead) < thrown.rank()) {
+                    double varianceMax = (current.rank() + varianceLookahead);
+
+                    if(varianceMax < thrown.rank()) {
                         i = i + this.minPlayersPerGame;
                         continue;
                     }
 
                     ISession session = new Session(this, this.sessionSettings);
                     try {
-                        for (int j = i; j < i + maxPlayersPerGame; j++)
-                            session.join(this.queuedPlayers.get(j));
+                        for (int j = i; j < i + maxPlayersPerGame; j++) {
+                            IMatchPlayer<IPlayerRank> nextInsert = this.queuedPlayers.get(j);
+                            if(varianceMax < nextInsert.rank()) throw new IndexOutOfBoundsException();
+                            session.join(nextInsert);
+                        }
                     } catch (IndexOutOfBoundsException ignore) {}
                     if(session.size() < session.settings().min()) throw new NoOutputException();
 
