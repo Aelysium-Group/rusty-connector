@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.core.lib.lang.LanguageResolver;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.WinLossPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.WinRatePlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
@@ -580,7 +581,7 @@ public class ProxyLang extends Lang {
         String algorithm = "RANDOMIZE";
         Matchmaker matchmaker = family.matchmaker();
         if(matchmaker.settings().ranking().schema().equals(WinLossPlayerRank.class)) algorithm = "WIN_LOSS";
-        if(matchmaker.settings().ranking().schema().equals(WinLossPlayerRank.class)) algorithm = "WIN_RATE";
+        if(matchmaker.settings().ranking().schema().equals(WinRatePlayerRank.class)) algorithm = "WIN_RATE";
 
         return join(
                 newlines(),
