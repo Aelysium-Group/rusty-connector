@@ -144,6 +144,8 @@ public class Matchmaker implements IMatchmaker {
             List<IMatchPlayer<IPlayerRank>> removePlayers = new ArrayList<>();
             List<ISession> builtSessions = new ArrayList<>();
             while(i < this.queuedPlayers.size()) {
+                // If a session fills up to max players, minPlayers won't be enough to jump the gap thus resulting in duplicate players in different sessions.
+                int nextHop = this.minPlayersPerGame;
                 try {
                     IMatchPlayer<IPlayerRank> current = this.queuedPlayers.get(i);
                     IMatchPlayer<IPlayerRank> thrown = this.queuedPlayers.get(i + this.minPlayersPerGame);
@@ -167,8 +169,9 @@ public class Matchmaker implements IMatchmaker {
 
                     builtSessions.add(session);
                     removePlayers.addAll(session.players().values());
+                    nextHop = session.size();
                 } catch (IndexOutOfBoundsException | NoOutputException ignore) {}
-                i = i + this.minPlayersPerGame;
+                i = i + nextHop;
             }
 
             if(builtSessions.size() == 0 && this.queuedPlayers.size() > this.minPlayersPerGame) this.failedBuilds.incrementAndGet();
