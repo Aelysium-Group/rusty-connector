@@ -31,14 +31,11 @@ public class Session implements ISession {
     protected final Map<UUID, IMatchPlayer<IPlayerRank>> players;
     protected IRankedMCLoader mcLoader;
     protected final Settings settings;
-    protected final RankRange rankRange;
     protected boolean frozen = false;
 
-    public Session(IMatchmaker matchmaker, IMatchPlayer<IPlayerRank> starter, Settings settings) {
+    public Session(IMatchmaker matchmaker, Settings settings) {
         this.matchmaker = matchmaker;
         this.players = new ConcurrentHashMap<>(settings.max());
-        this.players.put(starter.player().uuid(), starter);
-        this.rankRange = new RankRange(starter.rank(), settings.variance());
         this.settings = settings;
     }
 
@@ -57,10 +54,6 @@ public class Session implements ISession {
     public Optional<IRankedMCLoader> mcLoader() {
         if(!this.active()) return Optional.empty();
         return Optional.of(this.mcLoader);
-    }
-
-    public RankRange range() {
-        return this.rankRange;
     }
 
     public boolean active() {
@@ -100,11 +93,6 @@ public class Session implements ISession {
 
         if(this.players.containsKey(matchPlayer.player().uuid())) {
             result.complete(ConnectionResult.success(Component.text("You're already in this session!"), this.mcLoader));
-            return request;
-        }
-
-        if(!this.rankRange.validate(matchPlayer.rank())) {
-            result.complete(ConnectionResult.failed(Component.text("You're not the right rank to connect to this session!")));
             return request;
         }
 

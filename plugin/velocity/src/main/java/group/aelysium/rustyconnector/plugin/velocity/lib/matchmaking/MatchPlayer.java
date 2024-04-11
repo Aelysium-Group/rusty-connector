@@ -7,6 +7,8 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
+import java.util.Objects;
+
 public class MatchPlayer implements IMatchPlayer<IPlayerRank> {
     private final IPlayer player;
     private final IPlayerRank rank;
@@ -59,5 +61,18 @@ public class MatchPlayer implements IMatchPlayer<IPlayerRank> {
     @Override
     public int weight() {
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MatchPlayer that = (MatchPlayer) o;
+        return Objects.equals(player, that.player) && Objects.equals(gameId, that.gameId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(player, gameId);
     }
 }

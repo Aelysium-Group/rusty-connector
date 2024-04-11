@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking;
 
 import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.DefaultRankResolver;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
@@ -35,6 +37,7 @@ public class Matchmaker implements IMatchmaker {
     protected final ISession.Settings sessionSettings;
     protected final int minPlayersPerGame;
     protected final int maxPlayersPerGame;
+    protected final AtomicInteger failedBuilds = new AtomicInteger();
     protected BossBar waitingForPlayers = BossBar.bossBar(
             Component.text("Waiting for players...").color(GRAY),
             (float) 0.0,
@@ -47,10 +50,11 @@ public class Matchmaker implements IMatchmaker {
             BossBar.Color.WHITE,
             BossBar.Overlay.PROGRESS
     );
-    protected Map<UUID, ISession> sessions = new ConcurrentHashMap<>();
-    protected Set<UUID> queuedSessions = Collections.synchronizedSet(new HashSet<>());;
-    protected Set<UUID> activeSessions = Collections.synchronizedSet(new HashSet<>());;
-    protected Map<UUID, ISession> players = new ConcurrentHashMap<>();
+    protected Map<UUID, ISession> activeSessions = new ConcurrentHashMap<>();
+    protected Map<UUID, ISession> queuedSessions = new ConcurrentHashMap<>();
+    protected Map<UUID, ISession> sessionPlayers = new ConcurrentHashMap<>();
+    protected List<IMatchPlayer<IPlayerRank>> queuedPlayers = Collections.synchronizedList(new ArrayList<>());
+
 
     public Matchmaker(Settings settings, StorageService storage, String gameId) {
         this.storage = storage;
@@ -82,17 +86,16 @@ public class Matchmaker implements IMatchmaker {
         return rank.map(r -> new MatchPlayer(player, r, this.gameId));
     }
 
-    public void queue(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
+    public synchronized void queue(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         IPlayer player = request.player();
         try {
             IMatchPlayer<IPlayerRank> matchPlayer = this.resolveMatchPlayer(player);
 
-            if(this.players.containsKey(matchPlayer.player().uuid())) throw new RuntimeException("Player is already queued!");
+            if(this.sessionPlayers.containsKey(matchPlayer.player().uuid())) throw new RuntimeException("Player is already queued!");
 
-            ISession session = this.prepareSession(matchPlayer);
-            ConnectionResult sessionConnectResult = this.connectSession(session, matchPlayer);
-            if(!sessionConnectResult.connected()) throw new RuntimeException("Unable to connect to a session.");
-            this.queuedSessions.add(session.uuid());
+            int insertIndex = this.queuedPlayers.size();
+            this.queuedPlayers.add(insertIndex, matchPlayer);
+            SingleSort.sort(this.queuedPlayers, insertIndex);
         } catch (Exception e) {
             result.complete(ConnectionResult.failed(Component.text("There was an issue queuing into matchmaking!")));
             throw new RuntimeException(e);
@@ -101,29 +104,30 @@ public class Matchmaker implements IMatchmaker {
     }
 
     public void leave(IPlayer player) {
-        if(!this.players.containsKey(player.uuid())) return;
+        if(!this.sessionPlayers.containsKey(player.uuid())) return;
 
         try {
             hideBossBars(player.resolve().orElseThrow());
         } catch (Exception ignore) {}
 
-        ((Session) this.players.get(player.uuid())).leave(player);
+        ((Session) this.sessionPlayers.get(player.uuid())).leave(player);
 
-        this.players.remove(player.uuid());
+        this.sessionPlayers.remove(player.uuid());
     }
 
     public boolean contains(IPlayer player) {
-        return this.players.containsKey(player.uuid());
+        return this.sessionPlayers.containsKey(player.uuid());
     }
 
     public Optional<ISession> fetchPlayersSession(UUID playerUUID) {
-        ISession session = this.players.get(playerUUID);
+        ISession session = this.sessionPlayers.get(playerUUID);
         if(session == null) return Optional.empty();
         return Optional.of(session);
     }
 
     public Optional<ISession> fetch(UUID sessionUUID) {
-        ISession session = this.sessions.get(sessionUUID);
+        ISession session = this.activeSessions.get(sessionUUID);
+        if(session == null) session = this.queuedSessions.get(sessionUUID);
         if(session == null) return Optional.empty();
         return Optional.of(session);
     }
@@ -134,22 +138,52 @@ public class Matchmaker implements IMatchmaker {
     }
 
     public void start(ILoadBalancer<IMCLoader> loadBalancer) {
-        // Connect sessions to a server periodically
+        this.supervisor.scheduleRecurring(() -> {
+            int i = 0;
+            double varianceLookahead = (this.settings.ranking().variance() + (this.settings.ranking().varianceExpansionCoefficient() * this.failedBuilds.get())) * 2;
+            List<IMatchPlayer<IPlayerRank>> removePlayers = new ArrayList<>();
+            List<ISession> builtSessions = new ArrayList<>();
+            while(i < this.queuedPlayers.size()) {
+                try {
+                    IMatchPlayer<IPlayerRank> current = this.queuedPlayers.get(i);
+                    IMatchPlayer<IPlayerRank> thrown = this.queuedPlayers.get(i + this.minPlayersPerGame);
+
+                    if((current.rank() + varianceLookahead) < thrown.rank()) {
+                        i = i + this.minPlayersPerGame;
+                        continue;
+                    }
+
+                    ISession session = new Session(this, this.sessionSettings);
+                    try {
+                        for (int j = i; j < i + maxPlayersPerGame; j++)
+                            session.join(this.queuedPlayers.get(j));
+                    } catch (IndexOutOfBoundsException ignore) {}
+                    if(session.size() < session.settings().min()) throw new NoOutputException();
+
+                    builtSessions.add(session);
+                    removePlayers.addAll(session.players().values());
+                } catch (IndexOutOfBoundsException | NoOutputException ignore) {}
+                i = i + this.minPlayersPerGame;
+            }
+
+            if(builtSessions.size() == 0 && this.queuedPlayers.size() > this.minPlayersPerGame) this.failedBuilds.incrementAndGet();
+            if(builtSessions.size() > 0) this.failedBuilds.set(0);
+
+            this.queuedPlayers.removeAll(removePlayers);
+            builtSessions.forEach(s -> this.queuedSessions.put(s.uuid(), s));
+        }, LiquidTimestamp.from(10, TimeUnit.SECONDS));
+
         this.supervisor.scheduleRecurring(() -> {
             if(loadBalancer.size(false) == 0) return;
 
-            for (UUID uuid : this.queuedSessions.stream().toList()) {
+            for (ISession session : this.queuedSessions.values()) {
                 if(loadBalancer.size(false) == 0) return;
 
                 try {
-                    Optional<ISession> optionalSession = this.fetch(uuid);
-                    if(optionalSession.isEmpty()) { // If empty, the session no-longer exists and shouldn't be here.
-                        this.queuedSessions.remove(uuid);
+                    if (session.size() < session.settings().min()) {
+                        session.implode("There are not enough players to start a game!");
                         continue;
                     }
-                    ISession session = optionalSession.orElseThrow();
-
-                    if (session.size() < session.settings().min()) continue;
 
                     RankedMCLoader server = (RankedMCLoader) loadBalancer.current().orElseThrow(
                             () -> new RuntimeException("There are no servers to connect to!")
@@ -158,7 +192,7 @@ public class Matchmaker implements IMatchmaker {
                     session.start(server);
 
                     this.queuedSessions.remove(session.uuid());
-                    this.activeSessions.add(session.uuid());
+                    this.activeSessions.put(session.uuid(), session);
 
                     session.players().values().forEach(matchPlayer -> {
                         try {
@@ -176,11 +210,16 @@ public class Matchmaker implements IMatchmaker {
         if(!this.settings.queue().joining().showInfo()) return;
         this.queueIndicator.scheduleRecurring(() -> {
             // So that we don't lock the Vector while sending messages
-            for (UUID uuid : this.queuedSessions.stream().toList()) {
-                Optional<ISession> optionalSession = this.fetch(uuid);
-                if(optionalSession.isEmpty()) continue;
-                ISession session = optionalSession.get();
+            for(IMatchPlayer<IPlayerRank> matchPlayer : this.queuedPlayers.stream().toList()) {
+                Player velocityPlayer = matchPlayer.player().resolve().orElseThrow();
 
+                hideBossBars(velocityPlayer);
+                velocityPlayer.sendActionBar(Component.text("----< MATCHMAKING >----", NamedTextColor.YELLOW));
+
+                Bossbar.WAITING_FOR_PLAYERS(this.waitingForPlayers, 0, maxPlayersPerGame);
+                velocityPlayer.showBossBar(this.waitingForPlayers);
+            }
+            for (ISession session : this.queuedSessions.values())
                 for (IMatchPlayer<IPlayerRank> matchPlayer : session.players().values())
                     try {
                         Player velocityPlayer = matchPlayer.player().resolve().orElseThrow();
@@ -188,34 +227,23 @@ public class Matchmaker implements IMatchmaker {
                         hideBossBars(velocityPlayer);
                         velocityPlayer.sendActionBar(Component.text("----< MATCHMAKING >----", NamedTextColor.YELLOW));
 
-                        if(session.size() > session.settings().min()) {
-                            Bossbar.WAITING_FOR_SERVERS(this.waitingForServers, loadBalancer.size(true), loadBalancer.size(false));
-                            velocityPlayer.showBossBar(this.waitingForServers);
-                            continue;
-                        }
-
-                        Bossbar.WAITING_FOR_PLAYERS(this.waitingForPlayers, session.size(), maxPlayersPerGame);
-                        velocityPlayer.showBossBar(this.waitingForPlayers);
+                        Bossbar.WAITING_FOR_SERVERS(this.waitingForServers, loadBalancer.size(true), loadBalancer.size(false));
+                        velocityPlayer.showBossBar(this.waitingForServers);
                     } catch (Exception ignore) {}
-            }
-        }, LiquidTimestamp.from(4, TimeUnit.SECONDS));
+        }, LiquidTimestamp.from(5, TimeUnit.SECONDS));
     }
 
     public int playerCount() {
-        return this.players.size();
+        return this.sessionPlayers.size() + this.queuedPlayers.size();
     }
 
     public int queuedPlayerCount() {
         AtomicInteger count = new AtomicInteger();
 
-        for (UUID uuid : this.queuedSessions.stream().toList()) {
-            try {
-                ISession session = this.fetch(uuid).orElseThrow();
-                count.addAndGet(session.size());
-            } catch (Exception e) { // This exception should never throw. If it does, the uuid needs to be removed from the waiting sessions vector.
-                this.queuedSessions.remove(uuid);
-            }
-        }
+        for (ISession session : this.queuedSessions.values())
+            count.addAndGet(session.size());
+
+        count.addAndGet(this.queuedPlayers.size());
 
         return count.get();
     }
@@ -223,20 +251,14 @@ public class Matchmaker implements IMatchmaker {
     public int activePlayerCount() {
         AtomicInteger count = new AtomicInteger();
 
-        for (UUID uuid : this.activeSessions.stream().toList()) {
-            try {
-                ISession session = this.fetch(uuid).orElseThrow();
-                count.addAndGet(session.size());
-            } catch (Exception e) { // This exception should never throw. If it does, the uuid needs to be removed from the waiting sessions vector.
-                this.queuedSessions.remove(uuid);
-            }
-        }
+        for (ISession session : this.activeSessions.values())
+            count.addAndGet(session.size());
 
         return count.get();
     }
 
     public int sessionCount() {
-        return this.sessions.size();
+        return this.activeSessions.size() + this.queuedSessions.size();
     }
 
     public int queuedSessionCount() {
@@ -260,34 +282,13 @@ public class Matchmaker implements IMatchmaker {
      * Attempts to connect the player to the session.
      */
     protected ConnectionResult connectSession(ISession session, IMatchPlayer<IPlayerRank> matchPlayer) throws ExecutionException, InterruptedException, TimeoutException {
+        if(!session.matchmaker().equals(this)) throw new RuntimeException("Attempted to connect to a session governed by anotehr matchmaker!");
         ConnectionResult result = session.join(matchPlayer).result().get(5, TimeUnit.SECONDS);
 
-        if(result.connected()) {
-            this.players.put(matchPlayer.player().uuid(), session);
-            if(!this.sessions.containsKey(session.uuid())) this.sessions.put(session.uuid(), session);
-        }
+        if(result.connected())
+            this.sessionPlayers.put(matchPlayer.player().uuid(), session);
 
         return result;
-    }
-
-    /**
-     * Prepares a session for the passed player.
-     * This method does not save the session, nor does it connect the player to it.
-     * To connect a player to the session use {@link Matchmaker#connectSession(ISession, IMatchPlayer)}
-     */
-    protected ISession prepareSession(IMatchPlayer<IPlayerRank> matchPlayer) {
-        double rank = matchPlayer.rank();
-        ISession chosenSession = null;
-        for (ISession session : this.sessions.values()) {
-            if(!session.range().validate(rank)) continue;
-            if(session.full()) continue;
-            chosenSession = session;
-            break;
-        }
-
-        if(chosenSession == null) chosenSession = new Session(this, matchPlayer, sessionSettings);
-
-        return chosenSession;
     }
 
     /**
@@ -306,10 +307,9 @@ public class Matchmaker implements IMatchmaker {
     }
 
     public void leave(ISession session) {
-        session.players().keySet().forEach(k->this.players.remove(k));
+        session.players().keySet().forEach(k->this.sessionPlayers.remove(k));
         this.activeSessions.remove(session.uuid());
         this.queuedSessions.remove(session.uuid());
-        this.sessions.remove(session.uuid());
     }
 
     public void kill() {
@@ -319,10 +319,8 @@ public class Matchmaker implements IMatchmaker {
         this.queuedSessions.clear();
         this.activeSessions.clear();
 
-        this.sessions.values().forEach(session -> session.end(List.of(), List.of()));
-        this.sessions.clear();
-
-        this.players.clear();
+        this.queuedPlayers.clear();
+        this.sessionPlayers.clear();
     }
 
     protected interface Bossbar {

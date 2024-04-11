@@ -101,7 +101,7 @@ public interface IMatchmaker extends Service {
             Session session,
             Queue queue
     ) {
-        public record Ranking(Class<? extends IPlayerRank> schema, double variance) {}
+        public record Ranking(Class<? extends IPlayerRank> schema, double variance, double varianceExpansionCoefficient) {}
         public record Session(
                 boolean freezeActiveSessions,
                 int min,

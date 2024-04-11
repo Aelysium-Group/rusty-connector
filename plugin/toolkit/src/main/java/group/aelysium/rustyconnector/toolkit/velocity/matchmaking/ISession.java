@@ -35,8 +35,6 @@ public interface ISession extends JSONParseable {
 
     Optional<IRankedMCLoader> mcLoader();
 
-    RankRange range();
-
     int size();
 
     /**

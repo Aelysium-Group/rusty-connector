@@ -35,6 +35,7 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
     protected void register() throws IllegalStateException {
         String algorithm = IYAML.getValue(this.data,"ranking.algorithm",String.class);
         double variance = IYAML.getValue(this.data,"ranking.variance",Double.class);
+        double varianceExpansionCoefficient = IYAML.getValue(this.data,"ranking.variance-expansion-coefficient",Double.class);
 
         boolean freezeActiveSessions = IYAML.getValue(this.data,"session.freeze-active-sessions",Boolean.class);
         int min = IYAML.getValue(this.data,"session.min",Integer.class);
@@ -63,7 +64,7 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         };
 
         this.settings = new IMatchmaker.Settings(
-                new IMatchmaker.Settings.Ranking(actualSchema, variance),
+                new IMatchmaker.Settings.Ranking(actualSchema, variance, varianceExpansionCoefficient),
                 new IMatchmaker.Settings.Session(
                         freezeActiveSessions,
                         min,
