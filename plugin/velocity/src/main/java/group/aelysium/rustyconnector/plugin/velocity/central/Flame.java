@@ -427,8 +427,7 @@ class Initialize {
 
         DataTransitService dataTransitService = new DataTransitService(
                 dataTransitConfig.denylist_enabled(),
-                dataTransitConfig.whitelist_enabled(),
-                dataTransitConfig.maxPacketLength()
+                dataTransitConfig.whitelist_enabled()
         );
         services.put(DataTransitService.class, dataTransitService);
 

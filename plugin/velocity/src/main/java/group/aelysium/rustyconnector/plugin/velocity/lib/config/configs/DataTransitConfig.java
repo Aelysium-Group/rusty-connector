@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataTransitConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.DataTransitConfig {
-    private int maxPacketLength = 512;
-
     private int cache_size = 100;
     private final List<PacketIdentification> cache_ignoredTypes = new ArrayList<>();
     private final List<PacketStatus> cache_ignoredStatuses = new ArrayList<>();
@@ -31,9 +29,6 @@ public class DataTransitConfig extends YAML implements group.aelysium.rustyconne
     private boolean denylist_enabled = false;
     private List<String> denylist_addresses = new ArrayList<>();
 
-    public int maxPacketLength() {
-        return maxPacketLength;
-    }
 
     public int cache_size() {
         return cache_size;
@@ -75,12 +70,6 @@ public class DataTransitConfig extends YAML implements group.aelysium.rustyconne
     @SuppressWarnings("unchecked")
     protected void register() throws IllegalStateException, NoOutputException {
         PluginLogger logger = Tinder.get().logger();
-
-        this.maxPacketLength = IYAML.getValue(this.data,"max-packet-length",Integer.class);
-        if(this.maxPacketLength < 384) {
-            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "Max message length is to small to be effective! " + this.maxPacketLength + " < 384. Max message length set to 384.", NamedTextColor.YELLOW);
-            this.maxPacketLength = 384;
-        }
 
         this.cache_size = IYAML.getValue(this.data,"cache.size",Integer.class);
         if(this.cache_size > 500) {

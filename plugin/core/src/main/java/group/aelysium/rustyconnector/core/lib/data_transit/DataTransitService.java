@@ -12,14 +12,12 @@ import java.util.List;
 public class DataTransitService implements Service {
     private final boolean hasBlacklist;
     private final boolean hasWhitelist;
-    private final int maxLength;
     private final List<InetSocketAddress> blacklist = new ArrayList<>();
     private final List<InetSocketAddress> whitelist = new ArrayList<>();
 
-    public DataTransitService(boolean hasBlacklist, boolean hasWhitelist, int maxLength) {
+    public DataTransitService(boolean hasBlacklist, boolean hasWhitelist) {
         this.hasBlacklist = hasBlacklist;
         this.hasWhitelist = hasWhitelist;
-        this.maxLength = maxLength;
     }
 
     public void blacklistAddress(InetSocketAddress address) {
@@ -40,9 +38,6 @@ public class DataTransitService implements Service {
             throw new BlockedMessageException("The incoming message contained a protocol version greater than expected! " + message.messageVersion() + " > " + Packet.protocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
         if(message.messageVersion() < Packet.protocolVersion())
             throw new BlockedMessageException("The incoming message contained a protocol version that was less than expected! " + message.messageVersion() + " < " + Packet.protocolVersion() + ". Make sure you are using the same version of RustyConnector on your proxy and sub-servers!");
-
-        if(message.toString().length() > this.maxLength)
-            throw new BlockedMessageException("The message is to long!");
 
         if(hasBlacklist)
             if(this.blacklist.contains(message.sender()))
