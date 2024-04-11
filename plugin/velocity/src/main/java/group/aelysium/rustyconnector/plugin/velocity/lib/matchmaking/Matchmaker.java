@@ -153,8 +153,6 @@ public class Matchmaker implements IMatchmaker {
             List<IMatchPlayer<IPlayerRank>> removePlayers = new ArrayList<>();
             List<ISession> builtSessions = new ArrayList<>();
             while(i < this.queuedPlayers.size()) {
-                // If a session fills up to max players, minPlayers won't be enough to jump the gap thus resulting in duplicate players in different sessions.
-                int nextHop = this.minPlayersPerGame;
                 IMatchPlayer<IPlayerRank> current = null;
                 IMatchPlayer<IPlayerRank> thrown = null;
                 try {
@@ -163,34 +161,37 @@ public class Matchmaker implements IMatchmaker {
                 } catch (IndexOutOfBoundsException | NoOutputException ignore) {}
 
                 if(current == null || thrown == null) {
-                    i = i + nextHop;
+                    i = i + this.minPlayersPerGame;
                     continue;
                 }
 
                 double varianceMax = (current.rank() + varianceLookahead);
 
                 if(thrown.rank() > varianceMax) {
-                    i = i + nextHop;
+                    i = i + this.minPlayersPerGame;
                     continue;
                 }
 
                 ISession session = new Session(this, this.sessionSettings);
                 for (int j = i; j < i + maxPlayersPerGame; j++) {
-                    IMatchPlayer<IPlayerRank> nextInsert = this.queuedPlayers.get(j);
+                    IMatchPlayer<IPlayerRank> nextInsert = null;
+                    try {
+                        nextInsert = this.queuedPlayers.get(j);
+                    } catch (IndexOutOfBoundsException ignore) {}
+                    if(nextInsert == null) break;
                     if(nextInsert.rank() > varianceMax) break;
                     session.join(nextInsert);
                 }
 
                 if(session.size() < session.settings().min()) {
-                    i = i + nextHop;
+                    session.empty();
+                    i = i + this.minPlayersPerGame;
                     continue;
                 }
 
                 builtSessions.add(session);
                 removePlayers.addAll(session.players().values());
-                nextHop = session.size();
-
-                i = i + nextHop;
+                i = i + session.size();
             }
 
             if(builtSessions.isEmpty() && this.queuedPlayers.size() > this.minPlayersPerGame) this.failedBuilds.incrementAndGet();

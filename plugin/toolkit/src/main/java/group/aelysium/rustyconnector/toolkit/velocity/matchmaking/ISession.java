@@ -80,34 +80,10 @@ public interface ISession extends JSONParseable {
      */
     void start(IRankedMCLoader mcLoader) throws AlreadyBoundException;
 
-    class RankRange {
-        private final double pivot;
-        private final double min;
-        private final double max;
-
-        public RankRange(double pivot, double variance) {
-            this.pivot = pivot;
-
-            this.max = pivot + variance;
-            this.min = pivot - variance;
-        }
-
-        public double pivot() {
-            return this.pivot;
-        }
-
-        public double min() {
-            return this.min;
-        }
-
-        public double max() {
-            return this.max;
-        }
-
-        public boolean validate(double rank) {
-            return rank > min && rank < max;
-        }
-    }
+    /**
+     * Empties all players out of this session.
+     */
+    void empty();
 
     record Settings(boolean shouldFreeze, int min, int max, double variance, String gameId, boolean quittersLose, boolean stayersWin) {}
 }

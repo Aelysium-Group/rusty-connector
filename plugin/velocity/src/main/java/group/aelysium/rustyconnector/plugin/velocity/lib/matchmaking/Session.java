@@ -79,6 +79,11 @@ public class Session implements ISession {
     public boolean contains(IMatchPlayer<IPlayerRank> matchPlayer) {
         return this.players.containsKey(matchPlayer.player().uuid());
     }
+
+    public void empty() {
+        this.players.clear();
+    }
+
     public void start(IRankedMCLoader mcLoader) throws AlreadyBoundException {
         if(mcLoader.currentSession().isPresent()) throw new AlreadyBoundException("There's already a Session running on this MCLoader!");
         ((RankedMCLoader) mcLoader).connect(this);
