@@ -37,7 +37,7 @@ public class Matchmaker implements IMatchmaker {
     protected final ISession.Settings sessionSettings;
     protected final int minPlayersPerGame;
     protected final int maxPlayersPerGame;
-    protected final AtomicInteger failedBuilds = new AtomicInteger();
+    protected final AtomicInteger failedBuilds = new AtomicInteger(0);
     protected BossBar waitingForPlayers = BossBar.bossBar(
             Component.text("Waiting for players...").color(GRAY),
             (float) 0.0,
@@ -155,31 +155,41 @@ public class Matchmaker implements IMatchmaker {
             while(i < this.queuedPlayers.size()) {
                 // If a session fills up to max players, minPlayers won't be enough to jump the gap thus resulting in duplicate players in different sessions.
                 int nextHop = this.minPlayersPerGame;
+                IMatchPlayer<IPlayerRank> current = null;
+                IMatchPlayer<IPlayerRank> thrown = null;
                 try {
-                    IMatchPlayer<IPlayerRank> current = this.queuedPlayers.get(i);
-                    IMatchPlayer<IPlayerRank> thrown = this.queuedPlayers.get(i + this.minPlayersPerGame);
-
-                    double varianceMax = (current.rank() + varianceLookahead);
-
-                    if(varianceMax < thrown.rank()) {
-                        i = i + this.minPlayersPerGame;
-                        continue;
-                    }
-
-                    ISession session = new Session(this, this.sessionSettings);
-                    try {
-                        for (int j = i; j < i + maxPlayersPerGame; j++) {
-                            IMatchPlayer<IPlayerRank> nextInsert = this.queuedPlayers.get(j);
-                            if(varianceMax < nextInsert.rank()) throw new IndexOutOfBoundsException();
-                            session.join(nextInsert);
-                        }
-                    } catch (IndexOutOfBoundsException ignore) {}
-                    if(session.size() < session.settings().min()) throw new NoOutputException();
-
-                    builtSessions.add(session);
-                    removePlayers.addAll(session.players().values());
-                    nextHop = session.size();
+                    current = this.queuedPlayers.get(i);
+                    thrown = this.queuedPlayers.get(i + this.minPlayersPerGame);
                 } catch (IndexOutOfBoundsException | NoOutputException ignore) {}
+
+                if(current == null || thrown == null) {
+                    i = i + nextHop;
+                    continue;
+                }
+
+                double varianceMax = (current.rank() + varianceLookahead);
+
+                if(thrown.rank() > varianceMax) {
+                    i = i + nextHop;
+                    continue;
+                }
+
+                ISession session = new Session(this, this.sessionSettings);
+                for (int j = i; j < i + maxPlayersPerGame; j++) {
+                    IMatchPlayer<IPlayerRank> nextInsert = this.queuedPlayers.get(j);
+                    if(nextInsert.rank() > varianceMax) break;
+                    session.join(nextInsert);
+                }
+
+                if(session.size() < session.settings().min()) {
+                    i = i + nextHop;
+                    continue;
+                }
+
+                builtSessions.add(session);
+                removePlayers.addAll(session.players().values());
+                nextHop = session.size();
+
                 i = i + nextHop;
             }
 
