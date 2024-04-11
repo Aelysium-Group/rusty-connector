@@ -25,7 +25,10 @@ public class WinLossPlayerRank implements IPlayerRank {
     }
 
     public double rank() {
-        return (double) wins / losses;
+        try {
+            return (double) wins / losses;
+        } catch (ArithmeticException ignore) {}
+        return 0;
     }
 
     public String schemaName() {

@@ -26,9 +26,11 @@ public class WinRatePlayerRank implements IPlayerRank {
     }
 
     public double rank() {
-        int games = wins + losses;
-
-        return (double) wins / games;
+        try {
+            int games = wins + losses;
+            return (double) wins / games;
+        } catch (ArithmeticException ignore) {}
+        return 0;
     }
 
     public String schemaName() {
