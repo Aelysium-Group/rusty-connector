@@ -24,7 +24,8 @@ public class DefaultRankResolver implements IRankResolver {
             case "WIN_RATE" -> {
                 int wins = object.get("wins").getAsInt();
                 int losses = object.get("losses").getAsInt();
-                yield new WinRatePlayerRank(wins, losses);
+                int ties = object.get("ties").getAsInt();
+                yield new WinRatePlayerRank(wins, losses, ties);
             }
             default -> throw new IllegalStateException("The passed rank object uses schema "+schema+" which doesn't match a supported schema!");
         };

@@ -12,7 +12,7 @@ import java.util.*;
 
 public interface RankedGame {
     record Session(UUID uuid, Map<UUID, MCLoaderMatchPlayer> players) {}
-    record EndedSession(UUID uuid, List<UUID> winners, List<UUID> losers) {}
+    record EndedSession(UUID uuid, List<UUID> winners, List<UUID> losers, boolean tied) {}
 
     class Ready extends Packet.Wrapper {
         public Session session() {
@@ -60,7 +60,7 @@ public interface RankedGame {
             List<UUID> losers = new ArrayList<>();
             object.getAsJsonArray("losers").forEach(entry -> losers.add(UUID.fromString(entry.getAsString())));
 
-            return new EndedSession(uuid, winners, losers);
+            return new EndedSession(uuid, winners, losers, false);
         }
 
         public End(Packet packet) {
@@ -69,6 +69,22 @@ public interface RankedGame {
 
         public interface Parameters {
             String SESSION = "s";
+        }
+    }
+
+    class EndTied extends Packet.Wrapper {
+        public EndedSession session() {
+            UUID uuid = UUID.fromString(this.parameter(Parameters.SESSION_UUID).getAsString());
+
+            return new EndedSession(uuid, List.of(), List.of(), true);
+        }
+
+        public EndTied(Packet packet) {
+            super(packet);
+        }
+
+        public interface Parameters {
+            String SESSION_UUID = "s";
         }
     }
 

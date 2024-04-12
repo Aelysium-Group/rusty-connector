@@ -20,7 +20,7 @@ public interface IMatchmaker extends Service {
      * Gets the matched player for this matchmaker.
      * If no rank exists for this player, it returns an Empty
      */
-    Optional<IMatchPlayer<IPlayerRank>> matchPlayer(IPlayer player);
+    Optional<IMatchPlayer> matchPlayer(IPlayer player);
 
     /**
      * Inserts a player into the matchmaker.

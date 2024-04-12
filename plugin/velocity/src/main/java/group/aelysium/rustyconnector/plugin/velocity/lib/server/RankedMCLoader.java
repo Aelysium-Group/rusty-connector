@@ -31,7 +31,7 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
     public void connect(ISession session) {
         this.lock();
 
-        for (IMatchPlayer<IPlayerRank> matchPlayer : session.players().values())
+        for (IMatchPlayer matchPlayer : session.players().values())
             try {
                 ConnectionResult result = this.connect(matchPlayer.player()).result().get(5, TimeUnit.SECONDS);
 

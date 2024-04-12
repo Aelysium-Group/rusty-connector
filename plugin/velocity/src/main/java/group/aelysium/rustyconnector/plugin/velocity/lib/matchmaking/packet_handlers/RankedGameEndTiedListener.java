@@ -2,36 +2,34 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_han
 
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.RankedGame;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
-import java.util.List;
-
-public class RankedGameEndListener extends PacketListener<RankedGame.End> {
+public class RankedGameEndTiedListener extends PacketListener<RankedGame.EndTied> {
     protected Tinder api;
 
-    public RankedGameEndListener(Tinder api) {
+    public RankedGameEndTiedListener(Tinder api) {
         this.api = api;
     }
 
     @Override
     public PacketIdentification target() {
-        return BuiltInIdentifications.RANKED_GAME_END;
+        return BuiltInIdentifications.RANKED_GAME_END_TIE;
     }
 
     @Override
-    public RankedGame.End wrap(Packet packet) {
-        return new RankedGame.End(packet);
+    public RankedGame.EndTied wrap(Packet packet) {
+        return new RankedGame.EndTied(packet);
     }
 
     @Override
-    public void execute(RankedGame.End packet) {
+    public void execute(RankedGame.EndTied packet) {
         RankedMCLoader mcloader = new IRankedMCLoader.Reference(packet.sender().uuid()).get();
 
         ISession session = mcloader.currentSession().orElseGet(() -> {
@@ -41,6 +39,6 @@ public class RankedGameEndListener extends PacketListener<RankedGame.End> {
             );
         });
 
-        session.end(packet.session().winners(), packet.session().losers());
+        session.endTied();
     }
 }

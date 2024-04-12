@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class Session implements ISession {
     protected final IMatchmaker matchmaker;
     protected final UUID uuid = UUID.randomUUID();;
-    protected final Map<UUID, IMatchPlayer<IPlayerRank>> players;
+    protected final Map<UUID, IMatchPlayer> players;
     protected IRankedMCLoader mcLoader;
     protected final Settings settings;
     protected boolean frozen = false;
@@ -72,11 +72,11 @@ public class Session implements ISession {
         return this.frozen;
     }
 
-    public Map<UUID, IMatchPlayer<IPlayerRank>> players() {
+    public Map<UUID, IMatchPlayer> players() {
         return players;
     }
 
-    public boolean contains(IMatchPlayer<IPlayerRank> matchPlayer) {
+    public boolean contains(IMatchPlayer matchPlayer) {
         return this.players.containsKey(matchPlayer.player().uuid());
     }
 
@@ -92,7 +92,7 @@ public class Session implements ISession {
         if(this.settings.shouldFreeze()) this.frozen = true;
     }
 
-    public PlayerConnectable.Request join(IMatchPlayer<IPlayerRank> matchPlayer) {
+    public PlayerConnectable.Request join(IMatchPlayer matchPlayer) {
         CompletableFuture<ConnectionResult> result = new CompletableFuture<>();
         PlayerConnectable.Request request = new PlayerConnectable.Request(matchPlayer.player(), result);
 
@@ -134,7 +134,7 @@ public class Session implements ISession {
         this.players.remove(player.uuid());
 
         if(settings.quittersLose()) {
-            Optional<IMatchPlayer<IPlayerRank>> matchPlayer = this.matchmaker.matchPlayer(player);
+            Optional<IMatchPlayer> matchPlayer = this.matchmaker.matchPlayer(player);
             matchPlayer.ifPresent(IMatchPlayer::markLoss);
         }
 
@@ -167,10 +167,31 @@ public class Session implements ISession {
     public void end(List<UUID> winners, List<UUID> losers) {
         this.matchmaker.leave(this);
 
-        for (IMatchPlayer<IPlayerRank> matchPlayer : this.players.values()) {
+        for (IMatchPlayer matchPlayer : this.players.values()) {
             try {
                 if(winners.contains(matchPlayer.player().uuid())) matchPlayer.markWin();
                 if(losers.contains(matchPlayer.player().uuid())) matchPlayer.markLoss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if(this.active())
+                try {
+                    this.mcLoader.family().parent().connect(matchPlayer.player());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+        }
+
+        if(this.active()) ((RankedMCLoader) this.mcLoader).rawUnlock();
+    }
+
+    public void endTied() {
+        this.matchmaker.leave(this);
+
+        for (IMatchPlayer matchPlayer : this.players.values()) {
+            try {
+                matchPlayer.markTie();
             } catch (Exception e) {
                 e.printStackTrace();
             }

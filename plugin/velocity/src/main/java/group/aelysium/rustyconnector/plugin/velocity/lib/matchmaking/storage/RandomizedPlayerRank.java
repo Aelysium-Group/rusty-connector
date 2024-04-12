@@ -23,6 +23,9 @@ public class RandomizedPlayerRank implements IPlayerRank {
     public void markLoss() {}
 
     @Override
+    public void markTie() {}
+
+    @Override
     public JsonObject toJSON() {
         JsonObject object = new JsonObject();
         object.add("schema", new JsonPrimitive(this.schemaName()));
