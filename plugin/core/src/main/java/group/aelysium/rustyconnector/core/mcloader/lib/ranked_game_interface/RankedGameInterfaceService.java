@@ -60,12 +60,30 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
 
         MCLoaderTinder tinder = TinderAdapterForCore.getTinder();
 
-        tinder.services().events().fireEvent(new RankedGameEndEvent(uuid, winners, losers));
+        tinder.services().events().fireEvent(new RankedGameEndEvent(uuid, winners, losers, false));
 
         Packet packet = tinder.services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_END)
                 .sendingToProxy()
                 .parameter(RankedGame.End.Parameters.SESSION, new PacketParameter(object))
+                .build();
+        tinder.services().magicLink().connection().orElseThrow().publish(packet);
+
+        this.uuid = null;
+        this.players = null;
+    }
+
+    public void endInTie() {
+        if(this.uuid == null) return;
+
+        MCLoaderTinder tinder = TinderAdapterForCore.getTinder();
+
+        tinder.services().events().fireEvent(new RankedGameEndEvent(uuid, List.of(), List.of(), true));
+
+        Packet packet = tinder.services().packetBuilder().newBuilder()
+                .identification(BuiltInIdentifications.RANKED_GAME_END_TIE)
+                .sendingToProxy()
+                .parameter(RankedGame.EndTied.Parameters.SESSION_UUID, new PacketParameter(uuid.toString()))
                 .build();
         tinder.services().magicLink().connection().orElseThrow().publish(packet);
 

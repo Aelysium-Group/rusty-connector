@@ -23,4 +23,12 @@ public interface IRankedGameInterfaceService extends Service {
      * @param losers A list of players that are losers. These players will have a loss added to their scorecard.
      */
     void end(List<UUID> winners, List<UUID> losers);
+
+    /**
+     * Ends the session in a tie.
+     * If there is no active session, nothing will happen.
+     * All players in the session will receive a tie. If the game's ranking algorithm supports ties, this may impact their rank.
+     * If you want to end a game with a guarantee to not impact a player's rank, you can use {@link IRankedGameInterfaceService#end(List, List)} with an empty list for each parameter.
+     */
+    void endInTie();
 }

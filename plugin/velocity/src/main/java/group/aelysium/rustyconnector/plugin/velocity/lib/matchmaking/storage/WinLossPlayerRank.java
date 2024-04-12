@@ -24,6 +24,8 @@ public class WinLossPlayerRank implements IPlayerRank {
         this.losses = this.losses + 1;
     }
 
+    public void markTie() {}
+
     public double rank() {
         if (losses == 0) return 0;
         return (double) wins / losses;

@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 import java.util.Objects;
 
-public class MatchPlayer implements IMatchPlayer<IPlayerRank> {
+public class MatchPlayer implements IMatchPlayer {
     private final IPlayer player;
     private final IPlayerRank rank;
     private final String gameId;
@@ -24,6 +24,12 @@ public class MatchPlayer implements IMatchPlayer<IPlayerRank> {
         this.rank.markWin();
         Tinder.get().services().storage().database().ranks().set(this);
     }
+
+    public void markTie() {
+        this.rank.markTie();
+        Tinder.get().services().storage().database().ranks().set(this);
+    }
+
     public void markLoss() {
         this.rank.markLoss();
         Tinder.get().services().storage().database().ranks().set(this);
@@ -55,7 +61,7 @@ public class MatchPlayer implements IMatchPlayer<IPlayerRank> {
 
     @Override
     public double sortIndex() {
-        return rank.rank();
+        return this.rank.rank();
     }
 
     @Override

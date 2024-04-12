@@ -10,6 +10,7 @@ public interface IPlayerRank extends JSONParseable {
 
     void markWin();
     void markLoss();
+    void markTie();
 
     /**
      * Returns the string name of the ranking schema.

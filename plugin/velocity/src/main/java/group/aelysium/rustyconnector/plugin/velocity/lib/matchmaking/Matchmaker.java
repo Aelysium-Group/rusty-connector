@@ -53,7 +53,7 @@ public class Matchmaker implements IMatchmaker {
     protected Map<UUID, ISession> activeSessions = new ConcurrentHashMap<>();
     protected Map<UUID, ISession> queuedSessions = new ConcurrentHashMap<>();
     protected Map<UUID, ISession> sessionPlayers = new ConcurrentHashMap<>();
-    protected List<IMatchPlayer<IPlayerRank>> queuedPlayers = Collections.synchronizedList(new ArrayList<>());
+    protected List<IMatchPlayer> queuedPlayers = Collections.synchronizedList(new ArrayList<>());
 
 
     public Matchmaker(Settings settings, StorageService storage, String gameId) {
@@ -81,7 +81,7 @@ public class Matchmaker implements IMatchmaker {
         return this.gameId;
     }
 
-    public Optional<IMatchPlayer<IPlayerRank>> matchPlayer(IPlayer player) {
+    public Optional<IMatchPlayer> matchPlayer(IPlayer player) {
         Optional<IPlayerRank> rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New());
         return rank.map(r -> new MatchPlayer(player, r, this.gameId));
     }
@@ -89,7 +89,7 @@ public class Matchmaker implements IMatchmaker {
     public synchronized void queue(PlayerConnectable.Request request, CompletableFuture<ConnectionResult> result) {
         IPlayer player = request.player();
         try {
-            IMatchPlayer<IPlayerRank> matchPlayer = this.resolveMatchPlayer(player);
+            IMatchPlayer matchPlayer = this.resolveMatchPlayer(player);
 
             if(this.sessionPlayers.containsKey(matchPlayer.player().uuid())) throw new RuntimeException("Player is already queued!");
 
@@ -116,14 +116,14 @@ public class Matchmaker implements IMatchmaker {
     }
 
     public boolean contains(IPlayer player) {
-        Optional<IMatchPlayer<IPlayerRank>> matchPlayer = this.matchPlayer(player);
+        Optional<IMatchPlayer> matchPlayer = this.matchPlayer(player);
         if(matchPlayer.isEmpty()) return false;
         if(this.sessionPlayers.containsKey(player.uuid())) return true;
         return this.queuedPlayers.contains(matchPlayer.get());
     }
 
     public boolean isQueued(IPlayer player) {
-        Optional<IMatchPlayer<IPlayerRank>> matchPlayer = this.matchPlayer(player);
+        Optional<IMatchPlayer> matchPlayer = this.matchPlayer(player);
         if(matchPlayer.isEmpty()) return false;
         return this.queuedPlayers.contains(matchPlayer.get());
     }
@@ -150,11 +150,11 @@ public class Matchmaker implements IMatchmaker {
         this.supervisor.scheduleRecurring(() -> {
             int i = 0;
             double varianceLookahead = (this.settings.ranking().variance() + (this.settings.ranking().varianceExpansionCoefficient() * this.failedBuilds.get())) * 2;
-            List<IMatchPlayer<IPlayerRank>> removePlayers = new ArrayList<>();
+            List<IMatchPlayer> removePlayers = new ArrayList<>();
             List<ISession> builtSessions = new ArrayList<>();
             while(i < this.queuedPlayers.size()) {
-                IMatchPlayer<IPlayerRank> current = null;
-                IMatchPlayer<IPlayerRank> thrown = null;
+                IMatchPlayer current = null;
+                IMatchPlayer thrown = null;
                 try {
                     current = this.queuedPlayers.get(i);
                     thrown = this.queuedPlayers.get(i + this.minPlayersPerGame);
@@ -174,7 +174,7 @@ public class Matchmaker implements IMatchmaker {
 
                 ISession session = new Session(this, this.sessionSettings);
                 for (int j = i; j < i + maxPlayersPerGame; j++) {
-                    IMatchPlayer<IPlayerRank> nextInsert = null;
+                    IMatchPlayer nextInsert = null;
                     try {
                         nextInsert = this.queuedPlayers.get(j);
                     } catch (IndexOutOfBoundsException ignore) {}
@@ -238,7 +238,7 @@ public class Matchmaker implements IMatchmaker {
         if(!this.settings.queue().joining().showInfo()) return;
         this.queueIndicator.scheduleRecurring(() -> {
             // So that we don't lock the Vector while sending messages
-            for(IMatchPlayer<IPlayerRank> matchPlayer : this.queuedPlayers.stream().toList()) {
+            for(IMatchPlayer matchPlayer : this.queuedPlayers.stream().toList()) {
                 Player velocityPlayer = matchPlayer.player().resolve().orElseThrow();
 
                 hideBossBars(velocityPlayer);
@@ -248,7 +248,7 @@ public class Matchmaker implements IMatchmaker {
                 velocityPlayer.showBossBar(this.waitingForPlayers);
             }
             for (ISession session : this.queuedSessions.values())
-                for (IMatchPlayer<IPlayerRank> matchPlayer : session.players().values())
+                for (IMatchPlayer matchPlayer : session.players().values())
                     try {
                         Player velocityPlayer = matchPlayer.player().resolve().orElseThrow();
 
@@ -309,7 +309,7 @@ public class Matchmaker implements IMatchmaker {
     /**
      * Attempts to connect the player to the session.
      */
-    protected ConnectionResult connectSession(ISession session, IMatchPlayer<IPlayerRank> matchPlayer) throws ExecutionException, InterruptedException, TimeoutException {
+    protected ConnectionResult connectSession(ISession session, IMatchPlayer matchPlayer) throws ExecutionException, InterruptedException, TimeoutException {
         if(!session.matchmaker().equals(this)) throw new RuntimeException("Attempted to connect to a session governed by anotehr matchmaker!");
         ConnectionResult result = session.join(matchPlayer).result().get(5, TimeUnit.SECONDS);
 
@@ -322,7 +322,7 @@ public class Matchmaker implements IMatchmaker {
     /**
      * Resolves a player rank for the player.
      */
-    protected IMatchPlayer<IPlayerRank> resolveMatchPlayer(IPlayer player) {
+    protected IMatchPlayer resolveMatchPlayer(IPlayer player) {
         IPlayerRank rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New()).orElseGet(()->{
             IPlayerRank newRank = this.newPlayerRank();
 

@@ -60,8 +60,15 @@ public interface BuiltInIdentifications {
 
     /**
      * `MCLoader > Proxy` | Tells the proxy to end a game.
+     *                    | Games ended with this packet will result in some player winning, and some losing.
      */
     PacketIdentification RANKED_GAME_END = PacketIdentification.from("RC","ERG");
+
+    /**
+     * `MCLoader > Proxy` | Tells the proxy to end a game.
+     *                    | Games ended with this packet will result in all players receiving a "tie".
+     */
+    PacketIdentification RANKED_GAME_END_TIE = PacketIdentification.from("RC","ERGT");
 
     /**
      * `Proxy > MCLoader` | Informs the MCLoader that the game has imploded and was forced to end.

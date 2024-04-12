@@ -22,13 +22,20 @@ public interface ISession extends JSONParseable {
     IMatchmaker matchmaker();
 
     /**
-     * Ends this session.
+     * Ends this session with a set of winners and losers.
      */
     void end(List<UUID> winners, List<UUID> losers);
 
     /**
+     * Ends this session in a tie.
+     * All players will receive a "tie" if the ranking algorithm supports ties
+     * this might affect their rank.
+     */
+    void endTied();
+
+    /**
      * Implodes the session.
-     * This method is similar to {@link #end(List, List)} except that it will inform players that their session had to be ended,
+     * This method is similar to {@link #end(List, List, List)} except that it will inform players that their session had to be ended,
      * and not players will be rewarded points.
      */
     void implode(String reason);
@@ -57,19 +64,19 @@ public interface ISession extends JSONParseable {
     /**
      * Checks if the running session contains the player.
      */
-    boolean contains(IMatchPlayer<IPlayerRank> player);
+    boolean contains(IMatchPlayer player);
 
     /**
      * Gets the players that are currently in this session.
      */
-    Map<UUID, IMatchPlayer<IPlayerRank>> players();
+    Map<UUID, IMatchPlayer> players();
 
     /**
      * Adds the player to the session.
      * If the session is currently active the player will also attempt to connect to it.
      * @param player The player to join.
      */
-    PlayerConnectable.Request join(IMatchPlayer<IPlayerRank> player);
+    PlayerConnectable.Request join(IMatchPlayer player);
 
     /**
      * Starts the session on the specified MCLoader.

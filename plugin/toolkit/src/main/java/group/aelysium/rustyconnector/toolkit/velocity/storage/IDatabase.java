@@ -142,7 +142,7 @@ public interface IDatabase {
          * Stores a players rank for a specific gamemode.
          * @param player The MatchPlayer to store.
          */
-        void set(IMatchPlayer<IPlayerRank> player);
+        void set(IMatchPlayer player);
 
         /**
          * Gets a player's rank from a specific game.

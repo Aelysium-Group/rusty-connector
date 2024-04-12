@@ -12,11 +12,13 @@ public class RankedGameEndEvent implements Event {
     private final UUID uuid;
     private final List<UUID> losers;
     private final List<UUID> winners;
+    private final boolean tied;
 
-    public RankedGameEndEvent(UUID uuid, List<UUID> winners, List<UUID> losers) {
+    public RankedGameEndEvent(UUID uuid, List<UUID> winners, List<UUID> losers, boolean tied) {
         this.uuid = uuid;
         this.losers = losers;
         this.winners = winners;
+        this.tied = tied;
     }
 
     public UUID gameUUID() {
@@ -27,5 +29,8 @@ public class RankedGameEndEvent implements Event {
     }
     public List<UUID> winners() {
         return winners;
+    }
+    public boolean tied() {
+        return tied;
     }
 }
