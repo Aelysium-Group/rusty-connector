@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IDatabase;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.Optional;
@@ -11,10 +12,14 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface IMatchmaker extends Service {
+    Settings settings();
+
     /**
      * Gets the game id used by this matchmaker to handle player ranks.
      */
     String gameId();
+
+    IDatabase.PlayerRanks storage();
 
     /**
      * Gets the matched player for this matchmaker.

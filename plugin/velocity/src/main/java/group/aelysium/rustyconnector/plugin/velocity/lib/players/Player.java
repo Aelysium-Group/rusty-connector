@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.DefaultRankResolver;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.DefaultRankResolver;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.MCLoader;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;

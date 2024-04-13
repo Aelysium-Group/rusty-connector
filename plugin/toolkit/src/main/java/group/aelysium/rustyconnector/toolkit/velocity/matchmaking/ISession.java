@@ -35,7 +35,7 @@ public interface ISession extends JSONParseable {
 
     /**
      * Implodes the session.
-     * This method is similar to {@link #end(List, List, List)} except that it will inform players that their session had to be ended,
+     * This method is similar to {@link ISession#end(List, List)} except that it will inform players that their session had to be ended,
      * and not players will be rewarded points.
      */
     void implode(String reason);

@@ -51,7 +51,6 @@ public class MySQLReactor extends StorageReactor {
             "CREATE TABLE IF NOT EXISTS player_ranks (" +
                     "    player_uuid VARCHAR(36) NOT NULL," +
                     "    game_id VARCHAR(16) NOT NULL," +
-                    "    schema VARCHAR(16) NOT NULL," +
                     "    rank VARCHAR(256) NOT NULL," +
                     "    FOREIGN KEY (player_uuid) REFERENCES players(uuid) ON DELETE CASCADE," +
                     "    CONSTRAINT uc_Mappings UNIQUE (player_uuid, game_id)" +
@@ -323,13 +322,12 @@ public class MySQLReactor extends StorageReactor {
     }
 
     @Override
-    public void saveRank(UUID player, String gameId, String schema, JsonObject rank) {
+    public void saveRank(UUID player, String gameId, JsonObject rank) {
         try {
-            PreparedStatement statement = this.core.prepare("REPLACE INTO player_ranks (player_uuid, game_id, schema, rank) VALUES(?, ?, ?, ?);");
+            PreparedStatement statement = this.core.prepare("REPLACE INTO player_ranks (player_uuid, game_id, rank) VALUES(?, ?, ?);");
             statement.setString(1, player.toString());
             statement.setString(2, gameId);
-            statement.setString(3, schema);
-            statement.setString(4, rank.toString());
+            statement.setString(3, rank.toString());
         this.core.execute(statement);
         } catch (Exception e) {
             e.printStackTrace();
@@ -347,12 +345,11 @@ public class MySQLReactor extends StorageReactor {
             boolean hasRows = result.next();
             if(!hasRows) return Optional.empty();
 
-            String schema = result.getString("schema");
             Gson gson = new Gson();
             JsonObject rank = gson.fromJson(result.getString("rank"), JsonObject.class);
             System.out.println(rank);
 
-            return Optional.of(resolver.resolve(schema, rank));
+            return Optional.of(resolver.resolve(rank));
         } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();

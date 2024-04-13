@@ -82,8 +82,8 @@ public class ConfigService implements IProxyConfigService {
     }
 
     @Override
-    public Optional<MatchMakerConfig> matchmaker(String name) {
-        return get(new ConfigKey(MatchMakerConfig.class, name));
+    public Optional<MatchmakerConfig> matchmaker(String name) {
+        return get(new ConfigKey(MatchmakerConfig.class, name));
     }
 
     @Override

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage;
+package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank;
 
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
@@ -9,12 +9,10 @@ public class DefaultRankResolver implements IRankResolver {
     protected DefaultRankResolver() {}
 
     @Override
-    public IPlayerRank resolve(String schemaName, JsonObject object) throws IllegalStateException {
+    public IPlayerRank resolve(JsonObject object) throws IllegalStateException {
         String schema = object.get("schema").getAsString();
 
-        if(!schema.equals(schemaName)) throw new IllegalStateException("The passed rank object uses schema "+schema+", when it was expected to use "+schemaName);
-
-        return switch (schemaName) {
+        return switch (schema) {
             case "RANDOMIZE" -> RandomizedPlayerRank.New();
             case "WIN_LOSS" -> {
                 int wins = object.get("wins").getAsInt();
@@ -26,6 +24,10 @@ public class DefaultRankResolver implements IRankResolver {
                 int losses = object.get("losses").getAsInt();
                 int ties = object.get("ties").getAsInt();
                 yield new WinRatePlayerRank(wins, losses, ties);
+            }
+            case "ELO" -> {
+                double elo = object.get("elo").getAsDouble();
+                yield new ELOPlayerRank(elo);
             }
             default -> throw new IllegalStateException("The passed rank object uses schema "+schema+" which doesn't match a supported schema!");
         };

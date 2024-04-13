@@ -5,14 +5,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ISortable;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 public interface IMatchPlayer extends ISortable {
-    void markWin();
-    void markLoss();
-    void markTie();
-    JsonObject rankToJSON();
-    String rankSchemaName();
-    boolean isRandomizedPlayerRank();
-
     IPlayer player();
-    double rank();
+    IPlayerRank gameRank();
     String gameId();
 }

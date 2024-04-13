@@ -3,9 +3,10 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RandomizedPlayerRank;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.WinLossPlayerRank;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.WinRatePlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.ELOPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.RandomizedPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.WinLossPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.WinRatePlayerRank;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
@@ -16,20 +17,20 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.MatchMakerConfig {
+public class MatchmakerConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.MatchMakerConfig {
     private IMatchmaker.Settings settings;
 
     public IMatchmaker.Settings settings() {
         return this.settings;
     }
 
-    protected MatchMakerConfig(Path dataFolder, String target, String name, LangService lang) {
+    protected MatchmakerConfig(Path dataFolder, String target, String name, LangService lang) {
         super(dataFolder, target, name, lang, LangFileMappings.PROXY_MATCHMAKER_TEMPLATE);
     }
 
     @Override
     public IConfigService.ConfigKey key() {
-        return new IConfigService.ConfigKey(MatchMakerConfig.class, name());
+        return new IConfigService.ConfigKey(MatchmakerConfig.class, name());
     }
 
     protected void register() throws IllegalStateException {
@@ -60,6 +61,7 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         Class<? extends IPlayerRank> actualSchema = switch (algorithm) {
             case "WIN_LOSS" -> WinLossPlayerRank.class;
             case "WIN_RATE" -> WinRatePlayerRank.class;
+            case "ELO" -> ELOPlayerRank.class;
             default -> RandomizedPlayerRank.class;
         };
 
@@ -81,8 +83,8 @@ public class MatchMakerConfig extends YAML implements group.aelysium.rustyconnec
         );
     }
 
-    public static MatchMakerConfig construct(Path dataFolder, String matchmakerName, LangService lang, ConfigService configService) {
-        MatchMakerConfig config = new MatchMakerConfig(dataFolder, "matchmakers/"+matchmakerName+".yml", matchmakerName, lang);
+    public static MatchmakerConfig construct(Path dataFolder, String matchmakerName, LangService lang, ConfigService configService) {
+        MatchmakerConfig config = new MatchmakerConfig(dataFolder, "matchmakers/"+matchmakerName+".yml", matchmakerName, lang);
         config.register();
         configService.put(config);
         return config;

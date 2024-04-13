@@ -3,9 +3,10 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking;
 import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.core.lib.algorithm.SingleSort;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.DefaultRankResolver;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RandomizedPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.DefaultRankResolver;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.RankedMCLoader;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.Database;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.ClockService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
@@ -76,6 +77,9 @@ public class Matchmaker implements IMatchmaker {
 
     public Settings settings() {
         return this.settings;
+    }
+    public Database.PlayerRanks storage() {
+        return this.storage.database().ranks();
     }
     public String gameId() {
         return this.gameId;
@@ -165,9 +169,9 @@ public class Matchmaker implements IMatchmaker {
                     continue;
                 }
 
-                double varianceMax = (current.rank() + varianceLookahead);
+                double varianceMax = (current.gameRank().rank() + varianceLookahead);
 
-                if(thrown.rank() > varianceMax) {
+                if(thrown.gameRank().rank() > varianceMax) {
                     i = i + this.minPlayersPerGame;
                     continue;
                 }
@@ -179,7 +183,7 @@ public class Matchmaker implements IMatchmaker {
                         nextInsert = this.queuedPlayers.get(j);
                     } catch (IndexOutOfBoundsException ignore) {}
                     if(nextInsert == null) break;
-                    if(nextInsert.rank() > varianceMax) break;
+                    if(nextInsert.gameRank().rank() > varianceMax) break;
                     session.join(nextInsert);
                 }
 

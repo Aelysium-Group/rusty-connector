@@ -35,7 +35,7 @@ public abstract class StorageReactor implements Service {
     public abstract void deleteGame(String gameId);
     public abstract void deleteRank(UUID player);
     public abstract void deleteRank(UUID player, String gameId);
-    public abstract void saveRank(UUID player, String gameId, String schema, JsonObject rank);
+    public abstract void saveRank(UUID player, String gameId, JsonObject rank);
     public abstract Optional<IPlayerRank> fetchRank(UUID player, String gameId, IRankResolver resolver);
 
     public static abstract class Holder {

@@ -135,7 +135,7 @@ public class Session implements ISession {
 
         if(settings.quittersLose()) {
             Optional<IMatchPlayer> matchPlayer = this.matchmaker.matchPlayer(player);
-            matchPlayer.ifPresent(IMatchPlayer::markLoss);
+            matchPlayer.ifPresent(mp -> mp.gameRank().computor().compute(List.of(), List.of(mp), matchmaker, this));
         }
 
         if(this.players.size() >= this.settings.min()) return;
@@ -167,10 +167,16 @@ public class Session implements ISession {
     public void end(List<UUID> winners, List<UUID> losers) {
         this.matchmaker.leave(this);
 
+        IPlayerRank.IComputor computer = null;
+        List<IMatchPlayer> playerWinners = new ArrayList<>();
+        List<IMatchPlayer> playerLosers = new ArrayList<>();
+
         for (IMatchPlayer matchPlayer : this.players.values()) {
+            if(computer == null) computer = matchPlayer.gameRank().computor();
+
             try {
-                if(winners.contains(matchPlayer.player().uuid())) matchPlayer.markWin();
-                if(losers.contains(matchPlayer.player().uuid())) matchPlayer.markLoss();
+                if(winners.contains(matchPlayer.player().uuid())) playerWinners.add(matchPlayer);
+                if(losers.contains(matchPlayer.player().uuid()))  playerLosers.add(matchPlayer);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -184,17 +190,23 @@ public class Session implements ISession {
         }
 
         if(this.active()) ((RankedMCLoader) this.mcLoader).rawUnlock();
+
+        // Run storing logic last so that if something happens the other logic ran first.
+        try {
+            if(computer == null) throw new RuntimeException("Unable to store player ranks for the session: "+this.uuid+"! No computer exists!");
+
+            computer.compute(playerWinners, playerLosers, this.matchmaker, this);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void endTied() {
         this.matchmaker.leave(this);
 
+        IPlayerRank.IComputor computer = null;
         for (IMatchPlayer matchPlayer : this.players.values()) {
-            try {
-                matchPlayer.markTie();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            if(computer == null) computer = matchPlayer.gameRank().computor();
 
             if(this.active())
                 try {
@@ -205,6 +217,15 @@ public class Session implements ISession {
         }
 
         if(this.active()) ((RankedMCLoader) this.mcLoader).rawUnlock();
+
+        // Run storing logic last so that if something happens the other logic ran first.
+        try {
+            if(computer == null) throw new RuntimeException("Unable to store player ranks for the session: "+this.uuid+"! No computer exists!");
+
+            computer.computeTie(this.players.values().stream().toList(), this.matchmaker, this);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -218,8 +239,8 @@ public class Session implements ISession {
 
             playerObject.add("uuid", new JsonPrimitive(matchPlayer.player().uuid().toString()));
             playerObject.add("username", new JsonPrimitive(matchPlayer.player().username()));
-            playerObject.add("schema", new JsonPrimitive(matchPlayer.rankSchemaName()));
-            playerObject.add("rank", matchPlayer.rankToJSON());
+            playerObject.add("schema", new JsonPrimitive(matchPlayer.gameRank().schemaName()));
+            playerObject.add("rank", matchPlayer.gameRank().toJSON());
 
             array.add(playerObject);
         });

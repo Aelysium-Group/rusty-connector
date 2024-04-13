@@ -43,6 +43,10 @@ ranking:
     #           many games they've won versus lost.            #
     #           Win-rate ranking ignores the number of games   #
     #           ranked players have played.                    #
+    #  ⚫ ELO -                                                #
+    #           Ranks players based on a multiplayer alternate #
+    #           implementation of the zero-sum ELO ranking     #
+    #           algorithm.                                     #
     #               ---------------------------                #
     #                                                          #
     #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#

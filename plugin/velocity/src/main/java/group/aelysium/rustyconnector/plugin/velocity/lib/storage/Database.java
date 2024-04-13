@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.storage.RandomizedPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.RandomizedPlayerRank;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.reactors.StorageReactor;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
@@ -137,10 +137,10 @@ public class Database extends StorageReactor.Holder implements IDatabase, Servic
 
         public void set(IMatchPlayer player) {
             // Storing randomized player ranks is a literal waste of space.
-            if(player.isRandomizedPlayerRank()) return;
-            if(player.rankSchemaName().equals(RandomizedPlayerRank.New().schemaName())) return;
+            if(player.gameRank() instanceof RandomizedPlayerRank) return;
+            if(player.gameRank().schemaName().equals(RandomizedPlayerRank.New().schemaName())) return;
 
-            this.reactor.saveRank(player.player().uuid(), player.gameId(), player.rankSchemaName(), player.rankToJSON());
+            this.reactor.saveRank(player.player().uuid(), player.gameId(), player.gameRank().toJSON());
         }
 
         public Optional<IPlayerRank> get(IPlayer player, String gameId, IRankResolver resolver) {

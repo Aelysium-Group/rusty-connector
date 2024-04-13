@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.RankedFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchMakerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchmakerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
@@ -18,7 +18,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
-import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
@@ -96,7 +95,7 @@ public class RankedFamily extends Family implements IRankedFamily {
 
         RankedFamilyConfig config = RankedFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d5());
 
-        MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
+        MatchmakerConfig matchMakerConfig = MatchmakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
 
         Matchmaker matchmaker = new Matchmaker(matchMakerConfig.settings(), storage, config.gameId());
 
