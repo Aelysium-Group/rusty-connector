@@ -10,6 +10,9 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import java.util.List;
 
 public class RandomizedPlayerRank implements IPlayerRank {
+    public static String schema() {
+        return "RANDOMIZED";
+    }
     private static final RandomizedPlayerRank singleton = new RandomizedPlayerRank();
 
     protected RandomizedPlayerRank() {}
@@ -18,7 +21,7 @@ public class RandomizedPlayerRank implements IPlayerRank {
     public double rank() { return 1.0; }
 
     public String schemaName() {
-        return "RANDOMIZED";
+        return schema();
     }
 
     public IComputor computor() {

@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.Database;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
@@ -12,6 +11,10 @@ import group.aelysium.rustyconnector.toolkit.velocity.storage.IDatabase;
 import java.util.List;
 
 public class WinLossPlayerRank implements IPlayerRank {
+    public static String schema() {
+        return "WIN_LOSS";
+    }
+
     protected int wins;
     protected int losses;
 
@@ -41,7 +44,7 @@ public class WinLossPlayerRank implements IPlayerRank {
     }
 
     public String schemaName() {
-        return "WIN_LOSS";
+        return schema();
     }
 
     public IComputor computor() {

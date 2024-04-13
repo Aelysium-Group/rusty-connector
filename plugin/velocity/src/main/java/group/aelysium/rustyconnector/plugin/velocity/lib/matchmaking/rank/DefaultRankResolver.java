@@ -29,6 +29,11 @@ public class DefaultRankResolver implements IRankResolver {
                 double elo = object.get("elo").getAsDouble();
                 yield new ELOPlayerRank(elo);
             }
+            case "OPEN_SKILL" -> {
+                double mu = object.get("mu").getAsDouble();
+                double sigma = object.get("sigma").getAsDouble();
+                yield new OpenSkillPlayerRank(mu, sigma);
+            }
             default -> throw new IllegalStateException("The passed rank object uses schema "+schema+" which doesn't match a supported schema!");
         };
     }

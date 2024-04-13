@@ -3,10 +3,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.config.configs;
 import group.aelysium.rustyconnector.core.lib.config.YAML;
 import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.ELOPlayerRank;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.RandomizedPlayerRank;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.WinLossPlayerRank;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.WinRatePlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.*;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
@@ -58,12 +55,11 @@ public class MatchmakerConfig extends YAML implements group.aelysium.rustyconnec
         boolean session_leaving_command = IYAML.getValue(this.data, "queue.leaving.command", Boolean.class);
         boolean session_leaving_boot = IYAML.getValue(this.data, "queue.leaving.boot", Boolean.class);
 
-        Class<? extends IPlayerRank> actualSchema = switch (algorithm) {
-            case "WIN_LOSS" -> WinLossPlayerRank.class;
-            case "WIN_RATE" -> WinRatePlayerRank.class;
-            case "ELO" -> ELOPlayerRank.class;
-            default -> RandomizedPlayerRank.class;
-        };
+        Class<? extends IPlayerRank> actualSchema = RandomizedPlayerRank.class;
+        if(algorithm.equals(WinLossPlayerRank.schema()))    actualSchema = WinLossPlayerRank.class;
+        if(algorithm.equals(WinRatePlayerRank.schema()))    actualSchema = WinRatePlayerRank.class;
+        if(algorithm.equals(ELOPlayerRank.schema()))        actualSchema = ELOPlayerRank.class;
+        if(algorithm.equals(OpenSkillPlayerRank.schema()))  actualSchema = OpenSkillPlayerRank.class;
 
         this.settings = new IMatchmaker.Settings(
                 new IMatchmaker.Settings.Ranking(actualSchema, variance, varianceExpansionCoefficient),

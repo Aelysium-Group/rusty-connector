@@ -73,6 +73,8 @@ public class Matchmaker implements IMatchmaker {
 
         this.minPlayersPerGame = settings.session().min();
         this.maxPlayersPerGame = settings.session().max();
+
+        this.storage().purgeSchemas(this);
     }
 
     public Settings settings() {

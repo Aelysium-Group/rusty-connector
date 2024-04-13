@@ -10,6 +10,9 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import java.util.List;
 
 public class ELOPlayerRank implements IPlayerRank {
+    public static String schema() {
+        return "ELO";
+    }
     private double elo = 1200;
 
     public ELOPlayerRank() {}
@@ -27,7 +30,7 @@ public class ELOPlayerRank implements IPlayerRank {
     }
 
     public String schemaName() {
-        return "ELO";
+        return schema();
     }
 
     public IComputor computor() {

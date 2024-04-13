@@ -12,6 +12,10 @@ import group.aelysium.rustyconnector.toolkit.velocity.storage.IDatabase;
 import java.util.List;
 
 public class WinRatePlayerRank implements IPlayerRank {
+    public static String schema() {
+        return "WIN_RATE";
+    }
+
     protected int wins;
     protected int losses;
     protected int ties;
@@ -44,7 +48,7 @@ public class WinRatePlayerRank implements IPlayerRank {
     }
 
     public String schemaName() {
-        return "WIN_RATE";
+        return schema();
     }
 
     public IComputor computor() {

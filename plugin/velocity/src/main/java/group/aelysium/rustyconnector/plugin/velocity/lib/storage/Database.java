@@ -1,12 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.storage;
 
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.RandomizedPlayerRank;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.*;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.reactors.StorageReactor;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IRankResolver;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
@@ -145,6 +146,16 @@ public class Database extends StorageReactor.Holder implements IDatabase, Servic
 
         public Optional<IPlayerRank> get(IPlayer player, String gameId, IRankResolver resolver) {
             return this.reactor.fetchRank(player.uuid(), gameId, resolver);
+        }
+
+        public void purgeSchemas(IMatchmaker matchmaker) {
+            String schema = null;
+            if(matchmaker.settings().ranking().schema().equals(WinLossPlayerRank.class))    schema = WinLossPlayerRank.schema();
+            if(matchmaker.settings().ranking().schema().equals(WinRatePlayerRank.class))    schema = WinRatePlayerRank.schema();
+            if(matchmaker.settings().ranking().schema().equals(ELOPlayerRank.class))        schema = ELOPlayerRank.schema();
+            if(matchmaker.settings().ranking().schema().equals(OpenSkillPlayerRank.class))  schema = OpenSkillPlayerRank.schema();
+            if(schema == null) return;
+            this.reactor.purgeInvalidSchemas(matchmaker.gameId(), schema);
         }
     }
 }

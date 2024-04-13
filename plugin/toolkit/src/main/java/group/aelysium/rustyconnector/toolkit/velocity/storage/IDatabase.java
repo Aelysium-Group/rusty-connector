@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServ
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IRankResolver;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
@@ -151,5 +152,11 @@ public interface IDatabase {
          * @return The players rank. Or Empty if there is no rank, or there was an issue getting it.
          */
         Optional<IPlayerRank> get(IPlayer player, String gameId, IRankResolver resolver);
+
+        /**
+         * Checks the schema of the matchmaker and deletes any and all ranks for this game that don't match the schema.
+         * @param matchmaker The matchmaker to purge invalid schemas from.
+         */
+        void purgeSchemas(IMatchmaker matchmaker);
     }
 }

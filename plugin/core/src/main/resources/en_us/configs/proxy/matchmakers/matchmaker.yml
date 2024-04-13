@@ -26,11 +26,7 @@ ranking:
     # | Algorithm controls not only how a player is ranked     #
     # | but also how ranked matches are created.               #
     #                                                          #
-    # | If you change algorithm, player skills, will reset.    #
-    # | If you switch from WIN_LOSS to RANDOM, the player      #
-    # | skills will reset, however if you switch back to       #
-    # | WIN_LOSS, the player's ranks will reload to what they  #
-    # | were before you switched away from WIN_LOSS.           #
+    # | If you change the algorithm, player ranks will reset.  #
     #                                                          #
     # | Your options are:                                      #
     #  ⚫ RANDOMIZED -                                         #
@@ -47,6 +43,11 @@ ranking:
     #           Ranks players based on a multiplayer alternate #
     #           implementation of the zero-sum ELO ranking     #
     #           algorithm.                                     #
+    #  ⚫ SIMPLE_OPEN_SKILL -                                  #
+    #           Ranks players based on a simplified Java       #
+    #           implementation of the OpenSkill ranking        #
+    #           algorithm.                                     #
+    #                                                          #
     #               ---------------------------                #
     #                                                          #
     #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
