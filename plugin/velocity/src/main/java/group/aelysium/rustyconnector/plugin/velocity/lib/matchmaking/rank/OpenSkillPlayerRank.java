@@ -73,6 +73,7 @@ public class OpenSkillPlayerRank implements IPlayerRank {
                 if (player.gameRank() instanceof OpenSkillPlayerRank) {
                     OpenSkillPlayerRank rank = (OpenSkillPlayerRank) player.gameRank();
                     rank.setRank(rank.mu + 1, Math.max(rank.sigma - 1, 1)); // Example adjustment
+                    matchmaker.storage().set(player);
                 }
             });
         }

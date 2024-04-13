@@ -65,8 +65,8 @@ public class ELOPlayerRank implements IPlayerRank {
             double expectedWinners = expected(averageWinnersRank, averageLosersRank);
             double expectedLosers = expected(averageLosersRank, averageWinnersRank);
 
-            winners.forEach(winner -> adjustRank(winner, 1, expectedWinners));
-            losers.forEach(loser -> adjustRank(loser, 0, expectedLosers));
+            winners.forEach(winner -> adjustRank(matchmaker, winner, 1, expectedWinners));
+            losers.forEach(loser -> adjustRank(matchmaker, loser, 0, expectedLosers));
         }
 
         @Override
@@ -75,14 +75,15 @@ public class ELOPlayerRank implements IPlayerRank {
 
             players.forEach(player -> {
                 double expected = expected(averageRank, averageRank);
-                adjustRank(player, 0.5, expected);
+                adjustRank(matchmaker, player, 0.5, expected);
             });
         }
 
-        private void adjustRank(IMatchPlayer player, double outcome, double expected) {
+        private void adjustRank(IMatchmaker matchmaker,IMatchPlayer player, double outcome, double expected) {
             double oldRank = player.gameRank().rank();
             double newRank = oldRank + K_FACTOR * (outcome - expected);
             ((ELOPlayerRank) player.gameRank()).setRank(newRank);
+            matchmaker.storage().set(player);
         }
 
         private double expected(double ratingA, double ratingB) {
