@@ -108,19 +108,18 @@ public class OnPlayerChooseInitialServer {
             // Handle family injectors if they exist
             try {
                 InjectorService injectors = api.services().dynamicTeleport().orElseThrow().services().injector().orElseThrow();
-                try {
-                    IFamily family = api.services().family().rootFamily();
-                    if(family == null) throw new RuntimeException("Unable to fetch a server to connect to.");
 
-                    String host = event.getPlayer().getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
+                IFamily family = api.services().family().rootFamily();
+                if(family == null) throw new RuntimeException("Unable to fetch a server to connect to.");
 
-                    family = injectors.familyOf(host).orElseThrow();
-                    IMCLoader server = family.smartFetch().orElseThrow();
+                String host = event.getPlayer().getVirtualHost().map(InetSocketAddress::getHostString).orElse("").toLowerCase(Locale.ROOT);
 
-                    EventDispatch.UnSafe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
-                    event.setInitialServer(server.registeredServer());
-                    return;
-                } catch (NoOutputException ignore) {}
+                family = injectors.familyOf(host).orElseThrow();
+                IMCLoader server = family.smartFetch().orElseThrow();
+
+                EventDispatch.UnSafe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
+                event.setInitialServer(server.registeredServer());
+                return;
             } catch (Exception ignore) {}
 
             IRootFamily family = api.services().family().rootFamily();
