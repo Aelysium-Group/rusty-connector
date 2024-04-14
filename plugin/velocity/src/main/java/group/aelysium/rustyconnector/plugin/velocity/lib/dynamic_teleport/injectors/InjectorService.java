@@ -19,14 +19,9 @@ public class InjectorService implements IInjectorService {
     }
 
     public Optional<IFamily> familyOf(String anchor) {
-        try {
-            IFamily family = this.injectors.get(anchor);
-            if(family == null) return Optional.empty();
-
-            return Optional.of(family);
-        } catch (Exception ignore) {}
-
-        return Optional.empty();
+        IFamily family = this.injectors.get(anchor);
+        if(family == null) return Optional.empty();
+        return Optional.of(family);
     }
 
     public void create(String name, IFamily target) {
@@ -58,7 +53,7 @@ public class InjectorService implements IInjectorService {
             for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
                 IFamily family;
                 try {
-                    family = familyService.find(entry.getValue()).orElseThrow();
+                    family = familyService.find(entry.getKey()).orElseThrow();
                 } catch (Exception ignore) {
                     bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
                     continue;
