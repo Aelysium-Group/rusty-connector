@@ -104,7 +104,6 @@ public class OnPlayerChooseInitialServer {
 
     private static void connect(PlayerChooseInitialServerEvent event, IPlayer player) {
         Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
         try {
             // Handle family injectors if they exist
             try {
@@ -121,10 +120,7 @@ public class OnPlayerChooseInitialServer {
                     EventDispatch.UnSafe.fireAndForget(new FamilyPostJoinEvent(family, server, player));
                     event.setInitialServer(server.registeredServer());
                     return;
-                } catch (NoOutputException ignore) {
-                } catch (Exception e) {
-                    logger.send(Component.text("Error while using Family Injectors! Players will attempt to connect to the root family because of this! "+e.getMessage(), NamedTextColor.RED));
-                }
+                } catch (NoOutputException ignore) {}
             } catch (Exception ignore) {}
 
             IRootFamily family = api.services().family().rootFamily();

@@ -33,9 +33,9 @@ public class InjectorService implements IInjectorService {
     }
 
     public List<String> injectorsFor(IFamily target) {
-        List<String> anchors = new ArrayList<>();
-        this.injectors.entrySet().stream().filter(anchor -> anchor.getValue().equals(target)).forEach(item -> anchors.add(item.getKey()));
-        return anchors;
+        List<String> injectors = new ArrayList<>();
+        this.injectors.entrySet().stream().filter(injector -> injector.getValue().equals(target)).forEach(item -> injectors.add(item.getKey()));
+        return injectors;
     }
 
     public void kill() {
@@ -49,7 +49,7 @@ public class InjectorService implements IInjectorService {
         try {
             if(!config.isFamilyInjector_enabled()) return Optional.empty();
 
-            Map<String, IFamily> anchors = new HashMap<>();
+            Map<String, IFamily> injectors = new HashMap<>();
             for(Map.Entry<String, String> entry : config.getFamilyInjector_injectors()) {
                 IFamily family;
                 try {
@@ -59,10 +59,10 @@ public class InjectorService implements IInjectorService {
                     continue;
                 }
 
-                anchors.put(entry.getKey(), family);
+                injectors.put(entry.getKey(), family);
             }
 
-            return Optional.of(new InjectorService(anchors));
+            return Optional.of(new InjectorService(injectors));
         } catch (Exception e) {
             bootOutput.add(Component.text("Issue initializing Family Injectors! "+ e.getMessage(), NamedTextColor.RED));
         }
