@@ -13,10 +13,10 @@ public class ELOPlayerRank implements IPlayerRank {
     public static String schema() {
         return "ELO";
     }
-    private double elo = 1200;
+    private int elo = 1200;
 
     public ELOPlayerRank() {}
-    public ELOPlayerRank(double elo) {
+    public ELOPlayerRank(int elo) {
         this.elo = elo;
     }
 
@@ -25,7 +25,7 @@ public class ELOPlayerRank implements IPlayerRank {
         return elo;
     }
 
-    public void setRank(double elo) {
+    public void setRank(int elo) {
         this.elo = elo;
     }
 
@@ -82,7 +82,7 @@ public class ELOPlayerRank implements IPlayerRank {
         private void adjustRank(IMatchmaker matchmaker,IMatchPlayer player, double outcome, double expected) {
             double oldRank = player.gameRank().rank();
             double newRank = oldRank + K_FACTOR * (outcome - expected);
-            ((ELOPlayerRank) player.gameRank()).setRank(newRank);
+            ((ELOPlayerRank) player.gameRank()).setRank((int) newRank);
             matchmaker.storage().set(player);
         }
 

@@ -43,10 +43,6 @@ ranking:
     #           Ranks players based on a multiplayer alternate #
     #           implementation of the zero-sum ELO ranking     #
     #           algorithm.                                     #
-    #  ⚫ SIMPLE_OPEN_SKILL -                                  #
-    #           Ranks players based on a simplified Java       #
-    #           implementation of the OpenSkill ranking        #
-    #           algorithm.                                     #
     #                                                          #
     #               ---------------------------                #
     #                                                          #

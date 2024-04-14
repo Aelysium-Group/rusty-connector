@@ -26,7 +26,7 @@ public class DefaultRankResolver implements IRankResolver {
             return new WinRatePlayerRank(wins, losses, ties);
         }
         if(schema.equals(ELOPlayerRank.schema())) {
-            double elo = object.get("elo").getAsDouble();
+            int elo = object.get("elo").getAsInt();
             return new ELOPlayerRank(elo);
         }
         if(schema.equals(OpenSkillPlayerRank.schema())) {
