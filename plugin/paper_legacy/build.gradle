@@ -9,10 +9,13 @@ dependencies {
     implementation project(path: ':core', configuration: 'shadow')
     compileOnly "org.spigotmc:spigot-api:${project.spigot_version}"
     implementation "cloud.commandframework:cloud-paper:${project.cloud_paperfabric_version}"
+    implementation 'org.yaml:snakeyaml:2.2'
 }
 
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
 shadowJar {
+    relocate 'org.yaml.snakeyaml', 'group.aelysium.snakeyaml'
+
     archiveBaseName.set('paper_legacy')
     archiveClassifier.set('')
     archiveVersion.set('')
