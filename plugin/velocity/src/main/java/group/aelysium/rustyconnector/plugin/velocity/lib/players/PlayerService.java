@@ -1,54 +1,40 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
+import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.Database;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerService implements IPlayerService {
+    private final Map<UUID, Boolean> recentPlayers;
     private final StorageService storage;
 
     public PlayerService(StorageService storage) {
         this.storage = storage;
+        this.recentPlayers = new LinkedHashMap<>(100){
+            @Override
+            protected boolean removeEldestEntry(Map.Entry eldest) {
+                return this.size() > 100;
+            }
+        };
+    }
+
+    public void store(IPlayer player) {
+        if(this.recentPlayers.containsKey(player.uuid())) return;
+        this.storage.database().players().set(player);
+        this.recentPlayers.put(player.uuid(), false);
     }
 
     public Optional<IPlayer> fetch(UUID uuid) {
-        try {
-            Database root = this.storage.database();
-
-            IPlayer player = root.players().get(uuid);
-
-            if(player == null) return Optional.empty();
-
-            return Optional.of(player);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Optional.empty();
+        return this.storage.database().players().get(uuid);
     }
 
     public Optional<IPlayer> fetch(String username) {
-        try {
-            Optional<com.velocitypowered.api.proxy.Player> velocityPlayer = Tinder.get().velocityServer().getPlayer(username);
-            Database root = this.storage.database();
-
-            if(velocityPlayer.isEmpty())
-                return root.players().values().stream().filter(fakePlayer -> fakePlayer.username().equals(username)).findAny();
-
-            IPlayer player = root.players().get(velocityPlayer.orElseThrow().getUniqueId());
-            if(player == null) return Optional.empty();
-
-            return Optional.of(player);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Optional.empty();
+        return this.storage.database().players().get(username);
     }
 
     @Override

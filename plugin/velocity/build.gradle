@@ -6,14 +6,10 @@ dependencies {
     // Include in jar
     implementation "club.minnced:discord-webhooks:${project.discord_version}"
 
-    implementation "org.eclipse.store:storage-restservice-sparkjava:${project.eclipsestore_version}"
-    implementation "org.eclipse.store:storage-embedded:${project.eclipsestore_version}"
-    implementation "org.eclipse.store:afs-sql:${project.eclipsestore_sql_version}"
-    implementation "org.mariadb.jdbc:mariadb-java-client:${project.mariadb_version}"
-
-    implementation "io.fabric8:kubernetes-client:${project.kubernetes_version}"
-
     implementation 'org.bstats:bstats-velocity:3.0.2'
+    implementation "org.xerial:sqlite-jdbc:${project.sqlite_version}"
+    implementation "mysql:mysql-connector-java:${project.mysql_version}"
+    implementation "org.mongodb:mongodb-driver-reactivestreams:${project.mongodb_version}"
 
     // Dev Only
     shadow project(path: ':core', configuration: 'shadow')

@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
 import java.util.List;
@@ -36,9 +36,11 @@ public class RankedGameEndListener extends PacketListener<RankedGame.End> {
 
         ISession session = mcloader.currentSession().orElseGet(() -> {
             RankedFamily family = (RankedFamily) mcloader.family();
-            return family.matchmaker().fetch(packet.session().uuid()).orElseThrow();
+            return family.matchmaker().fetch(packet.session().uuid()).orElseThrow(()->
+                    new RuntimeException("No session with the uuid: "+packet.session().uuid()+" exists on MCLoader: "+mcloader.uuid())
+            );
         });
 
-        session.end(List.of(), List.of());
+        session.end(packet.session().winners(), packet.session().losers());
     }
 }

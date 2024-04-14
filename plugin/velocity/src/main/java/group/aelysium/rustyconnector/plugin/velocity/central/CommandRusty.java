@@ -312,7 +312,7 @@ class Send {
                                     logger.send(ProxyLang.RC_SEND_NO_PLAYER.build(username));
                                     return Command.SINGLE_SUCCESS;
                                 }
-                                Player player = Player.from(fetchedPlayer);
+                                Player player = new Player(fetchedPlayer);
 
                                 Family family = new Family.Reference(familyName).get();
 
@@ -425,13 +425,31 @@ class Database {
                                     String gameId = context.getArgument("gameId", String.class);
 
                                     StorageService storage = flame.services().storage();
-                                    storage.database().deleteGame(gameId);
+                                    storage.database().ranks().deleteGame(gameId);
                                     logger.log("Successfully purged all rank records from "+gameId);
                                     return Command.SINGLE_SUCCESS;
                                 })))
                 .then(LiteralArgumentBuilder.literal("players"))
                 .then(LiteralArgumentBuilder.literal("residence"))
                 .then(LiteralArgumentBuilder.literal("friends"))
+                ;
+    }
+}
+
+class DebugMatchmaking {
+    public static ArgumentBuilder<CommandSource, ?> build(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
+        return LiteralArgumentBuilder.<CommandSource>literal("matchmaking") // k8 createPod <familyName> <containerName> <containerPort>
+
+                .then(LiteralArgumentBuilder.<CommandSource>literal("purgeGameRecords")
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameId", StringArgumentType.greedyString())
+                                .executes(context -> {
+                                    String gameId = context.getArgument("gameId", String.class);
+
+                                    StorageService storage = flame.services().storage();
+                                    storage.database().ranks().deleteGame(gameId);
+                                    logger.log("Successfully purged all rank records from "+gameId);
+                                    return Command.SINGLE_SUCCESS;
+                                })))
                 ;
     }
 }

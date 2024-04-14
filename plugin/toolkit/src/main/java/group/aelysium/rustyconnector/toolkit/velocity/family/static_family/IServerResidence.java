@@ -13,11 +13,6 @@ public interface IServerResidence {
 
     Optional<MCLoaderEntry> server(String familyID);
 
-    /**
-     * Deletes all mappings that are expired.
-     */
-    void purgeExpired();
-
     class MCLoaderEntry {
         protected UUID mcloaderUUID;
         protected Long expiration = null;

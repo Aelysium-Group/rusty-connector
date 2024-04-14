@@ -18,26 +18,21 @@ public class InjectorService implements IInjectorService {
         this.injectors = injectors;
     }
 
-    public Optional<IFamily> familyOf(String anchor) {
-        try {
-            IFamily family = this.injectors.get(anchor);
-            if(family == null) return Optional.empty();
-
-            return Optional.of(family);
-        } catch (Exception ignore) {}
-
-        return Optional.empty();
+    public Optional<IFamily> familyOf(String host) {
+        IFamily family = this.injectors.get(host);
+        if(family == null) return Optional.empty();
+        return Optional.of(family);
     }
 
-    public void create(String name, IFamily target) {
-        this.injectors.put(name, target);
+    public void create(String host, IFamily target) {
+        this.injectors.put(host, target);
     }
 
-    public void delete(String name) {
-        this.injectors.remove(name);
+    public void delete(String host) {
+        this.injectors.remove(host);
     }
 
-    public List<String> anchorsFor(IFamily target) {
+    public List<String> injectorsFor(IFamily target) {
         List<String> anchors = new ArrayList<>();
         this.injectors.entrySet().stream().filter(anchor -> anchor.getValue().equals(target)).forEach(item -> anchors.add(item.getKey()));
         return anchors;
@@ -52,10 +47,10 @@ public class InjectorService implements IInjectorService {
         FamilyService familyService = dependencies.d2();
 
         try {
-            if(!config.isFamilyAnchor_enabled()) return Optional.empty();
+            if(!config.isFamilyInjector_enabled()) return Optional.empty();
 
             Map<String, IFamily> anchors = new HashMap<>();
-            for(Map.Entry<String, String> entry : config.getFamilyAnchor_anchors()) {
+            for(Map.Entry<String, String> entry : config.getFamilyInjector_injectors()) {
                 IFamily family;
                 try {
                     family = familyService.find(entry.getValue()).orElseThrow();

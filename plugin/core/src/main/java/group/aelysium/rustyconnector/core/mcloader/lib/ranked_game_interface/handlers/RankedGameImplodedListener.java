@@ -20,7 +20,7 @@ public class RankedGameImplodedListener extends PacketListener<RankedGame.Implod
 
     @Override
     public PacketIdentification target() {
-        return BuiltInIdentifications.RANKED_GAME_END;
+        return BuiltInIdentifications.RANKED_GAME_IMPLODE;
     }
 
     @Override
@@ -31,6 +31,6 @@ public class RankedGameImplodedListener extends PacketListener<RankedGame.Implod
     @Override
     public void execute(RankedGame.Imploded packet) {
         TinderAdapterForCore.getTinder().services().rankedGameInterface().orElseThrow().session(null, null);
-        TinderAdapterForCore.getTinder().services().events().fireEvent(new RankedGameEndEvent(packet.sessionUUID(), List.of(), List.of()));
+        TinderAdapterForCore.getTinder().services().events().fireEvent(new RankedGameEndEvent(packet.sessionUUID(), List.of(), List.of(), false));
     }
 }

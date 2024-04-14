@@ -28,15 +28,6 @@
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ###########################################################################################################
 #
-# The max length that packets are allowed to be.
-# If a packet is over this value it will be thrown away.
-# The size below should work for just about everything that is sent by RustyConnector.
-# If you think your packets will need larger sizes, you might want to increase this.
-#
-max-packet-length: 512
-
-
-#
 # The cache allows you to view messages after they've been received.
 # This is helpful for debugging issues and seeing what's happening under the hood.
 #

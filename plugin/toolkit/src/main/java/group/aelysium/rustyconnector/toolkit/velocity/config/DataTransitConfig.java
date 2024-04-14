@@ -6,7 +6,6 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import java.util.List;
 
 public interface DataTransitConfig {
-    int maxPacketLength();
     int cache_size();
     List<PacketIdentification> cache_ignoredTypes();
     List<PacketStatus> cache_ignoredStatuses();

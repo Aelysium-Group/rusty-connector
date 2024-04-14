@@ -26,11 +26,7 @@ ranking:
     # | Algorithm controls not only how a player is ranked     #
     # | but also how ranked matches are created.               #
     #                                                          #
-    # | If you change algorithm, player skills, will reset.    #
-    # | If you switch from WIN_LOSS to RANDOM, the player      #
-    # | skills will reset, however if you switch back to       #
-    # | WIN_LOSS, the player's ranks will reload to what they  #
-    # | were before you switched away from WIN_LOSS.           #
+    # | If you change the algorithm, player ranks will reset.  #
     #                                                          #
     # | Your options are:                                      #
     #  ⚫ RANDOMIZED -                                         #
@@ -43,6 +39,11 @@ ranking:
     #           many games they've won versus lost.            #
     #           Win-rate ranking ignores the number of games   #
     #           ranked players have played.                    #
+    #  ⚫ ELO -                                                #
+    #           Ranks players based on a multiplayer alternate #
+    #           implementation of the zero-sum ELO ranking     #
+    #           algorithm.                                     #
+    #                                                          #
     #               ---------------------------                #
     #                                                          #
     #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -52,69 +53,89 @@ ranking:
 
 
     #
-    # A decimal representing the percentage that player's ranks are allowed to deviate from one-another.
-    #
-    # Cannot be set to 0.
-    #
-    # If algorithm is set to `RANDOM` this will be ignored.
-    #
-    # 0.1 means that other players in the round must have a rank within 10% of each-other.
-    # If set to 1.0, any players are allowed to be in a match together; regardless of rank.
-    # Setting to 1.0 is effectively the same as setting `algorithm` to RANDOM.
-    #
-    # For ranking systems with an infinitely high top-rank, variance will be calculated based on the highest ranking
-    # player in the matchmaking queue representing 100%.
+    # A numeric value representing how far apart players in a session are allowed to be in rank.
+    # This value is ignored for the RANDOMIZED algorithm.
+    # For example if you use WIN_LOSS and a player joins with a rank of 0.6 and variance is 0.1,
+    # Players with ranks of 0.5 and 0.7 will be able to also join this player's session.
     #
     variance: 0.2
 
 
 
+    #
+    # Sometimes players will be too far apart in rank for the matchmaker to make a session.
+    # Anytime there are enough players to be able to make a session
+    # but no session is able to be made (because the variance range isn't large enough),
+    # variance will be increased by this value until another session can be made.
+    #
+    # Once a session can be made, variance will reset to the default value.
+    #
+    # If there are not enough players to even make a single session,
+    # variance will stay at the base value.
+    #
+    variance-expansion-coefficient: 0.1
+
+
+
 session:
-    building:
-        #
-        # The minimum number of players that must be in a game session.
-        #
-        min: 8
+    #
+    # If a session is active should new players be able to join it?
+    # If enabled, and assuming the session isn't at max capacity.
+    # This may allow players to join a session in the middle of a game.
+    #
+    freeze-active-sessions: false
 
 
 
-        #
-        # The maximum number of players that can be in a game session.
-        #
-        max: 10
+    #
+    # The minimum number of players that must be in a game session.
+    #
+    min: 8
 
 
 
-        #
-        # A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to
-        # build a new game session
-        # This should be set relatively low depending on what you expect player influxes to be.
-        # Can't be set lower than `3 SECONDS`.
-        #
-        # Keep in mind that this setting doesn't necessarily mean that new matches will be made every interval.
-        # Matches will only be made if there is a satisfactory number of players with the proper ranks.
-        #
-        interval: 10 SECONDS
+    #
+    # The maximum number of players that can be in a game session.
+    #
+    max: 10
 
 
 
-    closing:
-        #
-        # If players quit the game, how many players can be left in the game before the game is closed.
-        # Set this value to be -1 if you want it to be the same number as `session.building.min`.
-        #
-        threshold: -1
+    #
+    # A LiquidTimestamp representing how often the matchmaker should review its waiting players and attempt to
+    # build a new game session
+    # This should be set relatively low depending on what you expect player influxes to be.
+    # Can't be set lower than `3 SECONDS`.
+    #
+    # Keep in mind that this setting doesn't necessarily mean that new matches will be made every interval.
+    # Matches will only be made if there is a satisfactory number of players with the proper ranks.
+    #
+    interval: 10 SECONDS
 
-        ranks:
-            #
-            # Should players that quit the game receive a "lose"?
-            #
-            quitters-lose: false
 
-            #
-            # Should the players that stay in the game when it closes receive a "win"?
-            #
-            stayers-win: false
+
+    #
+    # If players quit the game, how many players can be left in the game before the game is closed.
+    # Set this value to be -1 if you want it to be the same number as `session.building.min`.
+    #
+    closing-threshold: -1
+
+
+
+    #
+    # Should players that quit the game receive a "lose"?
+    # Quitting is defined as a player leaving a session while it's still going.
+    #
+    quitters-lose: false
+
+
+
+    #
+    # Should the players that stay in the game when it closes receive a "win"?
+    # This option effects the fact that, if a session's player count drops below `min`, it will implode.
+    # A session implosion means that the session will end instantly and all players will be returned to the waiting location.
+    #
+    stayers-win: false
 
 
 
@@ -127,15 +148,6 @@ queue:
         # If you disable this, you should probably have your own system to let players know what's happening.
         #
         show-info: true
-
-
-        #
-        # Should a player be reconnected to their previous session if
-        # it's still running when they try to join the queue.
-        #
-        # If false, the player will be put into queue for a new session instead.
-        #
-        reconnect: true
 
 
 

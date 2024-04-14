@@ -31,7 +31,7 @@ public class LeastConnection extends LoadBalancer {
     @Override
     public void singleSort() {
         this.index = 0;
-        SingleSort.sort(this.unlockedServers, this.index);
+        SingleSort.sortDesc(this.unlockedServers, this.index);
     }
 
     @Override

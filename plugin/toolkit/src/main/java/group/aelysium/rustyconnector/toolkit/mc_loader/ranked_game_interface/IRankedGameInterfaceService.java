@@ -13,7 +13,7 @@ public interface IRankedGameInterfaceService extends Service {
     /**
      * Gets the players that are currently in this session.
      */
-    Optional<Map<UUID, String>> players();
+    Optional<Map<UUID, MCLoaderMatchPlayer>> players();
 
     /**
      * Ends the session with the defined players marked as winners.
@@ -23,4 +23,19 @@ public interface IRankedGameInterfaceService extends Service {
      * @param losers A list of players that are losers. These players will have a loss added to their scorecard.
      */
     void end(List<UUID> winners, List<UUID> losers);
+
+    /**
+     * Ends the session in a tie.
+     * If there is no active session, nothing will happen.
+     * All players in the session will receive a tie. If the game's ranking algorithm supports ties, this may impact their rank.
+     * If you want to end a game with a guarantee to not impact a player's rank, you can use {@link IRankedGameInterfaceService#end(List, List)} with an empty list for each parameter.
+     */
+    void endInTie();
+
+    /**
+     * Manually force the session to end.
+     * Implosion may or may not affect player ranks based on what's defined in the matchmaker.yml
+     * @param reason The reason for the implosion. This reason will be sent to the players.
+     */
+    void implode(String reason);
 }

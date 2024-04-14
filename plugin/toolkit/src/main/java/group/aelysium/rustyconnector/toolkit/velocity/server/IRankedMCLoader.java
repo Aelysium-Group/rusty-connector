@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.toolkit.velocity.server;
 
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.gameplay.ISession;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;

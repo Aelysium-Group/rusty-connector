@@ -1,15 +1,17 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking;
 
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.storage.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
-public class MatchPlayer<PlayerRank extends IPlayerRank> implements IMatchPlayer<PlayerRank> {
+import java.util.Objects;
+
+public class MatchPlayer implements IMatchPlayer {
     private final IPlayer player;
-    private final PlayerRank rank;
+    private final IPlayerRank rank;
     private final String gameId;
 
-    public MatchPlayer(IPlayer player, PlayerRank rank, String gameId) {
+    public MatchPlayer(IPlayer player, IPlayerRank rank, String gameId) {
         this.player = player;
         this.rank = rank;
         this.gameId = gameId;
@@ -19,7 +21,7 @@ public class MatchPlayer<PlayerRank extends IPlayerRank> implements IMatchPlayer
         return this.player;
     }
 
-    public PlayerRank rank() {
+    public IPlayerRank gameRank() {
         return this.rank;
     }
 
@@ -29,11 +31,24 @@ public class MatchPlayer<PlayerRank extends IPlayerRank> implements IMatchPlayer
 
     @Override
     public double sortIndex() {
-        return rank.rank();
+        return this.rank.rank();
     }
 
     @Override
     public int weight() {
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MatchPlayer that = (MatchPlayer) o;
+        return Objects.equals(player, that.player) && Objects.equals(gameId, that.gameId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(player, gameId);
     }
 }

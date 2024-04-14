@@ -5,15 +5,16 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.RankedFamilyConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchMakerConfig;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.MatchmakerConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.load_balancing.RoundRobin;
-import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.matchmakers.Matchmaker;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.Matchmaker;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.Party;
 import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.ranked_family.IRankedFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
@@ -28,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.RANKED_FAMILY_META;
@@ -39,10 +41,6 @@ public class RankedFamily extends Family implements IRankedFamily {
     protected RankedFamily(Settings settings, RoundRobin roundRobin) {
         super(settings.id(), new Family.Settings(settings.displayName(), roundRobin, settings.parentFamily(), settings.whitelist(), new Connector(roundRobin, settings.matchmaker(), settings.whitelist())), RANKED_FAMILY_META);
         this.matchmaker = settings.matchmaker();
-    }
-
-    public boolean dequeue(IPlayer player) {
-        return this.matchmaker.dequeue(player);
     }
 
     /**
@@ -64,19 +62,18 @@ public class RankedFamily extends Family implements IRankedFamily {
 
     @Override
     public long playerCount() {
-        return super.playerCount() + this.waitingPlayers();
+        return this.matchmaker.playerCount();
+    }
+    public int queuedPlayers() {
+        return this.matchmaker.queuedPlayerCount();
+    }
+
+    public long activePlayers() {
+        return this.matchmaker.activePlayerCount();
     }
 
     public Matchmaker matchmaker() {
         return this.matchmaker;
-    }
-
-    public int waitingPlayers() {
-        return this.matchmaker.waitingPlayersCount();
-    }
-
-    public long activePlayers() {
-        return super.playerCount();
     }
 
     @Override
@@ -98,9 +95,9 @@ public class RankedFamily extends Family implements IRankedFamily {
 
         RankedFamilyConfig config = RankedFamilyConfig.construct(api.dataFolder(), familyName, lang, deps.d5());
 
-        MatchMakerConfig matchMakerConfig = MatchMakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
+        MatchmakerConfig matchMakerConfig = MatchmakerConfig.construct(api.dataFolder(), config.matchmaker_name(), lang, deps.d5());
 
-        Matchmaker matchmaker = Matchmaker.from(matchMakerConfig.settings(), storage, config.gameId());
+        Matchmaker matchmaker = new Matchmaker(matchMakerConfig.settings(), storage, config.gameId());
 
         Whitelist.Reference whitelist = null;
         if (config.isWhitelist_enabled())
@@ -134,7 +131,7 @@ public class RankedFamily extends Family implements IRankedFamily {
 
         @Override
         public void leave(IPlayer player) {
-            this.matchmaker.remove(player);
+            this.matchmaker.leave(player);
         }
 
         @Override
@@ -147,7 +144,29 @@ public class RankedFamily extends Family implements IRankedFamily {
                 return request;
             }
 
-            this.matchmaker.add(request, result);
+            // Validate that the player isn't in another matchmaker
+            Optional<IFamily> family = Tinder.get().services().family().dump().stream().filter(f -> {
+                if(!(f instanceof RankedFamily)) return false;
+                return ((RankedFamily) f).matchmaker().contains(player);
+            }).findAny();
+            if(family.isPresent())
+                if(family.get() instanceof RankedFamily rankedFamily) {
+                    if(rankedFamily.matchmaker.isQueued(player)) {
+                        result.complete(ConnectionResult.failed(ProxyLang.RANKED_FAMILY_IN_MATCHMAKER_QUEUE_DENIAL.build()));
+                        return request;
+                    }
+
+                    Optional<ISession> session = rankedFamily.matchmaker().fetchPlayersSession(player.uuid());
+                    if(session.isPresent()) {
+                        if(session.get().active()) {
+                            result.complete(ConnectionResult.failed(ProxyLang.RANKED_FAMILY_IN_MATCHMAKER_GAME_DENIAL.build()));
+
+                            return request;
+                        }
+                    }
+                }
+
+            this.matchmaker.queue(request, result);
 
             return request;
         }

@@ -8,29 +8,29 @@ import java.util.Optional;
 
 public interface IInjectorService extends Service {
     /**
-     * Gets a family which has the anchor which is provided.
-     * @param anchor The anchor to find the family of.
+     * Gets a family which has the host which is provided.
+     * @param host The host to find the family of.
      * @return {@link Optional<IFamily>}
      */
-    Optional<IFamily> familyOf(String anchor);
+    Optional<IFamily> familyOf(String host);
 
     /**
      * Creates a new anchor, which points to a family.
-     * @param name The name of the anchor to register. Anchors can be referenced using `/anchor-name`
+     * @param host The host to register.
      * @param target The family that this anchor will teleport players to.
      */
-    void create(String name, IFamily target);
+    void create(String host, IFamily target);
 
     /**
-     * Deletes an anchor.
-     * @param name The name of the anchor to delete.
+     * Deletes a host.
+     * @param host The host to delete.
      */
-    void delete(String name);
+    void delete(String host);
 
     /**
      * Find all injectors that point to a family.
      * @param target The family to target.
      * @return A list of anchor names.
      */
-    List<String> anchorsFor(IFamily target);
+    List<String> injectorsFor(IFamily target);
 }

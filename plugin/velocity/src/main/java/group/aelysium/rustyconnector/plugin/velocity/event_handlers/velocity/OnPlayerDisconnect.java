@@ -14,12 +14,16 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.NetworkLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class OnPlayerDisconnect {
     /**
@@ -29,10 +33,16 @@ public class OnPlayerDisconnect {
     @Subscribe(order = PostOrder.FIRST)
     public EventTask onPlayerDisconnect(DisconnectEvent event) {
         Tinder api = Tinder.get();
-        Player player = Player.from(event.getPlayer());
+        IPlayer player = new Player(event.getPlayer());
 
         return EventTask.async(() -> {
             EventDispatch.UnSafe.fireAndForget(new NetworkLeaveEvent(player));
+
+            Optional<IMCLoader> mcLoader = player.server();
+            if(mcLoader.isPresent()) {
+                EventDispatch.UnSafe.fireAndForget(new FamilyLeaveEvent(mcLoader.get().family(), mcLoader.get(), player, true));
+                EventDispatch.UnSafe.fireAndForget(new MCLoaderLeaveEvent(mcLoader.get(), player, true));
+            }
             WebhookEventManager.fire(WebhookAlertFlag.PLAYER_LEAVE, DiscordWebhookMessage.PROXY__PLAYER_LEAVE.build(player));
 
             handleParty(api, player);
@@ -62,7 +72,7 @@ public class OnPlayerDisconnect {
             });
 
             for (RankedFamily family : families)
-                if (family.matchmaker().remove(player)) break;
+                family.matchmaker().leave(player);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -95,7 +105,7 @@ public class OnPlayerDisconnect {
             FriendsService friendsService = api.services().friends().orElseThrow();
             if(!friendsService.settings().allowMessaging()) return;
 
-            List<IPlayer> friends = friendsService.findFriends(player).orElseThrow();
+            List<IPlayer> friends = friendsService.friendStorage().get(player).orElseThrow();
 
             if(friends.size() == 0) return;
 

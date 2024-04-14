@@ -69,26 +69,22 @@ public class ConnectorsConfig extends YAML {
 
         {
             StorageService.StorageType storageType = StorageService.StorageType.valueOf(IYAML.getValue(this.data, "storage.provider", String.class));
-            boolean restEnabled = IYAML.getValue(this.data, "storage.enable-rest-api", Boolean.class);
-            int restPort = 0;
-            StorageService.StorageConfiguration.RESTAPISettings restSettings = new StorageService.StorageConfiguration.RESTAPISettings(restEnabled, restPort);
             switch (storageType) {
-                case FILE -> this.storageConfiguration = new StorageService.StorageConfiguration.File(restSettings);
-                case MARIADB -> {
-                    String host = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.host", String.class);
+                case MYSQL -> {
+                    String host = IYAML.getValue(this.data, "storage.additional-providers.MYSQL.host", String.class);
                     if (host.equals(""))
                         throw new IllegalStateException("Please configure your connector settings. `host` cannot be empty.");
-                    int port = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.port", Integer.class);
+                    int port = IYAML.getValue(this.data, "storage.additional-providers.MYSQL.port", Integer.class);
                     InetSocketAddress address = new InetSocketAddress(host, port);
 
-                    String user = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.user", String.class);
+                    String user = IYAML.getValue(this.data, "storage.additional-providers.MYSQL.user", String.class);
                     if (user.equals(""))
                         throw new IllegalStateException("Please configure your connector settings. `user` cannot be empty.");
-                    char[] password = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.password", String.class).toCharArray();
+                    char[] password = IYAML.getValue(this.data, "storage.additional-providers.MYSQL.password", String.class).toCharArray();
                     UserPass userPass = new UserPass(user, password);
-                    String database = IYAML.getValue(this.data, "storage.additional-providers.MARIADB.database", String.class);
+                    String database = IYAML.getValue(this.data, "storage.additional-providers.MYSQL.database", String.class);
 
-                    this.storageConfiguration = new StorageService.StorageConfiguration.MariaDB(restSettings, address, userPass, database);
+                    this.storageConfiguration = new StorageService.StorageConfiguration.MySQL(address, userPass, database);
                 }
                 default -> throw new NullPointerException("No proper Storage System was defined!");
             }

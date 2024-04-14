@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.toolkit.velocity.friends;
 
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IDatabase;
 
 import java.util.*;
 
@@ -26,11 +27,10 @@ public interface IFriendsService extends Service {
      */
     Optional<IFriendRequest> findRequest(IPlayer target, IPlayer sender);
 
-    Optional<List<IPlayer>> findFriends(IPlayer player);
-
-    boolean areFriends(IPlayer player1, IPlayer player2);
-    void addFriends(IPlayer player1, IPlayer player2);
-    void removeFriends(IPlayer player1, IPlayer player2);
+    /**
+     * Gets the storage system for the Friends Service.
+     */
+    IDatabase.FriendLinks friendStorage();
 
     /**
      * Sends a friend request to the target username.

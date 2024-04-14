@@ -29,29 +29,28 @@ public class CommandLeave {
                         return Command.SINGLE_SUCCESS;
                     }
                     try {
-                        Player player = Player.from(eventPlayer);
+                        Player player = new Player(eventPlayer);
 
                         List<RankedFamily> families = new ArrayList<>();
                         service.dump().forEach(family -> {
                             if(family instanceof RankedFamily) families.add((RankedFamily) family);
                         });
 
-                        RankedFamily queuedFamily = null;
-                        for (RankedFamily family : families) {
-                            if(family.dequeue(player)) {
-                                queuedFamily = family;
-                                break;
-                            }
-                        }
+                        RankedFamily foundFamily = null;
+                        for (RankedFamily family : families)
+                            if(family.matchmaker().contains(player)) foundFamily = family;
 
-                        if(queuedFamily == null) {
-                            eventPlayer.sendMessage(Component.text("You must be in matchmaking to use the `/leave` command!", NamedTextColor.RED));
+                        if(foundFamily == null) {
+                            eventPlayer.sendMessage(Component.text("You have to be in matchmaking to use /leave"));
                             return Command.SINGLE_SUCCESS;
                         }
+
+                        foundFamily.leave(player);
+
                         eventPlayer.sendMessage(Component.text("You successfully left matchmaking!"));
 
-                        if(queuedFamily.matchmaker().settings().queue().leaving().boot())
-                            queuedFamily.parent().connect(player);
+                        if(foundFamily.matchmaker().settings().queue().leaving().boot())
+                            foundFamily.parent().connect(player);
                     } catch (Exception ignore) {
                         eventPlayer.sendMessage(Component.text("There was an issue trying to leave matchmaking"));
                     }

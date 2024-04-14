@@ -92,7 +92,6 @@ public class AnchorService implements IAnchorService {
 
                     anchors.put(entry.getKey(), family);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     bootOutput.add(Component.text("The family "+entry.getValue()+" doesn't exist! Ignoring...", NamedTextColor.RED));
                 }
             }

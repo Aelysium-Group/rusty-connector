@@ -3,11 +3,13 @@
 #                        Whitelist                         #
 #                                                          #
 #               ---------------------------                #
+#                                                          #
 # | Setup your whitelist! The name of this whitelist       #
 # | is the same as the name you give this file!            #
 #                                                          #
 # | To make a new whitelist, just duplicate this           #
 # | template, rename it, and configure it how you'd like!  #
+#                                                          #
 #               ---------------------------                #
 #                                                          #
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -18,6 +20,7 @@
 #                         Players                          #
 #                                                          #
 #               ---------------------------                #
+#                                                          #
 # | The players whitelist allows three parameters to give  #
 # | your criteria more or less flexibility!                #
 # | Username, uuid, and IP Address                         #
@@ -30,10 +33,10 @@
 #       IP Address. As such, make sure you are properly    #
 #       validating your connections and not using only IP  #
 #       Addresses as a whitelist criteria!                 #
+#                                                          #
 # NOTE: Make sure that if you are working with player      #
 #       IP Addresses that you properly inform your members #
 #       and that you never leak that information!          #
-#                                                          #
 #       There are laws that protect user data!             #
 #       Don't break them!                                  #
 #                                                          #
@@ -46,7 +49,6 @@
 #                                                          #
 #       Example (INVALID):                                 #
 #       00000000000000000000000000000000                   #
-#                                                          #
 #                                                          #
 #               ---------------------------                #
 #                                                          #
