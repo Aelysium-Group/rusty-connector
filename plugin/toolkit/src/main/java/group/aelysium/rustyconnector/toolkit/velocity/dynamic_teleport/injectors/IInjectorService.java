@@ -32,5 +32,5 @@ public interface IInjectorService extends Service {
      * @param target The family to target.
      * @return A list of anchor names.
      */
-    List<String> anchorsFor(IFamily target);
+    List<String> injectorsFor(IFamily target);
 }
