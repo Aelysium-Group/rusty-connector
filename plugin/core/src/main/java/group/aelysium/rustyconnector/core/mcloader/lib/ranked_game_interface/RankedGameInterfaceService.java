@@ -91,6 +91,17 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
         this.players = null;
     }
 
+    public void implode(String reason) {
+        MCLoaderTinder tinder = TinderAdapterForCore.getTinder();
+        Packet packet = tinder.services().packetBuilder().newBuilder()
+                .identification(BuiltInIdentifications.RANKED_GAME_IMPLODE)
+                .sendingToProxy()
+                .parameter(RankedGame.Imploded.Parameters.SESSION_UUID, new PacketParameter(uuid.toString()))
+                .parameter(RankedGame.Imploded.Parameters.REASON, new PacketParameter(reason))
+                .build();
+        tinder.services().magicLink().connection().orElseThrow().publish(packet);
+    }
+
     public void kill() {
         this.uuid = null;
         this.players = null;

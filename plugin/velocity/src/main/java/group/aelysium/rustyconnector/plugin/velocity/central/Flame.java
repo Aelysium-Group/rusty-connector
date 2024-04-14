@@ -12,6 +12,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.packet_handl
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.commands.CommandLeave;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndListener;
 import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameEndTiedListener;
+import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.packet_handlers.RankedGameImplodedListener;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnection;
 import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
@@ -324,6 +325,7 @@ class Initialize {
 
         connection.listen(new RankedGameEndListener(this.api));
         connection.listen(new RankedGameEndTiedListener(this.api));
+        connection.listen(new RankedGameImplodedListener(this.api));
 
         ((RedisConnection) connection).startListening(dependencies.d2(), dependencies.d3(), Packet.Node.proxy(uuid));
         bootOutput.add(Component.text("Finished booting Messenger.", NamedTextColor.GREEN));
