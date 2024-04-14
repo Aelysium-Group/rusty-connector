@@ -268,7 +268,7 @@ public class Matchmaker implements IMatchmaker {
     }
 
     public int playerCount() {
-        return this.sessionPlayers.size() + this.queuedPlayers.size();
+        return this.queuedPlayerCount() + this.activePlayerCount();
     }
 
     public int queuedPlayerCount() {
@@ -303,7 +303,7 @@ public class Matchmaker implements IMatchmaker {
         return this.activeSessions.size();
     }
 
-    protected IPlayerRank newPlayerRank() {
+    public IPlayerRank newPlayerRank() {
         try {
             return settings.ranking().schema().getConstructor().newInstance();
         } catch(Exception e) {

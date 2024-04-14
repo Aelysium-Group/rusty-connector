@@ -11,6 +11,7 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank.WinRat
 import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.family.scalar_family.IRootFamily;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
@@ -578,10 +579,8 @@ public class ProxyLang extends Lang {
             }
         }
 
-        String algorithm = "RANDOMIZE";
         Matchmaker matchmaker = family.matchmaker();
-        if(matchmaker.settings().ranking().schema().equals(WinLossPlayerRank.class)) algorithm = "WIN_LOSS";
-        if(matchmaker.settings().ranking().schema().equals(WinRatePlayerRank.class)) algorithm = "WIN_RATE";
+        String algorithm = matchmaker.newPlayerRank().schemaName();
 
         return join(
                 newlines(),

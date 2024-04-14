@@ -22,6 +22,10 @@ public class SingleSort {
             array.add(array.indexOf(entry), item);
             return;
         }
+
+        // If there are no items in the list smaller than the one we're
+        // sorting in, add it after the loop finishes.
+        array.add(item);
     }
     /**
      * Sorts a single index back into the entry set.
@@ -40,5 +44,9 @@ public class SingleSort {
             array.add(array.indexOf(entry), item);
             return;
         }
+
+        // If there are no items in the list bigger than the one we're
+        // sorting in, add it after the loop finishes.
+        array.add(item);
     }
 }
