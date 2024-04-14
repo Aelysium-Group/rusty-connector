@@ -1,11 +1,8 @@
 package group.aelysium.rustyconnector.core.lib.packets;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
-import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import group.aelysium.rustyconnector.toolkit.mc_loader.ranked_game_interface.MCLoaderMatchPlayer;
 
 import java.util.*;
@@ -63,12 +60,17 @@ public interface RankedGame {
             return new EndedSession(uuid, winners, losers, false);
         }
 
+        public boolean unlock() {
+            return this.parameter(Parameters.UNLOCK).getAsBoolean();
+        }
+
         public End(Packet packet) {
             super(packet);
         }
 
         public interface Parameters {
             String SESSION = "s";
+            String UNLOCK = "l";
         }
     }
 
@@ -79,12 +81,17 @@ public interface RankedGame {
             return new EndedSession(uuid, List.of(), List.of(), true);
         }
 
+        public boolean unlock() {
+            return this.parameter(Parameters.UNLOCK).getAsBoolean();
+        }
+
         public EndTied(Packet packet) {
             super(packet);
         }
 
         public interface Parameters {
             String SESSION_UUID = "s";
+            String UNLOCK = "l";
         }
     }
 
@@ -96,6 +103,10 @@ public interface RankedGame {
             return UUID.fromString(this.parameters().get(Parameters.SESSION_UUID).getAsString());
         }
 
+        public boolean unlock() {
+            return this.parameter(Parameters.UNLOCK).getAsBoolean();
+        }
+
         public Imploded(Packet packet) {
             super(packet);
         }
@@ -103,6 +114,7 @@ public interface RankedGame {
         public interface Parameters {
             String REASON = "r";
             String SESSION_UUID = "u";
+            String UNLOCK = "l";
         }
     }
 }

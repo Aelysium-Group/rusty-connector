@@ -23,8 +23,18 @@ public interface ISession extends JSONParseable {
 
     /**
      * Ends this session with a set of winners and losers.
+     * @param winners The uuids of the winning players.
+     * @param losers The uuids of the losing players.
      */
     void end(List<UUID> winners, List<UUID> losers);
+
+    /**
+     * Ends this session with a set of winners and losers.
+     * @param winners The uuids of the winning players.
+     * @param losers The uuids of the losing players.
+     * @param unlock Whether the MCLoader should unlock right away. If `false` the MCLoader will have to manually unlock itself.
+     */
+    void end(List<UUID> winners, List<UUID> losers, boolean unlock);
 
     /**
      * Ends this session in a tie.
@@ -34,11 +44,29 @@ public interface ISession extends JSONParseable {
     void endTied();
 
     /**
+     * Ends this session in a tie.
+     * All players will receive a "tie" if the ranking algorithm supports ties
+     * this might affect their rank.
+     * @param unlock Whether the MCLoader should unlock right away. If `false` the MCLoader will have to manually unlock itself.
+     */
+    void endTied(boolean unlock);
+
+    /**
      * Implodes the session.
      * This method is similar to {@link ISession#end(List, List)} except that it will inform players that their session had to be ended,
      * and not players will be rewarded points.
+     * @param reason The reason for the implosion. This reason will also be shown to the players.
      */
     void implode(String reason);
+
+    /**
+     * Implodes the session.
+     * This method is similar to {@link ISession#end(List, List)} except that it will inform players that their session had to be ended,
+     * and not players will be rewarded points.
+     * @param reason The reason for the implosion. This reason will also be shown to the players.
+     * @param unlock Whether the MCLoader should unlock right away. If `false` the MCLoader will have to manually unlock itself.
+     */
+    void implode(String reason, boolean unlock);
 
     Optional<IRankedMCLoader> mcLoader();
 

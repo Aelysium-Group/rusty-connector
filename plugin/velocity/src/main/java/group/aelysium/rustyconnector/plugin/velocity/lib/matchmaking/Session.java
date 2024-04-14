@@ -143,7 +143,7 @@ public class Session implements ISession {
         this.implode("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.");
     }
 
-    public void implode(String reason) {
+    public void implode(String reason, boolean unlock) {
         this.players.values().forEach(matchPlayer -> matchPlayer.player().sendMessage(Component.text(reason, NamedTextColor.RED)));
 
         if(this.active()) {
@@ -161,10 +161,14 @@ public class Session implements ISession {
         List<UUID> winners = new ArrayList<>();
         if(settings.stayersWin()) winners = new ArrayList<>(this.players.keySet());
 
-        this.end(winners, List.of());
+        this.end(winners, List.of(), unlock);
     }
 
-    public void end(List<UUID> winners, List<UUID> losers) {
+    public void implode(String reason) {
+        this.implode(reason, true);
+    }
+
+    public void end(List<UUID> winners, List<UUID> losers, boolean unlock) {
         this.matchmaker.leave(this);
 
         IPlayerRank.IComputor computer = null;
@@ -189,7 +193,7 @@ public class Session implements ISession {
                 }
         }
 
-        if(this.active()) ((RankedMCLoader) this.mcLoader).rawUnlock();
+        if(this.active() && unlock) ((RankedMCLoader) this.mcLoader).rawUnlock();
 
         // Run storing logic last so that if something happens the other logic ran first.
         try {
@@ -200,8 +204,11 @@ public class Session implements ISession {
             e.printStackTrace();
         }
     }
+    public void end(List<UUID> winners, List<UUID> losers) {
+        this.end(winners, losers, true);
+    }
 
-    public void endTied() {
+    public void endTied(boolean unlock) {
         this.matchmaker.leave(this);
 
         IPlayerRank.IComputor computer = null;
@@ -216,7 +223,7 @@ public class Session implements ISession {
                 }
         }
 
-        if(this.active()) ((RankedMCLoader) this.mcLoader).rawUnlock();
+        if(this.active() && unlock) ((RankedMCLoader) this.mcLoader).rawUnlock();
 
         // Run storing logic last so that if something happens the other logic ran first.
         try {
@@ -226,6 +233,10 @@ public class Session implements ISession {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void endTied() {
+        this.endTied(true);
     }
 
     @Override

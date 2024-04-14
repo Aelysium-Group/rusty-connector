@@ -41,6 +41,6 @@ public class RankedGameImplodedListener extends PacketListener<RankedGame.Implod
             );
         });
 
-        session.implode(packet.reason());
+        session.implode(packet.reason(), packet.unlock());
     }
 }

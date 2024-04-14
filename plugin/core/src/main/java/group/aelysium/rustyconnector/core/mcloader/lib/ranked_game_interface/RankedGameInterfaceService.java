@@ -35,7 +35,7 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
         this.players = players;
     }
 
-    public void end(List<UUID> winners, List<UUID> losers) {
+    public void end(List<UUID> winners, List<UUID> losers, boolean unlock) {
         if(this.uuid == null) return;
 
         JsonObject object = new JsonObject();
@@ -66,14 +66,18 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
                 .identification(BuiltInIdentifications.RANKED_GAME_END)
                 .sendingToProxy()
                 .parameter(RankedGame.End.Parameters.SESSION, new PacketParameter(object))
+                .parameter(RankedGame.End.Parameters.UNLOCK, new PacketParameter(unlock))
                 .build();
         tinder.services().magicLink().connection().orElseThrow().publish(packet);
 
         this.uuid = null;
         this.players = null;
     }
+    public void end(List<UUID> winners, List<UUID> losers) {
+        this.end(winners, losers, true);
+    }
 
-    public void endInTie() {
+    public void endInTie(boolean unlock) {
         if(this.uuid == null) return;
 
         MCLoaderTinder tinder = TinderAdapterForCore.getTinder();
@@ -84,6 +88,7 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
                 .identification(BuiltInIdentifications.RANKED_GAME_END_TIE)
                 .sendingToProxy()
                 .parameter(RankedGame.EndTied.Parameters.SESSION_UUID, new PacketParameter(uuid.toString()))
+                .parameter(RankedGame.EndTied.Parameters.UNLOCK, new PacketParameter(unlock))
                 .build();
         tinder.services().magicLink().connection().orElseThrow().publish(packet);
 
@@ -91,15 +96,24 @@ public class RankedGameInterfaceService implements IRankedGameInterfaceService {
         this.players = null;
     }
 
-    public void implode(String reason) {
+    public void endInTie() {
+        this.endInTie(true);
+    }
+
+    public void implode(String reason, boolean unlock) {
         MCLoaderTinder tinder = TinderAdapterForCore.getTinder();
         Packet packet = tinder.services().packetBuilder().newBuilder()
                 .identification(BuiltInIdentifications.RANKED_GAME_IMPLODE)
                 .sendingToProxy()
                 .parameter(RankedGame.Imploded.Parameters.SESSION_UUID, new PacketParameter(uuid.toString()))
                 .parameter(RankedGame.Imploded.Parameters.REASON, new PacketParameter(reason))
+                .parameter(RankedGame.Imploded.Parameters.UNLOCK, new PacketParameter(unlock))
                 .build();
         tinder.services().magicLink().connection().orElseThrow().publish(packet);
+    }
+
+    public void implode(String reason) {
+        this.implode(reason, true);
     }
 
     public void kill() {

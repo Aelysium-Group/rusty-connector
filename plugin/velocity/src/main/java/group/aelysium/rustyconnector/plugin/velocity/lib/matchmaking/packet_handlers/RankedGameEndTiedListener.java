@@ -39,6 +39,6 @@ public class RankedGameEndTiedListener extends PacketListener<RankedGame.EndTied
             );
         });
 
-        session.endTied();
+        session.endTied(packet.unlock());
     }
 }

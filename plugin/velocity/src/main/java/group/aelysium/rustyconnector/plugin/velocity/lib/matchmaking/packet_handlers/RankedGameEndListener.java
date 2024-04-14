@@ -41,6 +41,6 @@ public class RankedGameEndListener extends PacketListener<RankedGame.End> {
             );
         });
 
-        session.end(packet.session().winners(), packet.session().losers());
+        session.end(packet.session().winners(), packet.session().losers(), packet.unlock());
     }
 }
