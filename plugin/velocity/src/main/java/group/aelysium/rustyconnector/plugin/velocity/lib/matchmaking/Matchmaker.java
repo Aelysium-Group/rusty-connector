@@ -213,7 +213,7 @@ public class Matchmaker implements IMatchmaker {
 
             this.queuedPlayers.removeAll(removePlayers);
             builtSessions.forEach(s -> this.queuedSessions.put(s.uuid(), s));
-        }, LiquidTimestamp.from(10, TimeUnit.SECONDS));
+        }, this.settings.session().interval());
 
         this.supervisor.scheduleRecurring(() -> {
             if(loadBalancer.size(false) == 0) return;
@@ -247,7 +247,7 @@ public class Matchmaker implements IMatchmaker {
                     return;
                 }
             }
-        }, LiquidTimestamp.from(10, TimeUnit.SECONDS));
+        }, this.settings.session().interval());
 
         if(!this.settings.queue().joining().showInfo()) return;
         this.queueIndicator.scheduleRecurring(() -> {
