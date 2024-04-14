@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.core.lib.key.config;
+package group.aelysium.rustyconnector.core.lib.config.common;
 
 import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
 import net.kyori.adventure.text.Component;

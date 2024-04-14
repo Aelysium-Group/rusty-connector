@@ -23,7 +23,7 @@ public class ServerInfoService implements IServerInfoService {
     private final String magicConfigPointer;
     private ServerAssignment assignment = ServerAssignment.GENERIC;
 
-    public ServerInfoService(@NotNull String address, @NotNull String displayName, @NotNull String magicConfigPointer, int port) {
+    public ServerInfoService(@NotNull UUID uuid, @NotNull String address, @NotNull String displayName, @NotNull String magicConfigPointer, int port) {
         this.magicConfigPointer = magicConfigPointer;
         this.displayName = displayName;
 
