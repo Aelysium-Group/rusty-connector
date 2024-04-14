@@ -167,7 +167,7 @@ public final class CommandRusty {
         return builder.literal("unlock")
                 .handler(context -> {
                     try {
-                        api.services().magicLink().connection().orElseThrow().publish(MCLoader.Unlock.build(api.flame()));
+                        api.flame().unlock();
                         logger.log("Unlocking server.");
                     } catch (NullPointerException e) {
                         MCLoaderLang.RC_SEND_USAGE.send(logger);
@@ -186,7 +186,7 @@ public final class CommandRusty {
         return builder.literal("lock")
                 .handler(context -> {
                     try {
-                        api.services().magicLink().connection().orElseThrow().publish(MCLoader.Lock.build(api.flame()));
+                        api.flame().lock();
                         logger.log("Locking server.");
                     } catch (NullPointerException e) {
                         MCLoaderLang.RC_SEND_USAGE.send(logger);
