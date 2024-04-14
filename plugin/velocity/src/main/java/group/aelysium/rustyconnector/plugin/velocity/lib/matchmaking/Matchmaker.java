@@ -110,6 +110,8 @@ public class Matchmaker implements IMatchmaker {
     }
 
     public void leave(IPlayer player) {
+        IMatchPlayer matchPlayer = this.resolveMatchPlayer(player);
+        if(this.queuedPlayers.remove(matchPlayer)) return;
         if(!this.sessionPlayers.containsKey(player.uuid())) return;
 
         try {
@@ -119,6 +121,12 @@ public class Matchmaker implements IMatchmaker {
         ((Session) this.sessionPlayers.get(player.uuid())).leave(player);
 
         this.sessionPlayers.remove(player.uuid());
+    }
+
+    public void leave(ISession session) {
+        session.players().keySet().forEach(k->this.sessionPlayers.remove(k));
+        this.activeSessions.remove(session.uuid());
+        this.queuedSessions.remove(session.uuid());
     }
 
     public boolean contains(IPlayer player) {
@@ -338,12 +346,6 @@ public class Matchmaker implements IMatchmaker {
         });
 
         return new MatchPlayer(player, rank, this.gameId);
-    }
-
-    public void leave(ISession session) {
-        session.players().keySet().forEach(k->this.sessionPlayers.remove(k));
-        this.activeSessions.remove(session.uuid());
-        this.queuedSessions.remove(session.uuid());
     }
 
     public void kill() {

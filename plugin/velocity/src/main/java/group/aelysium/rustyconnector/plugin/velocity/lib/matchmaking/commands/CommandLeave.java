@@ -44,7 +44,9 @@ public class CommandLeave {
                             eventPlayer.sendMessage(Component.text("You have to be in matchmaking to use /leave"));
                             return Command.SINGLE_SUCCESS;
                         }
+
                         foundFamily.leave(player);
+
                         eventPlayer.sendMessage(Component.text("You successfully left matchmaking!"));
 
                         if(foundFamily.matchmaker().settings().queue().leaving().boot())
