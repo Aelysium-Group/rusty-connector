@@ -4,12 +4,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 
 import java.util.List;
 
-public class OpenSkillPlayerRank implements IPlayerRank {
+public class OpenSkillPlayerRank implements IVelocityPlayerRank {
     // Set higher for more conservative confidence levels. 3 is approx 99.7% certain.
     private static final int RANK_CONFIDENCE = 3;
     public static String schema() {
@@ -30,7 +31,7 @@ public class OpenSkillPlayerRank implements IPlayerRank {
         return mu - RANK_CONFIDENCE * sigma;
     }
 
-    public void setRank(double mu, double sigma) {
+    protected void setRank(double mu, double sigma) {
         this.mu = mu;
         this.sigma = sigma;
     }

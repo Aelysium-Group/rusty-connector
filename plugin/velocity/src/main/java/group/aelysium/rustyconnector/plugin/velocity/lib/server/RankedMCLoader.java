@@ -8,7 +8,6 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 

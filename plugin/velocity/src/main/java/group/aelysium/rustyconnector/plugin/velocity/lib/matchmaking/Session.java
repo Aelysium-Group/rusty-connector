@@ -13,7 +13,8 @@ import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectab
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 import net.kyori.adventure.text.Component;
@@ -171,7 +172,7 @@ public class Session implements ISession {
     public void end(List<UUID> winners, List<UUID> losers, boolean unlock) {
         this.matchmaker.leave(this);
 
-        IPlayerRank.IComputor computer = null;
+        IVelocityPlayerRank.IComputor computer = null;
         List<IMatchPlayer> playerWinners = new ArrayList<>();
         List<IMatchPlayer> playerLosers = new ArrayList<>();
 
@@ -211,7 +212,7 @@ public class Session implements ISession {
     public void endTied(boolean unlock) {
         this.matchmaker.leave(this);
 
-        IPlayerRank.IComputor computer = null;
+        IVelocityPlayerRank.IComputor computer = null;
         for (IMatchPlayer matchPlayer : this.players.values()) {
             if(computer == null) computer = matchPlayer.gameRank().computor();
 

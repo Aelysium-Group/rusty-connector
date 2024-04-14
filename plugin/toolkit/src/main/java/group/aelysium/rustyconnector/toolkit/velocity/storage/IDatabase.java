@@ -2,14 +2,13 @@ package group.aelysium.rustyconnector.toolkit.velocity.storage;
 
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IStaticFamily;
-import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IRankResolver;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
-import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.util.List;
 import java.util.Optional;
@@ -151,7 +150,7 @@ public interface IDatabase {
          * @param gameId The Game's ID to fetch the rank from.
          * @return The players rank. Or Empty if there is no rank, or there was an issue getting it.
          */
-        Optional<IPlayerRank> get(IPlayer player, String gameId, IRankResolver resolver);
+        Optional<IVelocityPlayerRank> get(IPlayer player, String gameId, IRankResolver resolver);
 
         /**
          * Checks the schema of the matchmaker and deletes any and all ranks for this game that don't match the schema.

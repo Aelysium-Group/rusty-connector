@@ -15,7 +15,8 @@ import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalanc
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
@@ -88,7 +89,7 @@ public class Matchmaker implements IMatchmaker {
     }
 
     public Optional<IMatchPlayer> matchPlayer(IPlayer player) {
-        Optional<IPlayerRank> rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New());
+        Optional<IVelocityPlayerRank> rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New());
         return rank.map(r -> new MatchPlayer(player, r, this.gameId));
     }
 
@@ -311,7 +312,7 @@ public class Matchmaker implements IMatchmaker {
         return this.activeSessions.size();
     }
 
-    public IPlayerRank newPlayerRank() {
+    public IVelocityPlayerRank newPlayerRank() {
         try {
             return settings.ranking().schema().getConstructor().newInstance();
         } catch(Exception e) {
@@ -337,8 +338,8 @@ public class Matchmaker implements IMatchmaker {
      * Resolves a player rank for the player.
      */
     protected IMatchPlayer resolveMatchPlayer(IPlayer player) {
-        IPlayerRank rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New()).orElseGet(()->{
-            IPlayerRank newRank = this.newPlayerRank();
+        IVelocityPlayerRank rank = this.storage.database().ranks().get(player, this.gameId, DefaultRankResolver.New()).orElseGet(()->{
+            IVelocityPlayerRank newRank = this.newPlayerRank();
 
             this.storage.database().ranks().set(new MatchPlayer(player, newRank, this.gameId));
 

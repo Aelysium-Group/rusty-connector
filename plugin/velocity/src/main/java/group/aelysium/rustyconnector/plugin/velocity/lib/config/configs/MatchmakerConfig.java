@@ -8,7 +8,8 @@ import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
 
 import java.nio.file.Path;
@@ -55,7 +56,7 @@ public class MatchmakerConfig extends YAML implements group.aelysium.rustyconnec
         boolean session_leaving_command = IYAML.getValue(this.data, "queue.leaving.command", Boolean.class);
         boolean session_leaving_boot = IYAML.getValue(this.data, "queue.leaving.boot", Boolean.class);
 
-        Class<? extends IPlayerRank> actualSchema = RandomizedPlayerRank.class;
+        Class<? extends IVelocityPlayerRank> actualSchema = RandomizedPlayerRank.class;
         if(algorithm.equals(WinLossPlayerRank.schema()))    actualSchema = WinLossPlayerRank.class;
         if(algorithm.equals(WinRatePlayerRank.schema()))    actualSchema = WinRatePlayerRank.class;
         if(algorithm.equals(ELOPlayerRank.schema()))        actualSchema = ELOPlayerRank.class;

@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.toolkit.velocity.matchmaking;
 
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
@@ -106,7 +107,7 @@ public interface IMatchmaker extends Service {
             Session session,
             Queue queue
     ) {
-        public record Ranking(Class<? extends IPlayerRank> schema, double variance, double varianceExpansionCoefficient) {}
+        public record Ranking(Class<? extends IVelocityPlayerRank> schema, double variance, double varianceExpansionCoefficient) {}
         public record Session(
                 boolean freezeActiveSessions,
                 int min,

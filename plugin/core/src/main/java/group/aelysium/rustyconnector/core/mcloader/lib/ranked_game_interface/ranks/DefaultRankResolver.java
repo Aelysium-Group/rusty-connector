@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.lib.matchmaking.rank;
+package group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.ranks;
 
 import com.google.gson.JsonObject;
 import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;

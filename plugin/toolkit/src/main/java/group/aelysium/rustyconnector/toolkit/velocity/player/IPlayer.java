@@ -1,7 +1,8 @@
 package group.aelysium.rustyconnector.toolkit.velocity.player;
 
 import group.aelysium.rustyconnector.toolkit.RustyConnector;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
@@ -49,7 +50,7 @@ public interface IPlayer {
      * Fetches the player's rank for a specific game.
      * @param gameId The game id to fetch the player's rank from.
      */
-    Optional<? extends IPlayerRank> rank(String gameId);
+    Optional<? extends IVelocityPlayerRank> rank(String gameId);
 
     class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IPlayer, UUID> {
         public Reference(UUID uuid) {

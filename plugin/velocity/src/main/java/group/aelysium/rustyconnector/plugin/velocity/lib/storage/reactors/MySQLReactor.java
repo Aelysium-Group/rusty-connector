@@ -2,21 +2,18 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.storage.reactors;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.mysql.cj.jdbc.Blob;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.core.UserPass;
 import group.aelysium.rustyconnector.toolkit.velocity.family.static_family.IServerResidence;
 import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IRankResolver;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -349,7 +346,7 @@ public class MySQLReactor extends StorageReactor {
     }
 
     @Override
-    public Optional<IPlayerRank> fetchRank(UUID player, String gameId, IRankResolver resolver) {
+    public Optional<IVelocityPlayerRank> fetchRank(UUID player, String gameId, IRankResolver resolver) {
         try {
             PreparedStatement statement = this.core.prepare("SELECT * FROM player_ranks WHERE player_uuid = ? AND game_id = ? LIMIT 1;");
             statement.setString(1, player.toString());
@@ -363,7 +360,7 @@ public class MySQLReactor extends StorageReactor {
             JsonObject rank = gson.fromJson(result.getString("rank"), JsonObject.class);
             System.out.println(rank);
 
-            return Optional.of(resolver.resolve(rank));
+            return Optional.of((IVelocityPlayerRank) resolver.resolve(rank));
         } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();

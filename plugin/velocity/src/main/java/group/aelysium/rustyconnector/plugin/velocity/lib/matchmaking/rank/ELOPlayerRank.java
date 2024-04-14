@@ -4,12 +4,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 
 import java.util.List;
 
-public class ELOPlayerRank implements IPlayerRank {
+public class ELOPlayerRank implements IVelocityPlayerRank {
     public static String schema() {
         return "ELO";
     }
@@ -25,7 +26,7 @@ public class ELOPlayerRank implements IPlayerRank {
         return elo;
     }
 
-    public void setRank(int elo) {
+    protected void setRank(int elo) {
         this.elo = elo;
     }
 
@@ -45,7 +46,7 @@ public class ELOPlayerRank implements IPlayerRank {
         return object;
     }
 
-    public static class Computer implements IPlayerRank.IComputor {
+    public static class Computer implements IComputor {
         private static final double K_FACTOR = 32.0;
         private static final double INITIAL_ELO = 1200.0;
         private static final double ELO_FACTOR = 400.0;

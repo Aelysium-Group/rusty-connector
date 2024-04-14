@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.core.lib.packets;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import group.aelysium.rustyconnector.core.mcloader.lib.ranked_game_interface.ranks.DefaultRankResolver;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.mc_loader.ranked_game_interface.MCLoaderMatchPlayer;
 
@@ -29,7 +30,7 @@ public interface RankedGame {
                         player_uuid,
                         entryObject.get("username").getAsString(),
                         entryObject.get("schema").getAsString(),
-                        entryObject.get("rank").getAsJsonObject()
+                        DefaultRankResolver.New().resolve(entryObject.get("rank").getAsJsonObject())
                     )
                 );
             });

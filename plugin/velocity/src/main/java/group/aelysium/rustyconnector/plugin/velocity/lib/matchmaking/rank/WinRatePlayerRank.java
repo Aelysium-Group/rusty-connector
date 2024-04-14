@@ -5,13 +5,14 @@ import com.google.gson.JsonPrimitive;
 
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IPlayerRank;
+import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
+import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IDatabase;
 
 import java.util.List;
 
-public class WinRatePlayerRank implements IPlayerRank {
+public class WinRatePlayerRank implements IVelocityPlayerRank {
     public static String schema() {
         return "WIN_RATE";
     }
@@ -29,15 +30,15 @@ public class WinRatePlayerRank implements IPlayerRank {
         this(0, 0, 0);
     }
 
-    public void addWin() {
+    protected void addWin() {
         this.wins++;
     }
 
-    public void addLoss() {
+    protected void addLoss() {
         this.losses++;
     }
 
-    public void addTie() {
+    protected void addTie() {
         this.ties++;
     }
 
@@ -65,7 +66,7 @@ public class WinRatePlayerRank implements IPlayerRank {
         return object;
     }
 
-    public static class Computer implements IPlayerRank.IComputor {
+    public static class Computer implements IComputor {
         private static final Computer singleton = new Computer();
         public static Computer New() {
             return singleton;
