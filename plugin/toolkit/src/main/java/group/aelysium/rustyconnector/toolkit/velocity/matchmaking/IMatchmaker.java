@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.toolkit.velocity.matchmaking;
 
-import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
 import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
@@ -50,13 +49,6 @@ public interface IMatchmaker extends Service {
      * @return `true` if the player is waiting in the matchmaker. `false` otherwise.
      */
     boolean contains(IPlayer player);
-
-    /**
-     * Ends a session.
-     * This method will close the session, connect all players to the parent family, and unlock the MCLoader.
-     * @param session The session to end.
-     */
-    void leave(ISession session);
 
     /**
      * Fetches a session based on a player's UUID.

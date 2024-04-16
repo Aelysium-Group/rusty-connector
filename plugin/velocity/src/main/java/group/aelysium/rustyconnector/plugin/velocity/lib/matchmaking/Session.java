@@ -13,7 +13,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectab
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
-import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
@@ -32,6 +31,7 @@ public class Session implements ISession {
     protected final Map<UUID, IMatchPlayer> players;
     protected IRankedMCLoader mcLoader;
     protected final Settings settings;
+    protected boolean ended = false;
     protected boolean frozen = false;
 
     public Session(IMatchmaker matchmaker, Settings settings) {
@@ -46,6 +46,10 @@ public class Session implements ISession {
 
     public Settings settings() {
         return this.settings;
+    }
+
+    public boolean ended() {
+        return this.ended;
     }
 
     public IMatchmaker matchmaker() {
@@ -145,6 +149,8 @@ public class Session implements ISession {
     }
 
     public void implode(String reason, boolean unlock) {
+        this.ended = true;
+
         this.players.values().forEach(matchPlayer -> matchPlayer.player().sendMessage(Component.text(reason, NamedTextColor.RED)));
 
         if(this.active()) {
@@ -170,7 +176,9 @@ public class Session implements ISession {
     }
 
     public void end(List<UUID> winners, List<UUID> losers, boolean unlock) {
-        this.matchmaker.leave(this);
+        this.ended = true;
+
+        ((Matchmaker) this.matchmaker).remove(this);
 
         IVelocityPlayerRank.IComputor computer = null;
         List<IMatchPlayer> playerWinners = new ArrayList<>();
@@ -210,7 +218,9 @@ public class Session implements ISession {
     }
 
     public void endTied(boolean unlock) {
-        this.matchmaker.leave(this);
+        this.ended = true;
+
+        ((Matchmaker) this.matchmaker).remove(this);
 
         IVelocityPlayerRank.IComputor computer = null;
         for (IMatchPlayer matchPlayer : this.players.values()) {

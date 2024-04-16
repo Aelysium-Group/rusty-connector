@@ -11,8 +11,6 @@ import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
-import java.util.List;
-
 public class RankedGameImplodedListener extends PacketListener<RankedGame.Imploded> {
     protected Tinder api;
 

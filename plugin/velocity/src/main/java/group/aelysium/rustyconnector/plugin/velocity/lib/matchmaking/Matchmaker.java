@@ -124,7 +124,7 @@ public class Matchmaker implements IMatchmaker {
         this.sessionPlayers.remove(player.uuid());
     }
 
-    public void leave(ISession session) {
+    public void remove(ISession session) {
         session.players().keySet().forEach(k->this.sessionPlayers.remove(k));
         this.activeSessions.remove(session.uuid());
         this.queuedSessions.remove(session.uuid());

@@ -17,6 +17,11 @@ public interface ISession extends JSONParseable {
     Settings settings();
 
     /**
+     * Has the session ended
+     */
+    boolean ended();
+
+    /**
      * Gets the matchmaker that this session belongs to.
      */
     IMatchmaker matchmaker();
