@@ -151,10 +151,10 @@ public class Database extends StorageReactor.Holder implements IDatabase, Servic
 
         public void purgeSchemas(IMatchmaker matchmaker) {
             String schema = null;
-            if(matchmaker.settings().ranking().schema().equals(WinLossPlayerRank.class))    schema = WinLossPlayerRank.schema();
-            if(matchmaker.settings().ranking().schema().equals(WinRatePlayerRank.class))    schema = WinRatePlayerRank.schema();
-            if(matchmaker.settings().ranking().schema().equals(ELOPlayerRank.class))        schema = ELOPlayerRank.schema();
-            if(matchmaker.settings().ranking().schema().equals(OpenSkillPlayerRank.class))  schema = OpenSkillPlayerRank.schema();
+            if(matchmaker.settings().schema().equals(WinLossPlayerRank.class))    schema = WinLossPlayerRank.schema();
+            if(matchmaker.settings().schema().equals(WinRatePlayerRank.class))    schema = WinRatePlayerRank.schema();
+            if(matchmaker.settings().schema().equals(ELOPlayerRank.class))        schema = ELOPlayerRank.schema();
+            if(matchmaker.settings().schema().equals(OpenSkillPlayerRank.class))  schema = OpenSkillPlayerRank.schema();
             if(schema == null) return;
             this.reactor.purgeInvalidSchemas(matchmaker.gameId(), schema);
         }

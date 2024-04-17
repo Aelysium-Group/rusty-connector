@@ -15,7 +15,6 @@ import group.aelysium.rustyconnector.toolkit.velocity.load_balancing.ILoadBalanc
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
@@ -63,17 +62,17 @@ public class Matchmaker implements IMatchmaker {
         this.gameId = gameId;
         this.settings = settings;
         this.sessionSettings = new ISession.Settings(
-                settings.session().freezeActiveSessions(),
-                settings.session().closingThreshold(),
-                settings.session().max(),
-                settings.ranking().variance(),
+                settings.freezeActiveSessions(),
+                settings.closingThreshold(),
+                settings.max(),
+                settings.variance(),
                 this.gameId,
-                settings.session().quittersLose(),
-                settings.session().stayersWin()
+                settings.quittersLose(),
+                settings.stayersWin()
         );
 
-        this.minPlayersPerGame = settings.session().min();
-        this.maxPlayersPerGame = settings.session().max();
+        this.minPlayersPerGame = settings.min();
+        this.maxPlayersPerGame = settings.max();
 
         this.storage().purgeSchemas(this);
     }
@@ -164,7 +163,7 @@ public class Matchmaker implements IMatchmaker {
     public void start(ILoadBalancer<IMCLoader> loadBalancer) {
         this.supervisor.scheduleRecurring(() -> {
             int i = 0;
-            double varianceLookahead = (this.settings.ranking().variance() + (this.settings.ranking().varianceExpansionCoefficient() * this.failedBuilds.get())) * 2;
+            double varianceLookahead = (this.settings.variance() + (this.settings.varianceExpansionCoefficient() * this.failedBuilds.get())) * 2;
             List<IMatchPlayer> removePlayers = new ArrayList<>();
             List<ISession> builtSessions = new ArrayList<>();
             while(i < this.queuedPlayers.size()) {
@@ -197,8 +196,15 @@ public class Matchmaker implements IMatchmaker {
                     if(nextInsert.gameRank().rank() > varianceMax) break;
                     session.join(nextInsert);
                 }
+                ISession.Settings settings1 = session.settings();
 
-                if(session.size() < session.settings().min()) {
+                if(session.size() < settings1.min()) {
+                    session.empty();
+                    i = i + this.minPlayersPerGame;
+                    continue;
+                }
+
+                if(session.size() < settings1.max() - 1 && this.failedBuilds.get() < this.settings.requiredExpansionsForAccept()) {
                     session.empty();
                     i = i + this.minPlayersPerGame;
                     continue;
@@ -214,7 +220,7 @@ public class Matchmaker implements IMatchmaker {
 
             this.queuedPlayers.removeAll(removePlayers);
             builtSessions.forEach(s -> this.queuedSessions.put(s.uuid(), s));
-        }, this.settings.session().interval());
+        }, this.settings.sessionDispatchInterval());
 
         this.supervisor.scheduleRecurring(() -> {
             if(loadBalancer.size(false) == 0) return;
@@ -248,9 +254,9 @@ public class Matchmaker implements IMatchmaker {
                     return;
                 }
             }
-        }, this.settings.session().interval());
+        }, this.settings.sessionDispatchInterval());
 
-        if(!this.settings.queue().joining().showInfo()) return;
+        if(!this.settings.showInfo()) return;
         this.queueIndicator.scheduleRecurring(() -> {
             // So that we don't lock the Vector while sending messages
             for(IMatchPlayer matchPlayer : this.queuedPlayers.stream().toList()) {
@@ -314,9 +320,9 @@ public class Matchmaker implements IMatchmaker {
 
     public IVelocityPlayerRank newPlayerRank() {
         try {
-            return settings.ranking().schema().getConstructor().newInstance();
+            return settings.schema().getConstructor().newInstance();
         } catch(Exception e) {
-            if(!settings.ranking().schema().equals(RandomizedPlayerRank.class)) e.printStackTrace();
+            if(!settings.schema().equals(RandomizedPlayerRank.class)) e.printStackTrace();
             return RandomizedPlayerRank.New();
         }
     }

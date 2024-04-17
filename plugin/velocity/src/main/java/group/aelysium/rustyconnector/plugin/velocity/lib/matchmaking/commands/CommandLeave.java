@@ -11,7 +11,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.ranked_family.RankedFamily;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,7 @@ public class CommandLeave {
 
                         eventPlayer.sendMessage(Component.text("You successfully left matchmaking!"));
 
-                        if(foundFamily.matchmaker().settings().queue().leaving().boot())
+                        if(foundFamily.matchmaker().settings().parentFamilyOnLeave())
                             foundFamily.parent().connect(player);
                     } catch (Exception ignore) {
                         eventPlayer.sendMessage(Component.text("There was an issue trying to leave matchmaking"));

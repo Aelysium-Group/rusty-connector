@@ -95,23 +95,21 @@ public interface IMatchmaker extends Service {
     int activeSessionCount();
 
     record Settings (
-            Ranking ranking,
-            Session session,
-            Queue queue
-    ) {
-        public record Ranking(Class<? extends IVelocityPlayerRank> schema, double variance, double varianceExpansionCoefficient) {}
-        public record Session(
-                boolean freezeActiveSessions,
-                int min,
-                int max,
-                LiquidTimestamp interval,
-                int closingThreshold,
-                boolean quittersLose,
-                boolean stayersWin
-        ) {}
-        public record Queue(Joining joining, Leaving leaving) {
-            public record Joining(boolean showInfo) {}
-            public record Leaving(boolean command, boolean boot) {}
-        }
-    }
+            Class<? extends IVelocityPlayerRank> schema,
+            int min,
+            int max,
+            double variance,
+            double varianceExpansionCoefficient,
+            int requiredExpansionsForAccept,
+            LiquidTimestamp sessionDispatchInterval,
+            boolean freezeActiveSessions,
+            int closingThreshold,
+            boolean quittersLose,
+            boolean stayersWin,
+            boolean leaveCommand,
+            boolean parentFamilyOnLeave,
+            boolean showInfo,
+            ELOSettings elo
+    ) {}
+    record ELOSettings(double initialRank, double eloFactor, double kFactor) {}
 }

@@ -47,10 +47,6 @@ public class ELOPlayerRank implements IVelocityPlayerRank {
     }
 
     public static class Computer implements IComputor {
-        private static final double K_FACTOR = 32.0;
-        private static final double INITIAL_ELO = 1200.0;
-        private static final double ELO_FACTOR = 400.0;
-
         private static final Computer singleton = new Computer();
         public static Computer New() {
             return singleton;
@@ -60,11 +56,11 @@ public class ELOPlayerRank implements IVelocityPlayerRank {
 
         @Override
         public void compute(List<IMatchPlayer> winners, List<IMatchPlayer> losers, IMatchmaker matchmaker, ISession session) {
-            double averageWinnersRank = averageRank(winners);
-            double averageLosersRank = averageRank(losers);
+            double averageWinnersRank = averageRank(matchmaker, winners);
+            double averageLosersRank = averageRank(matchmaker, losers);
 
-            double expectedWinners = expected(averageWinnersRank, averageLosersRank);
-            double expectedLosers = expected(averageLosersRank, averageWinnersRank);
+            double expectedWinners = expected(matchmaker, averageWinnersRank, averageLosersRank);
+            double expectedLosers = expected(matchmaker, averageLosersRank, averageWinnersRank);
 
             winners.forEach(winner -> adjustRank(matchmaker, winner, 1, expectedWinners));
             losers.forEach(loser -> adjustRank(matchmaker, loser, 0, expectedLosers));
@@ -72,27 +68,27 @@ public class ELOPlayerRank implements IVelocityPlayerRank {
 
         @Override
         public void computeTie(List<IMatchPlayer> players, IMatchmaker matchmaker, ISession session) {
-            double averageRank = averageRank(players);
+            double averageRank = averageRank(matchmaker, players);
 
             players.forEach(player -> {
-                double expected = expected(averageRank, averageRank);
+                double expected = expected(matchmaker, averageRank, averageRank);
                 adjustRank(matchmaker, player, 0.5, expected);
             });
         }
 
-        private void adjustRank(IMatchmaker matchmaker,IMatchPlayer player, double outcome, double expected) {
+        private void adjustRank(IMatchmaker matchmaker, IMatchPlayer player, double outcome, double expected) {
             double oldRank = player.gameRank().rank();
-            double newRank = oldRank + K_FACTOR * (outcome - expected);
+            double newRank = oldRank + matchmaker.settings().elo().kFactor() * (outcome - expected);
             ((ELOPlayerRank) player.gameRank()).setRank((int) newRank);
             matchmaker.storage().set(player);
         }
 
-        private double expected(double ratingA, double ratingB) {
-            return 1 / (1 + Math.pow(10, (ratingB - ratingA) / ELO_FACTOR));
+        private double expected(IMatchmaker matchmaker,double ratingA, double ratingB) {
+            return 1 / (1 + Math.pow(10, (ratingB - ratingA) / matchmaker.settings().elo().eloFactor()));
         }
 
-        protected double averageRank(List<IMatchPlayer> players) {
-            return players.stream().mapToDouble(p -> p.gameRank().rank()).average().orElse(INITIAL_ELO);
+        protected double averageRank(IMatchmaker matchmaker, List<IMatchPlayer> players) {
+            return players.stream().mapToDouble(p -> p.gameRank().rank()).average().orElse(matchmaker.settings().elo().initialRank());
         }
     }
 }

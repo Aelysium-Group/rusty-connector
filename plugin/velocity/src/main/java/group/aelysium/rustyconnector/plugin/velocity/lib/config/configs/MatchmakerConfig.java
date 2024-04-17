@@ -32,29 +32,29 @@ public class MatchmakerConfig extends YAML implements group.aelysium.rustyconnec
     }
 
     protected void register() throws IllegalStateException {
-        String algorithm = IYAML.getValue(this.data,"ranking.algorithm",String.class);
-        double variance = IYAML.getValue(this.data,"ranking.variance",Double.class);
-        double varianceExpansionCoefficient = IYAML.getValue(this.data,"ranking.variance-expansion-coefficient",Double.class);
+        String algorithm = IYAML.getValue(this.data,"algorithm",String.class);
+        int min = IYAML.getValue(this.data,"min",Integer.class);
+        int max = IYAML.getValue(this.data,"max",Integer.class);
+        double variance = IYAML.getValue(this.data,"variance",Double.class);
+        double varianceExpansionCoefficient = IYAML.getValue(this.data,"variance-expansion-coefficient",Double.class);
+        int requiredExpansionsForAccept = IYAML.getValue(this.data,"required-expansions-for-accept",Integer.class);
 
-        boolean freezeActiveSessions = IYAML.getValue(this.data,"session.freeze-active-sessions",Boolean.class);
-        int min = IYAML.getValue(this.data,"session.min",Integer.class);
-        int max = IYAML.getValue(this.data,"session.max",Integer.class);
-
-        LiquidTimestamp matchmakingInterval = LiquidTimestamp.from(10, TimeUnit.SECONDS);
+        LiquidTimestamp sessionDispatchInterval = LiquidTimestamp.from(10, TimeUnit.SECONDS);
         try {
-            matchmakingInterval = LiquidTimestamp.from(IYAML.getValue(this.data, "session.building.interval", String.class));
+            sessionDispatchInterval = LiquidTimestamp.from(IYAML.getValue(this.data, "session-dispatch-interval", String.class));
         } catch (Exception ignore) {}
 
-        int session_closing_threshold = IYAML.getValue(this.data,"session.closing-threshold",Integer.class);
-        if(session_closing_threshold == -1) session_closing_threshold = min;
+        boolean freezeActiveSessions = IYAML.getValue(this.data,"freeze-active-sessions",Boolean.class);
 
-        boolean session_closing_ranks_quittersLose = IYAML.getValue(this.data,"session.quitters-lose",Boolean.class);
-        boolean session_closing_ranks_stayersWin = IYAML.getValue(this.data,"session.stayers-win",Boolean.class);
+        int closingThreshold = IYAML.getValue(this.data,"closing-threshold",Integer.class);
+        if(closingThreshold == -1) closingThreshold = min;
 
-        boolean queue_joining_showInfo = IYAML.getValue(this.data, "queue.joining.show-info", Boolean.class);
+        boolean quittersLose = IYAML.getValue(this.data,"quitters-lose",Boolean.class);
+        boolean stayersWin = IYAML.getValue(this.data,"stayers-win",Boolean.class);
 
-        boolean session_leaving_command = IYAML.getValue(this.data, "queue.leaving.command", Boolean.class);
-        boolean session_leaving_boot = IYAML.getValue(this.data, "queue.leaving.boot", Boolean.class);
+        boolean leaveCommand = IYAML.getValue(this.data, "leave-command", Boolean.class);
+        boolean parentFamilyOnLeave = IYAML.getValue(this.data, "parent-family-on-leave", Boolean.class);
+        boolean showInfo = IYAML.getValue(this.data, "show-info", Boolean.class);
 
         Class<? extends IVelocityPlayerRank> actualSchema = RandomizedPlayerRank.class;
         if(algorithm.equals(WinLossPlayerRank.schema()))    actualSchema = WinLossPlayerRank.class;
@@ -62,21 +62,30 @@ public class MatchmakerConfig extends YAML implements group.aelysium.rustyconnec
         if(algorithm.equals(ELOPlayerRank.schema()))        actualSchema = ELOPlayerRank.class;
         if(algorithm.equals(OpenSkillPlayerRank.schema()))  actualSchema = OpenSkillPlayerRank.class;
 
+
+
+        double eloInitialRank = IYAML.getValue(this.data, "elo.initial-rank", Double.class);
+        double eloFactor = IYAML.getValue(this.data, "elo.elo-factor", Double.class);
+        double eloKFactor = IYAML.getValue(this.data, "elo.k-factor", Double.class);
+
+
+
         this.settings = new IMatchmaker.Settings(
-                new IMatchmaker.Settings.Ranking(actualSchema, variance, varianceExpansionCoefficient),
-                new IMatchmaker.Settings.Session(
-                        freezeActiveSessions,
-                        min,
-                        max,
-                        matchmakingInterval,
-                        session_closing_threshold,
-                        session_closing_ranks_quittersLose,
-                        session_closing_ranks_stayersWin
-                ),
-                new IMatchmaker.Settings.Queue(
-                        new IMatchmaker.Settings.Queue.Joining(queue_joining_showInfo),
-                        new IMatchmaker.Settings.Queue.Leaving(session_leaving_command, session_leaving_boot)
-                )
+                actualSchema,
+                min,
+                max,
+                variance,
+                varianceExpansionCoefficient,
+                requiredExpansionsForAccept,
+                sessionDispatchInterval,
+                freezeActiveSessions,
+                closingThreshold,
+                quittersLose,
+                stayersWin,
+                leaveCommand,
+                parentFamilyOnLeave,
+                showInfo,
+                new IMatchmaker.ELOSettings(eloInitialRank, eloFactor, eloKFactor)
         );
     }
 
