@@ -145,6 +145,7 @@ public class Session implements ISession {
 
         if(this.players.size() >= this.settings.min()) return;
 
+        if(this.ended) return;
         this.implode("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.");
     }
 

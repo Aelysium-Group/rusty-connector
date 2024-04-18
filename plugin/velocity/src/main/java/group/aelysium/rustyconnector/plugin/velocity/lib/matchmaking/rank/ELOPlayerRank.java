@@ -53,7 +53,6 @@ public class ELOPlayerRank implements IVelocityPlayerRank {
         }
         private Computer() {}
 
-
         @Override
         public void compute(List<IMatchPlayer> winners, List<IMatchPlayer> losers, IMatchmaker matchmaker, ISession session) {
             double averageWinnersRank = averageRank(matchmaker, winners);
