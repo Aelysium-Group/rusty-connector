@@ -48,7 +48,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 processResources {
-    def props = ['version': plugin_version, 'minecraft_version': minecraft_version, 'loader_version': loader_version]
+    def props = ['version': plugin_version, 'config_version': config_version, 'magic_link_protocol_version': magic_link_protocol_version, 'minecraft_version': minecraft_version, 'loader_version': loader_version]
     inputs.properties props
     filteringCharset "UTF-8"
 

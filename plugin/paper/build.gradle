@@ -41,7 +41,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 processResources {
-    def props = ['version': plugin_version, 'config_version': velocity_config_version, 'magic_link_protocol_version': magic_link_protocol_version]
+    def props = ['version': plugin_version, 'config_version': config_version, 'magic_link_protocol_version': magic_link_protocol_version]
     inputs.properties props
     filteringCharset 'UTF-8'
 
