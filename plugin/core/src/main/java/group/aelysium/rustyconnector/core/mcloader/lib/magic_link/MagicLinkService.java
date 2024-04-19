@@ -19,13 +19,14 @@ import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import java.net.ConnectException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MagicLinkService implements IMagicLinkService {
     private final IMessengerConnector messenger;
     private final ClockService heartbeat = new ClockService(2);
     private final AtomicInteger delay = new AtomicInteger(5);
-    private boolean stopPinging = false;
+    private final AtomicBoolean stopPinging = new AtomicBoolean(false);
 
     public MagicLinkService(IMessengerConnector messenger) {
         this.messenger = messenger;
@@ -38,7 +39,7 @@ public class MagicLinkService implements IMagicLinkService {
     private void scheduleNextPing(IMCLoaderFlame<? extends ICoreServiceHandler> api) {
         IServerInfoService serverInfoService = api.services().serverInfo();
         this.heartbeat.scheduleDelayed(() -> {
-            if(stopPinging) return;
+            if(stopPinging.get()) return;
 
             try {
                 Packet packet = api.services().packetBuilder().newBuilder()
@@ -73,7 +74,8 @@ public class MagicLinkService implements IMagicLinkService {
 
     @Override
     public void kill() {
-        stopPinging = true;
+        stopPinging.set(true);
+        this.heartbeat.kill();
 
         try {
             MCLoaderFlame api = TinderAdapterForCore.getTinder().flame();
@@ -87,7 +89,6 @@ public class MagicLinkService implements IMagicLinkService {
             api.services().events().fireEvent(new DisconnectedEvent());
         } catch (Exception ignore) {}
 
-        this.heartbeat.kill();
         this.messenger.kill();
     }
 }
