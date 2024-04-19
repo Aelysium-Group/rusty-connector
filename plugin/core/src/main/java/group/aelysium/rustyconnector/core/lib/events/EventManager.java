@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.core.lib.events;
 
-import group.aelysium.rustyconnector.toolkit.core.events.AsyncPublishCommand;
 import group.aelysium.rustyconnector.toolkit.core.events.Event;
 import group.aelysium.rustyconnector.toolkit.core.events.Listener;
 

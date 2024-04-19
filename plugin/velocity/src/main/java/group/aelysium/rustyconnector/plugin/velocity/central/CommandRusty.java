@@ -420,7 +420,17 @@ class Database {
     private static ArgumentBuilder<CommandSource, ?> bulk(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
         return LiteralArgumentBuilder.<CommandSource>literal("bulk")
                 .then(LiteralArgumentBuilder.<CommandSource>literal("purgeGameRecords")
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameId", StringArgumentType.greedyString())
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameId", StringArgumentType.string())
+                                .executes(context -> {
+                                    String gameId = context.getArgument("gameId", String.class);
+
+                                    StorageService storage = flame.services().storage();
+                                    storage.database().ranks().deleteGame(gameId);
+                                    logger.log("Successfully purged all rank records from "+gameId);
+                                    return Command.SINGLE_SUCCESS;
+                                })))
+                .then(LiteralArgumentBuilder.<CommandSource>literal("purgeInvalidGameSchemas")
+                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameId", StringArgumentType.string())
                                 .executes(context -> {
                                     String gameId = context.getArgument("gameId", String.class);
 
@@ -432,24 +442,6 @@ class Database {
                 .then(LiteralArgumentBuilder.literal("players"))
                 .then(LiteralArgumentBuilder.literal("residence"))
                 .then(LiteralArgumentBuilder.literal("friends"))
-                ;
-    }
-}
-
-class DebugMatchmaking {
-    public static ArgumentBuilder<CommandSource, ?> build(Flame flame, PluginLogger logger, MessageCacheService messageCacheService) {
-        return LiteralArgumentBuilder.<CommandSource>literal("matchmaking") // k8 createPod <familyName> <containerName> <containerPort>
-
-                .then(LiteralArgumentBuilder.<CommandSource>literal("purgeGameRecords")
-                        .then(RequiredArgumentBuilder.<CommandSource, String>argument("gameId", StringArgumentType.greedyString())
-                                .executes(context -> {
-                                    String gameId = context.getArgument("gameId", String.class);
-
-                                    StorageService storage = flame.services().storage();
-                                    storage.database().ranks().deleteGame(gameId);
-                                    logger.log("Successfully purged all rank records from "+gameId);
-                                    return Command.SINGLE_SUCCESS;
-                                })))
                 ;
     }
 }
