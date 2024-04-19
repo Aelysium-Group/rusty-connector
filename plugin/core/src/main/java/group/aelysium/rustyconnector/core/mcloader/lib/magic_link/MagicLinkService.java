@@ -75,7 +75,9 @@ public class MagicLinkService implements IMagicLinkService {
     @Override
     public void kill() {
         stopPinging.set(true);
-        this.heartbeat.kill();
+        try {
+            this.heartbeat.kill();
+        } catch (Exception ignore) {}
 
         try {
             MCLoaderFlame api = TinderAdapterForCore.getTinder().flame();
