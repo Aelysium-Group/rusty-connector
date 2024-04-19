@@ -2,6 +2,8 @@
   "schemaVersion": 1,
   "id": "rustyconnector-fabric",
   "version": "${version}",
+  "config-version": "${config_version}",
+  "magic-link-protocol-version": "${magic_link_protocol_version}",
   "name": "RustyConnector",
   "authors": ["Juice"],
   "description": "A player and server connection manager for Velocity based Minecraft Networks!",

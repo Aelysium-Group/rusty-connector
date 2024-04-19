@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public final class Packet implements JSONParseable {
-    private static final int protocolVersion = 2;
+    private static final int protocolVersion = 3;
 
     public static int protocolVersion() {
         return protocolVersion;
