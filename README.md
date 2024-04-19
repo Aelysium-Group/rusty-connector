@@ -1,8 +1,8 @@
 ![Aelysium Wordmark Image](https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/wordmark.png?raw=true)
 
 # 👋 Welcome to RustyConnector
-![Velocity](https://flat.badgen.net/badge/Velocity/3.1.1%20-%203.2.0/1197d1?icon=dockbit)
-![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.20.2/F96854?icon=telegram)
+![Velocity](https://flat.badgen.net/badge/Velocity/3.3.0/1197d1?icon=dockbit)
+![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.20.4/F96854?icon=telegram)
 ![Folia](https://flat.badgen.net/badge/Folia/Supported/E004BC?icon=maven)
 [![Aelysium](https://flat.badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
 [![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
