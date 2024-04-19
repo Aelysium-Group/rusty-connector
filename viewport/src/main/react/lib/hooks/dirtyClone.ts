@@ -1,1 +1,0 @@
-export const dirtyClone = (object: any): any => JSON.parse(JSON.stringify(object));
