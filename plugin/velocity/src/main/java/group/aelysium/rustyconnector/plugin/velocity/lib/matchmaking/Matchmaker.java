@@ -162,6 +162,8 @@ public class Matchmaker implements IMatchmaker {
 
     public void start(ILoadBalancer<IMCLoader> loadBalancer) {
         this.supervisor.scheduleRecurring(() -> {
+            if(this.queuedPlayers.size() < minPlayersPerGame) this.failedBuilds.set(0);
+
             int i = 0;
             double varianceLookahead = (this.settings.variance() + (this.settings.varianceExpansionCoefficient() * this.failedBuilds.get())) * 2;
             List<IMatchPlayer> removePlayers = new ArrayList<>();
@@ -196,15 +198,14 @@ public class Matchmaker implements IMatchmaker {
                     if(nextInsert.gameRank().rank() > varianceMax) break;
                     session.join(nextInsert);
                 }
-                ISession.Settings settings1 = session.settings();
 
-                if(session.size() < settings1.min()) {
+                if(session.size() < this.settings.min()) {
                     session.empty();
                     i = i + this.minPlayersPerGame;
                     continue;
                 }
 
-                if(session.size() < settings1.max() - 1 && this.failedBuilds.get() < this.settings.requiredExpansionsForAccept()) {
+                if(session.size() < this.settings.max() - 1 && this.failedBuilds.get() < this.settings.requiredExpansionsForAccept()) {
                     session.empty();
                     i = i + this.minPlayersPerGame;
                     continue;
@@ -215,7 +216,7 @@ public class Matchmaker implements IMatchmaker {
                 i = i + session.size();
             }
 
-            if(builtSessions.isEmpty() && this.queuedPlayers.size() > this.minPlayersPerGame) this.failedBuilds.incrementAndGet();
+            if(builtSessions.isEmpty() && this.queuedPlayers.size() >= this.minPlayersPerGame) this.failedBuilds.incrementAndGet();
             if(!builtSessions.isEmpty()) this.failedBuilds.set(0);
 
             this.queuedPlayers.removeAll(removePlayers);
