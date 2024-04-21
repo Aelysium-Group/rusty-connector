@@ -358,7 +358,6 @@ public class MySQLReactor extends StorageReactor {
 
             Gson gson = new Gson();
             JsonObject rank = gson.fromJson(result.getString("rank"), JsonObject.class);
-            System.out.println(rank);
 
             return Optional.of((IVelocityPlayerRank) resolver.resolve(rank));
         } catch (Exception e) {
