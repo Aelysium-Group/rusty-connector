@@ -14,6 +14,11 @@ public interface IRankedMCLoader extends IMCLoader {
      */
     Optional<ISession> currentSession();
 
+    /**
+     * Silently drops the session from this MCLoader if it has a session.
+     */
+    void dropSession();
+
     class Reference extends group.aelysium.rustyconnector.toolkit.velocity.util.Reference<IRankedMCLoader, UUID> {
         public Reference(UUID uuid) {
             super(uuid);

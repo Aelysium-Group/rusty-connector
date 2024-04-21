@@ -138,14 +138,14 @@ public class Session implements ISession {
     public void leave(IPlayer player) {
         this.players.remove(player.uuid());
 
+        if(this.ended) return;
+
         if(settings.quittersLose()) {
             Optional<IMatchPlayer> matchPlayer = this.matchmaker.matchPlayer(player);
             matchPlayer.ifPresent(mp -> mp.gameRank().computor().compute(List.of(), List.of(mp), matchmaker, this));
         }
 
         if(this.players.size() >= this.settings.min()) return;
-
-        if(this.ended) return;
         this.implode("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.");
     }
 
@@ -163,7 +163,7 @@ public class Session implements ISession {
                     .build();
             Tinder.get().services().magicLink().connection().orElseThrow().publish(packet);
 
-            ((RankedMCLoader) this.mcLoader).rawUnlock();
+            this.mcLoader.dropSession();
         }
 
         List<UUID> winners = new ArrayList<>();
@@ -203,7 +203,10 @@ public class Session implements ISession {
                 }
         }
 
-        if(this.active() && unlock) ((RankedMCLoader) this.mcLoader).rawUnlock();
+        if(this.active()) {
+            this.mcLoader.dropSession();
+            if(unlock) this.mcLoader.unlock();
+        }
 
         // Run storing logic last so that if something happens the other logic ran first.
         try {
@@ -235,7 +238,10 @@ public class Session implements ISession {
                 }
         }
 
-        if(this.active() && unlock) ((RankedMCLoader) this.mcLoader).rawUnlock();
+        if(this.active()) {
+            this.mcLoader.dropSession();
+            if(unlock) this.mcLoader.unlock();
+        }
 
         // Run storing logic last so that if something happens the other logic ran first.
         try {
