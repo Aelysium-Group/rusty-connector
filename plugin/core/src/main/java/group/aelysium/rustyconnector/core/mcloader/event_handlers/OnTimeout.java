@@ -5,6 +5,5 @@ import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.Timeout
 
 public class OnTimeout implements Listener<TimeoutEvent> {
     public void handler(TimeoutEvent event) {
-        System.out.println("timedout!");
     }
 }

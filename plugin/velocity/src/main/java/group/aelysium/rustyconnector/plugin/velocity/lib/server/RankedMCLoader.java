@@ -33,9 +33,6 @@ public class RankedMCLoader extends MCLoader implements IRankedMCLoader {
         for (IMatchPlayer matchPlayer : session.players().values())
             try {
                 ConnectionResult result = this.connect(matchPlayer.player()).result().get(5, TimeUnit.SECONDS);
-
-                // System.out.println("");
-                Tinder.get().logger().send(result.message());
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -5,6 +5,5 @@ import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.Disconn
 
 public class OnDisconnection implements Listener<DisconnectedEvent> {
     public void handler(DisconnectedEvent event) {
-        System.out.println("unregistered!");
     }
 }

@@ -137,7 +137,6 @@ public class MCLoader implements IMCLoader {
             throw new Exception(error.getMessage());
         }
 
-        System.out.println("About to fire Register Event!");
         EventDispatch.UnSafe.fireAndForget(new RegisterEvent(family, this));
     }
 
@@ -166,7 +165,6 @@ public class MCLoader implements IMCLoader {
             if (removeFromFamily)
                 family.removeServer(server);
 
-            System.out.println("About to fire UnRegister Event!");
             EventDispatch.UnSafe.fireAndForget(new UnregisterEvent(family, server));
         } catch (Exception e) {
             if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))

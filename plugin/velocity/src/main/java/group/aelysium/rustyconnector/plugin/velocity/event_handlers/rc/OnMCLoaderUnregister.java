@@ -15,8 +15,6 @@ public class OnMCLoaderUnregister implements Listener<UnregisterEvent> {
     public void handler(UnregisterEvent event) {
         PluginLogger logger = Tinder.get().logger();
 
-        System.out.println("MCLoader unregister event has fired!");
-
         try {
             RankedMCLoader mcLoader = (RankedMCLoader) event.mcLoader();
             mcLoader.currentSession().orElseThrow().implode("The server that this session was on has closed!");

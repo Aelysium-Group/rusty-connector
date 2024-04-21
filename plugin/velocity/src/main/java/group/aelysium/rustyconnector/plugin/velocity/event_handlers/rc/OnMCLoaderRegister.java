@@ -14,8 +14,6 @@ public class OnMCLoaderRegister implements Listener<RegisterEvent> {
     public void handler(RegisterEvent event) {
         PluginLogger logger = Tinder.get().logger();
 
-        System.out.println("MCLoader register event has fired!");
-
         // Fire console message
         if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
             ProxyLang.REGISTERED.send(logger, event.mcLoader().uuidOrDisplayName(), event.family().id());

@@ -5,6 +5,5 @@ import group.aelysium.rustyconnector.toolkit.mc_loader.events.magic_link.Connect
 
 public class OnConnection implements Listener<ConnectedEvent> {
     public void handler(ConnectedEvent event) {
-        System.out.println("registered!");
     }
 }

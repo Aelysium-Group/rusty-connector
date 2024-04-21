@@ -62,9 +62,7 @@ public class OnPlayerDisconnect {
             player.server().orElseThrow().leave(player);
 
             return;
-        } catch (Exception ignore) {
-            System.out.println("No MCLoader was found for the player! Attempting to hard search for player in matchmakers...");
-        }
+        } catch (Exception ignore) {}
         try {
             List<RankedFamily> families = new ArrayList<>();
             api.services().family().dump().forEach(family -> {
