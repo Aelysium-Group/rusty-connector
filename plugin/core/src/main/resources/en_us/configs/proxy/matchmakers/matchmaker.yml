@@ -78,6 +78,17 @@ variance: 0.2
 
 
 #
+# Whether a player should be reconnected to their previous session if
+# it's still running when they try to join the queue.
+#
+# If false, the player will be put into queue for a new session instead.
+#
+
+reconnect: true
+
+
+
+#
 # Sometimes players will be too far apart in rank for the matchmaker to make a session.
 # Anytime there are enough players to be able to make a session
 # but no session is able to be made (because the variance range isn't large enough),

@@ -6,10 +6,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IRankedMCLoader;
 
 import java.rmi.AlreadyBoundException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public interface ISession extends JSONParseable {
     UUID uuid();
@@ -103,6 +100,12 @@ public interface ISession extends JSONParseable {
      * Gets the players that are currently in this session.
      */
     Map<UUID, IMatchPlayer> players();
+
+    /**
+     * Gets the list of players that were, at somepoint, in this session - but have since left.
+     * UUIDs will not appear in this Set until after the player has left.
+     */
+    Set<UUID> previousPlayers();
 
     /**
      * Adds the player to the session.

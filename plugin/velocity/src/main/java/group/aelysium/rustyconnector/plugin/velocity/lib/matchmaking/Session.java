@@ -27,8 +27,9 @@ import java.util.concurrent.TimeUnit;
 
 public class Session implements ISession {
     protected final IMatchmaker matchmaker;
-    protected final UUID uuid = UUID.randomUUID();;
+    protected final UUID uuid = UUID.randomUUID();
     protected final Map<UUID, IMatchPlayer> players;
+    protected Set<UUID> previousPlayers;
     protected IRankedMCLoader mcLoader;
     protected final Settings settings;
     protected boolean ended = false;
@@ -81,12 +82,22 @@ public class Session implements ISession {
         return players;
     }
 
+    public Set<UUID> previousPlayers() {
+        if(this.previousPlayers == null) return new HashSet<>();
+        return this.previousPlayers;
+    }
+
     public boolean contains(IMatchPlayer matchPlayer) {
         return this.players.containsKey(matchPlayer.player().uuid());
     }
 
     public void empty() {
         this.players.clear();
+    }
+
+    protected void recordLeavingPlayer(UUID uuid) {
+        if(this.previousPlayers == null) this.previousPlayers = new HashSet<>();
+        this.previousPlayers.add(uuid);
     }
 
     public void start(IRankedMCLoader mcLoader) throws AlreadyBoundException {
@@ -137,6 +148,8 @@ public class Session implements ISession {
 
     public void leave(IPlayer player) {
         this.players.remove(player.uuid());
+
+        this.recordLeavingPlayer(player.uuid());
 
         if(this.ended) return;
 

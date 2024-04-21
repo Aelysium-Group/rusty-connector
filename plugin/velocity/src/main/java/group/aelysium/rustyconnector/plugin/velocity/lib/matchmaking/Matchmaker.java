@@ -97,7 +97,23 @@ public class Matchmaker implements IMatchmaker {
         try {
             IMatchPlayer matchPlayer = this.resolveMatchPlayer(player);
 
-            if(this.sessionPlayers.containsKey(matchPlayer.player().uuid())) throw new RuntimeException("Player is already queued!");
+            if(this.queuedPlayers.contains(matchPlayer)) return;
+            if(this.sessionPlayers.containsKey(matchPlayer.player().uuid()))
+                if(settings.reconnect()) {
+                    ISession foundSession = null;
+                    for (ISession s : this.activeSessions.values()) {
+                        if(!s.previousPlayers().contains(player.uuid())) continue;
+                        this.connectSession(s, matchPlayer);
+                        result.complete(ConnectionResult.success(Component.text("Successfully queued into the matchmaker!"), s.mcLoader().orElse(null)));
+                        return;
+                    }
+                    for (ISession s : this.queuedSessions.values()) {
+                        if(!s.previousPlayers().contains(player.uuid())) continue;
+                        this.connectSession(s, matchPlayer);
+                        result.complete(ConnectionResult.success(Component.text("Successfully queued into the matchmaker!"), null));
+                        return;
+                    }
+                } else throw new RuntimeException("Player is already queued!");
 
             int insertIndex = this.queuedPlayers.size();
             this.queuedPlayers.add(insertIndex, matchPlayer);
@@ -332,7 +348,7 @@ public class Matchmaker implements IMatchmaker {
      * Attempts to connect the player to the session.
      */
     protected ConnectionResult connectSession(ISession session, IMatchPlayer matchPlayer) throws ExecutionException, InterruptedException, TimeoutException {
-        if(!session.matchmaker().equals(this)) throw new RuntimeException("Attempted to connect to a session governed by anotehr matchmaker!");
+        if(!session.matchmaker().equals(this)) throw new RuntimeException("Attempted to connect to a session governed by another matchmaker!");
         ConnectionResult result = session.join(matchPlayer).result().get(5, TimeUnit.SECONDS);
 
         if(result.connected())

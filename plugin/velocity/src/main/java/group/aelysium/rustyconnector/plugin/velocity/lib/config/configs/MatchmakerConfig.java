@@ -36,6 +36,7 @@ public class MatchmakerConfig extends YAML implements group.aelysium.rustyconnec
         int min = IYAML.getValue(this.data,"min",Integer.class);
         int max = IYAML.getValue(this.data,"max",Integer.class);
         double variance = IYAML.getValue(this.data,"variance",Double.class);
+        boolean reconnect = IYAML.getValue(this.data,"reconnect",Boolean.class);
         double varianceExpansionCoefficient = IYAML.getValue(this.data,"variance-expansion-coefficient",Double.class);
         int requiredExpansionsForAccept = IYAML.getValue(this.data,"required-expansions-for-accept",Integer.class);
 
@@ -75,6 +76,7 @@ public class MatchmakerConfig extends YAML implements group.aelysium.rustyconnec
                 min,
                 max,
                 variance,
+                reconnect,
                 varianceExpansionCoefficient,
                 requiredExpansionsForAccept,
                 sessionDispatchInterval,
