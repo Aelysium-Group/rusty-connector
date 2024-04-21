@@ -21,7 +21,7 @@ public class RankedGameEndEvent implements Event {
         this.tied = tied;
     }
 
-    public UUID gameUUID() {
+    public UUID sessionUUID() {
         return uuid;
     }
     public List<UUID> losers() {
