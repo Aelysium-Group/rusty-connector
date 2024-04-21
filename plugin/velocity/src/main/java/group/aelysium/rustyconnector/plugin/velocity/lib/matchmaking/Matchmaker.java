@@ -205,7 +205,7 @@ public class Matchmaker implements IMatchmaker {
                     continue;
                 }
 
-                if(session.size() <= this.settings.max() && this.failedBuilds.get() < this.settings.requiredExpansionsForAccept()) {
+                if(session.size() < this.settings.max() && this.failedBuilds.get() < this.settings.requiredExpansionsForAccept()) {
                     session.empty();
                     i = i + this.minPlayersPerGame;
                     continue;
