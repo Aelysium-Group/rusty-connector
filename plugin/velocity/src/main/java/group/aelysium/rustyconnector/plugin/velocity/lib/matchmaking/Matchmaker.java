@@ -124,15 +124,17 @@ public class Matchmaker implements IMatchmaker {
     }
 
     public void leave(IPlayer player) {
-        IMatchPlayer matchPlayer = this.resolveMatchPlayer(player);
-        if(this.queuedPlayers.remove(matchPlayer)) return;
-        if(!this.sessionPlayers.containsKey(player.uuid())) return;
-
         try {
             hideBossBars(player.resolve().orElseThrow());
         } catch (Exception ignore) {}
 
-        ((Session) this.sessionPlayers.get(player.uuid())).leave(player);
+        IMatchPlayer matchPlayer = this.resolveMatchPlayer(player);
+
+        if(this.queuedPlayers.remove(matchPlayer)) return;
+
+        Session session = ((Session) this.sessionPlayers.get(player.uuid()));
+        if(session == null) return;
+        session.leave(player);
 
         this.sessionPlayers.remove(player.uuid());
     }

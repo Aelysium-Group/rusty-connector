@@ -158,7 +158,7 @@ public class Session implements ISession {
             matchPlayer.ifPresent(mp -> mp.gameRank().computor().compute(List.of(), List.of(mp), matchmaker, this));
         }
 
-        if(this.players.size() >= this.settings.min()) return;
+        if(this.players.size() > this.settings.min()) return;
         this.implode("To many players left your game session so it had to be terminated. Sessions that are ended early won't penalize you.");
     }
 
