@@ -173,7 +173,7 @@ public class Matchmaker implements IMatchmaker {
                 IMatchPlayer thrown = null;
                 try {
                     current = this.queuedPlayers.get(i);
-                    thrown = this.queuedPlayers.get(i + this.minPlayersPerGame);
+                    thrown = this.queuedPlayers.get(i + (this.minPlayersPerGame - 1));
                 } catch (IndexOutOfBoundsException | NoOutputException ignore) {}
 
                 if(current == null || thrown == null) {
@@ -205,7 +205,7 @@ public class Matchmaker implements IMatchmaker {
                     continue;
                 }
 
-                if(session.size() < this.settings.max() - 1 && this.failedBuilds.get() < this.settings.requiredExpansionsForAccept()) {
+                if(session.size() <= this.settings.max() && this.failedBuilds.get() < this.settings.requiredExpansionsForAccept()) {
                     session.empty();
                     i = i + this.minPlayersPerGame;
                     continue;
