@@ -7,10 +7,7 @@ import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
-import group.aelysium.rustyconnector.toolkit.mc_loader.events.ranked_game.RankedGameEndEvent;
 import group.aelysium.rustyconnector.toolkit.mc_loader.events.ranked_game.RankedGameImplodeEvent;
-
-import java.util.List;
 
 public class RankedGameImplodedListener extends PacketListener<RankedGame.Imploded> {
     protected IMCLoaderTinder api;

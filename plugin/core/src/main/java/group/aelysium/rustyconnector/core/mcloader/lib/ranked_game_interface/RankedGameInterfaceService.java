@@ -7,7 +7,6 @@ import group.aelysium.rustyconnector.core.TinderAdapterForCore;
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.core.lib.packets.RankedGame;
 import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
-import group.aelysium.rustyconnector.core.mcloader.lib.server_info.ServerInfoService;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketParameter;
 import group.aelysium.rustyconnector.toolkit.mc_loader.events.ranked_game.RankedGameEndEvent;
