@@ -182,7 +182,8 @@ public class Matchmaker implements IMatchmaker {
 
             int i = 0;
             double varianceLookahead = (this.settings.variance() + (this.settings.varianceExpansionCoefficient() * this.failedBuilds.get())) * 2;
-            List<IMatchPlayer> removePlayers = new ArrayList<>();
+            List<IMatchPlayer> selectedPlayers = new ArrayList<>();
+            Map<UUID, ISession> sessionMappings = new HashMap<>();
             List<ISession> builtSessions = new ArrayList<>();
             while(i < this.queuedPlayers.size()) {
                 IMatchPlayer current = null;
@@ -228,14 +229,18 @@ public class Matchmaker implements IMatchmaker {
                 }
 
                 builtSessions.add(session);
-                removePlayers.addAll(session.players().values());
+                session.players().values().forEach(p -> {
+                    selectedPlayers.add(p);
+                    sessionMappings.put(p.player().uuid(), session);
+                });
                 i = i + session.size();
             }
 
             if(builtSessions.isEmpty() && this.queuedPlayers.size() >= this.minPlayersPerGame) this.failedBuilds.incrementAndGet();
             if(!builtSessions.isEmpty()) this.failedBuilds.set(0);
 
-            this.queuedPlayers.removeAll(removePlayers);
+            this.sessionPlayers.putAll(sessionMappings);
+            this.queuedPlayers.removeAll(selectedPlayers);
             builtSessions.forEach(s -> this.queuedSessions.put(s.uuid(), s));
         }, this.settings.sessionDispatchInterval());
 

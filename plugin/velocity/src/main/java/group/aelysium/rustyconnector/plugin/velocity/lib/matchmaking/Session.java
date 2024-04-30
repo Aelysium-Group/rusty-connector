@@ -163,8 +163,6 @@ public class Session implements ISession {
     }
 
     public void implode(String reason, boolean unlock) {
-        this.ended = true;
-
         this.players.values().forEach(matchPlayer -> matchPlayer.player().sendMessage(Component.text(reason, NamedTextColor.RED)));
 
         if(this.active()) {

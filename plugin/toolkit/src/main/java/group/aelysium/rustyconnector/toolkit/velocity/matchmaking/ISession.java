@@ -115,6 +115,13 @@ public interface ISession extends JSONParseable {
     PlayerConnectable.Request join(IMatchPlayer player);
 
     /**
+     * Handles a player leaving the session.
+     * This method is called when this session is in a {@link IRankedMCLoader} and the player leaves that MCLoader.
+     * If this method causes the player count in this Session to drop below the required amount, the session should implode.
+     */
+    void leave(IPlayer player);
+
+    /**
      * Starts the session on the specified MCLoader.
      * Once the session starts, all players will be connected to the MCLoader.
      * Additionally, any players that join the session after it's started will also connect to the MCLoader instantly.

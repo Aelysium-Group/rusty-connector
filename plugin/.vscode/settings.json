@@ -7,5 +7,6 @@
         "**/bin/**": true,
         "**/.idea/**": true,
         "**/node_modules/**": true
-    } 
+    },
+    "editor.fontSize": 12
 }
