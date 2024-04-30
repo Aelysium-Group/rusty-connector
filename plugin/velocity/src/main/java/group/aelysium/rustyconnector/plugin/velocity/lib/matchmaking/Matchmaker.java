@@ -242,6 +242,11 @@ public class Matchmaker implements IMatchmaker {
             this.sessionPlayers.putAll(sessionMappings);
             this.queuedPlayers.removeAll(selectedPlayers);
             builtSessions.forEach(s -> this.queuedSessions.put(s.uuid(), s));
+
+            // Some intentional cleanup
+            sessionMappings.clear();
+            selectedPlayers.clear();
+            builtSessions.clear();
         }, this.settings.sessionDispatchInterval());
 
         this.supervisor.scheduleRecurring(() -> {
