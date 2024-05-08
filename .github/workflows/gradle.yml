@@ -18,7 +18,7 @@ jobs:
         uses: gradle/gradle-build-action@v3
 
       - name: Execute Gradle build
-        run: ./plugin/gradlew build
+        run: chmod +x plugin/gradlew && ./plugin/gradlew build
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
