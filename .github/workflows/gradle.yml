@@ -2,7 +2,7 @@ name: Build RC
 on:
   push:
     branches:
-      - '**'# matches every branch
+      - '**'
 
 jobs:
   build:
