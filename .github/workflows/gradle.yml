@@ -7,8 +7,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./plugin
+      with:
+        working-directory: ./plugin
+      uses:
+        working-directory: ./plugin
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4  
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -18,12 +25,12 @@ jobs:
         uses: gradle/gradle-build-action@v3
 
       - name: Execute Gradle build
-        run: chmod +x plugin/gradlew && ./plugin/gradlew build
+        run: chmod +x gradlew && ./gradlew build
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: RustyConnector
           path: |
-            ${{ github.workspace }}/plugin/paper/build/libs/paper.jar
-            ${{ github.workspace }}/plugin/paper/build/libs/velocity.jar
+            paper/build/libs/paper.jar
+            velocity/build/libs/velocity.jar
