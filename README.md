@@ -2,7 +2,7 @@
 
 # 👋 Welcome to RustyConnector
 ![Velocity](https://flat.badgen.net/badge/Velocity/3.3.0/1197d1?icon=dockbit)
-![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.20.4/F96854?icon=telegram)
+![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.20.6/F96854?icon=telegram)
 ![Folia](https://flat.badgen.net/badge/Folia/Supported/E004BC?icon=maven)
 [![Aelysium](https://flat.badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
 [![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
