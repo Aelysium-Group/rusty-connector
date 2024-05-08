@@ -15,7 +15,6 @@ jobs:
           java-version: 17
       
       - name: Setup Gradle
-        working-directory: ./plugin
         uses: gradle/gradle-build-action@v3
 
       - name: Execute Gradle build
@@ -23,10 +22,9 @@ jobs:
         run: chmod +x gradlew && ./gradlew build
 
       - name: Upload Artifacts
-        working-directory: ./plugin
         uses: actions/upload-artifact@v4
         with:
           name: RustyConnector
           path: |
-            paper/build/libs/paper.jar
-            velocity/build/libs/velocity.jar
+            ${{ github.workspace }}/plugin/paper/build/libs/paper.jar
+            ${{ github.workspace }}/plugin/velocity/build/libs/velocity.jar
