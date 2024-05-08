@@ -9,10 +9,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFla
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.toolkit.core.events.Listener;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
-import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.UnregisterEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.MCLoaderUnregisterEvent;
 
-public class OnMCLoaderUnregister implements Listener<UnregisterEvent> {
-    public void handler(UnregisterEvent event) {
+public class OnMCLoaderUnregister implements Listener<MCLoaderUnregisterEvent> {
+    public void handler(MCLoaderUnregisterEvent event) {
         PluginLogger logger = Tinder.get().logger();
 
         try {

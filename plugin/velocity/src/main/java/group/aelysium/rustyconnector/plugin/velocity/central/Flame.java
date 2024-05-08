@@ -19,8 +19,8 @@ import group.aelysium.rustyconnector.toolkit.core.messenger.IMessengerConnector;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.VelocityPacketBuilder;
 import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
-import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
-import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.UnregisterEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.MCLoaderRegisterEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.MCLoaderUnregisterEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilyLeaveEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.FamilySwitchEvent;
 import group.aelysium.rustyconnector.toolkit.velocity.events.player.MCLoaderLeaveEvent;
@@ -234,8 +234,8 @@ class Initialize {
 
         rcEventManager.on(FamilyLeaveEvent.class, new OnFamilyLeave());
         rcEventManager.on(FamilySwitchEvent.class, new OnFamilySwitch());
-        rcEventManager.on(RegisterEvent.class, new OnMCLoaderRegister());
-        rcEventManager.on(UnregisterEvent.class, new OnMCLoaderUnregister());
+        rcEventManager.on(MCLoaderRegisterEvent.class, new OnMCLoaderRegister());
+        rcEventManager.on(MCLoaderUnregisterEvent.class, new OnMCLoaderUnregister());
         rcEventManager.on(MCLoaderSwitchEvent.class, new OnMCLoaderSwitch());
         rcEventManager.on(MCLoaderLeaveEvent.class, new OnMCLoaderLeave());
     }

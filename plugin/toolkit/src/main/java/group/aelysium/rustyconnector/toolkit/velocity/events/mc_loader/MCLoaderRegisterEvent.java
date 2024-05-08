@@ -7,11 +7,11 @@ import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 /**
  * Represents an MCLoader successfully registering to the Proxy.
  */
-public class RegisterEvent implements Event {
+public class MCLoaderRegisterEvent implements Event {
     protected final IFamily family;
     protected final IMCLoader mcLoader;
 
-    public RegisterEvent(IFamily family, IMCLoader mcLoader) {
+    public MCLoaderRegisterEvent(IFamily family, IMCLoader mcLoader) {
         this.family = family;
         this.mcLoader = mcLoader;
     }

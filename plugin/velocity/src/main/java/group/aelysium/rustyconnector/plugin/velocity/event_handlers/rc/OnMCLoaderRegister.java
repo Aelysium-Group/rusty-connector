@@ -8,10 +8,10 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFla
 import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
 import group.aelysium.rustyconnector.toolkit.core.events.Listener;
 import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
-import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.RegisterEvent;
+import group.aelysium.rustyconnector.toolkit.velocity.events.mc_loader.MCLoaderRegisterEvent;
 
-public class OnMCLoaderRegister implements Listener<RegisterEvent> {
-    public void handler(RegisterEvent event) {
+public class OnMCLoaderRegister implements Listener<MCLoaderRegisterEvent> {
+    public void handler(MCLoaderRegisterEvent event) {
         PluginLogger logger = Tinder.get().logger();
 
         // Fire console message
