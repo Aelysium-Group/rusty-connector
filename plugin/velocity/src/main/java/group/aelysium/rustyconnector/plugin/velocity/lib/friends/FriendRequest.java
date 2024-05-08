@@ -1,90 +1,102 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.UUID;
 
-public class FriendRequest {
+public class FriendRequest implements IFriendRequest {
     private final FriendsService friendsService;
-    private long id;
-    private ResolvablePlayer sender;
-    private ResolvablePlayer target;
+    private UUID uuid = UUID.randomUUID();
+    private IPlayer sender;
+    private String target;
     private Boolean isAcknowledged = null;
 
-    public FriendRequest(FriendsService friendsService, long id, ResolvablePlayer sender, ResolvablePlayer target) {
+    public FriendRequest(FriendsService friendsService, IPlayer sender, String target) {
         this.friendsService = friendsService;
-        this.id = id;
         this.sender = sender;
         this.target = target;
     }
 
-    public long id() {
-        return this.id;
+    public UUID uuid() {
+        return this.uuid;
     }
-    public ResolvablePlayer sender() {
+    public IPlayer sender() {
         return this.sender;
     }
-    public ResolvablePlayer target() {
+    public String target() {
         return this.target;
     }
 
-
-    /**
-     * Accept the party invite.
-     * This will subsequently connect the player to the party's server and then decompose the invite and remove it from the PartyService that it belongs to.
-     */
     public synchronized void accept() {
         try {
-            if (friendsService.friendCount(this.target).orElseThrow() > friendsService.settings().maxFriends())
-                throw new IllegalStateException(VelocityLang.FRIEND_INJECTED_MAXED);
-        } catch (IllegalStateException e) {
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalStateException(VelocityLang.FRIEND_INJECTED_INTERNAL_ERROR);
-        }
-
-        if(this.isAcknowledged != null)
-            throw new IllegalStateException(VelocityLang.FRIEND_INJECTED_ACKNOWLEDGED);
-
-        try {
-            friendsService.addFriends(this.sender, this.target);
+            Player player = new IPlayer.UsernameReference(this.target).get();
 
             try {
-                Player resolved = this.target.resolve().orElseThrow();
-                resolved.sendMessage(VelocityLang.BECOME_FRIENDS.build(sender.username()));
-            } catch (NoSuchElementException ignore) {}
-            try {
-                Player resolved = this.sender.resolve().orElseThrow();
-                resolved.sendMessage(VelocityLang.BECOME_FRIENDS.build(target.username()));
-            } catch (NoSuchElementException ignore) {}
+                if (friendsService.friendCount(player) > friendsService.settings().maxFriends())
+                    throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_MAXED);
+            } catch (IllegalStateException e) {
+                throw e;
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_INTERNAL_ERROR);
+            }
 
-            friendsService.closeInvite(this);
-            this.isAcknowledged = true;
+            if(this.isAcknowledged != null)
+                throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_ACKNOWLEDGED);
+
+            try {
+                friendsService.friendStorage().set(this.sender, player);
+
+                try {
+                    player.sendMessage(ProxyLang.BECOME_FRIENDS.build(sender.username()));
+                } catch (NoSuchElementException ignore) {}
+                try {
+                    com.velocitypowered.api.proxy.Player resolved = this.sender.resolve().orElseThrow();
+                    resolved.sendMessage(ProxyLang.BECOME_FRIENDS.build(player.username()));
+                } catch (NoSuchElementException ignore) {}
+
+                friendsService.closeInvite(this);
+                this.isAcknowledged = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_INTERNAL_ERROR);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalStateException(VelocityLang.FRIEND_INJECTED_INTERNAL_ERROR);
+            throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_INTERNAL_ERROR);
         }
     }
 
-    /**
-     * Deny the party invite.
-     * This will subsequently decompose the invite and remove it from the PartyService that it belongs to.
-     */
     public synchronized void ignore() {
         try {
             friendsService.closeInvite(this);
             this.isAcknowledged = true;
         } catch (Exception ignore) {
-            throw new IllegalStateException(VelocityLang.FRIEND_INJECTED_INTERNAL_ERROR);
+            throw new IllegalStateException(ProxyLang.FRIEND_INJECTED_INTERNAL_ERROR);
         }
     }
 
     public synchronized void decompose() {
-        this.id = 0;
         this.sender = null;
         this.target = null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FriendRequest that = (FriendRequest) o;
+        return
+                Objects.equals(sender, that.sender) && Objects.equals(target, that.target) ||
+                Objects.equals(sender.username(), that.target) && Objects.equals(target, that.sender.username());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sender, target);
     }
 }

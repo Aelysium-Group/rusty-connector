@@ -2,36 +2,42 @@ package group.aelysium.rustyconnector.plugin.paper.central;
 
 import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.core.mcloader.central.CoreServiceHandler;
+import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderFlame;
+import group.aelysium.rustyconnector.core.mcloader.central.MCLoaderTinder;
+import group.aelysium.rustyconnector.plugin.paper.commands.CommandRusty;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerJoin;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerLeave;
+import group.aelysium.rustyconnector.plugin.paper.events.OnPlayerPreLogin;
+import group.aelysium.rustyconnector.toolkit.RustyConnector;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
-import org.bukkit.Bukkit;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
-import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.entity.Player;
 import org.slf4j.Logger;
 
-import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Path;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 
-public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<BukkitScheduler> {
-    private static Tinder instance;
+public class Tinder extends MCLoaderTinder {
+    protected static Tinder instance;
     public static Tinder get() {
         return instance;
     }
-
-    private PaperCommandManager<CommandSender> commandManager;
+    private final PaperCommandManager<CommandSender> commandManager;
     private final PaperRustyConnector plugin;
-    private Flame flame;
     private final PluginLogger pluginLogger;
-    private LangService lang;
+    private final LangService lang;
 
 
     private Tinder(PaperRustyConnector plugin, PluginLogger logger, LangService lang) throws Exception {
-        instance = this;
+        super(logger, lang);
         this.plugin = plugin;
         this.pluginLogger = logger;
         this.lang = lang;
@@ -42,35 +48,8 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Bu
                 Function.identity(),
                 Function.identity()
         );
-    }
 
-    /**
-     * Ignites a {@link Flame} which effectively starts the RustyConnector kernel.
-     * @return A {@link Flame}.
-     */
-    public Flame ignite() throws RuntimeException {
-        this.flame = Flame.fabricateNew(this.plugin, this.lang);
-        return flame;
-    }
-
-    /**
-     * Restarts the entire RustyConnector kernel by exhausting the current {@link Flame} and igniting a new one.
-     */
-    public void rekindle() {
-        this.flame.exhaust(this.plugin);
-        this.flame = null;
-
-        this.ignite();
-    }
-
-    @Override
-    public InputStream resourceAsStream(String filename)  {
-        return getClass().getClassLoader().getResourceAsStream(filename);
-    }
-
-    @Override
-    public BukkitScheduler scheduler() {
-        return Bukkit.getScheduler();
+        instance = this;
     }
 
     @Override
@@ -88,8 +67,51 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Bu
         return this.lang;
     }
 
-    public Path dataFolderPath() {
-        return plugin.getDataFolder().toPath();
+    @Override
+    public void setMaxPlayers(int max) {
+        plugin.getServer().setMaxPlayers(max);
+    }
+
+    @Override
+    public int onlinePlayerCount() {
+        return plugin.getServer().getOnlinePlayers().size();
+    }
+
+    @Override
+    public UUID getPlayerUUID(String name) {
+        return plugin.getServer().getOfflinePlayer(name).getUniqueId();
+    }
+
+    @Override
+    public String getPlayerName(UUID uuid) {
+        return plugin.getServer().getOfflinePlayer(uuid).getName();
+    }
+
+    @Override
+    public boolean isOnline(UUID uuid) {
+        return plugin.getServer().getPlayer(uuid) != null;
+    }
+
+    @Override
+    public void teleportPlayer(UUID uuid, UUID targetUuid) {
+        Player client = plugin.getServer().getPlayer(uuid);
+        if (client == null) return;
+
+        Player target = plugin.getServer().getPlayer(targetUuid);
+        if (target == null) return;
+
+        if (isFolia()) {
+            plugin.getServer().getScheduler().scheduleSyncDelayedTask(PaperRustyConnector.getPlugin(PaperRustyConnector.class), () -> {
+               client.teleport(target.getLocation());
+            }, 0);
+        } else {
+            client.teleportAsync(target.getLocation());
+        }
+    }
+
+    @Override
+    public void sendMessage(UUID uuid, Component component) {
+        Objects.requireNonNull(plugin.getServer().getPlayer(uuid)).sendMessage(component);
     }
 
     /**
@@ -99,16 +121,9 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Bu
         return this.plugin.getServer();
     }
 
-    /**
-     * Returns the currently active RustyConnector kernel.
-     * @return A {@link Flame}.
-     */
-    public Flame flame() {
-        return this.flame;
-    }
-
-    public CoreServiceHandler services() {
-        return this.flame.services();
+    @Override
+    public Object server() {
+        return this.paperServer();
     }
 
     public PaperCommandManager<CommandSender> commandManager() {
@@ -123,16 +138,24 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Bu
         return false;
     }
 
+    @Override
+    public void ignite(int port) throws RuntimeException {
+        super.ignite(port);
+
+        CommandRusty.create(this.commandManager());
+
+        this.paperServer().getPluginManager().registerEvents(new OnPlayerJoin(), plugin);
+        this.paperServer().getPluginManager().registerEvents(new OnPlayerLeave(), plugin);
+        this.paperServer().getPluginManager().registerEvents(new OnPlayerPreLogin(), plugin);
+    }
+
     /**
      * Creates new {@link Tinder} based on the gathered resources.
      */
     public static Tinder gather(PaperRustyConnector plugin, Logger logger) {
         PluginLogger pluginLogger = new PluginLogger(logger);
         try {
-            RootLanguageConfig config = new RootLanguageConfig(new File(plugin.getDataFolder(), "language.yml"));
-            if (!config.generate(pluginLogger))
-                throw new IllegalStateException("Unable to load or create language.yml!");
-            config.register();
+            RootLanguageConfig config = RootLanguageConfig.construct(plugin.getDataFolder().toPath());
 
             LangService langService = LangService.resolveLanguageCode(config.getLanguage(), plugin.getDataFolder().toPath());
 

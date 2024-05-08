@@ -1,59 +1,44 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.players;
 
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageRoot;
-import one.microstream.storage.embedded.types.EmbeddedStorageManager;
+import group.aelysium.rustyconnector.core.lib.cache.CacheableMessage;
+import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayerService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.Database;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-public class PlayerService extends Service {
-    private final MySQLStorage storage;
+public class PlayerService implements IPlayerService {
+    private final Map<UUID, Boolean> recentPlayers;
+    private final StorageService storage;
 
-    public PlayerService(MySQLStorage storage) {
+    public PlayerService(StorageService storage) {
         this.storage = storage;
+        this.recentPlayers = new LinkedHashMap<>(100){
+            @Override
+            protected boolean removeEldestEntry(Map.Entry eldest) {
+                return this.size() > 100;
+            }
+        };
     }
 
-    public Optional<ResolvablePlayer> fetch(UUID uuid) {
-        try {
-            StorageRoot root = this.storage.root();
-
-            return root.players().stream().filter(fakePlayer -> fakePlayer.uuid().equals(uuid)).findAny();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Optional.empty();
+    public void store(IPlayer player) {
+        if(this.recentPlayers.containsKey(player.uuid())) return;
+        this.storage.database().players().set(player);
+        this.recentPlayers.put(player.uuid(), false);
     }
 
-    public Optional<ResolvablePlayer> fetch(String username) {
-        try {
-            StorageRoot root = this.storage.root();
-
-            return root.players().stream().filter(fakePlayer -> fakePlayer.username().equals(username)).findAny();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Optional.empty();
+    public Optional<IPlayer> fetch(UUID uuid) {
+        return this.storage.database().players().get(uuid);
     }
 
-    public void savePlayer(Player player) {
-        try {
-            StorageRoot root = this.storage.root();
-
-            List<ResolvablePlayer> players = root.players();
-            players.add(ResolvablePlayer.from(player));
-
-            this.storage.store(players);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public Optional<IPlayer> fetch(String username) {
+        return this.storage.database().players().get(username);
     }
 
     @Override
-    public void kill() {}
+    public void kill() {
+        // this.storage.kill();  -  Storage is cleaned up in a different process.
+    }
 }

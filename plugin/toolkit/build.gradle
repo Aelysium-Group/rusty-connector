@@ -1,0 +1,25 @@
+compileJava {
+    options.encoding = "UTF-8"
+}
+
+dependencies {
+    shadow "net.kyori:adventure-text-minimessage:${project.minimessage_version}"
+    shadow "com.google.code.gson:gson:${project.gson_version}"
+    implementation "com.velocitypowered:velocity-api:${project.velocity_version}"
+}
+
+// If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
+shadowJar {
+    archiveClassifier.set('')
+    archiveVersion.set('')
+
+    mergeServiceFiles()
+    minimize()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+jar.finalizedBy('shadowJar')

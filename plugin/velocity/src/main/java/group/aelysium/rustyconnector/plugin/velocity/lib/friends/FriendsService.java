@@ -3,38 +3,37 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.friends;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.FriendsServiceSettings;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendRequest;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.IFriendsService;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.storage.IDatabase;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFM;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandFriends;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.commands.CommandUnFriend;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class FriendsService extends Service {
-    private final Cache<Long, FriendRequest> friendRequests;
-    private final FriendsSettings settings;
-    private final Snowflake snowflakeGenerator = new Snowflake();
-    private final FriendsDataEnclave dataEnclave;
+public class FriendsService implements IFriendsService {
+    private final Cache<UUID, IFriendRequest> friendRequests;
+    private final FriendsServiceSettings settings;
 
-    public FriendsService(FriendsSettings settings) throws Exception {
+    public FriendsService(FriendsServiceSettings settings) throws Exception {
         this.settings = settings;
 
         this.friendRequests = CacheBuilder.newBuilder()
-                .maximumSize(500)
+                .maximumSize(200)
                 .expireAfterWrite(10, TimeUnit.MINUTES)
                 .build();
-
-        this.dataEnclave = new FriendsDataEnclave(this.settings.storage());
     }
 
     public void initCommand(DependencyInjector.DI1<List<Component>> dependencies) {
@@ -80,74 +79,55 @@ public class FriendsService extends Service {
         bootOutput.add(Component.text("Finished building friends service commands.", NamedTextColor.GREEN));
     }
 
-    public FriendsSettings settings() {
+    public FriendsServiceSettings settings() {
         return this.settings;
     }
 
-    public List<FriendRequest> findRequestsToTarget(ResolvablePlayer target) {
-        List<Map.Entry<Long, FriendRequest>> entries = this.friendRequests.asMap().entrySet().stream().filter(request -> request.getValue().target().equals(target)).findAny().stream().toList();
+    public List<IFriendRequest> findRequestsToTarget(IPlayer target) {
+        List<Map.Entry<UUID, IFriendRequest>> entries = this.friendRequests.asMap().entrySet().stream().filter(request -> request.getValue().target().equals(target.username())).findAny().stream().toList();
 
-        List<FriendRequest> requests = new ArrayList<>();
-        for (Map.Entry<Long, FriendRequest> entry : entries)
+        List<IFriendRequest> requests = new ArrayList<>();
+        for (Map.Entry<UUID, IFriendRequest> entry : entries)
             requests.add(entry.getValue());
 
         return requests;
     }
-    public Optional<FriendRequest> findRequest(ResolvablePlayer target, ResolvablePlayer sender) {
-        Optional<Map.Entry<Long, FriendRequest>> entry = this.friendRequests.asMap().entrySet().stream().filter(invite -> invite.getValue().target().equals(target) && invite.getValue().sender().equals(sender)).findFirst();
+
+    public IDatabase.FriendLinks friendStorage() {
+        return this.settings.storage().database().friends();
+    }
+
+    public Optional<IFriendRequest> findRequest(IPlayer target, IPlayer sender) {
+        Optional<Map.Entry<UUID, IFriendRequest>> entry = this.friendRequests.asMap().entrySet().stream().filter(invite ->
+                invite.getValue().target().equals(target.username()) && invite.getValue().sender().equals(sender)
+        ).findFirst();
         return entry.map(Map.Entry::getValue);
     }
 
-    public Optional<List<ResolvablePlayer>> findFriends(Player player) {
-        List<ResolvablePlayer> friends = new ArrayList<>();
-        List<FriendMapping> friendMappings = this.dataEnclave.findFriends(ResolvablePlayer.from(player)).orElse(null);
-        if(friendMappings == null) return Optional.empty();
+    public void sendRequest(IPlayer sender, String targetUsername) {
+        if(this.friendCount(sender) > this.settings().maxFriends())
+            sender.sendMessage(ProxyLang.MAX_FRIENDS_REACHED);
 
-        friendMappings.forEach(mapping -> {
-            try {
-                friends.add(mapping.fetchOther(ResolvablePlayer.from(player)));
-            } catch (NullPointerException ignore) {}
-        });
-
-        return Optional.of(friends);
-    }
-
-    public boolean areFriends(ResolvablePlayer player1, ResolvablePlayer player2) {
-        return this.dataEnclave.areFriends(player1, player2);
-    }
-    public void addFriends(ResolvablePlayer player1, ResolvablePlayer player2) {
-        this.dataEnclave.addFriend(player1, player2);
-    }
-    public void removeFriends(ResolvablePlayer player1, ResolvablePlayer player2) {
-        this.dataEnclave.removeFriend(player1, player2);
-    }
-
-    public FriendMapping sendRequest(Player sender, ResolvablePlayer target) {
-        if(this.friendCount(ResolvablePlayer.from(sender)).orElseThrow() > this.settings().maxFriends())
-            sender.sendMessage(VelocityLang.MAX_FRIENDS_REACHED);
-
-        ResolvablePlayer fakeSender = ResolvablePlayer.from(sender);
-        FriendRequest friendRequest = new FriendRequest(this, snowflakeGenerator.nextId(), fakeSender, target);
-        this.friendRequests.put(friendRequest.id(), friendRequest);
-
+        IFriendRequest friendRequest = new FriendRequest(this, sender, targetUsername);
+        this.friendRequests.put(friendRequest.uuid(), friendRequest);
 
         try {
-            target.resolve().orElseThrow().sendMessage(VelocityLang.FRIEND_REQUEST.build(sender));
-            sender.sendMessage(VelocityLang.FRIEND_REQUEST_SENT.build(target.username()));
-        } catch (NoSuchElementException ignore) {
-            sender.sendMessage(VelocityLang.FRIEND_REQUEST_TARGET_NOT_ONLINE.build(target.username()));
+            Player player = new IPlayer.UsernameReference(targetUsername).get();
+            if(!player.online()) throw new NoOutputException();
+            player.sendMessage(ProxyLang.FRIEND_REQUEST.build(sender));
+            sender.sendMessage(ProxyLang.FRIEND_REQUEST_SENT.build(targetUsername));
+        } catch (Exception ignore) {
+            sender.sendMessage(ProxyLang.FRIEND_REQUEST_TARGET_NOT_ONLINE.build(targetUsername));
         }
-
-        return FriendMapping.from(fakeSender, target);
     }
 
-    public void closeInvite(FriendRequest request) {
-        this.friendRequests.invalidate(request.id());
+    public void closeInvite(IFriendRequest request) {
+        this.friendRequests.invalidate(request.uuid());
         request.decompose();
     }
 
-    public Optional<Long> friendCount(ResolvablePlayer player) {
-        return this.dataEnclave.getFriendCount(player);
+    public long friendCount(IPlayer player) {
+        return this.settings.storage().database().friends().get(player).orElseGet(ArrayList::new).size();
     }
 
     @Override
@@ -160,12 +140,4 @@ public class FriendsService extends Service {
         commandManager.unregister("unfriend");
         commandManager.unregister("fm");
     }
-
-    public record FriendsSettings(
-            MySQLStorage storage,
-            int maxFriends,
-            boolean sendNotifications,
-            boolean showFamilies,
-            boolean allowMessaging
-    ) {}
 }

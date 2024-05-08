@@ -1,26 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.server;
 
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.rustyconnector.core.lib.lang.log_gate.GateKey;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
-import group.aelysium.rustyconnector.core.lib.util.AddressUtil;
-import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
-import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.BaseServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.DiscordWebhookMessage;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookAlertFlag;
-import group.aelysium.rustyconnector.plugin.velocity.lib.webhook.WebhookEventManager;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IServerService;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.net.InetSocketAddress;
-import java.util.Vector;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ServerService extends Service {
-    private final Vector<WeakReference<PlayerServer>> servers =  new Vector<>();
-
+public class ServerService implements IServerService {
+    protected final Map<UUID, IMCLoader> servers = new ConcurrentHashMap<>();
     private final int serverTimeout;
     private final int serverInterval;
 
@@ -37,139 +24,57 @@ public class ServerService extends Service {
         return this.serverInterval;
     }
 
-    /**
-     * Search for a server.
-     * @param serverInfo The server info to search for.
-     * @return A server or `null`
-     */
-    public PlayerServer search(ServerInfo serverInfo) {
-        for(BaseServerFamily<?> family : Tinder.get().services().familyService().dump()) {
-            PlayerServer server = family.findServer(serverInfo);
-            if(server == null) continue;
-
-            return server;
-        }
-        return null;
+    public void add(IMCLoader mcLoader) {
+        this.servers.put(mcLoader.uuid(), mcLoader);
+    }
+    public void remove(IMCLoader mcLoader) {
+        this.servers.remove(mcLoader.uuid());
     }
 
-    public Vector<WeakReference<PlayerServer>> servers() {
-        return this.servers;
+    public Optional<IMCLoader> fetch(UUID uuid) {
+        IMCLoader loader = this.servers.get(uuid);
+        if(loader == null) return Optional.empty();
+        return Optional.of(loader);
     }
 
-    public boolean contains(ServerInfo serverInfo) {
-        for(BaseServerFamily family : Tinder.get().services().familyService().dump()) {
-            if(family.containsServer(serverInfo)) return true;
-        }
-        return false;
+    public List<IMCLoader> servers() {
+        return this.servers.values().stream().toList();
+    }
+
+    public boolean contains(UUID uuid) {
+        return this.servers.containsKey(uuid);
     }
 
     /**
      * Registers fake servers into the proxy to help with testing systems.
      */
-    public void registerFakeServers() {
+    /*public void registerFakeServers() {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        for (BaseServerFamily family : api.services().familyService().dump()) {
-            logger.log("---| Starting on: " + family.name());
+        for (Family family : api.services().family().dump()) {
+            logger.log("---| Starting on: " + family.id());
             // Register 1000 servers into each family
             for (int i = 0; i < 1000; i++) {
                 InetSocketAddress address = AddressUtil.stringToAddress("localhost:"+i);
-                String name = "server"+i;
+                String name = "fakeSRV-"+i;
 
-                ServerInfo info = new ServerInfo(name, address);
-                PlayerServer server = new PlayerServer(info, 40, 50, 0, this.serverTimeout);
+                MCLoader server = new MCLoader(UUID.randomUUID(), address, name, 40, 50, 0, this.serverTimeout);
                 server.setPlayerCount((int) (Math.random() * 50));
 
                 try {
                     RegisteredServer registeredServer = api.velocityServer().registerServer(server.serverInfo());
-                    server.setRegisteredServer(registeredServer);
+                    server.registeredServer(registeredServer);
 
                     family.addServer(server);
 
-                    logger.log("-----| Added: " + server.serverInfo() + " to " + family.name());
+                    logger.log("-----| Added: " + server.serverInfo() + " to " + family.id());
                 } catch (Exception ignore) {}
             }
         }
-    }
+    }*/
 
-    /**
-     * Register a server to the proxy.
-     * @param server The server to be registered.
-     * @param family The family to register the server into.
-     * @return A RegisteredServer node.
-     */
-    public RegisteredServer registerServer(PlayerServer server, BaseServerFamily family) throws Exception {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-
-        try {
-            if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
-                VelocityLang.REGISTRATION_REQUEST.send(logger, server.serverInfo(), family.name());
-
-            if(this.contains(server.serverInfo())) throw new RuntimeException("Server ["+server.serverInfo().getName()+"]("+server.serverInfo().getAddress()+":"+server.serverInfo().getAddress().getPort()+") can't be registered twice!");
-
-            RegisteredServer registeredServer = api.registerServer(server.serverInfo());
-            if(registeredServer == null) throw new NullPointerException("Unable to register the server to the proxy.");
-
-            family.addServer(server);
-
-            this.servers.add(new WeakReference<>(server));
-
-            if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
-                VelocityLang.REGISTERED.send(logger, server.serverInfo(), family.name());
-
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, DiscordWebhookMessage.PROXY__SERVER_REGISTER.build(server, family.name()));
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_REGISTER, family.name(), DiscordWebhookMessage.FAMILY__SERVER_REGISTER.build(server, family.name()));
-            return registeredServer;
-        } catch (Exception error) {
-            if(logger.loggerGate().check(GateKey.REGISTRATION_ATTEMPT))
-                VelocityLang.ERROR.send(logger, server.serverInfo(), family.name());
-            throw new Exception(error.getMessage());
-        }
-    }
-
-    /**
-     * Unregister a server from the proxy.
-     * @param serverInfo The server to be unregistered.
-     * @param familyName The name of the family associated with the server.
-     * @param removeFromFamily Should the server be removed from it's associated family?
-     */
-    public void unregisterServer(ServerInfo serverInfo, String familyName, Boolean removeFromFamily) throws Exception {
-        Tinder api = Tinder.get();
-        PluginLogger logger = api.logger();
-        try {
-            PlayerServer server = this.search(serverInfo);
-            if(server == null) throw new NullPointerException("Server ["+serverInfo.getName()+"]("+serverInfo.getAddress()+":"+serverInfo.getAddress().getPort()+") doesn't exist! It can't be unregistered!");
-
-            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                VelocityLang.UNREGISTRATION_REQUEST.send(logger, serverInfo, familyName);
-
-            BaseServerFamily family = server.family();
-
-            api.unregisterServer(server.serverInfo());
-            if(removeFromFamily)
-                family.removeServer(server);
-
-            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                VelocityLang.UNREGISTERED.send(logger, serverInfo, familyName);
-
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, DiscordWebhookMessage.PROXY__SERVER_UNREGISTER.build(server));
-            WebhookEventManager.fire(WebhookAlertFlag.SERVER_UNREGISTER, familyName, DiscordWebhookMessage.FAMILY__SERVER_UNREGISTER.build(server));
-        } catch (NullPointerException e) {
-            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                VelocityLang.ERROR.send(logger, serverInfo, familyName);
-            throw new NullPointerException(e.getMessage());
-        } catch (Exception e) {
-            if(logger.loggerGate().check(GateKey.UNREGISTRATION_ATTEMPT))
-                VelocityLang.ERROR.send(logger, serverInfo, familyName);
-            throw new Exception(e);
-        }
-    }
-
-    @Override
     public void kill() {
-        this.servers.forEach(Reference::clear);
         this.servers.clear();
     }
 
@@ -189,60 +94,6 @@ public class ServerService extends Service {
 
         public ServerService build() {
             return new ServerService(timeout, interval);
-        }
-    }
-
-    public static class ServerBuilder {
-        private ServerInfo serverInfo;
-        private String familyName;
-        private int playerCount = 0;
-        private int weight;
-        private int softPlayerCap;
-        private int hardPlayerCap;
-
-        private String parentFamilyName;
-
-        protected int initialTimeout = 15;
-
-        public ServerService.ServerBuilder setServerInfo(ServerInfo serverInfo) {
-            this.serverInfo = serverInfo;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setFamilyName(String familyName) {
-            this.familyName = familyName;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setParentFamilyName(String parentFamilyName) {
-            this.parentFamilyName = parentFamilyName;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setPlayerCount(int playerCount) {
-            this.playerCount = playerCount;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setWeight(int weight) {
-            this.weight = weight;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setSoftPlayerCap(int softPlayerCap) {
-            this.softPlayerCap = softPlayerCap;
-            return this;
-        }
-
-        public ServerService.ServerBuilder setHardPlayerCap(int hardPlayerCap) {
-            this.hardPlayerCap = hardPlayerCap;
-            return this;
-        }
-
-        public PlayerServer build() {
-            this.initialTimeout = Tinder.get().services().serverService().serverTimeout();
-
-            return new PlayerServer(serverInfo, softPlayerCap, hardPlayerCap, weight, initialTimeout);
         }
     }
 }

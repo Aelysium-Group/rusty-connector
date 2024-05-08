@@ -1,10 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.central;
 
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnection;
-import group.aelysium.rustyconnector.core.lib.messenger.MessengerConnector;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.core.lib.events.EventManager;
+import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
+import group.aelysium.rustyconnector.toolkit.core.packet.VelocityPacketBuilder;
+import group.aelysium.rustyconnector.toolkit.velocity.central.ICoreServiceHandler;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.ServiceHandler;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.data_transit.DataTransitService;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
+import group.aelysium.rustyconnector.core.lib.messenger.implementors.redis.RedisConnector;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.FamilyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
@@ -13,61 +17,60 @@ import group.aelysium.rustyconnector.plugin.velocity.lib.magic_link.MagicLinkSer
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.PartyService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.PlayerService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.storage.MySQLStorage;
-import group.aelysium.rustyconnector.plugin.velocity.lib.viewport.ViewportService;
+import group.aelysium.rustyconnector.plugin.velocity.lib.storage.StorageService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistService;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class CoreServiceHandler extends group.aelysium.rustyconnector.core.lib.serviceable.ServiceHandler {
+public class CoreServiceHandler extends ServiceHandler implements ICoreServiceHandler {
     public CoreServiceHandler(Map<Class<? extends Service>, Service> services) {
         super(services);
     }
-    public CoreServiceHandler() {
-        super();
-    }
 
-    public FamilyService familyService() {
+    public EventManager events() {
+        return this.find(EventManager.class).orElseThrow();
+    }
+    public FamilyService family() {
         return this.find(FamilyService.class).orElseThrow();
     }
-    public ServerService serverService() {
+    public ServerService server() {
         return this.find(ServerService.class).orElseThrow();
     }
-    public MessengerConnector<MessengerConnection> messenger() {
-        return (MessengerConnector<MessengerConnection>) this.find(MessengerConnector.class).orElseThrow();
+    public MagicLinkService magicLink() {
+        return this.find(MagicLinkService.class).orElseThrow();
     }
-    public MySQLStorage storage() {
-        return this.find(MySQLStorage.class).orElseThrow();
+    public StorageService storage() {
+        return this.find(StorageService.class).orElseThrow();
     }
-    public PlayerService playerService() {
+    public PlayerService player() {
         return this.find(PlayerService.class).orElseThrow();
+    }
+    public ConfigService config() {
+        return this.find(ConfigService.class).orElseThrow();
     }
     public DataTransitService dataTransitService() {
         return this.find(DataTransitService.class).orElseThrow();
     }
-    public MessageCacheService messageCacheService() {
+    public MessageCacheService messageCache() {
         return this.find(MessageCacheService.class).orElseThrow();
     }
-    public WhitelistService whitelistService() {
+    public WhitelistService whitelist() {
         return this.find(WhitelistService.class).orElseThrow();
     }
     public LoadBalancingService loadBalancingService() {
         return this.find(LoadBalancingService.class).orElseThrow();
     }
-    public MagicLinkService magicLinkService() {
-        return this.find(MagicLinkService.class).orElseThrow();
+    public VelocityPacketBuilder packetBuilder() {
+        return this.find(VelocityPacketBuilder.class).orElseThrow();
     }
-    public Optional<PartyService> partyService() {
+    public Optional<PartyService> party() {
         return this.find(PartyService.class);
     }
-    public Optional<FriendsService> friendsService() {
+    public Optional<FriendsService> friends() {
         return this.find(FriendsService.class);
     }
-    public Optional<DynamicTeleportService> dynamicTeleportService() {
+    public Optional<DynamicTeleportService> dynamicTeleport() {
         return this.find(DynamicTeleportService.class);
-    }
-    public Optional<ViewportService> viewportService() {
-        return this.find(ViewportService.class);
     }
 }

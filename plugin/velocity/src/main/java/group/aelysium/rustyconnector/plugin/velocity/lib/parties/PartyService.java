@@ -1,31 +1,32 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
 import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.friends.PlayerPair;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyInvite;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IPartyService;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.PartyServiceSettings;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.friends.FriendsService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.parties.commands.CommandParty;
-import group.aelysium.rustyconnector.plugin.velocity.lib.players.ResolvablePlayer;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PartyService extends Service {
-    private final Vector<Party> parties = new Vector<>();
-    private final Vector<PartyInvite> invites = new Vector<>();
-    private final PartySettings settings;
+public class PartyService implements IPartyService {
+    private final Vector<IParty> parties = new Vector<>();
+    private final Map<PlayerPair, IPartyInvite> invites = new HashMap<>();
+    private final PartyServiceSettings settings;
     private final ExecutorService connector;
 
-    public PartyService(PartySettings settings) {
+    public PartyService(PartyServiceSettings settings) {
         this.settings = settings;
 
         this.connector = Executors.newFixedThreadPool(10);
@@ -54,78 +55,80 @@ public class PartyService extends Service {
         this.connector.submit(runnable);
     }
 
-    public PartySettings settings() {
+    public PartyServiceSettings settings() {
         return this.settings;
     }
 
-    public Party create(Player host, PlayerServer server) {
-        Party party = new Party(this.settings.maxMembers, host, server);
+    public Party create(IPlayer host, IMCLoader server) {
+        Party party = new Party(this.settings.maxMembers(), host, server);
         this.parties.add(party);
         return party;
     }
 
-    public void delete(Party party) {
+    public void delete(IParty party) {
         party.decompose();
         this.parties.remove(party);
     }
 
-    /**
-     * Find a party based on its member.
-     * @return A party.
-     */
-    public Optional<Party> find(Player member) {
+    public Optional<IParty> find(IPlayer member) {
         return this.parties.stream().filter(party -> party.contains(member)).findFirst();
     }
 
-    public void disband(Party party) {
-        for (Player player : party.players()) {
-            player.sendMessage(VelocityLang.PARTY_DISBANDED);
+    public void disband(IParty party) {
+        for (IPlayer player : party.players()) {
+            player.sendMessage(ProxyLang.PARTY_DISBANDED);
         }
         this.delete(party);
     }
 
-    public PartyInvite invitePlayer(Party party, Player sender, Player target) {
+    public IPartyInvite invitePlayer(IParty party, IPlayer sender, IPlayer target) {
         Tinder api = Tinder.get();
 
-        if(party.leader() != sender && this.settings.onlyLeaderCanInvite)
-            throw new IllegalStateException(VelocityLang.PARTY_INJECTED_ONLY_LEADER_CAN_INVITE);
+        if(!party.leader().equals(sender) && this.settings.onlyLeaderCanInvite())
+            throw new IllegalStateException(ProxyLang.PARTY_INJECTED_ONLY_LEADER_CAN_INVITE);
 
         if(this.settings.friendsOnly())
             try {
-                FriendsService friendsService = api.services().friendsService().orElse(null);
-                if(friendsService == null) {
-                    api.logger().send(Component.text(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
-                    throw new NoOutputException();
-                }
+                FriendsService friendsService = api.services().friends().orElseThrow(
+                        () -> {
+                            api.logger().send(Component.text(ProxyLang.PARTY_INJECTED_FRIENDS_RESTRICTION_CONFLICT, NamedTextColor.YELLOW));
+                            return new NoOutputException();
+                        }
+                );
 
-                if(friendsService.findFriends(sender).orElseThrow().contains(target))
-                    throw new IllegalStateException(VelocityLang.PARTY_INJECTED_FRIENDS_RESTRICTION);
+                Optional<Boolean> contains = friendsService.friendStorage().contains(sender, target);
+                if(contains.isEmpty())
+                    throw new IllegalStateException("There was an internal error while trying to do that.");
+                if(contains.get())
+                    throw new IllegalStateException(ProxyLang.PARTY_INJECTED_FRIENDS_RESTRICTION);
             } catch (IllegalStateException e) {
                 throw e;
             } catch (Exception ignore) {}
 
         PartyInvite invite = new PartyInvite(this, party, sender, target);
-        this.invites.add(invite);
+        this.invites.put(PlayerPair.from(invite.target(), invite.sender()), invite);
 
-        sender.sendMessage(VelocityLang.PARTY_INVITE_SENT.build(target.getUsername()));
+        sender.sendMessage(ProxyLang.PARTY_INVITE_SENT.build(target.username()));
 
-        target.sendMessage(VelocityLang.PARTY_INVITE_RECEIVED.build(sender.getUsername()));
+        target.sendMessage(ProxyLang.PARTY_INVITE_RECEIVED.build(sender.username()));
         return invite;
     }
 
-    public List<PartyInvite> findInvitesToTarget(ResolvablePlayer target) {
-        return this.invites.stream().filter(invite -> invite.target().equals(target)).findAny().stream().toList();
+    public List<IPartyInvite> findInvitesToTarget(IPlayer target) {
+        return this.invites.values().stream().filter(invite -> invite.target().equals(target)).findAny().stream().toList();
     }
-    public Optional<PartyInvite> findInvite(ResolvablePlayer target, ResolvablePlayer sender) {
-        return this.invites.stream().filter(invite -> invite.target().equals(target) && invite.sender().equals(sender)).findFirst();
+    public Optional<IPartyInvite> findInvite(IPlayer target, IPlayer sender) {
+        IPartyInvite invite = this.invites.get(PlayerPair.from(target, sender));
+        if(invite == null) return Optional.empty();
+        return Optional.of(invite);
     }
 
-    public void closeInvite(PartyInvite invite) {
+    public void closeInvite(IPartyInvite invite) {
         this.invites.remove(invite);
         invite.decompose();
     }
 
-    public List<Party> dump() {
+    public List<IParty> dump() {
         return this.parties.stream().toList();
     }
 
@@ -138,15 +141,4 @@ public class PartyService extends Service {
         CommandManager commandManager = Tinder.get().velocityServer().getCommandManager();
         commandManager.unregister("party");
     }
-
-    public record PartySettings(
-                                int maxMembers,
-                                boolean friendsOnly,
-                                boolean localOnly,
-                                boolean onlyLeaderCanInvite,
-                                boolean onlyLeaderCanKick,
-                                boolean onlyLeaderCanSwitchServers,
-                                boolean disbandOnLeaderQuit,
-                                SwitchPower switchPower
-                                ) {}
 }

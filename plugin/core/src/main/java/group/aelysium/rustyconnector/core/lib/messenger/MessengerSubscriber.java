@@ -1,35 +1,30 @@
 package group.aelysium.rustyconnector.core.lib.messenger;
 
-import group.aelysium.rustyconnector.core.central.PluginLogger;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.CacheableMessage;
-import group.aelysium.rustyconnector.core.lib.data_transit.cache.MessageCacheService;
+import group.aelysium.rustyconnector.toolkit.core.packet.*;
+import group.aelysium.rustyconnector.toolkit.core.message_cache.ICacheableMessage;
+import group.aelysium.rustyconnector.toolkit.core.message_cache.IMessageCacheService;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
+import group.aelysium.rustyconnector.core.lib.cache.MessageCacheService;
 import group.aelysium.rustyconnector.core.lib.exception.BlockedMessageException;
 import group.aelysium.rustyconnector.core.lib.exception.NoOutputException;
-import group.aelysium.rustyconnector.core.lib.hash.AESCryptor;
-import group.aelysium.rustyconnector.core.lib.lang.log_gate.GateKey;
-import group.aelysium.rustyconnector.core.lib.packets.*;
+import group.aelysium.rustyconnector.core.lib.crypt.AESCryptor;
+import group.aelysium.rustyconnector.toolkit.core.log_gate.GateKey;
 
-import java.net.InetSocketAddress;
-import java.util.Map;
+import java.util.*;
 
 public abstract class MessengerSubscriber {
+    private final Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners;
     private final AESCryptor cryptor;
     private final PluginLogger logger;
-    private MessageCacheService messageCache;
-    private Map<PacketType.Mapping, PacketHandler> handlers;
-    private PacketOrigin origin;
-    private InetSocketAddress originAddress;
+    private IMessageCacheService<? extends ICacheableMessage> messageCache;
+    private final Packet.Node self; // This is a representation of who we are. Any time we receive a packet, this is how we know if it is addressed to us.
 
-    public MessengerSubscriber(AESCryptor cryptor, MessageCacheService messageCache, PluginLogger logger, Map<PacketType.Mapping, PacketHandler> handlers, PacketOrigin origin, InetSocketAddress originAddress) {
+    public MessengerSubscriber(AESCryptor cryptor, IMessageCacheService<? extends ICacheableMessage> messageCache, PluginLogger logger, Packet.Node self, Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners) {
         this.cryptor = cryptor;
         this.messageCache = messageCache;
         this.logger = logger;
-        this.handlers = handlers;
-        this.origin = origin;
-        if(this.origin == PacketOrigin.PROXY)
-            this.originAddress = null;
-        else
-            this.originAddress = originAddress;
+        this.self = self;
+        this.listeners = listeners;
     }
 
     public AESCryptor cryptor() { return this.cryptor; }
@@ -37,9 +32,11 @@ public abstract class MessengerSubscriber {
     protected void onMessage(String rawMessage) {
         // If the proxy doesn't have a message cache (maybe it's in the middle of a reload)
         // Set a temporary, worthless, message cache so that the system can still "cache" messages into the worthless cache if needed.
-        if(messageCache == null) messageCache = new MessageCacheService(1);
+        if(messageCache == null) {
+            this.messageCache = new MessageCacheService(1);
+        }
 
-        CacheableMessage cachedMessage = null;
+        ICacheableMessage cachedMessage = null;
         try {
             String decryptedMessage;
             try {
@@ -51,27 +48,32 @@ public abstract class MessengerSubscriber {
                 return;
             }
 
-            GenericPacket.Serializer serializer = new GenericPacket.Serializer();
-            GenericPacket message = serializer.parseReceived(decryptedMessage);
+            Packet message = Packet.Serializer.parseReceived(decryptedMessage);
 
-            if(messageCache.ignoredType(message)) messageCache.removeMessage(cachedMessage.getSnowflake());
-            if(message.origin() == this.origin) throw new Exception("Message from the "+this.origin.name()+"! Ignoring...");
-            if(this.origin == PacketOrigin.SERVER)
-                if (!this.originAddress.toString().equals(message.address().toString()))
-                    throw new Exception("Message is addressed to another server! Ignoring...");
+            if (messageCache.ignoredType(message)) messageCache.removeMessage(cachedMessage.getSnowflake());
+
+            if(!self.isNodeEquivalentToMe(message.target())) throw new Exception("Message was not addressed to us.");
+
             try {
                 cachedMessage.sentenceMessage(PacketStatus.ACCEPTED);
 
-                PacketHandler handler = this.handlers.get(message.type());
-                if(handler == null) throw new NullPointerException("No packet handler with the type "+message.type().name()+" exists!");
+                List<PacketListener<? extends Packet.Wrapper>> listeners = this.listeners.get(message.identification());
+                if(listeners == null) throw new NullPointerException("No packet handler with the type "+message.identification()+" exists!");
+                if(listeners.isEmpty()) throw new NullPointerException("No packet handler with the type "+message.identification()+" exists!");
 
-                handler.execute(message);
+                listeners.forEach(listener -> {
+                    try {
+                        listener.wrapAndExecute(message);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             } catch (BlockedMessageException e) {
                 cachedMessage.sentenceMessage(PacketStatus.AUTH_DENIAL, e.getMessage());
 
                 if(!logger.loggerGate().check(GateKey.MESSAGE_TUNNEL_FAILED_MESSAGE)) return;
 
-                logger.error("An incoming message from: "+message.address().toString()+" was blocked by the message tunnel!");
+                logger.error("An incoming message from: "+message.sender().toString()+" was blocked by the message tunnel!");
                 logger.log("To view the thrown away message use: /rc message get "+cachedMessage.getSnowflake());
             } catch (NoOutputException e) {
                 cachedMessage.sentenceMessage(PacketStatus.AUTH_DENIAL, e.getMessage());

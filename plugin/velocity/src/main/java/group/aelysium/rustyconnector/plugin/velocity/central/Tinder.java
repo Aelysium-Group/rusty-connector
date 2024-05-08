@@ -2,22 +2,24 @@ package group.aelysium.rustyconnector.plugin.velocity.central;
 
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerInfo;
-import com.velocitypowered.api.scheduler.Scheduler;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityFlame;
+import group.aelysium.rustyconnector.toolkit.velocity.central.VelocityTinder;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
 import group.aelysium.rustyconnector.core.lib.lang.config.RootLanguageConfig;
+import group.aelysium.rustyconnector.toolkit.mc_loader.central.IMCLoaderTinder;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.VelocityRustyConnector;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Vector;
+import java.util.function.Consumer;
 
 /**
  * The root api endpoint for the entire RustyConnector api.
  */
-public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Scheduler> {
+public class Tinder implements VelocityTinder {
     private static Tinder instance;
     public static Tinder get() {
         return instance;
@@ -29,6 +31,8 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
     private final Path dataFolder;
     private final PluginLogger pluginLogger;
     private final LangService lang;
+    private final Vector<Consumer<Flame>> onStart = new Vector<>();
+    private final Vector<Runnable> onStop = new Vector<>();
 
     private Tinder(VelocityRustyConnector plugin, ProxyServer server, PluginLogger logger, @DataDirectory Path dataFolder, LangService lang) {
         instance = this;
@@ -42,34 +46,21 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
 
     /**
      * Ignites a {@link Flame} which effectively starts the RustyConnector kernel.
-     * @return A {@link Flame}.
      */
-    public Flame ignite() throws RuntimeException {
+    public void ignite() throws RuntimeException {
         this.flame = Flame.fabricateNew(this.plugin, this.lang);
-        return flame;
+
+        this.onStart.forEach(callback -> callback.accept(this.flame));
     }
 
-    @Override
-    public InputStream resourceAsStream(String filename)  {
-        return getClass().getClassLoader().getResourceAsStream(filename);
-    }
-
-    @Override
-    public Scheduler scheduler() {
-        return velocityServer().getScheduler();
-    }
-
-    @Override
     public PluginLogger logger() {
         return this.pluginLogger;
     }
 
-    @Override
-    public String dataFolder() {
-        return String.valueOf(this.dataFolder);
+    public Path dataFolder() {
+        return this.dataFolder;
     }
 
-    @Override
     public LangService lang() {
         return this.lang;
     }
@@ -79,13 +70,25 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
      */
     public void rekindle() {
         try {
-            this.flame.exhaust(this.plugin);
+            this.onStop.forEach(Runnable::run);
+
+            this.exhaust(this.plugin);
             this.flame = null;
 
             this.ignite();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Kill the {@link Flame}.
+     * Typically good for if you want to ignite a new one.
+     */
+    public void exhaust(VelocityRustyConnector plugin) {
+        Tinder.get().velocityServer().getEventManager().unregisterListeners(plugin);
+        if(this.flame == null) return;
+        this.flame.kill();
     }
 
     public CoreServiceHandler services() {
@@ -101,29 +104,19 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
     }
 
     /**
+     * Gets a resource by id and returns it as a stream.
+     * @param filename The id of the resource to get.
+     * @return The resource as a stream.
+     */
+    public static InputStream resourceAsStream(String filename)  {
+        return IMCLoaderTinder.class.getClassLoader().getResourceAsStream(filename);
+    }
+
+    /**
      * Get the velocity server
      */
     public ProxyServer velocityServer() {
         return this.server;
-    }
-
-    /**
-     * Registers a server with this proxy.` A server with this name should not already exist.
-     *
-     * @param serverInfo the server to register
-     * @return the newly registered server
-     */
-    public RegisteredServer registerServer(ServerInfo serverInfo) {
-        return velocityServer().registerServer(serverInfo);
-    }
-
-    /**
-     * Unregisters this server from the proxy.
-     *
-     * @param serverInfo the server to unregister
-     */
-    public void unregisterServer(ServerInfo serverInfo) {
-        velocityServer().unregisterServer(serverInfo);
     }
 
     /**
@@ -132,16 +125,23 @@ public class Tinder extends group.aelysium.rustyconnector.core.central.Tinder<Sc
     public static Tinder gather(VelocityRustyConnector plugin, ProxyServer server, Logger logger, @DataDirectory Path dataFolder) {
         try {
             PluginLogger pluginLogger = new PluginLogger(logger);
-            RootLanguageConfig config = new RootLanguageConfig(new File(String.valueOf(dataFolder), "language.yml"));
-            if (!config.generate(pluginLogger))
-                throw new IllegalStateException("Unable to load or create language.yml!");
-            config.register();
-
+            RootLanguageConfig config = RootLanguageConfig.construct(dataFolder);
             LangService langService = LangService.resolveLanguageCode(config.getLanguage(), dataFolder);
 
             return new Tinder(plugin, server, pluginLogger, dataFolder, langService);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public <TFlame extends VelocityFlame<?>> void onStart(Consumer<TFlame> callback) {
+        this.onStart.add((Consumer<Flame>) callback);
+        if(this.flame != null) callback.accept((TFlame) this.flame);
+    }
+
+    @Override
+    public void onStop(Runnable callback) {
+        this.onStop.add(callback);
     }
 }
