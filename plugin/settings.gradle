@@ -9,5 +9,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'rusty-connector'
-include ':toolkit', ':core', ':paper', ':fabric', ':velocity'
+rootProject.name = 'rustyconnector'
+include ':toolkit', ':core', ':paper', ':velocity'
