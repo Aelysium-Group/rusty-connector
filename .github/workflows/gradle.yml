@@ -2,18 +2,11 @@ name: Build RC
 on:
   push:
     branches:
-      - '**'
+      - '**'# matches every branch
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./plugin
-      with:
-        working-directory: ./plugin
-      uses:
-        working-directory: ./plugin
     steps:
       - uses: actions/checkout@v4  
       - uses: actions/setup-java@v4
@@ -22,12 +15,15 @@ jobs:
           java-version: 17
       
       - name: Setup Gradle
+        working-directory: ./plugin
         uses: gradle/gradle-build-action@v3
 
       - name: Execute Gradle build
+        working-directory: ./plugin
         run: chmod +x gradlew && ./gradlew build
 
       - name: Upload Artifacts
+        working-directory: ./plugin
         uses: actions/upload-artifact@v4
         with:
           name: RustyConnector
