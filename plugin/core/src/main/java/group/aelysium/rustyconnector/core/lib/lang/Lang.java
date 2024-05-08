@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.core.lib.lang;
 
-import group.aelysium.rustyconnector.core.central.PluginLogger;
+import group.aelysium.rustyconnector.toolkit.core.logger.PluginLogger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 
@@ -10,6 +10,14 @@ import static net.kyori.adventure.text.JoinConfiguration.newlines;
 @SuppressWarnings("ConstantConditions")
 public class Lang {
     public final static String attachedWordmark = "RustyConnector:";
+    /*
+     * AQUA - For when data is successfully returned or when we send usage info
+     * RED - For when an error has occurred.
+     * ORANGE/YELLOW - For emphasis or highlighting.
+     */
+    public final static JoinConfiguration newlines() {
+        return JoinConfiguration.separator(newline());
+    }
 
     public interface Message {
         Component build();

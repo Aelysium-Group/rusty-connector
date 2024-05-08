@@ -1,8 +1,8 @@
 package group.aelysium.rustyconnector.plugin.paper.events;
 
+import group.aelysium.rustyconnector.core.mcloader.lib.lang.MCLoaderLang;
+import group.aelysium.rustyconnector.core.mcloader.lib.dynamic_teleport.CoordinateRequest;
 import group.aelysium.rustyconnector.plugin.paper.central.Tinder;
-import group.aelysium.rustyconnector.plugin.paper.lib.lang.PaperLang;
-import group.aelysium.rustyconnector.plugin.paper.lib.dynamic_teleport.models.CoordinateRequest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -21,12 +21,13 @@ public class OnPlayerJoin implements Listener {
             try {
                 tpaRequest.teleport();
             } catch (NullPointerException e) {
-                event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.target().getPlayerProfile().getName()));
+                event.getPlayer().sendMessage(MCLoaderLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
             }
         } catch (Exception e) {
-            event.getPlayer().sendMessage(PaperLang.TPA_FAILED_TELEPORT.build(tpaRequest.target().getPlayerProfile().getName()));
+            event.getPlayer().sendMessage(MCLoaderLang.TPA_FAILED_TELEPORT.build(api.getPlayerName(tpaRequest.target())));
         }
 
-        api.services().dynamicTeleport().removeAllPlayersRequests(event.getPlayer());
+        if (!((group.aelysium.rustyconnector.plugin.paper.central.Tinder) api).isFolia()) return;
+        api.services().dynamicTeleport().removeAllPlayersRequests(event.getPlayer().getUniqueId());
     }
 }

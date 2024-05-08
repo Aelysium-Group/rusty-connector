@@ -11,6 +11,6 @@ public class OnPlayerLeave implements Listener {
     public void onPlayerLeave(PlayerQuitEvent event) {
         Tinder api = Tinder.get();
 
-        api.services().dynamicTeleport().removeAllPlayersRequests(event.getPlayer());
+        api.services().dynamicTeleport().removeAllPlayersRequests(event.getPlayer().getUniqueId());
     }
 }

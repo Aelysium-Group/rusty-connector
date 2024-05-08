@@ -1,12 +1,12 @@
-![Aelysium Wordmark Image](https://github.com/Aelysium-Group/.github/blob/main/images/rustyconnector-wordmark.png?raw=true)
+![Aelysium Wordmark Image](https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/wordmark.png?raw=true)
 
 # 👋 Welcome to RustyConnector
-![Velocity](https://flat.badgen.net/badge/Velocity/3.1.1%20-%203.2.0/1197d1?icon=dockbit)
-![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.20.1/F96854?icon=telegram)
+![Velocity](https://flat.badgen.net/badge/Velocity/3.3.0/1197d1?icon=dockbit)
+![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.20.4/F96854?icon=telegram)
 ![Folia](https://flat.badgen.net/badge/Folia/Supported/E004BC?icon=maven)
 [![Aelysium](https://flat.badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
 [![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
-[![License](https://flat.badgen.net/badge/License/MIT/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE)
+[![License](https://flat.badgen.net/badge/License/GPL-V3/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE_rusty-connector)
 
 [RustyConnector] is a load-balancing plugin that can run on [Velocity]/[Paper]/[Folia] networks, which allows your proxy to automatically register or unregister sub-servers while it's running.
 
@@ -19,19 +19,19 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://github.com/Aelysium-Group/rusty-connector/wiki"><img src="./blob/images/logo/rc-logo.webp"></a>
+    <a href="https://wiki.aelysium.group/rusty-connector/"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/logo.webp?raw=true"></a>
   </td>
   <td valign="top">
     <h3>Wiki</h3>
     <p>
-      Wanna learn how to get started? <a href="https://github.com/Aelysium-Group/rusty-connector/wiki">Look here</a>!
+      Wanna learn how to get started? <a href="https://wiki.aelysium.group/rusty-connector/">Look here</a>!
     </p>
   </td>
 </tr>
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://github.com/Aelysium-Group/rusty-connector/releases"><img src="./blob/images/logo/rc-logo.webp"></a>
+    <a href="https://github.com/Aelysium-Group/rusty-connector/releases"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/logo.webp?raw=true"></a>
   </td>
   <td valign="top">
     <h3>Download</h3>
@@ -43,7 +43,7 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://join.aelysium.group"><img src="./blob/images/logo/rc-logo.webp"></a>
+    <a href="https://join.aelysium.group"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/logo.webp?raw=true"></a>
   </td>
   <td>
     <h3>Support</h3>
@@ -57,7 +57,7 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://github.com/Aelysium-Group/rusty-connector/issues"><img src="./blob/images/logo/rc-logo.webp"></a>
+    <a href="https://github.com/Aelysium-Group/rusty-connector/issues"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/logo.webp?raw=true"></a>
   </td>
   <td>
     <h3>Report Bugs</h3>
@@ -78,7 +78,7 @@
 <tr>
   <td width="80" align="center" valign="center">
     <br>
-    <a href="https://modrinth.com/plugin/rustyconnector"><img src="./blob/images/logo/modrinth.svg"></a>
+    <a href="https://modrinth.com/plugin/rustyconnector"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/modrinth.svg?raw=true"></a>
   </td>
   <td valign="top">
     <h3>Modrinth</h3>
@@ -90,7 +90,7 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector"><img src="./blob/images/logo/hangar.svg"></a>
+    <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/hangar.svg?raw=true"></a>
   </td>
   <td valign="top">
     <h3>Hangar</h3>
@@ -103,53 +103,41 @@
 </table>
 
 ---
-# ✨ Features
-- ### ✅ Built for large networks
-- ### ✅ Register brand-new servers to the proxy during runtime
-- ### ✅ Blazing fast data transmission with Redis integration
-- ### ✅ Create pre-defined whitelist configs and activate them dynamically
-- ### ✅ Register similar servers into families with family-level whitelists and load balancing
-- ### ✅ Automatically unregister frozen servers from the proxy
+# ⭐ Basic Features
+- ### ✅ Register new servers to the proxy during runtime
+- ### ✅ Organize servers into Families
+- ### ✅ Network and Family level whitelists
 - ### ✅ Set soft and hard player limits for servers
-- ### ✅ Built for stateful Minecraft servers!
-- ### ✅ End-to-end packet encryption
-- ### ✅ Works with LuckPerms-Velocity
-- ### ✅ Works with Kubernetes
-- ### ✅ Works with Folia
-- ### ❌ Can give you a hug
+- ### ✅ Cross-server /tpa
+- ### ✅ Friends
+- ### ✅ Parties
+
+# ✨ Advanced Features
+- ### ✅ Supports Kubernetes/Docker
+- ### ✅ Toolkit API
+- ### ✅ Integrated Load Balancing
+- ### ✅ Integrated Matchmaking (Ranked Families)
+- ### ✅ Support for stateful game modes (Static Families)
+- ### ✅ Forced-Hosts (Family Injectors)
+- ### ✅ End-to-end packet encryption (AES-256)
+- ### ✅ Can give you a hug
+
+# 🤔 Upcoming Features
+- ### 🔳 Kubernetes-Native Dynamic Scaling (v0.9)
+- ### 🔳 Comprehensive Git-Ops (v0.9)
+- ### 🔳 Absolute Redundancy Architecture (v0.9)
+- ### 🔳 Stateful packet communication (v1)
+- ### 🔳 RabbitMQ Support (v1)
+- ### 🔳 Native Websocket Support (v1)
+
+- ### 🔳 Viewport Integrated Dashboard (Release Version TBD)
 ---
 # 🎨 Statistics
 
 ## 🌌 Networks Served ([Click to view](https://bstats.org/plugin/velocity/RustyConnector/17972)):
 [![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)](https://bstats.org/signatures/velocity/RustyConnector.svg)
 
----
-
-# 📖 Wiki
-### [Home](https://github.com/Aelysium-Group/rusty-connector/wiki)
-### [FAQ](https://github.com/Aelysium-Group/rusty-connector/wiki#faq)
-### [Getting Started](https://github.com/Aelysium-Group/rusty-connector/wiki/Getting-Started-(First-Time))
-  - [Installation](https://github.com/Aelysium-Group/rusty-connector/wiki/Getting-Started-(First-Time))
-  - [How it works](https://github.com/Aelysium-Group/rusty-connector/wiki/Getting-Started-(First-Time)#how-it-works)
-  - [Families](https://github.com/Aelysium-Group/rusty-connector/wiki/Family)
-  - [Whitelists](https://github.com/Aelysium-Group/rusty-connector/wiki/Whitelist)
-  - [Load Balancing](https://github.com/Aelysium-Group/rusty-connector/wiki/Family#load-balancing)
-### [Commands](https://github.com/Aelysium-Group/rusty-connector/wiki/Commands)
-### [Permissions](https://github.com/Aelysium-Group/rusty-connector/wiki/Permissions)
-### [Configs](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration)
-  - [RC-Velocity](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-v2#rc-velocity)
-  - [RC-Paper](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-v2#rc-paper)
-### [Config Migration](https://github.com/Aelysium-Group/rusty-connector/wiki/Config-Migration)
-
-## 🌐 Language Switch
-
-语言切换 / Need to switch languages?
-
-[![English](https://flat.badgen.net/badge/English/Click%20me/blue)](https://github.com/Aelysium-Group/rusty-connector)
-[![简体中文](https://flat.badgen.net/badge/简体中文/Click%20me/blue)](https://github.com/Aelysium-Group/rustyconnector-zhhans)
-[![繁體中文](https://flat.badgen.net/badge/繁體中文/Click%20me/blue)](https://github.com/Aelysium-Group/rustyconnector-zhhant)
-
-2023 © [Aelysium](https://www.aelysium.group)
+2024 © [Aelysium](https://www.aelysium.group)
 
 <!-- URL LIST -->
 [Folia]:https://github.com/PaperMC/Folia

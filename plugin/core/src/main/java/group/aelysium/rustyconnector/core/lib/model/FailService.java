@@ -2,16 +2,16 @@ package group.aelysium.rustyconnector.core.lib.model;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import group.aelysium.rustyconnector.core.lib.hash.Snowflake;
-import group.aelysium.rustyconnector.core.lib.serviceable.Service;
+import group.aelysium.rustyconnector.toolkit.velocity.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.core.lib.crypt.Snowflake;
+import group.aelysium.rustyconnector.toolkit.core.serviceable.interfaces.Service;
 
-public class FailService extends Service {
-    protected Cache<Long, Boolean> fails;
+public class FailService implements Service {
+    protected final Cache<Long, Boolean> fails;
     protected int numberOfFails;
     protected LiquidTimestamp period;
     protected Snowflake snowflake = new Snowflake();
 
-    private FailService() {}
     /**
      * Define a new fail service.
      * @param numberOfFails The number of times that this {@link FailService} is allowed to be triggered within {@link FailService#period} before it fails.
@@ -50,9 +50,7 @@ public class FailService extends Service {
     @Override
     public void kill() {
         this.numberOfFails = 0;
-        this.fails.cleanUp();
         this.fails.invalidateAll();
-        this.fails = null;
-        this.period = null;
+        this.fails.cleanUp();
     }
 }

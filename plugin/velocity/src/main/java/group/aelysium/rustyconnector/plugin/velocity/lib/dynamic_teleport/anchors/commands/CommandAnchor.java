@@ -5,59 +5,60 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.proxy.Player;
-import group.aelysium.rustyconnector.core.lib.util.DependencyInjector;
+import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
+import group.aelysium.rustyconnector.toolkit.velocity.family.IFamily;
+import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.DynamicTeleportService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.dynamic_teleport.anchors.AnchorService;
-import group.aelysium.rustyconnector.plugin.velocity.lib.family.bases.PlayerFocusedServerFamily;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.server.ServerService;
 import net.kyori.adventure.text.Component;
 
-import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class CommandAnchor {
     public static BrigadierCommand create(DependencyInjector.DI3<DynamicTeleportService, ServerService, AnchorService> dependencies, String anchor) {
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
-        DynamicTeleportService dynamicTeleportService = dependencies.d1();
-        ServerService serverService = dependencies.d2();
         AnchorService anchorService = dependencies.d3();
 
 
         LiteralCommandNode<CommandSource> anchorCommand = LiteralArgumentBuilder
                 .<CommandSource>literal(anchor)
-                .requires(source -> source instanceof Player)
+                .requires(source -> source instanceof com.velocitypowered.api.proxy.Player)
                 .executes(context -> {
-                    if(!(context.getSource() instanceof Player player)) {
+                    if(!(context.getSource() instanceof com.velocitypowered.api.proxy.Player velocityPlayer)) {
                         logger.log("/"+anchor+" must be sent as a player!");
                         return Command.SINGLE_SUCCESS;
                     }
-                    if(!Permission.validate(player, "rustyconnector.command.anchor", "rustyconnector.command.anchor."+anchor)) {
-                        player.sendMessage(VelocityLang.NO_PERMISSION);
+                    if(!Permission.validate(velocityPlayer, "rustyconnector.command.anchor", "rustyconnector.command.anchor."+anchor)) {
+                        velocityPlayer.sendMessage(ProxyLang.NO_PERMISSION);
                         return Command.SINGLE_SUCCESS;
                     }
 
                     try {
-                        PlayerFocusedServerFamily family = ((PlayerFocusedServerFamily) anchorService.family(anchor).orElseThrow());
+                        Player player = new Player(velocityPlayer);
+
+                        IFamily family = anchorService.familyOf(anchor).orElseThrow();
 
                         // If the attempt to check player's family fails, just ignore it and try to connect.
                         // If there's actually an issue it'll be caught further down.
                         try {
-                            PlayerServer server = serverService.search(Objects.requireNonNull(player.getCurrentServer().orElse(null)).getServerInfo());
-                            if(family.equals(server.family()))
-                                return closeMessage(player, VelocityLang.SERVER_ALREADY_CONNECTED);
+                            if(family.equals(player.server().orElseThrow().family()))
+                                return closeMessage(velocityPlayer, ProxyLang.SERVER_ALREADY_CONNECTED);
                         } catch (Exception ignore) {}
 
-                        family.connect(player);
+                        ConnectionResult result = family.connect(player).result().get(50, TimeUnit.SECONDS);
+
+                        if(!result.connected()) return closeMessage(player.resolve().orElseThrow(), result.message());
                     } catch (Exception e) {
                         e.printStackTrace();
-                        return closeMessage(player, VelocityLang.INTERNAL_ERROR);
+                        return closeMessage(velocityPlayer, ProxyLang.INTERNAL_ERROR);
                     }
                     return Command.SINGLE_SUCCESS;
                 })
@@ -66,7 +67,7 @@ public class CommandAnchor {
         return new BrigadierCommand(anchorCommand);
     }
 
-    public static int closeMessage(Player player, Component message) {
+    public static int closeMessage(com.velocitypowered.api.proxy.Player player, Component message) {
         player.sendMessage(message);
         return Command.SINGLE_SUCCESS;
     }

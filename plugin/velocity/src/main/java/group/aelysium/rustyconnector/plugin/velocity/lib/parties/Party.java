@@ -1,106 +1,111 @@
 package group.aelysium.rustyconnector.plugin.velocity.lib.parties;
 
-import com.velocitypowered.api.proxy.Player;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.IParty;
+import group.aelysium.rustyconnector.toolkit.velocity.parties.SwitchPower;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
-import group.aelysium.rustyconnector.plugin.velocity.lib.lang.VelocityLang;
-import group.aelysium.rustyconnector.plugin.velocity.lib.server.PlayerServer;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.lang.ref.WeakReference;
-import java.rmi.ConnectException;
-import java.util.Objects;
-import java.util.Vector;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class Party {
-    private final Vector<Player> players;
+public class Party implements group.aelysium.rustyconnector.toolkit.velocity.parties.IParty {
+    private final Map<UUID, IPlayer> players;
     private final int maxSize;
-    private Player leader;
-    private WeakReference<PlayerServer> server;
+    private UUID leader;
+    private WeakReference<IMCLoader> server;
 
-    public Party(int maxSize, Player host, PlayerServer server) {
-        this.players = new Vector<>(maxSize);
+    public Party(int maxSize, IPlayer host, IMCLoader server) {
+        this.players = new ConcurrentHashMap<>(maxSize);
         this.maxSize = maxSize;
-        this.leader = host;
-        this.players.add(host);
+        this.players.put(host.uuid(), host);
+        this.leader = host.uuid();
         this.server = new WeakReference<>(server);
     }
 
-    public void setServer(PlayerServer server) {
+    public void setServer(IMCLoader server) {
         if(server.equals(server())) return;
 
         this.server = new WeakReference<>(server);
     }
-    public PlayerServer server() {
+    public IMCLoader server() {
         return this.server.get();
     }
 
-    public synchronized Player leader() {
+    public synchronized IPlayer leader() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
-        if(!this.players.contains(this.leader)) {
-            this.newRandomLeader();
-            this.broadcast(Component.text("The old party leader is no-longer available! "+this.leader.getUsername()+" is the new leader!", NamedTextColor.YELLOW));
+        if(this.players.get(this.leader) == null) {
+            IPlayer player = this.randomPlayer();
+            this.leader = player.uuid();
+            this.broadcast(Component.text("The old party leader is no-longer available! "+player.username()+" is the new leader!", NamedTextColor.YELLOW));
         }
 
-        return this.leader;
+        return this.players.get(this.leader);
     }
 
-    public void setLeader(Player player) {
-        if(!this.players.contains(player))
-            throw new IllegalStateException(player.getUsername() + " isn't in this party, they can't be made leader!");
-        this.leader = player;
+    public void setLeader(IPlayer player) {
+        if(!this.players.containsKey(player.uuid())) throw new IllegalStateException();
+        this.leader = player.uuid();
     }
 
-    public void newRandomLeader() {
+    public IPlayer randomPlayer() {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
-
-        this.leader = this.players.firstElement();
+        try {
+            return this.players.values().stream().findAny().orElseThrow();
+        } catch (Exception ignore) {
+            return this.players.values().stream().findFirst().orElseThrow();
+        }
     }
 
     public boolean isEmpty() {
         return this.players().isEmpty();
     }
 
-    public Vector<Player> players() {
-        return this.players;
+    public List<IPlayer> players() {
+        return this.players.values().stream().toList();
     }
 
-    public synchronized void join(Player player) {
+    public synchronized void join(IPlayer player) {
         if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
 
         if(this.players.size() > this.maxSize) throw new RuntimeException("The party is already full! Try again later!");
 
-        player.sendMessage(VelocityLang.PARTY_JOINED_SELF);
-        this.players.forEach(partyMember -> partyMember.sendMessage(VelocityLang.PARTY_JOINED.build(partyMember.getUsername())));
-        this.players.add(player);
+        player.sendMessage(ProxyLang.PARTY_JOINED_SELF);
+        this.players.values().forEach(partyMember -> partyMember.sendMessage(ProxyLang.PARTY_JOINED.build(player.username())));
+        this.players.put(player.uuid(), player);
     }
 
-    public synchronized void leave(Player player) {
-        if(this.isEmpty()) throw new IllegalStateException("This party is empty and is no-longer useable!");
-        this.players.remove(player);
+    public synchronized void leave(IPlayer player) {
+        if(this.isEmpty()) return;
+        this.players.remove(player.uuid());
 
         if(this.isEmpty()) { // This was the last member of the party
-            Tinder.get().services().partyService().orElseThrow().disband(this);
+            Tinder.get().services().party().orElseThrow().disband(this);
             return;
         }
 
-        this.players.forEach(partyMember -> partyMember.sendMessage(Component.text(player.getUsername() + " left the party.", NamedTextColor.YELLOW)));
+        this.players.values().forEach(partyMember -> partyMember.sendMessage(Component.text(player.username() + " left the party.", NamedTextColor.YELLOW)));
 
-        if(player.equals(this.leader)) {
-            newRandomLeader();
-            this.broadcast(Component.text(this.leader.getUsername()+" is the new party leader!", NamedTextColor.YELLOW));
+        if(player.uuid().equals(this.leader)) {
+            IPlayer newLeader = randomPlayer();
+            setLeader(newLeader);
+            this.broadcast(Component.text(newLeader.username()+" is the new party leader!", NamedTextColor.YELLOW));
         }
 
         if(this.isEmpty())
-            Tinder.get().services().partyService().orElseThrow().disband(this);
+            Tinder.get().services().party().orElseThrow().disband(this);
     }
 
     public void broadcast(Component message) {
-        this.players.forEach(player -> player.sendMessage(message));
+        this.players.values().forEach(player -> player.sendMessage(message));
     }
 
-    public boolean contains(Player player) {
-        return this.players.contains(player);
+    public boolean contains(IPlayer player) {
+        return this.players.containsKey(player.uuid());
     }
 
     public void decompose() {
@@ -108,48 +113,35 @@ public class Party {
         this.leader = null;
     }
 
-    public synchronized void connect(PlayerServer server) {
-        SwitchPower switchPower = Tinder.get().services().partyService().orElseThrow().settings().switchPower();
-        this.setServer(server);
-        Vector<Player> kickedPlayers = new Vector<>();
-
-        Tinder.get().services().partyService().orElseThrow().queueConnector(() -> {
-            for (Player player : this.players)
-                try {
-                    switch (switchPower) {
-                        case MINIMAL -> {
-                            if(server.full()) {
-                                kickedPlayers.add(player);
-                                return;
-                            }
-                            server.directConnect(player);
-                        }
-                        case MODERATE -> {
-                            if(server.maxed()) {
-                                kickedPlayers.add(player);
-                                return;
-                            }
-                            server.directConnect(player);
-                        }
-                        case AGGRESSIVE -> server.directConnect(player);
-                    }
-                } catch (ConnectException e) {
-                    kickedPlayers.add(player);
-                }
-
-            kickedPlayers.forEach(player -> {
-                player.sendMessage(VelocityLang.PARTY_FOLLOWING_KICKED);
-                this.leave(player);
-            });
-        });
-    }
-
     @Override
     public String toString() {
         try {
-            return "<Party players=" + this.players.size() + " leader=" + this.leader.getUsername() + ">";
+            return "<Party players=" + this.players.size() + " leader=" + this.players.get(this.leader) + ">";
         } catch (Exception ignore) {
             return "<Party players=" + this.players.size() + " leader=null>";
         }
+    }
+
+    /**
+     * Checks is the player is a member of a party.
+     * @param player The player.
+     * @return A party if the player is in one. Otherwise, returns an empty optional.
+     */
+    public static Optional<IParty> locate(IPlayer player) {
+        try {
+            return Tinder.get().services().party().orElseThrow().find(player);
+        } catch (Exception ignore) {}
+        return Optional.empty();
+    }
+
+    public static boolean allowedToInitiateConnection(IParty party, IPlayer player) {
+        try {
+            if(!party.contains(player)) return false;
+
+            if(party.leader().equals(player)) return true;
+
+            return !Tinder.get().services().party().orElseThrow().settings().onlyLeaderCanInvite();
+        } catch (Exception ignore) {}
+        return true;
     }
 }

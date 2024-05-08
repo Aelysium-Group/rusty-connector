@@ -1,118 +1,73 @@
 package group.aelysium.rustyconnector.core.lib.config;
 
-import group.aelysium.rustyconnector.core.lib.lang.config.LangFileMappings;
-import group.aelysium.rustyconnector.core.lib.lang.config.LangService;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
+import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.core.lib.lang.LangService;
+import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
+import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.file.Path;
 
-public abstract class YAML {
+public abstract class YAML implements IYAML {
+    protected String name;
+    protected String target;
     protected File configPointer;
     protected ConfigurationNode data;
 
-    public ConfigurationNode getData() { return this.data; }
-
-    public YAML(File configPointer) {
-        this.configPointer = configPointer;
+    public ConfigurationNode nodes() { return this.data; }
+    public String name() {
+        return this.name;
     }
-    public String getName() {
-        return this.configPointer.getName();
+    public String fileTarget() {
+        return this.target;
     }
-    protected static ConfigurationNode get(ConfigurationNode node, String path) {
-        String[] steps = path.split("\\.");
+    public abstract IConfigService.ConfigKey key();
 
-        final ConfigurationNode[] currentNode = {node};
-        Arrays.stream(steps).forEach(step -> {
-            currentNode[0] = currentNode[0].getNode(step);
-        });
-
-        if(currentNode[0] == null) throw new IllegalArgumentException("The called YAML node `"+path+"` was null.");
-
-        return currentNode[0];
+    protected YAML(Path dataFolder, String target, String name) {
+        this.configPointer = new File(String.valueOf(dataFolder), target);
+        this.target = target;
+        this.name = name;
     }
 
-    /**
-     * Retrieve data from a specific configuration node.
-     * @param data The configuration data to search for a specific node.
-     * @param node The node to search for.
-     * @param type The type to convert the retrieved data to.
-     * @return Data with a type matching `type`
-     * @throws IllegalStateException If there was an issue while retrieving the data or converting it to `type`.
-     */
-    protected <T> T getNode(ConfigurationNode data, String node, Class<? extends T> type) throws IllegalStateException {
+    protected YAML(Path dataFolder, String target, String name, LangService lang, LangFileMappings.Mapping template) {
+        this.configPointer = new File(String.valueOf(dataFolder), target);
+        this.target = target;
+        this.name = name;
+
         try {
-            Object objectData = YAML.get(data,node).getValue();
-            if(objectData == null) throw new NullPointerException();
+            if (!this.configPointer.exists()) {
+                File parent = this.configPointer.getParentFile();
+                if (!parent.exists())
+                    parent.mkdirs();
 
-            return type.cast(objectData);
-        } catch (NullPointerException e) {
-            throw new IllegalStateException("The node ["+node+"] is missing!");
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("The node ["+node+"] is of the wrong data type! Make sure you are using the correct type of data!");
-        } catch (Exception e) {
-            throw new IllegalStateException("Unable to register the node: "+node);
-        }
-    }
+                InputStream stream;
+                if (lang.isInline())
+                    stream = IYAML.getResource(lang.code() + "/" + template.path());
+                else
+                    stream = new FileInputStream(lang.get(template));
 
-    /**
-     * Generate and then load the yaml file.
-     * If it already exists, just load it.
-     * This method also closes the passed {@link InputStream} once it's done.
-     * @return `true` If the file successfully loaded. `false` otherwise.
-     */
-    public boolean generate(List<Component> outputLog, LangService lang, LangFileMappings.Mapping template) throws IOException {
-        outputLog.add(Component.text("Building "+this.configPointer.getName()+"...", NamedTextColor.DARK_GRAY));
-        if (!this.configPointer.exists()) {
-            File parent = this.configPointer.getParentFile();
-            if (!parent.exists())
-                parent.mkdirs();
+                try {
+                    Files.copy(stream, this.configPointer.toPath());
+                } catch (IOException e) {
+                    throw new RuntimeException("Unable to setup " + this.configPointer.getName() + "! No further information.");
+                }
 
-            InputStream stream;
-            if(lang.isInline())
-                stream = YAML.getResource("en_us/"+template.path());
-            else
-                stream = new FileInputStream(lang.get(template));
-
-            try {
-                Files.copy(stream, this.configPointer.toPath());
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to setup " + this.configPointer.getName() + "! No further information.");
+                stream.close();
             }
 
-            stream.close();
-        }
-
-        try {
-            this.data = this.loadYAML(this.configPointer);
-            if(this.data == null) return false;
-            outputLog.add(Component.text("Finished building "+this.configPointer.getName(), NamedTextColor.GREEN));
-
-            return true;
+            try {
+                this.data = IYAML.loadYAML(this.configPointer);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         } catch (Exception e) {
-            outputLog.add(Component.text("Failed to build "+this.configPointer.getName(), NamedTextColor.RED));
-
-            return false;
+            throw new RuntimeException(e);
         }
-    }
-
-    public static InputStream getResource(String path) {
-        return YAML.class.getClassLoader().getResourceAsStream(path);
-    }
-
-    public ConfigurationNode loadYAML(File file) throws IOException {
-        return YAMLConfigurationLoader.builder()
-                .setIndent(2)
-                .setPath(file.toPath())
-                .build().load();
     }
 
     /**
@@ -122,7 +77,7 @@ public abstract class YAML {
      */
     public void processVersion(int currentVersion) {
         try {
-            Integer version = this.getNode(this.data, "version", Integer.class);
+            Integer version = IYAML.getValue(this.data, "version", Integer.class);
 
             if(currentVersion > version)
                 throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
@@ -136,12 +91,12 @@ public abstract class YAML {
             return;
         } catch (IllegalStateException e1) {
             try {
-                this.getNode(this.data, "version", String.class);
+                IYAML.getValue(this.data, "version", String.class);
 
                 throw new RuntimeException("You have set the value of `version` in config.yml to be a string! `version` must be an integer!");
             } catch (IllegalStateException e2) {
                 try {
-                    this.getNode(this.data, "config-version", Integer.class);
+                    IYAML.getValue(this.data, "config-version", Integer.class);
 
                     throw new UnsupportedClassVersionError("Your configuration file is outdated! " +
                             "(v1 < v"+ currentVersion +") " +

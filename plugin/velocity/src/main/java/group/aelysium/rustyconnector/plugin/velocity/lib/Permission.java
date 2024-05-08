@@ -14,6 +14,8 @@ public class Permission {
      * @return `true` If the player has any one of the defined permissions. `false` If the player has none of them.
      */
     public static boolean validate(Player player, String... nodes) {
+        if(player == null) return false;
+
         for (String node : nodes) {
             String nodeToLower = node.toLowerCase(Locale.ROOT);
 
@@ -32,7 +34,7 @@ public class Permission {
      * Construct a permission node using insertion nodes. Define your string to be inserted into.
      * By surrounding a string with `<>` brackets you can mark to be replaced.
      * <h3>Example:</h3>
-     * `rustyconnector.<server name>.access`
+     * `rustyconnector.<server id>.access`
      *
      * Insertion points are replaced with the defined values in the order that they are defined.
      * @param pattern The pattern to change
