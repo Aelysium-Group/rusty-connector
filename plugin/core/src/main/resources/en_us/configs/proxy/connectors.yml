@@ -32,9 +32,6 @@ redis:
 
 
 storage:
-    #
-    # The default provider is "SQLITE" and will store all database information on your Velocity server's filesystem.
-    #
     provider: MYSQL
 
 
