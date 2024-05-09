@@ -86,14 +86,7 @@ public class PartyConfig extends YAML implements group.aelysium.rustyconnector.t
 
         this.maxMembers = IYAML.getValue(this.data, "max-members", Integer.class);
 
-        try {
-            this.friendsOnly = IYAML.getValue(this.data, "friends-only", Boolean.class);
-            if(this.friendsOnly)
-                Tinder.get().services().friends().orElseThrow();
-        } catch (Exception ignore) {
-            Tinder.get().logger().send(ProxyLang.BOXED_MESSAGE_COLORED.build("[friends-only] in `party.yml` is set to true. But the friends module isn't enabled! Ignoring...", NamedTextColor.YELLOW));
-            this.friendsOnly = false;
-        }
+        this.friendsOnly = IYAML.getValue(this.data, "friends-only", Boolean.class);
         this.localOnly = IYAML.getValue(this.data, "local-only", Boolean.class);
 
         this.partyLeader_onlyLeaderCanInvite = IYAML.getValue(this.data, "party-leader.only-leader-can-invite", Boolean.class);
