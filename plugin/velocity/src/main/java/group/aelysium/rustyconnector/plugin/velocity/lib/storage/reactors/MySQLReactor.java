@@ -48,7 +48,7 @@ public class MySQLReactor extends StorageReactor {
             "CREATE TABLE IF NOT EXISTS player_ranks (" +
                     "    player_uuid VARCHAR(36) NOT NULL," +
                     "    game_id VARCHAR(16) NOT NULL," +
-                    "    schema VARCHAR(32) NOT NULL," +
+                    "    rank_schema VARCHAR(32) NOT NULL," +
                     "    rank VARCHAR(256) NOT NULL," +
                     "    FOREIGN KEY (player_uuid) REFERENCES players(uuid) ON DELETE CASCADE," +
                     "    CONSTRAINT uc_Mappings UNIQUE (player_uuid, game_id)" +
@@ -322,10 +322,10 @@ public class MySQLReactor extends StorageReactor {
     @Override
     public void saveRank(UUID player, String gameId, JsonObject rank) {
         try {
-            PreparedStatement statement = this.core.prepare("REPLACE INTO player_ranks (player_uuid, game_id, schema, rank) VALUES(?, ?, ?, ?);");
+            PreparedStatement statement = this.core.prepare("REPLACE INTO player_ranks (player_uuid, game_id, rank_schema, rank) VALUES(?, ?, ?, ?);");
             statement.setString(1, player.toString());
             statement.setString(2, gameId);
-            statement.setString(3, rank.get("schema").getAsString());
+            statement.setString(3, rank.get("rank_schema").getAsString());
             statement.setString(4, rank.toString());
         this.core.execute(statement);
         } catch (Exception e) {
@@ -336,7 +336,7 @@ public class MySQLReactor extends StorageReactor {
     @Override
     public void purgeInvalidSchemas(String gameId, String validSchema) {
         try {
-            PreparedStatement statement = this.core.prepare("DELETE FROM player_ranks WHERE game_id = ? AND schema <> ?;");
+            PreparedStatement statement = this.core.prepare("DELETE FROM player_ranks WHERE game_id = ? AND rank_schema <> ?;");
             statement.setString(1, gameId);
             statement.setString(2, validSchema);
             this.core.execute(statement);
