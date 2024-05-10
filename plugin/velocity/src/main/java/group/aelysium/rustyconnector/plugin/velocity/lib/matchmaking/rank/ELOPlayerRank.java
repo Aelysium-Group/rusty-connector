@@ -41,7 +41,7 @@ public class ELOPlayerRank implements IVelocityPlayerRank {
     @Override
     public JsonObject toJSON() {
         JsonObject object = new JsonObject();
-        object.add("schema", new JsonPrimitive(this.schemaName()));
+        object.add("rank_schema", new JsonPrimitive(this.schemaName()));
         object.add("elo", new JsonPrimitive(this.elo));
         return object;
     }
