@@ -116,7 +116,7 @@ public class ScalarFamily extends Family implements IScalarFamily {
                 Request request = new Request(player, result);
 
                 if(!this.validateLoadBalancer()) {
-                    result.complete(ConnectionResult.failed(Component.text("There are no servers for you to connect to!")));
+                    result.complete(ConnectionResult.failed(Component.text("There are no available servers to connect you to! Try again later.")));
                     return request;
                 }
                 if(!this.whitelisted(player)) {
@@ -130,13 +130,15 @@ public class ScalarFamily extends Family implements IScalarFamily {
                 for (int attempt = 1; attempt <= attemptsLeft; attempt++) {
                     IMCLoader server = this.loadBalancer.current().orElse(null);
                     if(server == null) {
-                        result.complete(ConnectionResult.failed(Component.text("There are no servers for you to connect to!")));
+                        result.complete(ConnectionResult.failed(Component.text("There are no available servers to connect you to! Try again later.")));
                         return request;
                     }
 
                     serverResponse = Optional.of(server.connect(player));
                     this.loadBalancer.forceIterate();
                 }
+
+                if(!result.isDone()) result.complete(ConnectionResult.failed(Component.text("There are no available servers to connect you to! Try again later.")));
 
                 return serverResponse.orElse(request);
             }
@@ -153,7 +155,7 @@ public class ScalarFamily extends Family implements IScalarFamily {
                 Request request = new Request(player, result);
 
                 if(!this.validateLoadBalancer()) {
-                    result.complete(ConnectionResult.failed(Component.text("There are no servers for you to connect to!")));
+                    result.complete(ConnectionResult.failed(Component.text("There are no available servers to connect you to! Try again later.")));
                     return request;
                 }
                 if(!this.whitelisted(player)) {
@@ -162,7 +164,7 @@ public class ScalarFamily extends Family implements IScalarFamily {
                 }
                 IMCLoader server = this.loadBalancer.current().orElse(null);
                 if(server == null) {
-                    result.complete(ConnectionResult.failed(Component.text("There are no server to connect to. Try again later.")));
+                    result.complete(ConnectionResult.failed(Component.text("There are no available servers to connect you to! Try again later.")));
                     return request;
                 }
 
