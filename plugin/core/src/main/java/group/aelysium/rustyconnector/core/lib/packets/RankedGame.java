@@ -30,7 +30,7 @@ public interface RankedGame {
                         player_uuid,
                         entryObject.get("username").getAsString(),
                         entryObject.get("schema").getAsString(),
-                        DefaultRankResolver.New().resolve(entryObject.get("rank").getAsJsonObject())
+                        DefaultRankResolver.New().resolve(entryObject.get("rank_schema").getAsJsonObject())
                     )
                 );
             });
