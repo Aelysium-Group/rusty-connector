@@ -36,9 +36,14 @@ public class SendPlayerListener extends PacketListener<SendPlayerPacket> {
         com.velocitypowered.api.proxy.Player player = api.velocityServer().getPlayer(packet.uuid()).orElseThrow();
 
         try {
-            Family family = new Family.Reference(packet.targetFamilyName()).get();
-            if (family == null) throw new InvalidAlgorithmParameterException("A family with the id `"+packet.targetFamilyName()+"` doesn't exist!");
-
+            Family family;
+            try {
+                family = new Family.Reference(packet.targetFamilyName()).get();
+            } catch (Exception ignore) {
+                player.sendMessage(Component.text("The server you're trying to connect to doesn't exist! You should contact the server admin about this."));
+                Tinder.get().logger().error("MCLoader["+packet.packet().sender().uuid()+"] is requesting to send "+player.getUsername()+"["+player.getUniqueId()+"] to the family: "+packet.targetFamilyName()+". But this family doesn't exist on the proxy! Either create the family or fix the MCLoader that's requesting it.");
+                return;
+            }
             IMCLoader server;
             try {
                 server = new IMCLoader.Reference(UUID.fromString(player.getCurrentServer().orElseThrow().getServerInfo().getName())).get();
