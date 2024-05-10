@@ -279,7 +279,7 @@ public class Session implements ISession {
 
             playerObject.add("uuid", new JsonPrimitive(matchPlayer.player().uuid().toString()));
             playerObject.add("username", new JsonPrimitive(matchPlayer.player().username()));
-            playerObject.add("schema", new JsonPrimitive(matchPlayer.gameRank().schemaName()));
+            playerObject.add("rank_schema", new JsonPrimitive(matchPlayer.gameRank().schemaName()));
             playerObject.add("rank", matchPlayer.gameRank().toJSON());
 
             array.add(playerObject);
