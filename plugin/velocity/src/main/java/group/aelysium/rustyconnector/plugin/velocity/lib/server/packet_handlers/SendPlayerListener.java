@@ -44,6 +44,7 @@ public class SendPlayerListener extends PacketListener<SendPlayerPacket> {
                 Tinder.get().logger().error("MCLoader["+packet.packet().sender().uuid()+"] is requesting to send "+player.getUsername()+"["+player.getUniqueId()+"] to the family: "+packet.targetFamilyName()+". But this family doesn't exist on the proxy! Either create the family or fix the MCLoader that's requesting it.");
                 return;
             }
+
             IMCLoader server;
             try {
                 server = new IMCLoader.Reference(UUID.fromString(player.getCurrentServer().orElseThrow().getServerInfo().getName())).get();
