@@ -16,13 +16,14 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RedisConnection extends MessengerConnection implements IMessengerConnection {
     private final Vector<RedisSubscriber> subscribers = new Vector<>();
     private final Map<PacketIdentification, List<PacketListener<? extends Packet.Wrapper>>> listeners = new HashMap<>();
     private final RedisPublisher publisher;
     private final RedisClient.Builder clientBuilder;
-    private boolean isAlive = false;
+    private final AtomicBoolean alive = new AtomicBoolean(false);
     private ExecutorService executorService;
     private final FailService failService;
     private final AESCryptor cryptor;
@@ -37,7 +38,7 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
     }
 
     protected void subscribe(IMessageCacheService<?> cache, PluginLogger logger, Packet.Node senderUUID) {
-        if(!this.isAlive) return;
+        if(!this.alive.get()) return;
 
         this.executorService.submit(() -> {
             try {
@@ -62,23 +63,27 @@ public class RedisConnection extends MessengerConnection implements IMessengerCo
     }
 
     public void startListening(IMessageCacheService<?> cache, PluginLogger logger, Packet.Node senderUUID) {
-        if(this.isAlive) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
+        if(this.alive.get()) throw new IllegalStateException("The RedisService is already running! You can't start it again! Shut it down with `.kill()` first and then try again!");
         this.executorService = Executors.newFixedThreadPool(2);
 
-        this.isAlive = true;
+        this.alive.set(true);
 
         this.subscribe(cache, logger, senderUUID);
     }
 
     @Override
     public void kill() {
-        this.isAlive = false;
+        this.alive.set(false);
         this.failService.kill();
 
         for (Iterator<RedisSubscriber> iterator = this.subscribers.elements().asIterator(); iterator.hasNext(); ) {
             RedisSubscriber subscriber = iterator.next();
             subscriber.shutdown();
         }
+
+        try {
+            this.publisher.kill();
+        } catch (Exception ignore) {}
 
         try {
             this.executorService.shutdown();
