@@ -5,10 +5,10 @@ import com.google.gson.JsonPrimitive;
 
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchmaker;
-import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.ISession;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.storage.IDatabase;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -52,7 +52,7 @@ public class WinRatePlayerRank implements IVelocityPlayerRank {
         return schema();
     }
 
-    public IComputor computor() {
+    public @NotNull IComputer computer() {
         return Computer.New();
     }
 
@@ -66,7 +66,7 @@ public class WinRatePlayerRank implements IVelocityPlayerRank {
         return object;
     }
 
-    public static class Computer implements IComputor {
+    public static class Computer implements IComputer {
         private static final Computer singleton = new Computer();
         public static Computer New() {
             return singleton;

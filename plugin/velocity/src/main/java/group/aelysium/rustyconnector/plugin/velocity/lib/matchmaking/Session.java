@@ -155,7 +155,7 @@ public class Session implements ISession {
 
         if(settings.quittersLose()) {
             Optional<IMatchPlayer> matchPlayer = this.matchmaker.matchPlayer(player);
-            matchPlayer.ifPresent(mp -> mp.gameRank().computor().compute(List.of(), List.of(mp), matchmaker, this));
+            matchPlayer.ifPresent(mp -> mp.gameRank().computer().compute(List.of(), List.of(mp), matchmaker, this));
         }
 
         if(this.players.size() > this.settings.min()) return;
@@ -192,12 +192,12 @@ public class Session implements ISession {
 
         ((Matchmaker) this.matchmaker).remove(this);
 
-        IVelocityPlayerRank.IComputor computer = null;
+        IVelocityPlayerRank.IComputer computer = null;
         List<IMatchPlayer> playerWinners = new ArrayList<>();
         List<IMatchPlayer> playerLosers = new ArrayList<>();
 
         for (IMatchPlayer matchPlayer : this.players.values()) {
-            if(computer == null) computer = matchPlayer.gameRank().computor();
+            computer = matchPlayer.gameRank().computer();
 
             try {
                 if(winners.contains(matchPlayer.player().uuid())) playerWinners.add(matchPlayer);
@@ -237,9 +237,9 @@ public class Session implements ISession {
 
         ((Matchmaker) this.matchmaker).remove(this);
 
-        IVelocityPlayerRank.IComputor computer = null;
+        IVelocityPlayerRank.IComputer computer = null;
         for (IMatchPlayer matchPlayer : this.players.values()) {
-            if(computer == null) computer = matchPlayer.gameRank().computor();
+            if(computer == null) computer = matchPlayer.gameRank().computer();
 
             if(this.active())
                 try {
