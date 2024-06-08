@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Session implements ISession {
     protected final IMatchmaker matchmaker;
@@ -32,8 +33,8 @@ public class Session implements ISession {
     protected Set<UUID> previousPlayers;
     protected IRankedMCLoader mcLoader;
     protected final Settings settings;
-    protected boolean ended = false;
-    protected boolean frozen = false;
+    protected AtomicBoolean ended = new AtomicBoolean(false);
+    protected AtomicBoolean frozen = new AtomicBoolean(false);
 
     public Session(IMatchmaker matchmaker, Settings settings) {
         this.matchmaker = matchmaker;
@@ -50,7 +51,7 @@ public class Session implements ISession {
     }
 
     public boolean ended() {
-        return this.ended;
+        return this.ended.get();
     }
 
     public IMatchmaker matchmaker() {
@@ -75,7 +76,7 @@ public class Session implements ISession {
     }
 
     public boolean frozen() {
-        return this.frozen;
+        return this.frozen.get();
     }
 
     public Map<UUID, IMatchPlayer> players() {
@@ -105,7 +106,7 @@ public class Session implements ISession {
         ((RankedMCLoader) mcLoader).connect(this);
         this.mcLoader = mcLoader;
 
-        if(this.settings.shouldFreeze()) this.frozen = true;
+        if(this.settings.shouldFreeze()) this.frozen.set(true);
     }
 
     public PlayerConnectable.Request join(IMatchPlayer matchPlayer) {
@@ -117,7 +118,7 @@ public class Session implements ISession {
             return request;
         }
 
-        if(this.frozen) {
+        if(this.frozen.get()) {
             result.complete(ConnectionResult.failed(Component.text("This session is already active and not accepting new players!")));
             return request;
         }
@@ -147,11 +148,11 @@ public class Session implements ISession {
     }
 
     public void leave(IPlayer player) {
+        if(this.ended.get()) return;
+
         this.players.remove(player.uuid());
 
         this.recordLeavingPlayer(player.uuid());
-
-        if(this.ended) return;
 
         if(settings.quittersLose()) {
             Optional<IMatchPlayer> matchPlayer = this.matchmaker.matchPlayer(player);
@@ -188,7 +189,7 @@ public class Session implements ISession {
     }
 
     public void end(List<UUID> winners, List<UUID> losers, boolean unlock) {
-        this.ended = true;
+        this.ended.set(true);
 
         ((Matchmaker) this.matchmaker).remove(this);
 
@@ -233,7 +234,7 @@ public class Session implements ISession {
     }
 
     public void endTied(boolean unlock) {
-        this.ended = true;
+        this.ended.set(true);
 
         ((Matchmaker) this.matchmaker).remove(this);
 
