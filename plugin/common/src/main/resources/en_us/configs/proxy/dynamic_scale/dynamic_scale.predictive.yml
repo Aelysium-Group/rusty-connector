@@ -1,0 +1,176 @@
+#############################################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Dynamic Scale                        #
+#                                                           #
+#               ----------------------------                #
+#                                                           #
+# | Autoscalers hook directly into your Kubernetes instance #
+# | to allow your families to dynamically resize the number #
+# | of servers they use to handle different                 #
+# | influxes of players.                                    #
+#                                                           #
+# | If you assign the same autoscaler to multiple families  #
+# | They will all follow the rules of that one autoscaler.  #
+#                                                           #
+#               ----------------------------                #
+#                                                           #
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#############################################################
+#
+# Is this autoscaler enabled?
+# If false, the family will not scale at all.
+#
+enabled: false
+
+helm-chart: "itzg/minecraft"
+
+
+
+#
+# The absolute max number of pods that this auto-scaler is allowed to generate.
+# The auto-scaler is never allowed to generate more pods than this number.
+#
+max-pods: 10
+
+
+
+#
+# The reactive scaling module observe player activity in the family and reactively generates or degenerates MCLoaders based on player activity.
+# Reactive takes action AFTER player influxes have occurred.
+#
+reactive:
+    enabled: false
+
+    generation:
+        #
+        # The ratio of players to available player slots (soft-cap) in this family.
+        # If the ratio is greater than or equal to this number. New pods will be generated.
+        #
+        ratio: 0.8
+
+        #
+        # The amount of time to wait, after `ratio` has been reached, before generating new MCLoaders.
+        # If `ratio` is no-longer valid before delay is over, nothing will happen.
+        #
+        # This value is a Liquid Timestamp.
+        # You can set it to be "INSTANT" for no delay.
+        #
+        delay: INSTANT
+
+        #
+        # The number of MCLoaders to generate once `delay` has successfully elapsed.
+        #
+        count: 1
+
+    degeneration:
+        #
+        # The ratio of players to available player slots (soft-cap) in a specific MCLoader.
+        # If the ratio is less than or equal to this number. The MCLoader will be degenerated.
+        #
+        ratio: 0.0
+
+        #
+        # The amount of time to wait, after `ratio` has been reached, before degenerating the MCLoader.
+        # If `ratio` is no-longer valid before delay is over, nothing will happen.
+        #
+        # This value is a Liquid Timestamp.
+        # You can set it to be "INSTANT" for no delay.
+        #
+        delay: 1m
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                   Proactive Algorithm                    #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | The algorithm to use for handling proactive scaling.   #
+# | Based on the value defined here, you can configure     #
+# | the specific algorithm futher down.                    #
+#                                                          #
+#  ⚫ NONE                                                 #
+#  ⚫ SCHEDULED                                            #
+#  ⚫ PREDICTIVE                                           #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+proactive-algorithm: "NONE"
+
+
+
+#
+# The scheduled scaling module generates or degenerates MCLoaders based on timespans.
+# Scheduled takes action AT SPECIFIC TIMES regardless of actual player counts.
+#
+scheduled:
+    #
+    # The absolute start time of a timespan.
+    # The syntax is: `every [DAY/MONTH/YEAR] at [HOUR/DAY/MONTH <number> | IMMEDIATELY] `
+    # <number> is not an index. The number 1 is the first unit in the list. If you want to start as soon as the new DAY/MONTH/YEAR starts. Set the value to `IMMEDIATELY`.
+    #
+    # You must make sure that your unit offset (`at [HOUR/DAY/MONTH] <number>`) is not greater than the maximum that your unit start (`every [DAY/MONTH/YEAR]`) can be.
+    #
+    start: every MONTH at IMMEDIATELY
+
+    #
+    # MCLoaders will be actively created and deleted based on the current time.
+    #
+    timespans: []
+
+
+
+#
+# The predictive scaling module collects telemetry data of player influxes on this family and attempts to generate or degenerate MCLoaders based on expected player influxes.
+# Predictive takes action BEFORE player influxes are expected.
+#
+predictive:
+    #
+    # How far back should we store telemetry data for?
+    #
+    keep-telemetry-for: 1 YEAR
+
+    #
+    # The resolution of telemetry data to store.
+    # Valid values are: QUARTER_HOURLY, HALF_HOURLY, HOURLY, HALF_DAILY, DAILY, WEEKLY.
+    #
+    # This value also determines how frequently telemetry data is reviewed and new predictive measures are taken.
+    #
+    resolution: HOURLY
+
+    #
+    # The ideal ratio of players to available player slots (soft-cap) in this family to achieve.
+    # Based on telemetry data, the predictive scaling module will attempt to prepare the perfect number of MCLoaders to match this number.
+    #
+    ideal-ratio: 0.7
+
+    #
+    # How it works
+    #
+    # RustyConnector's predictive scaling attempts to accurately predict and prepare for upcoming player influxes.
+    # This is done by storing telemetry data such as player counts, mcloader counts, player ratios, and ideal player ratios.
+    #
+    # Let's walk through behaviors of the predictive algorithm.
+    # To start, let's assume that today is December 25th at 8pm.
+    #
+    # Step 1. Daypart Chunking
+    # The algorithm start by preparing a chunky average of daypart telemetry metrics.
+    # > Does this date in previous years have any special patterns? (Dec 25th is Christmas, more people are off work, so more players would most likely be playing on the nextwork. This step would catch that)
+    # > Does this day in the week bear significance? (If it's Tuesday, the algorithm will look at prior tuesdays to see what traffic looked like on those days)
+    #
+    # Step 2. Hourly Chunking
+    # Next, the algorithm compares hourly telemetry data between today and other days in the vicinity.
+    # > How did this hour look on this day in previous months?
+    # > How did this hour look on this day in previous weeks?
+    # > How did this hour look across the past 7 days?
+    #
+    # Step 3. Telemetry Compilation
+    # Using statistics and analytics algorithms. The predictive scaling module compiles a Telemetry Chunk Report which will be used to prepare for the upcoming influx.
+    #
+    # Step 4. Prepare and Dispatch
+    # The predictive scaling module takes the Telemetry Chunk Report and uses it to dispatch a new Predictive Measure.
+    # If previous predictive measures have been noted to over or under-compensate for influxes, the predictive algorithm will take things like that into account.
+    #

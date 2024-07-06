@@ -1,0 +1,26 @@
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                            GIT                           #
+#                                                          #
+#               ---------------------------                #
+# | This module allows you to use GIT as the source for    #
+# | configurations.                                        #
+#                                                          #
+# | Once enabled, RustyConnector will no-longer load       #
+# | configurations from the local file-system.             #
+# | Instead, configurations will be loaded from the        #
+# | provided git repository.                               #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+#
+# Once enabled, no configuration files other than this one will be loaded from the local filesystem.
+# All RC configurations will be loaded from the provided git repo.
+#
+enabled: false
+
+repository: "https://github.com/Aelysium-Group/rustyconnector.git"
+
+branch: "main"
+
+access-token: ""

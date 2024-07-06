@@ -1,0 +1,62 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'com.github.johnrengelman:shadow:8.1.1'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'java-library'
+
+group = project.maven_group
+version = project.plugin_version
+
+allprojects {
+    repositories {
+        mavenCentral();
+        maven { url = "https://repo.maven.apache.org/maven2/" }
+        maven { url = "https://repo.papermc.io/repository/maven-public/" }
+        maven { url = "https://hub.spigotmc.org/nexus/content/groups/public/" }
+        maven { url = "https://oss.sonatype.org/content/groups/public/" }
+        maven { url = "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url = "https://maven.mrnavastar.rock/" }
+        maven { url = "https://repo.eclipse.org/content/groups/releases/" }
+    }
+}
+
+subprojects {
+    apply plugin: "java"
+    apply plugin: 'com.github.johnrengelman.shadow'
+}
+
+configurations {
+    modules
+    compile.extendsFrom(modules)
+}
+
+dependencies{
+    modules project(':toolkit')
+    modules project(':common')
+
+    modules project(':proxy')
+    modules project(':mcloader')
+
+    modules project(':paper')
+    modules project(':velocity')
+}
+
+def projects = [":toolkit", ":common", ":proxy", ":mcloader", ":paper", ":velocity"]
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn(projects.collect {it + ":shadowJar"} )
+
+    from configurations.modules.collect {
+        it.isDirectory() ? it : zipTree(it)
+    }
+
+    from(files("LICENSE_rusty-connector"))
+
+    exclude("META-INF/*.RSA", "META-INF/*.DSA", "META-INF/*.SF")
+}

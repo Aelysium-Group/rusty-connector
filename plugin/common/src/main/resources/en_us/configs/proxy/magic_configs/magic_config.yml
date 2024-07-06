@@ -1,0 +1,37 @@
+#
+# MCLoader configs are loaded by setting `magic-config` in your MCLoader to be the same name as this file's name.
+# Any MCLoaders pointing to this config will load its values.
+#
+
+#
+# The name of the family that this MCLoader should be registered into.
+#
+family: "lobby"
+
+#
+# If the family that this server is associated with has load balancing which involves "weight" you can set this server's weight level here.
+# When servers are added to a weighted family. The family will first add players to the servers with the highest weight.
+#
+weight: 0
+
+#########################
+#      Player Caps      #
+#########################
+player-cap:
+    #
+    # At what point, should this server stop accepting regular players.
+    # This allows you to mark the server as "full" while still allowing extra space for VIP and staff.
+    #
+    # To allow players to join past this point, you can give them one of two permissions:
+    # rustyconnector.softCapBypass - Bypass the soft cap of any server on this network
+    # rustyconnector.<family name>.softCapBypass - Bypass the soft cap of any server inside of this family
+    #
+    soft: 20
+
+    #
+    # At what point, should this server stop accepting soft-cap bypassing players.
+    # if you wish to still allow high-level staff to access a server at hard player cap. You can grant them the permission:
+    # rustyconnector.hardCapBypass - Bypass the hard cap of any server on this network
+    # rustyconnector.<family name>.hardCapBypass - Bypass the hard cap of any server inside of this family. This also bypasses the soft cap too.
+    #
+    hard: 30

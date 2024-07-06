@@ -1,0 +1,173 @@
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Scalar Family                       #
+#                                                          #
+#               ---------------------------                #
+# | Scalar families are optimized for stateless            #
+# | minecraft gamemodes.                                   #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                       Display Name                       #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Display name is the name of your family, as players    #
+# | will see it, in-game.                                  #
+#                                                          #
+# | Multiple families are allowed to have the              #
+# | same display name.                                     #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+display-name: ""
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Parent Family                       #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | The parent family is the family that players will      #
+# | be sent to when a fallback occurs.                     #
+# | If the parent family is unavailable, the root family   #
+# | is used instead.                                       #
+# | Setting the parent family lets you define how players  #
+# | should move around when they're kicked or disconnected #
+# | from a family.                                         #
+#                                                          #
+#   NOTE: If this value is set for the root family         #
+#         it will be ignored.                              #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+parent-family: ""
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                      Load Balancing                      #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Load balancing is the system through which networks    #
+# | manage player influxes by spreading out players        #
+# | across various server nodes.                           #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+load-balancer: "default"
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                        Whitelist                         #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | To setup a whitelist, you'll need to navigate to the   #
+# | "whitelists" folder and follow the directions in the   #
+# | provided whitelist-template.                           #
+#                                                          #
+# | More often than not, you will have multiple whitelist  #
+# | configurations that you may want to switch between     #
+# | during various points in your network's lifetime.      #
+# | This system allows you to set up as many pre-defined   #
+# | whitelists as you'd like, and enable or switch between #
+# | then whenever you want!                                #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+whitelist:
+    enabled: false
+
+    #
+    # The name of the whitelist configuration file in your "whitelists" folder.
+    # You can include the ".yml" at the end of the name below if you'd like. It doesn't matter either way.
+    #
+    name: "whitelist-template"
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                       Family Anchor                      #
+#                                                          #
+#               ----------------------------               #
+#                                                          #
+# | Family anchors are player facing commands that         #
+# | directly connect players to a specific family!         #
+#                                                          #
+# | If you have an anchor defined "survival", players can  #
+# | use `/survial` to connect to that family!              #
+#                                                          #
+#               -----------------------------              #
+#                        Permissions:                      #
+#               rustyconnector.command.anchor              #
+#        rustyconnector.command.anchor.<anchor name>       #
+#               -----------------------------              #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+anchors: []
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                     Family Injectors                     #
+#                                                          #
+#               ----------------------------               #
+#                                                          #
+# | Family injection is similar to Velocity's forced hosts #
+# | system.                                                #
+#                                                          #
+# | It lets players connect to your network from certain   #
+# | hosts, and it will inject them directly into a         #
+# | specific family.                                       #
+#                                                          #
+#               -----------------------------              #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+#
+# Simply list the hosts you want to target this family.
+# Players connecting from that host will be injected into this family!
+#
+family-injectors: []
+
+
+
+############################################################
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#                           Hub                            #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+# | Should players be allowed to use the `/hub` command    #
+# | in this family to travel to this family's parent?      #
+# | If this family has no parent defined, /hub will        #
+# | send the player to the root family.                    #
+#                                                          #
+# | If this is the root family, nothing will happen.       #
+#                                                          #
+#               ---------------------------                #
+#                                                          #
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+############################################################
+hub: enabled
