@@ -29,8 +29,8 @@ public interface RankedGame {
                     new MCLoaderMatchPlayer(
                         player_uuid,
                         entryObject.get("username").getAsString(),
-                        entryObject.get("schema").getAsString(),
-                        DefaultRankResolver.New().resolve(entryObject.get("rank").getAsJsonObject())
+                        entryObject.get("rank_schema").getAsString(),
+                        DefaultRankResolver.New().resolve(entryObject.get("rank_schema").getAsJsonObject())
                     )
                 );
             });

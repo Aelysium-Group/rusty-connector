@@ -2,17 +2,21 @@ package group.aelysium.rustyconnector.plugin.velocity.lib.server.packet_handlers
 
 import group.aelysium.rustyconnector.core.lib.packets.BuiltInIdentifications;
 import group.aelysium.rustyconnector.plugin.velocity.lib.family.Family;
+import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
 import group.aelysium.rustyconnector.plugin.velocity.lib.players.Player;
 import group.aelysium.rustyconnector.toolkit.core.packet.Packet;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketListener;
 import group.aelysium.rustyconnector.core.lib.packets.SendPlayerPacket;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.toolkit.core.packet.PacketIdentification;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.ConnectionResult;
+import group.aelysium.rustyconnector.toolkit.velocity.connection.PlayerConnectable;
 import group.aelysium.rustyconnector.toolkit.velocity.server.IMCLoader;
 import net.kyori.adventure.text.Component;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class SendPlayerListener extends PacketListener<SendPlayerPacket> {
     protected Tinder api;
@@ -36,8 +40,14 @@ public class SendPlayerListener extends PacketListener<SendPlayerPacket> {
         com.velocitypowered.api.proxy.Player player = api.velocityServer().getPlayer(packet.uuid()).orElseThrow();
 
         try {
-            Family family = new Family.Reference(packet.targetFamilyName()).get();
-            if (family == null) throw new InvalidAlgorithmParameterException("A family with the id `"+packet.targetFamilyName()+"` doesn't exist!");
+            Family family;
+            try {
+                family = new Family.Reference(packet.targetFamilyName()).get();
+            } catch (Exception ignore) {
+                player.sendMessage(Component.text("The server you're trying to connect to doesn't exist! You should contact the server admin about this."));
+                Tinder.get().logger().error("MCLoader["+packet.packet().sender().uuid()+"] is requesting to send "+player.getUsername()+"["+player.getUniqueId()+"] to the family: "+packet.targetFamilyName()+". But this family doesn't exist on the proxy! Either create the family or fix the MCLoader that's requesting it.");
+                return;
+            }
 
             IMCLoader server;
             try {
@@ -48,9 +58,14 @@ public class SendPlayerListener extends PacketListener<SendPlayerPacket> {
 
             if(family.equals(server.family())) throw new RuntimeException("You're already connected to this server!");
 
-            family.connect(new Player(player));
+            PlayerConnectable.Request request = family.connect(new Player(player));
+
+            ConnectionResult result = request.result().get(10, TimeUnit.SECONDS);
+            if(result.connected()) return;
+
+            player.sendMessage(result.message());
         } catch (Exception e) {
-            player.sendMessage(Component.text(e.getMessage()));
+            player.sendMessage(ProxyLang.INTERNAL_ERROR);
         }
     }
 }
