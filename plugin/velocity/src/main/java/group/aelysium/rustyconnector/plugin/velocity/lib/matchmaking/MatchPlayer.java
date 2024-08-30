@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IMatchPlayer;
 import group.aelysium.rustyconnector.toolkit.core.matchmaking.IPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.matchmaking.IVelocityPlayerRank;
 import group.aelysium.rustyconnector.toolkit.velocity.player.IPlayer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -12,21 +13,21 @@ public class MatchPlayer implements IMatchPlayer {
     private final IVelocityPlayerRank rank;
     private final String gameId;
 
-    public MatchPlayer(IPlayer player, IVelocityPlayerRank rank, String gameId) {
+    public MatchPlayer(@NotNull IPlayer player, @NotNull IVelocityPlayerRank rank, @NotNull String gameId) {
         this.player = player;
         this.rank = rank;
         this.gameId = gameId;
     }
 
-    public IPlayer player() {
+    public @NotNull IPlayer player() {
         return this.player;
     }
 
-    public IVelocityPlayerRank gameRank() {
+    public @NotNull IVelocityPlayerRank gameRank() {
         return this.rank;
     }
 
-    public String gameId() {
+    public @NotNull String gameId() {
         return this.gameId;
     }
 

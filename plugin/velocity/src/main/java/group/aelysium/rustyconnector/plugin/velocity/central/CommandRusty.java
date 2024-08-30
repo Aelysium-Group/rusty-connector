@@ -330,7 +330,6 @@ class Send {
                             } catch (NoSuchElementException e) {
                                 logger.send(ProxyLang.RC_SEND_NO_FAMILY.build(familyName));
                             } catch (Exception e) {
-                                e.printStackTrace();
                                 logger.send(Component.text("There was an issue using that command! "+e.getMessage(), NamedTextColor.RED));
                             }
                             return Command.SINGLE_SUCCESS;

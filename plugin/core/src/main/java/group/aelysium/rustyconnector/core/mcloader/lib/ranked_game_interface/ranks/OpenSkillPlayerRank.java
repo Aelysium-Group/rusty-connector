@@ -38,7 +38,7 @@ public class OpenSkillPlayerRank implements IPlayerRank {
     @Override
     public JsonObject toJSON() {
         JsonObject object = new JsonObject();
-        object.add("schema", new JsonPrimitive(this.schemaName()));
+        object.add("rank_schema", new JsonPrimitive(this.schemaName()));
         object.add("mu", new JsonPrimitive(this.mu));
         object.add("sigma", new JsonPrimitive(this.sigma));
         return object;

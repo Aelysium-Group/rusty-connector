@@ -10,7 +10,7 @@ public class DefaultRankResolver implements IRankResolver {
 
     @Override
     public IPlayerRank resolve(JsonObject object) throws IllegalStateException {
-        String schema = object.get("schema").getAsString();
+        String schema = object.get("rank_schema").getAsString();
 
         if(schema.equals(RandomizedPlayerRank.schema()))
             return RandomizedPlayerRank.New();
