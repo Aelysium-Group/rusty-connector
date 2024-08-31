@@ -284,8 +284,12 @@ public class MCLoader implements IMCLoader {
                 this.playerCount.incrementAndGet();
                 result.complete(ConnectionResult.success(Component.text("You successfully connected to the server!"), this));
                 return request;
-            } catch (Exception ignore) {}
-        } catch (Exception ignore) {}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         result.complete(ConnectionResult.failed(Component.text("Unable to connect you to the server!")));
         return request;
