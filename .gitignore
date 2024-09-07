@@ -12,6 +12,8 @@ out/
 build
 bin
 
+libs/
+
 # Compiled class file
 *.class
 
