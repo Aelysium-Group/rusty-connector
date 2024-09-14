@@ -1,14 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.rustyconnector.common.IPV6Broadcaster;
-import group.aelysium.rustyconnector.common.cache.MessageCache;
 import group.aelysium.rustyconnector.common.config.Comment;
 import group.aelysium.rustyconnector.common.config.Config;
 import group.aelysium.rustyconnector.common.config.ConfigLoader;
 import group.aelysium.rustyconnector.common.config.Node;
 import group.aelysium.rustyconnector.common.crypt.AES;
 import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
+import group.aelysium.rustyconnector.common.magic_link.MessageCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.common.util.IPV6Broadcaster;
 import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 
@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-@Config("magic_link.yml")
+@Config("plugins/rustyconnector/magic_link.yml")
 @Comment({
     "#`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´#",
     "#.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·.#",
@@ -124,8 +124,9 @@ public class MagicLinkConfig {
     public WebSocketMagicLink.Tinder tinder() throws IOException {
         AES cryptor = PrivateKeyConfig.New().cryptor();
 
+        ServerRegistrationConfig.New("default");
         Map<String, MagicLinkCore.Proxy.ServerRegistrationConfiguration> registrations = new HashMap<>();
-        for (File file : Objects.requireNonNull((new File("server_registrations")).listFiles())) {
+        for (File file : Objects.requireNonNull((new File("plugins/rustyconnector/server_registrations")).listFiles())) {
             if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
             int extensionIndex = file.getName().lastIndexOf(".");
             String name = file.getName().substring(0, extensionIndex);
@@ -143,7 +144,7 @@ public class MagicLinkConfig {
 
         return new WebSocketMagicLink.Tinder(
                 AddressUtil.parseAddress(this.address),
-                Packet.Target.proxy(ServerUUIDConfig.New().uuid()),
+                Packet.SourceIdentifier.proxy(ServerUUIDConfig.New().uuid()),
                 cryptor,
                 new MessageCache(this.cacheSize, ignoredStatuses, ignoredIdentifications),
                 registrations,

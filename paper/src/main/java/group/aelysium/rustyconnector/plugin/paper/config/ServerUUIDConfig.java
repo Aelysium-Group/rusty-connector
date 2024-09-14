@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-@Config("metadata/aes.private")
+@Config("plugins/rustyconnector/metadata/server.uuid")
 public class ServerUUIDConfig {
     @AllContents()
     private byte[] key;
@@ -21,7 +21,7 @@ public class ServerUUIDConfig {
 
     public static ServerUUIDConfig New() throws IOException {
         // This logic only cares about generating the config if it doesn't exist.
-        File file = new File("metadata/aes.private");
+        File file = new File("plugins/rustyconnector/metadata/server.uuid");
         try {
             if (!file.exists()) {
                 File parent = file.getParentFile();

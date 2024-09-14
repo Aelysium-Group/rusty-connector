@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.common.config.Node;
 
 import java.io.IOException;
 
-@Config("config.yml")
+@Config("plugins/rustyconnector/config.yml")
 public class DefaultConfig {
     @Comment({
             "###########################################################################################################" +
@@ -66,8 +66,20 @@ public class DefaultConfig {
     @Node(key = "version", defaultValue = "7")
     private int version;
 
+    @Comment({
+            "#" +
+            "# The name of the root family which all players initially connecting to the network will join into." +
+            "#"
+    })
+    @Node(order = 1, key = "rootFamily", defaultValue = "lobby")
+    private String rootFamily;
+
     public int version() {
         return version;
+    }
+
+    public String rootFamily() {
+        return this.rootFamily;
     }
 
     public static DefaultConfig New() throws IOException {

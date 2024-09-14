@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
 import java.io.IOException;
 import java.text.ParseException;
 
-@Config("load_balancer/{name}.yml")
+@Config("plugins/rustyconnector/load_balancers/{name}.yml")
 @Comment({
         "############################################################",
         "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",

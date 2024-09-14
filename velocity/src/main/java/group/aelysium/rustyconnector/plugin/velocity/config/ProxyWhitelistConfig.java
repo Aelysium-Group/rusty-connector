@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
-@Config("proxy_whitelist.yml")
+@Config("plugins/rustyconnector/proxy_whitelist.yml")
 @Comment({
         "############################################################",
         "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",

@@ -1,12 +1,13 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.common.config.*;
+import group.aelysium.rustyconnector.plugin.velocity.serializers.WhitelistFilterAdapter;
 import group.aelysium.rustyconnector.proxy.family.whitelist.Whitelist;
 
 import java.io.IOException;
 import java.util.List;
 
-@Config("whitelist/{name}.yml")
+@Config("plugins/rustyconnector/whitelists/{name}.yml")
 @Comment({
         "############################################################",
         "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
@@ -72,7 +73,7 @@ public class WhitelistConfig {
     private boolean usePlayers;
 
     @Node(order = 1, key = "players", defaultValue = "[]")
-    private List<Whitelist.Filter> players;
+    private List<WhitelistFilterAdapter> players;
 
     @Comment({
             "############################################################",
@@ -154,7 +155,7 @@ public class WhitelistConfig {
         Whitelist.Settings settings = new Whitelist.Settings(
                 this.name,
                 this.usePlayers,
-                this.players,
+                this.players.stream().map(WhitelistFilterAdapter::resolveFilter).toList(),
                 this.usePermission,
                 this.message,
                 this.strict,

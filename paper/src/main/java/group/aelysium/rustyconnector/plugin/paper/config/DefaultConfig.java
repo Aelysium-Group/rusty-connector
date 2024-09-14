@@ -1,25 +1,25 @@
 package group.aelysium.rustyconnector.plugin.paper.config;
 
-import group.aelysium.rustyconnector.common.IPV6Broadcaster;
-import group.aelysium.rustyconnector.common.absolute_redundancy.Particle;
-import group.aelysium.rustyconnector.common.cache.MessageCache;
 import group.aelysium.rustyconnector.common.config.Comment;
 import group.aelysium.rustyconnector.common.config.Config;
 import group.aelysium.rustyconnector.common.config.ConfigLoader;
 import group.aelysium.rustyconnector.common.config.Node;
 import group.aelysium.rustyconnector.common.crypt.AES;
-import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
+import group.aelysium.rustyconnector.common.magic_link.MessageCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.common.util.IPV6Broadcaster;
+import group.aelysium.rustyconnector.common.util.URL;
 import group.aelysium.rustyconnector.plugin.paper.PaperServerAdapter;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
-import group.aelysium.rustyconnector.server.ServerFlame;
+import group.aelysium.rustyconnector.server.ServerKernel;
 import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import org.bukkit.Server;
 
 import java.io.IOException;
+import java.text.ParseException;
 
-@Config("config.yml")
+@Config("plugins/rustyconnector/config.yml")
 public class DefaultConfig {
     @Comment({
             "#" +
@@ -43,18 +43,15 @@ public class DefaultConfig {
             "# Example: 127.0.0.1:25565",
             "#"
     })
-    @Node(order = 1, key = "address", defaultValue = "default")
+    @Node(order = 1, key = "address", defaultValue = "127.0.0.1:25565")
     private String address;
 
     @Comment({
             "#",
-            "# The address used to connect to this server.",
-            "# This address should match what a player would enter if they were trying to connect directly to this server.",
-            "# Make sure you also include the port number!",
+            "# An optional display name that can be used to represent this MCLoader in the console.",
+            "# If you do not provide a display name, the family name will be appended with an index instead.",
             "#",
-            "# If you're in a Kubernetes or Docker environment, you can bypass this option by setting the",
-            "#",
-            "# Example: 127.0.0.1:25565",
+            "# Display names can't be longer than 16 characters.",
             "#"
     })
     @Node(order = 2, key = "display-name", defaultValue = "")
@@ -79,7 +76,7 @@ public class DefaultConfig {
             "#"
     })
     @Node(order = 4, key = "magic-link.access-endpoint", defaultValue = "http://127.0.0.1:8080")
-    private String magicLinkEndpoint;
+    private String magicLinkAccessEndpoint;
 
     @Comment({
             "#",
@@ -97,18 +94,18 @@ public class DefaultConfig {
     @Node(order = 5, key = "magic-link.broadcasting-address", defaultValue = "")
     private String broadcastingAddress;
 
-    public ServerFlame.Tinder data(Server server, PluginLogger logger) throws IOException {
+    public ServerKernel.Tinder data(Server server, PluginLogger logger) throws IOException, ParseException {
         AES cryptor = PrivateKeyConfig.New().cryptor();
         WebSocketMagicLink.Tinder magicLink = new WebSocketMagicLink.Tinder(
-                this.magicLinkEndpoint,
-                Packet.Target.server(ServerUUIDConfig.New().uuid()),
+                URL.parseURL(this.magicLinkAccessEndpoint),
+                Packet.SourceIdentifier.server(ServerUUIDConfig.New().uuid()),
                 cryptor,
                 new MessageCache(100),
                 this.serverRegistration,
-                new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.broadcastingAddress))
+                this.broadcastingAddress.isEmpty() ? null : new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.broadcastingAddress))
         );
 
-        return new ServerFlame.Tinder(
+        return new ServerKernel.Tinder(
                 ServerUUIDConfig.New().uuid(),
                 new PaperServerAdapter(server, logger),
                 this.displayName,

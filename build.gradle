@@ -3,15 +3,21 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.github.johnrengelman:shadow:8.1.1'
+        classpath 'io.github.goooler.shadow:shadow-gradle-plugin:8.1.8'
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'java-library'
-
 group = project.maven_group
 version = project.plugin_version
+
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'io.github.goooler.shadow'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
 allprojects {
     repositories {
@@ -21,14 +27,20 @@ allprojects {
         maven { url = "https://hub.spigotmc.org/nexus/content/groups/public/" }
         maven { url = "https://oss.sonatype.org/content/groups/public/" }
         maven { url = "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url = "https://maven.mrnavastar.me/" }
+        maven { url = "https://maven.mrnavastar.me/snapshots/" }
         maven { url = "https://repo.eclipse.org/content/groups/releases/" }
     }
 }
 
 subprojects {
-    apply plugin: "java"
-    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'io.github.goooler.shadow'
+
+    dependencies {
+        //implementation "group.aelysium:rustyconnector-core:0.9.0"
+        implementation files("../libs/rustyconnector-core-0.9.0.jar")
+    }
 }
 
 configurations {
@@ -36,21 +48,22 @@ configurations {
     compile.extendsFrom(modules)
 }
 
-dependencies{
+dependencies {
     modules project(':paper')
     modules project(':velocity')
 }
 
-def projects = [":paper", ":velocity"]
-jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    dependsOn(projects.collect {it + ":shadowJar"} )
-
-    from configurations.modules.collect {
-        it.isDirectory() ? it : zipTree(it)
-    }
-
-    from(files("LICENSE"))
-
-    exclude("META-INF/*.RSA", "META-INF/*.DSA", "META-INF/*.SF")
+tasks.named('jar').configure {
+    enabled = false
 }
+
+task copyJars(type: Copy) {
+    from project(':paper').shadowJar
+    from project(':velocity').shadowJar
+    into "$buildDir/libs"
+    rename { String fileName ->
+        fileName.replace('all', project.plugin_version as String)
+    }
+}
+
+build.dependsOn copyJars

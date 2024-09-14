@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 
 import java.io.IOException;
 
-@Config("server_registrations/{name}.yml")
+@Config("plugins/rustyconnector/server_registrations/{name}.yml")
 @Comment({
         "############################################################",
         "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
@@ -43,7 +43,7 @@ public class ServerRegistrationConfig {
             "# The server's weight as it applies to load balancing.",
             "#"
     })
-    @Node(order = 1, key = "weight", defaultValue = "lobby")
+    @Node(order = 1, key = "weight", defaultValue = "0")
     private int weight;
 
     @Comment({
@@ -56,7 +56,7 @@ public class ServerRegistrationConfig {
             "# rustyconnector.<family name>.softCapBypass - Bypass the soft cap of any server inside of this family",
             "#"
     })
-    @Node(order = 2, key = "soft-cap", defaultValue = "lobby")
+    @Node(order = 2, key = "soft-cap", defaultValue = "20")
     private int softCap;
 
     @Comment({
@@ -67,7 +67,7 @@ public class ServerRegistrationConfig {
             "# rustyconnector.<family name>.hardCapBypass - Bypass the hard cap of any server inside of this family. This also bypasses the soft cap too.",
             "#"
     })
-    @Node(order = 3, key = "hard-cap", defaultValue = "lobby")
+    @Node(order = 3, key = "hard-cap", defaultValue = "30")
     private int hardCap;
 
     public MagicLinkCore.Proxy.ServerRegistrationConfiguration configuration() {

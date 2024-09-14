@@ -1,9 +1,9 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-
 import group.aelysium.rustyconnector.server.ServerAdapter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -19,37 +19,45 @@ public class PaperServerAdapter extends ServerAdapter {
     }
 
     @Override
-    public void setMaxPlayers(int i) {
-
+    public void setMaxPlayers(int max) {
+        this.server.setMaxPlayers(max);
     }
 
     @Override
     public int onlinePlayerCount() {
-        return 0;
+        return this.server.getOnlinePlayers().size();
     }
 
     @Override
-    public Optional<UUID> playerUUID(@NotNull String s) {
-        return Optional.empty();
+    public Optional<UUID> playerUUID(@NotNull String username) {
+        Player player = this.server.getPlayer(username);
+        if(player == null) return Optional.empty();
+        return Optional.of(player.getUniqueId());
     }
 
     @Override
-    public String playerUsername(@NotNull UUID uuid) {
-        return null;
+    public Optional<String> playerUsername(@NotNull UUID uuid) {
+        Player player = this.server.getPlayer(uuid);
+        if(player == null) return Optional.empty();
+        return Optional.of(player.getName());
     }
 
     @Override
     public boolean isOnline(@NotNull UUID uuid) {
-        return false;
+        Player player = this.server.getPlayer(uuid);
+        if(player == null) return false;
+        return player.isOnline();
     }
 
     @Override
-    public void sendMessage(UUID uuid, Component component) {
-
+    public void sendMessage(UUID uuid, Component message) {
+        Player player = this.server.getPlayer(uuid);
+        if(player == null) return;
+        player.sendMessage(message);
     }
 
     @Override
-    public void log(Component component) {
-
+    public void log(Component message) {
+        this.logger.send(message);
     }
 }

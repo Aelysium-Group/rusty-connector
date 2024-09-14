@@ -12,9 +12,12 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
-import group.aelysium.rustyconnector.proxy.ProxyFlame;
-import group.aelysium.rustyconnector.proxy.family.Families;
-import group.aelysium.rustyconnector.proxy.util.Version;
+import group.aelysium.rustyconnector.proxy.ProxyKernel;
+import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
+import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.shaded.org.reflections.Reflections;
+import group.aelysium.rustyconnector.shaded.org.reflections.util.ClasspathHelper;
+import group.aelysium.rustyconnector.shaded.org.reflections.util.ConfigurationBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,9 +30,11 @@ import org.incendo.cloud.velocity.VelocityCommandManager;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -62,7 +67,7 @@ public class VelocityRustyConnector implements PluginContainer {
     }
 
     @Subscribe
-    public void onLoad(ProxyInitializeEvent event) {
+    public void onLoad(ProxyInitializeEvent event) throws Exception {
         this.logger.log("Initializing RustyConnector...");
 
         if(!this.server.getConfiguration().isOnlineMode())
@@ -76,38 +81,35 @@ public class VelocityRustyConnector implements PluginContainer {
             this.logger.log("Failed to register to bstats!");
         }
 
-        //RootLanguageConfig config = RootLanguageConfig.construct(dataFolder);
-
         try {
-            ProxyFlame.Tinder tinder = new ProxyFlame.Tinder(
+            this.logger.log("Building configuration...");
+            ProxyKernel.Tinder tinder = new ProxyKernel.Tinder(
                     ServerUUIDConfig.New().uuid(),
                     new VelocityProxyAdapter(server, logger),
                     MagicLinkConfig.New().tinder()
             );
             tinder.whitelist(ProxyWhitelistConfig.New().tinder());
 
-            Families.Tinder families = new Families.Tinder();
-            for (File file : Objects.requireNonNull((new File("scalar_families")).listFiles())) {
+            DefaultConfig config = DefaultConfig.New();
+            FamilyRegistry.Tinder families = new FamilyRegistry.Tinder();
+            families.addFamily(ScalarFamilyConfig.New("lobby").tinder().flux());
+            for (File file : Objects.requireNonNull((new File("plugins/rustyconnector/scalar_families")).listFiles())) {
                 if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
                 int extensionIndex = file.getName().lastIndexOf(".");
                 String name = file.getName().substring(0, extensionIndex);
-                families.addFamily(ScalarFamilyConfig.New(name).tinder().flux());
+                ScalarFamily.Tinder family = ScalarFamilyConfig.New(name).tinder();
+                families.addFamily(family.flux());
+                if(name.equalsIgnoreCase(config.rootFamily())) families.setRootFamily(family.flux());
             }
-            tinder.families(families);
+            tinder.familyRegistry(families);
 
-            RustyConnector.Toolkit.registerAndIgnite(tinder);
+            ProxyKernel kernel = RustyConnector.Toolkit.registerAndIgnite(tinder);
+            RC.P.Adapter().log(RC.P.Lang().lang().RUSTY_CONNECTOR(kernel.version()));
+
+            kernel.EventManager().orElseThrow().listen(OnMCLoaderRegister.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        try {
-            RustyConnector.Toolkit.Proxy().orElseThrow().access().get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
-
-        RC.P.Adapter().log(RC.P.Lang().lang().RUSTY_CONNECTOR(new Version("0.0.0")));
 
         if(!this.server.getConfiguration().isOnlineMode())
             this.logger.send(RC.P.Lang().lang().boxed(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!", NamedTextColor.RED)));
@@ -117,7 +119,7 @@ public class VelocityRustyConnector implements PluginContainer {
             this.logger.send(RC.P.Lang().lang().boxed(
                     Component.join(
                             JoinConfiguration.newlines(),
-                            Component.text("Your network is identified as having multiple, pre-defined, non-RC servers, in it!"),
+                            Component.text("Your network is identified as having multiple, pre-defined, non-RC servers in it!"),
                             Component.text("Please note that you will receive no help in regards to making RC work with predefined servers!")
                     )
                     , NamedTextColor.RED

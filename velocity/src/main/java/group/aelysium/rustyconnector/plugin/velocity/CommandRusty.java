@@ -3,7 +3,8 @@ package group.aelysium.rustyconnector.plugin.velocity;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
-import group.aelysium.rustyconnector.common.cache.CacheableMessage;
+import group.aelysium.rustyconnector.common.crypt.NanoID;
+import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
@@ -65,7 +66,7 @@ public final class CommandRusty {
     @Command("rc message list")
     public void pfnommtocuemordk(ConsoleCommandSource sender) {
         try {
-            List<CacheableMessage> messages = RC.P.MagicLink().messageCache().messages();
+            List<Packet.Remote> messages = RC.P.MagicLink().messageCache().messages();
             reply(sender, RC.P.Lang().lang().messagePage(messages, 1, (int) Math.floor((double) messages.size() / 10)));
         } catch (Exception e) {
             error(sender, "There was an issue getting those messages!\n" + e.getMessage());
@@ -75,7 +76,7 @@ public final class CommandRusty {
     @Command("rc message list <page>")
     public void evyfrpitotgxtbmf(ConsoleCommandSource sender, @Argument(value = "page") int page) {
         try {
-            List<CacheableMessage> messages = RC.P.MagicLink().messageCache().messages();
+            List<Packet.Remote> messages = RC.P.MagicLink().messageCache().messages();
             reply(sender, RC.P.Lang().lang().messagePage(messages, page, (int) Math.floor((double) messages.size() / 10)));
         } catch (Exception e) {
             error(sender, "There was an issue getting those messages!\n" + e.getMessage());
@@ -87,19 +88,22 @@ public final class CommandRusty {
         reply(sender, RC.P.Lang().lang().messageGetUsage());
     }
 
-    @Command("rc message get <snowflake>")
-    public void nidbtmkngikxlzyo(ConsoleCommandSource sender, @Argument(value = "snowflake") long snowflake) {
+    @Command("rc message get <id>")
+    public void nidbtmkngikxlzyo(ConsoleCommandSource sender, @Argument(value = "id") String id) {
         try {
-            reply(sender, RC.P.MagicLink().messageCache().findMessage(snowflake).toString());
+            reply(sender, RC.P.MagicLink().messageCache().findMessage(NanoID.fromString(id)).toString());
         } catch (Exception e) {
             error(sender, "There was an issue getting that message!\n" + e.getMessage());
         }
     }
 
     @Command("send")
+    public void acmednsmiufxxviz(ConsoleCommandSource sender) {
+        reply(sender, RC.P.Lang().lang().usage());
+    }
     @Command("send <username>")
     @Command("send <username> server")
-    public void acmednrmiufxxviz(ConsoleCommandSource sender) {
+    public void acmednrmiufxxviz(ConsoleCommandSource sender, @Argument(value = "username") String username) {
         reply(sender, RC.P.Lang().lang().usage());
     }
 

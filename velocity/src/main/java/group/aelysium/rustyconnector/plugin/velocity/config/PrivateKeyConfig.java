@@ -1,6 +1,8 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.rustyconnector.common.config.*;
+import group.aelysium.rustyconnector.common.config.AllContents;
+import group.aelysium.rustyconnector.common.config.Config;
+import group.aelysium.rustyconnector.common.config.ConfigLoader;
 import group.aelysium.rustyconnector.common.crypt.AES;
 
 import java.io.File;
@@ -9,18 +11,19 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-@Config("metadata/aes.private")
+@Config("plugins/rustyconnector/metadata/aes.private")
 public class PrivateKeyConfig {
     @AllContents()
     private byte[] key;
 
     public AES cryptor() {
-        return AES.from(this.key);
+        System.out.println(new String(key, StandardCharsets.UTF_8));
+        return AES.from(Base64.getDecoder().decode(this.key));
     }
 
     public static PrivateKeyConfig New() throws IOException {
         // This logic only cares about generating the config if it doesn't exist.
-        File file = new File("metadata/aes.private");
+        File file = new File("plugins/rustyconnector/metadata/aes.private");
         try {
             if (!file.exists()) {
                 File parent = file.getParentFile();
@@ -31,6 +34,7 @@ public class PrivateKeyConfig {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
         return ConfigLoader.load(PrivateKeyConfig.class);

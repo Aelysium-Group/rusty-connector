@@ -9,7 +9,7 @@ import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
 import java.io.IOException;
 import java.text.ParseException;
 
-@Config("scalar_families/{id}.yml")
+@Config("plugins/rustyconnector/scalar_families/{id}.yml")
 public class ScalarFamilyConfig {
     @PathParameter("id")
     private String id;
