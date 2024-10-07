@@ -24,9 +24,6 @@ public class WhitelistConfig extends YAML implements group.aelysium.rustyconnect
     private final List<IWhitelistPlayerFilter> players = new ArrayList<>();
 
     private boolean use_permission = false;
-
-    private boolean use_country = false;
-    private List<String> countries = new ArrayList<>();
     private String message = "You aren't whitelisted on this server!";
     private boolean strict = false;
     private boolean inverted = false;
@@ -41,14 +38,6 @@ public class WhitelistConfig extends YAML implements group.aelysium.rustyconnect
 
     public boolean getUse_permission() {
         return use_permission;
-    }
-
-    public boolean getUse_country() {
-        return use_country;
-    }
-
-    public List<String> getCountries() {
-        return countries;
     }
 
     public String getMessage() {
@@ -96,12 +85,6 @@ public class WhitelistConfig extends YAML implements group.aelysium.rustyconnect
         }
 
         this.use_permission = IYAML.getValue(this.data,"use-permission",Boolean.class);
-
-        this.use_country = IYAML.getValue(this.data,"use-country",Boolean.class);
-        if(this.use_country)
-            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false.", NamedTextColor.YELLOW);
-        this.use_country = false;
-        this.countries = new ArrayList<>();
 
         this.message = IYAML.getValue(data,"message",String.class);
         if(this.message.equalsIgnoreCase(""))
