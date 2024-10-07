@@ -6,18 +6,22 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistPlayerFilter;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistPlayerFilter;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class WhitelistConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.WhitelistConfig {
     private boolean use_players = false;
-    private List<Object> players = new ArrayList<>();
+    private final List<IWhitelistPlayerFilter> players = new ArrayList<>();
 
     private boolean use_permission = false;
 
@@ -31,7 +35,7 @@ public class WhitelistConfig extends YAML implements group.aelysium.rustyconnect
         return use_players;
     }
 
-    public List<Object> getPlayers() {
+    public List<IWhitelistPlayerFilter> getPlayers() {
         return players;
     }
 
@@ -71,9 +75,23 @@ public class WhitelistConfig extends YAML implements group.aelysium.rustyconnect
         PluginLogger logger = Tinder.get().logger();
 
         this.use_players = IYAML.getValue(this.data,"use-players",Boolean.class);
+
         try {
-            this.players = (IYAML.getValue(this.data,"players",List.class));
-        } catch (ClassCastException e) {
+            IYAML.get(this.data,"players").childrenList().forEach(e -> {
+                try {
+                    String username = e.node("username").get(String.class);
+                    String uuid = e.node("uuid").get(String.class);
+                    String ip = e.node("ip").get(String.class);
+                    new WhitelistPlayerFilter(
+                            username,
+                            uuid == null ? null : UUID.fromString(uuid),
+                            ip
+                    );
+                } catch (SerializationException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+        } catch (Exception e) {
             throw new IllegalStateException("The node [players] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }
 
