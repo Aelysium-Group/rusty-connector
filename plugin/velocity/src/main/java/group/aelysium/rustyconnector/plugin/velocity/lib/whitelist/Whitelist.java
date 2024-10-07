@@ -10,6 +10,7 @@ import group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.configs.WhitelistConfig;
 import group.aelysium.rustyconnector.plugin.velocity.lib.Permission;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistPlayerFilter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -20,7 +21,7 @@ public class Whitelist implements IWhitelist {
     private final String message;
     private final String name;
     private final String permission;
-    private final List<WhitelistPlayerFilter> playerFilters = new ArrayList<>();
+    private final List<IWhitelistPlayerFilter> playerFilters = new ArrayList<>();
 
     private final boolean usePlayers;
     private final boolean usePermission;
@@ -53,7 +54,7 @@ public class Whitelist implements IWhitelist {
         return this.inverted;
     }
 
-    public List<WhitelistPlayerFilter> playerFilters() {
+    public List<IWhitelistPlayerFilter> playerFilters() {
         return this.playerFilters;
     }
 
@@ -125,16 +126,8 @@ public class Whitelist implements IWhitelist {
                 whitelistConfig.isStrict(),
                 whitelistConfig.isInverted()
         );
-        if(whitelistConfig.getUse_players()) {
-            List<Object> players = whitelistConfig.getPlayers();
-            Gson gson = new Gson();
-            players.forEach(entry -> {
-                String json = gson.toJson(entry);
-                WhitelistPlayerFilter player = gson.fromJson(json, WhitelistPlayerFilter.class);
-
-                whitelist.playerFilters().add(player);
-            });
-        }
+        if(whitelistConfig.getUse_players())
+            whitelist.playerFilters.addAll(whitelistConfig.getPlayers());
 
         bootOutput.add(Component.text(" | Registered whitelist: "+whitelistName, NamedTextColor.YELLOW));
 

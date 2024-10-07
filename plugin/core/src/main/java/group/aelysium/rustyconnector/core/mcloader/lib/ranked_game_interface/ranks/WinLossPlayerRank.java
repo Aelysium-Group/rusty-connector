@@ -43,7 +43,7 @@ public class WinLossPlayerRank implements IPlayerRank {
     @Override
     public JsonObject toJSON() {
         JsonObject object = new JsonObject();
-        object.add("schema", new JsonPrimitive(this.schemaName()));
+        object.add("rank_schema", new JsonPrimitive(this.schemaName()));
         object.add("wins", new JsonPrimitive(this.wins));
         object.add("losses", new JsonPrimitive(this.losses));
         return object;

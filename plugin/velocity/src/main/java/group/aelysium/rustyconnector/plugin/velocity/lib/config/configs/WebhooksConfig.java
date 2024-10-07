@@ -36,6 +36,8 @@ public class WebhooksConfig extends YAML implements group.aelysium.rustyconnecto
         Tinder api = Tinder.get();
         PluginLogger logger = api.logger();
 
+        WebhookEventManager.clear();
+
         Boolean enabled = IYAML.getValue(this.data, "enabled", Boolean.class);
         if(!enabled) return;
 
