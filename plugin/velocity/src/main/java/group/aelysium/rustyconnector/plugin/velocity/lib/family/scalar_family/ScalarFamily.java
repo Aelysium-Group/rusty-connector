@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static group.aelysium.rustyconnector.toolkit.velocity.family.Metadata.SCALAR_FAMILY_META;
 import static group.aelysium.rustyconnector.toolkit.velocity.util.DependencyInjector.inject;
@@ -134,7 +135,12 @@ public class ScalarFamily extends Family implements IScalarFamily {
                         return request;
                     }
 
-                    serverResponse = Optional.of(server.connect(player));
+                    Request r = server.connect(player);
+                    serverResponse = Optional.of(r);
+                    try {
+                        if (r.result().get(10, TimeUnit.SECONDS).connected()) break;
+                    } catch (Exception ignore) {}
+
                     this.loadBalancer.forceIterate();
                 }
 

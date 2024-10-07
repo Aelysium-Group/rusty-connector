@@ -30,7 +30,7 @@ public class WhitelistPlayerFilter implements IWhitelistPlayerFilter {
     }
 
     public static boolean validate(Whitelist whitelist, IPlayer playerToValidate) {
-        WhitelistPlayerFilter player = whitelist.playerFilters().stream()
+        IWhitelistPlayerFilter player = whitelist.playerFilters().stream()
                 .filter(whitelistPlayerFilter -> whitelistPlayerFilter.username().equals(playerToValidate.username()))
                 .findAny().orElse(null);
         if(player == null) return false;

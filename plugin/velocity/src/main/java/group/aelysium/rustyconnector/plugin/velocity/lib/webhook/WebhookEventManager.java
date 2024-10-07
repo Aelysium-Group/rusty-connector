@@ -12,6 +12,11 @@ public class WebhookEventManager {
     private static Map<WebhookAlertFlag, List<DiscordWebhook>> proxyListeners = new HashMap<>();
     private static Map<WebhookAlertFlag, Map<String, List<DiscordWebhook>>> familyListeners = new HashMap<>();
 
+    public static void clear() {
+        proxyListeners.clear();
+        familyListeners.clear();
+    }
+
     /**
      * Registers a webhook to the proxy.
      * @param webhook The webhook to register.

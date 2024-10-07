@@ -6,23 +6,24 @@ import group.aelysium.rustyconnector.plugin.velocity.PluginLogger;
 import group.aelysium.rustyconnector.plugin.velocity.central.Tinder;
 import group.aelysium.rustyconnector.plugin.velocity.lib.config.ConfigService;
 import group.aelysium.rustyconnector.plugin.velocity.lib.lang.ProxyLang;
+import group.aelysium.rustyconnector.plugin.velocity.lib.whitelist.WhitelistPlayerFilter;
 import group.aelysium.rustyconnector.toolkit.core.config.IConfigService;
 import group.aelysium.rustyconnector.toolkit.core.config.IYAML;
 import group.aelysium.rustyconnector.toolkit.core.lang.LangFileMappings;
+import group.aelysium.rustyconnector.toolkit.velocity.whitelist.IWhitelistPlayerFilter;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class WhitelistConfig extends YAML implements group.aelysium.rustyconnector.toolkit.velocity.config.WhitelistConfig {
     private boolean use_players = false;
-    private List<Object> players = new ArrayList<>();
+    private final List<IWhitelistPlayerFilter> players = new ArrayList<>();
 
     private boolean use_permission = false;
-
-    private boolean use_country = false;
-    private List<String> countries = new ArrayList<>();
     private String message = "You aren't whitelisted on this server!";
     private boolean strict = false;
     private boolean inverted = false;
@@ -31,20 +32,12 @@ public class WhitelistConfig extends YAML implements group.aelysium.rustyconnect
         return use_players;
     }
 
-    public List<Object> getPlayers() {
+    public List<IWhitelistPlayerFilter> getPlayers() {
         return players;
     }
 
     public boolean getUse_permission() {
         return use_permission;
-    }
-
-    public boolean getUse_country() {
-        return use_country;
-    }
-
-    public List<String> getCountries() {
-        return countries;
     }
 
     public String getMessage() {
@@ -71,19 +64,27 @@ public class WhitelistConfig extends YAML implements group.aelysium.rustyconnect
         PluginLogger logger = Tinder.get().logger();
 
         this.use_players = IYAML.getValue(this.data,"use-players",Boolean.class);
+
         try {
-            this.players = (IYAML.getValue(this.data,"players",List.class));
-        } catch (ClassCastException e) {
+            IYAML.get(this.data,"players").childrenList().forEach(e -> {
+                try {
+                    String username = e.node("username").get(String.class);
+                    String uuid = e.node("uuid").get(String.class);
+                    String ip = e.node("ip").get(String.class);
+                    new WhitelistPlayerFilter(
+                            username,
+                            uuid == null ? null : UUID.fromString(uuid),
+                            ip
+                    );
+                } catch (SerializationException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+        } catch (Exception e) {
             throw new IllegalStateException("The node [players] in "+this.name()+" is invalid! Make sure you are using the correct type of data!");
         }
 
         this.use_permission = IYAML.getValue(this.data,"use-permission",Boolean.class);
-
-        this.use_country = IYAML.getValue(this.data,"use-country",Boolean.class);
-        if(this.use_country)
-            ProxyLang.BOXED_MESSAGE_COLORED.send(logger, "RustyConnector does not currently support country codes in whitelists. Setting `use-country` to false.", NamedTextColor.YELLOW);
-        this.use_country = false;
-        this.countries = new ArrayList<>();
 
         this.message = IYAML.getValue(data,"message",String.class);
         if(this.message.equalsIgnoreCase(""))

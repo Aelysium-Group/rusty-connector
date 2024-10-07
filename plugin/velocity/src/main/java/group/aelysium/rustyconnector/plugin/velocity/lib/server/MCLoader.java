@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MCLoader implements IMCLoader {
@@ -277,15 +278,25 @@ public class MCLoader implements IMCLoader {
 
             ConnectionRequestBuilder connection = player.resolve().orElseThrow().createConnectionRequest(this.registeredServer());
             try {
-                ConnectionRequestBuilder.Result connectionResult = connection.connect().orTimeout(5, TimeUnit.SECONDS).get();
+                ConnectionRequestBuilder.Result connectionResult = connection.connect().get(5, TimeUnit.SECONDS);
 
-                if (!connectionResult.isSuccessful()) throw new NoOutputException();
+                if (!connectionResult.isSuccessful()) {
+                    result.complete(ConnectionResult.failed(connectionResult.getReasonComponent().orElse(Component.text("An internal error occurred while establishing this connection!"))));
+                    return request;
+                }
 
                 this.playerCount.incrementAndGet();
                 result.complete(ConnectionResult.success(Component.text("You successfully connected to the server!"), this));
                 return request;
-            } catch (Exception ignore) {}
-        } catch (Exception ignore) {}
+            } catch (TimeoutException e) {
+                result.complete(ConnectionResult.failed(Component.text("The connection timed out.")));
+                return request;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         result.complete(ConnectionResult.failed(Component.text("Unable to connect you to the server!")));
         return request;
