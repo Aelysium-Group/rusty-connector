@@ -43,7 +43,7 @@ public class ServerInfoService implements IServerInfoService {
         return this.displayName;
     }
     public String address() {
-        return AddressUtil.addressToString(this.address);
+        return this.address.getAddress().getHostAddress() + ":" + this.address.getPort();
     }
 
     public int playerCount() {
