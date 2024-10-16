@@ -1,8 +1,11 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
+import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
+import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.paper.lang.PaperLang;
 import group.aelysium.rustyconnector.server.ServerKernel;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -28,15 +31,22 @@ public final class PaperRustyConnector extends JavaPlugin {
         }
 
         try {
+            {
+                GitOpsConfig config = GitOpsConfig.New();
+                if(config != null) DeclarativeYAML.registerRepository("rustyconnector", config.config());
+            }
+
             ServerKernel.Tinder tinder = DefaultConfig.New().data(this.getServer(), this.logger);
             ServerKernel kernel = RustyConnector.Toolkit.registerAndIgnite(tinder);
+            kernel.Lang().onStart(p -> p.registerLangNodes(PaperLang.class));
+
             LegacyPaperCommandManager<CommandSender> commandManager = LegacyPaperCommandManager.createNative(
                     this,
                     ExecutionCoordinator.asyncCoordinator()
             );
             AnnotationParser<CommandSender> annotationParser = new AnnotationParser<>(commandManager, CommandSender.class);
             annotationParser.parse(new CommandRusty());
-            RC.S.Adapter().log(RC.S.Lang().lang().RUSTY_CONNECTOR(kernel.version()));
+            RC.Lang("rustyconnector-wordmark").send(kernel.version());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,8 +1,7 @@
-package group.aelysium.rustyconnector.plugin.paper.config;
+package group.aelysium.rustyconnector.plugin.common.config;
 
-import group.aelysium.rustyconnector.common.config.AllContents;
-import group.aelysium.rustyconnector.common.config.Config;
-import group.aelysium.rustyconnector.common.config.ConfigLoader;
+import group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.declarative_yaml.annotations.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,7 +24,7 @@ public class ServerUUIDConfig {
         try {
             if (!file.exists()) {
                 File parent = file.getParentFile();
-                if (!parent.exists()) parent.mkdirs();
+                if(!parent.exists()) parent.mkdirs();
 
                 try(FileWriter writer = new FileWriter(file)) {
                     writer.write(UUID.randomUUID().toString());
@@ -34,6 +33,6 @@ public class ServerUUIDConfig {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return ConfigLoader.load(ServerUUIDConfig.class);
+        return DeclarativeYAML.load(ServerUUIDConfig.class);
     }
 }

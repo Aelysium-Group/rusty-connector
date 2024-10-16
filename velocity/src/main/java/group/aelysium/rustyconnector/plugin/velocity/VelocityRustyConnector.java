@@ -9,18 +9,19 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.declarative_yaml.GitOperator;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
+import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
+import group.aelysium.rustyconnector.plugin.common.config.ServerUUIDConfig;
+import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
+import group.aelysium.rustyconnector.plugin.velocity.commands.CommandServer;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
+import group.aelysium.rustyconnector.plugin.velocity.lang.VelocityLang;
 import group.aelysium.rustyconnector.proxy.ProxyKernel;
 import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
-import group.aelysium.rustyconnector.shaded.org.reflections.Reflections;
-import group.aelysium.rustyconnector.shaded.org.reflections.util.ClasspathHelper;
-import group.aelysium.rustyconnector.shaded.org.reflections.util.ConfigurationBuilder;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bstats.velocity.Metrics;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.SenderMapper;
@@ -30,11 +31,9 @@ import org.incendo.cloud.velocity.VelocityCommandManager;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -83,47 +82,49 @@ public class VelocityRustyConnector implements PluginContainer {
 
         try {
             this.logger.log("Building configuration...");
+            {
+                GitOpsConfig config = GitOpsConfig.New();
+                if(config != null) DeclarativeYAML.registerRepository("rustyconnector", config.config());
+            }
+
             ProxyKernel.Tinder tinder = new ProxyKernel.Tinder(
                     ServerUUIDConfig.New().uuid(),
                     new VelocityProxyAdapter(server, logger),
                     MagicLinkConfig.New().tinder()
             );
-            tinder.whitelist(ProxyWhitelistConfig.New().tinder());
 
             DefaultConfig config = DefaultConfig.New();
             FamilyRegistry.Tinder families = new FamilyRegistry.Tinder();
-            families.addFamily(ScalarFamilyConfig.New("lobby").tinder().flux());
+            ScalarFamilyConfig.New(config.rootFamily()); // Literally just exists to ensure the root family exists and then generate the scalar family folder
             for (File file : Objects.requireNonNull((new File("plugins/rustyconnector/scalar_families")).listFiles())) {
                 if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
                 int extensionIndex = file.getName().lastIndexOf(".");
                 String name = file.getName().substring(0, extensionIndex);
                 ScalarFamily.Tinder family = ScalarFamilyConfig.New(name).tinder();
-                families.addFamily(family.flux());
-                if(name.equalsIgnoreCase(config.rootFamily())) families.setRootFamily(family.flux());
+                families.addFamily(name, family.flux());
+                if(name.equalsIgnoreCase(config.rootFamily())) families.setRootFamily(name, family.flux());
             }
             tinder.familyRegistry(families);
 
             ProxyKernel kernel = RustyConnector.Toolkit.registerAndIgnite(tinder);
-            RC.P.Adapter().log(RC.P.Lang().lang().RUSTY_CONNECTOR(kernel.version()));
+            kernel.Lang().onStart(p -> p.registerLangNodes(VelocityLang.class));
 
             kernel.EventManager().orElseThrow().listen(OnMCLoaderRegister.class);
+
+            RC.Lang("rustyconnector-wordmark").send(kernel.version());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
         if(!this.server.getConfiguration().isOnlineMode())
-            this.logger.send(RC.P.Lang().lang().boxed(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!", NamedTextColor.RED)));
+            RC.P.Lang().lang("rustyconnector-offlineMode").send();
 
         // Velocity requires that at least one server is always defined in velocity.toml
         if(this.server.getConfiguration().getServers().size() > 1)
-            this.logger.send(RC.P.Lang().lang().boxed(
-                    Component.join(
-                            JoinConfiguration.newlines(),
-                            Component.text("Your network is identified as having multiple, pre-defined, non-RC servers in it!"),
-                            Component.text("Please note that you will receive no help in regards to making RC work with predefined servers!")
-                    )
-                    , NamedTextColor.RED
-            ));
+            RC.P.Lang().lang("rustyconnector-hybrid").send();
+
+        this.server.getCommandManager().unregister("server");
+        this.annotationParser.parse(CommandServer.class);
     }
 
     @Subscribe

@@ -1,8 +1,7 @@
-package group.aelysium.rustyconnector.plugin.velocity.config;
+package group.aelysium.rustyconnector.plugin.common.config;
 
-import group.aelysium.rustyconnector.common.config.AllContents;
-import group.aelysium.rustyconnector.common.config.Config;
-import group.aelysium.rustyconnector.common.config.ConfigLoader;
+import group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.crypt.AES;
 
 import java.io.File;
@@ -12,12 +11,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Config("plugins/rustyconnector/metadata/aes.private")
+@Git(value = "rustyconnector", required = false)
 public class PrivateKeyConfig {
     @AllContents()
     private byte[] key;
 
     public AES cryptor() {
-        System.out.println(new String(key, StandardCharsets.UTF_8));
         return AES.from(Base64.getDecoder().decode(this.key));
     }
 
@@ -37,6 +36,6 @@ public class PrivateKeyConfig {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return ConfigLoader.load(PrivateKeyConfig.class);
+        return DeclarativeYAML.load(PrivateKeyConfig.class);
     }
 }

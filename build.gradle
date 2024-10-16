@@ -28,6 +28,7 @@ allprojects {
         maven { url = "https://oss.sonatype.org/content/groups/public/" }
         maven { url = "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
         maven { url = "https://maven.mrnavastar.me/snapshots/" }
+        maven { url = "https://maven.mrnavastar.me/releases/" }
         maven { url = "https://repo.eclipse.org/content/groups/releases/" }
     }
 }
@@ -38,8 +39,11 @@ subprojects {
     apply plugin: 'io.github.goooler.shadow'
 
     dependencies {
-        //implementation "group.aelysium:rustyconnector-core:0.9.0"
+//        implementation "group.aelysium:rustyconnector-core:0.9.0"
+//        implementation "group.aelysium:declarative-yaml:0.1.5"
         implementation files("../libs/rustyconnector-core-0.9.0.jar")
+        implementation files("../libs/declarative-yaml-0.1.6.jar")
+
     }
 }
 
@@ -49,6 +53,7 @@ configurations {
 }
 
 dependencies {
+    modules project(':common')
     modules project(':paper')
     modules project(':velocity')
 }

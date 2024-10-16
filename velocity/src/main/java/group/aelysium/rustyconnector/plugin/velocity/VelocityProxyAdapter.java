@@ -4,7 +4,12 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import com.velocitypowered.api.proxy.server.ServerPing;
+import group.aelysium.ara.Particle;
+import group.aelysium.rustyconnector.common.crypt.NanoID;
+import group.aelysium.rustyconnector.plugin.velocity.lib.ServerRegistry;
 import group.aelysium.rustyconnector.proxy.ProxyAdapter;
+import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
 import net.kyori.adventure.text.Component;
@@ -17,6 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class VelocityProxyAdapter extends ProxyAdapter {
+    private static final ServerRegistry serverRegistry = new ServerRegistry();
     private final ProxyServer velocity;
     private final PluginLogger logger;
 
@@ -43,13 +49,39 @@ public class VelocityProxyAdapter extends ProxyAdapter {
     }
 
     @Override
-    public void registerServer(@NotNull Server server) {
-        this.velocity.registerServer(new ServerInfo(server.uuid().toString(), server.address()));
+    public boolean registerServer(@NotNull Server server) {
+        ServerInfo info = null;
+        try {
+            String registration = serverRegistry.register(server);
+            info = new ServerInfo(registration, server.address());
+        } catch (Exception ignore) {}
+        if(info == null) return false;
+
+        try {
+            RegisteredServer registeredServer = this.velocity.registerServer(info);
+            ServerPing ping = registeredServer.ping().get(10, TimeUnit.SECONDS);
+            return true;
+        } catch (Exception ignore) {
+            try {
+                this.velocity.unregisterServer(info);
+                serverRegistry.unregister(server.uuid());
+            } catch (Exception ignore2) {}
+            return false;
+        }
     }
 
     @Override
     public void unregisterServer(@NotNull Server server) {
+        String registration = serverRegistry.find(server.uuid()).orElse(null);
+        if(registration == null) return;
         this.velocity.unregisterServer(new ServerInfo(server.uuid().toString(), server.address()));
+    }
+
+    @Override
+    public boolean serverExists(@NotNull Server server) {
+        String registration = serverRegistry.find(server.uuid()).orElse(null);
+        if(registration == null) return false;
+        return this.velocity.getServer(registration).isPresent();
     }
 
     @Override

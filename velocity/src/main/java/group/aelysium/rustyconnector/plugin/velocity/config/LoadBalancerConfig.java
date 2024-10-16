@@ -1,15 +1,19 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.rustyconnector.common.absolute_redundancy.Particle;
-import group.aelysium.rustyconnector.common.config.*;
+import group.aelysium.ara.Particle;
+import group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.declarative_yaml.annotations.*;
+import group.aelysium.declarative_yaml.lib.Printer;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancerAlgorithmExchange;
 import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Map;
 
 @Config("plugins/rustyconnector/load_balancers/{name}.yml")
+@Git(value = "rustyconnector", required = false)
 @Comment({
         "############################################################",
         "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
@@ -62,8 +66,8 @@ public class LoadBalancerConfig {
             "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
             "############################################################"
     })
-    @Node(key = "algorithm", defaultValue = "ROUND_ROBIN")
-    private String algorithm;
+    @Node()
+    private String algorithm = "ROUND_ROBIN";
 
     @Comment({
             "############################################################",
@@ -92,8 +96,8 @@ public class LoadBalancerConfig {
             "# until they have been filled. It will then step to the next, lower, weight level and continue.",
             "#"
     })
-    @Node(order = 1, key = "weighted", defaultValue = "false")
-    private boolean weighted;
+    @Node(1)
+    private boolean weighted = false;
 
     @Comment({
             "############################################################",
@@ -113,8 +117,8 @@ public class LoadBalancerConfig {
             "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
             "############################################################"
     })
-    @Node(order = 2, key = "persistence.enabled", defaultValue = "false")
-    private boolean persistenceEnabled;
+    @Node(2)
+    private boolean persistence_enabled = false;
 
     @Comment({
             "#",
@@ -124,8 +128,8 @@ public class LoadBalancerConfig {
             "# Set to -1 for the load balancer to never give up. (In most cases this isn't really the best idea)",
             "#"
     })
-    @Node(order = 3, key = "persistence.attempts", defaultValue = "5")
-    private int persistenceAttempts;
+    @Node(3)
+    private int persistence_attempts = 5;
 
     @Comment({
             "#",
@@ -137,20 +141,22 @@ public class LoadBalancerConfig {
             "# This value is a Liquid Timestamp. Check the Wiki for more details.",
             "#",
     })
-    @Node(order = 4, key = "rebalance", defaultValue = "15 SECONDS")
-    private String rebalance;
+    @Node(4)
+    private String rebalance = "15 SECONDS";
 
     public Particle.Tinder<LoadBalancer> tinder() throws ParseException {
         return LoadBalancerAlgorithmExchange.generateTinder(this.algorithm, new LoadBalancer.Settings(
                 this.algorithm,
                 this.weighted,
-                this.persistenceEnabled,
-                this.persistenceAttempts,
+                this.persistence_enabled,
+                this.persistence_attempts,
                 LiquidTimestamp.from(rebalance)
         ));
     }
 
-    public static LoadBalancerConfig New(String loadBalancerName) throws IOException {
-        return ConfigLoader.load(LoadBalancerConfig.class, loadBalancerName);
+    public static LoadBalancerConfig New(String name) throws IOException {
+        Printer printer = new Printer()
+                .pathReplacements(Map.of("name", name));
+        return DeclarativeYAML.load(LoadBalancerConfig.class, printer);
     }
 }

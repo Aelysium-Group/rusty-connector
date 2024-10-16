@@ -7,6 +7,8 @@ dependencies {
     implementation "com.velocitypowered:velocity-api:3.3.0-SNAPSHOT"
     implementation "org.incendo:cloud-velocity:2.0.0-beta.8"
     implementation "org.incendo:cloud-annotations:2.0.0"
+
+    shadow project(path: ':common', configuration: 'shadow')
 }
 
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/

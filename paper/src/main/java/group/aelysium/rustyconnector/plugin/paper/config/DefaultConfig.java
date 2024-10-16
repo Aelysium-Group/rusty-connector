@@ -1,14 +1,13 @@
 package group.aelysium.rustyconnector.plugin.paper.config;
 
-import group.aelysium.rustyconnector.common.config.Comment;
-import group.aelysium.rustyconnector.common.config.Config;
-import group.aelysium.rustyconnector.common.config.ConfigLoader;
-import group.aelysium.rustyconnector.common.config.Node;
+import group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.crypt.AES;
 import group.aelysium.rustyconnector.common.magic_link.MessageCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
-import group.aelysium.rustyconnector.common.util.IPV6Broadcaster;
 import group.aelysium.rustyconnector.common.util.URL;
+import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
+import group.aelysium.rustyconnector.plugin.common.config.ServerUUIDConfig;
 import group.aelysium.rustyconnector.plugin.paper.PaperServerAdapter;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
@@ -20,17 +19,18 @@ import java.io.IOException;
 import java.text.ParseException;
 
 @Config("plugins/rustyconnector/config.yml")
+@Git(value = "rustyconnector", required = false)
 public class DefaultConfig {
     @Comment({
-            "#" +
-            "# If you need help updating your configs from an older version;" +
-            "# take a look at our config migration docs:" +
-            "#" +
-            "# https://wiki.aelysium.group/rusty-connector/docs/updating/" +
+            "#",
+            "# If you need help updating your configs from an older version;",
+            "# take a look at our config migration docs:",
+            "#",
+            "# https://wiki.aelysium.group/rusty-connector/docs/updating/",
             "#"
     })
-    @Node(key = "version", defaultValue = "7")
-    private int version;
+    @Node()
+    private int version = 7;
 
     @Comment({
             "#",
@@ -38,13 +38,13 @@ public class DefaultConfig {
             "# This address should match what a player would enter if they were trying to connect directly to this server.",
             "# Make sure you also include the port number!",
             "#",
-            "# If you're in a Kubernetes or Docker environment, you can bypass this option by setting the",
+            "# If you're in a Kubernetes or Docker environment, you can bypass this option by setting the RC_ADDRESS environment variable.",
             "#",
             "# Example: 127.0.0.1:25565",
             "#"
     })
-    @Node(order = 1, key = "address", defaultValue = "127.0.0.1:25565")
-    private String address;
+    @Node(1)
+    private String address = "127.0.0.1:25565";
 
     @Comment({
             "#",
@@ -54,8 +54,8 @@ public class DefaultConfig {
             "# Display names can't be longer than 16 characters.",
             "#"
     })
-    @Node(order = 2, key = "display-name", defaultValue = "")
-    private String displayName;
+    @Node(2)
+    private String displayName = "";
 
     @Comment({
             "#",
@@ -64,8 +64,8 @@ public class DefaultConfig {
             "# The definition below can contain \".yml\" or not, it doesn't matter.",
             "#"
     })
-    @Node(order = 3, key = "server-registration", defaultValue = "default")
-    private String serverRegistration;
+    @Node(3)
+    private String serverRegistration = "default";
 
     @Comment({
             "#",
@@ -75,9 +75,9 @@ public class DefaultConfig {
             "# Example: http://127.0.0.1:8080",
             "#"
     })
-    @Node(order = 4, key = "magic-link.access-endpoint", defaultValue = "http://127.0.0.1:8080")
-    private String magicLinkAccessEndpoint;
-
+    @Node(4)
+    private String magicLink_accessEndpoint = "http://127.0.0.1:8080";
+/*
     @Comment({
             "#",
             "# This setting should only be used if endpoint broadcasting has been enabled on the Proxy.",
@@ -91,18 +91,19 @@ public class DefaultConfig {
             "# Example: [FF02::1]:4446",
             "#"
     })
-    @Node(order = 5, key = "magic-link.broadcasting-address", defaultValue = "")
-    private String broadcastingAddress;
+    @Node(5)*/
+    private String magicLink_broadcastingAddress = "";
 
     public ServerKernel.Tinder data(Server server, PluginLogger logger) throws IOException, ParseException {
         AES cryptor = PrivateKeyConfig.New().cryptor();
         WebSocketMagicLink.Tinder magicLink = new WebSocketMagicLink.Tinder(
-                URL.parseURL(this.magicLinkAccessEndpoint),
+                URL.parseURL(this.magicLink_accessEndpoint),
                 Packet.SourceIdentifier.server(ServerUUIDConfig.New().uuid()),
                 cryptor,
                 new MessageCache(100),
                 this.serverRegistration,
-                this.broadcastingAddress.isEmpty() ? null : new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.broadcastingAddress))
+                null
+                //this.magicLink_broadcastingAddress.isEmpty() ? null : new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.magicLink_broadcastingAddress))
         );
 
         return new ServerKernel.Tinder(
@@ -115,6 +116,6 @@ public class DefaultConfig {
     }
 
     public static DefaultConfig New() throws IOException {
-        return ConfigLoader.load(DefaultConfig.class);
+        return DeclarativeYAML.load(DefaultConfig.class);
     }
 }

@@ -1,11 +1,14 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.rustyconnector.common.config.*;
+import group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.declarative_yaml.annotations.*;
+import group.aelysium.declarative_yaml.lib.Printer;
 import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 
-import java.io.IOException;
+import java.util.Map;
 
 @Config("plugins/rustyconnector/server_registrations/{name}.yml")
+@Git(value = "rustyconnector", required = false)
 @Comment({
         "############################################################",
         "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
@@ -35,16 +38,16 @@ public class ServerRegistrationConfig {
             "# The family that the server will be registered into.",
             "#"
     })
-    @Node(order = 0, key = "family", defaultValue = "lobby")
-    private String family;
+    @Node()
+    private String family = "lobby";
 
     @Comment({
             "#",
             "# The server's weight as it applies to load balancing.",
             "#"
     })
-    @Node(order = 1, key = "weight", defaultValue = "0")
-    private int weight;
+    @Node(1)
+    private int weight = 0;
 
     @Comment({
             "#",
@@ -56,8 +59,8 @@ public class ServerRegistrationConfig {
             "# rustyconnector.<family name>.softCapBypass - Bypass the soft cap of any server inside of this family",
             "#"
     })
-    @Node(order = 2, key = "soft-cap", defaultValue = "20")
-    private int softCap;
+    @Node(2)
+    private int softCap = 20;
 
     @Comment({
             "#",
@@ -67,8 +70,8 @@ public class ServerRegistrationConfig {
             "# rustyconnector.<family name>.hardCapBypass - Bypass the hard cap of any server inside of this family. This also bypasses the soft cap too.",
             "#"
     })
-    @Node(order = 3, key = "hard-cap", defaultValue = "30")
-    private int hardCap;
+    @Node(3)
+    private int hardCap = 30;
 
     public MagicLinkCore.Proxy.ServerRegistrationConfiguration configuration() {
         return new MagicLinkCore.Proxy.ServerRegistrationConfiguration(
@@ -79,7 +82,9 @@ public class ServerRegistrationConfig {
         );
     }
 
-    public static ServerRegistrationConfig New(String name) throws IOException {
-        return ConfigLoader.load(ServerRegistrationConfig.class, name);
+    public static ServerRegistrationConfig New(String name) {
+        Printer printer = new Printer()
+                .pathReplacements(Map.of("name", name));
+        return DeclarativeYAML.load(ServerRegistrationConfig.class, printer);
     }
 }

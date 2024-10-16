@@ -17,8 +17,7 @@ import java.util.UUID;
 public final class CommandRusty {
     private boolean isValid(CommandSender sender) {
         if (sender instanceof ConsoleCommandSender) return true;
-        RC.S.Adapter().log(Component.text(sender.getName() + " tried using a RustyConnector command. RC commands can only be executed from the console!"));
-        error(sender, "This command can only be executed from the server console.");
+        reply(sender, RC.Lang("rustyconnector-consoleOnly").generate());
         return false;
     }
 
@@ -26,19 +25,10 @@ public final class CommandRusty {
         source.sendMessage(response);
     }
 
-    private void reply(CommandSender source, String response) {
-        source.sendMessage(Component.text(response));
-    }
-
-    private void error(CommandSender source, String error) {
-        source.sendMessage(Component.text(error, NamedTextColor.RED));
-    }
-
-
     @Command("rc message")
     public void yckarhhyoblbmbdl(CommandSender sender) {
         if(!isValid(sender)) return;
-        reply(sender, RC.S.Lang().lang().messageUsage());
+        reply(sender, RC.Lang("rustyconnector-messageUsage").generate());
     }
 
     @Command("rc message list")
@@ -46,9 +36,9 @@ public final class CommandRusty {
         if(!isValid(sender)) return;
         try {
             List<Packet.Remote> messages = RC.S.MagicLink().messageCache().messages();
-            reply(sender, RC.S.Lang().lang().messagePage(messages, 1, (int) Math.floor((double) messages.size() / 10)));
+            reply(sender, RC.Lang("rustyconnector-messagePage").generate(messages, 1, (int) Math.floor((double) messages.size() / 10)));
         } catch (Exception e) {
-            error(sender, "There was an issue getting those messages!\n" + e.getMessage());
+            reply(sender, RC.Lang("rustyconnector-error").generate(e.getMessage()));
         }
     }
 
@@ -57,55 +47,73 @@ public final class CommandRusty {
         if(!isValid(sender)) return;
         try {
             List<Packet.Remote> messages = RC.S.MagicLink().messageCache().messages();
-            reply(sender, RC.S.Lang().lang().messagePage(messages, page, (int) Math.floor((double) messages.size() / 10)));
+            reply(sender, RC.Lang("rustyconnector-messagePage").generate(messages, page, (int) Math.floor((double) messages.size() / 10)));
         } catch (Exception e) {
-            error(sender, "There was an issue getting those messages!\n" + e.getMessage());
+            reply(sender, RC.Lang("rustyconnector-error").generate(e.getMessage()));
         }
     }
 
     @Command("rc message get")
     public void scfjnwbsynzbksyh(CommandSender sender) {
         if(!isValid(sender)) return;
-        reply(sender, RC.S.Lang().lang().messageGetUsage());
+        reply(sender, RC.Lang("rustyconnector-messageGetUsage").generate());
     }
 
     @Command("rc message get <id>")
     public void nidbtmkngikxlzyo(CommandSender sender, @Argument("id") String id) {
         if(!isValid(sender)) return;
         try {
-            reply(sender, RC.S.MagicLink().messageCache().findMessage(NanoID.fromString(id)).toString());
+            reply(sender, RC.Lang("rustyconnector-message").generate(RC.S.MagicLink().messageCache().findMessage(NanoID.fromString(id))));
         } catch (Exception e) {
-            error(sender, "There was an issue getting that message!\n" + e.getMessage());
+            reply(sender, RC.Lang("rustyconnector-error").generate(e.getMessage()));
         }
     }
 
     @Command("send")
     public void acmednrmiufxxviz(CommandSender sender) {
         if(!isValid(sender)) return;
-        reply(sender, RC.S.Lang().lang().sendUsage());
+        reply(sender, RC.Lang("rustyconnector-sendUsage").generate());
     }
     @Command("send <username>")
     public void acmednrmiusgxviz(CommandSender sender, @Argument("username") String username) {
         acmednrmiufxxviz(sender);
     }
 
-    @Command("send <username> <target>")
-    private  void sertgsdbfdfxxviz(CommandSender sender, @Argument("username") String username, @Argument("target") String target) {
+    @Command("send <username> <family_name>")
+    private  void sertgsdbfdfxxviz(CommandSender sender, @Argument("username") String username, @Argument("family_name") String family_name) {
         if(!isValid(sender)) return;
+
         UUID uuid = RC.S.Adapter().playerUUID(username).orElse(null);
         if(uuid == null) {
-            error(sender, "A player with that username doesn't exist.");
+            reply(sender, RC.Lang("rustyconnector-missing2").generate("player", username));
+            return;
+        }
+
+        Packet.Local packet = RC.S.Kernel().send(uuid, family_name);
+
+        packet.onReply(p -> {
+            MagicLinkCore.Packets.ResponsePacket response = new MagicLinkCore.Packets.ResponsePacket(p);
+            RC.S.Adapter().log(Component.text(response.message()));
+        });
+    }
+    @Command("send <username> server <server_uuid>")
+    private  void sertgsdbgrfxxviz(CommandSender sender, @Argument("username") String username, @Argument("server_uuid") String server_uuid) {
+        if(!isValid(sender)) return;
+
+        UUID uuid = RC.S.Adapter().playerUUID(username).orElse(null);
+        if(uuid == null) {
+            reply(sender, RC.Lang("rustyconnector-missing2").generate("player", username));
             return;
         }
 
         UUID server = null;
         try {
-            server = UUID.fromString(target);
-        } catch (Exception ignore) {}
+            server = UUID.fromString(server_uuid);
+        } catch (Exception ignore) {
+            reply(sender, RC.Lang("rustyconnector-error").generate("The provided server uuid was invalid!"));
+        }
 
-        Packet.Local packet;
-        if(server != null) packet = RC.S.Kernel().send(uuid, server);
-        else packet = RC.S.Kernel().send(uuid, target);
+        Packet.Local packet = RC.S.Kernel().send(uuid, server);
 
         packet.onReply(p -> {
             MagicLinkCore.Packets.ResponsePacket response = new MagicLinkCore.Packets.ResponsePacket(p);
