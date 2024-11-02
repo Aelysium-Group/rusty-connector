@@ -6,7 +6,9 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import group.aelysium.ara.Particle;
+import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.crypt.NanoID;
+import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.velocity.lib.ServerRegistry;
 import group.aelysium.rustyconnector.proxy.ProxyAdapter;
 import group.aelysium.rustyconnector.proxy.family.Family;
@@ -19,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.net.InetSocketAddress;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class VelocityProxyAdapter extends ProxyAdapter {
@@ -90,9 +93,12 @@ public class VelocityProxyAdapter extends ProxyAdapter {
     }
 
     @Override
-    public void messagePlayer(@NotNull Player player, @NotNull Component component) {
-        if(!(this.convertToObject(player) instanceof com.velocitypowered.api.proxy.Player velocityPlayer)) throw new RuntimeException("Provided object was not a player!");
-        velocityPlayer.sendMessage(component);
+    public void messagePlayer(@NotNull UUID uuid, @NotNull Component component) {
+        try {
+            RC.P.Player(uuid).orElseThrow(()->new NullPointerException("No player with the uuid "+uuid+" is online.")).message(component);
+        } catch (Exception e) {
+            RC.Error(Error.from(e));
+        }
     }
 
     @Override

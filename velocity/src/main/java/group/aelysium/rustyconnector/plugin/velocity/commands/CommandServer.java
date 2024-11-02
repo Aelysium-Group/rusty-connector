@@ -1,6 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.commands;
 
 import com.velocitypowered.api.command.CommandSource;
+import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.proxy.player.Player;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.proxy.family.Family;
@@ -17,18 +18,18 @@ public class CommandServer {
     }
 
     @Command("server")
-    public static void esdfdfitotgxtbmf(com.velocitypowered.api.proxy.Player player) {
+    public void esdfdfitotgxtbmf(com.velocitypowered.api.proxy.Player player) {
         if(player == null) {
-            RC.Lang("rustyconnector-error").generate("/server can only be used by players!");
+            RC.Adapter().log(Error.from("/server can only be used by players!").toComponent());
             return;
         }
         player.sendMessage(RC.Lang("velocity-serverUsage").generate());
     }
 
     @Command("server <family_name>")
-    public static void esdfdfitotgxtbmf(com.velocitypowered.api.proxy.Player player, @Argument(value = "family_name") String family_name) {
+    public void esdfdfitotgxtbmf(com.velocitypowered.api.proxy.Player player, @Argument(value = "family_name") String family_name) {
         if(player == null) {
-            RC.Lang("rustyconnector-error").generate("/server can only be used by players!");
+            RC.Adapter().log(Error.from("/server can only be used by players!").toComponent());
             return;
         }
         try {
@@ -45,7 +46,7 @@ public class CommandServer {
         } catch (NoSuchElementException e) {
             reply(player, RC.Lang("rustyconnector-missing2").generate("family", family_name));
         } catch (Exception e) {
-            reply(player, RC.Lang("rustyconnector-error").generate(e.getMessage()));
+            reply(player, Error.from(e).toComponent());
         }
     }
 }

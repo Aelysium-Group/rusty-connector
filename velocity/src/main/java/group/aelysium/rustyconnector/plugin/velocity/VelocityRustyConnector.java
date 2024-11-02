@@ -13,6 +13,7 @@ import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.GitOperator;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
+import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
 import group.aelysium.rustyconnector.plugin.common.config.ServerUUIDConfig;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
@@ -106,12 +107,17 @@ public class VelocityRustyConnector implements PluginContainer {
             }
             tinder.familyRegistry(families);
 
-            ProxyKernel kernel = RustyConnector.Toolkit.registerAndIgnite(tinder);
-            kernel.Lang().onStart(p -> p.registerLangNodes(VelocityLang.class));
+            RustyConnector.Toolkit.registerAndIgnite(tinder.flux());
 
-            kernel.EventManager().orElseThrow().listen(OnMCLoaderRegister.class);
+            RustyConnector.Toolkit.Proxy().orElseThrow().onStart(p->{
+                try {
+                    p.fetchPlugin(LangLibrary.class).onStart(l -> {
+                        l.registerLangNodes(VelocityLang.class);
+                    });
+                } catch (Exception ignore) {}
+            });
 
-            RC.Lang("rustyconnector-wordmark").send(kernel.version());
+            RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

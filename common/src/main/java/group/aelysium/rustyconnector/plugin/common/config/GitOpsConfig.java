@@ -50,8 +50,11 @@ public class GitOpsConfig {
 
     public static @Nullable GitOpsConfig New() throws IOException {
         GitOpsConfig config = new GitOpsConfig();
-        DeclarativeYAML.reload(config, new Printer());
-        if(config.repository.isEmpty()) return null;
+        try {
+            DeclarativeYAML.reload(config, new Printer());
+        } catch (Exception ignore) {
+            return null;
+        }
 
         return config;
     }

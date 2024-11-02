@@ -14,7 +14,7 @@ public class PaperLang extends CommonLang {
     public PaperLang() {}
 
     @Lang("rustyconnector-magicLinkHandshake")
-    public Component magicLink() {
+    public static Component magicLink() {
         return join(
                 newlines(),
                 space(),
@@ -27,18 +27,18 @@ public class PaperLang extends CommonLang {
     @Lang("rustyconnector-consoleOnly")
     public static final String consoleOnly = "This command can only be executed from the console.";
 
-    public Component paperFolia(boolean isFolia) {
+    public static Component paperFolia(boolean isFolia) {
         if(isFolia) return text("RustyConnector-Folia");
         return text("RustyConnector-Paper");
     };
 
-    public Component paperFoliaLowercase(boolean isFolia) {
+    public static Component paperFoliaLowercase(boolean isFolia) {
         if(isFolia) return text("rustyconnector-folia");
         return text("rustyconnector-paper");
     };
 
     @Lang("rustyconnector-magicLinkHandshakeFailure")
-    public Component magicLinkHandshakeFailure(String reason, int delayAmount, TimeUnit delayUnit) {
+    public static Component magicLinkHandshakeFailure(String reason, int delayAmount, TimeUnit delayUnit) {
         return join(
                 newlines(),
                 text(reason, NamedTextColor.RED),

@@ -1,14 +1,23 @@
 package group.aelysium.rustyconnector.plugin.common.lang;
 
 import group.aelysium.rustyconnector.RC;
+import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.proxy.util.Version;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.Component.text;
@@ -26,7 +35,7 @@ public class CommonLang {
     public static final String waiting = "Working on it...";
 
     @Lang("rustyconnector-border")
-    public static final Component border = Component.text("█████████████████████████████████████████████████████████████████████████████████████████████████");
+    public static final Component border = Component.text("█████████████████████████████████████████████████████████████████████████████████████████████████", DARK_GRAY);
 
     @Lang("rustyconnector-unknownCommand")
     public static final String unknownCommand = "Unknown command. Type \"/help\" for help.";
@@ -36,46 +45,135 @@ public class CommonLang {
 
     @Lang("rustyconnector-internalError")
     public static final String internalError = "There was an internal error while trying to complete that request.";
-    @Lang("rustyconnector-error")
-    public static String error(String error) { return "There was an error while trying to complete that request.\n"+error; }
-    @Lang("rustyconnector-missing")
-    public static String missing(String what) { return "Unable to find "+what; }
 
-    @Lang("rustyconnector-missing2")
-    public static String missing(String what, String identifier) { return "There is no "+what+" with the identifier "+identifier; }
+    @Lang("rustyconnector-moduleReloadList")
+    public static Component moduleReloadList(Set<String> validModules) {
+        return Component.join(
+                JoinConfiguration.builder().separator(Component.newline()).build(),
+                Component.text("Please provide the name of the module you want to reload. Valid options are: Kernel, "+String.join(", ", validModules)),
+                Component.text("If you wish to reload specific families, or family specific modules, you can do that under the /family menu.")
+        );
+    }
+
+    @Lang("rustyconnector-exception")
+    public static Component exception(Throwable e) {
+        return RC.Lang("rustyconnector-box").generate(
+                join(
+                        newlines(),
+                        Component.text(e.getMessage() == null ? "No message was provided by this exception" : e.getMessage(), NamedTextColor.BLUE),
+                        Component.text(e.getClass().getName(), NamedTextColor.BLUE),
+                        join(
+                                newlines(),
+                                Arrays.stream(e.getStackTrace()).map(t->Component.text("        "+t.toString(), NamedTextColor.BLUE)).toList()
+                        )
+                )
+        );
+    }
+
+    @Lang("rustyconnector-error")
+    public static Component error(Error error) {
+        try {
+            List<Component> extras = new ArrayList<>();
+
+            ZonedDateTime zonedDateTime = error.createdAt().atZone(ZoneId.systemDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String formattedDateTime = zonedDateTime.format(formatter);
+
+            extras.add(
+                    join(
+                            newlines(),
+                            text("RustyConnector", BLUE).append(text(" (" + error.uuid() + ") [" + formattedDateTime +"]", DARK_GRAY)),
+                            text(error.message(), GRAY)
+                    )
+            );
+
+            Component hintOrSolution = space();
+            if (error.hint() != null)
+                hintOrSolution = hintOrSolution.appendNewline().append(text("Hint: ", BLUE).append(text(error.hint(), GRAY)));
+            if (error.solution() != null)
+                hintOrSolution = hintOrSolution.appendNewline().append(text("Solution: ", BLUE).append(text(error.solution(), GRAY)));
+            extras.add(hintOrSolution);
+
+            if (error.throwable() != null) error.causedBy(error.throwable().getClass().getSimpleName());
+            if (!error.details().isEmpty()) {
+                extras.add(text("Details: ", BLUE));
+                extras.add(join(
+                        newlines(),
+                        error.details().stream().map(e ->
+                                text(" • ", DARK_GRAY)
+                                        .append(text(e.key + ": ", BLUE)
+                                                .append(RC.Lang("rustyconnector-typedValue").generate(e.value))
+                                        )
+                        ).toList()
+                ));
+            }
+
+            return join(
+                    newlines(),
+                    space(),
+                    space(),
+                    join(
+                            newlines(),
+                            extras
+                    ),
+                    space()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Component.space();
+    }
+
+    @Lang("rustyconnector-typedValue")
+    public static Component typedValue(Object value) {
+        Class<?> clazz = value.getClass();
+        if(Long.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz) ||
+                Double.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz) ||
+                Integer.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz) ||
+                Float.class.isAssignableFrom(clazz) || float.class.isAssignableFrom(clazz)
+        )
+            return text(value.toString(), YELLOW);
+        if(Boolean.class.isAssignableFrom(clazz) || boolean.class.isAssignableFrom(clazz))
+            return text(value.toString(), BLUE);
+        if(String.class.isAssignableFrom(clazz))
+            return text("\""+value+"\"", GOLD);
+        if(Component.class.isAssignableFrom(clazz))
+            return (Component) value;
+        return text(value.toString(), WHITE);
+    }
 
     @Lang("rustyconnector-wordmark")
     public static Component wordmark(Version version) {// font: ANSI Shadow
         Component versionComponent = space();
 
         if(version != null && !version.equals(""))
-            versionComponent = versionComponent.append(text("Version "+version, GREEN));
+            versionComponent = versionComponent.append(text("Version "+version, DARK_AQUA));
 
         return RC.Lang("rustyconnector-box").generate(
                 join(
                         newlines(),
-                        text(" /███████                        /██", AQUA),
-                        text("| ██__  ██                      | ██", AQUA),
-                        text("| ██  \\ ██ /██   /██  /███████ /██████   /██   /██", AQUA),
-                        text("| ███████/| ██  | ██ /██_____/|_  ██_/  | ██  | ██", AQUA),
-                        text("| ██__  ██| ██  | ██|  ██████   | ██    | ██  | ██", AQUA),
-                        text("| ██  \\ ██| ██  | ██ \\____  ██  | ██ /██| ██  | ██", AQUA),
-                        text("| ██  | ██|  ██████/ /███████/  |  ████/|  ███████", AQUA),
-                        text("|__/  |__/ \\______/ |_______/    \\___/   \\____  ██", AQUA),
-                        text("                                         /██  | ██  ", AQUA).append(versionComponent),
-                        text("                                        |  ██████/", AQUA),
-                        text("  /██████                                \\______/             /██", AQUA),
-                        text(" /██__  ██                                                    | ██", AQUA),
-                        text("| ██  \\__/  /██████  /███████  /███████   /██████   /███████ /██████    /██████   /██████", AQUA),
-                        text("| ██       /██__  ██| ██__  ██| ██__  ██ /██__  ██ /██_____/|_  ██_/   /██__  ██ /██__  ██", AQUA),
-                        text("| ██      | ██  \\ ██| ██  \\ ██| ██  \\ ██| ████████| ██        | ██    | ██  \\ ██| ██  \\__/", AQUA),
-                        text("| ██    ██| ██  | ██| ██  | ██| ██  | ██| ██_____/| ██        | ██ /██| ██  | ██| ██", AQUA),
-                        text("|  ██████/|  ██████/| ██  | ██| ██  | ██|  ███████|  ███████  |  ████/|  ██████/| ██", AQUA),
-                        text("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/", AQUA),
+                        text(" /███████                        /██", BLUE),
+                        text("| ██__  ██                      | ██", BLUE),
+                        text("| ██  \\ ██ /██   /██  /███████ /██████   /██   /██", BLUE),
+                        text("| ███████/| ██  | ██ /██_____/|_  ██_/  | ██  | ██", BLUE),
+                        text("| ██__  ██| ██  | ██|  ██████   | ██    | ██  | ██", BLUE),
+                        text("| ██  \\ ██| ██  | ██ \\____  ██  | ██ /██| ██  | ██", BLUE),
+                        text("| ██  | ██|  ██████/ /███████/  |  ████/|  ███████", BLUE),
+                        text("|__/  |__/ \\______/ |_______/    \\___/   \\____  ██", BLUE),
+                        text("                                         /██  | ██  ", BLUE).append(versionComponent),
+                        text("                                        |  ██████/", BLUE),
+                        text("  /██████                                \\______/             /██", BLUE),
+                        text(" /██__  ██                                                    | ██", BLUE),
+                        text("| ██  \\__/  /██████  /███████  /███████   /██████   /███████ /██████    /██████   /██████", BLUE),
+                        text("| ██       /██__  ██| ██__  ██| ██__  ██ /██__  ██ /██_____/|_  ██_/   /██__  ██ /██__  ██", BLUE),
+                        text("| ██      | ██  \\ ██| ██  \\ ██| ██  \\ ██| ████████| ██        | ██    | ██  \\ ██| ██  \\__/", BLUE),
+                        text("| ██    ██| ██  | ██| ██  | ██| ██  | ██| ██_____/| ██        | ██ /██| ██  | ██| ██", BLUE),
+                        text("|  ██████/|  ██████/| ██  | ██| ██  | ██|  ███████|  ███████  |  ████/|  ██████/| ██", BLUE),
+                        text("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/", BLUE),
                         space(),
                         space(),
-                        text("Developed by Aelysium | Juice"),
-                        text("Use: `/rc` to get started", YELLOW)
+                        text("Developed by Aelysium | Juice", DARK_AQUA),
+                        text("Use: `/rc` to get started", DARK_AQUA)
                 )
         );
     };
@@ -98,7 +196,7 @@ public class CommonLang {
         return RC.Lang("rustyconnector-box").generate(
                 join(
                         newlines(),
-                        RC.P.Lang().asciiAlphabet().generate(header, AQUA),
+                        RC.P.Lang().asciiAlphabet().generate(header, BLUE),
                         space(),
                         RC.Lang("rustyconnector-border").generate(),
                         space(),
@@ -112,10 +210,10 @@ public class CommonLang {
         return RC.Lang("rustyconnector-box").generate(
                 join(
                         newlines(),
-                        text("rc message get <Message ID>", AQUA),
+                        text("rc message get <Message ID>", BLUE),
                         text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!", DARK_GRAY),
                         space(),
-                        text("rc message list <page number>", AQUA),
+                        text("rc message list <page number>", BLUE),
                         text("Lists all currently cached messages! As new messages get cached, older ones will be pushed out of the cache.", DARK_GRAY)
                 )
         );
@@ -177,14 +275,14 @@ public class CommonLang {
     };
 
     @Lang("rustyconnector-sendUsage")
-    public Component sendUsage() {
+    public static Component sendUsage() {
         return RC.Lang("rustyconnector-box").generate(
                 join(
                         newlines(),
-                        text("send <username> <family_name>", AQUA),
+                        text("rc send <username> <family_name>", BLUE),
                         text("Sends the user to the specific family!", DARK_GRAY),
                         space(),
-                        text("send <username> server <server_uuid>", AQUA),
+                        text("rc send <username> server <server_uuid>", BLUE),
                         text("Sends the user to the specific server!", DARK_GRAY)
                 )
         );

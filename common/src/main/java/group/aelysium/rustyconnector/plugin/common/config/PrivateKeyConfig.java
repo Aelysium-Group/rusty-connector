@@ -2,7 +2,9 @@ package group.aelysium.rustyconnector.plugin.common.config;
 
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
+import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.crypt.AES;
+import group.aelysium.rustyconnector.common.errors.Error;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -33,8 +35,7 @@ public class PrivateKeyConfig {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            RC.Error(Error.from(e));
         }
         return DeclarativeYAML.load(PrivateKeyConfig.class);
     }
