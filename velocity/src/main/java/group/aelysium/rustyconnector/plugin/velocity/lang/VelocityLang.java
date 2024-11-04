@@ -2,10 +2,16 @@ package group.aelysium.rustyconnector.plugin.velocity.lang;
 
 import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
+import group.aelysium.rustyconnector.common.Plugin;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
 import group.aelysium.rustyconnector.proxy.family.Family;
+import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
 import group.aelysium.rustyconnector.proxy.family.Server;
+import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
+import group.aelysium.rustyconnector.proxy.player.PlayerRegistry;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -27,29 +33,31 @@ public class VelocityLang extends CommonLang {
         return "You're already connected to this server.";
     }
 
-    @Lang("rustyconnector-rootUsage")
+    @Lang("rustyconnector-kernelDetails")
     public static Component usage() {
-        return RC.Lang("rustyconnector-box").generate(
-                join(
-                        newlines(),
-                        text("rc family", BLUE),
-                        text("View all families.", DARK_GRAY),
-                        space(),
-                        text("rc server", BLUE),
-                        text("View all servers.", DARK_GRAY),
-                        space(),
-                        text("rc send", BLUE),
-                        text("Send a player a family or server.", DARK_GRAY),
-                        space(),
-                        text("rc message", BLUE),
-                        text("Access recently sent MagicLink packets.", DARK_GRAY),
-                        space(),
-                        text("rc reload", BLUE),
-                        text("Reload entire plugin.", DARK_GRAY),
-                        space(),
-                        text("rc errors", BLUE),
-                        text("Fetches the recent errors thrown by RustyConnector.", DARK_GRAY)
-                )
+        return join(
+                newlines(),
+                space(),
+                text("rc families", BLUE),
+                text("View all families.", DARK_GRAY),
+                space(),
+                text("rc servers", BLUE),
+                text("View all servers.", DARK_GRAY),
+                space(),
+                text("rc send", BLUE),
+                text("Send a player a family or server.", DARK_GRAY),
+                space(),
+                text("rc messages", BLUE),
+                text("Access recently sent MagicLink packets.", DARK_GRAY),
+                space(),
+                text("rc reload", BLUE),
+                text("Reload RustyConnector.", DARK_GRAY),
+                space(),
+                text("rc plugins", BLUE),
+                text("Get details for RustyConnector modules.", DARK_GRAY),
+                space(),
+                text("rc errors", BLUE),
+                text("Fetches the recent errors thrown by RustyConnector.", DARK_GRAY)
         );
     }
 
@@ -71,12 +79,8 @@ public class VelocityLang extends CommonLang {
 
     @Lang("rustyconnector-families")
     public static Component families() {
-        AtomicReference<Component> families = new AtomicReference<>(text(""));
-        AtomicReference<String> rootFamily = new AtomicReference<>("Unknown");
+        AtomicReference<String> rootFamily = new AtomicReference<>("[Unavailable]");
         RC.P.Families().rootFamily().executeNow(r -> rootFamily.set(r.id()));
-
-        for (Particle.Flux<? extends Family> family : RC.P.Families().dump())
-            family.executeNow(f -> families.set(families.get().append(text("["+f.id()+"*] ").color(BLUE))));
 
         return RC.Lang("rustyconnector-box").generate(
                 join(
@@ -87,7 +91,11 @@ public class VelocityLang extends CommonLang {
                         space(),
                         RC.Lang("rustyconnector-border").generate(),
                         space(),
-                        families.get(),
+                        text(String.join(", ",RC.P.Families().dump().stream().map(f->{
+                            AtomicReference<String> id = new AtomicReference<>("[Unavailable]");
+                            f.executeNow(fa->id.set(fa.id()));
+                            return id.get();
+                        }).toList()), BLUE),
                         space(),
                         text("Root Family: ", BLUE).append(text(rootFamily.get(), DARK_GRAY)),
                         space(),
@@ -140,62 +148,24 @@ public class VelocityLang extends CommonLang {
                         RC.Lang("rustyconnector-border").generate(),
                         space(),
                         text("Details:", DARK_GRAY),
-                        text(" • UUID: ",           DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(server.uuid())),
-                        text(" • Display Name: ",   DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(server.displayName().orElse("None"))),
-                        text(" • Address: ",        DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(AddressUtil.addressToString(server.address()))),
-                        text(" • Family: ",         DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate((family == null ? (missing ? "Unavailable" : "None") : family.id()))),
-                        text(" • Online Players: ", DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(server.players())),
-                        text(" • Player Limit: ",   DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate("(Soft: "+server.softPlayerCap()+", Hard: "+server.hardPlayerCap())),
-                        text(" • Weight: ",         DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(server.weight())),
-                        text(" • Locked: ",         DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(locked)),
-                        text(" • Stale: ",          DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(server.stale()))
+                        keyValue("UUID",           server.uuid()),
+                        keyValue("Display Name",   server.displayName().orElse("None")),
+                        keyValue("Address",        AddressUtil.addressToString(server.address())),
+                        keyValue("Family",         (family == null ? (missing ? "Unavailable" : "None") : family.id())),
+                        keyValue("Online Players", server.players()),
+                        keyValue("Player Limit",   "(Soft: "+server.softPlayerCap()+", Hard: "+server.hardPlayerCap()),
+                        keyValue("Weight",         server.weight()),
+                        keyValue("Locked",         locked),
+                        keyValue("Stale",          server.stale())
                 )
         );
     };
 
     @Lang("rustyconnector-family")
     public static Component family(@NotNull Family family) {
-        AtomicReference<Component> serversComponent = new AtomicReference<>(family.servers().isEmpty() ? text("There are no servers to show.", DARK_GRAY) : empty());
-        family.servers().forEach(s -> serversComponent.set(serversComponent.get().appendNewline().append(RC.Lang("rustyconnector-serverNugget").generate(s))));
-
-        AtomicReference<String> parentName = new AtomicReference<>("none");
-        try {
-            Particle.Flux<? extends Family> parent = family.parent().orElse(null);
-            if(parent == null) throw new RuntimeException();
-            parent.executeLocking(f -> parentName.set(f.id()), ()->parentName.set("exists but unknown (did it crash?)"), 10, TimeUnit.SECONDS);
-        } catch (Exception ignore) {}
-
         return RC.Lang("rustyconnector-headerBox").generate(
                 family.id(),
-                join(
-                        newlines(),
-                        text("Details:", DARK_GRAY),
-                        text(" • Parent Family: ", DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(parentName)),
-                        text(" • Plugins: ",       DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(join(
-                                newlines(),
-                                family.plugins().stream().map(Component::text).toList()
-                        ))),
-                        space(),
-                        RC.Lang("rustyconnector-border").generate(),
-                        space(),
-                        serversComponent.get()
-                )
-        );
-    };
-
-    @Lang("rustyconnector-plugin")
-    public static Component plugin(@NotNull Family.Plugin plugin) {
-        return RC.Lang("rustyconnector-headerBox").generate(
-                plugin.name(),
-                join(
-                        newlines(),
-                        text("Details:", DARK_GRAY),
-                        text(" • Name: ", DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(plugin.name())),
-                        join(
-                                newlines(),
-                                plugin.details().entrySet().stream().map(e->text(" • "+e.getKey()+": ", DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(e.getValue()))).toList()
-                        )
-                )
+                RC.Lang("rustyconnector-familyDetails").generate(family)
         );
     };
 
@@ -220,5 +190,88 @@ public class VelocityLang extends CommonLang {
                     text("Type /server <server_name> to switch to another server.")
             );
         }
+    }
+
+    @Lang("rustyconnector-playerRegistryDetails")
+    public static Component playerRegistryDetails(PlayerRegistry playerRegistry) {
+        return join(
+                newlines(),
+                keyValue("Players", join(
+                        JoinConfiguration.separator(text(", ", DARK_BLUE)),
+                        playerRegistry.dump().stream().map(p -> text(p.username(), BLUE)).toList()
+                ))
+        );
+    }
+
+    @Lang("rustyconnector-familyRegistryDetails")
+    public static Component familyRegistryDetails(FamilyRegistry familyRegistry) {
+        List<Family> families = new ArrayList<>();
+        familyRegistry.dump().forEach(f -> f.executeNow(families::add));
+
+        AtomicReference<Family> rootFamily = new AtomicReference<>(null);
+        familyRegistry.rootFamily().executeNow(rootFamily::set);
+        return join(
+                newlines(),
+                keyValue("Total Families", familyRegistry.size()),
+                keyValue("Available Families", families.size()),
+                keyValue("Root Family", rootFamily.get() == null ? "Unavailable" : rootFamily.get().name()),
+                keyValue("Families", join(
+                        JoinConfiguration.separator(text(", ", DARK_BLUE)),
+                        families.stream().map(f -> text(f.name(), BLUE)).toList()
+                )),
+                space(),
+                text("Families are technically considered plugins as well, you can view details for the above families if you'd like.", DARK_GRAY)
+        );
+    }
+
+    @Lang("rustyconnector-familyDetails")
+    public static Component familyDetails(Family family) {
+        AtomicReference<String> parentName = new AtomicReference<>("none");
+        try {
+            Particle.Flux<? extends Family> parent = family.parent().orElse(null);
+            if(parent == null) throw new RuntimeException();
+            parent.executeLocking(f -> parentName.set(f.id()), ()->parentName.set("[Unavailable]"), 10, TimeUnit.SECONDS);
+        } catch (Exception ignore) {}
+
+        return join(
+                newlines(),
+                keyValue("Display Name", family.displayName() == null ? "No Display Name" : family.displayName()),
+                keyValue("Parent Family", parentName.get()),
+                keyValue("Servers", family.servers().size()),
+                keyValue("Players", family.players()),
+                keyValue("Plugins", join(
+                        JoinConfiguration.separator(text(", ", BLUE)),
+                        family.plugins().stream().map(f->{
+                            AtomicReference<String> name = new AtomicReference<>("Unknown");
+                            f.executeNow(p->name.set(p.name()));
+                            return text(name.get(), BLUE);
+                        }).toList()
+                )),
+                space(),
+                RC.Lang("rustyconnector-border").generate(),
+                space(),
+                join(
+                        newlines(),
+                        family.servers().stream().map(s -> RC.Lang("rustyconnector-serverNugget").generate(s)).toList()
+                )
+        );
+    }
+
+    @Lang("rustyconnector-scalarFamilyDetails")
+    public static Component scalarFamilyDetails(ScalarFamily family) {
+        return RC.Lang("rustyconnector-familyDetails").generate(family);
+    }
+
+    @Lang("rustyconnector-loadBalancerDetails")
+    public static Component loadBalancerDetails(LoadBalancer loadBalancer) {
+        return join(
+                newlines(),
+                keyValue("Algorithm", loadBalancer.getClass().getSimpleName()),
+                keyValue("Total Servers", loadBalancer.servers().size()),
+                keyValue("Unlocked Servers", loadBalancer.unlockedServers().size()),
+                keyValue("Locked Servers", loadBalancer.lockedServers().size()),
+                keyValue("Weighted", loadBalancer.weighted()),
+                keyValue("Persistence", loadBalancer.persistent() ? "Enabled ("+loadBalancer.attempts()+")" : "Disabled")
+        );
     }
 }

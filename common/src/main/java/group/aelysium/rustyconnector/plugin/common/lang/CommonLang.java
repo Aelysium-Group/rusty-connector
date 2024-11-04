@@ -1,23 +1,25 @@
 package group.aelysium.rustyconnector.plugin.common.lang;
 
 import group.aelysium.rustyconnector.RC;
+import group.aelysium.rustyconnector.common.Plugin;
 import group.aelysium.rustyconnector.common.errors.Error;
+import group.aelysium.rustyconnector.common.errors.ErrorRegistry;
+import group.aelysium.rustyconnector.common.events.EventManager;
 import group.aelysium.rustyconnector.common.lang.Lang;
+import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
 import group.aelysium.rustyconnector.proxy.util.Version;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.Component.text;
@@ -30,12 +32,12 @@ public class CommonLang {
     }
 
     @Lang("rustyconnector-finished")
-    public static final String finished = "Finished!";
+    public static final Component finished = text("Finished!", DARK_AQUA);
     @Lang("rustyconnector-waiting")
-    public static final String waiting = "Working on it...";
+    public static final Component waiting = text("Working on it...", BLUE);
 
     @Lang("rustyconnector-border")
-    public static final Component border = Component.text("█████████████████████████████████████████████████████████████████████████████████████████████████", DARK_GRAY);
+    public static final Component border = Component.text("-------------------------------------------------------------------------------------------------", DARK_BLUE);
 
     @Lang("rustyconnector-unknownCommand")
     public static final String unknownCommand = "Unknown command. Type \"/help\" for help.";
@@ -46,26 +48,40 @@ public class CommonLang {
     @Lang("rustyconnector-internalError")
     public static final String internalError = "There was an internal error while trying to complete that request.";
 
-    @Lang("rustyconnector-moduleReloadList")
+    @Lang("rustyconnector-pluginList")
     public static Component moduleReloadList(Set<String> validModules) {
-        return Component.join(
-                JoinConfiguration.builder().separator(Component.newline()).build(),
-                Component.text("Please provide the name of the module you want to reload. Valid options are: Kernel, "+String.join(", ", validModules)),
-                Component.text("If you wish to reload specific families, or family specific modules, you can do that under the /family menu.")
+        return RC.Lang("rustyconnector-box").generate(
+            join(
+                    newlines(),
+                    text("Please provide the name of the module you want to see details for. Valid options are:", GRAY),
+                    text(String.join(", ", validModules), BLUE),
+                    text("If a module has sub-modules, you can view those using using `module.submodule.submodule`.", GRAY),
+                    space(),
+                    text("rc module <target_module>", BLUE),
+                    text("Returns details for specific modules.", DARK_GRAY),
+                    space(),
+                    text("rc reload <target_module>", BLUE),
+                    text("Reloads a specific module.", DARK_GRAY)
+            )
         );
     }
 
     @Lang("rustyconnector-exception")
     public static Component exception(Throwable e) {
+        List<Component> stackTrace = new ArrayList<>();
+
+        AtomicReference<Throwable> current = new AtomicReference<>(e);
+        while(current.get() != null) {
+            if(current.get().getMessage() != null) stackTrace.add(text(current.get().getMessage(), BLUE));
+            stackTrace.add(text(e.getClass().getName(), BLUE));
+            stackTrace.addAll(Arrays.stream(current.get().getStackTrace()).map(s->text("        "+s.toString(), BLUE)).toList());
+            current.set(current.get().getCause());
+        }
+
         return RC.Lang("rustyconnector-box").generate(
                 join(
-                        newlines(),
-                        Component.text(e.getMessage() == null ? "No message was provided by this exception" : e.getMessage(), NamedTextColor.BLUE),
-                        Component.text(e.getClass().getName(), NamedTextColor.BLUE),
-                        join(
-                                newlines(),
-                                Arrays.stream(e.getStackTrace()).map(t->Component.text("        "+t.toString(), NamedTextColor.BLUE)).toList()
-                        )
+                    newlines(),
+                    stackTrace
                 )
         );
     }
@@ -102,7 +118,7 @@ public class CommonLang {
                         error.details().stream().map(e ->
                                 text(" • ", DARK_GRAY)
                                         .append(text(e.key + ": ", BLUE)
-                                                .append(RC.Lang("rustyconnector-typedValue").generate(e.value))
+                                                .append(typedValue(e.value))
                                         )
                         ).toList()
                 ));
@@ -122,6 +138,16 @@ public class CommonLang {
             e.printStackTrace();
         }
         return Component.space();
+    }
+
+    @Lang("rustyconnector-keyValue")
+    public static Component keyValueLang(String key, Object value) {
+        return text(" • "+key+": ", DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(value));
+    }
+
+    // Exists as a shorthand way to use the lang entry "rustyconnector-keyValue" cause the nature of that lang value adds a lot of bloat to other places trying to use it.
+    public static Component keyValue(String key, Object value) {
+        return RC.Lang("rustyconnector-keyValue").generate(key, value);
     }
 
     @Lang("rustyconnector-typedValue")
@@ -169,7 +195,7 @@ public class CommonLang {
                         text("| ██      | ██  \\ ██| ██  \\ ██| ██  \\ ██| ████████| ██        | ██    | ██  \\ ██| ██  \\__/", BLUE),
                         text("| ██    ██| ██  | ██| ██  | ██| ██  | ██| ██_____/| ██        | ██ /██| ██  | ██| ██", BLUE),
                         text("|  ██████/|  ██████/| ██  | ██| ██  | ██|  ███████|  ███████  |  ████/|  ██████/| ██", BLUE),
-                        text("\\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/", BLUE),
+                        text(" \\______/  \\______/ |__/  |__/|__/  |__/ \\_______/ \\_______/   \\___/   \\______/ |__/", BLUE),
                         space(),
                         space(),
                         text("Developed by Aelysium | Juice", DARK_AQUA),
@@ -183,11 +209,11 @@ public class CommonLang {
         return join(
                 newlines(),
                 space(),
-                RC.Lang("rustyconnector-border").generate().color(DARK_GRAY),
+                RC.Lang("rustyconnector-border").generate(),
                 space(),
                 component,
                 space(),
-                RC.Lang("rustyconnector-border").generate().color(DARK_GRAY)
+                RC.Lang("rustyconnector-border").generate()
         );
     }
 
@@ -205,23 +231,6 @@ public class CommonLang {
         );
     }
 
-    @Lang("rustyconnector-messageUsage")
-    public static Component messageUsage() {
-        return RC.Lang("rustyconnector-box").generate(
-                join(
-                        newlines(),
-                        text("rc message get <Message ID>", BLUE),
-                        text("Pulls a message out of the message cache. If a message is to old it might not be available anymore!", DARK_GRAY),
-                        space(),
-                        text("rc message list <page number>", BLUE),
-                        text("Lists all currently cached messages! As new messages get cached, older ones will be pushed out of the cache.", DARK_GRAY)
-                )
-        );
-    }
-
-    @Lang("rustyconnector-messageGetUsage")
-    public static final String messageGetUsage = "/rc message get <Message ID>";
-
     @Lang("rustyconnector-message")
     public static Component message(Packet.Remote message) {
         return RC.Lang("rustyconnector-headerBox").generate(
@@ -238,39 +247,20 @@ public class CommonLang {
         );
     }
 
-    @Lang("rustyconnector-messagePage")
-    public static Component messagePage(List<Packet.Remote> packets, int pageNumber, int maxPages) {
-        Component output = text("");
-        for (Packet.Remote packet : packets)
-            output = output.append(join(
-                    newlines(),
-                    RC.Lang("rustyconnector-border").generate(),
-                    text("Status: " + packet.status().name(), packet.status().color()),
-                    text("Reason: " + packet.statusMessage(), packet.status().color()),
-                    space(),
-                    text("ID: ", packet.status().color()).append(text(packet.id().toString(), GRAY)),
-                    text("Timestamp: ", packet.status().color()).append(text(packet.received().toString(), GRAY)),
-                    text("Contents: ", packet.status().color()).append(text(packet.toString(), GRAY))
-            ));
-
-        Component pageNumbers = text("[ ",DARK_GRAY);
-        for (int i = 1; i <= maxPages; i++) {
-            if(i == pageNumber)
-                pageNumbers = pageNumbers.append(text(i+" ",GOLD));
-            else
-                pageNumbers = pageNumbers.append(text(i+" ",GRAY));
-        }
-        pageNumbers = pageNumbers.append(text("]",DARK_GRAY));
-
-        return output.append(
-                RC.Lang("rustyconnector-box").generate(
-                        join(
-                                newlines(),
-                                RC.Lang("rustyconnector-border").generate(),
-                                text("Pages:"),
-                                pageNumbers
-                        )
-                )
+    @Lang("rustyconnector-messages")
+    public static Component messages(List<Packet.Remote> packets) {
+        return join(
+                newlines(),
+                packets.stream().map(packet -> join(
+                        newlines(),
+                        RC.Lang("rustyconnector-border").generate(),
+                        text("Status: " + packet.status().name(), packet.status().color()),
+                        text("Reason: " + packet.statusMessage(), packet.status().color()),
+                        space(),
+                        text("ID: ", packet.status().color()).append(text(packet.id().toString(), GRAY)),
+                        text("Timestamp: ", packet.status().color()).append(text(packet.received().toString(), GRAY)),
+                        text("Contents: ", packet.status().color()).append(text(packet.toString(), GRAY))
+                )).toList()
         );
     };
 
@@ -285,6 +275,63 @@ public class CommonLang {
                         text("rc send <username> server <server_uuid>", BLUE),
                         text("Sends the user to the specific server!", DARK_GRAY)
                 )
+        );
+    }
+
+    @Lang("rustyconnector-pluginAlreadyStarted")
+    public static Component pluginAlreadyStarted() {
+        return text("This plugin is already running!", BLUE);
+    }
+
+    @Lang("rustyconnector-pluginAlreadyStopped")
+    public static Component pluginAlreadyStopped() {
+        return text("This plugin is already stopped!", BLUE);
+    }
+
+    @Lang("rustyconnector-details")
+    public static Component details(Plugin plugin) {
+        return join(
+                newlines(),
+                space(),
+                space(),
+                RC.Lang().asciiAlphabet().generate(plugin.name(), BLUE),
+                text(plugin.description(), GRAY),
+                space(),
+                text("Details:", DARK_GRAY),
+                plugin.details(),
+                space()
+        );
+    }
+
+    @Lang("rustyconnector-langLibraryDetails")
+    public static Component langLibraryDetails(LangLibrary langLibrary) {
+        return join(
+                newlines(),
+                keyValue("ASCII Alphabet - Supported Characters", "'"+String.join("', '", langLibrary.asciiAlphabet().supportedCharacters().stream().map(c -> c.toString()).toList())+"'"),
+                keyValue("Registered Nodes", String.join(", ", langLibrary.langNodes()))
+        );
+    }
+
+    @Lang("rustyconnector-errorRegistryDetails")
+    public static Component errorRegistryDetails(ErrorRegistry errorRegistry) {
+        return join(
+                newlines(),
+                keyValue("Log Errors", errorRegistry.logErrors()),
+                keyValue("Cache Size", errorRegistry.cacheSize()),
+                keyValue("Error Count", errorRegistry.fetchAll().size())
+        );
+    }
+
+    @Lang("rustyconnector-eventManagerDetails")
+    public static Component eventManagerDetails(EventManager eventManager) {
+        return text("No other details exist to show.", DARK_GRAY);
+    }
+
+    @Lang("rustyconnector-magicLinkDetails")
+    public static Component magicLinkDetails(WebSocketMagicLink magicLink) {
+        return join(
+                newlines(),
+                keyValue("Cached Packets", magicLink.messageCache().size())
         );
     }
 }
