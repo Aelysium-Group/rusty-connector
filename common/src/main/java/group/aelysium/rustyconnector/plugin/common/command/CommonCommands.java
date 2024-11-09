@@ -3,16 +3,15 @@ package group.aelysium.rustyconnector.plugin.common.command;
 import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
-import group.aelysium.rustyconnector.common.Plugin;
 import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.common.plugins.Plugin;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -91,7 +90,11 @@ public class CommonCommands {
         }
         client.send(RC.Lang("rustyconnector-waiting").generate());
         flux.close();
-        client.send(RC.Lang("rustyconnector-finished").generate());
+        try {
+            client.send(RC.Lang("rustyconnector-finished").generate());
+        } catch (NoSuchElementException e) {
+            RC.Adapter().log(Component.text("Successfully closed that plugin!"));
+        }
     }
     @Command("rc plugins <plugin> start")
     public void asfdmgfsgsodjaon(Client<?> client, @Argument(value = "plugin") String plugin) {
@@ -117,7 +120,9 @@ public class CommonCommands {
                 .orElseThrow(()->new NoSuchElementException("No RustyConnector Kernel has been registered."))
         );
 
-        for (String node : nodes) {
+        for (int i = 0; i < nodes.length; i++) {
+            String node = nodes[i];
+            boolean isLast = i == (nodes.length - 1);
             if(!current.get().exists()) {
                 client.send(Error.withHint(
                                 "While attempting to fetch the plugin "+plugin+" a plugin in the chain was unavailable.",
@@ -137,25 +142,17 @@ public class CommonCommands {
                 return null;
             }
 
-            Optional<Particle.Flux<? extends Plugin>> newCurrent = resolvedPlugin.plugins().stream().filter(f->{
-                AtomicBoolean matches = new AtomicBoolean(false);
-                f.executeNow(p->matches.set(p.name().equalsIgnoreCase(node)));
-                return matches.get();
-            }).findAny();
-            if(newCurrent.isEmpty()) {
+            Particle.Flux<? extends Plugin> newCurrent = resolvedPlugin.plugins().get(node);
+            if(newCurrent == null) {
                 client.send(Error.withSolution(
                             node+" doesn't exist on "+resolvedPlugin.name()+".",
-                            "Available plugins are: "+String.join(", "+resolvedPlugin.plugins().stream().map(f->{
-                                AtomicReference<String> name = new AtomicReference<>(null);
-                                f.executeNow(p->name.set(p.name()));
-                                return name.get();
-                            }).toList())
+                            "Available plugins are: "+String.join(", "+resolvedPlugin.plugins().keySet())
                     )
                     .causedBy("Attempting to fetch the plugin "+plugin)
                 );
                 return null;
             }
-            if(!newCurrent.get().exists()) {
+            if(!newCurrent.exists() && !isLast) {
                 client.send(Error.withHint(
                                 "Despite existing and being correct; "+node+" is not currently available. It's probably rebooting.",
                                 "This issue typically occurs when a plugin is restarting. You can try again after a little bit, or try reloading the plugin directly and see if that works."
@@ -165,7 +162,7 @@ public class CommonCommands {
                 return null;
             }
 
-            current.set(newCurrent.orElseThrow());
+            current.set(newCurrent);
         }
 
         return current.get();

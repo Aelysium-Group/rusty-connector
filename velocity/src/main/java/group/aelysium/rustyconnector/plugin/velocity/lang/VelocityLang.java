@@ -2,7 +2,6 @@ package group.aelysium.rustyconnector.plugin.velocity.lang;
 
 import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
-import group.aelysium.rustyconnector.common.Plugin;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
 import group.aelysium.rustyconnector.proxy.family.Family;
@@ -10,7 +9,6 @@ import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
-import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
 import group.aelysium.rustyconnector.proxy.player.PlayerRegistry;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 import net.kyori.adventure.text.Component;
@@ -91,7 +89,7 @@ public class VelocityLang extends CommonLang {
                         space(),
                         RC.Lang("rustyconnector-border").generate(),
                         space(),
-                        text(String.join(", ",RC.P.Families().dump().stream().map(f->{
+                        text(String.join(", ",RC.P.Families().fetchAll().stream().map(f->{
                             AtomicReference<String> id = new AtomicReference<>("[Unavailable]");
                             f.executeNow(fa->id.set(fa.id()));
                             return id.get();
@@ -172,7 +170,7 @@ public class VelocityLang extends CommonLang {
     @Lang("velocity-serverUsage")
     public static Component velocityServer(Server server) {
         List<String> families = new ArrayList<>();
-        RC.P.Families().dump().forEach(flux -> flux.executeNow(f -> families.add(f.id())));
+        RC.P.Families().fetchAll().forEach(flux -> flux.executeNow(f -> families.add(f.id())));
         try {
             Family family = server.family().orElseThrow().observe(1, TimeUnit.MINUTES);
 
@@ -206,7 +204,7 @@ public class VelocityLang extends CommonLang {
     @Lang("rustyconnector-familyRegistryDetails")
     public static Component familyRegistryDetails(FamilyRegistry familyRegistry) {
         List<Family> families = new ArrayList<>();
-        familyRegistry.dump().forEach(f -> f.executeNow(families::add));
+        familyRegistry.fetchAll().forEach(f -> f.executeNow(families::add));
 
         AtomicReference<Family> rootFamily = new AtomicReference<>(null);
         familyRegistry.rootFamily().executeNow(rootFamily::set);
@@ -239,14 +237,7 @@ public class VelocityLang extends CommonLang {
                 keyValue("Parent Family", parentName.get()),
                 keyValue("Servers", family.servers().size()),
                 keyValue("Players", family.players()),
-                keyValue("Plugins", join(
-                        JoinConfiguration.separator(text(", ", BLUE)),
-                        family.plugins().stream().map(f->{
-                            AtomicReference<String> name = new AtomicReference<>("Unknown");
-                            f.executeNow(p->name.set(p.name()));
-                            return text(name.get(), BLUE);
-                        }).toList()
-                )),
+                keyValue("Plugins", text(String.join(", ",family.plugins().keySet()), BLUE)),
                 space(),
                 RC.Lang("rustyconnector-border").generate(),
                 space(),

@@ -8,6 +8,7 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import group.aelysium.ara.Particle;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
@@ -23,6 +24,7 @@ import group.aelysium.rustyconnector.plugin.velocity.commands.VelocityClient;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.lang.VelocityLang;
 import group.aelysium.rustyconnector.proxy.ProxyKernel;
+import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
 import org.bstats.velocity.Metrics;
@@ -34,6 +36,7 @@ import org.incendo.cloud.velocity.VelocityCommandManager;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
@@ -101,24 +104,33 @@ public class VelocityRustyConnector implements PluginContainer {
                     MagicLinkConfig.New().tinder()
             );
 
-            DefaultConfig config = DefaultConfig.New();
-            FamilyRegistry.Tinder families = new FamilyRegistry.Tinder();
-            ScalarFamilyConfig.New(config.rootFamily()); // Literally just exists to ensure the root family exists and then generate the scalar family folder
-            for (File file : Objects.requireNonNull((new File("plugins/rustyconnector/scalar_families")).listFiles())) {
-                if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
-                int extensionIndex = file.getName().lastIndexOf(".");
-                String name = file.getName().substring(0, extensionIndex);
-                ScalarFamily.Tinder family = ScalarFamilyConfig.New(name).tinder();
-                families.addFamily(name, family.flux());
-                if(name.equalsIgnoreCase(config.rootFamily())) families.setRootFamily(name, family.flux());
-            }
-            tinder.familyRegistry(families);
-
             RustyConnector.Toolkit.registerAndIgnite(tinder.flux());
 
             RustyConnector.Toolkit.Proxy().orElseThrow().onStart(p->{
                 try {
                     p.fetchPlugin(LangLibrary.class).onStart(l -> l.registerLangNodes(VelocityLang.class));
+                } catch (Exception e) {
+                    RC.Error(Error.from(e));
+                }
+                try {
+                    p.fetchPlugin(FamilyRegistry.class).onStart(f -> {
+                        try {
+                            DefaultConfig config = DefaultConfig.New();
+                            ScalarFamilyConfig.New(config.rootFamily()); // Literally just exists to ensure the root family exists and then generate the scalar family folder
+                            for (File file : Objects.requireNonNull((new File("plugins/rustyconnector/scalar_families")).listFiles())) {
+                                if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
+                                int extensionIndex = file.getName().lastIndexOf(".");
+                                String name = file.getName().substring(0, extensionIndex);
+                                ScalarFamily.Tinder family = ScalarFamilyConfig.New(name).tinder();
+                                Particle.Flux<? extends Family> flux = family.flux();
+                                f.register(name, flux);
+                                if(name.equalsIgnoreCase(config.rootFamily())) f.setRootFamily(name);
+                                flux.observe();
+                            }
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));
+                        }
+                    });
                 } catch (Exception e) {
                     RC.Error(Error.from(e));
                 }
