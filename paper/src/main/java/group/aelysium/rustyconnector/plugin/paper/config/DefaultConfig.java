@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.paper.config;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.crypt.AES;
-import group.aelysium.rustyconnector.common.magic_link.MessageCache;
+import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.util.URL;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
@@ -100,7 +100,7 @@ public class DefaultConfig {
                 URL.parseURL(this.magicLink_accessEndpoint),
                 Packet.SourceIdentifier.server(ServerUUIDConfig.New().uuid()),
                 cryptor,
-                new MessageCache(100),
+                new PacketCache(100),
                 this.serverRegistration,
                 null
                 //this.magicLink_broadcastingAddress.isEmpty() ? null : new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.magicLink_broadcastingAddress))

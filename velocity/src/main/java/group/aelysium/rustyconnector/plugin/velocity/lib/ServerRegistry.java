@@ -40,11 +40,11 @@ public class ServerRegistry {
      * @return The newly generated registration for that server.
      * @throws NoSuchElementException If the server doesn't have a family or if the family isn't available.
      */
-    public String register(@NotNull Server server) throws NoSuchElementException {
+    public void register(@NotNull Server server) throws NoSuchElementException {
         Family family = server.family().orElseThrow().orElseThrow();
         String registration = family.id() + "-" + NanoID.randomNanoID(12);
         this.servers.put(server.uuid(), registration);
-        return registration;
+        server.property("velocity_registration_name", registration);
     }
 
     /**

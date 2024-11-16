@@ -6,6 +6,3 @@ main: group.aelysium.rustyconnector.plugin.paper.PaperRustyConnector
 api-version: 1.21.1
 website: https://github.com/Aelysium-Group/rusty-connector
 authors: [ Juice ]
-commands:
-    rc:
-        description: The main RC command.

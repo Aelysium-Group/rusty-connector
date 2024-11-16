@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.common.errors.ErrorRegistry;
 import group.aelysium.rustyconnector.common.events.EventManager;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
+import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.plugins.Plugin;
 import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
@@ -14,8 +15,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,9 +34,6 @@ public class CommonLang {
     public static final Component finished = text("Finished!", DARK_AQUA);
     @Lang("rustyconnector-waiting")
     public static final Component waiting = text("Working on it...", BLUE);
-
-    @Lang("rustyconnector-border")
-    public static final Component border = Component.text("-------------------------------------------------------------------------------------------------", DARK_BLUE);
 
     @Lang("rustyconnector-unknownCommand")
     public static final String unknownCommand = "Unknown command. Type \"/help\" for help.";
@@ -65,13 +62,39 @@ public class CommonLang {
         );
     }
 
+    @Lang("rustyconnector-formatInstant")
+    public static String formatDate(Instant instant) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mma");
+
+        // Convert Instant to LocalDateTime
+        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, zoneId);
+        LocalDate date = dateTime.toLocalDate();
+
+        // Get the current date
+        LocalDate today = LocalDate.now(zoneId);
+        LocalDate yesterday = today.minusDays(1);
+
+        // Determine if the date is today or yesterday
+        String prefix = dateFormatter.format(date);
+        if (date.equals(today)) prefix = "Today at";
+        if (date.equals(yesterday)) prefix = "Yesterday at";
+
+        // Format the time with the time zone
+        String formattedTime = timeFormatter.format(dateTime)+" ("+zoneId.getId()+")";
+
+        // Combine the prefix and the formatted time
+        return prefix + " " + formattedTime;
+    }
+
     @Lang("rustyconnector-exception")
     public static Component exception(Throwable e) {
         List<Component> stackTrace = new ArrayList<>();
 
         AtomicReference<Throwable> current = new AtomicReference<>(e);
         while(current.get() != null) {
-            if(current.get().getMessage() != null) stackTrace.add(text(current.get().getMessage(), BLUE));
+            if(current.get().getMessage() != null) stackTrace.add(text(current.get().getMessage(), AQUA));
             stackTrace.add(text(e.getClass().getName(), BLUE));
             stackTrace.addAll(Arrays.stream(current.get().getStackTrace()).map(s->text("        "+s.toString(), BLUE)).toList());
             current.set(current.get().getCause());
@@ -139,9 +162,14 @@ public class CommonLang {
         return Component.space();
     }
 
+    @Lang("rustyconnector-bullet")
+    public static Component keyValueLang(String value) {
+        return text(" • "+value, DARK_GRAY);
+    }
+
     @Lang("rustyconnector-keyValue")
     public static Component keyValueLang(String key, Object value) {
-        return text(" • "+key+": ", DARK_GRAY).append(RC.Lang("rustyconnector-typedValue").generate(value));
+        return RC.Lang("rustyconnector-bullet").generate(key+": ").append(RC.Lang("rustyconnector-typedValue").generate(value));
     }
 
     // Exists as a shorthand way to use the lang entry "rustyconnector-keyValue" cause the nature of that lang value adds a lot of bloat to other places trying to use it.
@@ -151,6 +179,9 @@ public class CommonLang {
 
     @Lang("rustyconnector-typedValue")
     public static Component typedValue(Object value) {
+        if(value == null)
+            return text("null", GRAY);
+
         Class<?> clazz = value.getClass();
         if(Long.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz) ||
                 Double.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz) ||
@@ -207,12 +238,10 @@ public class CommonLang {
     public static Component box(Component component) {
         return join(
                 newlines(),
-                space(),
-                RC.Lang("rustyconnector-border").generate(),
-                space(),
+                empty(),
+                empty(),
                 component,
-                space(),
-                RC.Lang("rustyconnector-border").generate()
+                empty()
         );
     }
 
@@ -221,45 +250,78 @@ public class CommonLang {
         return RC.Lang("rustyconnector-box").generate(
                 join(
                         newlines(),
-                        RC.P.Lang().asciiAlphabet().generate(header, BLUE),
-                        space(),
-                        RC.Lang("rustyconnector-border").generate(),
-                        space(),
+                        RC.Lang().asciiAlphabet().generate(header, BLUE),
+                        empty(),
                         content
                 )
         );
     }
 
-    @Lang("rustyconnector-message")
-    public static Component message(Packet.Remote message) {
-        return RC.Lang("rustyconnector-headerBox").generate(
-                "Message",
+    @Lang("rustyconnector-packet")
+    public static Component message(Packet message) {
+        return join(
+                JoinConfiguration.separator(empty()),
+                (
+                    message.isLocal() ?
+                            text("<<<", DARK_BLUE) :
+                            text(">>>", DARK_GREEN)
+                ),
+                space(),
+                text("[", DARK_GRAY),
+                RC.Lang("rustyconnector-formatInstant").generate(message.created()).color(YELLOW),
+                text("]", DARK_GRAY),
+                text("[", DARK_GRAY),
+                text(message.local().replyEndpoint().orElseThrow().toString(), GRAY),
+                space(),
+                text(message.identification().toString(), GRAY),
+                text("]: ", DARK_GRAY),
+                text(message.status().name(), message.status().color())
+        );
+    }
+
+    @Lang("rustyconnector-packetDetails")
+    public static Component messageDetails(Packet packet) {
+        return RC.Lang("rustyconnector-box").generate(
                 join(
                         newlines(),
-                        text("Status: " + message.status().name(), message.status().color()),
-                        text("Reason: " + message.statusMessage(), message.status().color()),
-                        space(),
-                        text("ID: ", message.status().color()).append(text(message.id().toString(), GRAY)),
-                        text("Timestamp: ", message.status().color()).append(text(message.received().toString(), GRAY)),
-                        text("Contents: ", message.status().color()).append(text(message.toString(), GRAY))
+                        text("Details:", DARK_GRAY),
+                        keyValue("ID", packet.local().replyEndpoint().orElseThrow().toString()),
+                        keyValue("Type", packet.identification().toString()),
+                        keyValue("Direction", packet.isLocal() ? "Outgoing" : "Incoming"),
+                        keyValue(packet.isLocal() ? "Created" : "Received", RC.Lang("rustyconnector-formatInstant").generate(packet.created())),
+                        keyValue("Version", packet.messageVersion()),
+                        keyValue("Status", text(packet.status().name(), packet.status().color())),
+                        keyValue("Reason", packet.statusMessage()),
+                        keyValue("Responding To", packet.replying() ? text("Packet "+packet.remote().replyEndpoint().orElseThrow(), DARK_GRAY) : "Nothing"),
+                        keyValue("Sender", packet.local().origin().name()+" "+packet.local().uuid()),
+                        empty(),
+                        text("Properties:", DARK_GRAY),
+                        join(
+                                newlines(),
+                                packet.parameters().entrySet().stream().map(e->keyValue(e.getKey(), e.getValue().getOriginalValue())).toList()
+                        ),
+                        empty(),
+                        text("Raw Packet:", DARK_GRAY),
+                        text(packet.toString(), DARK_GRAY)
                 )
         );
     }
 
-    @Lang("rustyconnector-messages")
-    public static Component messages(List<Packet.Remote> packets) {
+    @Lang("rustyconnector-packets")
+    public static Component messages(List<Packet> packets) {
+
         return join(
                 newlines(),
-                packets.stream().map(packet -> join(
-                        newlines(),
-                        RC.Lang("rustyconnector-border").generate(),
-                        text("Status: " + packet.status().name(), packet.status().color()),
-                        text("Reason: " + packet.statusMessage(), packet.status().color()),
-                        space(),
-                        text("ID: ", packet.status().color()).append(text(packet.id().toString(), GRAY)),
-                        text("Timestamp: ", packet.status().color()).append(text(packet.received().toString(), GRAY)),
-                        text("Contents: ", packet.status().color()).append(text(packet.toString(), GRAY))
-                )).toList()
+                space(),
+                space(),
+                RC.Lang().asciiAlphabet().generate("Packets", BLUE),
+                space(),
+                packets.isEmpty() ?
+                    text("There are no packets to show.", DARK_GRAY) :
+                    join(
+                            newlines(),
+                            packets.stream().map(packet -> RC.Lang("rustyconnector-packet").generate(packet)).toList()
+                    )
         );
     };
 
@@ -275,6 +337,11 @@ public class CommonLang {
                         text("Sends the user to the specific server!", DARK_GRAY)
                 )
         );
+    }
+
+    @Lang("rustyconnector-noSendTarget")
+    public static Component noSendTarget(String target) {
+        return text("No server or family exists with the identifier `"+target+"`. Servers must be targeted using the server uuid and families must be targeted using the family id.", BLUE);
     }
 
     @Lang("rustyconnector-pluginAlreadyStarted")
@@ -327,10 +394,10 @@ public class CommonLang {
     }
 
     @Lang("rustyconnector-magicLinkDetails")
-    public static Component magicLinkDetails(WebSocketMagicLink magicLink) {
+    public static Component magicLinkDetails(MagicLinkCore magicLink) {
         return join(
                 newlines(),
-                keyValue("Cached Packets", magicLink.messageCache().size())
+                keyValue("Cached Packets", magicLink.packetCache().size())
         );
     }
 }

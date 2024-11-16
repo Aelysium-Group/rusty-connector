@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -55,16 +56,21 @@ public class VelocityProxyAdapter extends ProxyAdapter {
     public boolean registerServer(@NotNull Server server) {
         ServerInfo info = null;
         try {
-            String registration = serverRegistry.register(server);
+            serverRegistry.register(server);
+            String registration = (String) server.property("velocity_registration_name")
+                    .orElseThrow(()->new NoSuchElementException("Unable to find the server's velocity registration name."));
             info = new ServerInfo(registration, server.address());
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            RC.Error(Error.from(e).whileAttempting("To register the server: "+server.uuid()+" "+server.address()));
+        }
         if(info == null) return false;
 
         try {
             RegisteredServer registeredServer = this.velocity.registerServer(info);
             ServerPing ping = registeredServer.ping().get(10, TimeUnit.SECONDS);
             return true;
-        } catch (Exception ignore) {
+        } catch (Exception e) {
+            RC.Error(Error.from(e).whileAttempting("To register the server: "+server.uuid()+" "+server.address()));
             try {
                 this.velocity.unregisterServer(info);
                 serverRegistry.unregister(server.uuid());

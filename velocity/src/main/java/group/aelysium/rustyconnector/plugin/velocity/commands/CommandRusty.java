@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.commands;
 
 import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
+import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.plugins.Plugin;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
@@ -16,29 +17,30 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public final class CommandRusty {
-    @Command("rc send")
-    public void acmednsmiufxxviz(Client<?> client) {
-        client.send(RC.Lang("rustyconnector-sendUsage").generate());
-    }
-    @Command("rc send <username>")
-    @Command("rc send <username> server")
-    public void acmednrmiufxxviz(Client<?> client, @Argument(value = "username") String username) {
-        client.send(RC.Lang("rustyconnector-sendUsage").generate());
-    }
+    @Command("rc send <username> <target>")
+    public void qxeafgbinengqytu(Client<?> client, @Argument(value = "username") String username, @Argument(value = "target") String target) {
+        Player player = RC.P.Player(username)
+                .orElseThrow(()->new NoSuchElementException("No player with the username ["+username+"] exists."));
+        if (!player.online()) {
+            client.send(Error.from(username+" isn't online."));
+            return;
+        }
 
-    @Command("rc send <username> <family_name>")
-    public void qxeafgbinengqytu(Client<?> client, @Argument(value = "username") String username, @Argument(value = "family_name") String family_name) {
+        Player.Connectable connectable = null;
         try {
-            Player player = RC.Kernel().fetchPlugin(PlayerRegistry.class).orElseThrow().fetch(username).orElse(null);
-            if (!player.online()) {
-                RC.Error(Error.from("No player with the username ["+username+"] is online.").urgent(true));
-                return;
-            }
+            connectable = RC.P.Server(UUID.fromString(target)).orElseThrow();
+        } catch (Exception ignore) {}
+        try {
+            connectable = RC.P.Family(target).orElseThrow();
+        } catch (Exception ignore) {}
 
-            Family family = RC.P.Family(family_name)
-                    .orElseThrow(()->new NoSuchElementException("No family with the id ["+family_name+"] exists."));
+        if(connectable == null) {
+            client.send(RC.Lang("rustyconnector-sendFail").generate(target));
+            return;
+        }
 
-            Player.Connection.Request request = family.connect(player);
+        try {
+            Player.Connection.Request request = connectable.connect(player);
             Player.Connection.Result result = request.result().get(30, TimeUnit.SECONDS);
 
             if (result.connected()) return;
@@ -51,29 +53,17 @@ public final class CommandRusty {
 
     @Command("rc send <username> server <server_uuid>")
     public void mlavtgbdguegwcwi(Client<?> client, @Argument(value = "username") String username, @Argument(value = "server_uuid") String server_uuid) {
-        try {
-            Player player = RC.P.Player(username)
-                    .orElseThrow(()->new NoSuchElementException("No player with the username ["+username+"] exists."));
-            if (!player.online()) {
-                client.send(Error.from(username+" isn't online."));
-                return;
-            }
 
-            Server server = RC.P.Server(UUID.fromString(server_uuid))
-                    .orElseThrow(()->new NoSuchElementException("No server with the uuid ["+server_uuid+"] exists."));
-
-            server.connect(player);
-        } catch (Exception e) {
-            RC.Error(Error.from(e).urgent(true));
-        }
     }
 
     @Command("rc server")
+    @Command("rc servers")
     public void ftuynemwdiuemhid(Client<?> client) {
-        client.send(RC.Lang("rustyconnector-serverList").generate());
+        client.send(RC.Lang("rustyconnector-servers").generate());
     }
 
     @Command("rc server <server_uuid>")
+    @Command("rc servers <server_uuid>")
     public void fneriygwehmigimh(Client<?> client, @Argument(value = "server_uuid") String server_uuid) {
         try {
             Server server = RC.P.Server(UUID.fromString(server_uuid))
@@ -85,10 +75,13 @@ public final class CommandRusty {
     }
 
     @Command("rc family")
+    @Command("rc families")
     public void tdrdolhxvcjhaskb(Client<?> client) {
         client.send(RC.Lang("rustyconnector-families").generate());
     }
+
     @Command("rc family <id>")
+    @Command("rc families <id>")
     public void mfndwqqzuiqmesyn(Client<?> client, @Argument(value = "id") String id) {
         try {
             Family family = RC.P.Family(id)
@@ -100,6 +93,7 @@ public final class CommandRusty {
         }
     }
     @Command("rc family <id> reload")
+    @Command("rc families <id> reload")
     public void mfndwqqzwodmesyn(Client<?> client, @Argument(value = "id") String id) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
@@ -113,6 +107,7 @@ public final class CommandRusty {
     }
 
     @Command("rc family <id> <plugin_id>")
+    @Command("rc families <id> <plugin_id>")
     public void mfndwmkpwodmesyn(Client<?> client, @Argument(value = "id") String id, @Argument(value = "plugin_id") String pluginID) {
         try {
             Family family = RC.P.Family(id)
@@ -128,6 +123,7 @@ public final class CommandRusty {
     }
 
     @Command("rc family <id> <plugin_id> reload")
+    @Command("rc families <id> <plugin_id> reload")
     public void mfndwqqzwodmesyn(Client<?> client, @Argument(value = "id") String id, @Argument(value = "plugin_id") String pluginID) {
         try {
             Family family = RC.P.Family(id)

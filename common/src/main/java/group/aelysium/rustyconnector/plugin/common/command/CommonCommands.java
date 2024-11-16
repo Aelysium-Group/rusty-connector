@@ -16,9 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.kyori.adventure.text.Component.text;
@@ -34,7 +32,7 @@ public class CommonCommands {
     public void nglbwcmuzzxvjaon(Client<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
-            Particle.Flux<?> particle = RustyConnector.Toolkit.Proxy().orElseThrow();
+            Particle.Flux<?> particle = RustyConnector.Toolkit.Kernel().orElseThrow();
             particle.reignite();
             particle.observe();
             client.send(RC.Lang("rustyconnector-finished").generate());
@@ -43,10 +41,12 @@ public class CommonCommands {
         }
     }
 
+    @Command("rc plugin")
     @Command("rc plugins")
     public void nglbwcmuvchdjaon(Client<?> client) {
         client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().allPlugins().keySet()));
     }
+    @Command("rc plugin <plugin>")
     @Command("rc plugins <plugin>")
     public void nglbwcmuvchdjaon(Client<?> client, @Argument(value = "plugin") String plugin) {
         try {
@@ -68,6 +68,7 @@ public class CommonCommands {
         }
     }
 
+    @Command("rc plugin <plugin> reload")
     @Command("rc plugins <plugin> reload")
     public void nglbwzmspchdjaon(Client<?> client, @Argument(value = "plugin") String plugin) {
         try {
@@ -80,6 +81,7 @@ public class CommonCommands {
             client.send(Error.from(e).toComponent());
         }
     }
+    @Command("rc plugin <plugin> stop")
     @Command("rc plugins <plugin> stop")
     public void nglbwzmzpsodjaon(Client<?> client, @Argument(value = "plugin") String plugin) {
         Particle.Flux<? extends Plugin> flux = fetchPlugin(client, plugin);
@@ -96,6 +98,7 @@ public class CommonCommands {
             RC.Adapter().log(Component.text("Successfully closed that plugin!"));
         }
     }
+    @Command("rc plugin <plugin> start")
     @Command("rc plugins <plugin> start")
     public void asfdmgfsgsodjaon(Client<?> client, @Argument(value = "plugin") String plugin) {
         try {
@@ -168,16 +171,15 @@ public class CommonCommands {
         return current.get();
     }
 
+    @Command("rc error")
     @Command("rc errors")
     public void nglbwzmxvchdjaon() {
         RC.Adapter().log(
                 Component.join(
                         CommonLang.newlines(),
-                        Component.space(),
-                        RC.Lang("rustyconnector-border").generate(),
-                        Component.space(),
+                        Component.empty(),
                         RC.Lang().asciiAlphabet().generate("Errors").color(NamedTextColor.BLUE),
-                        Component.space(),
+                        Component.empty(),
                         (
                             RC.Errors().fetchAll().isEmpty() ?
                                 text("There are no errors to show.", NamedTextColor.DARK_GRAY)
@@ -186,16 +188,17 @@ public class CommonCommands {
                                     CommonLang.newlines(),
                                     RC.Errors().fetchAll().stream().map(e->Component.join(
                                             CommonLang.newlines(),
-                                            RC.Lang("rustyconnector-border").generate(),
+                                            text("------------------------------------------------------", NamedTextColor.DARK_GRAY),
                                             e.toComponent()
                                     )).toList()
                                 )
                         ),
-                        RC.Lang("rustyconnector-border").generate()
+                        Component.empty()
                 )
         );
     }
 
+    @Command("rc error <uuid>")
     @Command("rc errors <uuid>")
     public void nglbwzmxvchdjaon(Client<?> client, @Argument(value = "uuid") String uuid) {
         try {
@@ -216,23 +219,49 @@ public class CommonCommands {
         }
     }
 
-    @Command("rc messages")
+    @Command("rc packet")
+    @Command("rc packets")
     public void yckarhhyoblbmbdl(Client<?> client) {
         try {
-            List<Packet.Remote> messages = RC.MagicLink().messageCache().messages();
-            client.send(RC.P.Lang().lang("rustyconnector-messages").generate(messages, 1, (int) Math.floor((double) messages.size() / 10)));
+            List<Packet> messages = RC.MagicLink().packetCache().packets();
+            client.send(RC.Lang("rustyconnector-packets").generate(messages));
         } catch (Exception e) {
             client.send(Error.from(e).toComponent());
         }
     }
-    @Command("rc messages <id>")
+
+    @Command("rc packet clear")
+    @Command("rc packets clear")
+    public void wuifhmwefmhuidid(Client<?> client) {
+        try {
+            client.send(RC.Lang("rustyconnector-waiting").generate());
+            RC.MagicLink().packetCache().empty();
+            client.send(RC.Lang("rustyconnector-finished").generate());
+        } catch (Exception e) {
+            client.send(Error.from(e).toComponent());
+        }
+    }
+
+    @Command("rc packet <id>")
+    @Command("rc packets <id>")
     public void nidbtmkngikxlzyo(Client<?> client, @Argument(value = "id") String id) {
         try {
-            client.send(RC.Lang("rustyconnector-message").generate(
-                    RC.P.MagicLink().messageCache().findMessage(NanoID.fromString(id))
+            client.send(RC.Lang("rustyconnector-packetDetails").generate(
+                    RC.MagicLink().packetCache().find(NanoID.fromString(id)).orElseThrow(
+                            ()->new NoSuchElementException("Unable to find packet with id "+id)
+                    )
             ));
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
         }
+    }
+
+    @Command("rc send")
+    public void acmednrmiufxxviz(Client<?> client) {
+        client.send(RC.Lang("rustyconnector-sendUsage").generate());
+    }
+    @Command("rc send <username>")
+    public void acmednrmiusgxviz(Client<?> client, @Argument("username") String username) {
+        acmednrmiufxxviz(client);
     }
 }

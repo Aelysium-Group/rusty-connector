@@ -4,7 +4,7 @@ import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.crypt.AES;
 import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
-import group.aelysium.rustyconnector.common.magic_link.MessageCache;
+import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.common.config.ServerUUIDConfig;
@@ -146,7 +146,7 @@ public class MagicLinkConfig {
                 AddressUtil.parseAddress(this.address),
                 Packet.SourceIdentifier.proxy(ServerUUIDConfig.New().uuid()),
                 cryptor,
-                new MessageCache(this.cache_size, ignoredStatuses, ignoredIdentifications),
+                new PacketCache(this.cache_size, ignoredStatuses, ignoredIdentifications),
                 registrations,
                 null
                 //this.endpointBroadcasting_enabled ? new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.endpointBroadcasting_address)) : null

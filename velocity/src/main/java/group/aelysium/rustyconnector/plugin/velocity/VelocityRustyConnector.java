@@ -13,6 +13,7 @@ import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
+import group.aelysium.rustyconnector.common.events.EventManager;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
@@ -22,11 +23,15 @@ import group.aelysium.rustyconnector.plugin.velocity.commands.CommandServer;
 import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.velocity.commands.VelocityClient;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnServerRegister;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnServerTimeout;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnServerUnregister;
 import group.aelysium.rustyconnector.plugin.velocity.lang.VelocityLang;
 import group.aelysium.rustyconnector.proxy.ProxyKernel;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
 import org.bstats.velocity.Metrics;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.SenderMapper;
@@ -109,6 +114,15 @@ public class VelocityRustyConnector implements PluginContainer {
             RustyConnector.Toolkit.Proxy().orElseThrow().onStart(p->{
                 try {
                     p.fetchPlugin(LangLibrary.class).onStart(l -> l.registerLangNodes(VelocityLang.class));
+                } catch (Exception e) {
+                    RC.Error(Error.from(e));
+                }
+                try {
+                    p.fetchPlugin(EventManager.class).onStart(m -> {
+                        m.listen(OnServerRegister.class);
+                        m.listen(OnServerUnregister.class);
+                        m.listen(OnServerTimeout.class);
+                    });
                 } catch (Exception e) {
                     RC.Error(Error.from(e));
                 }

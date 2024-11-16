@@ -8,10 +8,32 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.concurrent.TimeUnit;
 
 import static net.kyori.adventure.text.Component.*;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_PURPLE;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class PaperLang extends CommonLang {
     public PaperLang() {}
+
+    @Lang("rustyconnector-kernelDetails")
+    public static Component usage() {
+        return join(
+                newlines(),
+                space(),
+                text("rc send <player> <target>", BLUE),
+                text("Send a player to a family or server.", DARK_GRAY),
+                space(),
+                text("rc packets ['clear' | <packet_id>]", BLUE),
+                text("Access recently sent MagicLink packets.", DARK_GRAY),
+                space(),
+                text("rc reload", BLUE),
+                text("Reload RustyConnector.", DARK_GRAY),
+                space(),
+                text("rc plugins [plugin_node] ['start' | 'stop' | 'reload']", BLUE),
+                text("Get details for RustyConnector modules.", DARK_GRAY),
+                space(),
+                text("rc errors [error_uuid]", BLUE),
+                text("Fetches the recent errors thrown by RustyConnector.", DARK_GRAY)
+        );
+    }
 
     @Lang("rustyconnector-magicLinkHandshake")
     public static Component magicLink() {

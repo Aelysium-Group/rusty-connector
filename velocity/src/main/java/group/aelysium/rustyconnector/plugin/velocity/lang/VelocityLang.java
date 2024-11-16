@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.lang;
 
 import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
+import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
 import group.aelysium.rustyconnector.proxy.family.Family;
@@ -16,8 +17,7 @@ import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,7 +45,7 @@ public class VelocityLang extends CommonLang {
                 text("rc send", BLUE),
                 text("Send a player a family or server.", DARK_GRAY),
                 space(),
-                text("rc messages", BLUE),
+                text("rc packets", BLUE),
                 text("Access recently sent MagicLink packets.", DARK_GRAY),
                 space(),
                 text("rc reload", BLUE),
@@ -64,6 +64,67 @@ public class VelocityLang extends CommonLang {
         return RC.Lang("rustyconnector-box").generate(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!"), RED);
     }
 
+    @Lang("rustyconnector-serverRegister")
+    public static Component serverRegister(Server.Configuration server, Particle.Flux<? extends Family> family) {
+        Optional<String> displayName = Optional.ofNullable(server.displayName());
+        try {
+            return join(
+                    JoinConfiguration.separator(empty()),
+                    text(displayName.orElse(server.uuid().toString()), BLUE),
+                    space(),
+                    text("(", DARK_GRAY),
+                    text(AddressUtil.addressToString(server.address()), YELLOW),
+                    text(")", DARK_GRAY),
+                    space(),
+                    text("->", GREEN),
+                    space(),
+                    text(family.orElseThrow().id(), GRAY)
+            );
+        } catch (NoSuchElementException e) {
+            RC.Error(Error.from(e).whileAttempting("To inform the console of new server registration (failed silently since not urgent)"));
+            return join(
+                    JoinConfiguration.separator(empty()),
+                    text(displayName.orElse(server.uuid().toString()), BLUE),
+                    space(),
+                    text("(", DARK_GRAY),
+                    text(AddressUtil.addressToString(server.address()), YELLOW),
+                    text(")", DARK_GRAY),
+                    space(),
+                    text("Registered", GREEN)
+            );
+        }
+    }
+
+    @Lang("rustyconnector-serverUnregister")
+    public static Component serverUnregister(Server server) {
+        try {
+            return join(
+                    JoinConfiguration.separator(empty()),
+                    text(server.displayName().orElse((String) server.property("velocity_registration_name").orElse(server.uuid().toString())), GRAY),
+                    space(),
+                    text("(", DARK_GRAY),
+                    text(AddressUtil.addressToString(server.address()), YELLOW),
+                    text(")", DARK_GRAY),
+                    space(),
+                    text("-x", RED),
+                    space(),
+                    text(server.family().orElseThrow().orElseThrow().id(), GRAY)
+            );
+        } catch (NoSuchElementException e) {
+            RC.Error(Error.from(e).whileAttempting("To inform the console of new server registration (failed silently since not urgent)"));
+            return join(
+                    JoinConfiguration.separator(empty()),
+                    text(server.displayName().orElse((String) server.property("velocity_registration_name").orElse(server.uuid().toString())), GRAY),
+                    space(),
+                    text("(", DARK_GRAY),
+                    text(AddressUtil.addressToString(server.address()), YELLOW),
+                    text(")", DARK_GRAY),
+                    space(),
+                    text("Unregistered", RED)
+            );
+        }
+    }
+
     @Lang("rustyconnector-hybrid")
     public static Component hybrid() {
         return RC.Lang("rustyconnector-box").generate(
@@ -80,48 +141,82 @@ public class VelocityLang extends CommonLang {
         AtomicReference<String> rootFamily = new AtomicReference<>("[Unavailable]");
         RC.P.Families().rootFamily().executeNow(r -> rootFamily.set(r.id()));
 
-        return RC.Lang("rustyconnector-box").generate(
+        return RC.Lang("rustyconnector-headerBox").generate(
+                "families",
                 join(
                         newlines(),
-                        RC.Lang().asciiAlphabet().generate("family"),
-                        space(),
-                        RC.Lang().asciiAlphabet().generate("registry"),
-                        space(),
-                        RC.Lang("rustyconnector-border").generate(),
-                        space(),
-                        text(String.join(", ",RC.P.Families().fetchAll().stream().map(f->{
-                            AtomicReference<String> id = new AtomicReference<>("[Unavailable]");
-                            f.executeNow(fa->id.set(fa.id()));
-                            return id.get();
-                        }).toList()), BLUE),
-                        space(),
-                        text("Root Family: ", BLUE).append(text(rootFamily.get(), DARK_GRAY)),
-                        space(),
-                        RC.Lang("rustyconnector-border").generate(),
-                        space(),
-                        text("/rc family <family word_id>",BLUE),
-                        text("See more details about a particular family.", GRAY)
+                        RC.P.Families().fetchAll().stream().map(flux->{
+                            try {
+                                Family family = flux.orElseThrow();
+                                return join(
+                                        JoinConfiguration.separator(empty()),
+                                        text("[", DARK_GRAY),
+                                        text(family.id(), BLUE),
+                                        text("]: ", DARK_GRAY),
+                                        (
+                                            family.displayName() == null ? empty() :
+                                            text(family.displayName(), GRAY)
+                                        ),
+                                        text("(Servers: ", DARK_GRAY),
+                                        text(family.servers().size(), YELLOW),
+                                        text(") ", DARK_GRAY),
+                                        text("(Players: ", DARK_GRAY),
+                                        text(family.players(), YELLOW),
+                                        text(")", DARK_GRAY),
+                                        (
+                                            !family.id().equals(rootFamily.get()) ? empty() : join(
+                                                    JoinConfiguration.separator(empty()),
+                                                    text(" [", DARK_GRAY),
+                                                    text("Root Family", GREEN),
+                                                    text("]", DARK_GRAY)
+                                            )
+                                        )
+                                );
+                            } catch (Exception ignore) {}
+                            return null;
+                        }).filter(Objects::nonNull).toList()
                 )
         );
     };
 
-    @Lang("rustyconnector-serverNugget")
-    public static Component serverNugget(Server server) {
-        boolean hasServerName = server.uuid().toString().equals(server.displayName());
-        return Component.text("["+server.uuid()+"] "+ (hasServerName ? server.displayName() : "") +"("+ AddressUtil.addressToString(server.address()) +") ["+server.players()+" ("+server.softPlayerCap()+" <--> "+server.hardPlayerCap()+") w-"+server.weight()+"]");
-    }
-
-    @Lang("rustyconnector-serverList")
-    public static Component serverList() {
-        List<Server> servers = RC.P.Servers();
-        AtomicReference<Component> serversComponent = new AtomicReference<>(servers.isEmpty() ? text("There are no servers to show.", DARK_GRAY) : empty());
-        servers.forEach(s -> serversComponent.set(serversComponent.get().appendNewline().append(RC.Lang("rustyconnector-serverNugget").generate(s))));
-
+    @Lang("rustyconnector-servers")
+    public static Component servers() {
         return RC.Lang("rustyconnector-headerBox").generate(
                 "servers",
-                serversComponent.get()
+                join(
+                        newlines(),
+                        RC.P.Servers().stream().map(s->{
+                            String familyName = null;
+                            try {
+                                familyName = s.family().orElseThrow().orElseThrow().id();
+                            } catch (Exception ignore) {}
+
+                            return join(
+                                    JoinConfiguration.separator(empty()),
+                                    text("[", DARK_GRAY),
+                                    text(s.uuid().toString(), BLUE),
+                                    space(),
+                                    text(AddressUtil.addressToString(s.address()), YELLOW),
+                                    text("]: ", DARK_GRAY),
+                                    text(s.displayName().orElse((String) s.property("velocity_registration_name").orElse("")), GRAY),
+                                    (
+                                        familyName == null ? empty() : join(
+                                                JoinConfiguration.separator(empty()),
+                                                text(" (Family: ", DARK_GRAY),
+                                                text(familyName, DARK_AQUA),
+                                                text(")", DARK_GRAY)
+                                        )
+                                    )
+                            );
+                        }).toList()
+                )
         );
-    };
+    }
+
+    @Lang("rustyconnector-serverRegistered")
+    public static Component serverRegistered(Server server) {
+        return Component.text(server.property("velocity_registration_name").orElse(server.uuid().toString())+" ({address}) -> {Family}");
+    }
 
     @Lang("rustyconnector-serverDetails")
     public static Component serverDetails(Server server) {
@@ -136,25 +231,27 @@ public class VelocityLang extends CommonLang {
             locked = family.isLocked(server);
         } catch (Exception ignore) {}
 
-        return RC.Lang("rustyconnector-box").generate(
+        return RC.Lang("rustyconnector-headerBox").generate(
+                "server",
                 join(
                         newlines(),
-                        RC.Lang("rustyconnector-border").generate(),
-                        space(),
-                        text(""),
-                        space(),
-                        RC.Lang("rustyconnector-border").generate(),
-                        space(),
                         text("Details:", DARK_GRAY),
                         keyValue("UUID",           server.uuid()),
                         keyValue("Display Name",   server.displayName().orElse("None")),
                         keyValue("Address",        AddressUtil.addressToString(server.address())),
                         keyValue("Family",         (family == null ? (missing ? "Unavailable" : "None") : family.id())),
                         keyValue("Online Players", server.players()),
-                        keyValue("Player Limit",   "(Soft: "+server.softPlayerCap()+", Hard: "+server.hardPlayerCap()),
+                        keyValue("Player Limit",   text("(Soft: "+server.softPlayerCap()+", Hard: "+server.hardPlayerCap()+")", GOLD)),
                         keyValue("Weight",         server.weight()),
                         keyValue("Locked",         locked),
-                        keyValue("Stale",          server.stale())
+                        keyValue("Stale",          server.stale()),
+                        empty(),
+                        text("Extra Properties:", DARK_GRAY),
+                        join(
+                                newlines(),
+                                server.properties().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue().toString())).toList()
+                        )
+
                 )
         );
     };
@@ -239,11 +336,37 @@ public class VelocityLang extends CommonLang {
                 keyValue("Players", family.players()),
                 keyValue("Plugins", text(String.join(", ",family.plugins().keySet()), BLUE)),
                 space(),
-                RC.Lang("rustyconnector-border").generate(),
-                space(),
+                text("Servers:", DARK_GRAY),
                 join(
                         newlines(),
-                        family.servers().stream().map(s -> RC.Lang("rustyconnector-serverNugget").generate(s)).toList()
+                        family.servers().stream().map(s->{
+                            boolean locked = family.isLocked(s);
+                            if(locked) return join(
+                                    JoinConfiguration.separator(empty()),
+                                    text("[", DARK_GRAY),
+                                    text(s.uuid().toString(), GRAY),
+                                    space(),
+                                    text(AddressUtil.addressToString(s.address()), GRAY),
+                                    text("]: ", DARK_GRAY),
+                                    text((String) s.property("velocity_registration_name").orElse("This server hasn't been registered yet."), GRAY),
+                                    space(),
+                                    s.displayName().isEmpty() || s.property("velocity_registration_name").isEmpty() ? empty() :
+                                            text("["+s.displayName().orElse("No Display Name Exists")+"]", GRAY)
+                            );
+
+                            return join(
+                                    JoinConfiguration.separator(empty()),
+                                    text("[", DARK_GRAY),
+                                    text(s.uuid().toString(), BLUE),
+                                    space(),
+                                    text(AddressUtil.addressToString(s.address()), YELLOW),
+                                    text("]: ", DARK_GRAY),
+                                    text((String) s.property("velocity_registration_name").orElse("This server hasn't been registered yet."), GREEN),
+                                    space(),
+                                    s.displayName().isEmpty() || s.property("velocity_registration_name").isEmpty() ? empty() :
+                                            text("["+s.displayName().orElse("No Display Name Exists")+"]", DARK_GRAY)
+                            );
+                        }).toList()
                 )
         );
     }
