@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.util.URL;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.plugin.common.config.ServerUUIDConfig;
+import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.plugin.paper.PaperServerAdapter;
 import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
@@ -98,7 +98,7 @@ public class DefaultConfig {
         AES cryptor = PrivateKeyConfig.New().cryptor();
         WebSocketMagicLink.Tinder magicLink = new WebSocketMagicLink.Tinder(
                 URL.parseURL(this.magicLink_accessEndpoint),
-                Packet.SourceIdentifier.server(ServerUUIDConfig.New().uuid()),
+                Packet.SourceIdentifier.server(ServerIDConfig.New().id()),
                 cryptor,
                 new PacketCache(100),
                 this.serverRegistration,
@@ -107,7 +107,7 @@ public class DefaultConfig {
         );
 
         return new ServerKernel.Tinder(
-                ServerUUIDConfig.New().uuid(),
+                ServerIDConfig.New().id(),
                 new PaperServerAdapter(server, logger),
                 this.displayName,
                 AddressUtil.parseAddress(this.address),

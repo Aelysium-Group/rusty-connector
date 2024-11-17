@@ -11,7 +11,7 @@ public class OnPlayerChooseInitialServer {
     /**
      * Runs when a player first joins the proxy
      */
-    @Subscribe(order = PostOrder.LAST)
+    @Subscribe(priority = Short.MAX_VALUE)
     public EventTask onPlayerChooseInitialServer(PlayerChooseInitialServerEvent event) {
         return EventTask.async(() -> {
             Player player = RC.P.Adapter().convertToRCPlayer(event.getPlayer());

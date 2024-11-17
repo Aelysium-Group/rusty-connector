@@ -17,21 +17,22 @@ import group.aelysium.rustyconnector.common.events.EventManager;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
-import group.aelysium.rustyconnector.plugin.common.config.ServerUUIDConfig;
+import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandServer;
 import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.velocity.commands.VelocityClient;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnFamilyLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnServerRegister;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnServerTimeout;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnServerUnregister;
+import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.*;
 import group.aelysium.rustyconnector.plugin.velocity.lang.VelocityLang;
 import group.aelysium.rustyconnector.proxy.ProxyKernel;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
-import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
 import org.bstats.velocity.Metrics;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.SenderMapper;
@@ -41,7 +42,6 @@ import org.incendo.cloud.velocity.VelocityCommandManager;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
@@ -54,6 +54,7 @@ public class VelocityRustyConnector implements PluginContainer {
     private final PluginLogger logger;
     private final ProxyServer server;
     private final Path dataFolder;
+    private final VirtualFamilyServers virtualFamilyServers;
     private final AnnotationParser<VelocityClient> annotationParser;
 
     @Inject
@@ -62,6 +63,7 @@ public class VelocityRustyConnector implements PluginContainer {
         this.server = server;
         this.metricsFactory = metricsFactory;
         this.dataFolder = dataFolder;
+        this.virtualFamilyServers = new VirtualFamilyServers(server);
 
         CommandManager<VelocityClient> commandManager = new VelocityCommandManager<>(
                 this,
@@ -104,14 +106,15 @@ public class VelocityRustyConnector implements PluginContainer {
             }
 
             ProxyKernel.Tinder tinder = new ProxyKernel.Tinder(
-                    ServerUUIDConfig.New().uuid(),
+                    ServerIDConfig.New().id(),
                     new VelocityProxyAdapter(server, logger),
                     MagicLinkConfig.New().tinder()
             );
 
             RustyConnector.Toolkit.registerAndIgnite(tinder.flux());
 
-            RustyConnector.Toolkit.Proxy().orElseThrow().onStart(p->{
+            Particle.Flux<? extends ProxyKernel> kernelFlux = RustyConnector.Toolkit.Proxy().orElseThrow();
+            kernelFlux.onStart(p->{
                 try {
                     p.fetchPlugin(LangLibrary.class).onStart(l -> l.registerLangNodes(VelocityLang.class));
                 } catch (Exception e) {
@@ -122,6 +125,7 @@ public class VelocityRustyConnector implements PluginContainer {
                         m.listen(OnServerRegister.class);
                         m.listen(OnServerUnregister.class);
                         m.listen(OnServerTimeout.class);
+                        m.listen(new OnFamilyLifecycle(this.virtualFamilyServers));
                     });
                 } catch (Exception e) {
                     RC.Error(Error.from(e));
@@ -149,6 +153,11 @@ public class VelocityRustyConnector implements PluginContainer {
                     RC.Error(Error.from(e));
                 }
             });
+            kernelFlux.onClose(()->{
+                try {
+                    this.virtualFamilyServers.close();
+                } catch (Exception ignore) {}
+            });
 
             RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
         } catch (Exception e) {
@@ -164,6 +173,12 @@ public class VelocityRustyConnector implements PluginContainer {
 
         this.server.getCommandManager().unregister("server");
         this.annotationParser.parse(CommandServer.class);
+
+        this.server.getEventManager().register(this, new OnPlayerChangeServer());
+        this.server.getEventManager().register(this, new OnPlayerChooseInitialServer());
+        this.server.getEventManager().register(this, new OnPlayerDisconnect());
+        this.server.getEventManager().register(this, new OnPlayerKicked());
+        this.server.getEventManager().register(this, new OnPlayerPreConnectServer(this.server, this.virtualFamilyServers));
     }
 
     @Subscribe

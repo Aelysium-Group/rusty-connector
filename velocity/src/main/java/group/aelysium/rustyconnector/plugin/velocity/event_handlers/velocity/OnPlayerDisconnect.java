@@ -12,7 +12,7 @@ public class OnPlayerDisconnect {
      * Runs when a player disconnects from the proxy
      * This event prevents Velocity from attempting to connect the player to a velocity.toml server upon disconnect.
      */
-    @Subscribe(order = PostOrder.FIRST)
+    @Subscribe(priority = Short.MAX_VALUE)
     public EventTask onPlayerDisconnect(DisconnectEvent event) {
 
         return EventTask.async(() -> {

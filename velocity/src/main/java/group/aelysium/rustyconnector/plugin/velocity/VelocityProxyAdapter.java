@@ -5,13 +5,9 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.proxy.server.ServerPing;
-import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
-import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.errors.Error;
-import group.aelysium.rustyconnector.plugin.velocity.lib.ServerRegistry;
 import group.aelysium.rustyconnector.proxy.ProxyAdapter;
-import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
 import net.kyori.adventure.text.Component;
@@ -20,13 +16,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
 import java.util.Locale;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class VelocityProxyAdapter extends ProxyAdapter {
-    private static final ServerRegistry serverRegistry = new ServerRegistry();
     private final ProxyServer velocity;
     private final PluginLogger logger;
 
@@ -54,26 +48,16 @@ public class VelocityProxyAdapter extends ProxyAdapter {
 
     @Override
     public boolean registerServer(@NotNull Server server) {
-        ServerInfo info = null;
-        try {
-            serverRegistry.register(server);
-            String registration = (String) server.property("velocity_registration_name")
-                    .orElseThrow(()->new NoSuchElementException("Unable to find the server's velocity registration name."));
-            info = new ServerInfo(registration, server.address());
-        } catch (Exception e) {
-            RC.Error(Error.from(e).whileAttempting("To register the server: "+server.uuid()+" "+server.address()));
-        }
-        if(info == null) return false;
+        ServerInfo info = new ServerInfo(server.id(), server.address());
 
         try {
             RegisteredServer registeredServer = this.velocity.registerServer(info);
             ServerPing ping = registeredServer.ping().get(10, TimeUnit.SECONDS);
             return true;
         } catch (Exception e) {
-            RC.Error(Error.from(e).whileAttempting("To register the server: "+server.uuid()+" "+server.address()));
+            RC.Error(Error.from(e).whileAttempting("To register the server: "+server.id()+" "+server.address()));
             try {
                 this.velocity.unregisterServer(info);
-                serverRegistry.unregister(server.uuid());
             } catch (Exception ignore2) {}
             return false;
         }
@@ -81,16 +65,12 @@ public class VelocityProxyAdapter extends ProxyAdapter {
 
     @Override
     public void unregisterServer(@NotNull Server server) {
-        String registration = serverRegistry.find(server.uuid()).orElse(null);
-        if(registration == null) return;
-        this.velocity.unregisterServer(new ServerInfo(server.uuid().toString(), server.address()));
+        this.velocity.unregisterServer(new ServerInfo(server.id(), server.address()));
     }
 
     @Override
     public boolean serverExists(@NotNull Server server) {
-        String registration = serverRegistry.find(server.uuid()).orElse(null);
-        if(registration == null) return false;
-        return this.velocity.getServer(registration).isPresent();
+        return this.velocity.getServer(server.id()).isPresent();
     }
 
     @Override

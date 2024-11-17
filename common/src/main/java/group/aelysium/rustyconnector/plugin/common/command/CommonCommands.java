@@ -46,18 +46,18 @@ public class CommonCommands {
     public void nglbwcmuvchdjaon(Client<?> client) {
         client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().allPlugins().keySet()));
     }
-    @Command("rc plugin <plugin>")
-    @Command("rc plugins <plugin>")
-    public void nglbwcmuvchdjaon(Client<?> client, @Argument(value = "plugin") String plugin) {
+    @Command("rc plugin <pluginTree>")
+    @Command("rc plugins <pluginTree>")
+    public void nglbwcmuschdjaon(Client<?> client, String pluginTree) {
         try {
-            Particle.Flux<? extends Plugin> flux = fetchPlugin(client, plugin);
+            Particle.Flux<? extends Plugin> flux = fetchPlugin(client, pluginTree);
             if(!flux.exists()) {
                 client.send(
                     Error.withHint(
-                                "While attempting to fetch the plugin "+plugin+" a plugin in the chain was unavailable.",
+                                "While attempting to fetch the plugin "+pluginTree+" a plugin in the chain was unavailable.",
                                 "This issue typically arises when a plugin is being reloaded. In which case wait a bit before attempting to access it."
                         )
-                        .causedBy("Attempting to fetch the plugin "+plugin)
+                        .causedBy("Attempting to fetch the plugin "+pluginTree)
                 );
                 return;
             }
@@ -68,11 +68,11 @@ public class CommonCommands {
         }
     }
 
-    @Command("rc plugin <plugin> reload")
-    @Command("rc plugins <plugin> reload")
-    public void nglbwzmspchdjaon(Client<?> client, @Argument(value = "plugin") String plugin) {
+    @Command("rc plugin <pluginTree> reload")
+    @Command("rc plugins <pluginTree> reload")
+    public void nglbwzmspchdjaon(Client<?> client, String pluginTree) {
         try {
-            Particle.Flux<? extends Plugin> flux = fetchPlugin(client, plugin);
+            Particle.Flux<? extends Plugin> flux = fetchPlugin(client, pluginTree);
             if(flux == null) return;
             client.send(RC.Lang("rustyconnector-waiting").generate());
             flux.reignite().get();
@@ -81,10 +81,10 @@ public class CommonCommands {
             client.send(Error.from(e).toComponent());
         }
     }
-    @Command("rc plugin <plugin> stop")
-    @Command("rc plugins <plugin> stop")
-    public void nglbwzmzpsodjaon(Client<?> client, @Argument(value = "plugin") String plugin) {
-        Particle.Flux<? extends Plugin> flux = fetchPlugin(client, plugin);
+    @Command("rc plugin <pluginTree> stop")
+    @Command("rc plugins <pluginTree> stop")
+    public void nglbwzmzpsodjaon(Client<?> client, String pluginTree) {
+        Particle.Flux<? extends Plugin> flux = fetchPlugin(client, pluginTree);
         if(flux == null) return;
         if(!flux.exists()) {
             client.send(RC.Lang("rustyconnector-pluginAlreadyStopped").generate());
@@ -98,11 +98,11 @@ public class CommonCommands {
             RC.Adapter().log(Component.text("Successfully closed that plugin!"));
         }
     }
-    @Command("rc plugin <plugin> start")
-    @Command("rc plugins <plugin> start")
-    public void asfdmgfsgsodjaon(Client<?> client, @Argument(value = "plugin") String plugin) {
+    @Command("rc plugin <pluginTree> start")
+    @Command("rc plugins <pluginTree> start")
+    public void asfdmgfsgsodjaon(Client<?> client, String pluginTree) {
         try {
-            Particle.Flux<? extends Plugin> flux = fetchPlugin(client, plugin);
+            Particle.Flux<? extends Plugin> flux = fetchPlugin(client, pluginTree);
             if(flux == null) return;
             if(flux.exists()) {
                 client.send(RC.Lang("rustyconnector-pluginAlreadyStarted").generate());
@@ -200,7 +200,7 @@ public class CommonCommands {
 
     @Command("rc error <uuid>")
     @Command("rc errors <uuid>")
-    public void nglbwzmxvchdjaon(Client<?> client, @Argument(value = "uuid") String uuid) {
+    public void nglbwzmxvchdjaon(Client<?> client, String uuid) {
         try {
             UUID errorUUID;
             try {
@@ -244,7 +244,7 @@ public class CommonCommands {
 
     @Command("rc packet <id>")
     @Command("rc packets <id>")
-    public void nidbtmkngikxlzyo(Client<?> client, @Argument(value = "id") String id) {
+    public void nidbtmkngikxlzyo(Client<?> client, String id) {
         try {
             client.send(RC.Lang("rustyconnector-packetDetails").generate(
                     RC.MagicLink().packetCache().find(NanoID.fromString(id)).orElseThrow(
@@ -260,8 +260,8 @@ public class CommonCommands {
     public void acmednrmiufxxviz(Client<?> client) {
         client.send(RC.Lang("rustyconnector-sendUsage").generate());
     }
-    @Command("rc send <username>")
-    public void acmednrmiusgxviz(Client<?> client, @Argument("username") String username) {
+    @Command("rc send <playerTarget>")
+    public void acmednrmiusgxviz(Client<?> client, String playerTarget) {
         acmednrmiufxxviz(client);
     }
 }

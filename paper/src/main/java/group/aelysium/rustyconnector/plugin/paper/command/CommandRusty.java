@@ -18,35 +18,38 @@ import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 public final class CommandRusty {
-    @Command("rc send <username> <target>")
-    private  void sertgsdbfdfxxviz(Client<?> client, @Argument("username") String username, @Argument("target") String target) {
+    @Command("rc send <playerTarget> <target>")
+    private  void sertgsdbfdfxxviz(Client<?> client, String playerTarget, String target) {
         try {
-            boolean isServer = false;
-            try {
-                UUID.fromString(target);
-                isServer = true;
-            } catch (Exception ignore) {}
-
-            if(isServer) {
-                UUID uuid = RC.S.Adapter().playerUUID(username)
-                        .orElseThrow(()->new NoSuchElementException("Unable to get the uuid for the username ["+username+"]."));
-
-                UUID server = UUID.fromString(target);
-
-                MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(uuid, server).get(15, TimeUnit.SECONDS);
-
-                client.send(Component.text(packet.message(), packet.successful() ? GREEN : RED));
-                return;
-            }
-
-            UUID uuid = RC.S.Adapter().playerUUID(username)
-                    .orElseThrow(()->new NoSuchElementException("Unable to get the uuid for the username ["+username+"]."));
-
-            MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(uuid, target).get(15, TimeUnit.SECONDS);
+            MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(playerTarget, target).get(15, TimeUnit.SECONDS);
 
             client.send(Component.text(packet.message(), packet.successful() ? GREEN : RED));
         } catch (TimeoutException e) {
-            client.send(Error.from("The server took to long attempting to lock itself.").urgent(true));
+            client.send(Error.from("The send request took to long to response.").urgent(true));
+        } catch (Exception e) {
+            client.send(Error.from(e).whileAttempting("To lock the server.").urgent(true));
+        }
+    }
+    @Command("rc send <playerTarget> <target> family")
+    private  void sdfvqewrsczzsrff(Client<?> client, String playerTarget, String target) {
+        try {
+            MagicLinkCore.Packets.Response packet = RC.S.Kernel().sendFamily(playerTarget, target).get(15, TimeUnit.SECONDS);
+
+            client.send(Component.text(packet.message(), packet.successful() ? GREEN : RED));
+        } catch (TimeoutException e) {
+            client.send(Error.from("The send request took to long to respond.").urgent(true));
+        } catch (Exception e) {
+            client.send(Error.from(e).whileAttempting("To lock the server.").urgent(true));
+        }
+    }
+    @Command("rc send <playerTarget> <target> server")
+    private  void sdfhmzzmfiruwmog(Client<?> client, String playerTarget, String target) {
+        try {
+            MagicLinkCore.Packets.Response packet = RC.S.Kernel().sendServer(playerTarget, target).get(15, TimeUnit.SECONDS);
+
+            client.send(Component.text(packet.message(), packet.successful() ? GREEN : RED));
+        } catch (TimeoutException e) {
+            client.send(Error.from("The send request took to long to respond.").urgent(true));
         } catch (Exception e) {
             client.send(Error.from(e).whileAttempting("To lock the server.").urgent(true));
         }

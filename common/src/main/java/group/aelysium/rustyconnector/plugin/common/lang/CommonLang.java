@@ -258,42 +258,51 @@ public class CommonLang {
     }
 
     @Lang("rustyconnector-packet")
-    public static Component message(Packet message) {
+    public static Component message(Packet packet) {
         return join(
                 JoinConfiguration.separator(empty()),
                 (
-                    message.isLocal() ?
+                    packet.isLocal() ?
                             text("<<<", DARK_BLUE) :
                             text(">>>", DARK_GREEN)
                 ),
                 space(),
                 text("[", DARK_GRAY),
-                RC.Lang("rustyconnector-formatInstant").generate(message.created()).color(YELLOW),
+                RC.Lang("rustyconnector-formatInstant").generate(packet.created()).color(YELLOW),
                 text("]", DARK_GRAY),
                 text("[", DARK_GRAY),
-                text(message.local().replyEndpoint().orElseThrow().toString(), GRAY),
+                text(packet.local().replyEndpoint().orElseThrow().toString(), GRAY),
                 space(),
-                text(message.identification().toString(), GRAY),
+                text(packet.type().toString(), GRAY),
                 text("]: ", DARK_GRAY),
-                text(message.status().name(), message.status().color())
+                packet.successful() ? text("SUCCESS", GREEN) : text("ERROR", RED)
         );
     }
 
     @Lang("rustyconnector-packetDetails")
     public static Component messageDetails(Packet packet) {
+        String serverDisplayName = null;
+        try {
+            serverDisplayName = RC.P.Server(packet.local().id()).orElseThrow().displayName().orElseThrow();
+        } catch (Exception ignore) {}
         return RC.Lang("rustyconnector-box").generate(
                 join(
                         newlines(),
                         text("Details:", DARK_GRAY),
                         keyValue("ID", packet.local().replyEndpoint().orElseThrow().toString()),
-                        keyValue("Type", packet.identification().toString()),
+                        keyValue("Type", packet.type().toString()),
                         keyValue("Direction", packet.isLocal() ? "Outgoing" : "Incoming"),
                         keyValue(packet.isLocal() ? "Created" : "Received", RC.Lang("rustyconnector-formatInstant").generate(packet.created())),
                         keyValue("Version", packet.messageVersion()),
-                        keyValue("Status", text(packet.status().name(), packet.status().color())),
+                        keyValue("Status", packet.successful() ? text("SUCCESS", GREEN) : text("ERROR", RED)),
                         keyValue("Reason", packet.statusMessage()),
                         keyValue("Responding To", packet.replying() ? text("Packet "+packet.remote().replyEndpoint().orElseThrow(), DARK_GRAY) : "Nothing"),
-                        keyValue("Sender", packet.local().origin().name()+" "+packet.local().uuid()),
+                        keyValue("Sender", join(
+                                JoinConfiguration.spaces(),
+                                text(packet.local().origin().name(), DARK_GRAY),
+                                text(packet.local().id(), DARK_GRAY),
+                                serverDisplayName == null ? empty() : text("("+serverDisplayName+")", DARK_GRAY)
+                        )),
                         empty(),
                         text("Properties:", DARK_GRAY),
                         join(

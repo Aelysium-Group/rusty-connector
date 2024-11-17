@@ -70,7 +70,7 @@ public class VelocityLang extends CommonLang {
         try {
             return join(
                     JoinConfiguration.separator(empty()),
-                    text(displayName.orElse(server.uuid().toString()), BLUE),
+                    text(displayName.orElse(server.id()), BLUE),
                     space(),
                     text("(", DARK_GRAY),
                     text(AddressUtil.addressToString(server.address()), YELLOW),
@@ -84,7 +84,7 @@ public class VelocityLang extends CommonLang {
             RC.Error(Error.from(e).whileAttempting("To inform the console of new server registration (failed silently since not urgent)"));
             return join(
                     JoinConfiguration.separator(empty()),
-                    text(displayName.orElse(server.uuid().toString()), BLUE),
+                    text(displayName.orElse(server.id()), BLUE),
                     space(),
                     text("(", DARK_GRAY),
                     text(AddressUtil.addressToString(server.address()), YELLOW),
@@ -100,7 +100,7 @@ public class VelocityLang extends CommonLang {
         try {
             return join(
                     JoinConfiguration.separator(empty()),
-                    text(server.displayName().orElse((String) server.property("velocity_registration_name").orElse(server.uuid().toString())), GRAY),
+                    text(server.displayName().orElse((String) server.property("velocity_registration_name").orElse(server.id())), GRAY),
                     space(),
                     text("(", DARK_GRAY),
                     text(AddressUtil.addressToString(server.address()), YELLOW),
@@ -114,7 +114,7 @@ public class VelocityLang extends CommonLang {
             RC.Error(Error.from(e).whileAttempting("To inform the console of new server registration (failed silently since not urgent)"));
             return join(
                     JoinConfiguration.separator(empty()),
-                    text(server.displayName().orElse((String) server.property("velocity_registration_name").orElse(server.uuid().toString())), GRAY),
+                    text(server.displayName().orElse((String) server.property("velocity_registration_name").orElse(server.id())), GRAY),
                     space(),
                     text("(", DARK_GRAY),
                     text(AddressUtil.addressToString(server.address()), YELLOW),
@@ -143,38 +143,43 @@ public class VelocityLang extends CommonLang {
 
         return RC.Lang("rustyconnector-headerBox").generate(
                 "families",
-                join(
-                        newlines(),
-                        RC.P.Families().fetchAll().stream().map(flux->{
-                            try {
-                                Family family = flux.orElseThrow();
-                                return join(
-                                        JoinConfiguration.separator(empty()),
-                                        text("[", DARK_GRAY),
-                                        text(family.id(), BLUE),
-                                        text("]: ", DARK_GRAY),
-                                        (
-                                            family.displayName() == null ? empty() :
-                                            text(family.displayName(), GRAY)
-                                        ),
-                                        text("(Servers: ", DARK_GRAY),
-                                        text(family.servers().size(), YELLOW),
-                                        text(") ", DARK_GRAY),
-                                        text("(Players: ", DARK_GRAY),
-                                        text(family.players(), YELLOW),
-                                        text(")", DARK_GRAY),
-                                        (
-                                            !family.id().equals(rootFamily.get()) ? empty() : join(
-                                                    JoinConfiguration.separator(empty()),
-                                                    text(" [", DARK_GRAY),
-                                                    text("Root Family", GREEN),
-                                                    text("]", DARK_GRAY)
-                                            )
-                                        )
-                                );
-                            } catch (Exception ignore) {}
-                            return null;
-                        }).filter(Objects::nonNull).toList()
+                (
+                    RC.P.Families().size() == 0 ?
+                        text("There are no available families at the moment.", DARK_GRAY)
+                    :
+                        join(
+                                newlines(),
+                                RC.P.Families().fetchAll().stream().map(flux->{
+                                    try {
+                                        Family family = flux.orElseThrow();
+                                        return join(
+                                                JoinConfiguration.separator(empty()),
+                                                text("[", DARK_GRAY),
+                                                text(family.id(), BLUE),
+                                                text("]: ", DARK_GRAY),
+                                                (
+                                                    family.displayName() == null ? empty() :
+                                                    text(family.displayName(), GRAY)
+                                                ),
+                                                text("(Servers: ", DARK_GRAY),
+                                                text(family.servers().size(), YELLOW),
+                                                text(") ", DARK_GRAY),
+                                                text("(Players: ", DARK_GRAY),
+                                                text(family.players(), YELLOW),
+                                                text(")", DARK_GRAY),
+                                                (
+                                                    !family.id().equals(rootFamily.get()) ? empty() : join(
+                                                            JoinConfiguration.separator(empty()),
+                                                            text(" [", DARK_GRAY),
+                                                            text("Root Family", GREEN),
+                                                            text("]", DARK_GRAY)
+                                                    )
+                                                )
+                                        );
+                                    } catch (Exception ignore) {}
+                                    return null;
+                                }).filter(Objects::nonNull).toList()
+                        )
                 )
         );
     };
@@ -183,39 +188,53 @@ public class VelocityLang extends CommonLang {
     public static Component servers() {
         return RC.Lang("rustyconnector-headerBox").generate(
                 "servers",
-                join(
-                        newlines(),
-                        RC.P.Servers().stream().map(s->{
-                            String familyName = null;
-                            try {
-                                familyName = s.family().orElseThrow().orElseThrow().id();
-                            } catch (Exception ignore) {}
+                (
+                    RC.P.Servers().isEmpty() ?
+                        text("There are no servers to show.", DARK_GRAY)
+                        :
+                        join(
+                            newlines(),
+                            RC.P.Servers().stream().map(s->{
+                                String familyName = null;
+                                try {
+                                    familyName = s.family().orElseThrow().orElseThrow().id();
+                                } catch (Exception ignore) {}
 
-                            return join(
-                                    JoinConfiguration.separator(empty()),
-                                    text("[", DARK_GRAY),
-                                    text(s.uuid().toString(), BLUE),
-                                    space(),
-                                    text(AddressUtil.addressToString(s.address()), YELLOW),
-                                    text("]: ", DARK_GRAY),
-                                    text(s.displayName().orElse((String) s.property("velocity_registration_name").orElse("")), GRAY),
-                                    (
-                                        familyName == null ? empty() : join(
-                                                JoinConfiguration.separator(empty()),
-                                                text(" (Family: ", DARK_GRAY),
-                                                text(familyName, DARK_AQUA),
-                                                text(")", DARK_GRAY)
+                                return join(
+                                        JoinConfiguration.separator(empty()),
+                                        text("[", DARK_GRAY),
+                                        text(s.id(), BLUE),
+                                        space(),
+                                        text(AddressUtil.addressToString(s.address()), YELLOW),
+                                        text("]:", DARK_GRAY),
+                                        space(),
+                                        (
+                                                s.displayName().isEmpty() ? empty() :
+                                                text(s.displayName().orElse(""), AQUA)
+                                                .append(space())
+                                        ),
+                                        text("(Players: ", DARK_GRAY),
+                                        text(s.players(), DARK_AQUA),
+                                        text(")", DARK_GRAY),
+                                        space(),
+                                        (
+                                                familyName == null ? text("This server has no family", DARK_GRAY) : join(
+                                                        JoinConfiguration.separator(empty()),
+                                                        text("(Family: ", DARK_GRAY),
+                                                        text(familyName, DARK_AQUA),
+                                                        text(")", DARK_GRAY)
+                                                )
                                         )
-                                    )
-                            );
-                        }).toList()
+                                );
+                            }).toList()
+                        )
                 )
         );
     }
 
     @Lang("rustyconnector-serverRegistered")
     public static Component serverRegistered(Server server) {
-        return Component.text(server.property("velocity_registration_name").orElse(server.uuid().toString())+" ({address}) -> {Family}");
+        return Component.text(server.property("velocity_registration_name").orElse(server.id())+" ({address}) -> {Family}");
     }
 
     @Lang("rustyconnector-serverDetails")
@@ -236,7 +255,7 @@ public class VelocityLang extends CommonLang {
                 join(
                         newlines(),
                         text("Details:", DARK_GRAY),
-                        keyValue("UUID",           server.uuid()),
+                        keyValue("UUID",           server.id()),
                         keyValue("Display Name",   server.displayName().orElse("None")),
                         keyValue("Address",        AddressUtil.addressToString(server.address())),
                         keyValue("Family",         (family == null ? (missing ? "Unavailable" : "None") : family.id())),
@@ -247,9 +266,14 @@ public class VelocityLang extends CommonLang {
                         keyValue("Stale",          server.stale()),
                         empty(),
                         text("Extra Properties:", DARK_GRAY),
-                        join(
-                                newlines(),
-                                server.properties().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue().toString())).toList()
+                        (
+                            server.properties().isEmpty() ?
+                                text("There are no properties to show.", DARK_GRAY)
+                            :
+                                join(
+                                        newlines(),
+                                        server.properties().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue().toString())).toList()
+                                )
                         )
 
                 )
@@ -337,36 +361,37 @@ public class VelocityLang extends CommonLang {
                 keyValue("Plugins", text(String.join(", ",family.plugins().keySet()), BLUE)),
                 space(),
                 text("Servers:", DARK_GRAY),
-                join(
-                        newlines(),
-                        family.servers().stream().map(s->{
-                            boolean locked = family.isLocked(s);
-                            if(locked) return join(
-                                    JoinConfiguration.separator(empty()),
-                                    text("[", DARK_GRAY),
-                                    text(s.uuid().toString(), GRAY),
-                                    space(),
-                                    text(AddressUtil.addressToString(s.address()), GRAY),
-                                    text("]: ", DARK_GRAY),
-                                    text((String) s.property("velocity_registration_name").orElse("This server hasn't been registered yet."), GRAY),
-                                    space(),
-                                    s.displayName().isEmpty() || s.property("velocity_registration_name").isEmpty() ? empty() :
-                                            text("["+s.displayName().orElse("No Display Name Exists")+"]", GRAY)
-                            );
-
-                            return join(
-                                    JoinConfiguration.separator(empty()),
-                                    text("[", DARK_GRAY),
-                                    text(s.uuid().toString(), BLUE),
-                                    space(),
-                                    text(AddressUtil.addressToString(s.address()), YELLOW),
-                                    text("]: ", DARK_GRAY),
-                                    text((String) s.property("velocity_registration_name").orElse("This server hasn't been registered yet."), GREEN),
-                                    space(),
-                                    s.displayName().isEmpty() || s.property("velocity_registration_name").isEmpty() ? empty() :
-                                            text("["+s.displayName().orElse("No Display Name Exists")+"]", DARK_GRAY)
-                            );
-                        }).toList()
+                (
+                    family.servers().isEmpty() ?
+                        text("There are no servers in this family.", DARK_GRAY)
+                    :
+                        join(
+                                newlines(),
+                                family.servers().stream().map(s->{
+                                    boolean locked = family.isLocked(s);
+                                    return join(
+                                            JoinConfiguration.separator(empty()),
+                                            text("[", DARK_GRAY),
+                                            text(s.id(), BLUE),
+                                            space(),
+                                            text(AddressUtil.addressToString(s.address()), YELLOW),
+                                            text("]:", DARK_GRAY),
+                                            space(),
+                                            (
+                                                    s.displayName().isEmpty() ? empty() :
+                                                    text(s.displayName().orElse(""), AQUA)
+                                                    .append(space())
+                                            ),
+                                            text("(Players: ", DARK_GRAY),
+                                            text(family.players(), YELLOW),
+                                            text(")", DARK_GRAY),
+                                            space(),
+                                            (
+                                                locked ? text("Locked", RED) : empty()
+                                            )
+                                    );
+                                }).toList()
+                        )
                 )
         );
     }

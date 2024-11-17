@@ -7,7 +7,7 @@ import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.plugin.common.config.ServerUUIDConfig;
+import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 
@@ -105,21 +105,12 @@ public class MagicLinkConfig {
 
     @Comment({
         "#",
-        "# The packet types that should be ignored.",
+        "# The packet types that shouldn't be cached.",
         "# If a packet is of a type that is contained below, it will not be cached.",
         "#"
     })
     @Node(6)
-    private List<String> cache_ignoredIdentifications = new ArrayList<>();
-
-    @Comment({
-        "#",
-        "# The packet statuses to ignore.",
-        "# If a packet matches a status listed below, it will not be cached.",
-        "#"
-    })
-    @Node(7)
-    private List<String> cache_ignoredStatuses = new ArrayList<>();
+    private List<String> cache_ignoredTypes = new ArrayList<>();
 
     public WebSocketMagicLink.Tinder tinder() throws IOException {
         AES cryptor = PrivateKeyConfig.New().cryptor();
@@ -133,20 +124,17 @@ public class MagicLinkConfig {
             registrations.put(name, ServerRegistrationConfig.New(name).configuration());
         }
 
-        List<Packet.Status> ignoredStatuses = new ArrayList<>();
-        this.cache_ignoredStatuses.forEach(s -> ignoredStatuses.add(Packet.Status.valueOf(s)));
-
-        List<Packet.Identification> ignoredIdentifications = new ArrayList<>();
-        this.cache_ignoredIdentifications.forEach(s -> {
+        List<Packet.Type> ignoredTypes = new ArrayList<>();
+        this.cache_ignoredTypes.forEach(s -> {
             String[] split = s.split("-");
-            ignoredIdentifications.add(Packet.Identification.from(split[0], split[1]));
+            ignoredTypes.add(Packet.Type.from(split[0], split[1]));
         });
 
         return new WebSocketMagicLink.Tinder(
                 AddressUtil.parseAddress(this.address),
-                Packet.SourceIdentifier.proxy(ServerUUIDConfig.New().uuid()),
+                Packet.SourceIdentifier.proxy(ServerIDConfig.New().id()),
                 cryptor,
-                new PacketCache(this.cache_size, ignoredStatuses, ignoredIdentifications),
+                new PacketCache(this.cache_size, ignoredTypes),
                 registrations,
                 null
                 //this.endpointBroadcasting_enabled ? new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.endpointBroadcasting_address)) : null
