@@ -32,7 +32,7 @@ public class CommonCommands {
     public void nglbwcmuzzxvjaon(Client<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
-            Particle.Flux<?> particle = RustyConnector.Toolkit.Kernel().orElseThrow();
+            Particle.Flux<?> particle = RustyConnector.Kernel().orElseThrow();
             particle.reignite();
             particle.observe();
             client.send(RC.Lang("rustyconnector-finished").generate());
@@ -119,7 +119,7 @@ public class CommonCommands {
     private static @Nullable Particle.Flux<? extends Plugin> fetchPlugin(Client<?> client, String plugin) {
         String[] nodes = plugin.split("\\.");
         AtomicReference<Particle.Flux<? extends Plugin>> current = new AtomicReference<>(
-                RustyConnector.Toolkit.Kernel()
+                RustyConnector.Kernel()
                 .orElseThrow(()->new NoSuchElementException("No RustyConnector Kernel has been registered."))
         );
 

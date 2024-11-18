@@ -8,12 +8,16 @@ import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
+import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.paper.command.CommandRusty;
 import group.aelysium.rustyconnector.plugin.paper.command.PaperClient;
 import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
 import group.aelysium.rustyconnector.plugin.paper.lang.PaperLang;
 import group.aelysium.rustyconnector.server.ServerKernel;
 import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.incendo.cloud.SenderMapper;
@@ -42,14 +46,31 @@ public final class PaperRustyConnector extends JavaPlugin {
         }
 
         try {
+            if(PrivateKeyConfig.Load().isEmpty()) {
+                this.logger.send(Component.join(
+                        JoinConfiguration.newlines(),
+                        Component.empty(),
+                        Component.empty(),
+                        Component.empty(),
+                        Component.empty(),
+                        Component.text("Looks like I'm still waiting on a private.key from the proxy!", NamedTextColor.BLUE),
+                        Component.text("You'll need to copy ", NamedTextColor.BLUE).append(Component.text("plugins/rustyconnector/metadata/private.key", NamedTextColor.YELLOW)).append(Component.text(" and paste it into this server in that same folder!", NamedTextColor.BLUE)),
+                        Component.text("Both the proxy and I need to have the same private.key!", NamedTextColor.BLUE),
+                        Component.empty(),
+                        Component.empty(),
+                        Component.empty()
+                ));
+                return;
+            }
+
             {
                 GitOpsConfig config = GitOpsConfig.New();
                 if(config != null) DeclarativeYAML.registerRepository("rustyconnector", config.config());
             }
 
             ServerKernel.Tinder tinder = DefaultConfig.New().data(this.getServer(), this.logger);
-            RustyConnector.Toolkit.registerAndIgnite(tinder.flux());
-            RustyConnector.Toolkit.Server().orElseThrow().onStart(p->{
+            RustyConnector.registerAndIgnite(tinder.flux());
+            RustyConnector.Server().orElseThrow().onStart(p->{
                 try {
                     p.fetchPlugin(LangLibrary.class).onStart(l -> l.registerLangNodes(PaperLang.class));
                 } catch (Exception e) {
@@ -84,7 +105,7 @@ public final class PaperRustyConnector extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-            RustyConnector.Toolkit.unregister();
+            RustyConnector.unregister();
         } catch (Exception e) {
             e.printStackTrace();
         }

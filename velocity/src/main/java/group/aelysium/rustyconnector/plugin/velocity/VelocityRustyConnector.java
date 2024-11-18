@@ -80,7 +80,7 @@ public class VelocityRustyConnector implements PluginContainer {
                 VelocityClient.class
         );
         this.annotationParser.parse(new CommonCommands());
-        this.annotationParser.parse(new CommandRusty());
+        this.annotationParser.parse(new CommandRusty(this.virtualFamilyServers));
     }
 
     @Subscribe
@@ -111,9 +111,9 @@ public class VelocityRustyConnector implements PluginContainer {
                     MagicLinkConfig.New().tinder()
             );
 
-            RustyConnector.Toolkit.registerAndIgnite(tinder.flux());
+            RustyConnector.registerAndIgnite(tinder.flux());
 
-            Particle.Flux<? extends ProxyKernel> kernelFlux = RustyConnector.Toolkit.Proxy().orElseThrow();
+            Particle.Flux<? extends ProxyKernel> kernelFlux = RustyConnector.Proxy().orElseThrow();
             kernelFlux.onStart(p->{
                 try {
                     p.fetchPlugin(LangLibrary.class).onStart(l -> l.registerLangNodes(VelocityLang.class));
@@ -184,7 +184,7 @@ public class VelocityRustyConnector implements PluginContainer {
     @Subscribe
     public void onUnload(ProxyShutdownEvent event) {
         try {
-            RustyConnector.Toolkit.unregister();
+            RustyConnector.unregister();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -13,7 +13,7 @@ public class OnPlayerKicked {
     /**
      * Runs when a player disconnects from a player server
      */
-    @Subscribe(priority = Short.MAX_VALUE)
+    @Subscribe(order = PostOrder.CUSTOM, priority = Short.MIN_VALUE)
     public EventTask onPlayerKicked(KickedFromServerEvent event) {
         return EventTask.async(() -> {
             Player player = RC.P.Adapter().convertToRCPlayer(event.getPlayer());

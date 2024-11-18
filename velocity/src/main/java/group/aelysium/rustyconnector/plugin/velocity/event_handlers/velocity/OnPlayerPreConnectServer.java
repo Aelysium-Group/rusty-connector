@@ -25,7 +25,7 @@ public class OnPlayerPreConnectServer {
         this.virtualFamilyServers = virtualFamilyServers;
     }
 
-    @Subscribe(priority = Short.MAX_VALUE)
+    @Subscribe(order = PostOrder.CUSTOM, priority = Short.MIN_VALUE)
     public EventTask onPlayerChangeServer(ServerPreConnectEvent event) {
             return EventTask.async(() -> {
                 RegisteredServer target = null;

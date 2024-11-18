@@ -15,7 +15,7 @@ public class OnPlayerChangeServer {
     /**
      * Also runs when a player first joins the proxy
      */
-    @Subscribe
+    @Subscribe(order = PostOrder.CUSTOM, priority = Short.MIN_VALUE)
     public EventTask onPlayerChangeServer(ServerPostConnectEvent event) {
             return EventTask.async(() -> {
                 Player player = RC.P.Adapter().convertToRCPlayer(event.getPlayer());

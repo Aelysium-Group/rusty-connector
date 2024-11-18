@@ -6,6 +6,7 @@ import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.plugins.Plugin;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
+import group.aelysium.rustyconnector.plugin.velocity.VirtualFamilyServers;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
@@ -20,6 +21,11 @@ import java.util.concurrent.TimeUnit;
 import static net.kyori.adventure.text.Component.text;
 
 public final class CommandRusty {
+    private final VirtualFamilyServers virtualFamilyServers;
+    public CommandRusty(VirtualFamilyServers virtualFamilyServers) {
+        this.virtualFamilyServers = virtualFamilyServers;
+    }
+
     @Command("rc send <playerTarget> <target>")
     public void qxeafgbinengqytu(Client<?> client, String playerTarget, String target) {
         Player player = null;
