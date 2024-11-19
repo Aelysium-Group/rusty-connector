@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity;
 
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.proxy.server.ServerPing;
@@ -89,7 +90,20 @@ public class VelocityProxyAdapter extends ProxyAdapter {
 
     @Override
     public Optional<Server> fetchServer(@NotNull Player player) {
-        return Optional.empty();
+        com.velocitypowered.api.proxy.Player velocityPlayer = null;
+        try {
+            velocityPlayer = this.velocity.getPlayer(player.uuid()).orElseThrow();
+            try {
+                velocityPlayer = this.velocity.getPlayer(player.username()).orElseThrow();
+            } catch (Exception ignore) {}
+        } catch (Exception ignore) {}
+        if(velocityPlayer == null) return Optional.empty();
+
+        if(velocityPlayer.getCurrentServer().isEmpty()) return Optional.empty();
+
+        ServerConnection serverConnection = velocityPlayer.getCurrentServer().orElseThrow();
+
+        return RC.P.Server(serverConnection.getServerInfo().getName());
     }
 
     @Override

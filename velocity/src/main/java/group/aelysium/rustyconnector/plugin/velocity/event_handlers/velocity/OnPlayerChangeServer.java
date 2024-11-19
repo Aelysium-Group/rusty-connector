@@ -24,7 +24,7 @@ public class OnPlayerChangeServer {
                     assert event.getPreviousServer() != null;
                     oldServer = RC.P.Server(event.getPreviousServer().getServerInfo().getName()).orElseThrow();
                 } catch (Exception ignore) {}
-                Server newServer = player.server().orElseThrow();
+                Server newServer = RC.P.Server(event.getPlayer().getCurrentServer().orElseThrow().getServerInfo().getName()).orElseThrow();
 
                 RC.P.Adapter().onServerSwitch(player, oldServer, newServer);
             });
