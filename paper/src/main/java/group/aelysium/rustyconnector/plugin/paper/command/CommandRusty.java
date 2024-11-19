@@ -14,8 +14,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public final class CommandRusty {
     @Command("rc send <playerTarget> <target>")
@@ -23,11 +23,11 @@ public final class CommandRusty {
         try {
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(playerTarget, target).get(15, TimeUnit.SECONDS);
 
-            client.send(Component.text(packet.message(), packet.successful() ? GREEN : RED));
+            client.send(text(packet.message(), packet.successful() ? GREEN : RED));
         } catch (TimeoutException e) {
-            client.send(Error.from("The send request took to long to response.").urgent(true));
+            client.send(text("The send request took to long to response.", BLUE));
         } catch (Exception e) {
-            client.send(Error.from(e).whileAttempting("To lock the server.").urgent(true));
+            RC.Error(Error.from(e).whileAttempting("To send a player to a server or family.").urgent(true));
         }
     }
     @Command("rc send <playerTarget> <target> family")
@@ -35,11 +35,11 @@ public final class CommandRusty {
         try {
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().sendFamily(playerTarget, target).get(15, TimeUnit.SECONDS);
 
-            client.send(Component.text(packet.message(), packet.successful() ? GREEN : RED));
+            client.send(text(packet.message(), packet.successful() ? GREEN : RED));
         } catch (TimeoutException e) {
-            client.send(Error.from("The send request took to long to respond.").urgent(true));
+            client.send(text("The send request took to long to response.", BLUE));
         } catch (Exception e) {
-            client.send(Error.from(e).whileAttempting("To lock the server.").urgent(true));
+            RC.Error(Error.from(e).whileAttempting("To send a player to a family.").urgent(true));
         }
     }
     @Command("rc send <playerTarget> <target> server")
@@ -47,11 +47,11 @@ public final class CommandRusty {
         try {
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().sendServer(playerTarget, target).get(15, TimeUnit.SECONDS);
 
-            client.send(Component.text(packet.message(), packet.successful() ? GREEN : RED));
+            client.send(text(packet.message(), packet.successful() ? GREEN : RED));
         } catch (TimeoutException e) {
-            client.send(Error.from("The send request took to long to respond.").urgent(true));
+            client.send(text("The send request took to long to response.", BLUE));
         } catch (Exception e) {
-            client.send(Error.from(e).whileAttempting("To lock the server.").urgent(true));
+            RC.Error(Error.from(e).whileAttempting("To send a player to a server.").urgent(true));
         }
     }
 
@@ -60,11 +60,11 @@ public final class CommandRusty {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().lock().get(7, TimeUnit.SECONDS);
-            client.send(Component.text(packet.message(), packet.successful() ? GREEN : RED));
+            client.send(text(packet.message(), packet.successful() ? GREEN : RED));
         } catch (TimeoutException e) {
-            client.send(Error.from("The server took to long attempting to lock itself.").urgent(true));
+            client.send(text("The server took to long attempting to lock itself.", BLUE));
         } catch (Exception e) {
-            client.send(Error.from(e).whileAttempting("To lock the server.").urgent(true));
+            RC.Error(Error.from(e).whileAttempting("To lock the server.").urgent(true));
         }
     }
 
@@ -73,11 +73,11 @@ public final class CommandRusty {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().unlock().get(7, TimeUnit.SECONDS);
-            client.send(Component.text(packet.message(), packet.successful() ? GREEN : RED));
+            client.send(text(packet.message(), packet.successful() ? GREEN : RED));
         } catch (TimeoutException e) {
-            client.send(Error.from("The server took to long attempting to unlock itself.").urgent(true));
+            client.send(text("The server took to long attempting to unlock itself.", BLUE));
         } catch (Exception e) {
-            client.send(Error.from(e).whileAttempting("To unlock the server.").urgent(true));
+            RC.Error(Error.from(e).whileAttempting("To unlock the server.").urgent(true));
         }
     }
 }

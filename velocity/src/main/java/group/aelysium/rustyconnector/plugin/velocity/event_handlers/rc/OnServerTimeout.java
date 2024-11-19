@@ -9,7 +9,7 @@ import net.kyori.adventure.text.Component;
 public class OnServerTimeout {
     @EventListener
     public static void handle(ServerTimeoutEvent event) {
-        //Component message = RC.Lang("rustyconnector-serverUnregister").generate(event.server());
-        //RC.Adapter().log(message);
+        Component message = RC.Lang("rustyconnector-serverUnregister").generate(event.server());
+        RC.Adapter().log(message);
     }
 }

@@ -37,14 +37,18 @@ public class CommonCommands {
             particle.observe();
             client.send(RC.Lang("rustyconnector-finished").generate());
         } catch (Exception e) {
-            client.send(Error.from(e).toComponent());
+            RC.Error(Error.from(e).urgent(true));
         }
     }
 
     @Command("rc plugin")
     @Command("rc plugins")
     public void nglbwcmuvchdjaon(Client<?> client) {
-        client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().allPlugins().keySet()));
+        try {
+            client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().allPlugins().keySet()));
+        } catch (Exception e) {
+            RC.Error(Error.from(e).urgent(true));
+        }
     }
     @Command("rc plugin <pluginTree>")
     @Command("rc plugins <pluginTree>")
@@ -64,7 +68,7 @@ public class CommonCommands {
 
             client.send(RC.Lang("rustyconnector-details").generate(flux.orElseThrow()));
         } catch (Exception e) {
-            client.send(Error.from(e).toComponent());
+            RC.Error(Error.from(e).urgent(true));
         }
     }
 
@@ -78,7 +82,7 @@ public class CommonCommands {
             flux.reignite().get();
             client.send(RC.Lang("rustyconnector-finished").generate());
         } catch (Exception e) {
-            client.send(Error.from(e).toComponent());
+            RC.Error(Error.from(e).urgent(true));
         }
     }
     @Command("rc plugin <pluginTree> stop")
@@ -95,7 +99,7 @@ public class CommonCommands {
         try {
             client.send(RC.Lang("rustyconnector-finished").generate());
         } catch (NoSuchElementException e) {
-            RC.Adapter().log(Component.text("Successfully closed that plugin!"));
+            client.send(Component.text("Successfully stopped that plugin!"));
         }
     }
     @Command("rc plugin <pluginTree> start")
@@ -112,7 +116,7 @@ public class CommonCommands {
             flux.observe();
             client.send(RC.Lang("rustyconnector-finished").generate());
         } catch (Exception e) {
-            client.send(Error.from(e).toComponent());
+            RC.Error(Error.from(e).urgent(true));
         }
     }
 
@@ -206,16 +210,16 @@ public class CommonCommands {
             try {
                 errorUUID = UUID.fromString(uuid);
             } catch (IllegalArgumentException e) {
-                client.send(Error.from(e).wrongValue("A valid UUID.", uuid).urgent(true));
+                client.send(text("Please provide a valid UUID.", NamedTextColor.BLUE));
                 return;
             }
 
             Error error = RC.Errors().fetch(errorUUID)
                     .orElseThrow(()->new NoSuchElementException("No Error entry exists with the uuid ["+uuid+"]"));
-            if(error.throwable() == null) client.send(Error.from(new NoSuchElementException("The error ["+uuid+"] doesn't have a throwable to inspect.")));
+            if(error.throwable() == null) client.send(text("The error ["+uuid+"] doesn't have a throwable to inspect.", NamedTextColor.BLUE));
             RC.Adapter().log(RC.Lang("rustyconnector-exception").generate(error.throwable()));
         } catch (Exception e) {
-            client.send(Error.from(e).urgent(true));
+            RC.Error(Error.from(e).urgent(true));
         }
     }
 
@@ -226,7 +230,7 @@ public class CommonCommands {
             List<Packet> messages = RC.MagicLink().packetCache().packets();
             client.send(RC.Lang("rustyconnector-packets").generate(messages));
         } catch (Exception e) {
-            client.send(Error.from(e).toComponent());
+            RC.Error(Error.from(e).urgent(true));
         }
     }
 
@@ -238,7 +242,7 @@ public class CommonCommands {
             RC.MagicLink().packetCache().empty();
             client.send(RC.Lang("rustyconnector-finished").generate());
         } catch (Exception e) {
-            client.send(Error.from(e).toComponent());
+            RC.Error(Error.from(e).urgent(true));
         }
     }
 

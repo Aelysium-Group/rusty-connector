@@ -14,6 +14,7 @@ import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class OnPlayerPreConnectServer {
@@ -49,7 +50,8 @@ public class OnPlayerPreConnectServer {
                 }
                 Server server = optionalServer.orElseThrow();
 
-                RegisteredServer registeredServer = (RegisteredServer) server.raw();
+                RegisteredServer registeredServer = (RegisteredServer) server.property("velocity_RegisteredServer")
+                        .orElseThrow(()->new NoSuchElementException("The server "+server.id()+" doesn't seem to have a RegisteredServer (from velocity) associated with it."));
                 event.setResult(ServerPreConnectEvent.ServerResult.allowed(registeredServer));
             });
     }
