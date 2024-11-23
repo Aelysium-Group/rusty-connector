@@ -48,10 +48,10 @@ public class DefaultConfig {
 
     @Comment({
             "#",
-            "# An optional display name that can be used to represent this MCLoader in the console.",
-            "# If you do not provide a display name, the family name will be appended with an index instead.",
-            "#",
-            "# Display names can't be longer than 16 characters.",
+            "# An optional display name that can be used to represent this server to users.",
+            "# If you do not provide a display name, the server's ID will be used instead.",
+            "# Display names are allowed to say whatever you want, they are also allowed to be duplicate across multiple servers.",
+            "# Display names only exist as a visual sugar. They carry no significance outside of looks.",
             "#"
     })
     @Node(2)
@@ -59,9 +59,10 @@ public class DefaultConfig {
 
     @Comment({
             "#",
-            "# Define the MCLoader Config to load from the proxy.",
+            "# Define the Registration Config to load from the proxy.",
+            "# The name you define here corresponds with a config on the proxy.",
+            "# When this server registers, the settings in that config will be applied.",
             "# To define new custom configs in the proxy look in the \"magic_configs\" folder.",
-            "# The definition below can contain \".yml\" or not, it doesn't matter.",
             "#"
     })
     @Node(3)

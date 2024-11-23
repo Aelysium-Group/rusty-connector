@@ -54,7 +54,6 @@ public class VelocityRustyConnector implements PluginContainer {
     private final PluginLogger logger;
     private final ProxyServer server;
     private final Path dataFolder;
-    private final VirtualFamilyServers virtualFamilyServers;
     private final AnnotationParser<VelocityClient> annotationParser;
 
     @Inject
@@ -63,7 +62,6 @@ public class VelocityRustyConnector implements PluginContainer {
         this.server = server;
         this.metricsFactory = metricsFactory;
         this.dataFolder = dataFolder;
-        this.virtualFamilyServers = new VirtualFamilyServers(server);
 
         CommandManager<VelocityClient> commandManager = new VelocityCommandManager<>(
                 this,
@@ -80,7 +78,8 @@ public class VelocityRustyConnector implements PluginContainer {
                 VelocityClient.class
         );
         this.annotationParser.parse(new CommonCommands());
-        this.annotationParser.parse(new CommandRusty(this.virtualFamilyServers));
+        this.annotationParser.parse(new CommandRusty());
+        this.annotationParser.parse(new CommandServer());
     }
 
     @Subscribe
@@ -125,7 +124,7 @@ public class VelocityRustyConnector implements PluginContainer {
                         m.listen(OnServerRegister.class);
                         m.listen(OnServerUnregister.class);
                         m.listen(OnServerTimeout.class);
-                        m.listen(new OnFamilyLifecycle(this.virtualFamilyServers));
+                        m.listen(new OnFamilyLifecycle(this.server));
                     });
                 } catch (Exception e) {
                     RC.Error(Error.from(e));
@@ -153,11 +152,6 @@ public class VelocityRustyConnector implements PluginContainer {
                     RC.Error(Error.from(e));
                 }
             });
-            kernelFlux.onClose(()->{
-                try {
-                    this.virtualFamilyServers.close();
-                } catch (Exception ignore) {}
-            });
 
             RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
         } catch (Exception e) {
@@ -178,7 +172,7 @@ public class VelocityRustyConnector implements PluginContainer {
         this.server.getEventManager().register(this, new OnPlayerChooseInitialServer());
         this.server.getEventManager().register(this, new OnPlayerDisconnect());
         this.server.getEventManager().register(this, new OnPlayerKicked());
-        this.server.getEventManager().register(this, new OnPlayerPreConnectServer(this.server, this.virtualFamilyServers));
+        this.server.getEventManager().register(this, new OnPlayerPreConnectServer(this.server));
     }
 
     @Subscribe

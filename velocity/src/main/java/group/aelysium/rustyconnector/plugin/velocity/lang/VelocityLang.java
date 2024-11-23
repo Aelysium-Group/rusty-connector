@@ -65,64 +65,36 @@ public class VelocityLang extends CommonLang {
     }
 
     @Lang("rustyconnector-serverRegister")
-    public static Component serverRegister(Server.Configuration server, Particle.Flux<? extends Family> family) {
+    public static Component serverRegister(Server.Configuration server, Family family) {
         Optional<String> displayName = Optional.ofNullable(server.displayName());
-        try {
-            return join(
-                    JoinConfiguration.separator(empty()),
-                    text(displayName.orElse(server.id()), BLUE),
-                    space(),
-                    text("(", DARK_GRAY),
-                    text(AddressUtil.addressToString(server.address()), YELLOW),
-                    text(")", DARK_GRAY),
-                    space(),
-                    text("->", GREEN),
-                    space(),
-                    text(family.orElseThrow().id(), GRAY)
-            );
-        } catch (NoSuchElementException e) {
-            RC.Error(Error.from(e).whileAttempting("To inform the console of new server registration (failed silently since not urgent)"));
-            return join(
-                    JoinConfiguration.separator(empty()),
-                    text(displayName.orElse(server.id()), BLUE),
-                    space(),
-                    text("(", DARK_GRAY),
-                    text(AddressUtil.addressToString(server.address()), YELLOW),
-                    text(")", DARK_GRAY),
-                    space(),
-                    text("Registered", GREEN)
-            );
-        }
+        return join(
+                JoinConfiguration.separator(empty()),
+                text("[", DARK_GRAY),
+                text(displayName.orElse(server.id()), BLUE),
+                space(),
+                text(AddressUtil.addressToString(server.address()), YELLOW),
+                text("]", DARK_GRAY),
+                space(),
+                text("->", GREEN),
+                space(),
+                text(family.id(), GRAY)
+        );
     }
 
     @Lang("rustyconnector-serverUnregister")
-    public static Component serverUnregister(Server server) {
-        try {
-            return join(
-                    JoinConfiguration.separator(empty()),
-                    text(server.displayName().orElse((String) server.property("velocity_registration_name").orElse(server.id())), GRAY),
-                    space(),
-                    text("(", DARK_GRAY),
-                    text(AddressUtil.addressToString(server.address()), YELLOW),
-                    text(")", DARK_GRAY),
-                    space(),
-                    text("-x", RED),
-                    space(),
-                    text(server.family().orElseThrow().orElseThrow().id(), GRAY)
-            );
-        } catch (NoSuchElementException e) {
-            RC.Error(Error.from(e).whileAttempting("To inform the console of new server registration (failed silently since not urgent)"));
-            return join(
-                    JoinConfiguration.separator(empty()),
-                    text(server.displayName().orElse((String) server.property("velocity_registration_name").orElse(server.id())), GRAY),
-                    space(),
-                    text("(", DARK_GRAY),
-                    text(AddressUtil.addressToString(server.address()), YELLOW),
-                    text(")", DARK_GRAY),
-                    space(),
-                    text("Unregistered", RED)
-            );
-        }
+    public static Component serverUnregister(Server server, Family family) {
+        return join(
+                JoinConfiguration.separator(empty()),
+                text("[", DARK_GRAY),
+                text(server.id(), BLUE),
+                space(),
+                text(AddressUtil.addressToString(server.address()), YELLOW),
+                text("]", DARK_GRAY),
+                space(),
+                text("-x", RED),
+                space(),
+                text(family.id(), GRAY)
+        );
     }
 
     @Lang("rustyconnector-hybrid")
@@ -272,7 +244,7 @@ public class VelocityLang extends CommonLang {
                             :
                                 join(
                                         newlines(),
-                                        server.properties().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue().toString())).toList()
+                                        server.properties().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue())).toList()
                                 )
                         )
 
@@ -360,6 +332,17 @@ public class VelocityLang extends CommonLang {
                 keyValue("Players", family.players()),
                 keyValue("Plugins", text(String.join(", ",family.plugins().keySet()), BLUE)),
                 space(),
+                text("Extra Properties:", DARK_GRAY),
+                (
+                    family.properties().isEmpty() ?
+                        text("There are no properties to show.", DARK_GRAY)
+                        :
+                        join(
+                            newlines(),
+                            family.properties().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue())).toList()
+                        )
+                ),
+                space(),
                 text("Servers:", DARK_GRAY),
                 (
                     family.servers().isEmpty() ?
@@ -383,7 +366,7 @@ public class VelocityLang extends CommonLang {
                                                     .append(space())
                                             ),
                                             text("(Players: ", DARK_GRAY),
-                                            text(family.players(), YELLOW),
+                                            text(s.players(), YELLOW),
                                             text(")", DARK_GRAY),
                                             space(),
                                             (

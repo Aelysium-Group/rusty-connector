@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.Permission;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -17,8 +18,10 @@ import java.util.concurrent.TimeoutException;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
+@Command("rc")
+@Permission("rustyconnector.commands.rc")
 public final class CommandRusty {
-    @Command("rc send <playerTarget> <target>")
+    @Command("send <playerTarget> <target>")
     private  void sertgsdbfdfxxviz(Client<?> client, String playerTarget, String target) {
         try {
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(playerTarget, target).get(15, TimeUnit.SECONDS);
@@ -30,7 +33,7 @@ public final class CommandRusty {
             RC.Error(Error.from(e).whileAttempting("To send a player to a server or family.").urgent(true));
         }
     }
-    @Command("rc send <playerTarget> <target> family")
+    @Command("send <playerTarget> <target> family")
     private  void sdfvqewrsczzsrff(Client<?> client, String playerTarget, String target) {
         try {
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().sendFamily(playerTarget, target).get(15, TimeUnit.SECONDS);
@@ -42,7 +45,7 @@ public final class CommandRusty {
             RC.Error(Error.from(e).whileAttempting("To send a player to a family.").urgent(true));
         }
     }
-    @Command("rc send <playerTarget> <target> server")
+    @Command("send <playerTarget> <target> server")
     private  void sdfhmzzmfiruwmog(Client<?> client, String playerTarget, String target) {
         try {
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().sendServer(playerTarget, target).get(15, TimeUnit.SECONDS);
@@ -55,7 +58,7 @@ public final class CommandRusty {
         }
     }
 
-    @Command("rc lock")
+    @Command("lock")
     private void zxcvssdbfdfxxviz(Client<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
@@ -68,7 +71,7 @@ public final class CommandRusty {
         }
     }
 
-    @Command("rc unlock")
+    @Command("unlock")
     private void sertgssdfvsscefd(Client<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());

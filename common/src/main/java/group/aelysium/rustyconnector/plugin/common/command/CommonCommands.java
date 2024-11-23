@@ -12,6 +12,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.Default;
+import org.incendo.cloud.annotations.Permission;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -21,14 +23,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static net.kyori.adventure.text.Component.text;
 
+@Command("rc")
+@Permission("rustyconnector.commands.rc")
 public class CommonCommands {
 
-    @Command("rc")
+    @Command("")
     public void hizfafjjszjivcys(Client<?> client) {
         client.send(RC.Kernel().details());
     }
 
-    @Command("rc reload")
+    @Command("reload")
     public void nglbwcmuzzxvjaon(Client<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
@@ -41,8 +45,8 @@ public class CommonCommands {
         }
     }
 
-    @Command("rc plugin")
-    @Command("rc plugins")
+    @Command("plugin")
+    @Command("plugins")
     public void nglbwcmuvchdjaon(Client<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().allPlugins().keySet()));
@@ -50,8 +54,8 @@ public class CommonCommands {
             RC.Error(Error.from(e).urgent(true));
         }
     }
-    @Command("rc plugin <pluginTree>")
-    @Command("rc plugins <pluginTree>")
+    @Command("plugin <pluginTree>")
+    @Command("plugins <pluginTree>")
     public void nglbwcmuschdjaon(Client<?> client, String pluginTree) {
         try {
             Particle.Flux<? extends Plugin> flux = fetchPlugin(client, pluginTree);
@@ -72,8 +76,8 @@ public class CommonCommands {
         }
     }
 
-    @Command("rc plugin <pluginTree> reload")
-    @Command("rc plugins <pluginTree> reload")
+    @Command("plugin <pluginTree> reload")
+    @Command("plugins <pluginTree> reload")
     public void nglbwzmspchdjaon(Client<?> client, String pluginTree) {
         try {
             Particle.Flux<? extends Plugin> flux = fetchPlugin(client, pluginTree);
@@ -85,8 +89,8 @@ public class CommonCommands {
             RC.Error(Error.from(e).urgent(true));
         }
     }
-    @Command("rc plugin <pluginTree> stop")
-    @Command("rc plugins <pluginTree> stop")
+    @Command("plugin <pluginTree> stop")
+    @Command("plugins <pluginTree> stop")
     public void nglbwzmzpsodjaon(Client<?> client, String pluginTree) {
         Particle.Flux<? extends Plugin> flux = fetchPlugin(client, pluginTree);
         if(flux == null) return;
@@ -102,8 +106,8 @@ public class CommonCommands {
             client.send(Component.text("Successfully stopped that plugin!"));
         }
     }
-    @Command("rc plugin <pluginTree> start")
-    @Command("rc plugins <pluginTree> start")
+    @Command("plugin <pluginTree> start")
+    @Command("plugins <pluginTree> start")
     public void asfdmgfsgsodjaon(Client<?> client, String pluginTree) {
         try {
             Particle.Flux<? extends Plugin> flux = fetchPlugin(client, pluginTree);
@@ -175,8 +179,8 @@ public class CommonCommands {
         return current.get();
     }
 
-    @Command("rc error")
-    @Command("rc errors")
+    @Command("error")
+    @Command("errors")
     public void nglbwzmxvchdjaon() {
         RC.Adapter().log(
                 Component.join(
@@ -202,8 +206,8 @@ public class CommonCommands {
         );
     }
 
-    @Command("rc error <uuid>")
-    @Command("rc errors <uuid>")
+    @Command("error <uuid>")
+    @Command("errors <uuid>")
     public void nglbwzmxvchdjaon(Client<?> client, String uuid) {
         try {
             UUID errorUUID;
@@ -223,8 +227,8 @@ public class CommonCommands {
         }
     }
 
-    @Command("rc packet")
-    @Command("rc packets")
+    @Command("packet")
+    @Command("packets")
     public void yckarhhyoblbmbdl(Client<?> client) {
         try {
             List<Packet> messages = RC.MagicLink().packetCache().packets();
@@ -234,8 +238,8 @@ public class CommonCommands {
         }
     }
 
-    @Command("rc packet clear")
-    @Command("rc packets clear")
+    @Command("packet clear")
+    @Command("packets clear")
     public void wuifhmwefmhuidid(Client<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
@@ -246,8 +250,8 @@ public class CommonCommands {
         }
     }
 
-    @Command("rc packet <id>")
-    @Command("rc packets <id>")
+    @Command("packet <id>")
+    @Command("packets <id>")
     public void nidbtmkngikxlzyo(Client<?> client, String id) {
         try {
             client.send(RC.Lang("rustyconnector-packetDetails").generate(
@@ -260,11 +264,11 @@ public class CommonCommands {
         }
     }
 
-    @Command("rc send")
+    @Command("send")
     public void acmednrmiufxxviz(Client<?> client) {
         client.send(RC.Lang("rustyconnector-sendUsage").generate());
     }
-    @Command("rc send <playerTarget>")
+    @Command("send <playerTarget>")
     public void acmednrmiusgxviz(Client<?> client, String playerTarget) {
         acmednrmiufxxviz(client);
     }

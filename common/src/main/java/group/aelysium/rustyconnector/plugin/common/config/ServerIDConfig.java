@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.common.config;
 
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
+import group.aelysium.rustyconnector.common.crypt.NanoID;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -27,7 +28,7 @@ public class ServerIDConfig {
                 if(!parent.exists()) parent.mkdirs();
 
                 try(FileWriter writer = new FileWriter(file)) {
-                    writer.write(UUID.randomUUID().toString());
+                    writer.write(NanoID.randomNanoID().toString());
                 }
             }
         } catch (Exception e) {

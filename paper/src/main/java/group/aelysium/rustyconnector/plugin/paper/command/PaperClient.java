@@ -3,9 +3,14 @@ package group.aelysium.rustyconnector.plugin.paper.command;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.text.Component;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class PaperClient implements Client<CommandSender> {
     private final CommandSender sender;
@@ -33,6 +38,7 @@ public class PaperClient implements Client<CommandSender> {
     public void send(Error error) {
         this.sender.sendMessage(error.toComponent());
     }
+
 
     @Override
     public CommandSender toSender() {

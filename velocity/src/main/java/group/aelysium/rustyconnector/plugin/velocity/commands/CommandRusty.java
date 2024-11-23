@@ -2,31 +2,24 @@ package group.aelysium.rustyconnector.plugin.velocity.commands;
 
 import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
-import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.errors.Error;
-import group.aelysium.rustyconnector.common.plugins.Plugin;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
-import group.aelysium.rustyconnector.plugin.velocity.VirtualFamilyServers;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
-import group.aelysium.rustyconnector.proxy.player.PlayerRegistry;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.Permission;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static net.kyori.adventure.text.Component.text;
 
+@Command("rc")
+@Permission("rustyconnector.commands.rc")
 public final class CommandRusty {
-    private final VirtualFamilyServers virtualFamilyServers;
-    public CommandRusty(VirtualFamilyServers virtualFamilyServers) {
-        this.virtualFamilyServers = virtualFamilyServers;
-    }
-
-    @Command("rc send <playerTarget> <target>")
+    @Command("send <playerTarget> <target>")
     public void qxeafgbinengqytu(Client<?> client, String playerTarget, String target) {
         Player player = null;
         try {
@@ -73,7 +66,7 @@ public final class CommandRusty {
         }
     }
 
-    @Command("rc send <playerTarget> <target> family")
+    @Command("send <playerTarget> <target> family")
     public void mgwsedhgsmudghug(Client<?> client, String playerTarget, String target) {
         Player player = null;
         try {
@@ -104,7 +97,7 @@ public final class CommandRusty {
             RC.Error(Error.from(e).urgent(true));
         }
     }
-    @Command("rc send <playerTarget> <target> server")
+    @Command("send <playerTarget> <target> server")
     public void zmasuiymddiumgsa(Client<?> client, String playerTarget, String target) {
         Player player = null;
         try {
@@ -136,14 +129,14 @@ public final class CommandRusty {
         }
     }
 
-    @Command("rc server")
-    @Command("rc servers")
+    @Command("server")
+    @Command("servers")
     public void ftuynemwdiuemhid(Client<?> client) {
         client.send(RC.Lang("rustyconnector-servers").generate());
     }
 
-    @Command("rc server <serverID>")
-    @Command("rc servers <serverID>")
+    @Command("server <serverID>")
+    @Command("servers <serverID>")
     public void fneriygwehmigimh(Client<?> client, String serverID) {
         try {
             Server server = RC.P.Server(serverID)
@@ -154,14 +147,14 @@ public final class CommandRusty {
         }
     }
 
-    @Command("rc family")
-    @Command("rc families")
+    @Command("family")
+    @Command("families")
     public void tdrdolhxvcjhaskb(Client<?> client) {
         client.send(RC.Lang("rustyconnector-families").generate());
     }
 
-    @Command("rc family <id>")
-    @Command("rc families <id>")
+    @Command("family <id>")
+    @Command("families <id>")
     public void mfndwqqzuiqmesyn(Client<?> client, String id) {
         try {
             Family family = RC.P.Family(id)
@@ -172,8 +165,8 @@ public final class CommandRusty {
             RC.Error(Error.from(e).urgent(true));
         }
     }
-    @Command("rc family <id> reload")
-    @Command("rc families <id> reload")
+    @Command("family <id> reload")
+    @Command("families <id> reload")
     public void mfndwqqzwodmesyn(Client<?> client, String id) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());

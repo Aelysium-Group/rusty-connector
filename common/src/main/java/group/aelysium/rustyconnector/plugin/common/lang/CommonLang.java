@@ -195,7 +195,7 @@ public class CommonLang {
             return text("\""+value+"\"", GOLD);
         if(Component.class.isAssignableFrom(clazz))
             return (Component) value;
-        return text(value.toString(), WHITE);
+        return text(value.toString(), GRAY);
     }
 
     @Lang("rustyconnector-wordmark")

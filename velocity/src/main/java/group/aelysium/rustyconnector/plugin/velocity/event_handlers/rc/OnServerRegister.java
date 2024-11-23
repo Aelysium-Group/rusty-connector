@@ -6,9 +6,7 @@ import group.aelysium.rustyconnector.proxy.events.ServerRegisterEvent;
 import net.kyori.adventure.text.Component;
 
 public class OnServerRegister {
-
-
-    @EventListener()
+    @EventListener
     public static void handle(ServerRegisterEvent event) {
         Component message = RC.Lang("rustyconnector-serverRegister").generate(event.server(), event.family());
         RC.Adapter().log(message);
