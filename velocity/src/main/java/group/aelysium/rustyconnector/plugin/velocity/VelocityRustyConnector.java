@@ -112,45 +112,46 @@ public class VelocityRustyConnector implements PluginContainer {
 
             RustyConnector.registerAndIgnite(tinder.flux());
 
-            Particle.Flux<? extends ProxyKernel> kernelFlux = RustyConnector.Proxy().orElseThrow();
-            kernelFlux.onStart(p->{
-                try {
-                    p.fetchPlugin(LangLibrary.class).onStart(l -> l.registerLangNodes(VelocityLang.class));
-                } catch (Exception e) {
-                    RC.Error(Error.from(e));
-                }
-                try {
-                    p.fetchPlugin(EventManager.class).onStart(m -> {
-                        m.listen(OnServerRegister.class);
-                        m.listen(OnServerUnregister.class);
-                        m.listen(OnServerTimeout.class);
-                        m.listen(new OnFamilyLifecycle(this.server));
-                    });
-                } catch (Exception e) {
-                    RC.Error(Error.from(e));
-                }
-                try {
-                    p.fetchPlugin(FamilyRegistry.class).onStart(f -> {
-                        try {
-                            DefaultConfig config = DefaultConfig.New();
-                            ScalarFamilyConfig.New(config.rootFamily()); // Literally just exists to ensure the root family exists and then generate the scalar family folder
-                            for (File file : Objects.requireNonNull((new File("plugins/rustyconnector/scalar_families")).listFiles())) {
-                                if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
-                                int extensionIndex = file.getName().lastIndexOf(".");
-                                String name = file.getName().substring(0, extensionIndex);
-                                ScalarFamily.Tinder family = ScalarFamilyConfig.New(name).tinder();
-                                Particle.Flux<? extends Family> flux = family.flux();
-                                f.register(name, flux);
-                                if(name.equalsIgnoreCase(config.rootFamily())) f.setRootFamily(name);
-                                flux.observe();
+            RustyConnector.Kernel(flux->{
+                flux.onStart(kernel->{
+                    try {
+                        kernel.fetchPlugin("LangLibrary").onStart(l -> ((LangLibrary) l).registerLangNodes(VelocityLang.class));
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                    try {
+                        kernel.fetchPlugin("EventManager").onStart(m -> {
+                            ((EventManager) m).listen(OnServerRegister.class);
+                            ((EventManager) m).listen(OnServerUnregister.class);
+                            ((EventManager) m).listen(OnServerTimeout.class);
+                            ((EventManager) m).listen(new OnFamilyLifecycle(this.server));
+                        });
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                    try {
+                        kernel.fetchPlugin("FamilyRegistry").onStart(f -> {
+                            try {
+                                DefaultConfig config = DefaultConfig.New();
+                                ScalarFamilyConfig.New(config.rootFamily()); // Literally just exists to ensure the root family exists and then generate the scalar family folder
+                                for (File file : Objects.requireNonNull((new File("plugins/rustyconnector/scalar_families")).listFiles())) {
+                                    if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
+                                    int extensionIndex = file.getName().lastIndexOf(".");
+                                    String name = file.getName().substring(0, extensionIndex);
+                                    ScalarFamily.Tinder family = ScalarFamilyConfig.New(name).tinder();
+                                    Particle.Flux<? extends Family> familyFlux = family.flux();
+                                    ((FamilyRegistry) f).register(name, familyFlux);
+                                    if(name.equalsIgnoreCase(config.rootFamily())) ((FamilyRegistry) f).setRootFamily(name);
+                                    familyFlux.observe();
+                                }
+                            } catch (Exception e) {
+                                RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));
                             }
-                        } catch (Exception e) {
-                            RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));
-                        }
-                    });
-                } catch (Exception e) {
-                    RC.Error(Error.from(e));
-                }
+                        });
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                });
             });
 
             RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());

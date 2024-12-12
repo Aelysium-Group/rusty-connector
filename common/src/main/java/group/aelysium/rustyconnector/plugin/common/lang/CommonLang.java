@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.common.lang;
 
+import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.errors.ErrorRegistry;
@@ -8,8 +9,6 @@ import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
-import group.aelysium.rustyconnector.common.plugins.Plugin;
-import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
 import group.aelysium.rustyconnector.proxy.util.Version;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -18,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.kyori.adventure.text.Component.*;
@@ -364,16 +364,38 @@ public class CommonLang {
     }
 
     @Lang("rustyconnector-details")
-    public static Component details(Plugin plugin) {
+    public static Component details(Particle.Flux<?> flux) {
+        String name = flux.metadata("name");
+        if(name == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name`, `description`, and `details` metadata.");
+
+        String description = flux.metadata("description");
+        if(description == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name`, `description`, and `details` metadata.");
+
+        String details = flux.metadata("details");
+        if(details == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name`, `description`, and `details` metadata.");
+
+        Particle plugin = null;
+        try {
+             plugin = flux.observe(3, TimeUnit.SECONDS);
+        } catch(Exception ignore) {}
+
         return join(
                 newlines(),
                 space(),
                 space(),
-                RC.Lang().asciiAlphabet().generate(plugin.name(), BLUE),
-                text(plugin.description(), GRAY),
+                RC.Lang().asciiAlphabet().generate(name, BLUE),
+                text(description, GRAY),
                 space(),
-                text("Details:", DARK_GRAY),
-                plugin.details(),
+                (
+                    plugin == null ?
+                        text("⬤", RED).append(text(" Stopped", GRAY))
+                    :
+                        join(
+                                newlines(),
+                                text("Details:", DARK_GRAY),
+                                RC.Lang(details).generate(plugin)
+                        )
+                ),
                 space()
         );
     }

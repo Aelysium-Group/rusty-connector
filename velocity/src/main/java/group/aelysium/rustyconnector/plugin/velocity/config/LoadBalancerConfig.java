@@ -144,9 +144,8 @@ public class LoadBalancerConfig {
     @Node(4)
     private String rebalance = "15 SECONDS";
 
-    public Particle.Tinder<LoadBalancer> tinder() throws ParseException {
-        return LoadBalancerAlgorithmExchange.generateTinder(this.algorithm, new LoadBalancer.Settings(
-                this.algorithm,
+    public LoadBalancer.Tinder<?> tinder() throws ParseException {
+        return LoadBalancerAlgorithmExchange.generateTinder(this.algorithm, new LoadBalancerAlgorithmExchange.Settings(
                 this.weighted,
                 this.persistence_enabled,
                 this.persistence_attempts,

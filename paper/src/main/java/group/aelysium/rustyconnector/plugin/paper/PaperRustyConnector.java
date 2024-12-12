@@ -70,17 +70,19 @@ public final class PaperRustyConnector extends JavaPlugin {
 
             ServerKernel.Tinder tinder = DefaultConfig.New().data(this.getServer(), this.logger);
             RustyConnector.registerAndIgnite(tinder.flux());
-            RustyConnector.Server().orElseThrow().onStart(p->{
-                try {
-                    p.fetchPlugin(LangLibrary.class).onStart(l -> l.registerLangNodes(PaperLang.class));
-                } catch (Exception e) {
-                    RC.Error(Error.from(e));
-                }
-                try {
-                    p.fetchPlugin("MagicLink").onStart(l -> ((WebSocketMagicLink) l).connect());
-                } catch (Exception e) {
-                    RC.Error(Error.from(e));
-                }
+            RustyConnector.Kernel(flux->{
+                flux.onStart(kernel -> {
+                    try {
+                        kernel.fetchPlugin("LangLibrary").onStart(l -> ((LangLibrary) l).registerLangNodes(PaperLang.class));
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                    try {
+                        kernel.fetchPlugin("MagicLink").onStart(l -> ((WebSocketMagicLink) l).connect());
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                });
             });
 
             LegacyPaperCommandManager<PaperClient> commandManager = new LegacyPaperCommandManager<>(

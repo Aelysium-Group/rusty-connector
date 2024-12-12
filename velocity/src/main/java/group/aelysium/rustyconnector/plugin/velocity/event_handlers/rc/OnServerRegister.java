@@ -8,7 +8,7 @@ import net.kyori.adventure.text.Component;
 public class OnServerRegister {
     @EventListener
     public static void handle(ServerRegisterEvent event) {
-        Component message = RC.Lang("rustyconnector-serverRegister").generate(event.server(), event.family());
+        Component message = RC.Lang("rustyconnector-serverRegister").generate(event.server());
         RC.Adapter().log(message);
     }
 }
