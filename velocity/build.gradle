@@ -5,7 +5,7 @@ compileJava {
 
 dependencies {
     implementation 'org.bstats:bstats-velocity:3.0.2'
-    implementation "com.velocitypowered:velocity-api:3.3.0-SNAPSHOT"
+    compileOnly "com.velocitypowered:velocity-api:3.3.0-SNAPSHOT"
     implementation "org.incendo:cloud-velocity:2.0.0-beta.10"
 
     implementation project(path: ':common', configuration: 'shadow')

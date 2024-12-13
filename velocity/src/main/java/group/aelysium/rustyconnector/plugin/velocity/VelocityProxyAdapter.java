@@ -56,7 +56,7 @@ public class VelocityProxyAdapter extends ProxyAdapter {
             RegisteredServer registeredServer = this.velocity.registerServer(info);
             ServerPing ping = registeredServer.ping().get(10, TimeUnit.SECONDS);
 
-            server.property("velocity_RegisteredServer", registeredServer);
+            server.metadata("velocity_RegisteredServer", registeredServer);
             return true;
         } catch (Exception e) {
             RC.Error(Error.from(e).whileAttempting("To register the server: "+server.id()+" "+server.address()));
@@ -125,7 +125,7 @@ public class VelocityProxyAdapter extends ProxyAdapter {
     public Player.Connection.Request connectServer(@NotNull Server server, @NotNull Player player) {
         if(!(this.convertToObject(player) instanceof com.velocitypowered.api.proxy.Player velocityPlayer)) throw new RuntimeException("Provided object was not a player!");
 
-        RegisteredServer registeredServer = (RegisteredServer) server.property("velocity_RegisteredServer")
+        RegisteredServer registeredServer = (RegisteredServer) server.metadata("velocity_RegisteredServer")
                 .orElseThrow(()->new NoSuchElementException("The server "+server.id()+" doesn't seem to have a RegisteredServer (from velocity) associated with it."));
 
         ConnectionRequestBuilder connection = velocityPlayer.createConnectionRequest(registeredServer);

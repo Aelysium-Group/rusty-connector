@@ -1,7 +1,12 @@
 package group.aelysium.rustyconnector.plugin.paper.lang;
 
+import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
+import group.aelysium.rustyconnector.proxy.family.Family;
+import group.aelysium.rustyconnector.proxy.util.AddressUtil;
+import group.aelysium.rustyconnector.server.ServerKernel;
+import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -14,24 +19,45 @@ public class PaperLang extends CommonLang {
     public PaperLang() {}
 
     @Lang("rustyconnector-kernelDetails")
-    public static Component usage() {
-        return join(
-                newlines(),
-                space(),
-                text("rc send <player> <target>", BLUE),
-                text("Send a player to a family or server.", DARK_GRAY),
-                space(),
-                text("rc packets ['clear' | <packet_id>]", BLUE),
-                text("Access recently sent MagicLink packets.", DARK_GRAY),
-                space(),
-                text("rc reload", BLUE),
-                text("Reload RustyConnector.", DARK_GRAY),
-                space(),
-                text("rc plugins [plugin_node] ['start' | 'stop' | 'reload']", BLUE),
-                text("Get details for RustyConnector modules.", DARK_GRAY),
-                space(),
-                text("rc errors [error_uuid]", BLUE),
-                text("Fetches the recent errors thrown by RustyConnector.", DARK_GRAY)
+    public static Component usage(ServerKernel kernel) {
+        return RC.Lang("rustyconnector-headerBox").generate(
+                "server",
+                join(
+                        newlines(),
+                        text("Details:", DARK_GRAY),
+                        keyValue("ID",             kernel.id()),
+                        keyValue("Address",        AddressUtil.addressToString(kernel.address())),
+                        keyValue("Family",         kernel.targetFamily()),
+                        keyValue("Online Players", kernel.playerCount()),
+                        empty(),
+                        text("Extra Properties:", DARK_GRAY),
+                        (
+                                kernel.metadata().isEmpty() ?
+                                        text("There is no metadata to show.", DARK_GRAY)
+                                        :
+                                        join(
+                                                newlines(),
+                                                kernel.metadata().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue())).toList()
+                                        )
+                        ),
+                        empty(),
+                        text("Commands:", DARK_GRAY),
+                        text("rc send <player> <target> [flags]", BLUE),
+                        text("Send a player to a family or server.", DARK_GRAY),
+                        space(),
+                        text("rc packets ['clear' | <packet_id>]", BLUE),
+                        text("Access recently sent MagicLink packets.", DARK_GRAY),
+                        space(),
+                        text("rc reload", BLUE),
+                        text("Reload RustyConnector.", DARK_GRAY),
+                        space(),
+                        text("rc plugins [plugin_node] ['start' | 'stop' | 'reload']", BLUE),
+                        text("Get details for RustyConnector modules.", DARK_GRAY),
+                        space(),
+                        text("rc errors [error_uuid]", BLUE),
+                        text("Fetches the recent errors thrown by RustyConnector.", DARK_GRAY),
+                        empty()
+                )
         );
     }
 

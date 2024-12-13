@@ -1,8 +1,12 @@
 package group.aelysium.rustyconnector.plugin.paper.config;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.crypt.AES;
+import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.util.URL;
@@ -16,7 +20,7 @@ import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import org.bukkit.Server;
 
 import java.io.IOException;
-import java.text.ParseException;
+import java.util.UUID;
 
 @Config("plugins/rustyconnector/config.yml")
 @Git(value = "rustyconnector", required = false)
@@ -48,25 +52,13 @@ public class DefaultConfig {
 
     @Comment({
             "#",
-            "# An optional display name that can be used to represent this server to users.",
-            "# If you do not provide a display name, the server's ID will be used instead.",
-            "# Display names are allowed to say whatever you want, they are also allowed to be duplicate across multiple servers.",
-            "# Display names only exist as a visual sugar. They carry no significance outside of looks.",
+            "# The family to register this server to.",
+            "# Every server must be a member of a family.",
+            "# If the server tries to register into a family that doesn't exist, the server won't register.",
             "#"
     })
     @Node(2)
-    private String displayName = "";
-
-    @Comment({
-            "#",
-            "# Define the Registration Config to load from the proxy.",
-            "# The name you define here corresponds with a config on the proxy.",
-            "# When this server registers, the settings in that config will be applied.",
-            "# To define new custom configs in the proxy look in the \"magic_configs\" folder.",
-            "#"
-    })
-    @Node(3)
-    private String serverRegistration = "default";
+    private String family = "lobby";
 
     @Comment({
             "#",
@@ -76,7 +68,7 @@ public class DefaultConfig {
             "# Example: http://127.0.0.1:8080",
             "#"
     })
-    @Node(4)
+    @Node(3)
     private String magicLink_accessEndpoint = "http://127.0.0.1:8080";
 /*
     @Comment({
@@ -95,25 +87,76 @@ public class DefaultConfig {
     @Node(5)*/
     private String magicLink_broadcastingAddress = "";
 
-    public ServerKernel.Tinder data(Server server, PluginLogger logger) throws IOException, ParseException {
-        AES cryptor = PrivateKeyConfig.New().cryptor();
+    @Comment({
+            "#",
+            "# Should this server us a UUID for it's serverID instead of the family name + nano id?",
+            "# This setting is really only necessary if you're in highly scalable environments and have",
+            "# the infrastructure to properly handle UUIDs as server names.",
+            "#",
+            "# Enabling this setting is the same as setting this server's name in velocity.toml to a UUID.",
+            "# Certain plugins aren't written to deal with server names that long and you'll have to implement",
+            "# proper API support to display something other than server UUIDs to players.",
+            "#",
+            "# If you enable this, you'll need to delete `metadata/server.id` so that it can be regenerated with the new uuid.",
+            "#"
+    })
+    @Node(4)
+    private boolean useUUID = false;
+
+    @Node(5)
+    @Comment({
+            "#",
+            "# Provide additional metadata for the server",
+            "# Metadata provided here is non-essential, meaning that RustyConnector is capable of running without anything provided here.",
+            "# When you provide metadata here it will be sent to the proxy. Ensure that the provided metadata conforms to valid JSON syntax.",
+            "#",
+            "# For built-in metadata options, check the Aelysium wiki:",
+            "# https://wiki.aelysium.group/rusty-connector/docs/concepts/metadata/",
+            "#"
+    })
+    private String metadata = "{\"softCap\": 30, \"hardCap\": 40}";
+
+    public ServerKernel.Tinder data(Server server, PluginLogger logger) throws Exception {
+        if(this.family.isBlank()) throw new IllegalArgumentException("Please provide a valid family name to target.");
+        if(this.family.length() > 16) throw new IllegalArgumentException("Family names are not allowed to be larger than 16 characters.");
+
+        ServerIDConfig idConfig = ServerIDConfig.Read();
+        String id = (idConfig == null ? null : idConfig.id());
+        if(id == null) {
+            if (this.useUUID) {
+                id = UUID.randomUUID().toString();
+            } else {
+                int extra = 16 - this.family.length();
+                NanoID nanoID = NanoID.randomNanoID(15 + extra); // 15 because there's a `-` separator between family name and nanoid
+                id = this.family + "-" + nanoID;
+            }
+
+            ServerIDConfig.Load(id);
+        }
+
+        AES aes = PrivateKeyConfig.New().cryptor();
         WebSocketMagicLink.Tinder magicLink = new WebSocketMagicLink.Tinder(
                 URL.parseURL(this.magicLink_accessEndpoint),
-                Packet.SourceIdentifier.server(ServerIDConfig.New().id()),
-                cryptor,
+                Packet.SourceIdentifier.server(id),
+                aes,
                 new PacketCache(100),
-                this.serverRegistration,
                 null
                 //this.magicLink_broadcastingAddress.isEmpty() ? null : new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.magicLink_broadcastingAddress))
         );
 
-        return new ServerKernel.Tinder(
-                ServerIDConfig.New().id(),
+        ServerKernel.Tinder tinder = new ServerKernel.Tinder(
+                id,
                 new PaperServerAdapter(server, logger),
-                this.displayName,
                 AddressUtil.parseAddress(this.address),
-                magicLink
+                magicLink,
+                this.family
         );
+
+        Gson gson = new Gson();
+        JsonObject metadataJson = gson.fromJson(this.metadata, JsonObject.class);
+        metadataJson.entrySet().forEach(e->tinder.metadata(e.getKey(), Packet.Parameter.fromJSON(e.getValue())));
+
+        return tinder;
     }
 
     public static DefaultConfig New() throws IOException {

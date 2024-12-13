@@ -283,7 +283,7 @@ public class CommonLang {
     public static Component messageDetails(Packet packet) {
         String serverDisplayName = null;
         try {
-            serverDisplayName = RC.P.Server(packet.local().id()).orElseThrow().displayName().orElseThrow();
+            serverDisplayName = RC.P.Server(packet.local().id()).orElseThrow().displayName();
         } catch (Exception ignore) {}
         return RC.Lang("rustyconnector-box").generate(
                 join(

@@ -3,7 +3,6 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.crypt.AES;
-import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
@@ -11,7 +10,6 @@ import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -115,14 +113,6 @@ public class MagicLinkConfig {
     public WebSocketMagicLink.Tinder tinder() throws IOException {
         AES cryptor = PrivateKeyConfig.New().cryptor();
 
-        ServerRegistrationConfig.New("default");
-        Map<String, MagicLinkCore.Proxy.ServerRegistrationConfiguration> registrations = new HashMap<>();
-        for (File file : Objects.requireNonNull((new File("plugins/rustyconnector/server_registrations")).listFiles())) {
-            if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
-            int extensionIndex = file.getName().lastIndexOf(".");
-            String name = file.getName().substring(0, extensionIndex);
-            registrations.put(name, ServerRegistrationConfig.New(name).configuration());
-        }
 
         List<Packet.Type> ignoredTypes = new ArrayList<>();
         this.cache_ignoredTypes.forEach(s -> {
@@ -132,10 +122,9 @@ public class MagicLinkConfig {
 
         return new WebSocketMagicLink.Tinder(
                 AddressUtil.parseAddress(this.address),
-                Packet.SourceIdentifier.proxy(ServerIDConfig.New().id()),
+                Packet.SourceIdentifier.proxy(ServerIDConfig.Load(UUID.randomUUID().toString()).id()),
                 cryptor,
                 new PacketCache(this.cache_size, ignoredTypes),
-                registrations,
                 null
                 //this.endpointBroadcasting_enabled ? new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.endpointBroadcasting_address)) : null
         );

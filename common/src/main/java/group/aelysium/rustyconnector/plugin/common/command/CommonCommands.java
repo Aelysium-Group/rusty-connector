@@ -28,7 +28,7 @@ public class CommonCommands {
 
     @Command("")
     public void hizfafjjszjivcys(Client<?> client) {
-        client.send(RC.Lang("rustyconnector-kernelDetails").generate(RustyConnector.Kernel()));
+        client.send(RC.Lang("rustyconnector-kernelDetails").generate(RC.Kernel()));
     }
 
     @Command("reload")

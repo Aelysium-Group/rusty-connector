@@ -23,7 +23,7 @@ public class OnFamilyLifecycle {
         event.family().onStart(family -> {
             info.set(new ServerInfo(family.id(), dummyAddress));
             this.proxyServer.registerServer(info.get());
-            family.property("velocity_FamilyProxy", info.get());
+            family.metadata("velocity_FamilyProxy", info.get());
         });
         event.family().onClose(()->{
             if(info.get() == null) return;

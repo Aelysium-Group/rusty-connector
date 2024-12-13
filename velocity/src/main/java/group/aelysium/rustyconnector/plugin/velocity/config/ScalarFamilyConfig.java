@@ -1,8 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.declarative_yaml.lib.Printer;
+import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
 
 import java.io.IOException;
@@ -91,13 +94,32 @@ public class ScalarFamilyConfig {
     })
     private String loadBalancer = "default";
 
+    @Node(3)
+    @Comment({
+            "#",
+            "# Provide additional metadata for the family.",
+            "# Metadata provided here is non-essential, meaning that RustyConnector is capable of running without anything provided here.",
+            "# Ensure that the provided metadata conforms to valid JSON syntax.",
+            "#",
+            "# For built-in metadata options, check the Aelysium wiki:",
+            "# https://wiki.aelysium.group/rusty-connector/docs/concepts/metadata/",
+            "#"
+    })
+    private String metadata = "{\"serverSoftCap\": 30, \"serverHardCap\": 40}";
+
     public ScalarFamily.Tinder tinder() throws IOException, ParseException {
-        return new ScalarFamily.Tinder(
+        ScalarFamily.Tinder tinder = new ScalarFamily.Tinder(
                 id,
                 displayName.isEmpty() ? null : displayName,
                 parentFamily.isEmpty() ? null : parentFamily,
                 LoadBalancerConfig.New(loadBalancer).tinder()
         );
+
+        Gson gson = new Gson();
+        JsonObject metadataJson = gson.fromJson(this.metadata, JsonObject.class);
+        metadataJson.entrySet().forEach(e->tinder.metadata(e.getKey(), Packet.Parameter.fromJSON(e.getValue()).getOriginalValue()));
+
+        return tinder;
     }
 
     public static ScalarFamilyConfig New(String familyID) throws IOException {

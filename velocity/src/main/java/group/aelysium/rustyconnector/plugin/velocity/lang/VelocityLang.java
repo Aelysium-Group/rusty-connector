@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
+import group.aelysium.rustyconnector.proxy.ProxyKernel;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
 import group.aelysium.rustyconnector.proxy.family.Server;
@@ -32,30 +33,44 @@ public class VelocityLang extends CommonLang {
     }
 
     @Lang("rustyconnector-kernelDetails")
-    public static Component usage() {
-        return join(
+    public static Component usage(ProxyKernel kernel) {
+        int families = RC.P.Families().size();
+        int servers = RC.P.Servers().size();
+        int players = RC.P.Players().dump().size();
+
+        return RC.Lang("rustyconnector-headerBox").generate(
+            "proxy",
+            join(
                 newlines(),
-                space(),
+                text("Details:", DARK_GRAY),
+                keyValue("ID",          kernel.id()),
+                keyValue("Plugins",     kernel.plugins().size()),
+                keyValue("Families",    families),
+                keyValue("Servers",     servers),
+                keyValue("Players",     players),
+                empty(),
+                text("Commands:", DARK_GRAY),
                 text("rc families", BLUE),
                 text("View all families.", DARK_GRAY),
-                space(),
+                empty(),
                 text("rc servers", BLUE),
                 text("View all servers.", DARK_GRAY),
-                space(),
+                empty(),
                 text("rc send", BLUE),
                 text("Send a player a family or server.", DARK_GRAY),
-                space(),
+                empty(),
                 text("rc packets", BLUE),
                 text("Access recently sent MagicLink packets.", DARK_GRAY),
-                space(),
+                empty(),
                 text("rc reload", BLUE),
                 text("Reload RustyConnector.", DARK_GRAY),
-                space(),
+                empty(),
                 text("rc plugins", BLUE),
                 text("Get details for RustyConnector modules.", DARK_GRAY),
-                space(),
+                empty(),
                 text("rc errors", BLUE),
                 text("Fetches the recent errors thrown by RustyConnector.", DARK_GRAY)
+            )
         );
     }
 
@@ -66,7 +81,7 @@ public class VelocityLang extends CommonLang {
 
     @Lang("rustyconnector-serverRegister")
     public static Component serverRegister(Server.Configuration server, Particle.Flux<? extends Family> family) {
-        Optional<String> displayName = Optional.ofNullable(server.displayName());
+        Optional<String> displayName = Optional.ofNullable((String) server.metadata().get("displayName"));
         try {
             return join(
                     JoinConfiguration.separator(empty()),
@@ -125,7 +140,9 @@ public class VelocityLang extends CommonLang {
     @Lang("rustyconnector-families")
     public static Component families() {
         AtomicReference<String> rootFamily = new AtomicReference<>("[Unavailable]");
-        RC.P.Families().rootFamily().executeNow(r -> rootFamily.set(r.id()));
+        try {
+            RC.P.Families().rootFamily().executeNow(r -> rootFamily.set(r.id()));
+        } catch (Exception ignore) {}
 
         return RC.Lang("rustyconnector-headerBox").generate(
                 "families",
@@ -195,8 +212,8 @@ public class VelocityLang extends CommonLang {
                                         text("]:", DARK_GRAY),
                                         space(),
                                         (
-                                                s.displayName().isEmpty() ? empty() :
-                                                text(s.displayName().orElse(""), AQUA)
+                                                s.displayName() == null ? empty() :
+                                                text(Objects.requireNonNull(s.displayName()), AQUA)
                                                 .append(space())
                                         ),
                                         text("(Players: ", DARK_GRAY),
@@ -218,11 +235,6 @@ public class VelocityLang extends CommonLang {
         );
     }
 
-    @Lang("rustyconnector-serverRegistered")
-    public static Component serverRegistered(Server server) {
-        return Component.text(server.property("velocity_registration_name").orElse(server.id())+" ({address}) -> {Family}");
-    }
-
     @Lang("rustyconnector-serverDetails")
     public static Component serverDetails(Server server) {
         boolean missing = server.family().isEmpty();
@@ -241,24 +253,22 @@ public class VelocityLang extends CommonLang {
                 join(
                         newlines(),
                         text("Details:", DARK_GRAY),
-                        keyValue("UUID",           server.id()),
-                        keyValue("Display Name",   server.displayName().orElse("None")),
+                        keyValue("ID",           server.id()),
                         keyValue("Address",        AddressUtil.addressToString(server.address())),
                         keyValue("Family",         (family == null ? (missing ? "Unavailable" : "None") : family.id())),
                         keyValue("Online Players", server.players()),
-                        keyValue("Player Limit",   text("(Soft: "+server.softPlayerCap()+", Hard: "+server.hardPlayerCap()+")", GOLD)),
                         keyValue("Weight",         server.weight()),
                         keyValue("Locked",         locked),
                         keyValue("Stale",          server.stale()),
                         empty(),
                         text("Extra Properties:", DARK_GRAY),
                         (
-                            server.properties().isEmpty() ?
+                            server.metadata().isEmpty() ?
                                 text("There are no properties to show.", DARK_GRAY)
                             :
                                 join(
                                         newlines(),
-                                        server.properties().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue())).toList()
+                                        server.metadata().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue())).toList()
                                 )
                         )
 
@@ -314,7 +324,9 @@ public class VelocityLang extends CommonLang {
         familyRegistry.fetchAll().forEach(f -> f.executeNow(families::add));
 
         AtomicReference<Family> rootFamily = new AtomicReference<>(null);
-        familyRegistry.rootFamily().executeNow(rootFamily::set);
+        try {
+            familyRegistry.rootFamily().executeNow(rootFamily::set);
+        } catch (Exception ignore) {}
         return join(
                 newlines(),
                 keyValue("Total Families", familyRegistry.size()),
@@ -348,12 +360,12 @@ public class VelocityLang extends CommonLang {
                 space(),
                 text("Extra Properties:", DARK_GRAY),
                 (
-                    family.properties().isEmpty() ?
+                    family.metadata().isEmpty() ?
                         text("There are no properties to show.", DARK_GRAY)
                         :
                         join(
                             newlines(),
-                            family.properties().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue())).toList()
+                            family.metadata().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue())).toList()
                         )
                 ),
                 space(),
@@ -375,8 +387,8 @@ public class VelocityLang extends CommonLang {
                                             text("]:", DARK_GRAY),
                                             space(),
                                             (
-                                                    s.displayName().isEmpty() ? empty() :
-                                                    text(s.displayName().orElse(""), AQUA)
+                                                    s.displayName() == null ? empty() :
+                                                    text(Objects.requireNonNull(s.displayName()), AQUA)
                                                     .append(space())
                                             ),
                                             text("(Players: ", DARK_GRAY),

@@ -45,6 +45,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -105,7 +106,7 @@ public class VelocityRustyConnector implements PluginContainer {
             }
 
             ProxyKernel.Tinder tinder = new ProxyKernel.Tinder(
-                    ServerIDConfig.New().id(),
+                    ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
                     new VelocityProxyAdapter(server, logger),
                     MagicLinkConfig.New().tinder()
             );

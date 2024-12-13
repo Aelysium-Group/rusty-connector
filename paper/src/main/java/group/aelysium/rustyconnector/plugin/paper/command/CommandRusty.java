@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.text.Component;
+import org.incendo.cloud.annotation.specifier.Greedy;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
@@ -24,7 +25,7 @@ public final class CommandRusty {
     @Command("send <playerTarget> <target>")
     private  void sertgsdbfdfxxviz(Client<?> client, String playerTarget, String target) {
         try {
-            MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(playerTarget, target).get(15, TimeUnit.SECONDS);
+            MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(playerTarget, target, "").get(15, TimeUnit.SECONDS);
 
             client.send(text(packet.message(), packet.successful() ? GREEN : RED));
         } catch (TimeoutException e) {
@@ -33,28 +34,24 @@ public final class CommandRusty {
             RC.Error(Error.from(e).whileAttempting("To send a player to a server or family.").urgent(true));
         }
     }
-    @Command("send <playerTarget> <target> family")
-    private  void sdfvqewrsczzsrff(Client<?> client, String playerTarget, String target) {
+    @Command("send <playerTarget> <target> <flags>")
+    private  void sdfvqewrsczzsrff(
+            Client<?> client,
+            String playerTarget,
+            String target,
+            @Greedy String flags
+    ) {
+        System.out.println(flags);
+        String flagsArray = flags.replaceAll("\\s*-+([a-zA-Z])\\s*", "$1");
+        System.out.println(flagsArray);
         try {
-            MagicLinkCore.Packets.Response packet = RC.S.Kernel().sendFamily(playerTarget, target).get(15, TimeUnit.SECONDS);
+            MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(playerTarget, target, flagsArray).get(15, TimeUnit.SECONDS);
 
             client.send(text(packet.message(), packet.successful() ? GREEN : RED));
         } catch (TimeoutException e) {
             client.send(text("The send request took to long to response.", BLUE));
         } catch (Exception e) {
             RC.Error(Error.from(e).whileAttempting("To send a player to a family.").urgent(true));
-        }
-    }
-    @Command("send <playerTarget> <target> server")
-    private  void sdfhmzzmfiruwmog(Client<?> client, String playerTarget, String target) {
-        try {
-            MagicLinkCore.Packets.Response packet = RC.S.Kernel().sendServer(playerTarget, target).get(15, TimeUnit.SECONDS);
-
-            client.send(text(packet.message(), packet.successful() ? GREEN : RED));
-        } catch (TimeoutException e) {
-            client.send(text("The send request took to long to response.", BLUE));
-        } catch (Exception e) {
-            RC.Error(Error.from(e).whileAttempting("To send a player to a server.").urgent(true));
         }
     }
 
