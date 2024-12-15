@@ -47,7 +47,7 @@ public class PrivateKeyConfig {
         File file = new File("plugins/rustyconnector/metadata/aes.private");
         try {
             if (!file.exists()) {
-                file.mkdirs();
+                file.getParentFile().mkdirs();
                 return Optional.empty();
             }
         } catch (Exception e) {
