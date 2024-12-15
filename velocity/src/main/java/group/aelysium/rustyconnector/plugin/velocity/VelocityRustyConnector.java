@@ -61,8 +61,8 @@ public class VelocityRustyConnector implements PluginContainer {
     public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder, Metrics.Factory metricsFactory) {
         this.logger = new PluginLogger(logger, server);
         this.server = server;
-        this.metricsFactory = metricsFactory;
         this.dataFolder = dataFolder;
+        this.metricsFactory = metricsFactory;
 
         CommandManager<VelocityClient> commandManager = new VelocityCommandManager<>(
                 this,
@@ -78,6 +78,8 @@ public class VelocityRustyConnector implements PluginContainer {
                 commandManager,
                 VelocityClient.class
         );
+
+        this.server.getCommandManager().unregister("server");
         this.annotationParser.parse(new CommonCommands());
         this.annotationParser.parse(new CommandRusty());
         this.annotationParser.parse(new CommandServer());
@@ -166,9 +168,6 @@ public class VelocityRustyConnector implements PluginContainer {
         // Velocity requires that at least one server is always defined in velocity.toml
         if(this.server.getConfiguration().getServers().size() > 1)
             RC.P.Lang().lang("rustyconnector-hybrid").send();
-
-        this.server.getCommandManager().unregister("server");
-        this.annotationParser.parse(CommandServer.class);
 
         this.server.getEventManager().register(this, new OnPlayerChangeServer());
         this.server.getEventManager().register(this, new OnPlayerChooseInitialServer());

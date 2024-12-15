@@ -163,7 +163,7 @@ public class CommonLang {
     }
 
     @Lang("rustyconnector-bullet")
-    public static Component keyValueLang(String value) {
+    public static Component bullet(String value) {
         return text(" • "+value, DARK_GRAY);
     }
 
@@ -339,11 +339,15 @@ public class CommonLang {
         return RC.Lang("rustyconnector-box").generate(
                 join(
                         newlines(),
-                        text("rc send <username> <family_name>", BLUE),
+                        text("rc send <username | uuid> <target> [flags]", BLUE),
                         text("Sends the user to the specific family!", DARK_GRAY),
-                        space(),
-                        text("rc send <username> server <server_uuid>", BLUE),
-                        text("Sends the user to the specific server!", DARK_GRAY)
+                        empty(),
+                        text("Extra Properties:", DARK_GRAY),
+                        RC.Lang("rustyconnector-bullet").generate("-f | Marks the target as a family."),
+                        RC.Lang("rustyconnector-bullet").generate("-s | Marks the target as a server."),
+                        RC.Lang("rustyconnector-bullet").generate("-i | Uses minimal connection power. (Server softCap will be enforced)"),
+                        RC.Lang("rustyconnector-bullet").generate("-o | Uses moderate connection power. (Server softCap will be ignored, hardCap will be enforced)"),
+                        RC.Lang("rustyconnector-bullet").generate("-a | Uses aggressive connection power. (All caps will be ignored)")
                 )
         );
     }

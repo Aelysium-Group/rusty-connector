@@ -2,9 +2,12 @@ package group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc;
 
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import group.aelysium.ara.Particle;
+import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.events.EventListener;
 import group.aelysium.rustyconnector.proxy.events.FamilyRegisterEvent;
 import group.aelysium.rustyconnector.proxy.events.FamilyUnregisterEvent;
+import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 
 import java.net.InetSocketAddress;
@@ -20,12 +23,20 @@ public class OnFamilyLifecycle {
     @EventListener
     public void handle(FamilyRegisterEvent event) {
         AtomicReference<ServerInfo> info = new AtomicReference<>(null);
-        event.family().onStart(family -> {
+
+        info.set(new ServerInfo(event.family().id(), dummyAddress));
+        this.proxyServer.registerServer(info.get());
+        event.family().metadata("velocity_FamilyProxy", info.get());
+
+        Particle.Flux<? extends Family> flux = RC.P.Families().find(event.family().id()).orElse(null);
+        if(flux == null) return;
+
+        flux.onStart(family -> {
             info.set(new ServerInfo(family.id(), dummyAddress));
             this.proxyServer.registerServer(info.get());
             family.metadata("velocity_FamilyProxy", info.get());
         });
-        event.family().onClose(()->{
+        flux.onClose(()->{
             if(info.get() == null) return;
             this.proxyServer.unregisterServer(info.get());
         });
@@ -33,7 +44,6 @@ public class OnFamilyLifecycle {
 
     @EventListener
     public void handle(FamilyUnregisterEvent event) {
-        System.out.println(event.family().id());
         this.proxyServer.unregisterServer(new ServerInfo(event.family().id(), dummyAddress));
     }
 }
