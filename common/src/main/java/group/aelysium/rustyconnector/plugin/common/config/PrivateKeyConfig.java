@@ -46,7 +46,10 @@ public class PrivateKeyConfig {
     public static Optional<PrivateKeyConfig> Load() throws IOException {
         File file = new File("plugins/rustyconnector/metadata/aes.private");
         try {
-            if (!file.exists()) return Optional.empty();
+            if (!file.exists()) {
+                file.mkdirs();
+                return Optional.empty();
+            }
         } catch (Exception e) {
             RC.Error(Error.from(e));
         }

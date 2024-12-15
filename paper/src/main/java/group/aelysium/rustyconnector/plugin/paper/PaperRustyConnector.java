@@ -54,8 +54,8 @@ public final class PaperRustyConnector extends JavaPlugin {
                         Component.empty(),
                         Component.empty(),
                         Component.text("Looks like I'm still waiting on a private.key from the proxy!", NamedTextColor.BLUE),
-                        Component.text("You'll need to copy ", NamedTextColor.BLUE).append(Component.text("plugins/rustyconnector/metadata/private.key", NamedTextColor.YELLOW)).append(Component.text(" and paste it into this server in that same folder!", NamedTextColor.BLUE)),
-                        Component.text("Both the proxy and I need to have the same private.key!", NamedTextColor.BLUE),
+                        Component.text("You'll need to copy ", NamedTextColor.BLUE).append(Component.text("plugins/rustyconnector/metadata/aes.private", NamedTextColor.YELLOW)).append(Component.text(" and paste it into this server in that same folder!", NamedTextColor.BLUE)),
+                        Component.text("Both the proxy and I need to have the same aes.private!", NamedTextColor.BLUE),
                         Component.empty(),
                         Component.empty(),
                         Component.empty()
