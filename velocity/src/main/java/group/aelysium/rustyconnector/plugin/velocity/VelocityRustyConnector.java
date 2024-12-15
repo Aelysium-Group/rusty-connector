@@ -9,19 +9,16 @@ import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.ara.Particle;
-import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.events.EventManager;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
-import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandServer;
 import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
-import group.aelysium.rustyconnector.plugin.velocity.commands.VelocityClient;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnFamilyLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnServerRegister;
@@ -102,10 +99,10 @@ public class VelocityRustyConnector implements PluginContainer {
 
         try {
             this.logger.log("Building configuration...");
-            {
-                GitOpsConfig config = GitOpsConfig.New();
-                if(config != null) DeclarativeYAML.registerRepository("rustyconnector", config.config());
-            }
+//            {
+//                GitOpsConfig config = GitOpsConfig.New();
+//                if(config != null) DeclarativeYAML.registerRepository("rustyconnector", config.config());
+//            }
 
             ProxyKernel.Tinder tinder = new ProxyKernel.Tinder(
                     ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
@@ -143,9 +140,9 @@ public class VelocityRustyConnector implements PluginContainer {
                                     String name = file.getName().substring(0, extensionIndex);
                                     ScalarFamily.Tinder family = ScalarFamilyConfig.New(name).tinder();
                                     Particle.Flux<? extends Family> familyFlux = family.flux();
+                                    familyFlux.observe();
                                     ((FamilyRegistry) f).register(name, familyFlux);
                                     if(name.equalsIgnoreCase(config.rootFamily())) ((FamilyRegistry) f).setRootFamily(name);
-                                    familyFlux.observe();
                                 }
                             } catch (Exception e) {
                                 RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));

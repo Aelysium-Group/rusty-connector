@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.paper.command;
+package group.aelysium.rustyconnector.plugin.paper;
 
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;

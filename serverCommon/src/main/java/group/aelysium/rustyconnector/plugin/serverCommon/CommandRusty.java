@@ -1,18 +1,13 @@
-package group.aelysium.rustyconnector.plugin.paper.command;
+package group.aelysium.rustyconnector.plugin.serverCommon;
 
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
-import net.kyori.adventure.text.Component;
 import org.incendo.cloud.annotation.specifier.Greedy;
-import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 
-import java.util.NoSuchElementException;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 

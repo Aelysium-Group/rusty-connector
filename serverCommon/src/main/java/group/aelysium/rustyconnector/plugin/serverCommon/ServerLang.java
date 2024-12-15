@@ -1,12 +1,10 @@
-package group.aelysium.rustyconnector.plugin.paper.lang;
+package group.aelysium.rustyconnector.plugin.serverCommon;
 
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
-import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 import group.aelysium.rustyconnector.server.ServerKernel;
-import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -15,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
-public class PaperLang extends CommonLang {
-    public PaperLang() {}
+public class ServerLang extends CommonLang {
+    public ServerLang() {}
 
     @Lang("rustyconnector-kernelDetails")
     public static Component usage(ServerKernel kernel) {

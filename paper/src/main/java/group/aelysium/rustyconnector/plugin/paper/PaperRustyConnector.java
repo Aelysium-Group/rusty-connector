@@ -9,24 +9,19 @@ import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
-import group.aelysium.rustyconnector.plugin.paper.command.CommandRusty;
-import group.aelysium.rustyconnector.plugin.paper.command.PaperClient;
-import group.aelysium.rustyconnector.plugin.paper.config.DefaultConfig;
-import group.aelysium.rustyconnector.plugin.paper.lang.PaperLang;
+import group.aelysium.rustyconnector.plugin.serverCommon.CommandRusty;
+import group.aelysium.rustyconnector.plugin.serverCommon.DefaultConfig;
+import group.aelysium.rustyconnector.plugin.serverCommon.ServerLang;
 import group.aelysium.rustyconnector.server.ServerKernel;
 import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
-import org.incendo.cloud.paper.PaperCommandManager;
-
-import java.util.concurrent.ForkJoinPool;
 
 public final class PaperRustyConnector extends JavaPlugin {
     private final PluginLogger logger = new PluginLogger(this.getSLF4JLogger(), this.getServer());
@@ -68,12 +63,14 @@ public final class PaperRustyConnector extends JavaPlugin {
                 if(config != null) DeclarativeYAML.registerRepository("rustyconnector", config.config());
             }
 
-            ServerKernel.Tinder tinder = DefaultConfig.New().data(this.getServer(), this.logger);
+            ServerKernel.Tinder tinder = DefaultConfig.New().data(
+                    new PaperServerAdapter(this.getServer(), this.logger)
+            );
             RustyConnector.registerAndIgnite(tinder.flux());
             RustyConnector.Kernel(flux->{
                 flux.onStart(kernel -> {
                     try {
-                        kernel.fetchPlugin("LangLibrary").onStart(l -> ((LangLibrary) l).registerLangNodes(PaperLang.class));
+                        kernel.fetchPlugin("LangLibrary").onStart(l -> ((LangLibrary) l).registerLangNodes(ServerLang.class));
                     } catch (Exception e) {
                         RC.Error(Error.from(e));
                     }

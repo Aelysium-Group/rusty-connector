@@ -40,9 +40,9 @@ subprojects {
 
     dependencies {
 //        implementation "group.aelysium:rustyconnector-core:0.9.0"
-//        implementation "group.aelysium:declarative-yaml:0.1.6"
+        implementation "group.aelysium:declarative-yaml:0.1.6"
         implementation files("../libs/rustyconnector-core-0.9.0.jar")
-        implementation files("../libs/declarative-yaml-0.1.6.jar")
+//        implementation files("../libs/declarative-yaml-0.1.6.jar")
 
     }
 }
@@ -54,6 +54,9 @@ configurations {
 
 dependencies {
     modules project(':common')
+
+    modules project(':serverCommon')
+
     modules project(':paper')
     modules project(':velocity')
 }

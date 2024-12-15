@@ -31,7 +31,7 @@ public class OnPlayerChooseInitialServer {
                     if(registeredServer == null) return Player.Connection.Request.failedRequest(player, "There are no servers available. If this issue persists please contact an admin.");
 
                     event.setInitialServer(registeredServer);
-                    return Player.Connection.Request.successfulRequest(player, "Successfully set the intial server for the player!", server);
+                    return Player.Connection.Request.successfulRequest(player, "Successfully set the initial server for the player!", server);
                 });
                 Player.Connection.Result result = request.result().get(10, TimeUnit.SECONDS);
                 if(result.connected()) return;

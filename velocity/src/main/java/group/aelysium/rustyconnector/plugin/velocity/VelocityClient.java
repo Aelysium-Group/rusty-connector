@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.plugin.velocity.commands;
+package group.aelysium.rustyconnector.plugin.velocity;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;

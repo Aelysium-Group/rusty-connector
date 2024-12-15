@@ -1,7 +1,6 @@
-package group.aelysium.rustyconnector.plugin.paper.config;
+package group.aelysium.rustyconnector.plugin.serverCommon;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
@@ -12,12 +11,10 @@ import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.util.URL;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
-import group.aelysium.rustyconnector.plugin.paper.PaperServerAdapter;
-import group.aelysium.rustyconnector.plugin.paper.PluginLogger;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
+import group.aelysium.rustyconnector.server.ServerAdapter;
 import group.aelysium.rustyconnector.server.ServerKernel;
 import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
-import org.bukkit.Server;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -116,7 +113,7 @@ public class DefaultConfig {
     })
     private String metadata = "{\\\"softCap\\\": 30, \\\"hardCap\\\": 40}";
 
-    public ServerKernel.Tinder data(Server server, PluginLogger logger) throws Exception {
+    public ServerKernel.Tinder data(ServerAdapter adapter) throws Exception {
         if(this.family.isBlank()) throw new IllegalArgumentException("Please provide a valid family name to target.");
         if(this.family.length() > 16) throw new IllegalArgumentException("Family names are not allowed to be larger than 16 characters.");
 
@@ -146,7 +143,7 @@ public class DefaultConfig {
 
         ServerKernel.Tinder tinder = new ServerKernel.Tinder(
                 id,
-                new PaperServerAdapter(server, logger),
+                adapter,
                 AddressUtil.parseAddress(this.address),
                 magicLink,
                 this.family

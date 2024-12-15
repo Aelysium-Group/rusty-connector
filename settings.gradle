@@ -12,5 +12,8 @@ pluginManagement {
 rootProject.name = 'rustyconnector-minecraft'
 
 include ':common'
+
+include ':serverCommon'
+
 include ':paper'
 include ':velocity'
