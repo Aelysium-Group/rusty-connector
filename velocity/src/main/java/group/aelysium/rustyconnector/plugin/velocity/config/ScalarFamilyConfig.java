@@ -105,7 +105,7 @@ public class ScalarFamilyConfig {
             "# https://wiki.aelysium.group/rusty-connector/docs/concepts/metadata/",
             "#"
     })
-    private String metadata = "{\"serverSoftCap\": 30, \"serverHardCap\": 40}";
+    private String metadata = "{\\\"serverSoftCap\\\": 30, \\\"serverHardCap\\\": 40}";
 
     public ScalarFamily.Tinder tinder() throws IOException, ParseException {
         ScalarFamily.Tinder tinder = new ScalarFamily.Tinder(

@@ -114,7 +114,7 @@ public class DefaultConfig {
             "# https://wiki.aelysium.group/rusty-connector/docs/concepts/metadata/",
             "#"
     })
-    private String metadata = "{\"softCap\": 30, \"hardCap\": 40}";
+    private String metadata = "{\\\"softCap\\\": 30, \\\"hardCap\\\": 40}";
 
     public ServerKernel.Tinder data(Server server, PluginLogger logger) throws Exception {
         if(this.family.isBlank()) throw new IllegalArgumentException("Please provide a valid family name to target.");
