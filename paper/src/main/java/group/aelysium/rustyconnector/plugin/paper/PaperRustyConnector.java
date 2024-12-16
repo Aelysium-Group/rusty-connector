@@ -17,6 +17,7 @@ import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
@@ -24,25 +25,24 @@ import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
 public final class PaperRustyConnector extends JavaPlugin {
-    private final PluginLogger logger = new PluginLogger(this.getSLF4JLogger(), this.getServer());
-
     public PaperRustyConnector() {}
 
     @Override
     public void onEnable() {
-        this.logger.log("Initializing RustyConnector...");
+        ConsoleCommandSender console = this.getServer().getConsoleSender();
+        console.sendMessage("Initializing RustyConnector...");
 
         try {
             //metricsFactory.make(this, 17972);
-            this.logger.log("Registered to bstats!");
+            console.sendMessage("Registered to bstats!");
         } catch (Exception e) {
             e.printStackTrace();
-            this.logger.log("Failed to register to bstats!");
+            console.sendMessage("Failed to register to bstats!");
         }
 
         try {
             if(PrivateKeyConfig.Load().isEmpty()) {
-                this.logger.send(Component.join(
+                console.sendMessage(Component.join(
                         JoinConfiguration.newlines(),
                         Component.empty(),
                         Component.empty(),
@@ -64,7 +64,7 @@ public final class PaperRustyConnector extends JavaPlugin {
             }
 
             ServerKernel.Tinder tinder = DefaultConfig.New().data(
-                    new PaperServerAdapter(this.getServer(), this.logger)
+                    new PaperServerAdapter(this.getServer())
             );
             RustyConnector.registerAndIgnite(tinder.flux());
             RustyConnector.Kernel(flux->{

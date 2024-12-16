@@ -13,11 +13,9 @@ import java.util.UUID;
 
 public class PaperServerAdapter extends ServerAdapter {
     private final Server server;
-    private final PluginLogger logger;
 
-    public PaperServerAdapter(@NotNull Server server, @NotNull PluginLogger logger) {
+    public PaperServerAdapter(@NotNull Server server) {
         this.server = server;
-        this.logger = logger;
     }
 
     @Override
@@ -64,6 +62,6 @@ public class PaperServerAdapter extends ServerAdapter {
 
     @Override
     public void log(@NotNull Component message) {
-        this.logger.send(message);
+        this.server.getConsoleSender().sendMessage(message);
     }
 }

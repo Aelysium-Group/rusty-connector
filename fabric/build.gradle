@@ -1,0 +1,73 @@
+plugins {
+    id 'fabric-loom' version '1.9-SNAPSHOT'
+}
+base {
+    archivesName = "rustyconnector-fabric"
+}
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        "rustyconnector-fabric" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
+repositories {
+    // Add repositories to retrieve artifacts from in here.
+    // You should only use this when depending on other mods because
+    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+    // for more information about repositories.
+}
+
+dependencies {
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:1.21.4"
+    mappings "net.fabricmc:yarn:1.21.4+build.2:v2"
+    modImplementation "net.fabricmc:fabric-loader:0.16.9"
+
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.112.0+1.21.4"
+
+    // Cloud
+    modImplementation("org.incendo:cloud-fabric:2.0.0-beta.10")
+    include("org.incendo:cloud-fabric:2.0.0-beta.10")
+
+    // Kiori Components
+    modCompileOnly("net.kyori:adventure-platform-mod-shared-fabric-repack:6.1.0")
+
+    implementation project(path: ':serverCommon')
+    implementation project(path: ':common')
+}
+
+processResources {
+    inputs.property "version", plugin_version
+    inputs.property "minecraft_version", "1.21.4"
+    inputs.property "loader_version", "0.16.9"
+    filteringCharset "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand "version": plugin_version,
+                "minecraft_version": "1.21.4",
+                "loader_version": "0.16.9"
+    }
+}
+
+def targetJavaVersion = project.java_version as int
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}

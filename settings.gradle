@@ -16,4 +16,6 @@ include ':common'
 include ':serverCommon'
 
 include ':paper'
+include ':fabric'
+
 include ':velocity'
