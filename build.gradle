@@ -39,9 +39,9 @@ subprojects {
     apply plugin: 'io.github.goooler.shadow'
 
     dependencies {
-//        implementation "group.aelysium:rustyconnector-core:0.9.0"
+        implementation "group.aelysium:rustyconnector-core:0.9.0"
         implementation "group.aelysium:declarative-yaml:0.1.6"
-        implementation files("../libs/rustyconnector-core-0.9.0.jar")
+//        implementation files("../libs/rustyconnector-core-0.9.0.jar")
 //        implementation files("../libs/declarative-yaml-0.1.6.jar")
 
     }

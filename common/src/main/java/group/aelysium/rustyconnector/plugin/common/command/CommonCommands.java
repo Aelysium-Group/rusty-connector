@@ -58,7 +58,7 @@ public class CommonCommands {
     public void nglbwcmuschdjaon(Client<?> client, String pluginTree) {
         try {
             Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
-            if(!flux.exists()) {
+            if(flux == null || !flux.exists()) {
                 client.send(
                     Error.withHint(
                                 "While attempting to fetch the plugin "+pluginTree+" a plugin in the chain was unavailable.",

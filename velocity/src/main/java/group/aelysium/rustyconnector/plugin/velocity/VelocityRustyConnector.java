@@ -154,6 +154,8 @@ public class VelocityRustyConnector implements PluginContainer {
                 });
             });
 
+            System.out.println(RustyConnector.Kernel().toString());
+
             RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
         } catch (Exception e) {
             throw new RuntimeException(e);

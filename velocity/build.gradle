@@ -14,7 +14,7 @@ dependencies {
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
 shadowJar {
     archiveBaseName.set('rustyconnector-velocity')
-    relocate 'org.bstats', 'group.aelysium.rustyconnector'
+    relocate 'org.bstats', 'group.aelysium.shadowed.bstats'
     mergeServiceFiles()
     minimize()
 }
