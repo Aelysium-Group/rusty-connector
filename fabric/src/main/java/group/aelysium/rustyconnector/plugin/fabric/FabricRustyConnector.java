@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
+import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
@@ -20,6 +21,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.server.command.ServerCommandSource;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.execution.ExecutionCoordinator;
@@ -83,11 +85,15 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                     });
                 });
 
-                FabricServerCommandManager<FabricClient> commandManager = new FabricServerCommandManager<>(
+                FabricServerCommandManager<Client<? extends ServerCommandSource>> commandManager = new FabricServerCommandManager<>(
                         ExecutionCoordinator.asyncCoordinator(),
                         SenderMapper.create(
-                                sender -> new FabricClient(sender),
-                                client -> client.toSender()
+                                sender -> {
+                                    if(sender.getServer() == null) return new FabricClient.Console(sender);
+                                    if(sender.isExecutedByPlayer()) return new FabricClient.Player(sender);
+                                    return new FabricClient.Other(sender);
+                                },
+                                Client::toSender
                         )
                 );
                 commandManager.registerCommandPreProcessor(new ValidateClient<>());

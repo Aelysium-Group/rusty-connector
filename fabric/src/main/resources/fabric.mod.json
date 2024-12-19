@@ -17,6 +17,6 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "cloud": "*"
+    "cloud-fabric": "*"
   }
 }

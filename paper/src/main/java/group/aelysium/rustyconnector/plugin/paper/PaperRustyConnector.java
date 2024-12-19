@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
+import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
@@ -17,7 +18,9 @@ import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
@@ -82,12 +85,16 @@ public final class PaperRustyConnector extends JavaPlugin {
                 });
             });
 
-            LegacyPaperCommandManager<PaperClient> commandManager = new LegacyPaperCommandManager<>(
+            LegacyPaperCommandManager<Client<? extends CommandSender>> commandManager = new LegacyPaperCommandManager<>(
                     this,
                     ExecutionCoordinator.asyncCoordinator(),
                     SenderMapper.create(
-                            sender -> new PaperClient(sender),
-                            client -> client.toSender()
+                            sender -> {
+                                if(sender instanceof ConsoleCommandSender source) return new PaperClient.Console(source);
+                                if(sender instanceof Player source) return new PaperClient.Player(source);
+                                return new PaperClient.Other(sender);
+                            },
+                            Client::toSender
                     )
             );
             commandManager.registerCommandPreProcessor(new ValidateClient<>());

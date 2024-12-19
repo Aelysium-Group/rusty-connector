@@ -27,12 +27,12 @@ import static net.kyori.adventure.text.Component.text;
 public class CommonCommands {
 
     @Command("")
-    public void hizfafjjszjivcys(Client<?> client) {
+    public void hizfafjjszjivcys(Client.Console<?> client) {
         client.send(RC.Lang("rustyconnector-kernelDetails").generate(RC.Kernel()));
     }
 
     @Command("reload")
-    public void nglbwcmuzzxvjaon(Client<?> client) {
+    public void nglbwcmuzzxvjaon(Client.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             Particle.Flux<?> particle = RustyConnector.Kernel();
@@ -46,7 +46,7 @@ public class CommonCommands {
 
     @Command("plugin")
     @Command("plugins")
-    public void nglbwcmuvchdjaon(Client<?> client) {
+    public void nglbwcmuvchdjaon(Client.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().plugins().keySet()));
         } catch (Exception e) {
@@ -55,7 +55,7 @@ public class CommonCommands {
     }
     @Command("plugin <pluginTree>")
     @Command("plugins <pluginTree>")
-    public void nglbwcmuschdjaon(Client<?> client, String pluginTree) {
+    public void nglbwcmuschdjaon(Client.Console<?> client, String pluginTree) {
         try {
             Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
             if(flux == null || !flux.exists()) {
@@ -77,7 +77,7 @@ public class CommonCommands {
 
     @Command("plugin <pluginTree> reload")
     @Command("plugins <pluginTree> reload")
-    public void nglbwzmspchdjaon(Client<?> client, String pluginTree) {
+    public void nglbwzmspchdjaon(Client.Console<?> client, String pluginTree) {
         try {
             Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
             if(flux == null) return;
@@ -90,7 +90,7 @@ public class CommonCommands {
     }
     @Command("plugin <pluginTree> stop")
     @Command("plugins <pluginTree> stop")
-    public void nglbwzmzpsodjaon(Client<?> client, String pluginTree) {
+    public void nglbwzmzpsodjaon(Client.Console<?> client, String pluginTree) {
         Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
         if(flux == null) return;
         if(!flux.exists()) {
@@ -107,7 +107,7 @@ public class CommonCommands {
     }
     @Command("plugin <pluginTree> start")
     @Command("plugins <pluginTree> start")
-    public void asfdmgfsgsodjaon(Client<?> client, String pluginTree) {
+    public void asfdmgfsgsodjaon(Client.Console<?> client, String pluginTree) {
         try {
             Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
             if(flux == null) return;
@@ -123,7 +123,7 @@ public class CommonCommands {
         }
     }
 
-    private static @Nullable Particle.Flux<? extends Particle> fetchPlugin(Client<?> client, String pluginTree) {
+    private static @Nullable Particle.Flux<? extends Particle> fetchPlugin(Client.Console<?> client, String pluginTree) {
         String[] nodes = pluginTree.split("\\.");
         AtomicReference<Particle.Flux<? extends Particle>> current = new AtomicReference<>(RustyConnector.Kernel());
 
@@ -211,7 +211,7 @@ public class CommonCommands {
 
     @Command("error <uuid>")
     @Command("errors <uuid>")
-    public void nglbwzmxvchdjaon(Client<?> client, String uuid) {
+    public void nglbwzmxvchdjaon(Client.Console<?> client, String uuid) {
         try {
             UUID errorUUID;
             try {
@@ -232,7 +232,7 @@ public class CommonCommands {
 
     @Command("packet")
     @Command("packets")
-    public void yckarhhyoblbmbdl(Client<?> client) {
+    public void yckarhhyoblbmbdl(Client.Console<?> client) {
         try {
             List<Packet> messages = RC.MagicLink().packetCache().packets();
             client.send(RC.Lang("rustyconnector-packets").generate(messages));
@@ -243,7 +243,7 @@ public class CommonCommands {
 
     @Command("packet clear")
     @Command("packets clear")
-    public void wuifhmwefmhuidid(Client<?> client) {
+    public void wuifhmwefmhuidid(Client.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             RC.MagicLink().packetCache().empty();
@@ -255,7 +255,7 @@ public class CommonCommands {
 
     @Command("packet <id>")
     @Command("packets <id>")
-    public void nidbtmkngikxlzyo(Client<?> client, String id) {
+    public void nidbtmkngikxlzyo(Client.Console<?> client, String id) {
         try {
             client.send(RC.Lang("rustyconnector-packetDetails").generate(
                     RC.MagicLink().packetCache().find(NanoID.fromString(id)).orElseThrow(
@@ -268,11 +268,11 @@ public class CommonCommands {
     }
 
     @Command("send")
-    public void acmednrmiufxxviz(Client<?> client) {
+    public void acmednrmiufxxviz(Client.Console<?> client) {
         client.send(RC.Lang("rustyconnector-sendUsage").generate());
     }
     @Command("send <playerTarget>")
-    public void acmednrmiusgxviz(Client<?> client, String playerTarget) {
+    public void acmednrmiusgxviz(Client.Console<?> client, String playerTarget) {
         acmednrmiufxxviz(client);
     }
 }

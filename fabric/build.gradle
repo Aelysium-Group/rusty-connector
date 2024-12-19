@@ -30,7 +30,7 @@ dependencies {
     mappings "net.fabricmc:yarn:1.21.4+build.2:v2"
     modImplementation "net.fabricmc:fabric-loader:0.16.9"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:0.112.0+1.21.4"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.110.0+1.21.3"
 
     // Cloud
     modImplementation("org.incendo:cloud-fabric:2.0.0-beta.10")
@@ -39,8 +39,8 @@ dependencies {
     // Kiori Components
     modCompileOnly("net.kyori:adventure-platform-mod-shared-fabric-repack:6.1.0")
 
-    implementation project(path: ':serverCommon')
     implementation project(path: ':common')
+    implementation project(path: ':serverCommon', "configuration": "shadow")
 }
 
 processResources {

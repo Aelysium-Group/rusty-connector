@@ -1,14 +1,14 @@
 compileJava {
-    options.encoding = "UTF-8"
+    options.encoding = 'UTF-8'
     options.compilerArgs << '-parameters'
 }
 
 dependencies {
-    implementation "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT"
-    implementation "org.incendo:cloud-paper:2.0.0-beta.10"
+    implementation 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
+    implementation 'org.incendo:cloud-paper:2.0.0-beta.10'
 
-    implementation project(path: ':serverCommon')
     implementation project(path: ':common')
+    implementation project(path: ':serverCommon', 'configuration': 'shadow')
 }
 
 // If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/

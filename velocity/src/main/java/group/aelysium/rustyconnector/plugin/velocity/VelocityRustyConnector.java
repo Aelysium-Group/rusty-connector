@@ -1,12 +1,15 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ConsoleCommandSource;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
@@ -14,6 +17,7 @@ import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.events.EventManager;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
+import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
@@ -61,13 +65,17 @@ public class VelocityRustyConnector implements PluginContainer {
         this.dataFolder = dataFolder;
         this.metricsFactory = metricsFactory;
 
-        CommandManager<VelocityClient> commandManager = new VelocityCommandManager<>(
+        CommandManager<Client<? extends CommandSource>> commandManager = new VelocityCommandManager<>(
                 this,
                 server,
                 ExecutionCoordinator.asyncCoordinator(),
                 SenderMapper.create(
-                        sender -> new VelocityClient(sender),
-                        client -> client.toSender()
+                        sender -> {
+                            if(sender instanceof ConsoleCommandSource console) return new VelocityClient.Console(console);
+                            if(sender instanceof Player player) return new VelocityClient.Player(player);
+                            return new VelocityClient.Other(sender);
+                        },
+                        Client::toSender
                 )
         );
         commandManager.registerCommandPreProcessor(new ValidateClient<>());

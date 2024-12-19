@@ -3,45 +3,45 @@ package group.aelysium.rustyconnector.plugin.paper;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.text.Component;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+public interface PaperClient {
+    class Player extends Client.Player<org.bukkit.entity.Player> {
+        public Player(org.bukkit.entity.Player source) {
+            super(source);
+        }
 
-public class PaperClient implements Client<CommandSender> {
-    private final CommandSender sender;
-
-    public PaperClient(@NotNull CommandSender sender) {
-        this.sender = sender;
+        public void send(Component message) {
+            this.source.sendMessage(message);
+        }
+        public void send(Error error) {
+            this.source.sendMessage(error.toComponent());
+        }
     }
-    @Override
-    public void enforceConsole() throws RuntimeException {
-        if(this.sender instanceof ConsoleCommandSender) return;
-        throw new RuntimeException("This command can only be used from the console.");
+    class Console extends Client.Console<ConsoleCommandSender> {
+        public Console(@NotNull ConsoleCommandSender source) {
+            super(source);
+        }
+
+        public void send(Component message) {
+            this.source.sendMessage(message);
+        }
+        public void send(Error error) {
+            this.source.sendMessage(error.toComponent());
+        }
     }
+    class Other extends Client.Other<CommandSender> {
+        public Other(@NotNull CommandSender source) {
+            super(source);
+        }
 
-    @Override
-    public void enforcePlayer() throws RuntimeException {
-        if(this.sender instanceof ConsoleCommandSender) throw new RuntimeException("This command can only be used from the console.");
-    }
-
-    @Override
-    public void send(Component message) {
-        this.sender.sendMessage(message);
-    }
-
-    @Override
-    public void send(Error error) {
-        this.sender.sendMessage(error.toComponent());
-    }
-
-
-    @Override
-    public CommandSender toSender() {
-        return this.sender;
+        public void send(Component message) {
+            this.source.sendMessage(message);
+        }
+        public void send(Error error) {
+            this.source.sendMessage(error.toComponent());
+        }
     }
 }

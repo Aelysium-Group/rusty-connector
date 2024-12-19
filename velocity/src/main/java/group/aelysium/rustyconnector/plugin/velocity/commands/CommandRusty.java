@@ -20,7 +20,7 @@ import static net.kyori.adventure.text.Component.text;
 @Permission("rustyconnector.commands.rc")
 public final class CommandRusty {
     @Command("send <playerTarget> <target>")
-    public void qxeafgbinengqytu(Client<?> client, String playerTarget, String target) {
+    public void qxeafgbinengqytu(Client.Console<?> client, String playerTarget, String target) {
         Player player = null;
         try {
             try {
@@ -67,7 +67,7 @@ public final class CommandRusty {
     }
 
     @Command("send <playerTarget> <target> family")
-    public void mgwsedhgsmudghug(Client<?> client, String playerTarget, String target) {
+    public void mgwsedhgsmudghug(Client.Console<?> client, String playerTarget, String target) {
         Player player = null;
         try {
             try {
@@ -98,7 +98,7 @@ public final class CommandRusty {
         }
     }
     @Command("send <playerTarget> <target> server")
-    public void zmasuiymddiumgsa(Client<?> client, String playerTarget, String target) {
+    public void zmasuiymddiumgsa(Client.Console<?> client, String playerTarget, String target) {
         Player player = null;
         try {
             try {
@@ -131,13 +131,13 @@ public final class CommandRusty {
 
     @Command("server")
     @Command("servers")
-    public void ftuynemwdiuemhid(Client<?> client) {
+    public void ftuynemwdiuemhid(Client.Console<?> client) {
         client.send(RC.Lang("rustyconnector-servers").generate());
     }
 
     @Command("server <serverID>")
     @Command("servers <serverID>")
-    public void fneriygwehmigimh(Client<?> client, String serverID) {
+    public void fneriygwehmigimh(Client.Console<?> client, String serverID) {
         try {
             Server server = RC.P.Server(serverID)
                     .orElseThrow(()->new NoSuchElementException("No server with the id '"+serverID+"' exists."));
@@ -149,13 +149,13 @@ public final class CommandRusty {
 
     @Command("family")
     @Command("families")
-    public void tdrdolhxvcjhaskb(Client<?> client) {
+    public void tdrdolhxvcjhaskb(Client.Console<?> client) {
         client.send(RC.Lang("rustyconnector-families").generate());
     }
 
     @Command("family <id>")
     @Command("families <id>")
-    public void mfndwqqzuiqmesyn(Client<?> client, String id) {
+    public void mfndwqqzuiqmesyn(Client.Console<?> client, String id) {
         try {
             Family family = RC.P.Family(id)
                     .orElseThrow(()->new NoSuchElementException("No family with the id ["+id+"] exists."));
@@ -167,7 +167,7 @@ public final class CommandRusty {
     }
     @Command("family <id> reload")
     @Command("families <id> reload")
-    public void mfndwqqzwodmesyn(Client<?> client, String id) {
+    public void mfndwqqzwodmesyn(Client.Console<?> client, String id) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             Particle.Flux<? extends Family> flux = RC.P.Families().find(id)

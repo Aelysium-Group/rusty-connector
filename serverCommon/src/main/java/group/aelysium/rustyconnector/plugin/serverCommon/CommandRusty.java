@@ -18,7 +18,7 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 @Permission("rustyconnector.commands.rc")
 public final class CommandRusty {
     @Command("send <playerTarget> <target>")
-    private  void sertgsdbfdfxxviz(Client<?> client, String playerTarget, String target) {
+    private  void sertgsdbfdfxxviz(Client.Console<?> client, String playerTarget, String target) {
         try {
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(playerTarget, target, "").get(15, TimeUnit.SECONDS);
 
@@ -31,7 +31,7 @@ public final class CommandRusty {
     }
     @Command("send <playerTarget> <target> <flags>")
     private  void sdfvqewrsczzsrff(
-            Client<?> client,
+            Client.Console<?> client,
             String playerTarget,
             String target,
             @Greedy String flags
@@ -51,7 +51,7 @@ public final class CommandRusty {
     }
 
     @Command("lock")
-    private void zxcvssdbfdfxxviz(Client<?> client) {
+    private void zxcvssdbfdfxxviz(Client.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().lock().get(7, TimeUnit.SECONDS);
@@ -64,7 +64,7 @@ public final class CommandRusty {
     }
 
     @Command("unlock")
-    private void sertgssdfvsscefd(Client<?> client) {
+    private void sertgssdfvsscefd(Client.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().unlock().get(7, TimeUnit.SECONDS);
