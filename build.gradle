@@ -1,27 +1,6 @@
-buildscript {
-    repositories {
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath 'io.github.goooler.shadow:shadow-gradle-plugin:8.1.8'
-    }
-}
-
-group = project.maven_group
-version = project.plugin_version
-
-apply plugin: 'java'
-apply plugin: 'java-library'
-apply plugin: 'io.github.goooler.shadow'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
-
 allprojects {
-    repositories {
-        mavenCentral();
+    repositories { 
+        mavenCentral()
         maven { url = "https://repo.maven.apache.org/maven2/" }
         maven { url = "https://repo.papermc.io/repository/maven-public/" }
         maven { url = "https://hub.spigotmc.org/nexus/content/groups/public/" }
@@ -36,7 +15,14 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'java-library'
-    apply plugin: 'io.github.goooler.shadow'
+
+    group = project.maven_group
+    version = project.plugin_version
+
+    java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    }
 
     dependencies {
         implementation "group.aelysium:rustyconnector-core:0.9.0"
@@ -54,27 +40,24 @@ configurations {
 
 dependencies {
     modules project(':common')
-
     modules project(':serverCommon')
-
     modules project(':paper')
     modules project(':fabric')
-
     modules project(':velocity')
 }
 
-tasks.named('jar').configure {
-    enabled = false
-}
+// tasks.named('jar').configure {
+//     enabled = false
+// }
 
-task copyJars(type: Copy) {
-    from project(':paper').shadowJar
-    from project(':fabric').shadowJar
-    from project(':velocity').shadowJar
-    into "$buildDir/libs"
-    rename { String fileName ->
-        fileName.replace('all', project.plugin_version as String)
-    }
-}
+// task copyJars(type: Copy) {
+//     from project(path: ':paper', configuration: 'default')
+//     from project(path: ':fabric', configuration: 'default')
+//     from project(path: ':velocity', configuration: 'default')
+//     into "$buildDir/libs"
+//     rename { String fileName ->
+//         fileName.replace('all', project.plugin_version as String)
+//     }
+// }
 
-build.dependsOn copyJars
+// build.dependsOn copyJars
