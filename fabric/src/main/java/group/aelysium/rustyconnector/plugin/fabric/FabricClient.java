@@ -3,8 +3,8 @@ package group.aelysium.rustyconnector.plugin.fabric;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 public interface FabricClient {
@@ -14,22 +14,22 @@ public interface FabricClient {
         }
 
         public void send(Component message) {
-            this.source.sendMessage(message);
+            ((ServerCommandSource) this.source).sendMessage((Text) message);
         }
         public void send(Error error) {
-            this.source.sendMessage(error.toComponent());
+            ((ServerCommandSource) this.source).sendMessage((Text) error.toComponent());
         }
     }
     class Console extends Client.Console<ServerCommandSource> {
-        public Console(@NotNull CommandSource source) {
+        public Console(@NotNull ServerCommandSource source) {
             super(source);
         }
 
         public void send(Component message) {
-            this.source.sendMessage(message);
+            ((ServerCommandSource) this.source).sendMessage((Text) message);
         }
         public void send(Error error) {
-            this.source.sendMessage(error.toComponent());
+            ((ServerCommandSource) this.source).sendMessage((Text) error.toComponent());
         }
     }
     class Other extends Client.Other<ServerCommandSource> {
@@ -38,10 +38,10 @@ public interface FabricClient {
         }
 
         public void send(Component message) {
-            this.source.sendMessage(message);
+            ((ServerCommandSource) this.source).sendMessage((Text) message);
         }
         public void send(Error error) {
-            this.source.sendMessage(error.toComponent());
+            ((ServerCommandSource) this.source).sendMessage((Text) error.toComponent());
         }
     }
 }

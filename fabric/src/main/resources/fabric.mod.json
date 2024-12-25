@@ -3,7 +3,7 @@
   "id": "rustyconnector-fabric",
   "version": "${version}",
   "name": "RustyConnector",
-  "description": "A whitelist implementation for RustyConnector core.",
+  "description": "The Fabric port of RustyConnector.",
   "authors": [],
   "contact": {},
   "license": "GPL-3.0",
@@ -16,7 +16,6 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
-    "minecraft": "${minecraft_version}",
-    "cloud-fabric": "*"
+    "minecraft": "${minecraft_version}"
   }
 }

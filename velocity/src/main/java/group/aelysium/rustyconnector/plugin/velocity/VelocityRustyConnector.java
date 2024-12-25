@@ -22,7 +22,6 @@ import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandServer;
-import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.velocity.config.*;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnFamilyLifecycle;
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnServerRegister;
@@ -56,7 +55,7 @@ public class VelocityRustyConnector implements PluginContainer {
     private final PluginLogger logger;
     private final ProxyServer server;
     private final Path dataFolder;
-    private final AnnotationParser<VelocityClient> annotationParser;
+    private final AnnotationParser<Client> annotationParser;
 
     @Inject
     public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder, Metrics.Factory metricsFactory) {
@@ -65,7 +64,7 @@ public class VelocityRustyConnector implements PluginContainer {
         this.dataFolder = dataFolder;
         this.metricsFactory = metricsFactory;
 
-        CommandManager<Client<? extends CommandSource>> commandManager = new VelocityCommandManager<>(
+        CommandManager<Client> commandManager = new VelocityCommandManager<>(
                 this,
                 server,
                 ExecutionCoordinator.asyncCoordinator(),
@@ -78,10 +77,9 @@ public class VelocityRustyConnector implements PluginContainer {
                         Client::toSender
                 )
         );
-        commandManager.registerCommandPreProcessor(new ValidateClient<>());
         this.annotationParser = new AnnotationParser<>(
                 commandManager,
-                VelocityClient.class
+                Client.class
         );
 
         this.server.getCommandManager().unregister("server");

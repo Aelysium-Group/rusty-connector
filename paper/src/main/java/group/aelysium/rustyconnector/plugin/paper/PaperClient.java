@@ -5,19 +5,20 @@ import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public interface PaperClient {
-    class Player extends Client.Player<org.bukkit.entity.Player> {
-        public Player(org.bukkit.entity.Player source) {
+    class Player extends Client.Player<CommandSender> {
+        public Player(CommandSender source) {
             super(source);
         }
 
         public void send(Component message) {
-            this.source.sendMessage(message);
+            ((org.bukkit.entity.Player) this.source).sendMessage(message);
         }
         public void send(Error error) {
-            this.source.sendMessage(error.toComponent());
+            ((org.bukkit.entity.Player) this.source).sendMessage(error.toComponent());
         }
     }
     class Console extends Client.Console<ConsoleCommandSender> {
@@ -26,10 +27,10 @@ public interface PaperClient {
         }
 
         public void send(Component message) {
-            this.source.sendMessage(message);
+            ((ConsoleCommandSender) this.source).sendMessage(message);
         }
         public void send(Error error) {
-            this.source.sendMessage(error.toComponent());
+            ((ConsoleCommandSender) this.source).sendMessage(error.toComponent());
         }
     }
     class Other extends Client.Other<CommandSender> {
@@ -38,10 +39,10 @@ public interface PaperClient {
         }
 
         public void send(Component message) {
-            this.source.sendMessage(message);
+            ((CommandSender) this.source).sendMessage(message);
         }
         public void send(Error error) {
-            this.source.sendMessage(error.toComponent());
+            ((CommandSender) this.source).sendMessage(error.toComponent());
         }
     }
 }

@@ -7,7 +7,6 @@ import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
-import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.serverCommon.CommandRusty;
@@ -21,7 +20,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.server.command.ServerCommandSource;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.execution.ExecutionCoordinator;
@@ -85,7 +83,7 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                     });
                 });
 
-                FabricServerCommandManager<Client<? extends ServerCommandSource>> commandManager = new FabricServerCommandManager<>(
+                FabricServerCommandManager<Client> commandManager = new FabricServerCommandManager<>(
                         ExecutionCoordinator.asyncCoordinator(),
                         SenderMapper.create(
                                 sender -> {
@@ -96,9 +94,11 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                                 Client::toSender
                         )
                 );
-                commandManager.registerCommandPreProcessor(new ValidateClient<>());
 
-                AnnotationParser<FabricClient> annotationParser = new AnnotationParser<>(commandManager, FabricClient.class);
+                    AnnotationParser<Client> annotationParser = new AnnotationParser<>(
+                            commandManager,
+                            Client.class
+                    );
                 annotationParser.parse(new CommonCommands());
                 annotationParser.parse(new CommandRusty());
                 RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());

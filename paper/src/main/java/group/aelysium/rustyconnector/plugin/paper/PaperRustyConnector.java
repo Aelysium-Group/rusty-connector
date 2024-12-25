@@ -7,7 +7,6 @@ import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
-import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.serverCommon.CommandRusty;
@@ -18,7 +17,6 @@ import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -85,7 +83,7 @@ public final class PaperRustyConnector extends JavaPlugin {
                 });
             });
 
-            LegacyPaperCommandManager<Client<? extends CommandSender>> commandManager = new LegacyPaperCommandManager<>(
+            LegacyPaperCommandManager<Client> commandManager = new LegacyPaperCommandManager<>(
                     this,
                     ExecutionCoordinator.asyncCoordinator(),
                     SenderMapper.create(
@@ -97,9 +95,11 @@ public final class PaperRustyConnector extends JavaPlugin {
                             Client::toSender
                     )
             );
-            commandManager.registerCommandPreProcessor(new ValidateClient<>());
 
-            AnnotationParser<PaperClient> annotationParser = new AnnotationParser<>(commandManager, PaperClient.class);
+            AnnotationParser<Client> annotationParser = new AnnotationParser<>(
+                    commandManager,
+                    Client.class
+            );
             annotationParser.parse(new CommonCommands());
             annotationParser.parse(new CommandRusty());
             RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
