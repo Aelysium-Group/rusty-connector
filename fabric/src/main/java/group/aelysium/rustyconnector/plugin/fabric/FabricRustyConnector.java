@@ -16,6 +16,7 @@ import group.aelysium.rustyconnector.server.ServerAdapter;
 import group.aelysium.rustyconnector.server.ServerKernel;
 import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -30,6 +31,20 @@ import static net.kyori.adventure.text.Component.text;
 public class FabricRustyConnector implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
+        CommandRegistrationCallback.EVENT.register((e1, e2, e3) -> {
+            FabricServerCommandManager<FabricClient> commandManager = new FabricServerCommandManager<>(
+                    ExecutionCoordinator.asyncCoordinator(),
+                    SenderMapper.create(
+                            sender -> new FabricClient(sender),
+                            client -> client.toSender()
+                    )
+            );
+            commandManager.registerCommandPreProcessor(new ValidateClient<>());
+
+            AnnotationParser<FabricClient> annotationParser = new AnnotationParser<>(commandManager, FabricClient.class);
+            annotationParser.parse(new CommonCommands());
+            annotationParser.parse(new CommandRusty());
+        });
         ServerLifecycleEvents.SERVER_STARTED.register(s -> {
             System.out.println("Initializing RustyConnector...");
             ServerAdapter adapter = new FabricServerAdapter(s);
@@ -83,18 +98,6 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                     });
                 });
 
-                FabricServerCommandManager<FabricClient> commandManager = new FabricServerCommandManager<>(
-                        ExecutionCoordinator.asyncCoordinator(),
-                        SenderMapper.create(
-                                sender -> new FabricClient(sender),
-                                client -> client.toSender()
-                        )
-                );
-                commandManager.registerCommandPreProcessor(new ValidateClient<>());
-
-                AnnotationParser<FabricClient> annotationParser = new AnnotationParser<>(commandManager, FabricClient.class);
-                annotationParser.parse(new CommonCommands());
-                annotationParser.parse(new CommandRusty());
                 RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
             } catch (Exception e) {
                 throw new RuntimeException(e);

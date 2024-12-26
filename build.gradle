@@ -20,8 +20,8 @@ subprojects {
     version = project.plugin_version
 
     java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     dependencies {
@@ -45,19 +45,3 @@ dependencies {
     modules project(':fabric')
     modules project(':velocity')
 }
-
-// tasks.named('jar').configure {
-//     enabled = false
-// }
-
-// task copyJars(type: Copy) {
-//     from project(path: ':paper', configuration: 'default')
-//     from project(path: ':fabric', configuration: 'default')
-//     from project(path: ':velocity', configuration: 'default')
-//     into "$buildDir/libs"
-//     rename { String fileName ->
-//         fileName.replace('all', project.plugin_version as String)
-//     }
-// }
-
-// build.dependsOn copyJars

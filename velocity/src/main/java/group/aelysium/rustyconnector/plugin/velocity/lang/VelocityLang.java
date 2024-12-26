@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.lang;
 
-import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.Lang;
@@ -13,6 +12,7 @@ import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.proxy.player.PlayerRegistry;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;

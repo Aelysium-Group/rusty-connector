@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.common.command;
 
-import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.crypt.NanoID;
@@ -8,6 +7,7 @@ import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.plugins.PluginHolder;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.incendo.cloud.annotations.Command;

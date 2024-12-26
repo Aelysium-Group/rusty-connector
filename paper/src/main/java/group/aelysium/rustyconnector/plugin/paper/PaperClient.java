@@ -3,14 +3,9 @@ package group.aelysium.rustyconnector.plugin.paper;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.text.Component;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class PaperClient implements Client<CommandSender> {
     private final CommandSender sender;
