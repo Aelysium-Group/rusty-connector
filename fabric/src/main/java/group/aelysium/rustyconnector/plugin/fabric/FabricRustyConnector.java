@@ -16,14 +16,11 @@ import group.aelysium.rustyconnector.server.ServerAdapter;
 import group.aelysium.rustyconnector.server.ServerKernel;
 import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.minecraft.text.Text;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.execution.ExecutionCoordinator;
@@ -48,14 +45,14 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
         annotationParser.parse(new CommandRusty());
 
         ServerLifecycleEvents.SERVER_STARTED.register(s -> {
-            System.out.println("Initializing RustyConnector...");
+            s.sendMessage(Text.of("Initializing RustyConnector..."));
             ServerAdapter adapter = new FabricServerAdapter(s);
 
             try {
                 //metricsFactory.make(this, 17972);
-                adapter.log(text("Registered to bstats!"));
+                s.sendMessage(Text.of("Registered to bstats!"));
             } catch (Exception e) {
-                adapter.log(text("Failed to register to bstats!"));
+                s.sendMessage(Text.of("Failed to register to bstats!"));
             }
 
             try {
