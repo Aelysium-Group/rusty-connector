@@ -20,7 +20,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
@@ -51,13 +50,6 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(s -> {
             s.sendMessage(Text.of("Initializing RustyConnector..."));
             ServerAdapter adapter = new FabricServerAdapter(s);
-
-            try {
-                //metricsFactory.make(this, 17972);
-                s.sendMessage(Text.of("Registered to bstats!"));
-            } catch (Exception e) {
-                s.sendMessage(Text.of("Failed to register to bstats!"));
-            }
 
             try {
                 if(PrivateKeyConfig.Load().isEmpty()) {

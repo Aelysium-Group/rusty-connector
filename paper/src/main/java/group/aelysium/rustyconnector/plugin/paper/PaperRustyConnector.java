@@ -34,14 +34,6 @@ public final class PaperRustyConnector extends JavaPlugin {
         console.sendMessage("Initializing RustyConnector...");
 
         try {
-            //metricsFactory.make(this, 17972);
-            console.sendMessage("Registered to bstats!");
-        } catch (Exception e) {
-            e.printStackTrace();
-            console.sendMessage("Failed to register to bstats!");
-        }
-
-        try {
             if(PrivateKeyConfig.Load().isEmpty()) {
                 console.sendMessage(Component.join(
                         JoinConfiguration.newlines(),
