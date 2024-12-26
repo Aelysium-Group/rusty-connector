@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.commands;
 
-import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;

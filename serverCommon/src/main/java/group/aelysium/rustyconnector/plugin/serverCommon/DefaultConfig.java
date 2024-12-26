@@ -1,7 +1,5 @@
 package group.aelysium.rustyconnector.plugin.serverCommon;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.crypt.AES;
@@ -15,6 +13,8 @@ import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 import group.aelysium.rustyconnector.server.ServerAdapter;
 import group.aelysium.rustyconnector.server.ServerKernel;
 import group.aelysium.rustyconnector.server.magic_link.WebSocketMagicLink;
+import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.Gson;
+import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonObject;
 
 import java.io.IOException;
 import java.util.UUID;

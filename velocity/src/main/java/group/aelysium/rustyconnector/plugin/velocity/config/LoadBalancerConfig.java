@@ -1,6 +1,5 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.ara.Particle;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.declarative_yaml.lib.Printer;

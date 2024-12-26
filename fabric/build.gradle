@@ -5,69 +5,66 @@ base {
     archivesName = "rustyconnector-fabric"
 }
 
-loom {
-    splitEnvironmentSourceSets()
+// Shadowjar Workaround
 
-    mods {
-        "rustyconnector-fabric" {
-            sourceSet sourceSets.main
-            sourceSet sourceSets.client
-        }
-    }
+configurations {
+    zip
 }
 
-repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
+jar {
+    archiveFileName = "rustyconnector-fabric-${version}.jar"
+    from {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        configurations.zip.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'org/**', 'net/**', 'kotlin/**', 'javax/**', 'jakarta/**', 'io/**', 'com/**', 'jetty-dir.css'
 }
 
 dependencies {
     // To change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:1.21.4"
-    mappings "net.fabricmc:yarn:1.21.4+build.2:v2"
+    minecraft "com.mojang:minecraft:1.21.3"
+    mappings "net.fabricmc:yarn:1.21.3+build.1:v2"
     modImplementation "net.fabricmc:fabric-loader:0.16.9"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.112.1+1.21.3"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:0.110.0+1.21.3"
+    // NanoID
+    implementation "com.aventrix.jnanoid:jnanoid:2.0.0"
+    include "com.aventrix.jnanoid:jnanoid:2.0.0"
+
+    // dYAML
+    implementation "group.aelysium:declarative-yaml:0.1.6"
+    include "group.aelysium:declarative-yaml:0.1.6"
+
+    // Scuffed Epic dYAML Workaround Moment Late 2024 Simulator Pogchamp (Cringe)
+    include(implementation('org.spongepowered:configurate-core:4.1.2'))
+    include(implementation('org.spongepowered:configurate-yaml:4.1.2'))
+    include(implementation("org.yaml:snakeyaml:2.3"))
 
     // Cloud
-    modImplementation("org.incendo:cloud-fabric:2.0.0-beta.10")
-    include("org.incendo:cloud-fabric:2.0.0-beta.10")
+    include modImplementation("org.incendo:cloud-fabric:2.0.0-beta.10")
+    include implementation("org.incendo:cloud-annotations:2.0.0")
 
-    // Kiori Components
-    modCompileOnly("net.kyori:adventure-platform-mod-shared-fabric-repack:6.1.0")
+    // Kyori Components
+    modCompileOnly("net.kyori:adventure-platform-fabric:6.1.0")
+    include("net.kyori:adventure-platform-fabric:6.1.0")
 
-    implementation project(path: ':common')
-    implementation project(path: ':serverCommon', "configuration": "shadow")
+    // Part of the shadowjar workaround so we get to not use shadowjar
+    zip implementation(project(path: ':serverCommon', configuration: 'default'))
+    zip implementation(project(path: ':common', configuration: 'default'))
 }
+
+
+// This just renames the jar because something was cringe
+remapJar {
+    archiveFileName = "rustyconnector-fabric-${version}.jar"
+}
+jar.finalizedBy(remapJar)
 
 processResources {
     inputs.property "version", plugin_version
-    inputs.property "minecraft_version", "1.21.4"
-    inputs.property "loader_version", "0.16.9"
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand "version": plugin_version,
-                "minecraft_version": "1.21.4",
-                "loader_version": "0.16.9"
-    }
-}
-
-def targetJavaVersion = project.java_version as int
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release = targetJavaVersion
+        expand "version": plugin_version
     }
 }

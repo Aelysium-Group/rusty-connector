@@ -2,13 +2,13 @@ package group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc;
 
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import group.aelysium.ara.Particle;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.events.EventListener;
 import group.aelysium.rustyconnector.proxy.events.FamilyRegisterEvent;
 import group.aelysium.rustyconnector.proxy.events.FamilyUnregisterEvent;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicReference;

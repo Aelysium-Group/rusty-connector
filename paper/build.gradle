@@ -1,25 +1,31 @@
 compileJava {
-    options.encoding = 'UTF-8'
+    options.encoding = "UTF-8"
     options.compilerArgs << '-parameters'
 }
 
+// Shadowjar Workaround
+
+configurations {
+    zip
+}
+
+jar {
+    archiveFileName = "rustyconnector-paper-${version}.jar"
+    from {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        configurations.zip.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'org/**', 'net/**', 'kotlin/**', 'javax/**', 'jakarta/**', 'io/**', 'com/**', 'metadata.json', 'jetty-dir.css'
+}
+
 dependencies {
-    implementation 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
-    implementation 'org.incendo:cloud-paper:2.0.0-beta.10'
+    implementation "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT"
+    implementation "org.incendo:cloud-paper:2.0.0-beta.10"
+    implementation "org.incendo:cloud-annotations:2.0.0"
 
-    implementation project(path: ':common')
-    implementation project(path: ':serverCommon', 'configuration': 'shadow')
+    zip implementation( project(path: ':serverCommon', configuration: 'default'))
+    zip implementation( project(path: ':common', configuration: 'default'))
 }
-
-// If ever strange behaviour check the docs for reference: https://imperceptiblethoughts.com/shadow/
-shadowJar {
-    archiveBaseName.set('rustyconnector-paper')
-    mergeServiceFiles()
-    minimize()
-    from(processResources)
-}
-
-jar.finalizedBy('shadowJar')
 
 def targetJavaVersion = project.java_version as int
 java {

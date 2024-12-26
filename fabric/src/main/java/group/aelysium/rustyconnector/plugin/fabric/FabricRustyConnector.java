@@ -5,8 +5,8 @@ import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
-import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
+import group.aelysium.rustyconnector.plugin.common.command.ValidateClient;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.serverCommon.CommandRusty;
@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.text.Text;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.execution.ExecutionCoordinator;
@@ -30,15 +31,28 @@ import static net.kyori.adventure.text.Component.text;
 public class FabricRustyConnector implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
+        FabricServerCommandManager<FabricClient> commandManager = new FabricServerCommandManager<>(
+                ExecutionCoordinator.asyncCoordinator(),
+                SenderMapper.create(
+                        sender -> new FabricClient(sender),
+                        client -> client.toSender()
+                )
+        );
+        commandManager.registerCommandPreProcessor(new ValidateClient<>());
+
+        AnnotationParser<FabricClient> annotationParser = new AnnotationParser<>(commandManager, FabricClient.class);
+        annotationParser.parse(new CommonCommands());
+        annotationParser.parse(new CommandRusty());
+
         ServerLifecycleEvents.SERVER_STARTED.register(s -> {
-            System.out.println("Initializing RustyConnector...");
+            s.sendMessage(Text.of("Initializing RustyConnector..."));
             ServerAdapter adapter = new FabricServerAdapter(s);
 
             try {
                 //metricsFactory.make(this, 17972);
-                adapter.log(text("Registered to bstats!"));
+                s.sendMessage(Text.of("Registered to bstats!"));
             } catch (Exception e) {
-                adapter.log(text("Failed to register to bstats!"));
+                s.sendMessage(Text.of("Failed to register to bstats!"));
             }
 
             try {
@@ -83,24 +97,6 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                     });
                 });
 
-                FabricServerCommandManager<Client> commandManager = new FabricServerCommandManager<>(
-                        ExecutionCoordinator.asyncCoordinator(),
-                        SenderMapper.create(
-                                sender -> {
-                                    if(sender.getServer() == null) return new FabricClient.Console(sender);
-                                    if(sender.isExecutedByPlayer()) return new FabricClient.Player(sender);
-                                    return new FabricClient.Other(sender);
-                                },
-                                Client::toSender
-                        )
-                );
-
-                    AnnotationParser<Client> annotationParser = new AnnotationParser<>(
-                            commandManager,
-                            Client.class
-                    );
-                annotationParser.parse(new CommonCommands());
-                annotationParser.parse(new CommandRusty());
                 RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
             } catch (Exception e) {
                 throw new RuntimeException(e);
