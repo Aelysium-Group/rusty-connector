@@ -21,6 +21,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.command.CommandSource;
+import net.minecraft.server.command.ServerCommandSource;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.execution.ExecutionCoordinator;
@@ -31,20 +34,19 @@ import static net.kyori.adventure.text.Component.text;
 public class FabricRustyConnector implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
-        CommandRegistrationCallback.EVENT.register((e1, e2, e3) -> {
-            FabricServerCommandManager<FabricClient> commandManager = new FabricServerCommandManager<>(
-                    ExecutionCoordinator.asyncCoordinator(),
-                    SenderMapper.create(
-                            sender -> new FabricClient(sender),
-                            client -> client.toSender()
-                    )
-            );
-            commandManager.registerCommandPreProcessor(new ValidateClient<>());
+        FabricServerCommandManager<FabricClient> commandManager = new FabricServerCommandManager<>(
+                ExecutionCoordinator.asyncCoordinator(),
+                SenderMapper.create(
+                        sender -> new FabricClient(sender),
+                        client -> client.toSender()
+                )
+        );
+        commandManager.registerCommandPreProcessor(new ValidateClient<>());
 
-            AnnotationParser<FabricClient> annotationParser = new AnnotationParser<>(commandManager, FabricClient.class);
-            annotationParser.parse(new CommonCommands());
-            annotationParser.parse(new CommandRusty());
-        });
+        AnnotationParser<FabricClient> annotationParser = new AnnotationParser<>(commandManager, FabricClient.class);
+        annotationParser.parse(new CommonCommands());
+        annotationParser.parse(new CommandRusty());
+
         ServerLifecycleEvents.SERVER_STARTED.register(s -> {
             System.out.println("Initializing RustyConnector...");
             ServerAdapter adapter = new FabricServerAdapter(s);

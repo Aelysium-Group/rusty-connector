@@ -17,7 +17,7 @@ jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         configurations.zip.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    //exclude 'org/**', 'net/**', 'kotlin/**', 'javax/**', 'jakarta/**', 'io/**', 'com/**', 'jetty-dir.css'
+    exclude 'org/**', 'net/**', 'kotlin/**', 'javax/**', 'jakarta/**', 'io/**', 'com/**', 'jetty-dir.css'
 }
 
 dependencies {
@@ -41,9 +41,8 @@ dependencies {
     include(implementation("org.yaml:snakeyaml:2.3"))
 
     // Cloud
-    modImplementation("org.incendo:cloud-fabric:2.0.0-beta.10")
-    implementation "org.incendo:cloud-annotations:2.0.0"
-    include("org.incendo:cloud-fabric:2.0.0-beta.10")
+    include modImplementation("org.incendo:cloud-fabric:2.0.0-beta.10")
+    include implementation("org.incendo:cloud-annotations:2.0.0")
 
     // Kyori Components
     modCompileOnly("net.kyori:adventure-platform-fabric:6.1.0")
