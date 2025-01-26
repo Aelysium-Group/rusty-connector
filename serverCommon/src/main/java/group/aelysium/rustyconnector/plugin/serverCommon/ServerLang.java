@@ -6,12 +6,11 @@ import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 import group.aelysium.rustyconnector.server.ServerKernel;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.concurrent.TimeUnit;
 
-import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.Component.*;
 
 public class ServerLang extends CommonLang {
     public ServerLang() {}
@@ -87,8 +86,8 @@ public class ServerLang extends CommonLang {
     public static Component magicLinkHandshakeFailure(String reason, int delayAmount, TimeUnit delayUnit) {
         return join(
                 newlines(),
-                text(reason, NamedTextColor.RED),
-                text("Waiting "+delayAmount+" "+delayUnit+" before trying again...", NamedTextColor.GRAY)
+                text(reason, RED),
+                text("Waiting "+delayAmount+" "+delayUnit+" before trying again...", GRAY)
         );
     }
 }

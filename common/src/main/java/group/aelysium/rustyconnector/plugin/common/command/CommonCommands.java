@@ -10,17 +10,15 @@ import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
 import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.jetbrains.annotations.Nullable;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static net.kyori.adventure.text.Component.text;
 
 @Command("rc")
 @Permission("rustyconnector.commands.rc")
@@ -193,13 +191,13 @@ public class CommonCommands {
                         Component.empty(),
                         (
                             RC.Errors().fetchAll().isEmpty() ?
-                                text("There are no errors to show.", NamedTextColor.DARK_GRAY)
+                                    Component.text("There are no errors to show.", NamedTextColor.DARK_GRAY)
                             :
                                 Component.join(
                                     CommonLang.newlines(),
                                     RC.Errors().fetchAll().stream().map(e->Component.join(
                                             CommonLang.newlines(),
-                                            text("------------------------------------------------------", NamedTextColor.DARK_GRAY),
+                                            Component.text("------------------------------------------------------", NamedTextColor.DARK_GRAY),
                                             e.toComponent()
                                     )).toList()
                                 )
@@ -217,13 +215,13 @@ public class CommonCommands {
             try {
                 errorUUID = UUID.fromString(uuid);
             } catch (IllegalArgumentException e) {
-                client.send(text("Please provide a valid UUID.", NamedTextColor.BLUE));
+                client.send(Component.text("Please provide a valid UUID.", NamedTextColor.BLUE));
                 return;
             }
 
             Error error = RC.Errors().fetch(errorUUID)
                     .orElseThrow(()->new NoSuchElementException("No Error entry exists with the uuid ["+uuid+"]"));
-            if(error.throwable() == null) client.send(text("The error ["+uuid+"] doesn't have a throwable to inspect.", NamedTextColor.BLUE));
+            if(error.throwable() == null) client.send(Component.text("The error ["+uuid+"] doesn't have a throwable to inspect.", NamedTextColor.BLUE));
             RC.Adapter().log(RC.Lang("rustyconnector-exception").generate(error.throwable()));
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));

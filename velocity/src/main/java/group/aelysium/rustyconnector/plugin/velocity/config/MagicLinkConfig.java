@@ -13,8 +13,8 @@ import group.aelysium.rustyconnector.proxy.util.AddressUtil;
 import java.io.IOException;
 import java.util.*;
 
-@Config("plugins/rustyconnector/magic_link.yml")
-@Git(value = "rustyconnector", required = false)
+@Namespace("rustyconnector")
+@Config("/magic_link.yml")
 @Comment({
     "#`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´#",
     "#.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·._.·´¯`·.#",
@@ -131,6 +131,6 @@ public class MagicLinkConfig {
     }
 
     public static MagicLinkConfig New() throws IOException {
-        return DeclarativeYAML.load(MagicLinkConfig.class);
+        return DeclarativeYAML.From(MagicLinkConfig.class);
     }
 }

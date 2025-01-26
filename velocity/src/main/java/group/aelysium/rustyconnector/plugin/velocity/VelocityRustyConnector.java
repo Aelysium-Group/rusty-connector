@@ -1,7 +1,6 @@
 package group.aelysium.rustyconnector.plugin.velocity;
 
 import com.google.inject.Inject;
-import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -11,11 +10,13 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.events.EventManager;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
+import group.aelysium.rustyconnector.common.plugins.PluginLoader;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
@@ -43,6 +44,7 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,9 +58,14 @@ public class VelocityRustyConnector implements PluginContainer {
     private final ProxyServer server;
     private final Path dataFolder;
     private final AnnotationParser<Client> annotationParser;
+    private final PluginLoader loader = new PluginLoader(List.of(
+            "com.velocitypowered"
+    ));
 
     @Inject
     public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder, Metrics.Factory metricsFactory) {
+        DeclarativeYAML.basePath("rustyconnector", "plugins/rustyconnector");
+        DeclarativeYAML.basePath("rustyconnector-modules", "rc-modules");
         this.logger = new PluginLogger(logger, server);
         this.server = server;
         this.dataFolder = dataFolder;
@@ -158,9 +165,9 @@ public class VelocityRustyConnector implements PluginContainer {
                         RC.Error(Error.from(e));
                     }
                 });
-            });
 
-            System.out.println(RustyConnector.Kernel().toString());
+                loader.loadPlugins(flux, "rc-modules");
+            });
 
             RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
         } catch (Exception e) {
@@ -185,6 +192,7 @@ public class VelocityRustyConnector implements PluginContainer {
     public void onUnload(ProxyShutdownEvent event) {
         try {
             RustyConnector.unregister();
+            loader.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

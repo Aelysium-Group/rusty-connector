@@ -2,10 +2,10 @@ package group.aelysium.rustyconnector.plugin.velocity;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
-import com.velocitypowered.api.proxy.Player;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 
 public interface VelocityClient {
@@ -15,10 +15,10 @@ public interface VelocityClient {
         }
 
         public void send(Component message) {
-            ((com.velocitypowered.api.proxy.Player) this.source).sendMessage(message);
+            ((com.velocitypowered.api.proxy.Player) this.source).sendMessage((ComponentLike) message);
         }
         public void send(Error error) {
-            ((com.velocitypowered.api.proxy.Player) this.source).sendMessage(error.toComponent());
+            ((com.velocitypowered.api.proxy.Player) this.source).sendMessage((ComponentLike) error.toComponent());
         }
     }
     class Console extends Client.Console<ConsoleCommandSource> {
@@ -27,10 +27,10 @@ public interface VelocityClient {
         }
 
         public void send(Component message) {
-            ((ConsoleCommandSource) this.source).sendMessage(message);
+            ((ConsoleCommandSource) this.source).sendMessage((ComponentLike) message);
         }
         public void send(Error error) {
-            ((ConsoleCommandSource) this.source).sendMessage(error.toComponent());
+            ((ConsoleCommandSource) this.source).sendMessage((ComponentLike) error.toComponent());
         }
     }
     class Other extends Client.Other<CommandSource> {
@@ -39,10 +39,10 @@ public interface VelocityClient {
         }
 
         public void send(Component message) {
-            ((CommandSource) this.source).sendMessage(message);
+            ((CommandSource) this.source).sendMessage((ComponentLike) message);
         }
         public void send(Error error) {
-            ((CommandSource) this.source).sendMessage(error.toComponent());
+            ((CommandSource) this.source).sendMessage((ComponentLike) error.toComponent());
         }
     }
 }

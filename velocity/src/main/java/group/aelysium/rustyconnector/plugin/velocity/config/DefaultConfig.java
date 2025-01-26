@@ -5,8 +5,8 @@ import group.aelysium.declarative_yaml.annotations.*;
 
 import java.io.IOException;
 
-@Config("plugins/rustyconnector/config.yml")
-@Git(value = "rustyconnector", required = false)
+@Namespace("rustyconnector")
+@Config("/config.yml")
 public class DefaultConfig {
     @Comment({
             "###########################################################################################################",
@@ -82,6 +82,6 @@ public class DefaultConfig {
     }
 
     public static DefaultConfig New() throws IOException {
-        return DeclarativeYAML.load(DefaultConfig.class);
+        return DeclarativeYAML.From(DefaultConfig.class);
     }
 }

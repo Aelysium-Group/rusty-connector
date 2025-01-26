@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Map;
 
-@Config("plugins/rustyconnector/scalar_families/{id}.yml")
-@Git(value = "rustyconnector", required = false)
+@Namespace("rustyconnector")
+@Config("/scalar_families/{id}.yml")
 @Comment({
         "############################################################",
         "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
@@ -126,6 +126,6 @@ public class ScalarFamilyConfig {
         Printer printer = new Printer()
                 .pathReplacements(Map.of("id", familyID))
                 .commentReplacements(Map.of("id", familyID));
-        return DeclarativeYAML.load(ScalarFamilyConfig.class, printer);
+        return DeclarativeYAML.From(ScalarFamilyConfig.class, printer);
     }
 }

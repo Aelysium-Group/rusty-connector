@@ -19,8 +19,8 @@ import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonObject
 import java.io.IOException;
 import java.util.UUID;
 
-@Config("plugins/rustyconnector/config.yml")
-@Git(value = "rustyconnector", required = false)
+@Namespace("rustyconnector")
+@Config("/config.yml")
 public class DefaultConfig {
     @Comment({
             "#",
@@ -157,6 +157,6 @@ public class DefaultConfig {
     }
 
     public static DefaultConfig New() throws IOException {
-        return DeclarativeYAML.load(DefaultConfig.class);
+        return DeclarativeYAML.From(DefaultConfig.class);
     }
 }

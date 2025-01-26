@@ -3,9 +3,9 @@ package group.aelysium.rustyconnector.plugin.paper;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public interface PaperClient {
@@ -15,10 +15,10 @@ public interface PaperClient {
         }
 
         public void send(Component message) {
-            ((org.bukkit.entity.Player) this.source).sendMessage(message);
+            ((org.bukkit.entity.Player) this.source).sendMessage((ComponentLike) message);
         }
         public void send(Error error) {
-            ((org.bukkit.entity.Player) this.source).sendMessage(error.toComponent());
+            ((org.bukkit.entity.Player) this.source).sendMessage((ComponentLike) error.toComponent());
         }
     }
     class Console extends Client.Console<ConsoleCommandSender> {
@@ -27,10 +27,10 @@ public interface PaperClient {
         }
 
         public void send(Component message) {
-            ((ConsoleCommandSender) this.source).sendMessage(message);
+            ((ConsoleCommandSender) this.source).sendMessage((ComponentLike) message);
         }
         public void send(Error error) {
-            ((ConsoleCommandSender) this.source).sendMessage(error.toComponent());
+            ((ConsoleCommandSender) this.source).sendMessage((ComponentLike) error.toComponent());
         }
     }
     class Other extends Client.Other<CommandSender> {
@@ -39,10 +39,10 @@ public interface PaperClient {
         }
 
         public void send(Component message) {
-            ((CommandSender) this.source).sendMessage(message);
+            ((CommandSender) this.source).sendMessage((ComponentLike) message);
         }
         public void send(Error error) {
-            ((CommandSender) this.source).sendMessage(error.toComponent());
+            ((CommandSender) this.source).sendMessage((ComponentLike) error.toComponent());
         }
     }
 }

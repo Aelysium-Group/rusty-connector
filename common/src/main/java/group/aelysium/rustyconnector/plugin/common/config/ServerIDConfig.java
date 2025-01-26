@@ -8,7 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-@Config("plugins/rustyconnector/metadata/server.id")
+@Namespace("rustyconnector")
+@Config("/metadata/server.id")
 public class ServerIDConfig {
     @AllContents()
     private byte[] id;
@@ -32,12 +33,12 @@ public class ServerIDConfig {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return DeclarativeYAML.load(ServerIDConfig.class);
+        return DeclarativeYAML.From(ServerIDConfig.class);
     }
     public static ServerIDConfig Read() throws IOException {
         // This logic only cares about generating the config if it doesn't exist.
         File file = new File("plugins/rustyconnector/metadata/server.id");
         if (!file.exists()) return null;
-        return DeclarativeYAML.load(ServerIDConfig.class);
+        return DeclarativeYAML.From(ServerIDConfig.class);
     }
 }

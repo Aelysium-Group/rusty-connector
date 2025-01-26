@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
+import group.aelysium.rustyconnector.common.plugins.PluginLoader;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
@@ -25,11 +26,19 @@ import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
+import java.util.List;
+
 public final class PaperRustyConnector extends JavaPlugin {
+    private final PluginLoader loader = new PluginLoader(List.of(
+            "io.papermc.paper"
+    ));
+
     public PaperRustyConnector() {}
 
     @Override
     public void onEnable() {
+        DeclarativeYAML.basePath("rustyconnector", "plugins/rustyconnector");
+        DeclarativeYAML.basePath("rustyconnector-modules", "rc-modules");
         ConsoleCommandSender console = this.getServer().getConsoleSender();
         console.sendMessage("Initializing RustyConnector...");
 

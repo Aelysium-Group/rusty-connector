@@ -4,9 +4,10 @@ import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.server.ServerAdapter;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
+import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -54,7 +55,7 @@ public class PaperServerAdapter extends ServerAdapter {
         try {
             Player player = this.server.getPlayer(uuid);
             if(player == null) throw new NullPointerException("No player with the uuid "+uuid+" is online.");
-            player.sendMessage(message);
+            player.sendMessage((ComponentLike) message);
         } catch (Exception e) {
             RC.Error(Error.from(e));
         }
@@ -62,6 +63,6 @@ public class PaperServerAdapter extends ServerAdapter {
 
     @Override
     public void log(@NotNull Component message) {
-        this.server.getConsoleSender().sendMessage(message);
+        this.server.getConsoleSender().sendMessage((ComponentLike) message);
     }
 }

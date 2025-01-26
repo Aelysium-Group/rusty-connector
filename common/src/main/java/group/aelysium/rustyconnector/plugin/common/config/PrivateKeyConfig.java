@@ -3,8 +3,7 @@ package group.aelysium.rustyconnector.plugin.common.config;
 import group.aelysium.declarative_yaml.*;
 import group.aelysium.declarative_yaml.annotations.AllContents;
 import group.aelysium.declarative_yaml.annotations.Config;
-import group.aelysium.declarative_yaml.annotations.Git;
-import group.aelysium.declarative_yaml.lib.Printer;
+import group.aelysium.declarative_yaml.annotations.Namespace;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.crypt.AES;
 import group.aelysium.rustyconnector.common.errors.Error;
@@ -16,8 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
 
-@Config("plugins/rustyconnector/metadata/aes.private")
-@Git(value = "rustyconnector", required = false)
+@Namespace("rustyconnector")
+@Config("/metadata/aes.private")
 public class PrivateKeyConfig {
     @AllContents()
     private byte[] key;
@@ -41,7 +40,7 @@ public class PrivateKeyConfig {
         } catch (Exception e) {
             RC.Error(Error.from(e));
         }
-        return DeclarativeYAML.load(PrivateKeyConfig.class);
+        return DeclarativeYAML.From(PrivateKeyConfig.class);
     }
     public static Optional<PrivateKeyConfig> Load() throws IOException {
         File file = new File("plugins/rustyconnector/metadata/aes.private");
@@ -54,6 +53,6 @@ public class PrivateKeyConfig {
             RC.Error(Error.from(e));
         }
 
-        return Optional.of(DeclarativeYAML.load(PrivateKeyConfig.class));
+        return Optional.of(DeclarativeYAML.From(PrivateKeyConfig.class));
     }
 }

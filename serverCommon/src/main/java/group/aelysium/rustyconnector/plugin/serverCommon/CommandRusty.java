@@ -11,8 +11,8 @@ import org.incendo.cloud.annotations.Permission;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.Component.*;
 
 @Command("rc")
 @Permission("rustyconnector.commands.rc")
@@ -36,9 +36,8 @@ public final class CommandRusty {
             String target,
             @Greedy String flags
     ) {
-        System.out.println(flags);
         String flagsArray = flags.replaceAll("\\s*-+([a-zA-Z])\\s*", "$1");
-        System.out.println(flagsArray);
+
         try {
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().send(playerTarget, target, flagsArray).get(15, TimeUnit.SECONDS);
 

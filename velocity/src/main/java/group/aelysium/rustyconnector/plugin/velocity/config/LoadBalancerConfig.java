@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Map;
 
-@Config("plugins/rustyconnector/load_balancers/{name}.yml")
-@Git(value = "rustyconnector", required = false)
+@Namespace("rustyconnector")
+@Config("/load_balancers/{name}.yml")
 @Comment({
         "############################################################",
         "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
@@ -155,6 +155,6 @@ public class LoadBalancerConfig {
     public static LoadBalancerConfig New(String name) throws IOException {
         Printer printer = new Printer()
                 .pathReplacements(Map.of("name", name));
-        return DeclarativeYAML.load(LoadBalancerConfig.class, printer);
+        return DeclarativeYAML.From(LoadBalancerConfig.class, printer);
     }
 }

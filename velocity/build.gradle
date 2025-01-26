@@ -3,30 +3,14 @@ compileJava {
     options.compilerArgs << '-parameters'
 }
 
-// Shadowjar Workaround
-
-configurations {
-    zip
-}
-
-jar {
-    archiveFileName = "rustyconnector-velocity-${version}.jar"
-    from {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        configurations.zip.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    exclude 'org/**', 'net/**', 'kotlin/**', 'javax/**', 'jakarta/**', 'io/**', 'com/**', 'metadata.json', 'jetty-dir.css'
-}
-
 dependencies {
     implementation 'org.bstats:bstats-velocity:3.1.0'
     compileOnly "com.velocitypowered:velocity-api:3.3.0-SNAPSHOT"
     implementation "org.incendo:cloud-velocity:2.0.0-beta.10"
 
-    zip implementation( project(path: ':common', configuration: 'default'))
+    implementation project(path: ':common', configuration: "shadow")
 }
 
-def plugin_version = project.plugin_version
 processResources {
     def props = ['version': plugin_version, 'config_version': config_version, 'magic_link_protocol_version': magic_link_protocol_version]
     inputs.properties props
@@ -36,3 +20,13 @@ processResources {
         expand props
     }
 }
+
+shadowJar {
+    archiveBaseName.set("rustyconnector-velocity")
+    archiveClassifier.set('')
+    mergeServiceFiles()
+
+    relocate "org.bstats.velocity", "group.aelysium.rustyconnector.velocity.org.bstats"
+}
+
+jar.finalizedBy(shadowJar)

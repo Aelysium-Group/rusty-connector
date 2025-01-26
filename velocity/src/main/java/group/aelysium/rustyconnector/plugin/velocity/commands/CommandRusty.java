@@ -7,7 +7,6 @@ import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
 import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 
@@ -15,6 +14,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_BLUE;
 
 @Command("rc")
 @Permission("rustyconnector.commands.rc")
@@ -29,11 +29,11 @@ public final class CommandRusty {
             player = RC.P.Player(playerTarget).orElseThrow();
         } catch (Exception ignore) {}
         if (player == null) {
-            client.send(text("No player "+playerTarget+" could be found.", NamedTextColor.DARK_BLUE));
+            client.send(text("No player "+playerTarget+" could be found.", DARK_BLUE));
             return;
         }
         if (!player.online()) {
-            client.send(text(player.username()+" isn't online.", NamedTextColor.DARK_BLUE));
+            client.send(text(player.username()+" isn't online.", DARK_BLUE));
             return;
         }
 
@@ -41,7 +41,7 @@ public final class CommandRusty {
         boolean isFamily = RC.P.Family(target).isPresent();
 
         if(isServer && isFamily) {
-            client.send(text("Both a server and family have the id `"+target+"`. Please clarify if you want to send the player to a family or a server.", NamedTextColor.DARK_BLUE));
+            client.send(text("Both a server and family have the id `"+target+"`. Please clarify if you want to send the player to a family or a server.", DARK_BLUE));
             return;
         }
 
@@ -76,11 +76,11 @@ public final class CommandRusty {
             player = RC.P.Player(playerTarget).orElseThrow();
         } catch (Exception ignore) {}
         if (player == null) {
-            client.send(text("No player "+playerTarget+" could be found.", NamedTextColor.DARK_BLUE));
+            client.send(text("No player "+playerTarget+" could be found.", DARK_BLUE));
             return;
         }
         if (!player.online()) {
-            client.send(text(player.username()+" isn't online.", NamedTextColor.DARK_BLUE));
+            client.send(text(player.username()+" isn't online.", DARK_BLUE));
             return;
         }
 
@@ -107,11 +107,11 @@ public final class CommandRusty {
             player = RC.P.Player(playerTarget).orElseThrow();
         } catch (Exception ignore) {}
         if (player == null) {
-            client.send(text("No player "+playerTarget+" could be found.", NamedTextColor.DARK_BLUE));
+            client.send(text("No player "+playerTarget+" could be found.", DARK_BLUE));
             return;
         }
         if (!player.online()) {
-            client.send(text(player.username()+" isn't online.", NamedTextColor.DARK_BLUE));
+            client.send(text(player.username()+" isn't online.", DARK_BLUE));
             return;
         }
 

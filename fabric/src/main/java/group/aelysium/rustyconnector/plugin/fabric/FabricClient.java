@@ -4,6 +4,7 @@ import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +18,7 @@ public interface FabricClient {
             ((Audience) this.source).sendMessage(message);
         }
         public void send(Error error) {
-            ((Audience) this.source).sendMessage(error.toComponent());
+            ((Audience) this.source).sendMessage((ComponentLike) error.toComponent());
         }
     }
     class Console extends Client.Console<ServerCommandSource> {
@@ -29,7 +30,7 @@ public interface FabricClient {
             ((Audience) this.source).sendMessage(message);
         }
         public void send(Error error) {
-            ((Audience) this.source).sendMessage(error.toComponent());
+            ((Audience) this.source).sendMessage((ComponentLike) error.toComponent());
         }
     }
     class Other extends Client.Other<ServerCommandSource> {
@@ -41,7 +42,7 @@ public interface FabricClient {
             ((Audience) this.source).sendMessage(message);
         }
         public void send(Error error) {
-            ((Audience) this.source).sendMessage(error.toComponent());
+            ((Audience) this.source).sendMessage((ComponentLike) error.toComponent());
         }
     }
 }

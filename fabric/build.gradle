@@ -32,8 +32,10 @@ dependencies {
     include "com.aventrix.jnanoid:jnanoid:2.0.0"
 
     // dYAML
-    implementation "group.aelysium:declarative-yaml:0.1.6"
-    include "group.aelysium:declarative-yaml:0.1.6"
+//    implementation "group.aelysium:declarative-yaml:0.1.6"
+//    include "group.aelysium:declarative-yaml:0.1.6"
+    implementation files("../libs/declarative-yaml-0.2.0.jar")
+//    include files("../libs/declarative-yaml-0.2.0.jar")
 
     // Scuffed Epic dYAML Workaround Moment Late 2024 Simulator Pogchamp (Cringe)
     include(implementation('org.spongepowered:configurate-core:4.1.2'))

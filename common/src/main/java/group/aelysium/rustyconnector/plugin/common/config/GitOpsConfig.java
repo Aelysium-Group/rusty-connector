@@ -2,25 +2,21 @@ package group.aelysium.rustyconnector.plugin.common.config;
 
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.GitOperator;
-import group.aelysium.declarative_yaml.annotations.AllContents;
 import group.aelysium.declarative_yaml.annotations.Comment;
 import group.aelysium.declarative_yaml.annotations.Config;
+import group.aelysium.declarative_yaml.annotations.Namespace;
 import group.aelysium.declarative_yaml.annotations.Node;
 import group.aelysium.declarative_yaml.lib.Printer;
-import group.aelysium.rustyconnector.common.crypt.AES;
 import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
-@Config("plugins/rustyconnector/gitops.yml")
+@Namespace("rustyconnector")
+@Config("/gitops.yml")
 @Comment({
         "Backs all of the RustyConnector configs behind GitOps so you can sync then to a Git repository.",
         "If you make changes to this config you must restart RustyConnector to see them."
@@ -51,7 +47,7 @@ public class GitOpsConfig {
     public static @Nullable GitOpsConfig New() throws IOException {
         GitOpsConfig config = new GitOpsConfig();
         try {
-            DeclarativeYAML.reload(config, new Printer());
+            DeclarativeYAML.ReadOnly(config, new Printer());
         } catch (Exception ignore) {
             return null;
         }
