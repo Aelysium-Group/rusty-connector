@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
-import group.aelysium.rustyconnector.common.plugins.PluginHolder;
+import group.aelysium.rustyconnector.common.modules.ModuleHolder;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
 import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
 import net.kyori.adventure.text.Component;
@@ -46,7 +46,7 @@ public class CommonCommands {
     @Command("plugins")
     public void nglbwcmuvchdjaon(Client.Console<?> client) {
         try {
-            client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().plugins().keySet()));
+            client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().modules().keySet()));
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
         }
@@ -141,12 +141,12 @@ public class CommonCommands {
             String name = current.get().metadata("name");
             if(name == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name`, `description`, and `details` metadata.");
 
-            Particle plugin = null;
+            Particle module = null;
             try {
-                plugin = current.get().observe(3, TimeUnit.SECONDS);
+                module = current.get().observe(3, TimeUnit.SECONDS);
             } catch(Exception ignore) {}
 
-            if(!(plugin instanceof PluginHolder pluginHolder)) {
+            if(!(module instanceof ModuleHolder moduleHolder)) {
                 client.send(Error.from(
                                 node+" doesn't exist on "+name+". "+name+" actually doesn't have any children plugins.")
                         .causedBy("Attempting to fetch the plugin "+pluginTree)
@@ -154,11 +154,11 @@ public class CommonCommands {
                 return null;
             }
 
-            Particle.Flux<? extends Particle> newCurrent = pluginHolder.plugins().get(node);
+            Particle.Flux<? extends Particle> newCurrent = moduleHolder.modules().get(node);
             if(newCurrent == null) {
                 client.send(Error.withSolution(
                             node+" doesn't exist on "+name+".",
-                            "Available plugins are: "+String.join(", "+pluginHolder.plugins().keySet())
+                            "Available plugins are: "+String.join(", "+moduleHolder.modules().keySet())
                     )
                     .causedBy("Attempting to fetch the plugin "+pluginTree)
                 );

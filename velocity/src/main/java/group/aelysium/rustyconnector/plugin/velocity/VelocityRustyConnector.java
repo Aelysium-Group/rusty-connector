@@ -16,7 +16,7 @@ import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.events.EventManager;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
-import group.aelysium.rustyconnector.common.plugins.PluginLoader;
+import group.aelysium.rustyconnector.common.modules.ModuleLoader;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
@@ -58,7 +58,7 @@ public class VelocityRustyConnector implements PluginContainer {
     private final ProxyServer server;
     private final Path dataFolder;
     private final AnnotationParser<Client> annotationParser;
-    private final PluginLoader loader = new PluginLoader(List.of(
+    private final ModuleLoader loader = new ModuleLoader(List.of(
             "com.velocitypowered"
     ));
 
@@ -128,12 +128,12 @@ public class VelocityRustyConnector implements PluginContainer {
             RustyConnector.Kernel(flux->{
                 flux.onStart(kernel->{
                     try {
-                        kernel.fetchPlugin("LangLibrary").onStart(l -> ((LangLibrary) l).registerLangNodes(VelocityLang.class));
+                        kernel.fetchModule("LangLibrary").onStart(l -> ((LangLibrary) l).registerLangNodes(VelocityLang.class));
                     } catch (Exception e) {
                         RC.Error(Error.from(e));
                     }
                     try {
-                        kernel.fetchPlugin("EventManager").onStart(m -> {
+                        kernel.fetchModule("EventManager").onStart(m -> {
                             ((EventManager) m).listen(OnServerRegister.class);
                             ((EventManager) m).listen(OnServerUnregister.class);
                             ((EventManager) m).listen(OnServerTimeout.class);
@@ -143,7 +143,7 @@ public class VelocityRustyConnector implements PluginContainer {
                         RC.Error(Error.from(e));
                     }
                     try {
-                        kernel.fetchPlugin("FamilyRegistry").onStart(f -> {
+                        kernel.fetchModule("FamilyRegistry").onStart(f -> {
                             try {
                                 DefaultConfig config = DefaultConfig.New();
                                 ScalarFamilyConfig.New(config.rootFamily()); // Literally just exists to ensure the root family exists and then generate the scalar family folder
@@ -166,7 +166,7 @@ public class VelocityRustyConnector implements PluginContainer {
                     }
                 });
 
-                loader.loadPlugins(flux, "rc-modules");
+                loader.loadFromFolder(flux, "rc-modules");
             });
 
             RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());

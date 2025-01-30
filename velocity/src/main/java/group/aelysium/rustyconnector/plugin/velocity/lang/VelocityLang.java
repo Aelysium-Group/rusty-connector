@@ -45,7 +45,7 @@ public class VelocityLang extends CommonLang {
                 newlines(),
                 text("Details:", DARK_GRAY),
                 keyValue("ID",          kernel.id()),
-                keyValue("Plugins",     kernel.plugins().size()),
+                keyValue("Plugins",     kernel.modules().size()),
                 keyValue("Families",    families),
                 keyValue("Servers",     servers),
                 keyValue("Players",     players),
@@ -357,7 +357,7 @@ public class VelocityLang extends CommonLang {
                 keyValue("Parent Family", parentName.get()),
                 keyValue("Servers", family.servers().size()),
                 keyValue("Players", family.players()),
-                keyValue("Plugins", text(String.join(", ",family.plugins().keySet()), BLUE)),
+                keyValue("Plugins", text(String.join(", ",family.modules().keySet()), BLUE)),
                 space(),
                 text("Extra Properties:", DARK_GRAY),
                 (

@@ -5,7 +5,7 @@ import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
-import group.aelysium.rustyconnector.common.plugins.PluginLoader;
+import group.aelysium.rustyconnector.common.modules.ModuleLoader;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
@@ -30,7 +30,7 @@ import org.incendo.cloud.fabric.FabricServerCommandManager;
 import java.util.List;
 
 public class FabricRustyConnector implements DedicatedServerModInitializer {
-    private final PluginLoader loader = new PluginLoader(List.of(
+    private final ModuleLoader loader = new ModuleLoader(List.of(
             "net.fabricmc"
     ));
 
@@ -89,16 +89,18 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                 RustyConnector.Kernel(flux->{
                     flux.onStart(kernel -> {
                         try {
-                            kernel.fetchPlugin("LangLibrary").onStart(l -> ((LangLibrary) l).registerLangNodes(ServerLang.class));
+                            kernel.fetchModule("LangLibrary").onStart(l -> ((LangLibrary) l).registerLangNodes(ServerLang.class));
                         } catch (Exception e) {
                             RC.Error(Error.from(e));
                         }
                         try {
-                            kernel.fetchPlugin("MagicLink").onStart(l -> ((WebSocketMagicLink) l).connect());
+                            kernel.fetchModule("MagicLink").onStart(l -> ((WebSocketMagicLink) l).connect());
                         } catch (Exception e) {
                             RC.Error(Error.from(e));
                         }
                     });
+
+                    loader.loadFromFolder(flux, "rc-modules");
                 });
 
                 RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
