@@ -35,20 +35,12 @@ public class VelocityLang extends CommonLang {
 
     @Lang("rustyconnector-kernelDetails")
     public static Component usage(ProxyKernel kernel) {
-        int families = RC.P.Families().size();
-        int servers = RC.P.Servers().size();
-        int players = RC.P.Players().dump().size();
-
         return RC.Lang("rustyconnector-headerBox").generate(
             "proxy",
             join(
                 newlines(),
                 text("Details:", DARK_GRAY),
-                keyValue("ID",          kernel.id()),
-                keyValue("Plugins",     kernel.modules().size()),
-                keyValue("Families",    families),
-                keyValue("Servers",     servers),
-                keyValue("Players",     players),
+                kernel.details(),
                 empty(),
                 text("Commands:", DARK_GRAY),
                 text("rc families", BLUE),
@@ -306,121 +298,5 @@ public class VelocityLang extends CommonLang {
                     text("Type /server <server_name> to switch to another server.")
             );
         }
-    }
-
-    @Lang("rustyconnector-playerRegistryDetails")
-    public static Component playerRegistryDetails(PlayerRegistry playerRegistry) {
-        return join(
-                newlines(),
-                keyValue("Players", join(
-                        JoinConfiguration.separator(text(", ", DARK_BLUE)),
-                        playerRegistry.dump().stream().map(p -> text(p.username(), BLUE)).toList()
-                ))
-        );
-    }
-
-    @Lang("rustyconnector-familyRegistryDetails")
-    public static Component familyRegistryDetails(FamilyRegistry familyRegistry) {
-        List<Family> families = new ArrayList<>();
-        familyRegistry.fetchAll().forEach(f -> f.executeNow(families::add));
-
-        AtomicReference<Family> rootFamily = new AtomicReference<>(null);
-        try {
-            familyRegistry.rootFamily().executeNow(rootFamily::set);
-        } catch (Exception ignore) {}
-        return join(
-                newlines(),
-                keyValue("Total Families", familyRegistry.size()),
-                keyValue("Available Families", families.size()),
-                keyValue("Root Family", rootFamily.get() == null ? "Unavailable" : rootFamily.get().id()),
-                keyValue("Families", join(
-                        JoinConfiguration.separator(text(", ", DARK_BLUE)),
-                        families.stream().map(f -> text(f.id(), BLUE)).toList()
-                )),
-                space(),
-                text("Families are technically considered plugins as well, you can view details for the above families if you'd like.", DARK_GRAY)
-        );
-    }
-
-    @Lang("rustyconnector-familyDetails")
-    public static Component familyDetails(Family family) {
-        AtomicReference<String> parentName = new AtomicReference<>("none");
-        try {
-            Particle.Flux<? extends Family> parent = family.parent().orElse(null);
-            if(parent == null) throw new RuntimeException();
-            parent.executeLocking(f -> parentName.set(f.id()), ()->parentName.set("[Unavailable]"), 10, TimeUnit.SECONDS);
-        } catch (Exception ignore) {}
-
-        return join(
-                newlines(),
-                keyValue("Display Name", family.displayName() == null ? "No Display Name" : family.displayName()),
-                keyValue("Parent Family", parentName.get()),
-                keyValue("Servers", family.servers().size()),
-                keyValue("Players", family.players()),
-                keyValue("Plugins", text(String.join(", ",family.modules().keySet()), BLUE)),
-                space(),
-                text("Extra Properties:", DARK_GRAY),
-                (
-                    family.metadata().isEmpty() ?
-                        text("There are no properties to show.", DARK_GRAY)
-                        :
-                        join(
-                            newlines(),
-                            family.metadata().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue())).toList()
-                        )
-                ),
-                space(),
-                text("Servers:", DARK_GRAY),
-                (
-                    family.servers().isEmpty() ?
-                        text("There are no servers in this family.", DARK_GRAY)
-                    :
-                        join(
-                                newlines(),
-                                family.servers().stream().map(s->{
-                                    boolean locked = family.isLocked(s);
-                                    return join(
-                                            JoinConfiguration.separator(empty()),
-                                            text("[", DARK_GRAY),
-                                            text(s.id(), BLUE),
-                                            space(),
-                                            text(AddressUtil.addressToString(s.address()), YELLOW),
-                                            text("]:", DARK_GRAY),
-                                            space(),
-                                            (
-                                                    s.displayName() == null ? empty() :
-                                                    text(Objects.requireNonNull(s.displayName()), AQUA)
-                                                    .append(space())
-                                            ),
-                                            text("(Players: ", DARK_GRAY),
-                                            text(s.players(), YELLOW),
-                                            text(")", DARK_GRAY),
-                                            space(),
-                                            (
-                                                locked ? text("Locked", RED) : empty()
-                                            )
-                                    );
-                                }).toList()
-                        )
-                )
-        );
-    }
-
-    @Lang("rustyconnector-scalarFamilyDetails")
-    public static Component scalarFamilyDetails(ScalarFamily family) {
-        return RC.Lang("rustyconnector-familyDetails").generate(family);
-    }
-
-    @Lang("rustyconnector-loadBalancerDetails")
-    public static Component loadBalancerDetails(LoadBalancer loadBalancer) {
-        return join(
-                newlines(),
-                keyValue("Algorithm", loadBalancer.getClass().getSimpleName()),
-                keyValue("Total Servers", loadBalancer.servers().size()),
-                keyValue("Unlocked Servers", loadBalancer.unlockedServers().size()),
-                keyValue("Locked Servers", loadBalancer.lockedServers().size()),
-                keyValue("Weighted", loadBalancer.weighted()),
-                keyValue("Persistence", loadBalancer.persistent() ? "Enabled ("+loadBalancer.attempts()+")" : "Disabled")
-        );
     }
 }

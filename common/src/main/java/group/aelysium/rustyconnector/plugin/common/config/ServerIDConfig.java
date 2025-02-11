@@ -36,7 +36,6 @@ public class ServerIDConfig {
         return DeclarativeYAML.From(ServerIDConfig.class);
     }
     public static ServerIDConfig Read() throws IOException {
-        // This logic only cares about generating the config if it doesn't exist.
         File file = new File("plugins/rustyconnector/metadata/server.id");
         if (!file.exists()) return null;
         return DeclarativeYAML.From(ServerIDConfig.class);

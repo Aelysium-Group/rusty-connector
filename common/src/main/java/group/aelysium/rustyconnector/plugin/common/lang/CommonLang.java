@@ -403,36 +403,4 @@ public class CommonLang {
                 space()
         );
     }
-
-    @Lang("rustyconnector-langLibraryDetails")
-    public static Component langLibraryDetails(LangLibrary langLibrary) {
-        return join(
-                newlines(),
-                keyValue("ASCII Alphabet - Supported Characters", "'"+String.join("', '", langLibrary.asciiAlphabet().supportedCharacters().stream().map(c -> c.toString()).toList())+"'"),
-                keyValue("Registered Nodes", String.join(", ", langLibrary.langNodes()))
-        );
-    }
-
-    @Lang("rustyconnector-errorRegistryDetails")
-    public static Component errorRegistryDetails(ErrorRegistry errorRegistry) {
-        return join(
-                newlines(),
-                keyValue("Log Errors", errorRegistry.logErrors()),
-                keyValue("Cache Size", errorRegistry.cacheSize()),
-                keyValue("Error Count", errorRegistry.fetchAll().size())
-        );
-    }
-
-    @Lang("rustyconnector-eventManagerDetails")
-    public static Component eventManagerDetails(EventManager eventManager) {
-        return text("No other details exist to show.", DARK_GRAY);
-    }
-
-    @Lang("rustyconnector-magicLinkDetails")
-    public static Component magicLinkDetails(MagicLinkCore magicLink) {
-        return join(
-                newlines(),
-                keyValue("Cached Packets", magicLink.packetCache().size())
-        );
-    }
 }

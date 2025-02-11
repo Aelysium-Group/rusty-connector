@@ -22,21 +22,7 @@ public class ServerLang extends CommonLang {
                 join(
                         newlines(),
                         text("Details:", DARK_GRAY),
-                        keyValue("ID",             kernel.id()),
-                        keyValue("Address",        AddressUtil.addressToString(kernel.address())),
-                        keyValue("Family",         kernel.targetFamily()),
-                        keyValue("Online Players", kernel.playerCount()),
-                        empty(),
-                        text("Extra Properties:", DARK_GRAY),
-                        (
-                                kernel.metadata().isEmpty() ?
-                                        text("There is no metadata to show.", DARK_GRAY)
-                                        :
-                                        join(
-                                                newlines(),
-                                                kernel.metadata().entrySet().stream().map(e -> keyValue(e.getKey(), e.getValue())).toList()
-                                        )
-                        ),
+                        kernel.details(),
                         empty(),
                         text("Commands:", DARK_GRAY),
                         text("rc send <player> <target> [flags]", BLUE),
