@@ -71,7 +71,7 @@ public class CommonCommands {
                 return;
             }
 
-            client.send(RC.Lang("rustyconnector-details").generate(flux));
+            client.send(RC.Lang("rustyconnector-details").generate(flux.metadata("name"), flux.metadata("description"), flux.));
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
         }

@@ -369,17 +369,12 @@ public class CommonLang {
     }
 
     @Lang("rustyconnector-details")
-    public static Component details(Particle.Flux<? extends ModuleParticle> flux) {
-        String name = flux.metadata("name");
-        if(name == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name` and `description` metadata.");
+    public static Component details(String name, String description, ModuleParticle plugin) {
+        if(name == null) throw new IllegalArgumentException("`rustyconnector-details` requires that `name` and `description` are not null.");
+        if(description == null) throw new IllegalArgumentException("`rustyconnector-details` requires that `name` and `description` are not null.");
 
-        String description = flux.metadata("description");
-        if(description == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name` and `description` metadata.");
-
-        ModuleParticle plugin = null;
         Component details = null;
         try {
-             plugin = flux.observe(3, TimeUnit.SECONDS);
              details = plugin.details();
         } catch(Exception ignore) {}
         
