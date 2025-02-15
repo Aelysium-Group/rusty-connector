@@ -79,7 +79,7 @@ public class VelocityProxyAdapter extends ProxyAdapter {
 
     @Override
     public void log(@NotNull Component component) {
-        this.logger.send((net.kyori.adventure.text.Component) component);
+        this.logger.send(component);
     }
 
     @Override
@@ -112,7 +112,7 @@ public class VelocityProxyAdapter extends ProxyAdapter {
     @Override
     public void disconnect(@NotNull Player player, @NotNull Component component) {
         if(!(this.convertToObject(player) instanceof com.velocitypowered.api.proxy.Player velocityPlayer)) throw new RuntimeException("Provided object was not a player!");
-        velocityPlayer.disconnect((net.kyori.adventure.text.Component) component);
+        velocityPlayer.disconnect(component);
     }
 
     @Override

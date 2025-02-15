@@ -3,44 +3,12 @@ compileJava {
     options.compilerArgs << '-parameters'
 }
 
-// Shadowjar Workaround
-
-configurations {
-    zip
-}
-
-jar {
-    archiveFileName = "rustyconnector-paper-${version}.jar"
-    from {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        configurations.zip.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    exclude 'org/**', 'net/**', 'kotlin/**', 'javax/**', 'jakarta/**', 'io/**', 'com/**', 'metadata.json', 'jetty-dir.css'
-}
-
 dependencies {
-    implementation "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT"
+    compileOnly "io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT"
     implementation "org.incendo:cloud-paper:2.0.0-beta.10"
-    implementation "org.incendo:cloud-annotations:2.0.0"
 
-    zip implementation( project(path: ':serverCommon', configuration: 'default'))
-    zip implementation( project(path: ':common', configuration: 'default'))
-}
-
-def targetJavaVersion = project.java_version as int
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release = targetJavaVersion
-    }
+    implementation project(path: ':serverCommon', configuration: 'shadow')
+    implementation project(path: ':common', configuration: 'shadow')
 }
 
 processResources {
@@ -52,3 +20,13 @@ processResources {
         expand props
     }
 }
+
+shadowJar {
+    archiveBaseName.set("rustyconnector-paper")
+    archiveClassifier.set('')
+    mergeServiceFiles()
+
+    relocate "org.incendo", "group.aelysium.rustyconnector.paper.org.incendo"
+}
+
+jar.finalizedBy(shadowJar)

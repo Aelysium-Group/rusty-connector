@@ -130,56 +130,6 @@ public class VelocityLang extends CommonLang {
         );
     }
 
-    @Lang("rustyconnector-families")
-    public static Component families() {
-        AtomicReference<String> rootFamily = new AtomicReference<>("[Unavailable]");
-        try {
-            RC.P.Families().rootFamily().executeNow(r -> rootFamily.set(r.id()));
-        } catch (Exception ignore) {}
-
-        return RC.Lang("rustyconnector-headerBox").generate(
-                "families",
-                (
-                    RC.P.Families().size() == 0 ?
-                        text("There are no available families at the moment.", DARK_GRAY)
-                    :
-                        join(
-                                newlines(),
-                                RC.P.Families().fetchAll().stream().map(flux->{
-                                    try {
-                                        Family family = flux.orElseThrow();
-                                        return join(
-                                                JoinConfiguration.separator(empty()),
-                                                text("[", DARK_GRAY),
-                                                text(family.id(), BLUE),
-                                                text("]: ", DARK_GRAY),
-                                                (
-                                                    family.displayName() == null ? empty() :
-                                                    text(family.displayName(), GRAY)
-                                                ),
-                                                text("(Servers: ", DARK_GRAY),
-                                                text(family.servers().size(), YELLOW),
-                                                text(") ", DARK_GRAY),
-                                                text("(Players: ", DARK_GRAY),
-                                                text(family.players(), YELLOW),
-                                                text(")", DARK_GRAY),
-                                                (
-                                                    !family.id().equals(rootFamily.get()) ? empty() : join(
-                                                            JoinConfiguration.separator(empty()),
-                                                            text(" [", DARK_GRAY),
-                                                            text("Root Family", GREEN),
-                                                            text("]", DARK_GRAY)
-                                                    )
-                                                )
-                                        );
-                                    } catch (Exception ignore) {}
-                                    return null;
-                                }).filter(Objects::nonNull).toList()
-                        )
-                )
-        );
-    };
-
     @Lang("rustyconnector-servers")
     public static Component servers() {
         return RC.Lang("rustyconnector-headerBox").generate(
@@ -269,18 +219,10 @@ public class VelocityLang extends CommonLang {
         );
     };
 
-    @Lang("rustyconnector-family")
-    public static Component family(@NotNull Family family) {
-        return RC.Lang("rustyconnector-headerBox").generate(
-                family.id(),
-                RC.Lang("rustyconnector-familyDetails").generate(family)
-        );
-    };
-
     @Lang("velocity-serverUsage")
     public static Component velocityServer(Server server) {
         List<String> families = new ArrayList<>();
-        RC.P.Families().fetchAll().forEach(flux -> flux.executeNow(f -> families.add(f.id())));
+        RC.P.Families().modules().values().forEach(flux -> flux.executeNow(f -> families.add(((Family) f).id())));
         try {
             Family family = server.family().orElseThrow().observe(1, TimeUnit.MINUTES);
 

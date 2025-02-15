@@ -20,7 +20,7 @@ public class CommandServer {
             RC.Adapter().log(Error.from("/server can only be used by players!").toComponent());
             return;
         }
-        player.send(RC.Lang("velocity-serverUsage").generate());
+        player.send(RC.Lang("velocity-serverUsage").generate((Object) null));
     }
 
     @Command("server <family_name>")

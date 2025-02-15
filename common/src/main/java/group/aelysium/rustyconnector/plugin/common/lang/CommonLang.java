@@ -8,6 +8,7 @@ import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.common.modules.ModuleParticle;
 import group.aelysium.rustyconnector.proxy.util.Version;
 import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
 import net.kyori.adventure.text.Component;
@@ -368,21 +369,20 @@ public class CommonLang {
     }
 
     @Lang("rustyconnector-details")
-    public static Component details(Particle.Flux<?> flux) {
+    public static Component details(Particle.Flux<? extends ModuleParticle> flux) {
         String name = flux.metadata("name");
-        if(name == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name`, `description`, and `details` metadata.");
+        if(name == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name` and `description` metadata.");
 
         String description = flux.metadata("description");
-        if(description == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name`, `description`, and `details` metadata.");
+        if(description == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name` and `description` metadata.");
 
-        String details = flux.metadata("details");
-        if(details == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name`, `description`, and `details` metadata.");
-
-        Particle plugin = null;
+        ModuleParticle plugin = null;
+        Component details = null;
         try {
              plugin = flux.observe(3, TimeUnit.SECONDS);
+             details = plugin.details();
         } catch(Exception ignore) {}
-
+        
         return join(
                 newlines(),
                 space(),
@@ -394,10 +394,13 @@ public class CommonLang {
                     plugin == null ?
                         text("⬤", RED).append(text(" Stopped", GRAY))
                     :
+                    details == null ?
+                        text("There are no other details to show.", GRAY)
+                    :
                         join(
                                 newlines(),
                                 text("Details:", DARK_GRAY),
-                                RC.Lang(details).generate(plugin)
+                                details
                         )
                 ),
                 space()

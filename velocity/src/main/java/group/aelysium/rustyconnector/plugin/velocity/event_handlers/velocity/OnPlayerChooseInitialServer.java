@@ -38,7 +38,7 @@ public class OnPlayerChooseInitialServer {
 
                 player.disconnect(result.message());
             } catch (Exception e) {
-                RC.Error(Error.from(e).causedBy("A player `"+event.getPlayer().getUsername()+"` trying to connect."));
+                RC.Error(Error.from(e).whileAttempting("To help a player `"+event.getPlayer().getUsername()+"` connect."));
                 event.getPlayer().disconnect(Component.text("An internal error prevented you from connecting.", BLUE));
             }
         });

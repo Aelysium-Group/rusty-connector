@@ -44,6 +44,8 @@ public class CommonCommands {
 
     @Command("plugin")
     @Command("plugins")
+    @Command("module")
+    @Command("modules")
     public void nglbwcmuvchdjaon(Client.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().modules().keySet()));
@@ -53,6 +55,8 @@ public class CommonCommands {
     }
     @Command("plugin <pluginTree>")
     @Command("plugins <pluginTree>")
+    @Command("module <pluginTree>")
+    @Command("modules <pluginTree>")
     public void nglbwcmuschdjaon(Client.Console<?> client, String pluginTree) {
         try {
             Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
@@ -75,6 +79,8 @@ public class CommonCommands {
 
     @Command("plugin <pluginTree> reload")
     @Command("plugins <pluginTree> reload")
+    @Command("module <pluginTree> reload")
+    @Command("modules <pluginTree> reload")
     public void nglbwzmspchdjaon(Client.Console<?> client, String pluginTree) {
         try {
             Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
@@ -86,8 +92,11 @@ public class CommonCommands {
             RC.Error(Error.from(e).urgent(true));
         }
     }
+
     @Command("plugin <pluginTree> stop")
     @Command("plugins <pluginTree> stop")
+    @Command("module <pluginTree> stop")
+    @Command("modules <pluginTree> stop")
     public void nglbwzmzpsodjaon(Client.Console<?> client, String pluginTree) {
         Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
         if(flux == null) return;
@@ -103,8 +112,11 @@ public class CommonCommands {
             client.send(Component.text("Successfully stopped that plugin!"));
         }
     }
+
     @Command("plugin <pluginTree> start")
     @Command("plugins <pluginTree> start")
+    @Command("module <pluginTree> start")
+    @Command("modules <pluginTree> start")
     public void asfdmgfsgsodjaon(Client.Console<?> client, String pluginTree) {
         try {
             Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
@@ -139,7 +151,7 @@ public class CommonCommands {
             }
 
             String name = current.get().metadata("name");
-            if(name == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name`, `description`, and `details` metadata.");
+            if(name == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name` and `description` metadata.");
 
             Particle module = null;
             try {

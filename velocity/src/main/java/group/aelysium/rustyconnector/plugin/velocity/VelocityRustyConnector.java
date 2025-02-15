@@ -118,9 +118,10 @@ public class VelocityRustyConnector implements PluginContainer {
 //            }
 
             ProxyKernel.Tinder tinder = new ProxyKernel.Tinder(
-                    ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
-                    new VelocityProxyAdapter(server, logger),
-                    MagicLinkConfig.New().tinder()
+                ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
+                this.dataFolder,
+                new VelocityProxyAdapter(server, logger),
+                MagicLinkConfig.New().tinder()
             );
 
             RustyConnector.registerAndIgnite(tinder.flux());
@@ -146,16 +147,27 @@ public class VelocityRustyConnector implements PluginContainer {
                         kernel.fetchModule("FamilyRegistry").onStart(f -> {
                             try {
                                 DefaultConfig config = DefaultConfig.New();
-                                ScalarFamilyConfig.New(config.rootFamily()); // Literally just exists to ensure the root family exists and then generate the scalar family folder
-                                for (File file : Objects.requireNonNull((new File("plugins/rustyconnector/scalar_families")).listFiles())) {
+                                ((FamilyRegistry) f).rootFamily(config.rootFamily());
+                                
+                                File directory = new File(DeclarativeYAML.basePath("rustyconnector")+"/scalar_families");
+                                if(!directory.exists()) directory.mkdirs();
+                                
+                                {
+                                    File[] files = directory.listFiles();
+                                    if (files == null || files.length == 0)
+                                        ScalarFamilyConfig.New("lobby");
+                                }
+                                
+                                File[] files = directory.listFiles();
+                                if (files == null) return;
+                                if (files.length == 0) return;
+                                
+                                for (File file : files) {
                                     if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
                                     int extensionIndex = file.getName().lastIndexOf(".");
                                     String name = file.getName().substring(0, extensionIndex);
                                     ScalarFamily.Tinder family = ScalarFamilyConfig.New(name).tinder();
-                                    Particle.Flux<? extends Family> familyFlux = family.flux();
-                                    familyFlux.observe();
-                                    ((FamilyRegistry) f).register(name, familyFlux);
-                                    if(name.equalsIgnoreCase(config.rootFamily())) ((FamilyRegistry) f).setRootFamily(name);
+                                    ((FamilyRegistry) f).register(name, family);
                                 }
                             } catch (Exception e) {
                                 RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));

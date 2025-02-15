@@ -150,7 +150,7 @@ public final class CommandRusty {
     @Command("family")
     @Command("families")
     public void tdrdolhxvcjhaskb(Client.Console<?> client) {
-        client.send(RC.Lang("rustyconnector-families").generate());
+        client.send(RC.P.Families().details());
     }
 
     @Command("family <id>")
@@ -160,7 +160,7 @@ public final class CommandRusty {
             Family family = RC.P.Family(id)
                     .orElseThrow(()->new NoSuchElementException("No family with the id ["+id+"] exists."));
 
-            client.send(RC.Lang("rustyconnector-family").generate(family));
+            client.send(family.details());
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
         }

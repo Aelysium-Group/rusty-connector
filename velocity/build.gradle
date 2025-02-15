@@ -26,7 +26,8 @@ shadowJar {
     archiveClassifier.set('')
     mergeServiceFiles()
 
-    relocate "org.bstats.velocity", "group.aelysium.rustyconnector.velocity.org.bstats"
+    relocate "org.bstats", "group.aelysium.rustyconnector.velocity.org.bstats"
+    relocate "org.incendo", "group.aelysium.rustyconnector.velocity.org.incendo"
 }
 
 jar.finalizedBy(shadowJar)

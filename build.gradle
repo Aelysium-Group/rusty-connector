@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         gradlePluginPortal()
+        maven { url = "https://repo.papermc.io/repository/maven-public/"}
     }
     dependencies {
         classpath 'com.gradleup.shadow:shadow-gradle-plugin:9.0.0-beta4'
