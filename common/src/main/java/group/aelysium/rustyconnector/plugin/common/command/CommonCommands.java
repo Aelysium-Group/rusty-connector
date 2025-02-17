@@ -60,18 +60,8 @@ public class CommonCommands {
     public void nglbwcmuschdjaon(Client.Console<?> client, String pluginTree) {
         try {
             Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
-            if(flux == null || !flux.exists()) {
-                client.send(
-                    Error.withHint(
-                                "While attempting to fetch the plugin "+pluginTree+" a plugin in the chain was unavailable.",
-                                "This issue typically arises when a plugin is being reloaded. In which case wait a bit before attempting to access it."
-                        )
-                        .causedBy("Attempting to fetch the plugin "+pluginTree)
-                );
-                return;
-            }
 
-            client.send(RC.Lang("rustyconnector-details").generate(flux.metadata("name"), flux.metadata("description"), flux.));
+            client.send(RC.Lang("rustyconnector-details").generate(flux.metadata("name"), flux.metadata("description"), flux.getNow()));
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
         }

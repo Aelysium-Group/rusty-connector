@@ -369,13 +369,13 @@ public class CommonLang {
     }
 
     @Lang("rustyconnector-details")
-    public static Component details(String name, String description, ModuleParticle plugin) {
+    public static Component details(String name, String description, Optional<ModuleParticle> plugin) {
         if(name == null) throw new IllegalArgumentException("`rustyconnector-details` requires that `name` and `description` are not null.");
         if(description == null) throw new IllegalArgumentException("`rustyconnector-details` requires that `name` and `description` are not null.");
 
         Component details = null;
         try {
-             details = plugin.details();
+             details = plugin.orElseThrow().details();
         } catch(Exception ignore) {}
         
         return join(
@@ -386,7 +386,7 @@ public class CommonLang {
                 text(description, GRAY),
                 space(),
                 (
-                    plugin == null ?
+                    plugin.isEmpty() ?
                         text("⬤", RED).append(text(" Stopped", GRAY))
                     :
                     details == null ?

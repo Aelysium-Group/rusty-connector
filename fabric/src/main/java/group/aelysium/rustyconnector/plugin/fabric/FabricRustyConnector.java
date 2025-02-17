@@ -93,11 +93,6 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                         } catch (Exception e) {
                             RC.Error(Error.from(e));
                         }
-                        try {
-                            kernel.fetchModule("MagicLink").onStart(l -> ((WebSocketMagicLink) l).connect());
-                        } catch (Exception e) {
-                            RC.Error(Error.from(e));
-                        }
                     });
 
                     loader.loadFromFolder(flux, "rc-modules");
