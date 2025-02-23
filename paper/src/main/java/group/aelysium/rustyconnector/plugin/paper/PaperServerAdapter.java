@@ -4,19 +4,25 @@ import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.server.ServerAdapter;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
+import org.incendo.cloud.CommandManager;
 import org.jetbrains.annotations.NotNull;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class PaperServerAdapter extends ServerAdapter {
     private final Server server;
+    private final CommandManager<?> commandManager;
 
-    public PaperServerAdapter(@NotNull Server server) {
+    public PaperServerAdapter(@NotNull Server server, @NotNull CommandManager<?> commandManager) {
         this.server = server;
+        this.commandManager = commandManager;
     }
 
     @Override
@@ -49,7 +55,42 @@ public class PaperServerAdapter extends ServerAdapter {
         if(player == null) return false;
         return player.isOnline();
     }
-
+    
+    @Override
+    public void teleport(@NotNull UUID from, @NotNull UUID to) {
+        try {
+            Player player1 = this.server.getPlayer(from);
+            if(player1 == null) throw new NullPointerException("Player "+from+" could not be found.");
+            Player player2 = this.server.getPlayer(to);
+            if(player2 == null) throw new NullPointerException("Player "+to+" could not be found.");
+            
+            player2.teleportAsync(player1.getLocation());
+        } catch (Exception e) {
+            RC.Error(Error.from(e).whileAttempting("To teleport player "+from+" to player "+to));
+        }
+    }
+    
+    @Override
+    public void teleport(@NotNull UUID from, @Nullable String world, @Nullable Double x, @Nullable Double y, @Nullable Double z, @Nullable Float pitch, @Nullable Float yaw) {
+        try {
+            Player player = this.server.getPlayer(from);
+            if(player == null) throw new NullPointerException("Player "+from+" could not be found.");
+            
+            player.teleportAsync(
+                new Location(
+                    world == null ? player.getWorld() : this.server.getWorld(world),
+                    x == null ? player.getX() : x,
+                    y == null ? player.getY() : y,
+                    z == null ? player.getZ() : z,
+                    pitch == null ? player.getPitch() : pitch,
+                    yaw == null ? player.getYaw() : yaw
+                )
+            );
+        } catch (Exception e) {
+            RC.Error(Error.from(e).whileAttempting("To teleport player "+from+" to "+x+", "+y+", "+z+", ("+pitch+", "+yaw+")"));
+        }
+    }
+    
     @Override
     public void messagePlayer(@NotNull UUID uuid, @NotNull Component message) {
         try {
@@ -60,7 +101,12 @@ public class PaperServerAdapter extends ServerAdapter {
             RC.Error(Error.from(e));
         }
     }
-
+    
+    @Override
+    public <T> CommandManager<T> commandManager() {
+        return (CommandManager<T>) this.commandManager;
+    }
+    
     @Override
     public void log(@NotNull Component message) {
         this.server.getConsoleSender().sendMessage((ComponentLike) message);

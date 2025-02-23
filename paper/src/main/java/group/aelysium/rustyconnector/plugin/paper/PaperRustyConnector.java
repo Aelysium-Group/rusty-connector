@@ -64,9 +64,22 @@ public final class PaperRustyConnector extends JavaPlugin {
                 GitOpsConfig config = GitOpsConfig.New();
                 if(config != null) DeclarativeYAML.registerRepository("rustyconnector", config.config());
             }
+            
+            LegacyPaperCommandManager<Client> commandManager = new LegacyPaperCommandManager<>(
+                this,
+                ExecutionCoordinator.asyncCoordinator(),
+                SenderMapper.create(
+                    sender -> {
+                        if(sender instanceof ConsoleCommandSender source) return new PaperClient.Console(source);
+                        if(sender instanceof Player source) return new PaperClient.Player(source);
+                        return new PaperClient.Other(sender);
+                    },
+                    Client::toSender
+                )
+            );
 
             ServerKernel.Tinder tinder = DefaultConfig.New().data(
-                    new PaperServerAdapter(this.getServer())
+                    new PaperServerAdapter(this.getServer(), commandManager)
             );
             RustyConnector.registerAndIgnite(tinder.flux());
             RustyConnector.Kernel(flux->{
@@ -80,19 +93,6 @@ public final class PaperRustyConnector extends JavaPlugin {
 
                 loader.loadFromFolder(flux, "rc-modules");
             });
-
-            LegacyPaperCommandManager<Client> commandManager = new LegacyPaperCommandManager<>(
-                    this,
-                    ExecutionCoordinator.asyncCoordinator(),
-                    SenderMapper.create(
-                            sender -> {
-                                if(sender instanceof ConsoleCommandSender source) return new PaperClient.Console(source);
-                                if(sender instanceof Player source) return new PaperClient.Player(source);
-                                return new PaperClient.Other(sender);
-                            },
-                            Client::toSender
-                    )
-            );
 
             AnnotationParser<Client> annotationParser = new AnnotationParser<>(
                     commandManager,

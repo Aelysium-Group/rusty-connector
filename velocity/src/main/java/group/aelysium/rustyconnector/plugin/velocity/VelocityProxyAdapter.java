@@ -12,6 +12,7 @@ import group.aelysium.rustyconnector.proxy.ProxyAdapter;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
 import net.kyori.adventure.text.Component;
+import org.incendo.cloud.CommandManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,10 +26,12 @@ import java.util.concurrent.TimeUnit;
 public class VelocityProxyAdapter extends ProxyAdapter {
     private final ProxyServer velocity;
     private final PluginLogger logger;
+    private final CommandManager<?> commandManager;
 
-    public VelocityProxyAdapter(@NotNull ProxyServer velocity, @NotNull PluginLogger logger) {
+    public VelocityProxyAdapter(@NotNull ProxyServer velocity, @NotNull PluginLogger logger, @NotNull CommandManager<?> commandManager) {
         this.velocity = velocity;
         this.logger = logger;
+        this.commandManager = commandManager;
     }
 
     @Override
@@ -90,7 +93,12 @@ public class VelocityProxyAdapter extends ProxyAdapter {
             RC.Error(Error.from(e));
         }
     }
-
+    
+    @Override
+    public <T> CommandManager<T> commandManager() {
+        return (CommandManager<T>) this.commandManager;
+    }
+    
     @Override
     public Optional<Server> fetchServer(@NotNull Player player) {
         com.velocitypowered.api.proxy.Player velocityPlayer = null;

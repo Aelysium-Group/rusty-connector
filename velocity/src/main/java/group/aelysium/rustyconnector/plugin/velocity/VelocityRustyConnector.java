@@ -58,6 +58,7 @@ public class VelocityRustyConnector implements PluginContainer {
     private final ProxyServer server;
     private final Path dataFolder;
     private final AnnotationParser<Client> annotationParser;
+    private final CommandManager<Client> commandManager;
     private final ModuleLoader loader = new ModuleLoader(List.of(
             "com.velocitypowered"
     ));
@@ -71,7 +72,7 @@ public class VelocityRustyConnector implements PluginContainer {
         this.dataFolder = dataFolder;
         this.metricsFactory = metricsFactory;
 
-        CommandManager<Client> commandManager = new VelocityCommandManager<>(
+        this.commandManager = new VelocityCommandManager<>(
                 this,
                 server,
                 ExecutionCoordinator.asyncCoordinator(),
@@ -85,7 +86,7 @@ public class VelocityRustyConnector implements PluginContainer {
                 )
         );
         this.annotationParser = new AnnotationParser<>(
-                commandManager,
+                this.commandManager,
                 Client.class
         );
 
@@ -120,7 +121,7 @@ public class VelocityRustyConnector implements PluginContainer {
             ProxyKernel.Tinder tinder = new ProxyKernel.Tinder(
                 ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
                 this.dataFolder,
-                new VelocityProxyAdapter(server, logger),
+                new VelocityProxyAdapter(server, logger, this.commandManager),
                 MagicLinkConfig.New().tinder()
             );
 

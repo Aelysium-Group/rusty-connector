@@ -57,7 +57,7 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTED.register(s -> {
             s.sendMessage(Text.of("Initializing RustyConnector..."));
-            ServerAdapter adapter = new FabricServerAdapter(s);
+            ServerAdapter adapter = new FabricServerAdapter(s, commandManager);
 
             try {
                 if(PrivateKeyConfig.Load().isEmpty()) {

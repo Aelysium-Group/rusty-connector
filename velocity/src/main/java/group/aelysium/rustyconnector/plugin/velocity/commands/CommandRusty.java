@@ -150,7 +150,7 @@ public final class CommandRusty {
     @Command("family")
     @Command("families")
     public void tdrdolhxvcjhaskb(Client.Console<?> client) {
-        client.send(RC.Lang("rustyconnector-details").generate("Families", "All of the families currently registered to on the proxy.", Optional.of(RC.P.Families())));
+        client.send(RC.Lang("rustyconnector-details").generate("Families", "All of the families currently registered on the proxy.", Optional.of(RC.P.Families())));
     }
 
     @Command("family <id>")
