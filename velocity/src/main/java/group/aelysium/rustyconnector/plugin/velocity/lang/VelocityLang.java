@@ -69,7 +69,7 @@ public class VelocityLang extends CommonLang {
 
     @Lang("rustyconnector-offlineMode")
     public static Component offlineMode() {
-        return RC.Lang("rustyconnector-box").generate(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!"), RED);
+        return RC.Lang("rustyconnector-box").generate(Component.text("Your network is running in offline mode! YOU WILL RECEIVE NO SUPPORT AT ALL WITH RUSTYCONNECTOR!", RED));
     }
 
     @Lang("rustyconnector-serverRegister")
@@ -122,11 +122,11 @@ public class VelocityLang extends CommonLang {
     @Lang("rustyconnector-hybrid")
     public static Component hybrid() {
         return RC.Lang("rustyconnector-box").generate(
-                Component.join(
-                        JoinConfiguration.newlines(),
-                        Component.text("Your network is identified as having multiple, pre-defined, non-RC servers in it!"),
-                        Component.text("Please note that you will receive no help in regards to making RC work with predefined servers!")
-                ), NamedTextColor.RED
+            Component.join(
+                JoinConfiguration.newlines(),
+                Component.text("Your network is identified as having multiple, pre-defined, non-RC servers in it!", NamedTextColor.RED),
+                Component.text("Please note that you will receive no help in regards to making RC work with predefined servers!", NamedTextColor.RED)
+            )
         );
     }
 

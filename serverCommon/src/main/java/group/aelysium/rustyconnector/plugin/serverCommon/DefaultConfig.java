@@ -146,6 +146,7 @@ public class DefaultConfig {
             id,
             adapter,
             Path.of(DeclarativeYAML.basePath("rustyconnector")),
+            Path.of(DeclarativeYAML.basePath("rustyconnector-modules")),
             AddressUtil.parseAddress(this.address),
             magicLink,
             this.family

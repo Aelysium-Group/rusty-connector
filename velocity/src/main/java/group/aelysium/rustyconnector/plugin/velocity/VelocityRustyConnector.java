@@ -121,6 +121,7 @@ public class VelocityRustyConnector implements PluginContainer {
             ProxyKernel.Tinder tinder = new ProxyKernel.Tinder(
                 ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
                 this.dataFolder,
+                this.dataFolder.resolve("../../rc-modules").normalize(),
                 new VelocityProxyAdapter(server, logger, this.commandManager),
                 MagicLinkConfig.New().tinder()
             );
