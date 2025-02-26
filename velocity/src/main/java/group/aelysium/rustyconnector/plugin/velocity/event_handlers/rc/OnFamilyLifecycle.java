@@ -26,7 +26,7 @@ public class OnFamilyLifecycle {
 
         info.set(new ServerInfo(event.family().id(), dummyAddress));
         this.proxyServer.registerServer(info.get());
-        event.family().metadata("velocity_FamilyProxy", info.get());
+        event.family().storeMetadata("velocity_FamilyProxy", info.get());
 
         Particle.Flux<? extends Family> flux = RC.P.Families().find(event.family().id()).orElse(null);
         if(flux == null) return;
@@ -34,7 +34,7 @@ public class OnFamilyLifecycle {
         flux.onStart(family -> {
             info.set(new ServerInfo(family.id(), dummyAddress));
             this.proxyServer.registerServer(info.get());
-            family.metadata("velocity_FamilyProxy", info.get());
+            family.storeMetadata("velocity_FamilyProxy", info.get());
         });
         flux.onClose(()->{
             if(info.get() == null) return;

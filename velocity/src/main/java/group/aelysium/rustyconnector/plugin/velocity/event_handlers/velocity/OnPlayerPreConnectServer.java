@@ -41,7 +41,7 @@ public class OnPlayerPreConnectServer {
                 }
                 Server server = optionalServer.orElseThrow();
 
-                RegisteredServer registeredServer = (RegisteredServer) server.metadata("velocity_RegisteredServer")
+                RegisteredServer registeredServer = (RegisteredServer) server.fetchMetadata("velocity_RegisteredServer")
                         .orElseThrow(()->new NoSuchElementException("The server "+server.id()+" doesn't seem to have a RegisteredServer (from velocity) associated with it."));
                 event.setResult(ServerPreConnectEvent.ServerResult.allowed(registeredServer));
             });

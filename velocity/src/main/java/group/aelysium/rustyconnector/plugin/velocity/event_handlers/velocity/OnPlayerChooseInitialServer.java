@@ -27,7 +27,7 @@ public class OnPlayerChooseInitialServer {
             try {
                 Player player = RC.P.Adapter().convertToRCPlayer(event.getPlayer());
                 Player.Connection.Request request = RC.P.Adapter().onInitialConnect(player, server -> {
-                    RegisteredServer registeredServer = (RegisteredServer) server.metadata("velocity_RegisteredServer").orElse(null);
+                    RegisteredServer registeredServer = (RegisteredServer) server.fetchMetadata("velocity_RegisteredServer").orElse(null);
                     if(registeredServer == null) return Player.Connection.Request.failedRequest(player, "There are no servers available. If this issue persists please contact an admin.");
 
                     event.setInitialServer(registeredServer);
