@@ -1,12 +1,12 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.declarative_yaml.DeclarativeYAML;
-import group.aelysium.declarative_yaml.annotations.*;
-import group.aelysium.declarative_yaml.lib.Printer;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancerGeneratorExchange;
 import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.lib.Printer;
 
 import java.io.IOException;
 import java.text.ParseException;

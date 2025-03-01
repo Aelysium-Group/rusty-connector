@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.common.config;
 
-import group.aelysium.declarative_yaml.DeclarativeYAML;
-import group.aelysium.declarative_yaml.annotations.*;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.*;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.annotations.*;
 
 import java.io.File;
 import java.io.FileWriter;

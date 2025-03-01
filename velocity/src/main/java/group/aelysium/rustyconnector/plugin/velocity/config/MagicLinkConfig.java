@@ -1,12 +1,11 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.declarative_yaml.DeclarativeYAML;
-import group.aelysium.declarative_yaml.annotations.*;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.crypt.AES;
 import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
-import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;

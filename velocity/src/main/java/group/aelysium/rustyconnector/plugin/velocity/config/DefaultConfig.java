@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
-import group.aelysium.declarative_yaml.DeclarativeYAML;
-import group.aelysium.declarative_yaml.annotations.*;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.annotations.*;
 
 import java.io.IOException;
 

@@ -1,13 +1,9 @@
 package group.aelysium.rustyconnector.plugin.common.config;
 
-import group.aelysium.declarative_yaml.DeclarativeYAML;
-import group.aelysium.declarative_yaml.GitOperator;
-import group.aelysium.declarative_yaml.annotations.Comment;
-import group.aelysium.declarative_yaml.annotations.Config;
-import group.aelysium.declarative_yaml.annotations.Namespace;
-import group.aelysium.declarative_yaml.annotations.Node;
-import group.aelysium.declarative_yaml.lib.Printer;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.*;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.lib.Printer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;

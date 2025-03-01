@@ -1,10 +1,8 @@
 package group.aelysium.rustyconnector.plugin.fabric;
 
-import group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
-import group.aelysium.rustyconnector.common.RCAdapter;
-import group.aelysium.rustyconnector.common.RCKernel;
 import group.aelysium.rustyconnector.common.crypt.AES;
 import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.errors.Error;
@@ -20,7 +18,6 @@ import group.aelysium.rustyconnector.common.modules.ModuleParticle;
 import group.aelysium.rustyconnector.common.util.URL;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
-import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.plugin.serverCommon.CommandRusty;
@@ -134,6 +131,9 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                 }));
                 
                 RustyConnector.Kernel(flux->{
+                    flux.metadata("name", "RCKernel");
+                    flux.metadata("description", "The root kernel for RustyConnector where all additional modules build off of.");
+
                     flux.onStart(kernel -> {
                         try {
                             kernel.registerModule(new ModuleBuilder<>("ErrorRegistry", "Provides error handling services.") {

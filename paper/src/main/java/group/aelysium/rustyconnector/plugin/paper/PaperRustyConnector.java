@@ -1,6 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
-import group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.crypt.AES;
@@ -136,6 +136,9 @@ public final class PaperRustyConnector extends JavaPlugin {
             }));
             
             RustyConnector.Kernel(flux->{
+                flux.metadata("name", "RCKernel");
+                flux.metadata("description", "The root kernel for RustyConnector where all additional modules build off of.");
+
                 flux.onStart(kernel -> {
                     try {
                         kernel.registerModule(new ModuleBuilder<>("ErrorRegistry", "Provides error handling services.") {

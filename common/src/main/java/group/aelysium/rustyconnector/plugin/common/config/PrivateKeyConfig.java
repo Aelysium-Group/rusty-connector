@@ -1,9 +1,7 @@
 package group.aelysium.rustyconnector.plugin.common.config;
 
-import group.aelysium.declarative_yaml.*;
-import group.aelysium.declarative_yaml.annotations.AllContents;
-import group.aelysium.declarative_yaml.annotations.Config;
-import group.aelysium.declarative_yaml.annotations.Namespace;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.*;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.crypt.AES;
 import group.aelysium.rustyconnector.common.errors.Error;

@@ -10,7 +10,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import group.aelysium.declarative_yaml.DeclarativeYAML;
+import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
@@ -34,14 +34,10 @@ import group.aelysium.rustyconnector.plugin.velocity.event_handlers.rc.OnServerU
 import group.aelysium.rustyconnector.plugin.velocity.event_handlers.velocity.*;
 import group.aelysium.rustyconnector.plugin.velocity.lang.VelocityLang;
 import group.aelysium.rustyconnector.proxy.ProxyKernel;
-import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.*;
-import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
-import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
 import group.aelysium.rustyconnector.proxy.player.PlayerRegistry;
 import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
-import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import org.bstats.velocity.Metrics;
 import org.incendo.cloud.CommandManager;
@@ -52,10 +48,7 @@ import org.incendo.cloud.velocity.VelocityCommandManager;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -128,6 +121,7 @@ public class VelocityRustyConnector implements PluginContainer {
 //            }
 
             RustyConnector.registerAndIgnite(Flux.using(()->{
+                System.out.println("Build kernel");
                 try {
                     return new ProxyKernel(
                         ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
@@ -141,52 +135,59 @@ public class VelocityRustyConnector implements PluginContainer {
             }));
 
             RustyConnector.Kernel(flux->{
+                flux.metadata("name", "RCKernel");
+                flux.metadata("description", "The root kernel for RustyConnector where all additional modules build off of.");
+
                 flux.onStart(kernel->{
                     try {
                         kernel.registerModule(new ModuleBuilder<>("ErrorRegistry", "Provides error handling services.") {
                             @Override
                             public ModuleParticle get() {
+                                System.out.println("Build "+this.name);
                                 return new ErrorRegistry(false, 200);
                             }
                         });
-                        
+
                         kernel.registerModule(new ModuleBuilder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
                             @Override
                             public ModuleParticle get() {
+                                System.out.println("Build "+this.name);
                                 LangLibrary l = new LangLibrary(new EnglishAlphabet());
                                 l.registerLangNodes(VelocityLang.class);
                                 return l;
                             }
                         });
-                        
+
                         kernel.registerModule(new ModuleBuilder<>("PlayerRegistry", "Provides uuid-username mappings for players connected to the network.") {
                             @Override
                             public ModuleParticle get() {
+                                System.out.println("Build "+this.name);
                                 return new PlayerRegistry();
                             }
                         });
-                        
+
                         kernel.registerModule(new ModuleBuilder<>("FamilyRegistry", "Provides itemized access for all families available on the RustyConnector kernel.") {
                             @Override
                             public ModuleParticle get() {
+                                System.out.println("Build "+this.name);
                                 FamilyRegistry f = new FamilyRegistry();
                                 try {
                                     DefaultConfig config = DefaultConfig.New();
                                     f.rootFamily(config.rootFamily());
-                                    
+
                                     File directory = new File(DeclarativeYAML.basePath("rustyconnector")+"/scalar_families");
                                     if(!directory.exists()) directory.mkdirs();
-                                    
+
                                     {
                                         File[] files = directory.listFiles();
                                         if (files == null || files.length == 0)
                                             ScalarFamilyConfig.New("lobby");
                                     }
-                                    
+
                                     File[] files = directory.listFiles();
                                     if (files == null) return f;
                                     if (files.length == 0) return f;
-                                    
+
                                     for (File file : files) {
                                         if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
                                         int extensionIndex = file.getName().lastIndexOf(".");
@@ -199,10 +200,11 @@ public class VelocityRustyConnector implements PluginContainer {
                                 return f;
                             }
                         });
-                        
+
                         kernel.registerModule(new ModuleBuilder<>("EventManager", "Provides event handling services.") {
                             @Override
                             public ModuleParticle get() {
+                                System.out.println("Build "+this.name);
                                 EventManager e = new EventManager();
                                 e.listen(OnServerRegister.class);
                                 e.listen(OnServerUnregister.class);
@@ -211,10 +213,11 @@ public class VelocityRustyConnector implements PluginContainer {
                                 return e;
                             }
                         });
-                        
+
                         kernel.registerModule(new ModuleBuilder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
                             @Override
                             public ModuleParticle get() {
+                                System.out.println("Build "+this.name);
                                 try {
                                     return MagicLinkConfig.New().build();
                                 } catch (Exception e) {
@@ -222,36 +225,39 @@ public class VelocityRustyConnector implements PluginContainer {
                                 }
                             }
                         });
-                        
+
                         LoadBalancerGeneratorExchange.registerBuilder("ROUND_ROBIN", config -> new ModuleBuilder<>("RR_LoadBalancer","Provides load balancing using the RoundRobin sorting algorithm.") {
                             @Override
                             public LoadBalancer get() {
+                                System.out.println("Build "+this.name);
                                 return new RoundRobin(
-                                    config.weighted(),
-                                    config.persistence(),
-                                    config.attempts()
+                                        config.weighted(),
+                                        config.persistence(),
+                                        config.attempts()
                                 );
                             }
                         });
                         LoadBalancerGeneratorExchange.registerBuilder("LEAST_CONNECTION", config -> new ModuleBuilder<>("LC_LoadBalancer","Provides load balancing using the LeastConnection sorting algorithm.") {
                             @Override
                             public LoadBalancer get() {
+                                System.out.println("Build "+this.name);
                                 return new LeastConnection(
-                                    config.weighted(),
-                                    config.persistence(),
-                                    config.attempts(),
-                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
+                                        config.weighted(),
+                                        config.persistence(),
+                                        config.attempts(),
+                                        config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
                                 );
                             }
                         });
                         LoadBalancerGeneratorExchange.registerBuilder("MOST_CONNECTION", config -> new ModuleBuilder<>("MC_LoadBalancer","Provides load balancing using the MostConnection sorting algorithm.") {
                             @Override
                             public LoadBalancer get() {
+                                System.out.println("Build "+this.name);
                                 return new MostConnection(
-                                    config.weighted(),
-                                    config.persistence(),
-                                    config.attempts(),
-                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
+                                        config.weighted(),
+                                        config.persistence(),
+                                        config.attempts(),
+                                        config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
                                 );
                             }
                         });
