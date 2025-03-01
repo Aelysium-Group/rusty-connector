@@ -6,8 +6,9 @@ import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.modules.ModuleHolder;
+import group.aelysium.rustyconnector.common.modules.ModuleParticle;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
-import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.Nullable;
@@ -33,9 +34,8 @@ public class CommonCommands {
     public void nglbwcmuzzxvjaon(Client.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
-            Particle.Flux<?> particle = RustyConnector.Kernel();
-            particle.reignite();
-            particle.observe();
+            Flux<?> particle = RustyConnector.Kernel();
+            particle.rebuild();
             client.send(RC.Lang("rustyconnector-finished").generate());
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
@@ -59,9 +59,9 @@ public class CommonCommands {
     @Command("modules <pluginTree>")
     public void nglbwcmuschdjaon(Client.Console<?> client, String pluginTree) {
         try {
-            Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
+            Flux<ModuleParticle> flux = fetchPlugin(client, pluginTree);
 
-            client.send(RC.Lang("rustyconnector-details").generate(flux.metadata("name"), flux.metadata("description"), flux.getNow()));
+            client.send(RC.Lang("rustyconnector-details").generate(flux.metadata("name"), flux.metadata("description"), flux.asOptional()));
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
         }
@@ -73,10 +73,10 @@ public class CommonCommands {
     @Command("modules <pluginTree> reload")
     public void nglbwzmspchdjaon(Client.Console<?> client, String pluginTree) {
         try {
-            Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
+            Flux<?> flux = fetchPlugin(client, pluginTree);
             if(flux == null) return;
             client.send(RC.Lang("rustyconnector-waiting").generate());
-            flux.reignite().get();
+            flux.rebuild();
             client.send(RC.Lang("rustyconnector-finished").generate());
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
@@ -88,9 +88,9 @@ public class CommonCommands {
     @Command("module <pluginTree> stop")
     @Command("modules <pluginTree> stop")
     public void nglbwzmzpsodjaon(Client.Console<?> client, String pluginTree) {
-        Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
+        Flux<?> flux = fetchPlugin(client, pluginTree);
         if(flux == null) return;
-        if(!flux.exists()) {
+        if(!flux.isPresent()) {
             client.send(RC.Lang("rustyconnector-pluginAlreadyStopped").generate());
             return;
         }
@@ -109,28 +109,28 @@ public class CommonCommands {
     @Command("modules <pluginTree> start")
     public void asfdmgfsgsodjaon(Client.Console<?> client, String pluginTree) {
         try {
-            Particle.Flux<?> flux = fetchPlugin(client, pluginTree);
+            Flux<?> flux = fetchPlugin(client, pluginTree);
             if(flux == null) return;
-            if(flux.exists()) {
+            if(flux.isPresent()) {
                 client.send(RC.Lang("rustyconnector-pluginAlreadyStarted").generate());
                 return;
             }
             client.send(RC.Lang("rustyconnector-waiting").generate());
-            flux.observe();
+            flux.build();
             client.send(RC.Lang("rustyconnector-finished").generate());
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
         }
     }
 
-    private static @Nullable Particle.Flux<? extends Particle> fetchPlugin(Client.Console<?> client, String pluginTree) {
+    private static @Nullable Flux<ModuleParticle> fetchPlugin(Client.Console<?> client, String pluginTree) {
         String[] nodes = pluginTree.split("\\.");
-        AtomicReference<Particle.Flux<? extends Particle>> current = new AtomicReference<>(RustyConnector.Kernel());
+        AtomicReference<Flux<ModuleParticle>> current = new AtomicReference<>((Flux<ModuleParticle>) (Object) RustyConnector.Kernel());
 
         for (int i = 0; i < nodes.length; i++) {
             String node = nodes[i];
             boolean isLast = i == (nodes.length - 1);
-            if(!current.get().exists()) {
+            if(!current.get().isPresent()) {
                 client.send(Error.withHint(
                                 "While attempting to fetch the plugin "+pluginTree+" a plugin in the chain was unavailable.",
                                 "This issue typically arises when a plugin is being reloaded. In which case wait a bit before attempting to access it."
@@ -142,13 +142,13 @@ public class CommonCommands {
 
             String name = current.get().metadata("name");
             if(name == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name` and `description` metadata.");
-
-            Particle module = null;
+            
+            ModuleParticle module = null;
             try {
-                module = current.get().observe(3, TimeUnit.SECONDS);
+                module = current.get().get(3, TimeUnit.SECONDS);
             } catch(Exception ignore) {}
 
-            if(!(module instanceof ModuleHolder moduleHolder)) {
+            if(!(module instanceof ModuleHolder<?> moduleHolder)) {
                 client.send(Error.from(
                                 node+" doesn't exist on "+name+". "+name+" actually doesn't have any children plugins.")
                         .causedBy("Attempting to fetch the plugin "+pluginTree)
@@ -156,7 +156,7 @@ public class CommonCommands {
                 return null;
             }
 
-            Particle.Flux<? extends Particle> newCurrent = moduleHolder.modules().get(node);
+            Flux<ModuleParticle> newCurrent = ((ModuleHolder<ModuleParticle>) moduleHolder).modules().get(node);
             if(newCurrent == null) {
                 client.send(Error.withSolution(
                             node+" doesn't exist on "+name+".",
@@ -166,7 +166,7 @@ public class CommonCommands {
                 );
                 return null;
             }
-            if(!newCurrent.exists() && !isLast) {
+            if(!newCurrent.isPresent() && !isLast) {
                 client.send(Error.withHint(
                                 "Despite existing and being correct; "+node+" is not currently available. It's probably rebooting.",
                                 "This issue typically occurs when a plugin is restarting. You can try again after a little bit, or try reloading the plugin directly and see if that works."

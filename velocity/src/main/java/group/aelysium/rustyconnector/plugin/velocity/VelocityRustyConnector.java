@@ -14,9 +14,13 @@ import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.errors.Error;
+import group.aelysium.rustyconnector.common.errors.ErrorRegistry;
 import group.aelysium.rustyconnector.common.events.EventManager;
+import group.aelysium.rustyconnector.common.lang.EnglishAlphabet;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
+import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
 import group.aelysium.rustyconnector.common.modules.ModuleLoader;
+import group.aelysium.rustyconnector.common.modules.ModuleParticle;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
@@ -32,8 +36,13 @@ import group.aelysium.rustyconnector.plugin.velocity.lang.VelocityLang;
 import group.aelysium.rustyconnector.proxy.ProxyKernel;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
+import group.aelysium.rustyconnector.proxy.family.load_balancing.*;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
-import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
+import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
+import group.aelysium.rustyconnector.proxy.player.PlayerRegistry;
+import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import org.bstats.velocity.Metrics;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.SenderMapper;
@@ -43,6 +52,7 @@ import org.incendo.cloud.velocity.VelocityCommandManager;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +60,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class VelocityRustyConnector implements PluginContainer {
     private final ExecutorService commandExecutor = Executors.newCachedThreadPool();
@@ -59,9 +70,7 @@ public class VelocityRustyConnector implements PluginContainer {
     private final Path dataFolder;
     private final AnnotationParser<Client> annotationParser;
     private final CommandManager<Client> commandManager;
-    private final ModuleLoader loader = new ModuleLoader(List.of(
-            "com.velocitypowered"
-    ));
+    private final ModuleLoader loader = new ModuleLoader();
 
     @Inject
     public VelocityRustyConnector(ProxyServer server, Logger logger, @DataDirectory Path dataFolder, Metrics.Factory metricsFactory) {
@@ -118,66 +127,140 @@ public class VelocityRustyConnector implements PluginContainer {
 //                if(config != null) DeclarativeYAML.registerRepository("rustyconnector", config.config());
 //            }
 
-            ProxyKernel.Tinder tinder = new ProxyKernel.Tinder(
-                ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
-                this.dataFolder,
-                this.dataFolder.resolve("../../rc-modules").normalize(),
-                new VelocityProxyAdapter(server, logger, this.commandManager),
-                MagicLinkConfig.New().tinder()
-            );
-
-            RustyConnector.registerAndIgnite(tinder.flux());
+            RustyConnector.registerAndIgnite(Flux.using(()->{
+                try {
+                    return new ProxyKernel(
+                        ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
+                        new VelocityProxyAdapter(server, logger, this.commandManager),
+                        this.dataFolder,
+                        this.dataFolder.resolve("../../rc-modules").normalize()
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }));
 
             RustyConnector.Kernel(flux->{
                 flux.onStart(kernel->{
                     try {
-                        kernel.fetchModule("LangLibrary").onStart(l -> ((LangLibrary) l).registerLangNodes(VelocityLang.class));
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                    try {
-                        kernel.fetchModule("EventManager").onStart(m -> {
-                            ((EventManager) m).listen(OnServerRegister.class);
-                            ((EventManager) m).listen(OnServerUnregister.class);
-                            ((EventManager) m).listen(OnServerTimeout.class);
-                            ((EventManager) m).listen(new OnFamilyLifecycle(this.server));
+                        kernel.registerModule(new ModuleBuilder<>("ErrorRegistry", "Provides error handling services.") {
+                            @Override
+                            public ModuleParticle get() {
+                                return new ErrorRegistry(false, 200);
+                            }
                         });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                    try {
-                        kernel.fetchModule("FamilyRegistry").onStart(f -> {
-                            try {
-                                DefaultConfig config = DefaultConfig.New();
-                                ((FamilyRegistry) f).rootFamily(config.rootFamily());
-                                
-                                File directory = new File(DeclarativeYAML.basePath("rustyconnector")+"/scalar_families");
-                                if(!directory.exists()) directory.mkdirs();
-                                
-                                {
+                        
+                        kernel.registerModule(new ModuleBuilder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
+                            @Override
+                            public ModuleParticle get() {
+                                LangLibrary l = new LangLibrary(new EnglishAlphabet());
+                                l.registerLangNodes(VelocityLang.class);
+                                return l;
+                            }
+                        });
+                        
+                        kernel.registerModule(new ModuleBuilder<>("PlayerRegistry", "Provides uuid-username mappings for players connected to the network.") {
+                            @Override
+                            public ModuleParticle get() {
+                                return new PlayerRegistry();
+                            }
+                        });
+                        
+                        kernel.registerModule(new ModuleBuilder<>("FamilyRegistry", "Provides itemized access for all families available on the RustyConnector kernel.") {
+                            @Override
+                            public ModuleParticle get() {
+                                FamilyRegistry f = new FamilyRegistry();
+                                try {
+                                    DefaultConfig config = DefaultConfig.New();
+                                    f.rootFamily(config.rootFamily());
+                                    
+                                    File directory = new File(DeclarativeYAML.basePath("rustyconnector")+"/scalar_families");
+                                    if(!directory.exists()) directory.mkdirs();
+                                    
+                                    {
+                                        File[] files = directory.listFiles();
+                                        if (files == null || files.length == 0)
+                                            ScalarFamilyConfig.New("lobby");
+                                    }
+                                    
                                     File[] files = directory.listFiles();
-                                    if (files == null || files.length == 0)
-                                        ScalarFamilyConfig.New("lobby");
+                                    if (files == null) return f;
+                                    if (files.length == 0) return f;
+                                    
+                                    for (File file : files) {
+                                        if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
+                                        int extensionIndex = file.getName().lastIndexOf(".");
+                                        String name = file.getName().substring(0, extensionIndex);
+                                        f.register(name, ScalarFamilyConfig.New(name).builder());
+                                    }
+                                } catch (Exception e) {
+                                    RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));
                                 }
-                                
-                                File[] files = directory.listFiles();
-                                if (files == null) return;
-                                if (files.length == 0) return;
-                                
-                                for (File file : files) {
-                                    if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
-                                    int extensionIndex = file.getName().lastIndexOf(".");
-                                    String name = file.getName().substring(0, extensionIndex);
-                                    ScalarFamily.Tinder family = ScalarFamilyConfig.New(name).tinder();
-                                    ((FamilyRegistry) f).register(name, family);
+                                return f;
+                            }
+                        });
+                        
+                        kernel.registerModule(new ModuleBuilder<>("EventManager", "Provides event handling services.") {
+                            @Override
+                            public ModuleParticle get() {
+                                EventManager e = new EventManager();
+                                e.listen(OnServerRegister.class);
+                                e.listen(OnServerUnregister.class);
+                                e.listen(OnServerTimeout.class);
+                                e.listen(new OnFamilyLifecycle(VelocityRustyConnector.this.server));
+                                return e;
+                            }
+                        });
+                        
+                        kernel.registerModule(new ModuleBuilder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
+                            @Override
+                            public ModuleParticle get() {
+                                try {
+                                    return MagicLinkConfig.New().build();
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
                                 }
-                            } catch (Exception e) {
-                                RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));
+                            }
+                        });
+                        
+                        LoadBalancerGeneratorExchange.registerBuilder("ROUND_ROBIN", config -> new ModuleBuilder<>("RR_LoadBalancer","Provides load balancing using the RoundRobin sorting algorithm.") {
+                            @Override
+                            public LoadBalancer get() {
+                                return new RoundRobin(
+                                    config.weighted(),
+                                    config.persistence(),
+                                    config.attempts()
+                                );
+                            }
+                        });
+                        LoadBalancerGeneratorExchange.registerBuilder("LEAST_CONNECTION", config -> new ModuleBuilder<>("LC_LoadBalancer","Provides load balancing using the LeastConnection sorting algorithm.") {
+                            @Override
+                            public LoadBalancer get() {
+                                return new LeastConnection(
+                                    config.weighted(),
+                                    config.persistence(),
+                                    config.attempts(),
+                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
+                                );
+                            }
+                        });
+                        LoadBalancerGeneratorExchange.registerBuilder("MOST_CONNECTION", config -> new ModuleBuilder<>("MC_LoadBalancer","Provides load balancing using the MostConnection sorting algorithm.") {
+                            @Override
+                            public LoadBalancer get() {
+                                return new MostConnection(
+                                    config.weighted(),
+                                    config.persistence(),
+                                    config.attempts(),
+                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
+                                );
                             }
                         });
                     } catch (Exception e) {
-                        RC.Error(Error.from(e));
+                        RC.Error(Error.from(e).whileAttempting("To boot up the RustyConnnector Kernel."));
                     }
+                });
+                flux.onClose(()->{
+                    LoadBalancerGeneratorExchange.clear();
                 });
 
                 loader.loadFromFolder(flux, "rc-modules");

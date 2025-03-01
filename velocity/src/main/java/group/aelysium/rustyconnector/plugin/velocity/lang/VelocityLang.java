@@ -12,7 +12,7 @@ import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancer;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.proxy.player.PlayerRegistry;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
-import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -73,7 +73,7 @@ public class VelocityLang extends CommonLang {
     }
 
     @Lang("rustyconnector-serverRegister")
-    public static Component serverRegister(Server.Configuration server, Particle.Flux<? extends Family> family) {
+    public static Component serverRegister(Server.Configuration server, Flux<? extends Family> family) {
         Optional<String> displayName = Optional.ofNullable((String) server.metadata().get("displayName"));
         try {
             return join(
@@ -143,7 +143,7 @@ public class VelocityLang extends CommonLang {
                             RC.P.Servers().stream().map(s->{
                                 String familyName = null;
                                 try {
-                                    familyName = s.family().orElseThrow().orElseThrow().id();
+                                    familyName = s.family().orElseThrow().id();
                                 } catch (Exception ignore) {}
 
                                 return join(
@@ -183,7 +183,7 @@ public class VelocityLang extends CommonLang {
         boolean missing = server.family().isEmpty();
         Family family = null;
         try {
-            family = server.family().orElseThrow().orElseThrow();
+            family = server.family().orElseThrow();
         } catch (Exception ignore) {}
         boolean locked = false;
         try {
@@ -222,9 +222,9 @@ public class VelocityLang extends CommonLang {
     @Lang("velocity-serverUsage")
     public static Component velocityServer(Server server) {
         List<String> families = new ArrayList<>();
-        RC.P.Families().modules().values().forEach(flux -> flux.executeNow(f -> families.add(((Family) f).id())));
+        RC.P.Families().modules().values().forEach(flux -> flux.ifPresent(f -> families.add(f.id())));
         try {
-            Family family = server.family().orElseThrow().observe(1, TimeUnit.MINUTES);
+            Family family = server.family().orElseThrow();
 
             return join(
                     newlines(),

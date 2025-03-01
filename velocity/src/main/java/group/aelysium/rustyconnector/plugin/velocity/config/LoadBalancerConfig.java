@@ -3,8 +3,9 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.declarative_yaml.lib.Printer;
+import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancerAlgorithmExchange;
+import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancerGeneratorExchange;
 import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
 
 import java.io.IOException;
@@ -143,18 +144,20 @@ public class LoadBalancerConfig {
     @Node(4)
     private String rebalance = "15 SECONDS";
 
-    public LoadBalancer.Tinder<?> tinder() throws ParseException {
-        return LoadBalancerAlgorithmExchange.generateTinder(this.algorithm, new LoadBalancerAlgorithmExchange.Settings(
-                this.weighted,
-                this.persistence_enabled,
-                this.persistence_attempts,
-                LiquidTimestamp.from(rebalance)
-        ));
-    }
-
-    public static LoadBalancerConfig New(String name) throws IOException {
+    public static ModuleBuilder<LoadBalancer> New(String name) throws ParseException {
         Printer printer = new Printer()
                 .pathReplacements(Map.of("name", name));
-        return DeclarativeYAML.From(LoadBalancerConfig.class, printer);
+        LoadBalancerConfig lb = DeclarativeYAML.From(LoadBalancerConfig.class, printer);
+        
+        LoadBalancer.Config config = new LoadBalancer.Config(
+            name,
+            lb.algorithm,
+            lb.weighted,
+            lb.persistence_enabled,
+            lb.persistence_attempts,
+            LiquidTimestamp.from(lb.rebalance)
+        );
+        
+        return LoadBalancerGeneratorExchange.generate(config.algorithm(), config);
     }
 }

@@ -3,8 +3,10 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.rustyconnector.common.crypt.AES;
+import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
 import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.proxy.magic_link.WebSocketMagicLink;
@@ -110,7 +112,7 @@ public class MagicLinkConfig {
     @Node(6)
     private List<String> cache_ignoredTypes = new ArrayList<>();
 
-    public WebSocketMagicLink.Tinder tinder() throws IOException {
+    public MagicLinkCore.Proxy build() throws Exception {
         AES cryptor = PrivateKeyConfig.New().cryptor();
 
 
@@ -120,13 +122,13 @@ public class MagicLinkConfig {
             ignoredTypes.add(Packet.Type.from(split[0], split[1]));
         });
 
-        return new WebSocketMagicLink.Tinder(
-                AddressUtil.parseAddress(this.address),
-                Packet.SourceIdentifier.proxy(ServerIDConfig.Load(UUID.randomUUID().toString()).id()),
-                cryptor,
-                new PacketCache(this.cache_size, ignoredTypes),
-                null
-                //this.endpointBroadcasting_enabled ? new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.endpointBroadcasting_address)) : null
+        return new WebSocketMagicLink(
+            AddressUtil.parseAddress(this.address),
+            Packet.SourceIdentifier.proxy(ServerIDConfig.Load(UUID.randomUUID().toString()).id()),
+            cryptor,
+            new PacketCache(this.cache_size, ignoredTypes),
+            null
+            //this.endpointBroadcasting_enabled ? new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.endpointBroadcasting_address)) : null
         );
     }
 

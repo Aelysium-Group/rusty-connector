@@ -4,12 +4,18 @@ import group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.declarative_yaml.annotations.*;
 import group.aelysium.declarative_yaml.lib.Printer;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
+import group.aelysium.rustyconnector.proxy.family.Family;
+import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancer;
+import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancerGeneratorExchange;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.Gson;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonObject;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Namespace("rustyconnector")
@@ -107,19 +113,28 @@ public class ScalarFamilyConfig {
     })
     private String metadata = "{\\\"serverSoftCap\\\": 30, \\\"serverHardCap\\\": 40}";
 
-    public ScalarFamily.Tinder tinder() throws IOException, ParseException {
-        ScalarFamily.Tinder tinder = new ScalarFamily.Tinder(
-                id,
-                displayName.isEmpty() ? null : displayName,
-                parentFamily.isEmpty() ? null : parentFamily,
-                LoadBalancerConfig.New(loadBalancer).tinder()
-        );
-
-        Gson gson = new Gson();
-        JsonObject metadataJson = gson.fromJson(this.metadata, JsonObject.class);
-        metadataJson.entrySet().forEach(e->tinder.metadata(e.getKey(), Packet.Parameter.fromJSON(e.getValue()).getOriginalValue()));
-
-        return tinder;
+    public ModuleBuilder<Family> builder() throws Exception {
+        return new ModuleBuilder<>("ScalarFamily", "Provides stateless server connectivity between players and it's child servers. Players that join this family may be routed to any server without regard for server details.") {
+            @Override
+            public ScalarFamily get() {
+                Gson gson = new Gson();
+                JsonObject metadataJson = gson.fromJson(metadata, JsonObject.class);
+                Map<String, Object> mt = new HashMap<>();
+                metadataJson.entrySet().forEach(e->mt.put(e.getKey(), Packet.Parameter.fromJSON(e.getValue()).getOriginalValue()));
+                
+                try {
+                    return new ScalarFamily(
+                        id,
+                        displayName.isEmpty() ? null : displayName,
+                        parentFamily.isEmpty() ? null : parentFamily,
+                        mt,
+                        LoadBalancerConfig.New(loadBalancer)
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 
     public static ScalarFamilyConfig New(String familyID) throws IOException {

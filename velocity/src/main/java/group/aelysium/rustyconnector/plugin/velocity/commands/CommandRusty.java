@@ -6,7 +6,7 @@ import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
-import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 
@@ -161,19 +161,6 @@ public final class CommandRusty {
                     .orElseThrow(()->new NoSuchElementException("No family with the id ["+id+"] exists."));
             
             client.send(RC.Lang("rustyconnector-details").generate(family.id(), "", Optional.of(family)));
-        } catch (Exception e) {
-            RC.Error(Error.from(e).urgent(true));
-        }
-    }
-    @Command("family <id> reload")
-    @Command("families <id> reload")
-    public void mfndwqqzwodmesyn(Client.Console<?> client, String id) {
-        try {
-            client.send(RC.Lang("rustyconnector-waiting").generate());
-            Particle.Flux<? extends Family> flux = RC.P.Families().find(id)
-                    .orElseThrow(()->new NoSuchElementException("So family with the id ["+id+"] exists."));
-            flux.reignite().get(1, TimeUnit.MINUTES);
-            client.send(RC.Lang("rustyconnector-finished").generate());
         } catch (Exception e) {
             RC.Error(Error.from(e).urgent(true));
         }

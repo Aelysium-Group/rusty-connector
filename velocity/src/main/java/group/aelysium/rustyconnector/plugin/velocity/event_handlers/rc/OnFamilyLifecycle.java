@@ -8,7 +8,7 @@ import group.aelysium.rustyconnector.proxy.events.FamilyRegisterEvent;
 import group.aelysium.rustyconnector.proxy.events.FamilyUnregisterEvent;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.util.AddressUtil;
-import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Particle;
+import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,7 +28,7 @@ public class OnFamilyLifecycle {
         this.proxyServer.registerServer(info.get());
         event.family().storeMetadata("velocity_FamilyProxy", info.get());
 
-        Particle.Flux<? extends Family> flux = RC.P.Families().find(event.family().id()).orElse(null);
+        Flux<Family> flux = RC.P.Families().find(event.family().id());
         if(flux == null) return;
 
         flux.onStart(family -> {

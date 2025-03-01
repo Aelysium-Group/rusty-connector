@@ -32,7 +32,7 @@ public class DefaultConfig {
         "#"
     })
     @Node()
-    private int version = 7;
+    public int version = 7;
 
     @Comment({
         "#",
@@ -46,7 +46,7 @@ public class DefaultConfig {
         "#"
     })
     @Node(1)
-    private String address = "127.0.0.1:25565";
+    public String address = "127.0.0.1:25565";
 
     @Comment({
         "#",
@@ -56,7 +56,7 @@ public class DefaultConfig {
         "#"
     })
     @Node(2)
-    private String family = "lobby";
+    public String family = "lobby";
 
     @Comment({
         "#",
@@ -67,7 +67,7 @@ public class DefaultConfig {
         "#"
     })
     @Node(3)
-    private String magicLink_accessEndpoint = "http://127.0.0.1:8080";
+    public String magicLink_accessEndpoint = "http://127.0.0.1:8080";
 /*
     @Comment({
         "#",
@@ -83,7 +83,7 @@ public class DefaultConfig {
         "#"
     })
     @Node(5)*/
-    private String magicLink_broadcastingAddress = "";
+    public String magicLink_broadcastingAddress = "";
 
     @Comment({
         "#",
@@ -99,7 +99,7 @@ public class DefaultConfig {
         "#"
     })
     @Node(4)
-    private boolean useUUID = false;
+    public boolean useUUID = false;
 
     @Node(5)
     @Comment({
@@ -112,54 +112,9 @@ public class DefaultConfig {
         "# https://wiki.aelysium.group/rusty-connector/docs/concepts/metadata/",
         "#"
     })
-    private String metadata = "{\\\"softCap\\\": 30, \\\"hardCap\\\": 40}";
+    public String metadata = "{\\\"softCap\\\": 30, \\\"hardCap\\\": 40}";
 
-    public ServerKernel.Tinder data(ServerAdapter adapter) throws Exception {
-        if(this.family.isBlank()) throw new IllegalArgumentException("Please provide a valid family name to target.");
-        if(this.family.length() > 16) throw new IllegalArgumentException("Family names are not allowed to be larger than 16 characters.");
-
-        ServerIDConfig idConfig = ServerIDConfig.Read();
-        String id = (idConfig == null ? null : idConfig.id());
-        if(id == null) {
-            if (this.useUUID) {
-                id = UUID.randomUUID().toString();
-            } else {
-                int extra = 16 - this.family.length();
-                NanoID nanoID = NanoID.randomNanoID(15 + extra); // 15 because there's a `-` separator between family name and nanoid
-                id = this.family + "-" + nanoID;
-            }
-
-            ServerIDConfig.Load(id);
-        }
-
-        AES aes = PrivateKeyConfig.New().cryptor();
-        WebSocketMagicLink.Tinder magicLink = new WebSocketMagicLink.Tinder(
-            URL.parseURL(this.magicLink_accessEndpoint),
-            Packet.SourceIdentifier.server(id),
-            aes,
-            new PacketCache(100),
-            null
-            //this.magicLink_broadcastingAddress.isEmpty() ? null : new IPV6Broadcaster(cryptor, AddressUtil.parseAddress(this.magicLink_broadcastingAddress))
-        );
-
-        ServerKernel.Tinder tinder = new ServerKernel.Tinder(
-            id,
-            adapter,
-            Path.of(DeclarativeYAML.basePath("rustyconnector")),
-            Path.of(DeclarativeYAML.basePath("rustyconnector-modules")),
-            AddressUtil.parseAddress(this.address),
-            magicLink,
-            this.family
-        );
-
-        Gson gson = new Gson();
-        JsonObject metadataJson = gson.fromJson(this.metadata, JsonObject.class);
-        metadataJson.entrySet().forEach(e->tinder.metadata(e.getKey(), Packet.Parameter.fromJSON(e.getValue())));
-
-        return tinder;
-    }
-
-    public static DefaultConfig New() throws IOException {
+    public static DefaultConfig New() {
         return DeclarativeYAML.From(DefaultConfig.class);
     }
 }
