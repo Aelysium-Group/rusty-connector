@@ -165,6 +165,42 @@ public class VelocityRustyConnector implements PluginContainer {
                                 return new PlayerRegistry();
                             }
                         });
+                        
+                        LoadBalancerGeneratorExchange.registerBuilder("ROUND_ROBIN", config -> new ModuleBuilder<>("LoadBalancer","Provides load balancing using the RoundRobin sorting algorithm.") {
+                            @Override
+                            public LoadBalancer get() {
+                                System.out.println("Build "+this.name);
+                                return new RoundRobin(
+                                    config.weighted(),
+                                    config.persistence(),
+                                    config.attempts()
+                                );
+                            }
+                        });
+                        LoadBalancerGeneratorExchange.registerBuilder("LEAST_CONNECTION", config -> new ModuleBuilder<>("LoadBalancer","Provides load balancing using the LeastConnection sorting algorithm.") {
+                            @Override
+                            public LoadBalancer get() {
+                                System.out.println("Build "+this.name);
+                                return new LeastConnection(
+                                    config.weighted(),
+                                    config.persistence(),
+                                    config.attempts(),
+                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
+                                );
+                            }
+                        });
+                        LoadBalancerGeneratorExchange.registerBuilder("MOST_CONNECTION", config -> new ModuleBuilder<>("LoadBalancer","Provides load balancing using the MostConnection sorting algorithm.") {
+                            @Override
+                            public LoadBalancer get() {
+                                System.out.println("Build "+this.name);
+                                return new MostConnection(
+                                    config.weighted(),
+                                    config.persistence(),
+                                    config.attempts(),
+                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
+                                );
+                            }
+                        });
 
                         kernel.registerModule(new ModuleBuilder<>("FamilyRegistry", "Provides itemized access for all families available on the RustyConnector kernel.") {
                             @Override
@@ -223,42 +259,6 @@ public class VelocityRustyConnector implements PluginContainer {
                                 } catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
-                            }
-                        });
-
-                        LoadBalancerGeneratorExchange.registerBuilder("ROUND_ROBIN", config -> new ModuleBuilder<>("RR_LoadBalancer","Provides load balancing using the RoundRobin sorting algorithm.") {
-                            @Override
-                            public LoadBalancer get() {
-                                System.out.println("Build "+this.name);
-                                return new RoundRobin(
-                                        config.weighted(),
-                                        config.persistence(),
-                                        config.attempts()
-                                );
-                            }
-                        });
-                        LoadBalancerGeneratorExchange.registerBuilder("LEAST_CONNECTION", config -> new ModuleBuilder<>("LC_LoadBalancer","Provides load balancing using the LeastConnection sorting algorithm.") {
-                            @Override
-                            public LoadBalancer get() {
-                                System.out.println("Build "+this.name);
-                                return new LeastConnection(
-                                        config.weighted(),
-                                        config.persistence(),
-                                        config.attempts(),
-                                        config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
-                                );
-                            }
-                        });
-                        LoadBalancerGeneratorExchange.registerBuilder("MOST_CONNECTION", config -> new ModuleBuilder<>("MC_LoadBalancer","Provides load balancing using the MostConnection sorting algorithm.") {
-                            @Override
-                            public LoadBalancer get() {
-                                System.out.println("Build "+this.name);
-                                return new MostConnection(
-                                        config.weighted(),
-                                        config.persistence(),
-                                        config.attempts(),
-                                        config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
-                                );
                             }
                         });
                     } catch (Exception e) {
