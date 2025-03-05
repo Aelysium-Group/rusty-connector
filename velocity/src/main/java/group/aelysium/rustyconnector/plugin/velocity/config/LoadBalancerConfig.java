@@ -1,16 +1,20 @@
 package group.aelysium.rustyconnector.plugin.velocity.config;
 
+import group.aelysium.rustyconnector.RC;
+import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancerRegistry;
+import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.Gson;
+import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonObject;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.annotations.*;
-import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
+import group.aelysium.rustyconnector.common.modules.Module;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancer;
-import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancerGeneratorExchange;
 import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.lib.Printer;
 
-import java.io.IOException;
-import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Namespace("rustyconnector")
 @Config("/load_balancers/{name}.yml")
@@ -143,11 +147,26 @@ public class LoadBalancerConfig {
     })
     @Node(4)
     private String rebalance = "15 SECONDS";
+    
+    @Comment({
+        "#",
+        "# Provide additional metadata for the load balancer.",
+        "# Metadata provided here is non-essential, meaning that RustyConnector is capable of running without anything provided here.",
+        "# Ensure that the provided metadata conforms to valid JSON syntax.",
+        "#"
+    })
+    @Node(5)
+    public String metadata = "{}";
 
-    public static ModuleBuilder<LoadBalancer> New(String name) throws ParseException {
+    public static Module.Builder<LoadBalancer> New(String name) throws Exception {
         Printer printer = new Printer()
                 .pathReplacements(Map.of("name", name));
         LoadBalancerConfig lb = DeclarativeYAML.From(LoadBalancerConfig.class, printer);
+        
+        Gson gson = new Gson();
+        JsonObject metadataJson = gson.fromJson(lb.metadata, JsonObject.class);
+        Map<String, Object> mt = new HashMap<>();
+        metadataJson.entrySet().forEach(e->mt.put(e.getKey(), Packet.Parameter.fromJSON(e.getValue()).getOriginalValue()));
         
         LoadBalancer.Config config = new LoadBalancer.Config(
             name,
@@ -155,9 +174,12 @@ public class LoadBalancerConfig {
             lb.weighted,
             lb.persistence_enabled,
             lb.persistence_attempts,
-            LiquidTimestamp.from(lb.rebalance)
+            LiquidTimestamp.from(lb.rebalance),
+            mt
         );
         
-        return LoadBalancerGeneratorExchange.generate(config.algorithm(), config);
+        LoadBalancerRegistry r = (LoadBalancerRegistry) RC.ModuleFlux("LoadBalancerRegistry").get(3, TimeUnit.SECONDS);
+        
+        return r.fetch(config.algorithm()).apply(config);
     }
 }

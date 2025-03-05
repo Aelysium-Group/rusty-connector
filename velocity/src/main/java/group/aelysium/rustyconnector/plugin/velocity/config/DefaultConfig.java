@@ -63,23 +63,35 @@ public class DefaultConfig {
             "#"
     })
     @Node()
-    private int version = 7;
+    public int version = 7;
 
     @Comment({
-            "#" +
-            "# The name of the root family which all players initially connecting to the network will join into." +
-            "#"
+        "#",
+        "# The name of the root family which all players initially connecting to the network will join into.",
+        "#"
     })
     @Node(1)
-    private String rootFamily = "lobby";
-
-    public int version() {
-        return version;
-    }
-
-    public String rootFamily() {
-        return this.rootFamily;
-    }
+    public String rootFamily = "lobby";
+    
+    @Comment({
+        "#",
+        "# The directory that RustyConnector should scan for native modules.",
+        "# Native modules are similar to Minecraft plugins except they've been written specifically for RustyConnector and do not depend on Minecraft code at all.",
+        "#"
+    })
+    @Node(2)
+    public String moduleDirectory = "/rc-module";
+    
+    @Comment({
+        "#",
+        "# The directory that RustyConnector should provide for modules to store their configs in.",
+        "# Modules are able to ignore this setting if they really want, but well-written modules",
+        "# will store their configs in the directory you provide inside of their own dedicated directory",
+        "# Native modules are similar to Minecraft plugins except they've been written specifically for RustyConnector and do not depend on Minecraft code at all.",
+        "#"
+    })
+    @Node(3)
+    public String moduleConfigDirectory = "/rc-module";
 
     public static DefaultConfig New() throws IOException {
         return DeclarativeYAML.From(DefaultConfig.class);

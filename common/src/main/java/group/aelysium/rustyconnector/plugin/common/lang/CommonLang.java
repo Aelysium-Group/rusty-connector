@@ -4,7 +4,7 @@ import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
-import group.aelysium.rustyconnector.common.modules.ModuleParticle;
+import group.aelysium.rustyconnector.common.modules.Module;
 import group.aelysium.rustyconnector.proxy.util.Version;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -363,7 +363,7 @@ public class CommonLang {
     }
 
     @Lang("rustyconnector-details")
-    public static Component details(String name, String description, Optional<ModuleParticle> plugin) {
+    public static Component details(String name, String description, Optional<Module> plugin) {
         if(name == null) throw new IllegalArgumentException("`rustyconnector-details` requires that `name` and `description` are not null.");
         if(description == null) throw new IllegalArgumentException("`rustyconnector-details` requires that `name` and `description` are not null.");
 

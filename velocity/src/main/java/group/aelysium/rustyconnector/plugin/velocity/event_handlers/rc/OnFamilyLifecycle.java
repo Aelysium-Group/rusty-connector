@@ -24,11 +24,11 @@ public class OnFamilyLifecycle {
     public void handle(FamilyRegisterEvent event) {
         AtomicReference<ServerInfo> info = new AtomicReference<>(null);
 
-        info.set(new ServerInfo(event.family().id(), dummyAddress));
+        info.set(new ServerInfo(event.family.id(), dummyAddress));
         this.proxyServer.registerServer(info.get());
-        event.family().storeMetadata("velocity_FamilyProxy", info.get());
+        event.family.storeMetadata("velocity_FamilyProxy", info.get());
 
-        Flux<Family> flux = RC.P.Families().find(event.family().id());
+        Flux<Family> flux = RC.P.Families().find(event.family.id());
         if(flux == null) return;
 
         flux.onStart(family -> {
@@ -44,6 +44,6 @@ public class OnFamilyLifecycle {
 
     @EventListener
     public void handle(FamilyUnregisterEvent event) {
-        this.proxyServer.unregisterServer(new ServerInfo(event.family().id(), dummyAddress));
+        this.proxyServer.unregisterServer(new ServerInfo(event.family.id(), dummyAddress));
     }
 }

@@ -12,9 +12,8 @@ import group.aelysium.rustyconnector.common.lang.EnglishAlphabet;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
-import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
 import group.aelysium.rustyconnector.common.modules.ModuleLoader;
-import group.aelysium.rustyconnector.common.modules.ModuleParticle;
+import group.aelysium.rustyconnector.common.modules.Module;
 import group.aelysium.rustyconnector.common.util.URL;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
@@ -141,32 +140,32 @@ public final class PaperRustyConnector extends JavaPlugin {
 
                 flux.onStart(kernel -> {
                     try {
-                        kernel.registerModule(new ModuleBuilder<>("ErrorRegistry", "Provides error handling services.") {
+                        kernel.registerModule(new Module.Builder<>("ErrorRegistry", "Provides error handling services.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 return new ErrorRegistry(false, 200);
                             }
                         });
                         
-                        kernel.registerModule(new ModuleBuilder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
+                        kernel.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 LangLibrary l = new LangLibrary(new EnglishAlphabet());
                                 l.registerLangNodes(ServerLang.class);
                                 return l;
                             }
                         });
                         
-                        kernel.registerModule(new ModuleBuilder<>("EventManager", "Provides event handling services.") {
+                        kernel.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 return new EventManager();
                             }
                         });
                         
-                        kernel.registerModule(new ModuleBuilder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
+                        kernel.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 try {
                                     DefaultConfig config = DefaultConfig.New();
                                     ServerIDConfig idConfig = ServerIDConfig.Read();

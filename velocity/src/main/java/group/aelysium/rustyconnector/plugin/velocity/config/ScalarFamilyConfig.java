@@ -2,16 +2,9 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.annotations.*;
-import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
-import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
-import group.aelysium.rustyconnector.proxy.family.Family;
-import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
-import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.Gson;
-import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonObject;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.lib.Printer;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Namespace("rustyconnector")
@@ -31,7 +24,7 @@ import java.util.Map;
 })
 public class ScalarFamilyConfig {
     @PathParameter("id")
-    private String id;
+    public String id;
 
     @Comment({
             "############################################################",
@@ -53,7 +46,7 @@ public class ScalarFamilyConfig {
             "############################################################"
     })
     @Node(0)
-    private String displayName = "";
+    public String displayName = "";
 
     @Comment({
             "############################################################",
@@ -75,7 +68,7 @@ public class ScalarFamilyConfig {
             "############################################################"
     })
     @Node(1)
-    private String parentFamily = "";
+    public String parentFamily = "";
 
     @Node(2)
     @Comment({
@@ -94,7 +87,7 @@ public class ScalarFamilyConfig {
             "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
             "############################################################"
     })
-    private String loadBalancer = "default";
+    public String loadBalancer = "default";
 
     @Node(3)
     @Comment({
@@ -102,36 +95,9 @@ public class ScalarFamilyConfig {
             "# Provide additional metadata for the family.",
             "# Metadata provided here is non-essential, meaning that RustyConnector is capable of running without anything provided here.",
             "# Ensure that the provided metadata conforms to valid JSON syntax.",
-            "#",
-            "# For built-in metadata options, check the Aelysium wiki:",
-            "# https://wiki.aelysium.group/rusty-connector/docs/concepts/metadata/",
             "#"
     })
-    private String metadata = "{\\\"serverSoftCap\\\": 30, \\\"serverHardCap\\\": 40}";
-
-    public ModuleBuilder<Family> builder() throws Exception {
-        return new ModuleBuilder<>("ScalarFamily", "Provides stateless server connectivity between players and it's child servers. Players that join this family may be routed to any server without regard for server details.") {
-            @Override
-            public ScalarFamily get() {
-                Gson gson = new Gson();
-                JsonObject metadataJson = gson.fromJson(metadata, JsonObject.class);
-                Map<String, Object> mt = new HashMap<>();
-                metadataJson.entrySet().forEach(e->mt.put(e.getKey(), Packet.Parameter.fromJSON(e.getValue()).getOriginalValue()));
-                
-                try {
-                    return new ScalarFamily(
-                        id,
-                        displayName.isEmpty() ? null : displayName,
-                        parentFamily.isEmpty() ? null : parentFamily,
-                        mt,
-                        LoadBalancerConfig.New(loadBalancer)
-                    );
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-    }
+    public String metadata = "{\\\"serverSoftCap\\\": 30, \\\"serverHardCap\\\": 40}";
 
     public static ScalarFamilyConfig New(String familyID) throws IOException {
         Printer printer = new Printer()

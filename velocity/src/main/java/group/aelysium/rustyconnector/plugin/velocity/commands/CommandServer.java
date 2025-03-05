@@ -1,12 +1,10 @@
 package group.aelysium.rustyconnector.plugin.velocity.commands;
 
-import com.velocitypowered.api.command.CommandSource;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.proxy.player.Player;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.proxy.family.Family;
-import net.kyori.adventure.text.Component;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 

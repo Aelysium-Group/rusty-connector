@@ -10,6 +10,11 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.proxy.family.Family;
+import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.Gson;
+import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonObject;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
@@ -18,9 +23,9 @@ import group.aelysium.rustyconnector.common.errors.ErrorRegistry;
 import group.aelysium.rustyconnector.common.events.EventManager;
 import group.aelysium.rustyconnector.common.lang.EnglishAlphabet;
 import group.aelysium.rustyconnector.common.lang.LangLibrary;
-import group.aelysium.rustyconnector.common.modules.ModuleBuilder;
+import group.aelysium.rustyconnector.common.modules.Module.Builder;
 import group.aelysium.rustyconnector.common.modules.ModuleLoader;
-import group.aelysium.rustyconnector.common.modules.ModuleParticle;
+import group.aelysium.rustyconnector.common.modules.Module;
 import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
@@ -49,6 +54,8 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -140,76 +147,112 @@ public class VelocityRustyConnector implements PluginContainer {
 
                 flux.onStart(kernel->{
                     try {
-                        kernel.registerModule(new ModuleBuilder<>("ErrorRegistry", "Provides error handling services.") {
+                        kernel.registerModule(new Module.Builder<>("ErrorRegistry", "Provides error handling services.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 System.out.println("Build "+this.name);
                                 return new ErrorRegistry(false, 200);
                             }
                         });
 
-                        kernel.registerModule(new ModuleBuilder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
+                        kernel.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 System.out.println("Build "+this.name);
                                 LangLibrary l = new LangLibrary(new EnglishAlphabet());
                                 l.registerLangNodes(VelocityLang.class);
                                 return l;
                             }
                         });
-
-                        kernel.registerModule(new ModuleBuilder<>("PlayerRegistry", "Provides uuid-username mappings for players connected to the network.") {
+                        
+                        kernel.registerModule(new Module.Builder<>("PlayerRegistry", "Provides uuid-username mappings for players connected to the network.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 System.out.println("Build "+this.name);
                                 return new PlayerRegistry();
                             }
                         });
                         
-                        LoadBalancerGeneratorExchange.registerBuilder("ROUND_ROBIN", config -> new ModuleBuilder<>("LoadBalancer","Provides load balancing using the RoundRobin sorting algorithm.") {
+                        LoadBalancerRegistry loadBalancerRegistry = (LoadBalancerRegistry) kernel.registerModule(new Builder<>("LoadBalancerRegistry", "Provides access to available LoadBalancer algorithms.") {
                             @Override
-                            public LoadBalancer get() {
+                            public LoadBalancerRegistry get() {
                                 System.out.println("Build "+this.name);
-                                return new RoundRobin(
-                                    config.weighted(),
-                                    config.persistence(),
-                                    config.attempts()
-                                );
-                            }
-                        });
-                        LoadBalancerGeneratorExchange.registerBuilder("LEAST_CONNECTION", config -> new ModuleBuilder<>("LoadBalancer","Provides load balancing using the LeastConnection sorting algorithm.") {
-                            @Override
-                            public LoadBalancer get() {
-                                System.out.println("Build "+this.name);
-                                return new LeastConnection(
-                                    config.weighted(),
-                                    config.persistence(),
-                                    config.attempts(),
-                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
-                                );
-                            }
-                        });
-                        LoadBalancerGeneratorExchange.registerBuilder("MOST_CONNECTION", config -> new ModuleBuilder<>("LoadBalancer","Provides load balancing using the MostConnection sorting algorithm.") {
-                            @Override
-                            public LoadBalancer get() {
-                                System.out.println("Build "+this.name);
-                                return new MostConnection(
-                                    config.weighted(),
-                                    config.persistence(),
-                                    config.attempts(),
-                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance()
-                                );
+                                LoadBalancerRegistry registry = new LoadBalancerRegistry(name -> {
+                                    try {
+                                        return LoadBalancerConfig.New(name);
+                                    } catch (Exception e) {
+                                        RC.Error(Error.from(e).whileAttempting("To build a new load balancer using config "+name+". Provided a ROUND_ROBIN as a fallback.").urgent(true));
+                                    }
+                                    return new Builder<>("LoadBalancer", "Provides load balancing using the RoundRobin sorting algorithm.") {
+                                        @Override
+                                        public LoadBalancer get() {
+                                            return new RoundRobin(false, false, 0, Map.of());
+                                        }
+                                    };
+                                });
+                                
+                                try {
+                                    registry.register("ROUND_ROBIN", config -> new Builder<>("LoadBalancer", "Provides load balancing using the RoundRobin sorting algorithm.") {
+                                        @Override
+                                        public LoadBalancer get() {
+                                            System.out.println("Build " + this.name);
+                                            return new RoundRobin(
+                                                config.weighted(),
+                                                config.persistence(),
+                                                config.attempts(),
+                                                config.metadata()
+                                            );
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    RC.Error(Error.from(e).whileAttempting("To build the ROUND_ROBIN load balancer algorithm"));
+                                }
+                                try {
+                                    registry.register("LEAST_CONNECTION", config -> new Builder<>("LoadBalancer", "Provides load balancing using the LeastConnection sorting algorithm.") {
+                                        @Override
+                                        public LoadBalancer get() {
+                                            System.out.println("Build " + this.name);
+                                            return new LeastConnection(
+                                                config.weighted(),
+                                                config.persistence(),
+                                                config.attempts(),
+                                                config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance(),
+                                                config.metadata()
+                                            );
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    RC.Error(Error.from(e).whileAttempting("To build the LEAST_CONNECTION load balancer algorithm"));
+                                }
+                                try {
+                                    registry.register("MOST_CONNECTION", config -> new Builder<>("LoadBalancer", "Provides load balancing using the MostConnection sorting algorithm.") {
+                                        @Override
+                                        public LoadBalancer get() {
+                                            System.out.println("Build " + this.name);
+                                            return new MostConnection(
+                                                config.weighted(),
+                                                config.persistence(),
+                                                config.attempts(),
+                                                config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance(),
+                                                config.metadata()
+                                            );
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    RC.Error(Error.from(e).whileAttempting("To build the MOST_CONNECTION load balancer algorithm"));
+                                }
+                                return registry;
                             }
                         });
 
-                        kernel.registerModule(new ModuleBuilder<>("FamilyRegistry", "Provides itemized access for all families available on the RustyConnector kernel.") {
+                        kernel.registerModule(new Module.Builder<>("FamilyRegistry", "Provides itemized access for all families available on the RustyConnector kernel.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 System.out.println("Build "+this.name);
                                 FamilyRegistry f = new FamilyRegistry();
                                 try {
                                     DefaultConfig config = DefaultConfig.New();
-                                    f.rootFamily(config.rootFamily());
+                                    f.rootFamily(config.rootFamily);
 
                                     File directory = new File(DeclarativeYAML.basePath("rustyconnector")+"/scalar_families");
                                     if(!directory.exists()) directory.mkdirs();
@@ -228,7 +271,30 @@ public class VelocityRustyConnector implements PluginContainer {
                                         if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
                                         int extensionIndex = file.getName().lastIndexOf(".");
                                         String name = file.getName().substring(0, extensionIndex);
-                                        f.register(name, ScalarFamilyConfig.New(name).builder());
+                                        f.register(name, new Module.Builder<>("ScalarFamily", "Provides stateless server connectivity between players and it's child servers. Players that join this family may be routed to any server without regard for server details.") {
+                                            @Override
+                                            public Family get() {
+                                                try {
+                                                    ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.New(name);
+                                                    
+                                                    Gson gson = new Gson();
+                                                    JsonObject metadataJson = gson.fromJson(scalarFamilyConfig.metadata, JsonObject.class);
+                                                    Map<String, Object> mt = new HashMap<>();
+                                                    metadataJson.entrySet().forEach(e->mt.put(e.getKey(), Packet.Parameter.fromJSON(e.getValue()).getOriginalValue()));
+                                                
+                                                    return new ScalarFamily(
+                                                        scalarFamilyConfig.id,
+                                                        scalarFamilyConfig.displayName.isEmpty() ? null : scalarFamilyConfig.displayName,
+                                                        scalarFamilyConfig.parentFamily.isEmpty() ? null : scalarFamilyConfig.parentFamily,
+                                                        mt,
+                                                        loadBalancerRegistry.generate(scalarFamilyConfig.loadBalancer)
+                                                    );
+                                                } catch (Exception e) {
+                                                    RC.Error(Error.from(e).whileAttempting("To generate the scalar family "+name));
+                                                }
+                                                return null;
+                                            }
+                                        });
                                     }
                                 } catch (Exception e) {
                                     RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));
@@ -237,9 +303,9 @@ public class VelocityRustyConnector implements PluginContainer {
                             }
                         });
 
-                        kernel.registerModule(new ModuleBuilder<>("EventManager", "Provides event handling services.") {
+                        kernel.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 System.out.println("Build "+this.name);
                                 EventManager e = new EventManager();
                                 e.listen(OnServerRegister.class);
@@ -250,9 +316,9 @@ public class VelocityRustyConnector implements PluginContainer {
                             }
                         });
 
-                        kernel.registerModule(new ModuleBuilder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
+                        kernel.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
                             @Override
-                            public ModuleParticle get() {
+                            public Module get() {
                                 System.out.println("Build "+this.name);
                                 try {
                                     return MagicLinkConfig.New().build();
@@ -264,9 +330,6 @@ public class VelocityRustyConnector implements PluginContainer {
                     } catch (Exception e) {
                         RC.Error(Error.from(e).whileAttempting("To boot up the RustyConnnector Kernel."));
                     }
-                });
-                flux.onClose(()->{
-                    LoadBalancerGeneratorExchange.clear();
                 });
 
                 loader.loadFromFolder(flux, "rc-modules");

@@ -5,8 +5,8 @@ import group.aelysium.rustyconnector.RustyConnector;
 import group.aelysium.rustyconnector.common.crypt.NanoID;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.common.modules.Module;
 import group.aelysium.rustyconnector.common.modules.ModuleHolder;
-import group.aelysium.rustyconnector.common.modules.ModuleParticle;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
 import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import net.kyori.adventure.text.Component;
@@ -59,7 +59,7 @@ public class CommonCommands {
     @Command("modules <pluginTree>")
     public void nglbwcmuschdjaon(Client.Console<?> client, String pluginTree) {
         try {
-            Flux<ModuleParticle> flux = fetchPlugin(client, pluginTree);
+            Flux<Module> flux = fetchPlugin(client, pluginTree);
 
             client.send(RC.Lang("rustyconnector-details").generate(flux.metadata("name"), flux.metadata("description"), flux.asOptional()));
         } catch (Exception e) {
@@ -90,7 +90,7 @@ public class CommonCommands {
     public void nglbwzmzpsodjaon(Client.Console<?> client, String pluginTree) {
         Flux<?> flux = fetchPlugin(client, pluginTree);
         if(flux == null) return;
-        if(!flux.isPresent()) {
+        if(flux.isEmpty()) {
             client.send(RC.Lang("rustyconnector-pluginAlreadyStopped").generate());
             return;
         }
@@ -123,9 +123,9 @@ public class CommonCommands {
         }
     }
 
-    private static @Nullable Flux<ModuleParticle> fetchPlugin(Client.Console<?> client, String pluginTree) {
+    private static @Nullable Flux<Module> fetchPlugin(Client.Console<?> client, String pluginTree) {
         String[] nodes = pluginTree.split("\\.");
-        AtomicReference<Flux<ModuleParticle>> current = new AtomicReference<>((Flux<ModuleParticle>) (Object) RustyConnector.Kernel());
+        AtomicReference<Flux<Module>> current = new AtomicReference<>((Flux<Module>) (Object) RustyConnector.Kernel());
 
         for (int i = 0; i < nodes.length; i++) {
             String node = nodes[i];
@@ -143,7 +143,7 @@ public class CommonCommands {
             String name = current.get().metadata("name");
             if(name == null) throw new IllegalArgumentException("Fluxes provided to `rustyconnector-details` must contain `name` and `description` metadata.");
             
-            ModuleParticle module = null;
+            Module module = null;
             try {
                 module = current.get().get(3, TimeUnit.SECONDS);
             } catch(Exception ignore) {}
@@ -156,7 +156,7 @@ public class CommonCommands {
                 return null;
             }
 
-            Flux<ModuleParticle> newCurrent = ((ModuleHolder<ModuleParticle>) moduleHolder).modules().get(node);
+            Flux<Module> newCurrent = ((ModuleHolder<Module>) moduleHolder).modules().get(node);
             if(newCurrent == null) {
                 client.send(Error.withSolution(
                             node+" doesn't exist on "+name+".",

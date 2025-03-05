@@ -96,6 +96,26 @@ public class DefaultConfig {
         "#"
     })
     public String metadata = "{\\\"softCap\\\": 30, \\\"hardCap\\\": 40}";
+    
+    @Comment({
+        "#",
+        "# The directory that RustyConnector should scan for native modules.",
+        "# Native modules are similar to Minecraft plugins except they've been written specifically for RustyConnector and do not depend on Minecraft code at all.",
+        "#"
+    })
+    @Node(6)
+    public String moduleDirectory = "/rc-module";
+    
+    @Comment({
+        "#",
+        "# The directory that RustyConnector should provide for modules to store their configs in.",
+        "# Modules are able to ignore this setting if they really want, but well-written modules",
+        "# will store their configs in the directory you provide inside of their own dedicated directory",
+        "# Native modules are similar to Minecraft plugins except they've been written specifically for RustyConnector and do not depend on Minecraft code at all.",
+        "#"
+    })
+    @Node(7)
+    public String moduleConfigDirectory = "/rc-module";
 
     public static DefaultConfig New() {
         return DeclarativeYAML.From(DefaultConfig.class);
