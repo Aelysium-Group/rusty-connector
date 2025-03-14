@@ -132,17 +132,22 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                 RustyConnector.Kernel(flux->{
                     flux.metadata("name", "RCKernel");
                     flux.metadata("description", "The root kernel for RustyConnector where all additional modules build off of.");
-
-                    flux.onStart(kernel -> {
+                    
+                    loader.queue(new ModuleLoader.ModuleRegistrar("ErrorRegistry", k->{
                         try {
-                            kernel.registerModule(new Module.Builder<>("ErrorRegistry", "Provides error handling services.") {
+                            k.registerModule(new Module.Builder<>("ErrorRegistry", "Provides error handling services.") {
                                 @Override
                                 public Module get() {
                                     return new ErrorRegistry(false, 200);
                                 }
                             });
-                            
-                            kernel.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of(), List.of()));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("LangLibrary", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
                                 @Override
                                 public Module get() {
                                     LangLibrary l = new LangLibrary(new EnglishAlphabet());
@@ -150,15 +155,25 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                                     return l;
                                 }
                             });
-                            
-                            kernel.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("ErrorRegistry"), List.of()));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("EventManager", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
                                 @Override
                                 public Module get() {
                                     return new EventManager();
                                 }
                             });
-                            
-                            kernel.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("ErrorRegistry"), List.of()));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("MagicLink", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
                                 @Override
                                 public Module get() {
                                     try {
@@ -182,9 +197,11 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                         } catch (Exception e) {
                             RC.Error(Error.from(e));
                         }
-                    });
+                    }, List.of("ErrorRegistry"), List.of()));
                     
-                    loader.loadFromFolder(flux, "rc-modules");
+                    loader.queueFromFolder("rc-modules");
+                    
+                    loader.resolveAndRegister(flux);
                 });
 
                 RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());

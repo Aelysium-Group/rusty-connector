@@ -24,9 +24,9 @@ public final class CommandRusty {
         Player player = null;
         try {
             try {
-                player = RC.P.Player(UUID.fromString(playerTarget)).orElseThrow();
+                player = RC.P.PlayerFromID(playerTarget).orElseThrow();
             } catch (Exception ignore) {}
-            player = RC.P.Player(playerTarget).orElseThrow();
+            player = RC.P.PlayerFromUsername(playerTarget).orElseThrow();
         } catch (Exception ignore) {}
         if (player == null) {
             client.send(text("No player "+playerTarget+" could be found.", DARK_BLUE));
@@ -71,9 +71,9 @@ public final class CommandRusty {
         Player player = null;
         try {
             try {
-                player = RC.P.Player(UUID.fromString(playerTarget)).orElseThrow();
+                player = RC.P.PlayerFromID(playerTarget).orElseThrow();
             } catch (Exception ignore) {}
-            player = RC.P.Player(playerTarget).orElseThrow();
+            player = RC.P.PlayerFromUsername(playerTarget).orElseThrow();
         } catch (Exception ignore) {}
         if (player == null) {
             client.send(text("No player "+playerTarget+" could be found.", DARK_BLUE));
@@ -102,9 +102,9 @@ public final class CommandRusty {
         Player player = null;
         try {
             try {
-                player = RC.P.Player(UUID.fromString(playerTarget)).orElseThrow();
+                player = RC.P.PlayerFromID(playerTarget).orElseThrow();
             } catch (Exception ignore) {}
-            player = RC.P.Player(playerTarget).orElseThrow();
+            player = RC.P.PlayerFromUsername(playerTarget).orElseThrow();
         } catch (Exception ignore) {}
         if (player == null) {
             client.send(text("No player "+playerTarget+" could be found.", DARK_BLUE));

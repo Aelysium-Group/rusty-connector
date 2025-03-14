@@ -92,7 +92,18 @@ public class DefaultConfig {
     })
     @Node(3)
     public String moduleConfigDirectory = "/rc-module";
-
+    
+    @Comment({
+        "#",
+        "# If you have a Haze driver installed, you can choose to store player mappings to your database.",
+        "# Simply set this value to be the name of the Haze database you'd like to store mappings in.",
+        "# This system specifically will allow module writers to even access player UUID/Usernames even for offline players.",
+        "# Which is something you never could really do on Velocity.",
+        "#"
+    })
+    @Node(4)
+    public String persistPlayerMappings = "";
+    
     public static DefaultConfig New() throws IOException {
         return DeclarativeYAML.From(DefaultConfig.class);
     }

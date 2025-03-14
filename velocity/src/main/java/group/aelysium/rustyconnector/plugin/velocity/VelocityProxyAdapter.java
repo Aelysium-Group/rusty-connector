@@ -36,13 +36,13 @@ public class VelocityProxyAdapter extends ProxyAdapter {
 
     @Override
     public @Nullable Object convertToObject(@NotNull Player player) {
-        return this.velocity.getPlayer(player.uuid()).orElse(null);
+        return this.velocity.getPlayer(UUID.fromString(player.id())).orElse(null);
     }
 
     @Override
     public @NotNull Player convertToRCPlayer(@NotNull Object o) {
         if(!(o instanceof com.velocitypowered.api.proxy.Player velocityPlayer)) throw new RuntimeException("Provided object was not a player!");
-        return new Player(velocityPlayer.getUniqueId(), velocityPlayer.getUsername());
+        return new Player(velocityPlayer.getUniqueId().toString(), velocityPlayer.getUsername());
     }
 
     @Override
@@ -86,9 +86,9 @@ public class VelocityProxyAdapter extends ProxyAdapter {
     }
 
     @Override
-    public void messagePlayer(@NotNull UUID uuid, @NotNull Component component) {
+    public void messagePlayer(@NotNull String playerID, @NotNull Component component) {
         try {
-            RC.P.Player(uuid).orElseThrow(()->new NullPointerException("No player with the uuid "+uuid+" is online.")).message(component);
+            RC.P.PlayerFromID(playerID).orElseThrow(()->new NullPointerException("No player with the uuid "+playerID+" is online.")).message(component);
         } catch (Exception e) {
             RC.Error(Error.from(e));
         }
@@ -103,7 +103,7 @@ public class VelocityProxyAdapter extends ProxyAdapter {
     public Optional<Server> fetchServer(@NotNull Player player) {
         com.velocitypowered.api.proxy.Player velocityPlayer = null;
         try {
-            velocityPlayer = this.velocity.getPlayer(player.uuid()).orElseThrow();
+            velocityPlayer = this.velocity.getPlayer(UUID.fromString(player.id())).orElseThrow();
             try {
                 velocityPlayer = this.velocity.getPlayer(player.username()).orElseThrow();
             } catch (Exception ignore) {}

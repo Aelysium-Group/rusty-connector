@@ -35,37 +35,37 @@ public class PaperServerAdapter extends ServerAdapter {
     }
 
     @Override
-    public Optional<UUID> playerUUID(@NotNull String username) {
+    public Optional<String> playerID(@NotNull String username) {
         Player player = this.server.getPlayer(username);
         if(player == null) return Optional.empty();
-        return Optional.of(player.getUniqueId());
+        return Optional.of(player.getUniqueId().toString());
     }
 
     @Override
-    public Optional<String> playerUsername(@NotNull UUID uuid) {
-        Player player = this.server.getPlayer(uuid);
+    public Optional<String> playerUsername(@NotNull String playerID) {
+        Player player = this.server.getPlayer(UUID.fromString(playerID));
         if(player == null) return Optional.empty();
         return Optional.of(player.getName());
     }
 
     @Override
-    public boolean isOnline(@NotNull UUID uuid) {
-        Player player = this.server.getPlayer(uuid);
+    public boolean isOnline(@NotNull String playerID) {
+        Player player = this.server.getPlayer(UUID.fromString(playerID));
         if(player == null) return false;
         return player.isOnline();
     }
     
     @Override
-    public void teleport(@NotNull UUID from, @NotNull UUID to) {
+    public void teleport(@NotNull String fromPlayer, @NotNull String toPlayer) {
         try {
-            Player player1 = this.server.getPlayer(from);
-            if(player1 == null) throw new NullPointerException("Player "+from+" could not be found.");
-            Player player2 = this.server.getPlayer(to);
-            if(player2 == null) throw new NullPointerException("Player "+to+" could not be found.");
+            Player player1 = this.server.getPlayer(fromPlayer);
+            if(player1 == null) throw new NullPointerException("Player "+fromPlayer+" could not be found.");
+            Player player2 = this.server.getPlayer(toPlayer);
+            if(player2 == null) throw new NullPointerException("Player "+toPlayer+" could not be found.");
             
             player2.teleportAsync(player1.getLocation());
         } catch (Exception e) {
-            RC.Error(Error.from(e).whileAttempting("To teleport player "+from+" to player "+to));
+            RC.Error(Error.from(e).whileAttempting("To teleport player "+fromPlayer+" to player "+toPlayer));
         }
     }
     
@@ -91,10 +91,10 @@ public class PaperServerAdapter extends ServerAdapter {
     }
     
     @Override
-    public void messagePlayer(@NotNull UUID uuid, @NotNull Component message) {
+    public void messagePlayer(@NotNull String playerID, @NotNull Component message) {
         try {
-            Player player = this.server.getPlayer(uuid);
-            if(player == null) throw new NullPointerException("No player with the uuid "+uuid+" is online.");
+            Player player = this.server.getPlayer(UUID.fromString(playerID));
+            if(player == null) throw new NullPointerException("No player with the uuid "+playerID+" is online.");
             player.sendMessage((ComponentLike) message);
         } catch (Exception e) {
             RC.Error(Error.from(e));

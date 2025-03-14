@@ -13,6 +13,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.proxy.player.PersistentPlayerRegistry;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.Gson;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonObject;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
@@ -54,10 +55,7 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -145,38 +143,53 @@ public class VelocityRustyConnector implements PluginContainer {
                 flux.metadata("name", "RCKernel");
                 flux.metadata("description", "The root kernel for RustyConnector where all additional modules build off of.");
 
-                flux.onStart(kernel->{
+                loader.queue(new ModuleLoader.ModuleRegistrar("ErrorRegistry", k->{
                     try {
-                        kernel.registerModule(new Module.Builder<>("ErrorRegistry", "Provides error handling services.") {
+                        k.registerModule(new Builder<>("ErrorRegistry", "Provides error handling services.") {
                             @Override
                             public Module get() {
-                                System.out.println("Build "+this.name);
                                 return new ErrorRegistry(false, 200);
                             }
                         });
-
-                        kernel.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                }, List.of(), List.of()));
+                loader.queue(new ModuleLoader.ModuleRegistrar("LangLibrary", k->{
+                    try {
+                        k.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
                             @Override
                             public Module get() {
-                                System.out.println("Build "+this.name);
                                 LangLibrary l = new LangLibrary(new EnglishAlphabet());
                                 l.registerLangNodes(VelocityLang.class);
                                 return l;
                             }
                         });
-                        
-                        kernel.registerModule(new Module.Builder<>("PlayerRegistry", "Provides uuid-username mappings for players connected to the network.") {
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                }, List.of("ErrorRegistry"), List.of()));
+                loader.queue(new ModuleLoader.ModuleRegistrar("PlayerRegistry", k->{
+                    try {
+                        k.registerModule(new Module.Builder<>("PlayerRegistry", "Provides uuid-username mappings for players connected to the network.") {
                             @Override
                             public Module get() {
-                                System.out.println("Build "+this.name);
+                                try {
+                                    DefaultConfig config = DefaultConfig.New();
+                                    return new PersistentPlayerRegistry(config.persistPlayerMappings, LiquidTimestamp.from(10, TimeUnit.MINUTES));
+                                } catch (Exception ignore) {}
                                 return new PlayerRegistry();
                             }
                         });
-                        
-                        LoadBalancerRegistry loadBalancerRegistry = (LoadBalancerRegistry) kernel.registerModule(new Builder<>("LoadBalancerRegistry", "Provides access to available LoadBalancer algorithms.") {
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                }, List.of("ErrorRegistry"), List.of("Haze")));
+                loader.queue(new ModuleLoader.ModuleRegistrar("LoadBalancerRegistry", k->{
+                    try {
+                        k.registerModule(new Builder<>("LoadBalancerRegistry", "Provides access to available LoadBalancer algorithms.") {
                             @Override
                             public LoadBalancerRegistry get() {
-                                System.out.println("Build "+this.name);
                                 LoadBalancerRegistry registry = new LoadBalancerRegistry(name -> {
                                     try {
                                         return LoadBalancerConfig.New(name);
@@ -244,29 +257,34 @@ public class VelocityRustyConnector implements PluginContainer {
                                 return registry;
                             }
                         });
-
-                        kernel.registerModule(new Module.Builder<>("FamilyRegistry", "Provides itemized access for all families available on the RustyConnector kernel.") {
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                }, List.of("ErrorRegistry"), List.of()));
+                
+                loader.queue(new ModuleLoader.ModuleRegistrar("FamilyRegistry", k->{
+                    try {
+                        k.registerModule(new Module.Builder<>("FamilyRegistry", "Provides itemized access for all families available on the RustyConnector kernel.") {
                             @Override
                             public Module get() {
-                                System.out.println("Build "+this.name);
                                 FamilyRegistry f = new FamilyRegistry();
                                 try {
                                     DefaultConfig config = DefaultConfig.New();
                                     f.rootFamily(config.rootFamily);
-
+                                    
                                     File directory = new File(DeclarativeYAML.basePath("rustyconnector")+"/scalar_families");
                                     if(!directory.exists()) directory.mkdirs();
-
+                                    
                                     {
                                         File[] files = directory.listFiles();
                                         if (files == null || files.length == 0)
                                             ScalarFamilyConfig.New("lobby");
                                     }
-
+                                    
                                     File[] files = directory.listFiles();
                                     if (files == null) return f;
                                     if (files.length == 0) return f;
-
+                                    
                                     for (File file : files) {
                                         if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
                                         int extensionIndex = file.getName().lastIndexOf(".");
@@ -281,13 +299,19 @@ public class VelocityRustyConnector implements PluginContainer {
                                                     JsonObject metadataJson = gson.fromJson(scalarFamilyConfig.metadata, JsonObject.class);
                                                     Map<String, Object> mt = new HashMap<>();
                                                     metadataJson.entrySet().forEach(e->mt.put(e.getKey(), Packet.Parameter.fromJSON(e.getValue()).getOriginalValue()));
-                                                
+                                                    
+                                                    LoadBalancerRegistry registry = (LoadBalancerRegistry) k.fetchModule("LoadBalancerRegistry").orElse(null);
+                                                    if(registry == null) {
+                                                        RC.Error(Error.from("Unable to register "+scalarFamilyConfig.id+" because LoadBalancerRegistry is null.").urgent(true));
+                                                        return null;
+                                                    }
+                                                    
                                                     return new ScalarFamily(
                                                         scalarFamilyConfig.id,
                                                         scalarFamilyConfig.displayName.isEmpty() ? null : scalarFamilyConfig.displayName,
                                                         scalarFamilyConfig.parentFamily.isEmpty() ? null : scalarFamilyConfig.parentFamily,
                                                         mt,
-                                                        loadBalancerRegistry.generate(scalarFamilyConfig.loadBalancer)
+                                                        registry.generate(scalarFamilyConfig.loadBalancer)
                                                     );
                                                 } catch (Exception e) {
                                                     RC.Error(Error.from(e).whileAttempting("To generate the scalar family "+name));
@@ -302,11 +326,16 @@ public class VelocityRustyConnector implements PluginContainer {
                                 return f;
                             }
                         });
-
-                        kernel.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                }, List.of("LoadBalancerRegistry"), List.of()));
+                
+                loader.queue(new ModuleLoader.ModuleRegistrar("EventManager", k->{
+                    try {
+                        k.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
                             @Override
                             public Module get() {
-                                System.out.println("Build "+this.name);
                                 EventManager e = new EventManager();
                                 e.listen(OnServerRegister.class);
                                 e.listen(OnServerUnregister.class);
@@ -315,11 +344,15 @@ public class VelocityRustyConnector implements PluginContainer {
                                 return e;
                             }
                         });
-
-                        kernel.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
+                    } catch (Exception e) {
+                        RC.Error(Error.from(e));
+                    }
+                }, List.of("ErrorRegistry"), List.of()));
+                loader.queue(new ModuleLoader.ModuleRegistrar("MagicLink", k->{
+                    try {
+                        k.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
                             @Override
                             public Module get() {
-                                System.out.println("Build "+this.name);
                                 try {
                                     return MagicLinkConfig.New().build();
                                 } catch (Exception e) {
@@ -328,11 +361,12 @@ public class VelocityRustyConnector implements PluginContainer {
                             }
                         });
                     } catch (Exception e) {
-                        RC.Error(Error.from(e).whileAttempting("To boot up the RustyConnnector Kernel."));
+                        RC.Error(Error.from(e));
                     }
-                });
+                }, List.of("ErrorRegistry"), List.of()));
 
-                loader.loadFromFolder(flux, "rc-modules");
+                loader.queueFromFolder("rc-modules");
+                loader.resolveAndRegister(flux);
             });
 
             RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());

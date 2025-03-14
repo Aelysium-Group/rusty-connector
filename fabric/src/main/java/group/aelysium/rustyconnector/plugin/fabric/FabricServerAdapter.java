@@ -35,21 +35,21 @@ public class FabricServerAdapter extends ServerAdapter {
     }
 
     @Override
-    public Optional<UUID> playerUUID(@NotNull String username) {
+    public Optional<String> playerID(@NotNull String username) {
         ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(username);
         if(player == null) return Optional.empty();
-        return Optional.of(player.getUuid());
+        return Optional.of(player.getUuid().toString());
     }
 
     @Override
-    public Optional<String> playerUsername(@NotNull UUID uuid) {
-        ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(uuid);
+    public Optional<String> playerUsername(@NotNull String id) {
+        ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(UUID.fromString(id));
         if(player == null) return Optional.empty();
         return Optional.of(player.getName().toString());
     }
 
     @Override
-    public boolean isOnline(@NotNull UUID uuid) {
+    public boolean isOnline(@NotNull String uuid) {
         ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(uuid);
         if(player == null) return false;
         if(player.isDisconnected()) return false;
@@ -57,13 +57,13 @@ public class FabricServerAdapter extends ServerAdapter {
     }
     
     @Override
-    public void teleport(@NotNull UUID from, @NotNull UUID to) {
+    public void teleport(@NotNull String fromPlayer, @NotNull String toPlayer) {
         try {
-            ServerPlayerEntity player1 = server.getPlayerManager().getPlayer(from);
-            if(player1 == null) throw new NullPointerException("Player "+from+" could not be found.");
+            ServerPlayerEntity player1 = server.getPlayerManager().getPlayer(fromPlayer);
+            if(player1 == null) throw new NullPointerException("Player "+fromPlayer+" could not be found.");
             
-            ServerPlayerEntity player2 = server.getPlayerManager().getPlayer(to);
-            if(player2 == null) throw new NullPointerException("Player "+to+" could not be found.");
+            ServerPlayerEntity player2 = server.getPlayerManager().getPlayer(toPlayer);
+            if(player2 == null) throw new NullPointerException("Player "+toPlayer+" could not be found.");
             player2.teleport(
                 player1.getServerWorld(),
                 player1.getX(),
@@ -75,7 +75,7 @@ public class FabricServerAdapter extends ServerAdapter {
                 false
             );
         } catch (Exception e) {
-            RC.Error(Error.from(e).whileAttempting("To teleport player "+from+" to player "+to));
+            RC.Error(Error.from(e).whileAttempting("To teleport player "+fromPlayer+" to player "+toPlayer));
         }
     }
     
@@ -101,9 +101,9 @@ public class FabricServerAdapter extends ServerAdapter {
     }
     
     @Override
-    public void messagePlayer(@NotNull UUID uuid, @NotNull Component message) {
+    public void messagePlayer(@NotNull String playerID, @NotNull Component message) {
         try {
-            ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(uuid);
+            ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(UUID.fromString(playerID));
             if(player == null) return;
             if(player.isDisconnected()) return;
 
