@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.paper;
 
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
+import group.aelysium.rustyconnector.common.util.CommandClient;
 import group.aelysium.rustyconnector.server.ServerAdapter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
@@ -17,9 +18,9 @@ import java.util.UUID;
 
 public class PaperServerAdapter extends ServerAdapter {
     private final Server server;
-    private final CommandManager<?> commandManager;
+    private final CommandManager<CommandClient> commandManager;
 
-    public PaperServerAdapter(@NotNull Server server, @NotNull CommandManager<?> commandManager) {
+    public PaperServerAdapter(@NotNull Server server, @NotNull CommandManager<CommandClient> commandManager) {
         this.server = server;
         this.commandManager = commandManager;
     }
@@ -58,9 +59,9 @@ public class PaperServerAdapter extends ServerAdapter {
     @Override
     public void teleport(@NotNull String fromPlayer, @NotNull String toPlayer) {
         try {
-            Player player1 = this.server.getPlayer(fromPlayer);
+            Player player1 = this.server.getPlayer(UUID.fromString(fromPlayer));
             if(player1 == null) throw new NullPointerException("Player "+fromPlayer+" could not be found.");
-            Player player2 = this.server.getPlayer(toPlayer);
+            Player player2 = this.server.getPlayer(UUID.fromString(toPlayer));
             if(player2 == null) throw new NullPointerException("Player "+toPlayer+" could not be found.");
             
             player2.teleportAsync(player1.getLocation());
@@ -70,9 +71,9 @@ public class PaperServerAdapter extends ServerAdapter {
     }
     
     @Override
-    public void teleport(@NotNull UUID from, @Nullable String world, @Nullable Double x, @Nullable Double y, @Nullable Double z, @Nullable Float pitch, @Nullable Float yaw) {
+    public void teleport(@NotNull String from, @Nullable String world, @Nullable Double x, @Nullable Double y, @Nullable Double z, @Nullable Float pitch, @Nullable Float yaw) {
         try {
-            Player player = this.server.getPlayer(from);
+            Player player = this.server.getPlayer(UUID.fromString(from));
             if(player == null) throw new NullPointerException("Player "+from+" could not be found.");
             
             player.teleportAsync(
@@ -102,8 +103,8 @@ public class PaperServerAdapter extends ServerAdapter {
     }
     
     @Override
-    public <T> CommandManager<T> commandManager() {
-        return (CommandManager<T>) this.commandManager;
+    public CommandManager<CommandClient> commandManager() {
+        return this.commandManager;
     }
     
     @Override

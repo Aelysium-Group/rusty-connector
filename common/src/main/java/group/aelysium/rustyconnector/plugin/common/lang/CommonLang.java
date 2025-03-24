@@ -5,6 +5,7 @@ import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.lang.Lang;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.modules.Module;
+import group.aelysium.rustyconnector.common.util.Parameter;
 import group.aelysium.rustyconnector.proxy.util.Version;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -188,6 +189,8 @@ public class CommonLang {
             return text(value.toString(), BLUE);
         if(String.class.isAssignableFrom(clazz))
             return text("\""+value+"\"", GOLD);
+        if(Parameter.class.isAssignableFrom(clazz))
+            return typedValue(((Parameter) value).getOriginalValue());
         if(Component.class.isAssignableFrom(clazz))
             return (Component) value;
         return text(value.toString(), GRAY);

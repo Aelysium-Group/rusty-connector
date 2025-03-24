@@ -2,6 +2,8 @@ package group.aelysium.rustyconnector.plugin.fabric;
 
 import group.aelysium.rustyconnector.common.modules.Module;
 import group.aelysium.rustyconnector.common.modules.ModuleLoader;
+import group.aelysium.rustyconnector.common.util.CommandClient;
+import group.aelysium.rustyconnector.common.util.Parameter;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
@@ -15,7 +17,6 @@ import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.common.magic_link.PacketCache;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.util.URL;
-import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
@@ -49,7 +50,7 @@ import java.util.UUID;
 public class FabricRustyConnector implements DedicatedServerModInitializer {
     private final ModuleLoader loader = new ModuleLoader();
     private final Gson gson = new Gson();
-    private FabricServerCommandManager<Client> commandManager;
+    private FabricServerCommandManager<CommandClient> commandManager;
     
     @Override
     public void onInitializeServer() {
@@ -64,7 +65,7 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                             if(sender.getEntity() == null && sender.getServer() != null) return new FabricClient.Console(sender);
                             return new FabricClient.Other(sender);
                         },
-                        Client::toSender
+                        CommandClient::toSender
                 )
         );
 
@@ -111,19 +112,19 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                             ServerIDConfig.Load(id);
                         }
                         
-                        JsonObject metadataJson = gson.fromJson(config.metadata, JsonObject.class);
-                        Map<String, Packet.Parameter> metadata = new HashMap<>();
-                        metadataJson.entrySet().forEach(e->metadata.put(e.getKey(), Packet.Parameter.fromJSON(e.getValue())));
-                        
-                        return new ServerKernel(
+                        ServerKernel kernel = new ServerKernel(
                             id,
                             new FabricServerAdapter(s, this.commandManager),
                             Path.of(DeclarativeYAML.basePath("rustyconnector")),
                             Path.of(DeclarativeYAML.basePath("rustyconnector-modules")),
                             AddressUtil.parseAddress(config.address),
-                            config.family,
-                            metadata
+                            config.family
                         );
+                        
+                        JsonObject metadataJson = gson.fromJson(config.metadata, JsonObject.class);
+                        metadataJson.entrySet().forEach(e->kernel.storeMetadata(e.getKey(), Parameter.fromJSON(e.getValue())));
+                        
+                        return kernel;
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -133,80 +134,82 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                     flux.metadata("name", "RCKernel");
                     flux.metadata("description", "The root kernel for RustyConnector where all additional modules build off of.");
                     
-                    loader.queue(new ModuleLoader.ModuleRegistrar("ErrorRegistry", k->{
-                        try {
-                            k.registerModule(new Module.Builder<>("ErrorRegistry", "Provides error handling services.") {
-                                @Override
-                                public Module get() {
-                                    return new ErrorRegistry(false, 200);
-                                }
-                            });
-                        } catch (Exception e) {
-                            RC.Error(Error.from(e));
-                        }
-                    }, List.of(), List.of()));
-                    loader.queue(new ModuleLoader.ModuleRegistrar("LangLibrary", k->{
-                        try {
-                            k.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
-                                @Override
-                                public Module get() {
-                                    LangLibrary l = new LangLibrary(new EnglishAlphabet());
-                                    l.registerLangNodes(ServerLang.class);
-                                    return l;
-                                }
-                            });
-                        } catch (Exception e) {
-                            RC.Error(Error.from(e));
-                        }
-                    }, List.of("ErrorRegistry"), List.of()));
-                    loader.queue(new ModuleLoader.ModuleRegistrar("EventManager", k->{
-                        try {
-                            k.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
-                                @Override
-                                public Module get() {
-                                    return new EventManager();
-                                }
-                            });
-                        } catch (Exception e) {
-                            RC.Error(Error.from(e));
-                        }
-                    }, List.of("ErrorRegistry"), List.of()));
-                    loader.queue(new ModuleLoader.ModuleRegistrar("MagicLink", k->{
-                        try {
-                            k.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
-                                @Override
-                                public Module get() {
-                                    try {
-                                        DefaultConfig config = DefaultConfig.New();
-                                        ServerIDConfig idConfig = ServerIDConfig.Read();
-                                        
-                                        AES aes = PrivateKeyConfig.New().cryptor();
-                                        return new WebSocketMagicLink(
-                                            URL.parseURL(config.magicLink_accessEndpoint),
-                                            Packet.SourceIdentifier.server(idConfig.id()),
-                                            aes,
-                                            new PacketCache(100),
-                                            null
-                                        );
-                                    } catch (Exception e) {
-                                        RC.Error(Error.from(e).whileAttempting("To initialize MagicLink.").urgent(true));
+                    flux.onStart(kernel -> {
+                        loader.queue(new ModuleLoader.ModuleRegistrar("LangLibrary", k->{
+                            try {
+                                k.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
+                                    @Override
+                                    public Module get() {
+                                        LangLibrary l = new LangLibrary(new EnglishAlphabet());
+                                        l.registerLangNodes(ServerLang.class);
+                                        return l;
                                     }
-                                    return null;
-                                }
-                            });
-                        } catch (Exception e) {
-                            RC.Error(Error.from(e));
-                        }
-                    }, List.of("ErrorRegistry"), List.of()));
-                    
-                    loader.queueFromFolder("rc-modules");
-                    
-                    loader.resolveAndRegister(flux);
+                                });
+                            } catch (Exception e) {
+                                RC.Error(Error.from(e));
+                            }
+                        }, List.of(), List.of("nothingThisIsTheStartOfTheChainIgnoreItYouGoober")));
+                        loader.queue(new ModuleLoader.ModuleRegistrar("ErrorRegistry", k->{
+                            try {
+                                k.registerModule(new Module.Builder<>("ErrorRegistry", "Provides error handling services.") {
+                                    @Override
+                                    public Module get() {
+                                        return new ErrorRegistry(false, 200);
+                                    }
+                                });
+                            } catch (Exception e) {
+                                RC.Error(Error.from(e));
+                            }
+                        }, List.of("LangLibrary"), List.of()));
+                        loader.queue(new ModuleLoader.ModuleRegistrar("EventManager", k->{
+                            try {
+                                k.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
+                                    @Override
+                                    public Module get() {
+                                        return new EventManager();
+                                    }
+                                });
+                            } catch (Exception e) {
+                                RC.Error(Error.from(e));
+                            }
+                        }, List.of("ErrorRegistry"), List.of()));
+                        loader.queue(new ModuleLoader.ModuleRegistrar("MagicLink", k->{
+                            try {
+                                k.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
+                                    @Override
+                                    public Module get() {
+                                        try {
+                                            DefaultConfig config = DefaultConfig.New();
+                                            ServerIDConfig idConfig = ServerIDConfig.Read();
+                                            
+                                            AES aes = PrivateKeyConfig.New().cryptor();
+                                            return new WebSocketMagicLink(
+                                                URL.parseURL(config.magicLink_accessEndpoint),
+                                                Packet.SourceIdentifier.server(idConfig.id()),
+                                                aes,
+                                                new PacketCache(100),
+                                                null
+                                            );
+                                        } catch (Exception e) {
+                                            RC.Error(Error.from(e).whileAttempting("To initialize MagicLink.").urgent(true));
+                                        }
+                                        return null;
+                                    }
+                                });
+                            } catch (Exception e) {
+                                RC.Error(Error.from(e));
+                            }
+                        }, List.of("EventManager"), List.of()));
+                        
+                        loader.queueFromFolder("rc-modules");
+                        
+                        loader.resolveAndRegister(kernel);
+                    });
                 });
 
                 RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
                 
-                AnnotationParser<Client> annotationParser = new AnnotationParser<>(this.commandManager, Client.class);
+                AnnotationParser<CommandClient> annotationParser = new AnnotationParser<>(this.commandManager, CommandClient.class);
                 annotationParser.parse(new CommonCommands());
                 annotationParser.parse(new CommandRusty());
             } catch (Exception e) {

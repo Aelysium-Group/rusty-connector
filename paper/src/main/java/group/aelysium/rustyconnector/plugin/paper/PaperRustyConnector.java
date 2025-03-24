@@ -1,5 +1,7 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
+import group.aelysium.rustyconnector.common.util.CommandClient;
+import group.aelysium.rustyconnector.common.util.Parameter;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.RustyConnector;
@@ -15,7 +17,6 @@ import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.modules.ModuleLoader;
 import group.aelysium.rustyconnector.common.modules.Module;
 import group.aelysium.rustyconnector.common.util.URL;
-import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.GitOpsConfig;
 import group.aelysium.rustyconnector.plugin.common.config.PrivateKeyConfig;
@@ -41,15 +42,13 @@ import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public final class PaperRustyConnector extends JavaPlugin {
     private static final Gson gson = new Gson();
     private final ModuleLoader loader = new ModuleLoader();
-    private LegacyPaperCommandManager<Client> commandManager;
+    private LegacyPaperCommandManager<CommandClient> commandManager;
 
     public PaperRustyConnector() {}
 
@@ -92,7 +91,7 @@ public final class PaperRustyConnector extends JavaPlugin {
                         if(sender instanceof Player source) return new PaperClient.Player(source);
                         return new PaperClient.Other(sender);
                     },
-                    Client::toSender
+                    CommandClient::toSender
                 )
             );
             
@@ -117,19 +116,19 @@ public final class PaperRustyConnector extends JavaPlugin {
                         ServerIDConfig.Load(id);
                     }
                     
-                    JsonObject metadataJson = gson.fromJson(config.metadata, JsonObject.class);
-                    Map<String, Packet.Parameter> metadata = new HashMap<>();
-                    metadataJson.entrySet().forEach(e->metadata.put(e.getKey(), Packet.Parameter.fromJSON(e.getValue())));
-                    
-                    return new ServerKernel(
+                    ServerKernel kernel = new ServerKernel(
                         id,
                         new PaperServerAdapter(PaperRustyConnector.this.getServer(), PaperRustyConnector.this.commandManager),
                         Path.of(DeclarativeYAML.basePath("rustyconnector")),
                         Path.of(DeclarativeYAML.basePath("rustyconnector-modules")),
                         AddressUtil.parseAddress(config.address),
-                        config.family,
-                        metadata
+                        config.family
                     );
+                    
+                    JsonObject metadataJson = gson.fromJson(config.metadata, JsonObject.class);
+                    metadataJson.entrySet().forEach(e->kernel.storeMetadata(e.getKey(), Parameter.fromJSON(e.getValue())));
+                    
+                    return kernel;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -139,80 +138,82 @@ public final class PaperRustyConnector extends JavaPlugin {
                 flux.metadata("name", "RCKernel");
                 flux.metadata("description", "The root kernel for RustyConnector where all additional modules build off of.");
                 
-                loader.queue(new ModuleLoader.ModuleRegistrar("ErrorRegistry", k->{
-                    try {
-                        k.registerModule(new Module.Builder<>("ErrorRegistry", "Provides error handling services.") {
-                            @Override
-                            public Module get() {
-                                return new ErrorRegistry(false, 200);
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of(), List.of()));
-                loader.queue(new ModuleLoader.ModuleRegistrar("LangLibrary", k->{
-                    try {
-                        k.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
-                            @Override
-                            public Module get() {
-                                LangLibrary l = new LangLibrary(new EnglishAlphabet());
-                                l.registerLangNodes(ServerLang.class);
-                                return l;
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of("ErrorRegistry"), List.of()));
-                loader.queue(new ModuleLoader.ModuleRegistrar("EventManager", k->{
-                    try {
-                        k.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
-                            @Override
-                            public Module get() {
-                                return new EventManager();
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of("ErrorRegistry"), List.of()));
-                loader.queue(new ModuleLoader.ModuleRegistrar("MagicLink", k->{
-                    try {
-                        k.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
-                            @Override
-                            public Module get() {
-                                try {
-                                    DefaultConfig config = DefaultConfig.New();
-                                    ServerIDConfig idConfig = ServerIDConfig.Read();
-                                    
-                                    AES aes = PrivateKeyConfig.New().cryptor();
-                                    return new WebSocketMagicLink(
-                                        URL.parseURL(config.magicLink_accessEndpoint),
-                                        Packet.SourceIdentifier.server(idConfig.id()),
-                                        aes,
-                                        new PacketCache(100),
-                                        null
-                                    );
-                                } catch (Exception e) {
-                                    RC.Error(Error.from(e).whileAttempting("To initialize MagicLink.").urgent(true));
+                flux.onStart(kernel -> {
+                    loader.queue(new ModuleLoader.ModuleRegistrar("LangLibrary", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
+                                @Override
+                                public Module get() {
+                                    LangLibrary l = new LangLibrary(new EnglishAlphabet());
+                                    l.registerLangNodes(ServerLang.class);
+                                    return l;
                                 }
-                                return null;
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of("ErrorRegistry"), List.of()));
-
-                loader.queueFromFolder("rc-modules");
-                
-                loader.resolveAndRegister(flux);
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of(), List.of("nothingThisIsTheStartOfTheChainIgnoreItYouGoober")));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("ErrorRegistry", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("ErrorRegistry", "Provides error handling services.") {
+                                @Override
+                                public Module get() {
+                                    return new ErrorRegistry(false, 200);
+                                }
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("LangLibrary"), List.of()));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("EventManager", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
+                                @Override
+                                public Module get() {
+                                    return new EventManager();
+                                }
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("ErrorRegistry"), List.of()));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("MagicLink", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
+                                @Override
+                                public Module get() {
+                                    try {
+                                        DefaultConfig config = DefaultConfig.New();
+                                        ServerIDConfig idConfig = ServerIDConfig.Read();
+                                        
+                                        AES aes = PrivateKeyConfig.New().cryptor();
+                                        return new WebSocketMagicLink(
+                                            URL.parseURL(config.magicLink_accessEndpoint),
+                                            Packet.SourceIdentifier.server(idConfig.id()),
+                                            aes,
+                                            new PacketCache(100),
+                                            null
+                                        );
+                                    } catch (Exception e) {
+                                        RC.Error(Error.from(e).whileAttempting("To initialize MagicLink.").urgent(true));
+                                    }
+                                    return null;
+                                }
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("EventManager"), List.of()));
+                    
+                    loader.queueFromFolder("rc-modules");
+                    
+                    loader.resolveAndRegister(kernel);
+                });
             });
 
-            AnnotationParser<Client> annotationParser = new AnnotationParser<>(
-                    commandManager,
-                    Client.class
+            AnnotationParser<CommandClient> annotationParser = new AnnotationParser<>(
+                commandManager,
+                CommandClient.class
             );
             annotationParser.parse(new CommonCommands());
             annotationParser.parse(new CommandRusty());

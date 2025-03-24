@@ -7,6 +7,7 @@ import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
 import group.aelysium.rustyconnector.common.modules.Module;
 import group.aelysium.rustyconnector.common.modules.ModuleHolder;
+import group.aelysium.rustyconnector.common.util.CommandClient;
 import group.aelysium.rustyconnector.plugin.common.lang.CommonLang;
 import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import net.kyori.adventure.text.Component;
@@ -26,12 +27,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public class CommonCommands {
 
     @Command("")
-    public void hizfafjjszjivcys(Client.Console<?> client) {
+    public void hizfafjjszjivcys(CommandClient.Console<?> client) {
         client.send(RC.Lang("rustyconnector-kernelDetails").generate(RC.Kernel()));
     }
 
     @Command("reload")
-    public void nglbwcmuzzxvjaon(Client.Console<?> client) {
+    public void nglbwcmuzzxvjaon(CommandClient.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             Flux<?> particle = RustyConnector.Kernel();
@@ -46,7 +47,7 @@ public class CommonCommands {
     @Command("plugins")
     @Command("module")
     @Command("modules")
-    public void nglbwcmuvchdjaon(Client.Console<?> client) {
+    public void nglbwcmuvchdjaon(CommandClient.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-pluginList").generate(RC.Kernel().modules().keySet()));
         } catch (Exception e) {
@@ -57,9 +58,10 @@ public class CommonCommands {
     @Command("plugins <pluginTree>")
     @Command("module <pluginTree>")
     @Command("modules <pluginTree>")
-    public void nglbwcmuschdjaon(Client.Console<?> client, String pluginTree) {
+    public void nglbwcmuschdjaon(CommandClient.Console<?> client, String pluginTree) {
         try {
             Flux<Module> flux = fetchPlugin(client, pluginTree);
+            if(flux == null) return;
 
             client.send(RC.Lang("rustyconnector-details").generate(flux.metadata("name"), flux.metadata("description"), flux.asOptional()));
         } catch (Exception e) {
@@ -71,7 +73,7 @@ public class CommonCommands {
     @Command("plugins <pluginTree> reload")
     @Command("module <pluginTree> reload")
     @Command("modules <pluginTree> reload")
-    public void nglbwzmspchdjaon(Client.Console<?> client, String pluginTree) {
+    public void nglbwzmspchdjaon(CommandClient.Console<?> client, String pluginTree) {
         try {
             Flux<?> flux = fetchPlugin(client, pluginTree);
             if(flux == null) return;
@@ -87,7 +89,7 @@ public class CommonCommands {
     @Command("plugins <pluginTree> stop")
     @Command("module <pluginTree> stop")
     @Command("modules <pluginTree> stop")
-    public void nglbwzmzpsodjaon(Client.Console<?> client, String pluginTree) {
+    public void nglbwzmzpsodjaon(CommandClient.Console<?> client, String pluginTree) {
         Flux<?> flux = fetchPlugin(client, pluginTree);
         if(flux == null) return;
         if(flux.isEmpty()) {
@@ -107,7 +109,7 @@ public class CommonCommands {
     @Command("plugins <pluginTree> start")
     @Command("module <pluginTree> start")
     @Command("modules <pluginTree> start")
-    public void asfdmgfsgsodjaon(Client.Console<?> client, String pluginTree) {
+    public void asfdmgfsgsodjaon(CommandClient.Console<?> client, String pluginTree) {
         try {
             Flux<?> flux = fetchPlugin(client, pluginTree);
             if(flux == null) return;
@@ -123,7 +125,7 @@ public class CommonCommands {
         }
     }
 
-    private static @Nullable Flux<Module> fetchPlugin(Client.Console<?> client, String pluginTree) {
+    private static @Nullable Flux<Module> fetchPlugin(CommandClient.Console<?> client, String pluginTree) {
         String[] nodes = pluginTree.split("\\.");
         AtomicReference<Flux<Module>> current = new AtomicReference<>((Flux<Module>) (Object) RustyConnector.Kernel());
 
@@ -211,7 +213,7 @@ public class CommonCommands {
 
     @Command("error <uuid>")
     @Command("errors <uuid>")
-    public void nglbwzmxvchdjaon(Client.Console<?> client, String uuid) {
+    public void nglbwzmxvchdjaon(CommandClient.Console<?> client, String uuid) {
         try {
             UUID errorUUID;
             try {
@@ -232,7 +234,7 @@ public class CommonCommands {
 
     @Command("packet")
     @Command("packets")
-    public void yckarhhyoblbmbdl(Client.Console<?> client) {
+    public void yckarhhyoblbmbdl(CommandClient.Console<?> client) {
         try {
             List<Packet> messages = RC.MagicLink().packetCache().packets();
             client.send(RC.Lang("rustyconnector-packets").generate(messages));
@@ -243,7 +245,7 @@ public class CommonCommands {
 
     @Command("packet clear")
     @Command("packets clear")
-    public void wuifhmwefmhuidid(Client.Console<?> client) {
+    public void wuifhmwefmhuidid(CommandClient.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             RC.MagicLink().packetCache().empty();
@@ -255,7 +257,7 @@ public class CommonCommands {
 
     @Command("packet <id>")
     @Command("packets <id>")
-    public void nidbtmkngikxlzyo(Client.Console<?> client, String id) {
+    public void nidbtmkngikxlzyo(CommandClient.Console<?> client, String id) {
         try {
             client.send(RC.Lang("rustyconnector-packetDetails").generate(
                     RC.MagicLink().packetCache().find(NanoID.fromString(id)).orElseThrow(
@@ -268,11 +270,11 @@ public class CommonCommands {
     }
 
     @Command("send")
-    public void acmednrmiufxxviz(Client.Console<?> client) {
+    public void acmednrmiufxxviz(CommandClient.Console<?> client) {
         client.send(RC.Lang("rustyconnector-sendUsage").generate());
     }
     @Command("send <playerTarget>")
-    public void acmednrmiusgxviz(Client.Console<?> client, String playerTarget) {
+    public void acmednrmiusgxviz(CommandClient.Console<?> client, String playerTarget) {
         acmednrmiufxxviz(client);
     }
 }

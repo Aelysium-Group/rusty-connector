@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.fabric;
 
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
+import group.aelysium.rustyconnector.common.util.CommandClient;
 import group.aelysium.rustyconnector.server.ServerAdapter;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -17,16 +18,15 @@ import java.util.UUID;
 
 public class FabricServerAdapter extends ServerAdapter {
     private final MinecraftServer server;
-    private final CommandManager<?> commandManager;
+    private final CommandManager<CommandClient> commandManager;
 
-    public FabricServerAdapter(@NotNull MinecraftServer server, @NotNull CommandManager<?> commandManager) {
+    public FabricServerAdapter(@NotNull MinecraftServer server, @NotNull CommandManager<CommandClient> commandManager) {
         this.server = server;
         this.commandManager = commandManager;
     }
 
     @Override
     public void setMaxPlayers(int max) {
-
     }
 
     @Override
@@ -50,7 +50,7 @@ public class FabricServerAdapter extends ServerAdapter {
 
     @Override
     public boolean isOnline(@NotNull String uuid) {
-        ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(uuid);
+        ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(UUID.fromString(uuid));
         if(player == null) return false;
         if(player.isDisconnected()) return false;
         return true;
@@ -59,10 +59,10 @@ public class FabricServerAdapter extends ServerAdapter {
     @Override
     public void teleport(@NotNull String fromPlayer, @NotNull String toPlayer) {
         try {
-            ServerPlayerEntity player1 = server.getPlayerManager().getPlayer(fromPlayer);
+            ServerPlayerEntity player1 = server.getPlayerManager().getPlayer(UUID.fromString(fromPlayer));
             if(player1 == null) throw new NullPointerException("Player "+fromPlayer+" could not be found.");
             
-            ServerPlayerEntity player2 = server.getPlayerManager().getPlayer(toPlayer);
+            ServerPlayerEntity player2 = server.getPlayerManager().getPlayer(UUID.fromString(toPlayer));
             if(player2 == null) throw new NullPointerException("Player "+toPlayer+" could not be found.");
             player2.teleport(
                 player1.getServerWorld(),
@@ -80,9 +80,9 @@ public class FabricServerAdapter extends ServerAdapter {
     }
     
     @Override
-    public void teleport(@NotNull UUID from, @Nullable String world, @Nullable Double x, @Nullable Double y, @Nullable Double z, @Nullable Float pitch, @Nullable Float yaw) {
+    public void teleport(@NotNull String from, @Nullable String world, @Nullable Double x, @Nullable Double y, @Nullable Double z, @Nullable Float pitch, @Nullable Float yaw) {
         try {
-            ServerPlayerEntity player = server.getPlayerManager().getPlayer(from);
+            ServerPlayerEntity player = server.getPlayerManager().getPlayer(UUID.fromString(from));
             if(player == null) throw new NullPointerException("Player "+from+" could not be found.");
             
             player.teleport(
@@ -114,8 +114,8 @@ public class FabricServerAdapter extends ServerAdapter {
     }
     
     @Override
-    public <T> CommandManager<T> commandManager() {
-        return (CommandManager<T>) this.commandManager;
+    public CommandManager<CommandClient> commandManager() {
+        return this.commandManager;
     }
     
     @Override

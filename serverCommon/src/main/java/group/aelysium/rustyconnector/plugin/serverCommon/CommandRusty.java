@@ -3,7 +3,7 @@ package group.aelysium.rustyconnector.plugin.serverCommon;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
 import group.aelysium.rustyconnector.common.magic_link.MagicLinkCore;
-import group.aelysium.rustyconnector.plugin.common.command.Client;
+import group.aelysium.rustyconnector.common.util.CommandClient;
 import org.incendo.cloud.annotation.specifier.Greedy;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
@@ -23,7 +23,7 @@ import static net.kyori.adventure.text.Component.*;
 @Permission("rustyconnector.commands.rc")
 public final class CommandRusty {
     @Command("send <playerTarget> <target>")
-    private  void sertgsdbfdfxxviz(Client.Console<?> client, String playerTarget, String target) {
+    private  void sertgsdbfdfxxviz(CommandClient.Console<?> client, String playerTarget, String target) {
         try {
             boolean isUUID = false;
             try {
@@ -45,7 +45,7 @@ public final class CommandRusty {
     }
     @Command("send <playerTarget> <target> <flags>")
     private  void sdfvqewrsczzsrff(
-            Client.Console<?> client,
+            CommandClient.Console<?> client,
             String playerTarget,
             String target,
             @Greedy String flags
@@ -85,7 +85,7 @@ public final class CommandRusty {
     }
 
     @Command("lock")
-    private void zxcvssdbfdfxxviz(Client.Console<?> client) {
+    private void zxcvssdbfdfxxviz(CommandClient.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().lock().get(7, TimeUnit.SECONDS);
@@ -98,7 +98,7 @@ public final class CommandRusty {
     }
 
     @Command("unlock")
-    private void sertgssdfvsscefd(Client.Console<?> client) {
+    private void sertgssdfvsscefd(CommandClient.Console<?> client) {
         try {
             client.send(RC.Lang("rustyconnector-waiting").generate());
             MagicLinkCore.Packets.Response packet = RC.S.Kernel().unlock().get(7, TimeUnit.SECONDS);

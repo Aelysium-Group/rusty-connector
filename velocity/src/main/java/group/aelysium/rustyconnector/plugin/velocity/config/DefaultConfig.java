@@ -104,6 +104,16 @@ public class DefaultConfig {
     @Node(4)
     public String persistPlayerMappings = "";
     
+    @Node(5)
+    @Comment({
+        "#",
+        "# Provide additional metadata for the proxy.",
+        "# Metadata provided here is non-essential, meaning that RustyConnector is capable of running without anything provided here.",
+        "# Ensure that the provided metadata conforms to valid JSON syntax.",
+        "#"
+    })
+    public String metadata = "{}";
+    
     public static DefaultConfig New() throws IOException {
         return DeclarativeYAML.From(DefaultConfig.class);
     }

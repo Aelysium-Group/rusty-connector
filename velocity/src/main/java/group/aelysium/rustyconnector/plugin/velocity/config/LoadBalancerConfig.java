@@ -2,6 +2,7 @@ package group.aelysium.rustyconnector.plugin.velocity.config;
 
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.common.util.Parameter;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.LoadBalancerRegistry;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.Gson;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonObject;
@@ -166,7 +167,7 @@ public class LoadBalancerConfig {
         Gson gson = new Gson();
         JsonObject metadataJson = gson.fromJson(lb.metadata, JsonObject.class);
         Map<String, Object> mt = new HashMap<>();
-        metadataJson.entrySet().forEach(e->mt.put(e.getKey(), Packet.Parameter.fromJSON(e.getValue()).getOriginalValue()));
+        metadataJson.entrySet().forEach(e->mt.put(e.getKey(), Parameter.fromJSON(e.getValue()).getOriginalValue()));
         
         LoadBalancer.Config config = new LoadBalancer.Config(
             name,

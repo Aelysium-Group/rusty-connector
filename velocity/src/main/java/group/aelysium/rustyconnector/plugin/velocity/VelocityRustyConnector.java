@@ -10,7 +10,8 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import group.aelysium.rustyconnector.common.magic_link.packet.Packet;
+import group.aelysium.rustyconnector.common.util.CommandClient;
+import group.aelysium.rustyconnector.common.util.Parameter;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
 import group.aelysium.rustyconnector.proxy.player.PersistentPlayerRegistry;
@@ -66,8 +67,8 @@ public class VelocityRustyConnector implements PluginContainer {
     private final PluginLogger logger;
     private final ProxyServer server;
     private final Path dataFolder;
-    private final AnnotationParser<Client> annotationParser;
-    private final CommandManager<Client> commandManager;
+    private final AnnotationParser<CommandClient> annotationParser;
+    private final CommandManager<CommandClient> commandManager;
     private final ModuleLoader loader = new ModuleLoader();
 
     @Inject
@@ -80,17 +81,17 @@ public class VelocityRustyConnector implements PluginContainer {
         this.metricsFactory = metricsFactory;
 
         this.commandManager = new VelocityCommandManager<>(
-                this,
-                server,
-                ExecutionCoordinator.asyncCoordinator(),
-                SenderMapper.create(
-                        sender -> {
-                            if(sender instanceof ConsoleCommandSource console) return new VelocityClient.Console(console);
-                            if(sender instanceof Player player) return new VelocityClient.Player(player);
-                            return new VelocityClient.Other(sender);
-                        },
-                        Client::toSender
-                )
+            this,
+            server,
+            ExecutionCoordinator.asyncCoordinator(),
+            SenderMapper.create(
+                sender -> {
+                    if(sender instanceof ConsoleCommandSource console) return new VelocityClient.Console(console);
+                    if(sender instanceof Player player) return new VelocityClient.Player(player);
+                    return new VelocityClient.Other(sender);
+                },
+                CommandClient::toSender
+            )
         );
         this.annotationParser = new AnnotationParser<>(
                 this.commandManager,
@@ -126,14 +127,20 @@ public class VelocityRustyConnector implements PluginContainer {
 //            }
 
             RustyConnector.registerAndIgnite(Flux.using(()->{
-                System.out.println("Build kernel");
                 try {
-                    return new ProxyKernel(
+                    DefaultConfig config = DefaultConfig.New();
+                    Gson gson = new Gson();
+                    JsonObject metadataJson = gson.fromJson(config.metadata, JsonObject.class);
+                    ProxyKernel kernel = new ProxyKernel(
                         ServerIDConfig.Load(UUID.randomUUID().toString()).id(),
                         new VelocityProxyAdapter(server, logger, this.commandManager),
                         this.dataFolder,
                         this.dataFolder.resolve("../../rc-modules").normalize()
                     );
+                    
+                    metadataJson.entrySet().forEach(e->kernel.storeMetadata(e.getKey(), Parameter.fromJSON(e.getValue())));
+                    
+                    return kernel;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -143,230 +150,233 @@ public class VelocityRustyConnector implements PluginContainer {
                 flux.metadata("name", "RCKernel");
                 flux.metadata("description", "The root kernel for RustyConnector where all additional modules build off of.");
 
-                loader.queue(new ModuleLoader.ModuleRegistrar("ErrorRegistry", k->{
-                    try {
-                        k.registerModule(new Builder<>("ErrorRegistry", "Provides error handling services.") {
-                            @Override
-                            public Module get() {
-                                return new ErrorRegistry(false, 200);
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of(), List.of()));
-                loader.queue(new ModuleLoader.ModuleRegistrar("LangLibrary", k->{
-                    try {
-                        k.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
-                            @Override
-                            public Module get() {
-                                LangLibrary l = new LangLibrary(new EnglishAlphabet());
-                                l.registerLangNodes(VelocityLang.class);
-                                return l;
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of("ErrorRegistry"), List.of()));
-                loader.queue(new ModuleLoader.ModuleRegistrar("PlayerRegistry", k->{
-                    try {
-                        k.registerModule(new Module.Builder<>("PlayerRegistry", "Provides uuid-username mappings for players connected to the network.") {
-                            @Override
-                            public Module get() {
-                                try {
-                                    DefaultConfig config = DefaultConfig.New();
-                                    return new PersistentPlayerRegistry(config.persistPlayerMappings, LiquidTimestamp.from(10, TimeUnit.MINUTES));
-                                } catch (Exception ignore) {}
-                                return new PlayerRegistry();
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of("ErrorRegistry"), List.of("Haze")));
-                loader.queue(new ModuleLoader.ModuleRegistrar("LoadBalancerRegistry", k->{
-                    try {
-                        k.registerModule(new Builder<>("LoadBalancerRegistry", "Provides access to available LoadBalancer algorithms.") {
-                            @Override
-                            public LoadBalancerRegistry get() {
-                                LoadBalancerRegistry registry = new LoadBalancerRegistry(name -> {
+                flux.onStart(kernel -> {
+                    loader.queue(new ModuleLoader.ModuleRegistrar("LangLibrary", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("LangLibrary", "Provides translatable lang messages that can be replaced and repurposed.") {
+                                @Override
+                                public Module get() {
+                                    LangLibrary l = new LangLibrary(new EnglishAlphabet());
+                                    l.registerLangNodes(VelocityLang.class);
+                                    return l;
+                                }
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of(), List.of("nothingThisIsTheStartOfTheChainIgnoreItYouGoober")));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("ErrorRegistry", k->{
+                        try {
+                            k.registerModule(new Builder<>("ErrorRegistry", "Provides error handling services.") {
+                                @Override
+                                public Module get() {
+                                    return new ErrorRegistry(false, 200);
+                                }
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("LangLibrary"), List.of()));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("PlayerRegistry", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("PlayerRegistry", "Provides uuid-username mappings for players connected to the network.") {
+                                @Override
+                                public Module get() {
                                     try {
-                                        return LoadBalancerConfig.New(name);
-                                    } catch (Exception e) {
-                                        RC.Error(Error.from(e).whileAttempting("To build a new load balancer using config "+name+". Provided a ROUND_ROBIN as a fallback.").urgent(true));
-                                    }
-                                    return new Builder<>("LoadBalancer", "Provides load balancing using the RoundRobin sorting algorithm.") {
-                                        @Override
-                                        public LoadBalancer get() {
-                                            return new RoundRobin(false, false, 0, Map.of());
-                                        }
-                                    };
-                                });
-                                
-                                try {
-                                    registry.register("ROUND_ROBIN", config -> new Builder<>("LoadBalancer", "Provides load balancing using the RoundRobin sorting algorithm.") {
-                                        @Override
-                                        public LoadBalancer get() {
-                                            System.out.println("Build " + this.name);
-                                            return new RoundRobin(
-                                                config.weighted(),
-                                                config.persistence(),
-                                                config.attempts(),
-                                                config.metadata()
-                                            );
-                                        }
-                                    });
-                                } catch (Exception e) {
-                                    RC.Error(Error.from(e).whileAttempting("To build the ROUND_ROBIN load balancer algorithm"));
+                                        DefaultConfig config = DefaultConfig.New();
+                                        return new PersistentPlayerRegistry(config.persistPlayerMappings, LiquidTimestamp.from(10, TimeUnit.MINUTES));
+                                    } catch (Exception ignore) {}
+                                    return new PlayerRegistry();
                                 }
-                                try {
-                                    registry.register("LEAST_CONNECTION", config -> new Builder<>("LoadBalancer", "Provides load balancing using the LeastConnection sorting algorithm.") {
-                                        @Override
-                                        public LoadBalancer get() {
-                                            System.out.println("Build " + this.name);
-                                            return new LeastConnection(
-                                                config.weighted(),
-                                                config.persistence(),
-                                                config.attempts(),
-                                                config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance(),
-                                                config.metadata()
-                                            );
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("ErrorRegistry"), List.of("Haze")));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("LoadBalancerRegistry", k->{
+                        try {
+                            k.registerModule(new Builder<>("LoadBalancerRegistry", "Provides access to available LoadBalancer algorithms.") {
+                                @Override
+                                public LoadBalancerRegistry get() {
+                                    LoadBalancerRegistry registry = new LoadBalancerRegistry(name -> {
+                                        try {
+                                            return LoadBalancerConfig.New(name);
+                                        } catch (Exception e) {
+                                            RC.Error(Error.from(e).whileAttempting("To build a new load balancer using config "+name+". Provided a ROUND_ROBIN as a fallback.").urgent(true));
                                         }
-                                    });
-                                } catch (Exception e) {
-                                    RC.Error(Error.from(e).whileAttempting("To build the LEAST_CONNECTION load balancer algorithm"));
-                                }
-                                try {
-                                    registry.register("MOST_CONNECTION", config -> new Builder<>("LoadBalancer", "Provides load balancing using the MostConnection sorting algorithm.") {
-                                        @Override
-                                        public LoadBalancer get() {
-                                            System.out.println("Build " + this.name);
-                                            return new MostConnection(
-                                                config.weighted(),
-                                                config.persistence(),
-                                                config.attempts(),
-                                                config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance(),
-                                                config.metadata()
-                                            );
-                                        }
-                                    });
-                                } catch (Exception e) {
-                                    RC.Error(Error.from(e).whileAttempting("To build the MOST_CONNECTION load balancer algorithm"));
-                                }
-                                return registry;
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of("ErrorRegistry"), List.of()));
-                
-                loader.queue(new ModuleLoader.ModuleRegistrar("FamilyRegistry", k->{
-                    try {
-                        k.registerModule(new Module.Builder<>("FamilyRegistry", "Provides itemized access for all families available on the RustyConnector kernel.") {
-                            @Override
-                            public Module get() {
-                                FamilyRegistry f = new FamilyRegistry();
-                                try {
-                                    DefaultConfig config = DefaultConfig.New();
-                                    f.rootFamily(config.rootFamily);
-                                    
-                                    File directory = new File(DeclarativeYAML.basePath("rustyconnector")+"/scalar_families");
-                                    if(!directory.exists()) directory.mkdirs();
-                                    
-                                    {
-                                        File[] files = directory.listFiles();
-                                        if (files == null || files.length == 0)
-                                            ScalarFamilyConfig.New("lobby");
-                                    }
-                                    
-                                    File[] files = directory.listFiles();
-                                    if (files == null) return f;
-                                    if (files.length == 0) return f;
-                                    
-                                    for (File file : files) {
-                                        if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
-                                        int extensionIndex = file.getName().lastIndexOf(".");
-                                        String name = file.getName().substring(0, extensionIndex);
-                                        f.register(name, new Module.Builder<>("ScalarFamily", "Provides stateless server connectivity between players and it's child servers. Players that join this family may be routed to any server without regard for server details.") {
+                                        return new Builder<>("LoadBalancer", "Provides load balancing using the RoundRobin sorting algorithm.") {
                                             @Override
-                                            public Family get() {
-                                                try {
-                                                    ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.New(name);
-                                                    
-                                                    Gson gson = new Gson();
-                                                    JsonObject metadataJson = gson.fromJson(scalarFamilyConfig.metadata, JsonObject.class);
-                                                    Map<String, Object> mt = new HashMap<>();
-                                                    metadataJson.entrySet().forEach(e->mt.put(e.getKey(), Packet.Parameter.fromJSON(e.getValue()).getOriginalValue()));
-                                                    
-                                                    LoadBalancerRegistry registry = (LoadBalancerRegistry) k.fetchModule("LoadBalancerRegistry").orElse(null);
-                                                    if(registry == null) {
-                                                        RC.Error(Error.from("Unable to register "+scalarFamilyConfig.id+" because LoadBalancerRegistry is null.").urgent(true));
-                                                        return null;
-                                                    }
-                                                    
-                                                    return new ScalarFamily(
-                                                        scalarFamilyConfig.id,
-                                                        scalarFamilyConfig.displayName.isEmpty() ? null : scalarFamilyConfig.displayName,
-                                                        scalarFamilyConfig.parentFamily.isEmpty() ? null : scalarFamilyConfig.parentFamily,
-                                                        mt,
-                                                        registry.generate(scalarFamilyConfig.loadBalancer)
-                                                    );
-                                                } catch (Exception e) {
-                                                    RC.Error(Error.from(e).whileAttempting("To generate the scalar family "+name));
-                                                }
-                                                return null;
+                                            public LoadBalancer get() {
+                                                return new RoundRobin(false, false, 0, Map.of());
+                                            }
+                                        };
+                                    });
+                                    
+                                    try {
+                                        registry.register("ROUND_ROBIN", config -> new Builder<>("LoadBalancer", "Provides load balancing using the RoundRobin sorting algorithm.") {
+                                            @Override
+                                            public LoadBalancer get() {
+                                                System.out.println("Build " + this.name);
+                                                return new RoundRobin(
+                                                    config.weighted(),
+                                                    config.persistence(),
+                                                    config.attempts(),
+                                                    config.metadata()
+                                                );
                                             }
                                         });
+                                    } catch (Exception e) {
+                                        RC.Error(Error.from(e).whileAttempting("To build the ROUND_ROBIN load balancer algorithm"));
                                     }
-                                } catch (Exception e) {
-                                    RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));
+                                    try {
+                                        registry.register("LEAST_CONNECTION", config -> new Builder<>("LoadBalancer", "Provides load balancing using the LeastConnection sorting algorithm.") {
+                                            @Override
+                                            public LoadBalancer get() {
+                                                System.out.println("Build " + this.name);
+                                                return new LeastConnection(
+                                                    config.weighted(),
+                                                    config.persistence(),
+                                                    config.attempts(),
+                                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance(),
+                                                    config.metadata()
+                                                );
+                                            }
+                                        });
+                                    } catch (Exception e) {
+                                        RC.Error(Error.from(e).whileAttempting("To build the LEAST_CONNECTION load balancer algorithm"));
+                                    }
+                                    try {
+                                        registry.register("MOST_CONNECTION", config -> new Builder<>("LoadBalancer", "Provides load balancing using the MostConnection sorting algorithm.") {
+                                            @Override
+                                            public LoadBalancer get() {
+                                                System.out.println("Build " + this.name);
+                                                return new MostConnection(
+                                                    config.weighted(),
+                                                    config.persistence(),
+                                                    config.attempts(),
+                                                    config.rebalance() == null ? LiquidTimestamp.from(15, TimeUnit.SECONDS) : config.rebalance(),
+                                                    config.metadata()
+                                                );
+                                            }
+                                        });
+                                    } catch (Exception e) {
+                                        RC.Error(Error.from(e).whileAttempting("To build the MOST_CONNECTION load balancer algorithm"));
+                                    }
+                                    return registry;
                                 }
-                                return f;
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of("LoadBalancerRegistry"), List.of()));
-                
-                loader.queue(new ModuleLoader.ModuleRegistrar("EventManager", k->{
-                    try {
-                        k.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
-                            @Override
-                            public Module get() {
-                                EventManager e = new EventManager();
-                                e.listen(OnServerRegister.class);
-                                e.listen(OnServerUnregister.class);
-                                e.listen(OnServerTimeout.class);
-                                e.listen(new OnFamilyLifecycle(VelocityRustyConnector.this.server));
-                                return e;
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of("ErrorRegistry"), List.of()));
-                loader.queue(new ModuleLoader.ModuleRegistrar("MagicLink", k->{
-                    try {
-                        k.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
-                            @Override
-                            public Module get() {
-                                try {
-                                    return MagicLinkConfig.New().build();
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("ErrorRegistry"), List.of()));
+                    
+                    loader.queue(new ModuleLoader.ModuleRegistrar("FamilyRegistry", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("FamilyRegistry", "Provides itemized access for all families available on the RustyConnector kernel.") {
+                                @Override
+                                public Module get() {
+                                    FamilyRegistry f = new FamilyRegistry();
+                                    try {
+                                        DefaultConfig config = DefaultConfig.New();
+                                        f.rootFamily(config.rootFamily);
+                                        
+                                        File directory = new File(DeclarativeYAML.basePath("rustyconnector")+"/scalar_families");
+                                        if(!directory.exists()) directory.mkdirs();
+                                        
+                                        {
+                                            File[] files = directory.listFiles();
+                                            if (files == null || files.length == 0)
+                                                ScalarFamilyConfig.New("lobby");
+                                        }
+                                        
+                                        File[] files = directory.listFiles();
+                                        if (files == null) return f;
+                                        if (files.length == 0) return f;
+                                        
+                                        for (File file : files) {
+                                            if(!(file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))) continue;
+                                            int extensionIndex = file.getName().lastIndexOf(".");
+                                            String name = file.getName().substring(0, extensionIndex);
+                                            f.register(name, new Module.Builder<>(name, "Provides stateless server connectivity between players and it's child servers. Players that join this family may be routed to any server without regard for server details.") {
+                                                @Override
+                                                public Family get() {
+                                                    try {
+                                                        ScalarFamilyConfig scalarFamilyConfig = ScalarFamilyConfig.New(name);
+                                                        
+                                                        Gson gson = new Gson();
+                                                        JsonObject metadataJson = gson.fromJson(scalarFamilyConfig.metadata, JsonObject.class);
+                                                        Map<String, Object> mt = new HashMap<>();
+                                                        metadataJson.entrySet().forEach(e->mt.put(e.getKey(), Parameter.fromJSON(e.getValue()).getOriginalValue()));
+                                                        
+                                                        LoadBalancerRegistry registry = (LoadBalancerRegistry) k.fetchModule("LoadBalancerRegistry").orElse(null);
+                                                        if(registry == null) {
+                                                            RC.Error(Error.from("Unable to register "+scalarFamilyConfig.id+" because LoadBalancerRegistry is null.").urgent(true));
+                                                            return null;
+                                                        }
+                                                        
+                                                        return new ScalarFamily(
+                                                            scalarFamilyConfig.id,
+                                                            scalarFamilyConfig.displayName.isEmpty() ? null : scalarFamilyConfig.displayName,
+                                                            scalarFamilyConfig.parentFamily.isEmpty() ? null : scalarFamilyConfig.parentFamily,
+                                                            mt,
+                                                            registry.generate(scalarFamilyConfig.loadBalancer)
+                                                        );
+                                                    } catch (Exception e) {
+                                                        RC.Error(Error.from(e).whileAttempting("To generate the scalar family "+name));
+                                                    }
+                                                    return null;
+                                                }
+                                            });
+                                        }
+                                    } catch (Exception e) {
+                                        RC.Error(Error.from(e).whileAttempting("To boot up the FamilyRegistry."));
+                                    }
+                                    return f;
                                 }
-                            }
-                        });
-                    } catch (Exception e) {
-                        RC.Error(Error.from(e));
-                    }
-                }, List.of("ErrorRegistry"), List.of()));
-
-                loader.queueFromFolder("rc-modules");
-                loader.resolveAndRegister(flux);
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("LoadBalancerRegistry"), List.of()));
+                    
+                    loader.queue(new ModuleLoader.ModuleRegistrar("EventManager", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("EventManager", "Provides event handling services.") {
+                                @Override
+                                public Module get() {
+                                    EventManager e = new EventManager();
+                                    e.listen(OnServerRegister.class);
+                                    e.listen(OnServerUnregister.class);
+                                    e.listen(OnServerTimeout.class);
+                                    e.listen(new OnFamilyLifecycle(VelocityRustyConnector.this.server));
+                                    return e;
+                                }
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("FamilyRegistry"), List.of()));
+                    
+                    loader.queue(new ModuleLoader.ModuleRegistrar("MagicLink", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
+                                @Override
+                                public Module get() {
+                                    try {
+                                        return MagicLinkConfig.New().build();
+                                    } catch (Exception e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("EventManager"), List.of()));
+                    
+                    loader.queueFromFolder("rc-modules");
+                    loader.resolveAndRegister(kernel);
+                });
             });
 
             RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());

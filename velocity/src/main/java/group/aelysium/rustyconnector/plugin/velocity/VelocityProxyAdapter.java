@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
+import group.aelysium.rustyconnector.common.util.CommandClient;
 import group.aelysium.rustyconnector.proxy.ProxyAdapter;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
@@ -17,23 +18,26 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
-import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class VelocityProxyAdapter extends ProxyAdapter {
     private final ProxyServer velocity;
     private final PluginLogger logger;
-    private final CommandManager<?> commandManager;
+    private final CommandManager<CommandClient> commandManager;
 
-    public VelocityProxyAdapter(@NotNull ProxyServer velocity, @NotNull PluginLogger logger, @NotNull CommandManager<?> commandManager) {
+    public VelocityProxyAdapter(@NotNull ProxyServer velocity, @NotNull PluginLogger logger, @NotNull CommandManager<CommandClient> commandManager) {
         this.velocity = velocity;
         this.logger = logger;
         this.commandManager = commandManager;
     }
-
+    
+    @Override
+    public @NotNull Set<Player> onlinePlayers() {
+        return this.velocity.getAllPlayers().stream().map(p -> new Player(p.getUniqueId().toString(), p.getUsername())).collect(Collectors.toSet());
+    }
+    
     @Override
     public @Nullable Object convertToObject(@NotNull Player player) {
         return this.velocity.getPlayer(UUID.fromString(player.id())).orElse(null);
@@ -95,8 +99,8 @@ public class VelocityProxyAdapter extends ProxyAdapter {
     }
     
     @Override
-    public <T> CommandManager<T> commandManager() {
-        return (CommandManager<T>) this.commandManager;
+    public CommandManager<CommandClient> commandManager() {
+        return this.commandManager;
     }
     
     @Override

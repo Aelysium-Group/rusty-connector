@@ -73,34 +73,32 @@ public class VelocityLang extends CommonLang {
     }
 
     @Lang("rustyconnector-serverRegister")
-    public static Component serverRegister(Server.Configuration server, Flux<? extends Family> family) {
+    public static Component serverRegister(Server.Configuration server, Family family) {
         Optional<String> displayName = Optional.ofNullable((String) server.metadata().get("displayName"));
-        try {
+        if(family == null)
             return join(
-                    JoinConfiguration.separator(empty()),
-                    text("[", DARK_GRAY),
-                    text(displayName.orElse(server.id()), BLUE),
-                    space(),
-                    text(AddressUtil.addressToString(server.address()), YELLOW),
-                    text("]", DARK_GRAY),
-                    space(),
-                    text("->", GREEN),
-                    space(),
-                    text(family.orElseThrow().id(), GRAY)
+                JoinConfiguration.separator(empty()),
+                text("[", DARK_GRAY),
+                text(displayName.orElse(server.id()), BLUE),
+                space(),
+                text(AddressUtil.addressToString(server.address()), YELLOW),
+                text("]", DARK_GRAY),
+                space(),
+                text("Registered", GREEN)
             );
-        } catch (NoSuchElementException e) {
-            RC.Error(Error.from(e).whileAttempting("To inform the console of new server registration (failed silently since not urgent)"));
+        else
             return join(
-                    JoinConfiguration.separator(empty()),
-                    text("[", DARK_GRAY),
-                    text(displayName.orElse(server.id()), BLUE),
-                    space(),
-                    text(AddressUtil.addressToString(server.address()), YELLOW),
-                    text("]", DARK_GRAY),
-                    space(),
-                    text("Registered", GREEN)
+                JoinConfiguration.separator(empty()),
+                text("[", DARK_GRAY),
+                text(displayName.orElse(server.id()), BLUE),
+                space(),
+                text(AddressUtil.addressToString(server.address()), YELLOW),
+                text("]", DARK_GRAY),
+                space(),
+                text("->", GREEN),
+                space(),
+                text(family.id(), GRAY)
             );
-        }
     }
 
     @Lang("rustyconnector-serverUnregister")
