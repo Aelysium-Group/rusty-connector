@@ -10,10 +10,12 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import group.aelysium.rustyconnector.common.haze.HazeProvider;
 import group.aelysium.rustyconnector.common.util.CommandClient;
 import group.aelysium.rustyconnector.common.util.Parameter;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.scalar_family.ScalarFamily;
+import group.aelysium.rustyconnector.proxy.player.OnlinePlayersRegistry;
 import group.aelysium.rustyconnector.proxy.player.PersistentPlayerRegistry;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.Gson;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonObject;
@@ -43,7 +45,6 @@ import group.aelysium.rustyconnector.plugin.velocity.lang.VelocityLang;
 import group.aelysium.rustyconnector.proxy.ProxyKernel;
 import group.aelysium.rustyconnector.proxy.family.FamilyRegistry;
 import group.aelysium.rustyconnector.proxy.family.load_balancing.*;
-import group.aelysium.rustyconnector.proxy.player.PlayerRegistry;
 import group.aelysium.rustyconnector.proxy.util.LiquidTimestamp;
 import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import org.bstats.velocity.Metrics;
@@ -186,7 +187,7 @@ public class VelocityRustyConnector implements PluginContainer {
                                         DefaultConfig config = DefaultConfig.New();
                                         return new PersistentPlayerRegistry(config.persistPlayerMappings, LiquidTimestamp.from(10, TimeUnit.MINUTES));
                                     } catch (Exception ignore) {}
-                                    return new PlayerRegistry();
+                                    return new OnlinePlayersRegistry();
                                 }
                             });
                         } catch (Exception e) {
@@ -356,7 +357,7 @@ public class VelocityRustyConnector implements PluginContainer {
                             RC.Error(Error.from(e));
                         }
                     }, List.of("FamilyRegistry"), List.of()));
-                    
+
                     loader.queue(new ModuleLoader.ModuleRegistrar("MagicLink", k->{
                         try {
                             k.registerModule(new Module.Builder<>("MagicLink", "Provides cross-node packet communication via WebSockets.") {
@@ -367,6 +368,18 @@ public class VelocityRustyConnector implements PluginContainer {
                                     } catch (Exception e) {
                                         throw new RuntimeException(e);
                                     }
+                                }
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("EventManager"), List.of()));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("Haze", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("Haze", "Provides access to remote persistent storage services.") {
+                                @Override
+                                public Module get() {
+                                    return new HazeProvider();
                                 }
                             });
                         } catch (Exception e) {

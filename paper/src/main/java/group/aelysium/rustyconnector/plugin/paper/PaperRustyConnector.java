@@ -1,5 +1,6 @@
 package group.aelysium.rustyconnector.plugin.paper;
 
+import group.aelysium.rustyconnector.common.haze.HazeProvider;
 import group.aelysium.rustyconnector.common.util.CommandClient;
 import group.aelysium.rustyconnector.common.util.Parameter;
 import group.aelysium.rustyconnector.shaded.group.aelysium.declarative_yaml.DeclarativeYAML;
@@ -198,6 +199,18 @@ public final class PaperRustyConnector extends JavaPlugin {
                                         RC.Error(Error.from(e).whileAttempting("To initialize MagicLink.").urgent(true));
                                     }
                                     return null;
+                                }
+                            });
+                        } catch (Exception e) {
+                            RC.Error(Error.from(e));
+                        }
+                    }, List.of("EventManager"), List.of()));
+                    loader.queue(new ModuleLoader.ModuleRegistrar("Haze", k->{
+                        try {
+                            k.registerModule(new Module.Builder<>("Haze", "Provides access to remote persistent storage services.") {
+                                @Override
+                                public Module get() {
+                                    return new HazeProvider();
                                 }
                             });
                         } catch (Exception e) {

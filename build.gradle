@@ -36,8 +36,7 @@ subprojects {
     }
 
     dependencies {
-        compileOnly 'org.jetbrains:annotations:24.1.0'
-        implementation 'group.aelysium.rustyconnector:core:0.9.33'
+        implementation 'group.aelysium.rustyconnector:core:0.9.40'
     }
 }
 
