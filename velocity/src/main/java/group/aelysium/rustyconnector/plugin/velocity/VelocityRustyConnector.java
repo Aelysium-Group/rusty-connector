@@ -30,7 +30,6 @@ import group.aelysium.rustyconnector.common.lang.LangLibrary;
 import group.aelysium.rustyconnector.common.modules.Module.Builder;
 import group.aelysium.rustyconnector.common.modules.ModuleLoader;
 import group.aelysium.rustyconnector.common.modules.Module;
-import group.aelysium.rustyconnector.plugin.common.command.Client;
 import group.aelysium.rustyconnector.plugin.common.command.CommonCommands;
 import group.aelysium.rustyconnector.plugin.common.config.ServerIDConfig;
 import group.aelysium.rustyconnector.plugin.velocity.commands.CommandRusty;
@@ -95,8 +94,8 @@ public class VelocityRustyConnector implements PluginContainer {
             )
         );
         this.annotationParser = new AnnotationParser<>(
-                this.commandManager,
-                Client.class
+            this.commandManager,
+            CommandClient.class
         );
 
         this.server.getCommandManager().unregister("server");

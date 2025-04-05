@@ -2,11 +2,10 @@ package group.aelysium.rustyconnector.plugin.velocity.commands;
 
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
-import group.aelysium.rustyconnector.plugin.common.command.Client;
+import group.aelysium.rustyconnector.common.util.CommandClient;
 import group.aelysium.rustyconnector.proxy.family.Family;
 import group.aelysium.rustyconnector.proxy.family.Server;
 import group.aelysium.rustyconnector.proxy.player.Player;
-import group.aelysium.rustyconnector.shaded.group.aelysium.ara.Flux;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 
@@ -20,7 +19,7 @@ import static net.kyori.adventure.text.format.NamedTextColor.DARK_BLUE;
 @Permission("rustyconnector.commands.rc")
 public final class CommandRusty {
     @Command("send <playerTarget> <target>")
-    public void qxeafgbinengqytu(Client.Console<?> client, String playerTarget, String target) {
+    public void qxeafgbinengqytu(CommandClient.Console<?> client, String playerTarget, String target) {
         Player player = null;
         try {
             try {
@@ -67,7 +66,7 @@ public final class CommandRusty {
     }
 
     @Command("send <playerTarget> <target> family")
-    public void mgwsedhgsmudghug(Client.Console<?> client, String playerTarget, String target) {
+    public void mgwsedhgsmudghug(CommandClient.Console<?> client, String playerTarget, String target) {
         Player player = null;
         try {
             try {
@@ -98,7 +97,7 @@ public final class CommandRusty {
         }
     }
     @Command("send <playerTarget> <target> server")
-    public void zmasuiymddiumgsa(Client.Console<?> client, String playerTarget, String target) {
+    public void zmasuiymddiumgsa(CommandClient.Console<?> client, String playerTarget, String target) {
         Player player = null;
         try {
             try {
@@ -131,13 +130,13 @@ public final class CommandRusty {
 
     @Command("server")
     @Command("servers")
-    public void ftuynemwdiuemhid(Client.Console<?> client) {
+    public void ftuynemwdiuemhid(CommandClient.Console<?> client) {
         client.send(RC.Lang("rustyconnector-servers").generate());
     }
 
     @Command("server <serverID>")
     @Command("servers <serverID>")
-    public void fneriygwehmigimh(Client.Console<?> client, String serverID) {
+    public void fneriygwehmigimh(CommandClient.Console<?> client, String serverID) {
         try {
             Server server = RC.P.Server(serverID)
                     .orElseThrow(()->new NoSuchElementException("No server with the id '"+serverID+"' exists."));
@@ -149,13 +148,13 @@ public final class CommandRusty {
 
     @Command("family")
     @Command("families")
-    public void tdrdolhxvcjhaskb(Client.Console<?> client) {
+    public void tdrdolhxvcjhaskb(CommandClient.Console<?> client) {
         client.send(RC.Lang("rustyconnector-details").generate("Families", "All of the families currently registered on the proxy.", Optional.of(RC.P.Families())));
     }
 
     @Command("family <id>")
     @Command("families <id>")
-    public void mfndwqqzuiqmesyn(Client.Console<?> client, String id) {
+    public void mfndwqqzuiqmesyn(CommandClient.Console<?> client, String id) {
         try {
             Family family = RC.P.Family(id)
                     .orElseThrow(()->new NoSuchElementException("No family with the id ["+id+"] exists."));

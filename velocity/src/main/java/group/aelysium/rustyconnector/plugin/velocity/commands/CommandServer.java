@@ -1,7 +1,7 @@
 package group.aelysium.rustyconnector.plugin.velocity.commands;
 
 import group.aelysium.rustyconnector.common.errors.Error;
-import group.aelysium.rustyconnector.plugin.common.command.Client;
+import group.aelysium.rustyconnector.common.util.CommandClient;
 import group.aelysium.rustyconnector.proxy.player.Player;
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.proxy.family.Family;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CommandServer {
     @Command("server")
-    public void esdfdfitotgxtbmf(Client.Player<?> player) {
+    public void esdfdfitotgxtbmf(CommandClient.Player<?> player) {
         if(player == null) {
             RC.Adapter().log(Error.from("/server can only be used by players!").toComponent());
             return;
@@ -22,7 +22,7 @@ public class CommandServer {
     }
 
     @Command("server <family_name>")
-    public void esdfdfitotgxtbmf(Client.Player<?> player, @Argument(value = "family_name") String family_name) {
+    public void esdfdfitotgxtbmf(CommandClient.Player<?> player, @Argument(value = "family_name") String family_name) {
         if(player == null) {
             RC.Adapter().log(Error.from("/server can only be used by players!").toComponent());
             return;

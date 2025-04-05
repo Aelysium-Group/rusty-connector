@@ -298,7 +298,7 @@ public class CommonLang {
                         keyValue("Sender", join(
                                 JoinConfiguration.spaces(),
                                 text(packet.local().origin().name(), DARK_GRAY),
-                                text(packet.local().id(), DARK_GRAY),
+                                    text(packet.local().id(), DARK_GRAY),
                                 serverDisplayName == null ? empty() : text("("+serverDisplayName+")", DARK_GRAY)
                         )),
                         empty(),
