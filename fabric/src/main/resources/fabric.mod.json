@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "rustyconnector-fabric",
+  "version": "${version}",
+  "name": "RustyConnector",
+  "description": "A whitelist implementation for RustyConnector core.",
+  "authors": [],
+  "contact": {},
+  "license": "GPL-3.0",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "group.aelysium.rustyconnector.plugin.fabric.FabricRustyConnector"
+    ]
+  },
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.16"
+  }
+}

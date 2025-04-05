@@ -1,0 +1,72 @@
+plugins {
+    id 'fabric-loom' version '1.9-SNAPSHOT'
+}
+base {
+    archivesName = "rustyconnector-fabric"
+}
+
+// Shadowjar Workaround
+
+configurations {
+    zip
+}
+
+jar {
+    archiveFileName = "rustyconnector-fabric-${version}.jar"
+    from {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        configurations.zip.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'org/**', 'net/**', 'kotlin/**', 'javax/**', 'jakarta/**', 'io/**', 'com/**', 'jetty-dir.css'
+}
+
+dependencies {
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:1.21.3"
+    mappings "net.fabricmc:yarn:1.21.3+build.1:v2"
+    modImplementation "net.fabricmc:fabric-loader:0.16.9"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.112.1+1.21.3"
+
+    // NanoID
+    implementation "com.aventrix.jnanoid:jnanoid:2.0.0"
+    include "com.aventrix.jnanoid:jnanoid:2.0.0"
+
+    // dYAML
+//    implementation "group.aelysium:declarative-yaml:0.1.6"
+//    include "group.aelysium:declarative-yaml:0.1.6"
+    implementation files("../libs/declarative-yaml-0.2.0.jar")
+//    include files("../libs/declarative-yaml-0.2.0.jar")
+
+    // Scuffed Epic dYAML Workaround Moment Late 2024 Simulator Pogchamp (Cringe)
+    include(implementation('org.spongepowered:configurate-core:4.1.2'))
+    include(implementation('org.spongepowered:configurate-yaml:4.1.2'))
+    include(implementation("org.yaml:snakeyaml:2.3"))
+
+    // Cloud
+    include modImplementation("org.incendo:cloud-fabric:2.0.0-beta.10")
+    include implementation("org.incendo:cloud-annotations:2.0.0")
+
+    // Kyori Components
+    modCompileOnly("net.kyori:adventure-platform-fabric:6.1.0")
+    include("net.kyori:adventure-platform-fabric:6.1.0")
+
+    // Part of the shadowjar workaround so we get to not use shadowjar
+    zip implementation(project(path: ':serverCommon', configuration: 'default'))
+    zip implementation(project(path: ':common', configuration: 'default'))
+}
+
+
+// This just renames the jar because something was cringe
+remapJar {
+    archiveFileName = "rustyconnector-fabric-${version}.jar"
+}
+jar.finalizedBy(remapJar)
+
+processResources {
+    inputs.property "version", plugin_version
+    filteringCharset "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand "version": plugin_version
+    }
+}

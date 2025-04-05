@@ -1,11 +1,12 @@
-![Aelysium Wordmark Image](https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/wordmark.png?raw=true)
+![Aelysium Wordmark Image](https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/development/blob/images/wordmark.png?raw=true)
 
 # 👋 Welcome to RustyConnector
-![Velocity](https://flat.badgen.net/badge/Velocity/3.3.0/1197d1?icon=dockbit)
-![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.20.6/F96854?icon=telegram)
-![Folia](https://flat.badgen.net/badge/Folia/Supported/E004BC?icon=maven)
+![Velocity](https://flat.badgen.net/badge/Velocity/3.4.0/1197d1?icon=dockbit)
+![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.21.4/F96854?icon=telegram)
+![Folia](https://flat.badgen.net/badge/Folia/Supported/E004BC?icon=flow)
+![Fabric](https://flat.badgen.net/badge/Fabric/1.16%20-%201.21.4/bf9b49?icon=telegram)
 [![Aelysium](https://flat.badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
-[![Build](https://flat.badgen.net/github/release/Aelysium-Group/rusty-connector?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
+[![Build](https://flat.badgen.net/github/release/Aelysium-Group/rustyconnector-minecraft?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rusty-connector/releases)
 [![License](https://flat.badgen.net/badge/License/GPL-V3/5865F2)](https://github.com/Aelysium-Group/rusty-connector/blob/main/LICENSE_rusty-connector)
 
 [RustyConnector] is a load-balancing plugin that can run on [Velocity]/[Paper]/[Folia] networks, which allows your proxy to automatically register or unregister sub-servers while it's running.
@@ -19,7 +20,7 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://wiki.aelysium.group/rusty-connector/"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/logo.webp?raw=true"></a>
+    <a href="https://wiki.aelysium.group/rusty-connector/"><img src="https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/development/blob/images/logo.webp?raw=true"></a>
   </td>
   <td valign="top">
     <h3>Wiki</h3>
@@ -31,19 +32,19 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://github.com/Aelysium-Group/rusty-connector/releases"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/logo.webp?raw=true"></a>
+    <a href="https://github.com/Aelysium-Group/rustyconnector-minecraft/releases"><img src="https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/development/blob/images/logo.webp?raw=true"></a>
   </td>
   <td valign="top">
     <h3>Download</h3>
     <p>
-      <a href="https://github.com/Aelysium-Group/rusty-connector/releases">Download from GitHub</a>, or check out the plugin release pages.
+      <a href="https://github.com/Aelysium-Group/rustyconnector-minecraft/releases">Download from GitHub</a>, or check out the plugin release pages.
     </p>
   </td>
 </tr>
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://join.aelysium.group"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/logo.webp?raw=true"></a>
+    <a href="https://join.aelysium.group"><img src="https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/development/blob/images/logo.webp?raw=true"></a>
   </td>
   <td>
     <h3>Support</h3>
@@ -57,12 +58,12 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://github.com/Aelysium-Group/rusty-connector/issues"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/logo.webp?raw=true"></a>
+    <a href="https://github.com/Aelysium-Group/rustyconnector-minecraft/issues"><img src="https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/development/blob/images/logo.webp?raw=true"></a>
   </td>
   <td>
     <h3>Report Bugs</h3>
     <p>
-    Experiencing annoying bugs while using the plugin? Report them <a href="https://github.com/Aelysium-Group/rusty-connector/issues"> here</a> to help us squash them.
+    Experiencing annoying bugs while using the plugin? Report them <a href="https://github.com/Aelysium-Group/rustyconnector-minecraft/issues"> here</a> to help us squash them.
     </p>
   </td>
 </tr>
@@ -78,7 +79,7 @@
 <tr>
   <td width="80" align="center" valign="center">
     <br>
-    <a href="https://modrinth.com/plugin/rustyconnector"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/modrinth.svg?raw=true"></a>
+    <a href="https://modrinth.com/plugin/rustyconnector"><img src="https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/development/blob/images/modrinth.svg?raw=true"></a>
   </td>
   <td valign="top">
     <h3>Modrinth</h3>
@@ -90,7 +91,7 @@
 <tr>
   <td width="80" align="center" valign="top">
     <br>
-    <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector"><img src="https://github.com/Aelysium-Group/rusty-connector/blob/development/blob/images/hangar.svg?raw=true"></a>
+    <a href="https://hangar.papermc.io/nathan-i-martin/RustyConnector"><img src="https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/development/blob/images/hangar.svg?raw=true"></a>
   </td>
   <td valign="top">
     <h3>Hangar</h3>
@@ -137,10 +138,10 @@
 ## 🌌 Networks Served ([Click to view](https://bstats.org/plugin/velocity/RustyConnector/17972)):
 [![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)](https://bstats.org/signatures/velocity/RustyConnector.svg)
 
-2024 © [Aelysium](https://www.aelysium.group)
+2025 © [Aelysium](https://www.aelysium.group)
 
 <!-- URL LIST -->
 [Folia]:https://github.com/PaperMC/Folia
 [Paper]: https://papermc.io
 [Velocity]: https://velocitypowered.com
-[RustyConnector]: https://github.com/Aelysium-Group/rusty-connector
+[RustyConnector]: https://github.com/Aelysium-Group/rustyconnector-minecraft

@@ -1,0 +1,18 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'rustyconnector-minecraft'
+
+include ':common'
+include ':serverCommon'
+include ':paper'
+include ':fabric'
+include ':velocity'
