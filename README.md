@@ -1,4 +1,4 @@
-![Aelysium Wordmark Image](https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/development/blob/images/wordmark.png?raw=true)
+![Aelysium Wordmark Image](https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/development/blob/images/banner.png?raw=true)
 
 # 👋 Welcome to RustyConnector
 ![Velocity](https://flat.badgen.net/badge/Velocity/3.4.0/1197d1?icon=dockbit)
