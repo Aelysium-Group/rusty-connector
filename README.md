@@ -104,32 +104,39 @@
 </table>
 
 ---
-# ⭐ Basic Features
+# ⭐ Core Features
 - ### ✅ Register new servers to the proxy during runtime
 - ### ✅ Organize servers into Families
-- ### ✅ Network and Family level whitelists
-- ### ✅ Set soft and hard player limits for servers
-- ### ✅ Cross-server /tpa
-- ### ✅ Friends
-- ### ✅ Parties
-
-# ✨ Advanced Features
-- ### ✅ Supports Kubernetes/Docker
-- ### ✅ Toolkit API
 - ### ✅ Integrated Load Balancing
-- ### ✅ Integrated Matchmaking (Ranked Families)
-- ### ✅ Support for stateful game modes (Static Families)
-- ### ✅ Forced-Hosts (Family Injectors)
-- ### ✅ End-to-end packet encryption (AES-256)
-- ### ✅ Can give you a hug
+- ### ✅ Set soft and hard player limits for servers
+- ### ✅ Supports Kubernetes/Docker
+- ### ✅ End-to-end packet encryption (AES-256)`
+- ### ✅ Comprehensive API
+- ### ✅ Fully Extensive Plugin System
+
+# 🤔 Returning Features
+The v0.9.0 rewrite has removed many "extra" features in previous versions.
+These features are being incrementally released as external modules you can install if you need them.
+- ### 🔳 Whitelist
+- ### 🔳 Static Family
+- ### 🔳 Anchors/Hub
+- ### 🔳 Player Registry (If a haze provider exists, we can persist player data to the database.)
+- ### 🔳 Parties
+- ### 🔳 Friends
+- ### 🔳 TPA
+- ### 🔳 Ranked Family
+- ### 🔳 Forced Hosts (RC natively supports Velocity's forced hosts via "virtual family servers")
+- ### 🔳 Discord Webhook
+- ### 🔳 Redis Magic Link (RC v0.9.0 now uses websockets instead of Redis by default)
 
 # 🤔 Upcoming Features
-- ### 🔳 Kubernetes-Native Dynamic Scaling (v0.9)
-- ### 🔳 Comprehensive Git-Ops (v0.9)
-- ### 🔳 Absolute Redundancy Architecture (v0.9)
-- ### 🔳 Stateful packet communication (v1)
-- ### 🔳 RabbitMQ Support (v1)
-- ### 🔳 Native Websocket Support (v1)
+- ### ✅ Absolute Redundancy Architecture (v0.9)
+- ### ✅ Stateful packet communication (v0.9)
+- ### ✅ Native Websocket Support (v0.9)
+- ### 🔳 Kubernetes-Native Dynamic Scaling
+- ### 🔳 Comprehensive Git-Ops
+- ### 🔳 RabbitMQ Support
+- ### 🔳 REST API Module
 
 - ### 🔳 Viewport Integrated Dashboard (Release Version TBD)
 ---
