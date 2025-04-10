@@ -145,7 +145,7 @@ These features are being incrementally released as external modules you can inst
 ## 🌌 Networks Served ([Click to view](https://bstats.org/plugin/velocity/RustyConnector/17972)):
 [![RustyConnector bstats graph](https://bstats.org/signatures/velocity/RustyConnector.svg)](https://bstats.org/signatures/velocity/RustyConnector.svg)
 
-2025 © [Aelysium](https://www.aelysium.group)
+2025 © [Aelysium Group LLC](https://www.aelysium.group)
 
 <!-- URL LIST -->
 [Folia]:https://github.com/PaperMC/Folia
