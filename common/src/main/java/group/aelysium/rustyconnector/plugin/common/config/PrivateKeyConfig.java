@@ -25,7 +25,7 @@ public class PrivateKeyConfig {
 
     public static PrivateKeyConfig New() throws IOException {
         // This logic only cares about generating the config if it doesn't exist.
-        File file = new File("plugins/rustyconnector/metadata/aes.private");
+        File file = new File(DeclarativeYAML.basePath("rustyconnector") + "/metadata/aes.private");
         try {
             if (!file.exists()) {
                 File parent = file.getParentFile();
@@ -41,7 +41,7 @@ public class PrivateKeyConfig {
         return DeclarativeYAML.From(PrivateKeyConfig.class);
     }
     public static Optional<PrivateKeyConfig> Load() throws IOException {
-        File file = new File("plugins/rustyconnector/metadata/aes.private");
+        File file = new File(DeclarativeYAML.basePath("rustyconnector") + "/metadata/aes.private");
         try {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();

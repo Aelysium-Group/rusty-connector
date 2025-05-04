@@ -36,7 +36,7 @@ public class GitOpsConfig {
         return new GitOperator.Config(URI.create(this.repository))
                 .branch(this.branch)
                 .fetchPeriod(period.value(), period.unit())
-                .location(Path.of("plugins/rustyconnector/git"));
+                .location(Path.of(DeclarativeYAML.basePath("rustyconnector") + "/git"));
 
     }
 

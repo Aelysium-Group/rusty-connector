@@ -32,10 +32,8 @@ dependencies {
     include "com.aventrix.jnanoid:jnanoid:2.0.0"
 
     // dYAML
-//    implementation "group.aelysium:declarative-yaml:0.1.6"
-//    include "group.aelysium:declarative-yaml:0.1.6"
-    implementation files("../libs/declarative-yaml-0.2.0.jar")
-//    include files("../libs/declarative-yaml-0.2.0.jar")
+    implementation "group.aelysium:declarative-yaml:0.2.0"
+    include "group.aelysium:declarative-yaml:0.2.0"
 
     // Scuffed Epic dYAML Workaround Moment Late 2024 Simulator Pogchamp (Cringe)
     include(implementation('org.spongepowered:configurate-core:4.1.2'))
@@ -49,6 +47,9 @@ dependencies {
     // Kyori Components
     modCompileOnly("net.kyori:adventure-platform-fabric:6.1.0")
     include("net.kyori:adventure-platform-fabric:6.1.0")
+
+    include(implementation("net.kyori:adventure-api:4.20.0"))
+    include(implementation("net.kyori:adventure-text-serializer-plain:4.20.0"))
 
     // Part of the shadowjar workaround so we get to not use shadowjar
     zip implementation(project(path: ':serverCommon', configuration: 'default'))
