@@ -20,7 +20,7 @@ public class ServerIDConfig {
 
     public static ServerIDConfig Load(String id) throws IOException {
         // This logic only cares about generating the config if it doesn't exist.
-        File file = new File("plugins/rustyconnector/metadata/server.id");
+        File file = new File(DeclarativeYAML.basePath("rustyconnector") + "/metadata/server.id");
         try {
             if(!file.exists()) {
                 File parent = file.getParentFile();
@@ -36,7 +36,7 @@ public class ServerIDConfig {
         return DeclarativeYAML.From(ServerIDConfig.class);
     }
     public static ServerIDConfig Read() throws IOException {
-        File file = new File("plugins/rustyconnector/metadata/server.id");
+        File file = new File(DeclarativeYAML.basePath("rustyconnector") + "/metadata/server.id");
         if (!file.exists()) return null;
         return DeclarativeYAML.From(ServerIDConfig.class);
     }

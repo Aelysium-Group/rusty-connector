@@ -43,9 +43,7 @@ import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.fabric.FabricServerCommandManager;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class FabricRustyConnector implements DedicatedServerModInitializer {
@@ -69,9 +67,14 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                         CommandClient::toSender
                 )
         );
+        
+        AnnotationParser<CommandClient> annotationParser = new AnnotationParser<>(this.commandManager, CommandClient.class);
+        annotationParser.parse(new CommonCommands());
+        annotationParser.parse(new CommandRusty());
 
         ServerLifecycleEvents.SERVER_STARTED.register(s -> {
             s.sendMessage(Text.of("Initializing RustyConnector..."));
+            
             ServerAdapter adapter = new FabricServerAdapter(s, commandManager);
 
             try {
@@ -221,10 +224,6 @@ public class FabricRustyConnector implements DedicatedServerModInitializer {
                 });
 
                 RC.Lang("rustyconnector-wordmark").send(RC.Kernel().version());
-                
-                AnnotationParser<CommandClient> annotationParser = new AnnotationParser<>(this.commandManager, CommandClient.class);
-                annotationParser.parse(new CommonCommands());
-                annotationParser.parse(new CommandRusty());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
