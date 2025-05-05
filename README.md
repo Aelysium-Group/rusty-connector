@@ -2,9 +2,9 @@
 
 # 👋 Welcome to RustyConnector
 ![Velocity](https://flat.badgen.net/badge/Velocity/3.4.0/1197d1?icon=dockbit)
-![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.21.4/F96854?icon=telegram)
+![PaperMC](https://flat.badgen.net/badge/Paper/1.16%20-%201.21.5/F96854?icon=telegram)
 ![Folia](https://flat.badgen.net/badge/Folia/Supported/E004BC?icon=flow)
-![Fabric](https://flat.badgen.net/badge/Fabric/1.16%20-%201.21.4/bf9b49?icon=telegram)
+![Fabric](https://flat.badgen.net/badge/Fabric/1.16%20-%201.21.5/bf9b49?icon=telegram)
 [![Aelysium](https://flat.badgen.net/badge/Discord/Aelysium/5865F2?icon=discord)](https://join.aelysium.group/)
 [![Build](https://flat.badgen.net/github/release/Aelysium-Group/rustyconnector-minecraft?label=Latest%20Stable%20Release&icon=maven)](https://github.com/Aelysium-Group/rustyconnector-minecraft/releases)
 [![License](https://flat.badgen.net/badge/License/GPL-V3/5865F2)](https://github.com/Aelysium-Group/rustyconnector-minecraft/blob/main/LICENSE)
